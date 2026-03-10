@@ -1,28 +1,572 @@
 {
     "user": {
         "Safe Browsing": {
-            "description": "Google Safe Browsing is a service from Google that warns users when they attempt to navigate to a dangerous website or download dangerous files.",
+            "description": "Google Safe Browsing warns users about dangerous websites and downloads.",
             "preferences": {
+                "browser.safebrowsing.malware.enabled": {
+                    "value": true,
+                    "title": "Enable malware protection",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "browser.safebrowsing.phishing.enabled": {
+                    "value": true,
+                    "title": "Enable phishing protection",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
                 "browser.safebrowsing.downloads.remote.enabled": {
                     "value": false,
-                    "title": "Disable Google Safe Browsing for downloads",
-                    "description": "To verify the safety of certain executable files, GeckoView may submit some information about the file, including the name, origin, size and a cryptographic hash of the contents, to the Google Safe Browsing service which helps GeckoView determine whether or not the file should be blocked.",
+                    "title": "Disable remote verification for downloads",
+                    "description": "Prevents sending file info (name, origin, hash) to Google for executable verification",
                     "requireUserOptIn": true
                 }
             }
         },
+        "Telemetry": {
+            "description": "Disable telemetry, studies, and related data collection",
+            "preferences": {
+                "app.shield.optoutstudies.enabled": {
+                    "value": false,
+                    "title": "Disable Shield studies",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "app.normandy.enabled": {
+                    "value": false,
+                    "title": "Disable Normandy",
+                    "shouldBeDefault": true
+                },
+                "app.normandy.api_url": {
+                    "value": "",
+                    "title": "Clear Normandy API URL",
+                    "shouldBeDefault": true
+                },
+                "app.normandy.run_interval_seconds": {
+                    "value": 0,
+                    "title": "Disable experiment fetch scheduling",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "datareporting.policy.dataSubmissionEnabled": {
+                    "value": false,
+                    "title": "Disable data submission",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "datareporting.healthreport.uploadEnabled": {
+                    "value": false,
+                    "title": "Disable health report upload",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "datareporting.usage.uploadEnabled": {
+                    "value": false,
+                    "title": "Disable daily usage ping",
+                    "description": "Daily activity ping",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "datareporting.dau.cachedUsageProfileID": {
+                    "value": "00000000-0000-0000-0000-000000000000",
+                    "title": "Spoof daily usage profile ID",
+                    "description": "Replaces the stored DAU profile identifier with a fixed dummy value",
+                    "enforceOnStartup": true
+                },
+                "datareporting.dau.cachedUsageProfileGroupID": {
+                    "value": "00000000-0000-0000-0000-000000000000",
+                    "title": "Spoof daily usage profile group ID",
+                    "description": "Replaces the stored DAU profile group identifier with a fixed dummy value",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.enabled": {
+                    "value": false,
+                    "title": "Disable telemetry",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.unified": {
+                    "value": false,
+                    "title": "Disable unified telemetry",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.archive.enabled": {
+                    "value": false,
+                    "title": "Disable telemetry archive",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.server": {
+                    "value": "data;",
+                    "title": "Block telemetry endpoint",
+                    "description": "Uses the data: URI scheme so accidental telemetry posts have no real network destination",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.cachedClientID": {
+                    "value": "00000000-0000-0000-0000-000000000000",
+                    "title": "Spoof telemetry client ID",
+                    "description": "Replaces the stored client ID with a fixed dummy value"
+                },
+                "toolkit.telemetry.initDelay": {
+                    "value": 2147483647,
+                    "title": "Delay telemetry initialization indefinitely",
+                    "enforceOnStartup": true
+                },
+                "telemetry.fog.test.localhost_port": {
+                    "value": 70000,
+                    "title": "Force telemetry to invalid port",
+                    "description": "Fallback Glean traffic is redirected to an invalid localhost port",
+                    "enforceOnStartup": true
+                },
+                "telemetry.fog.artifact_build": {
+                    "value": false,
+                    "title": "Disable artifact-build telemetry registration",
+                    "description": "Prevents JOG-style runtime metric registration in artifact-style configurations",
+                    "enforceOnStartup": true
+                },
+                "telemetry.fog.test.activity_limit": {
+                    "value": -1,
+                    "title": "Disable activity-based Glean submissions",
+                    "enforceOnStartup": true
+                },
+                "telemetry.fog.test.inactivity_limit": {
+                    "value": -1,
+                    "title": "Disable inactivity-based Glean submissions",
+                    "enforceOnStartup": true
+                },
+                "telemetry.fog.init_on_shutdown": {
+                    "value": false,
+                    "title": "Prevent Glean initialization during shutdown",
+                    "enforceOnStartup": true
+                },
+                "telemetry.glean.internal.finalInactive": {
+                    "value": false,
+                    "title": "Disable final inactive Glean ping",
+                    "enforceOnStartup": true
+                },
+                "nimbus.profilesdatastoreservice.enabled": {
+                    "value": false,
+                    "title": "Disable Nimbus experiment database",
+                    "enforceOnStartup": true
+                },
+                "nimbus.profilesdatastoreservice.read.enabled": {
+                    "value": false,
+                    "title": "Block reading experiment data",
+                    "enforceOnStartup": true
+                },
+                "nimbus.profilesdatastoreservice.sync.enabled": {
+                    "value": false,
+                    "title": "Block syncing experiment data",
+                    "enforceOnStartup": true
+                },
+                "nimbus.rollouts.enabled": {
+                    "value": false,
+                    "title": "Disable Nimbus rollouts",
+                    "enforceOnStartup": true
+                },
+                "nimbus.telemetry.targetingContextEnabled": {
+                    "value": false,
+                    "title": "Disable Nimbus targeting-context telemetry",
+                    "enforceOnStartup": true
+                },
+                "captchadetection.actor.enabled": {
+                    "value": false,
+                    "title": "Disable CAPTCHA detection pings",
+                    "description": "Prevents CAPTCHA detection measurements from being collected",
+                    "enforceOnStartup": true
+                },
+                "captchadetection.hasUnsubmittedData": {
+                    "value": false,
+                    "title": "Clear pending CAPTCHA detection data",
+                    "enforceOnStartup": true
+                },
+                "captchadetection.loglevel": {
+                    "value": "Off",
+                    "title": "Disable CAPTCHA detection logging",
+                    "enforceOnStartup": true
+                },
+                "extensions.dataCollectionPermissions.enabled": {
+                    "value": false,
+                    "title": "Disable extension data collection"
+                },
+                "extensions.gleanPingAddons.daily.interval": {
+                    "value": 2147483647,
+                    "title": "Disable add-on daily Glean scheduler",
+                    "enforceOnStartup": true
+                },
+                "extensions.gleanPingAddons.updated.delay": {
+                    "value": 2147483647,
+                    "title": "Disable add-on update Glean delay",
+                    "enforceOnStartup": true
+                },
+                "extensions.gleanPingAddons.updated.idleTimeout": {
+                    "value": 2147483647,
+                    "title": "Disable add-on update idle telemetry",
+                    "enforceOnStartup": true
+                },
+                "extensions.gleanPingAddons.updated.testing": {
+                    "value": false,
+                    "title": "Disable add-on update testing telemetry",
+                    "enforceOnStartup": true
+                },
+                "extensions.telemetry.EnvironmentAddonBuilder": {
+                    "value": false,
+                    "title": "Disable add-on environment telemetry builder",
+                    "enforceOnStartup": true
+                },
+                "network.trr.confirmation_telemetry_enabled": {
+                    "value": false,
+                    "title": "Disable DoH confirmation telemetry",
+                    "enforceOnStartup": true
+                },
+                "network.traffic_analyzer.enabled": {
+                    "value": false,
+                    "title": "Disable network traffic analyzer",
+                    "description": "Prevents the internal traffic analyzer from collecting extra network diagnostics",
+                    "enforceOnStartup": true
+                },
+                "privacy.trackingprotection.emailtracking.data_collection.enabled": {
+                    "value": false,
+                    "title": "Disable email tracking protection telemetry",
+                    "enforceOnStartup": true
+                },
+                "browser.safebrowsing.features.emailtracking.datacollection.update": {
+                    "value": false,
+                    "title": "Disable Safe Browsing email-tracking data updates",
+                    "enforceOnStartup": true
+                },
+                "urlclassifier.features.emailtracking.datacollection.allowlistTables": {
+                    "value": "",
+                    "title": "Clear email-tracking telemetry allowlist tables",
+                    "enforceOnStartup": true
+                },
+                "urlclassifier.features.emailtracking.datacollection.blocklistTables": {
+                    "value": "",
+                    "title": "Clear email-tracking telemetry blocklist tables",
+                    "enforceOnStartup": true
+                },
+                "dom.security.unexpected_system_load_telemetry_enabled": {
+                    "value": false,
+                    "title": "Disable unexpected system load telemetry",
+                    "enforceOnStartup": true
+                },
+                "telemetry.number_of_site_origin.min_interval": {
+                    "value": 2147483647,
+                    "title": "Disable site-origin telemetry scheduling",
+                    "enforceOnStartup": true
+                },
+                "toolkit.coverage.enabled": {
+                    "value": false,
+                    "title": "Disable coverage ping",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "toolkit.coverage.endpoint.base": {
+                    "value": "",
+                    "title": "Clear coverage endpoint",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.bhrPing.enabled": {
+                    "value": false,
+                    "title": "Disable background hang report ping",
+                    "description": "Prevents background hang reports from being sent",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.cachedProfileGroupID": {
+                    "value": "decafdec-afde-cafd-ecaf-decafdecafde",
+                    "title": "Spoof telemetry profile group ID",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.collectInterval": {
+                    "value": 2147483647,
+                    "title": "Disable telemetry collection interval",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.dap_enabled": {
+                    "value": false,
+                    "title": "Disable Distributed Aggregation Protocol",
+                    "description": "Prevents DAP-based telemetry collection",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.dap.helper.hpke": {
+                    "value": "",
+                    "title": "Clear DAP helper HPKE config",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.dap.helper.url": {
+                    "value": "",
+                    "title": "Clear DAP helper URL",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.dap.leader.hpke": {
+                    "value": "",
+                    "title": "Clear DAP leader HPKE config",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.dap.leader.url": {
+                    "value": "",
+                    "title": "Clear DAP leader URL",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.dap.logLevel": {
+                    "value": "Off",
+                    "title": "Disable DAP logging",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.dap_task1_enabled": {
+                    "value": false,
+                    "title": "Disable DAP task 1",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.dap_task1_taskid": {
+                    "value": "",
+                    "title": "Clear DAP task 1 identifier",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.dap_visit_counting_enabled": {
+                    "value": false,
+                    "title": "Disable DAP visit counting",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.dap_visit_counting_experiment_list": {
+                    "value": "[]",
+                    "title": "Clear DAP visit-counting experiments",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.debugSlowSql": {
+                    "value": false,
+                    "title": "Disable slow SQL telemetry debugging",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.eventping.maximumFrequency": {
+                    "value": 2147483647,
+                    "title": "Disable event ping maximum frequency",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.eventping.minimumFrequency": {
+                    "value": 2147483647,
+                    "title": "Disable event ping minimum frequency",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.newProfilePing.enabled": {
+                    "value": false,
+                    "title": "Disable new profile ping",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.newProfilePing.delay": {
+                    "value": 2147483647,
+                    "title": "Disable new profile ping delay scheduling",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.updatePing.enabled": {
+                    "value": false,
+                    "title": "Disable update ping",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.firstShutdownPing.enabled": {
+                    "value": false,
+                    "title": "Disable first shutdown ping",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.healthping.enabled": {
+                    "value": false,
+                    "title": "Disable health ping",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.log.dump": {
+                    "value": false,
+                    "title": "Disable telemetry log dumping",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.log.level": {
+                    "value": "Fatal",
+                    "title": "Restrict telemetry logging to fatal level",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.minSubsessionLength": {
+                    "value": 2147483647,
+                    "title": "Disable subsession telemetry scheduling",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.overrideUpdateChannel": {
+                    "value": "release",
+                    "title": "Normalize telemetry update channel",
+                    "description": "Always reports the release channel to reduce telemetry variability",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.previousBuildID": {
+                    "value": "",
+                    "title": "Clear previous telemetry build ID",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.reportingpolicy.firstRun": {
+                    "value": false,
+                    "title": "Disable telemetry first-run reporting policy",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.scheduler.idleTickInterval": {
+                    "value": 2147483647,
+                    "title": "Disable telemetry idle tick scheduler",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.scheduler.tickInterval": {
+                    "value": 2147483647,
+                    "title": "Disable telemetry tick scheduler",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.send.overrideOfficialCheck": {
+                    "value": false,
+                    "title": "Disable telemetry official-build override",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.server_owner": {
+                    "value": "",
+                    "title": "Clear telemetry server owner",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.shutdownPingSender.backgroundtask.enabled": {
+                    "value": false,
+                    "title": "Disable background telemetry shutdown sender",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.shutdownPingSender.enabled": {
+                    "value": false,
+                    "title": "Disable telemetry shutdown sender",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.shutdownPingSender.enabledFirstSession": {
+                    "value": false,
+                    "title": "Disable telemetry first-session shutdown sender",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.testing.disableFuzzingDelay": {
+                    "value": false,
+                    "title": "Disable telemetry fuzzing-delay override",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.testing.overridePreRelease": {
+                    "value": false,
+                    "title": "Disable telemetry prerelease override",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.testing.overrideProductsCheck": {
+                    "value": false,
+                    "title": "Disable telemetry products-check override",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.testing.suppressPingsender": {
+                    "value": true,
+                    "title": "Suppress telemetry ping sender",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.translations.logLevel": {
+                    "value": "Off",
+                    "title": "Disable translations telemetry logging",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.untrustedModulesPing.frequency": {
+                    "value": 2147483647,
+                    "title": "Disable untrusted modules ping scheduling",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.user_characteristics_ping.current_version": {
+                    "value": 0,
+                    "title": "Reset user-characteristics ping version",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.user_characteristics_ping.last_version_sent": {
+                    "value": 0,
+                    "title": "Reset last sent user-characteristics version",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.user_characteristics_ping.logLevel": {
+                    "value": "Off",
+                    "title": "Disable user-characteristics ping logging",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.user_characteristics_ping.opt-out": {
+                    "value": true,
+                    "title": "Opt out of user-characteristics ping",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.user_characteristics_ping.send-once": {
+                    "value": false,
+                    "title": "Disable one-time user-characteristics ping",
+                    "enforceOnStartup": true
+                },
+                "toolkit.telemetry.user_characteristics_ping.uuid": {
+                    "value": "",
+                    "title": "Clear user-characteristics ping UUID",
+                    "enforceOnStartup": true
+                },
+                "telemetry.glean.internal.maxPingsPerMinute": {
+                    "value": 0,
+                    "title": "Block all Glean pings",
+                    "description": "Prevents Glean from sending any telemetry pings",
+                    "enforceOnStartup": true
+                }
+            }
+        },
+        "Crash Reporting": {
+            "description": "Disable crash uploads and suppress crash-report prompts",
+            "preferences": {
+                "breakpad.reportURL": {
+                    "value": "",
+                    "title": "Clear crash report URL",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "browser.crashReports.crashPull": {
+                    "value": false,
+                    "title": "Disable remote crash report requests",
+                    "description": "Prevents remote settings from requesting background-process crash reports",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "browser.crashReports.onDemand": {
+                    "value": false,
+                    "title": "Disable on-demand crash report requests",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "browser.crashReports.requestedNeverShowAgain": {
+                    "value": true,
+                    "title": "Never prompt for background crash reports",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "browser.tabs.crashReporting.sendReport": {
+                    "value": false,
+                    "title": "Disable crashed-tab report sending",
+                    "shouldBeDefault": true
+                },
+                "browser.crashReports.unsubmittedCheck.autoSubmit2": {
+                    "value": false,
+                    "title": "Disable auto-submit of crash reports",
+                    "shouldBeDefault": true
+                },
+                "toolkit.crashreporter.include_context_heap": {
+                    "value": false,
+                    "title": "Exclude heap context from crash reports",
+                    "enforceOnStartup": true
+                }
+            }
+        },
         "Block Implicit Outbound": {
-            "description": "Control not explicitly user invoked interactions",
+            "description": "Control background or automatic network activity that was not explicitly user-initiated",
             "preferences": {
                 "network.prefetch-next": {
                     "value": false,
                     "title": "Disable link prefetching",
-                    "shouldBeDefault": true
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
                 },
                 "network.dns.disablePrefetch": {
                     "value": true,
                     "title": "Disable DNS prefetching",
-                    "shouldBeDefault": true
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
                 },
                 "network.dns.disablePrefetchFromHTTPS": {
                     "value": true,
@@ -31,37 +575,76 @@
                 "network.predictor.enabled": {
                     "value": false,
                     "title": "Disable prefetching predictor",
-                    "shouldBeDefault": true
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
                 },
                 "network.predictor.enable-prefetch": {
                     "value": false,
                     "title": "Disable prefetching predictions",
-                    "shouldBeDefault": true
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
                 },
                 "network.http.speculative-parallel-limit": {
                     "value": 0,
-                    "title": "Disable link-mouseover opening connection to linked server",
-                    "shouldBeDefault": true
+                    "title": "Disable speculative connections on link hover",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
                 },
                 "network.preconnect": {
                     "value": false,
-                    "title": "Disable automatic connections to third-party domains,"
+                    "title": "Disable automatic connections to third-party domains"
+                },
+                "network.early-hints.enabled": {
+                    "value": false,
+                    "title": "Disable Early Hints",
+                    "description": "Prevents servers from sending early responses before the main response",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "network.early-hints.preconnect.enabled": {
+                    "value": false,
+                    "title": "Disable Early Hints preconnect",
+                    "description": "Prevents Early Hints from triggering preconnect operations",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "network.http.basic_http_auth.enabled": {
+                    "value": false,
+                    "title": "Disable Basic HTTP authentication",
+                    "description": "Basic auth sends credentials in plaintext; only use with HTTPS"
+                },
+                "browser.send_pings": {
+                    "value": false,
+                    "title": "Disable hyperlink auditing (ping tracking)",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "network.http.network_error_logging.enabled": {
+                    "value": false,
+                    "title": "Disable Network Error Logging (NEL)",
+                    "description": "NEL is used for analytics by design and can be used for fingerprinting"
+                },
+                "security.csp.reporting.enabled": {
+                    "value": false,
+                    "title": "Disable CSP reporting",
+                    "description": "Prevents CSP violation reports from being sent to third-party servers"
                 }
             }
         },
         "DNS": {
-            "description": "Improve DNS and Proxy/SOCKS security",
+            "description": "Harden DNS resolution and reduce proxy bypass risks",
             "preferences": {
                 "network.dns.native_https_query": {
                     "value": true,
-                    "title": "Enable native DNS HTTPS Query",
-                    "description": "DNS over HTTPS",
-                    "shouldBeDefault": true
+                    "title": "Enable native HTTPS DNS record lookups",
+                    "description": "Allows HTTPS DNS resource-record queries used during connection setup; separate from DNS over HTTPS",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
                 },
                 "network.proxy.socks_remote_dns": {
                     "value": true,
-                    "title": "Set the proxy server to do any DNS lookups when using SOCKS",
-                    "description": "e.g. in Tor, this stops your local DNS server from knowing your Tor destination as a remote Tor node will handle the DNS request"
+                    "title": "Resolve DNS remotely when using SOCKS",
+                    "description": "For example with Tor, this keeps your local DNS resolver from seeing the destination hostname"
                 },
                 "network.file.disable_unc_paths": {
                     "value": true,
@@ -73,28 +656,78 @@
                     "value": "",
                     "title": "Disable GIO as a potential proxy bypass vector"
                 },
-                "media.peerconnection.enabled": {
-                    "value": false,
-                    "title": "Disable WebRTC PeerConnection",
-                    "description": "Prevent exposing local IP Address"
-                },
-                "media.peerconnection.ice.default_address_only": {
-                    "value": true,
-                    "title": "Force a single network interface for ICE candidates generation",
-                    "description": "When using a system-wide proxy, it uses the proxy interface"
-                },
                 "network.dns.localDomains": {
-                    "value": "250analytics.com,a.omappapi.com,activity-stream-icons.services.mozilla.com,ads.allizom.org,ads.mozilla.org,ads.nonprod.webservices.mozgcp.net,ads.prod.webservices.mozgcp.net,ads-img.mozilla.org,analytics.getpocket.com,analytics.google.com,analytics.withgoogle.com,anf1.fuzzing.mozilla.org,anonymco.com,api.divviup.org,asan-nightly-frontend-elb-1348905149.us-east-2.elb.amazonaws.com,braze.com,contile.services.mozilla.com,contile-images.services.mozilla.com,classify-client.nonprod.webservices.mozgcp.net,classify-client.prod.webservices.mozgcp.net,classify-client.services.mozilla.com,crash-reports.allizom.org,crash-reports.mozilla.com,crash-reports-xpsp2.mozilla.com,crash-stacks.mozilla.com,crash-stats.allizom.org,crash-stats.mozilla.com,crash-stats.mozilla.org,dap.services.mozilla.com,dap.nonprod.webservices.mozgcp.net,dap.prod.webservices.mozgcp.net,dap-09-3.api.divviup.org,data.mozilla.com,data-ingestion.prod.dataops.mozgcp.net,dataops.mozgcp.net,dataservices.mozgcp.net,discovery.addons.allizom.org,discovery.addons.mozilla.org,discovery.addons-dev.allizom.org,divviup.org,download-stats.mozilla.org,download-stats.r53-2.services.mozilla.com,experimenter.services.mozilla.com,experimenter.nonprod.webservices.mozgcp.net,experimenter.prod.webservices.mozgcp.net,fhr.data.mozilla.com,fhr.r53-2.services.mozilla.com,firefox-android-home-recommendations.getpocket.com,firefox-dns-perf-test.net,fuzzing.mozilla.org,google-analytics.com,google-analytics-cn.com,googleanalytics.com,googlesyndication.com,googlesyndication-cn.com,googletagmanager.com,googletagmanager-cn.com,googletagservices.com,googletagservices-cn.com,improving.duckduckgo.com,incoming.telemetry.mozilla.org,incoming.thunderbird.net,incoming-telemetry.thunderbird.net,ingestion-edge.prod.dataops.mozgcp.net,location.services.mozilla.com,locprod1-elb-eu-west-1.prod.mozaws.net,locprod2-elb-us-west-2.prod.mozaws.net,metrics-content.duckduckgo.com,new-sentry.gitlab.net,nonprod.classify-client.nonprod.webservices.mozgcp.net,normandy.cdn.mozilla.net,normandy.nonprod.cloudops.mozgcp.net,normandy.prod.cloudops.mozgcp.net,normandy-cdn.services.mozilla.com,omappapi.com,pagead2.googlesyndication.com,pipeline-incoming-prod-elb-149169523.us-west-2.elb.amazonaws.com,prod.ads.prod.webservices.mozgcp.net,prod.classify-client.prod.webservices.mozgcp.net,prod.dap.prod.webservices.mozgcp.net,prod.data-ingestion.prod.dataops.mozgcp.net,prod.dataops.mozgcp.net,prod.experimenter.prod.webservices.mozgcp.net,prod.ingestion-edge.prod.dataops.mozgcp.net,prod.sentry.prod.cloudops.mozgcp.net,prod-classifyclient.normandy.prod.cloudops.mozgcp.net,sdk.iad-05.braze.com,search.r53-2.services.mozilla.com,search.services.mozilla.com,self-repair.mozilla.org,self-repair.r53-2.services.mozilla.com,sentry.gitlab.net,sentry.io,sentry.nonprod.cloudops.mozgcp.net,sentry.prod.cloudops.mozgcp.net,sentry.prod.mozaws.net,sitereview.zscaler.com,snippets.allizom.org,snippets.cdn.mozilla.net,snippets.mozilla.com,snippets-prod.frankfurt.moz.works,snippets-prod.moz.works,snippets-prod.oregon-b.moz.works,snippets-stage.moz.works,snippets-stage.oregon-b.moz.works,snowplow.trx.gitlab.net,snowplowalb-1011729428.us-east-1.elb.amazonaws.com,snowplowprd.trx.gitlab.net,snowplowprdnlb-1490493263.us-east-2.elb.amazonaws.com,socorro.nonprod.webservices.mozgcp.net,socorro.prod.webservices.mozgcp.net,socorro-collector.services.mozilla.com,socorro-webapp-allizom.stage.mozaws.net,socorro-webapp.services.mozilla.com,spocs.getpocket.com,spocs.getpocket.dev,spocs.mozilla.net,ssl.google-analytics.com,ssl-google-analytics.l.google.com,stage.sentry.nonprod.cloudops.mozgcp.net,start.fedoraproject.org,start.thunderbird.net,start.ubuntu.com,start-stage.thunderbird.net,survey.mozilla.com,tagmanager.google.com,talkback.mozilla.org,talkback-public.mozilla.org,talkback-reports.mozilla.org,telemetry-coverage.mozilla.org,telemetry-coverage.r53-2.services.mozilla.com,telemetry-experiment.cdn.mozilla.net,telemetry-incoming.r53-2.services.mozilla.com,telemetry-incoming-a.r53-2.services.mozilla.com,telemetry-incoming-b.r53-2.services.mozilla.com,telemetry-prod-1054754349.us-east-1.elb.amazonaws.com,tiles-cdn.prod.ads.prod.webservices.mozgcp.net,updates.thunderbird.net,updates-stage.thunderbird.net,use-application-dns.net,vf.startpage.com,widgets.getpocket.com,www.250analytics.com,www.anonymco.com,www.google-analytics.com,www.google-analytics-cn.com,www.googleanalytics.com,www.googlesyndication.com,www.googlesyndication-cn.com,www.googletagmanager.com,www.googletagmanager-cn.com,www.googletagservices.com,www.googletagservices-cn.com,www.sentry.io,www-google-analytics.l.google.com,www-googletagmanager.l.google.com",
-                    "title": "Block Tracking Domains"
+                    "value": "250analytics.com,a.omappapi.com,activity-stream-icons.services.mozilla.com,ads.allizom.org,ads.mozilla.org,ads.nonprod.webservices.mozgcp.net,ads.prod.webservices.mozgcp.net,ads-img.mozilla.org,analytics.getpocket.com,analytics.google.com,analytics.withgoogle.com,anf1.fuzzing.mozilla.org,anonymco.com,api.divviup.org,asan-nightly-frontend-elb-1348905149.us-east-2.elb.amazonaws.com,braze.com,contile.services.mozilla.com,contile-images.services.mozilla.com,classify-client.nonprod.webservices.mozgcp.net,classify-client.prod.webservices.mozgcp.net,classify-client.services.mozilla.com,crash-reports.allizom.org,crash-reports.mozilla.com,crash-reports-xpsp2.mozilla.com,crash-stacks.mozilla.com,crash-stats.allizom.org,crash-stats.mozilla.com,crash-stats.mozilla.org,dap.services.mozilla.com,dap.nonprod.webservices.mozgcp.net,dap.prod.webservices.mozgcp.net,dap-09-3.api.divviup.org,data.mozilla.com,data-ingestion.prod.dataops.mozgcp.net,dataops.mozgcp.net,dataservices.mozgcp.net,debug-ping-preview.firebaseapp.com,discovery.addons.allizom.org,discovery.addons.mozilla.org,discovery.addons-dev.allizom.org,divviup.org,download-stats.mozilla.org,download-stats.r53-2.services.mozilla.com,experimenter.services.mozilla.com,experimenter.nonprod.webservices.mozgcp.net,experimenter.prod.webservices.mozgcp.net,fhr.data.mozilla.com,fhr.r53-2.services.mozilla.com,firefox-android-home-recommendations.getpocket.com,firefox-dns-perf-test.net,fuzzing.mozilla.org,google-analytics.com,google-analytics-cn.com,googleanalytics.com,googlesyndication.com,googlesyndication-cn.com,googletagmanager.com,googletagmanager-cn.com,googletagservices.com,googletagservices-cn.com,improving.duckduckgo.com,incoming.glean.example.com,incoming.telemetry.mozilla.org,incoming.thunderbird.net,incoming-telemetry.thunderbird.net,ingestion-edge.prod.dataops.mozgcp.net,location.services.mozilla.com,locprod1-elb-eu-west-1.prod.mozaws.net,locprod2-elb-us-west-2.prod.mozaws.net,metrics-content.duckduckgo.com,new-sentry.gitlab.net,nonprod.classify-client.nonprod.webservices.mozgcp.net,normandy.cdn.mozilla.net,normandy.nonprod.cloudops.mozgcp.net,normandy.prod.cloudops.mozgcp.net,normandy-cdn.services.mozilla.com,omappapi.com,pipeline-incoming-prod-elb-149169523.us-west-2.elb.amazonaws.com,prod.ads.prod.webservices.mozgcp.net,prod.classify-client.prod.webservices.mozgcp.net,prod.dap.prod.webservices.mozgcp.net,prod.data-ingestion.prod.dataops.mozgcp.net,prod.dataops.mozgcp.net,prod.experimenter.prod.webservices.mozgcp.net,prod.ingestion-edge.prod.dataops.mozgcp.net,prod.sentry.prod.cloudops.mozgcp.net,prod-classifyclient.normandy.prod.cloudops.mozgcp.net,profile.accounts.firefox.com,sdk.iad-05.braze.com,search.r53-2.services.mozilla.com,search.services.mozilla.com,self-repair.mozilla.org,self-repair.r53-2.services.mozilla.com,sentry.gitlab.net,sentry.io,sentry.nonprod.cloudops.mozgcp.net,sentry.prod.cloudops.mozgcp.net,sentry.prod.mozaws.net,sitereview.zscaler.com,snippets.allizom.org,snippets.cdn.mozilla.net,snippets.mozilla.com,snippets-prod.frankfurt.moz.works,snippets-prod.moz.works,snippets-prod.oregon-b.moz.works,snippets-stage.moz.works,snippets-stage.oregon-b.moz.works,snowplow.trx.gitlab.net,snowplowalb-1011729428.us-east-1.elb.amazonaws.com,snowplowprd.trx.gitlab.net,snowplowprdnlb-1490493263.us-east-2.elb.amazonaws.com,socorro.nonprod.webservices.mozgcp.net,socorro.prod.webservices.mozgcp.net,socorro-collector.services.mozilla.com,socorro-webapp-allizom.stage.mozaws.net,socorro-webapp.services.mozilla.com,spocs.getpocket.com,spocs.getpocket.dev,spocs.mozilla.net,ssl.google-analytics.com,ssl-google-analytics.l.google.com,stage.sentry.nonprod.cloudops.mozgcp.net,start.fedoraproject.org,start.thunderbird.net,start.ubuntu.com,start-stage.thunderbird.net,survey.mozilla.com,tagmanager.google.com,talkback.mozilla.org,talkback-public.mozilla.org,talkback-reports.mozilla.org,telemetry-coverage.mozilla.org,telemetry-coverage.r53-2.services.mozilla.com,telemetry-experiment.cdn.mozilla.net,telemetry-incoming.r53-2.services.mozilla.com,telemetry-incoming-a.r53-2.services.mozilla.com,telemetry-incoming-b.r53-2.services.mozilla.com,telemetry-prod-1054754349.us-east-1.elb.amazonaws.com,tiles-cdn.prod.ads.prod.webservices.mozgcp.net,updates.thunderbird.net,updates-stage.thunderbird.net,use-application-dns.net,vf.startpage.com,widgets.getpocket.com,www.250analytics.com,www.anonymco.com,www.google-analytics.com,www.google-analytics-cn.com,www.googleanalytics.com,www.googlesyndication.com,www.googlesyndication-cn.com,www.googletagmanager.com,www.googletagmanager-cn.com,www.googletagservices.com,www.googletagservices-cn.com,www.sentry.io,www-google-analytics.l.google.com,www-googletagmanager.l.google.com",
+                    "title": "Resolve tracking domains to localhost",
+                    "description": "Redirects known telemetry, analytics, and ad domains to localhost to prevent connections"
                 },
                 "network.proxy.type": {
                     "value": 0,
-                    "title": "Prevents using automatically the system's proxy configuration by default"
+                    "title": "Bypass system proxy configuration",
+                    "description": "Lets WebLibre control proxying instead of inheriting Android's system proxy settings"
+                },
+                "network.ohttp.configURL": {
+                    "value": "",
+                    "title": "Disable OHTTP config URL",
+                    "description": "Prevents fetching Oblivious HTTP configuration for telemetry",
+                    "enforceOnStartup": true
+                },
+                "network.ohttp.relayURL": {
+                    "value": "",
+                    "title": "Disable OHTTP relay URL",
+                    "description": "Prevents using Oblivious HTTP relay for telemetry",
+                    "enforceOnStartup": true
+                },
+                "network.android_doh.autoselect_enabled": {
+                    "value": false,
+                    "title": "Disable Android DoH autoselect",
+                    "description": "Prevents Android from automatically selecting a DoH provider",
+                    "enforceOnStartup": true
+                }
+            }
+        },
+        "Certificate Revocation": {
+            "description": "Use CRLite instead of OCSP for certificate revocation checks",
+            "preferences": {
+                "security.OCSP.enabled": {
+                    "value": 0,
+                    "title": "Disable OCSP fetches",
+                    "description": "CRLite provides faster and more private certificate revocation checking than OCSP"
+                },
+                "security.OCSP.require": {
+                    "value": false,
+                    "title": "Disable OCSP hard-fail",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "security.pki.crlite_mode": {
+                    "value": 2,
+                    "title": "Enforce CRLite revocation checks",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "security.remote_settings.crlite_filters.enabled": {
+                    "value": true,
+                    "title": "Enable CRLite filters",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "security.pki.certificate_transparency.mode": {
+                    "value": 2,
+                    "title": "Enforce Certificate Transparency (CT)",
+                    "description": "Rejects publicly trusted certificates that violate CT policy"
+                },
+                "security.certerrors.mitm.auto_enable_enterprise_roots": {
+                    "value": false,
+                    "title": "Disable auto-enabling enterprise root certificates",
+                    "description": "Prevents Firefox from automatically trusting system-installed root certificates",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
                 }
             }
         },
         "Secure Connections": {
-            "description": "SSL/TLS / OCSP / CERTS / HPKP",
+            "description": "Harden TLS, certificate validation, and HTTPS upgrade behavior",
             "preferences": {
                 "security.ssl.require_safe_negotiation": {
                     "value": true,
@@ -106,27 +739,9 @@
                     "title": "Disable TLS1.3 0-RTT (round-trip time)",
                     "description": "This data is not forward secret, as it is encrypted solely under keys derived using the offered PSK. There are no guarantees of non-replay between connections."
                 },
-                "security.OCSP.enabled": {
-                    "value": 1,
-                    "title": "Enforce OCSP fetching to confirm current validity of certificates"
-                },
-                "security.OCSP.require": {
-                    "value": true,
-                    "title": "Set OCSP fetch failures to hard-fail",
-                    "description": "When a CA cannot be reached to validate a cert, GeckoView just continues the connection (=soft-fail). Setting this pref to true tells GeckoView to instead terminate the connection (=hard-fail)."
-                },
                 "security.cert_pinning.enforcement_level": {
                     "value": 2,
-                    "title": "Enable strict PKP (Public Key Pinning)"
-                },
-                "security.remote_settings.crlite_filters.enabled": {
-                    "value": true,
-                    "title": "Enable CRLite"
-                },
-                "security.pki.crlite_mode": {
-                    "value": 2,
-                    "title": "Enable CRLite for PKI",
-                    "shouldBeDefault": true
+                    "title": "Enforce strict certificate pinning"
                 },
                 "security.tls.enable_kyber": {
                     "value": true,
@@ -142,46 +757,66 @@
                 },
                 "browser.xul.error_pages.expert_bad_cert": {
                     "value": true,
-                    "title": "Display advanced information on Insecure Connection warning pages"
+                    "title": "Show advanced certificate error details"
                 },
                 "dom.security.https_first": {
                     "value": true,
-                    "title": "Attempt to establish HTTPS connections first before falling back to HTTP",
-                    "shouldBeDefault": true
+                    "title": "Use HTTPS-First mode",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "security.mixed_content.upgrade_display_content": {
+                    "value": true,
+                    "title": "Upgrade mixed display content to HTTPS",
+                    "description": "Automatically upgrades insecure HTTP content to HTTPS when possible"
+                },
+                "network.http.http3.enable_0rtt": {
+                    "value": false,
+                    "title": "Disable HTTP/3 0-RTT",
+                    "description": "0-RTT data is not forward secret as it is encrypted solely under keys derived using the offered PSK. There are no guarantees of non-replay between connections."
+                },
+                "security.ssl.disable_session_identifiers": {
+                    "value": true,
+                    "title": "Disable TLS session identifiers",
+                    "description": "Prevents TLS session resumption from session tickets for tracking purposes"
                 }
             }
         },
         "Privacy": {
+            "description": "Reduce cross-site leakage and strengthen built-in tracking protections",
             "preferences": {
+                "network.http.referer.XOriginPolicy": {
+                    "value": 2,
+                    "title": "Only send cross-origin referer if host matches"
+                },
                 "network.http.referer.XOriginTrimmingPolicy": {
                     "value": 2,
                     "title": "Trim cross-origin referrers",
                     "description": "Trims down referrers to just the scheme, hostname and port"
                 },
-                "network.http.referer.XOriginPolicy": {
-                    "value": 2,
-                    "title": "Only send cross-origin referer if host matches"
-                },
                 "network.http.referer.disallowCrossSiteRelaxingDefault": {
                     "value": true,
-                    "title": "Disallow relaxing referrer policy for cross-site requests",
-                    "shouldBeDefault": true
+                    "title": "Enforce strict cross-site referrer policy",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
                 },
                 "network.http.referer.disallowCrossSiteRelaxingDefault.top_navigation": {
                     "value": true,
-                    "title": "Disallow relaxing referrer policy for cross-site requests",
-                    "description": "On top navigation",
-                    "shouldBeDefault": true
+                    "title": "Enforce strict referrer policy on top-level navigation",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
                 },
                 "general.useragent.updates.enabled": {
                     "value": false,
-                    "title": "Disable automatic User Agent updates",
-                    "description": "This preference controls whether Firefox automatically updates its User-Agent string. When set to false, it prevents Firefox from automatically updating the browser's User-Agent string, which is a text identifier that tells websites which browser and version you're using."
+                    "title": "Disable User-Agent string updates",
+                    "description": "Prevents the browser from automatically updating its User-Agent identifier"
                 },
                 "dom.private-attribution.submission.enabled": {
                     "value": false,
-                    "title": "Disable Private Attribution Submission Control",
-                    "shouldBeDefault": true
+                    "title": "Disable Privacy-Preserving Attribution",
+                    "description": "Mozilla's ad measurement API that allows privacy-preserving conversion tracking",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
                 },
                 "privacy.trackingprotection.enabled": {
                     "value": true,
@@ -194,100 +829,356 @@
                 "privacy.trackingprotection.socialtracking.enabled": {
                     "value": true,
                     "title": "Enable Social Tracking Protection",
-                    "shouldBeDefault": true
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
                 },
                 "privacy.trackingprotection.cryptomining.enabled": {
                     "value": true,
                     "title": "Enable Cryptomining Protection",
-                    "shouldBeDefault": true
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
                 },
                 "privacy.trackingprotection.fingerprinting.enabled": {
                     "value": true,
-                    "title": "Enable Fingerprinting Tracking Protection",
-                    "shouldBeDefault": true
+                    "title": "Enable fingerprinting tracker protection",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
                 },
                 "network.cookie.maxageCap": {
                     "value": 15552000,
                     "title": "Limit maximum cookie lifetime to 180 days"
+                },
+                "dom.storage_access.auto_grants": {
+                    "value": false,
+                    "title": "Disable automatic storage access grants",
+                    "description": "Prevents websites from automatically gaining storage access through heuristics"
+                },
+                "privacy.restrict3rdpartystorage.heuristic.navigation": {
+                    "value": false,
+                    "title": "Disable navigation-based storage access heuristic"
+                },
+                "privacy.restrict3rdpartystorage.heuristic.redirect": {
+                    "value": false,
+                    "title": "Disable redirect-based storage access heuristic"
+                },
+                "privacy.restrict3rdpartystorage.heuristic.window_open": {
+                    "value": false,
+                    "title": "Disable window-open-based storage access heuristic"
                 }
             }
         },
         "Resist Fingerprinting": {
-            "description": "Advanced Fingerprinting protection. This might break websites. For best results make sure to enable \"Privacy\" hardenings.",
+            "description": "Enable stronger anti-fingerprinting defenses. Some sites may break, especially without the Privacy protections above.",
             "preferences": {
                 "privacy.fingerprintingProtection": {
                     "value": true,
-                    "title": "Enable Suspected Fingerprinters Protection (FPP)",
-                    "shouldBeDefault": true
+                    "title": "Enable fingerprinting protection",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
                 },
                 "privacy.fingerprintingProtection.pbmode": {
                     "value": true,
-                    "title": "Enable Suspected Fingerprinters Protection (FPP) (Private browsing)",
-                    "shouldBeDefault": true
+                    "title": "Enable fingerprinting protection in Private Browsing",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
                 },
                 "privacy.reduceTimerPrecision": {
                     "value": true,
                     "title": "Reduce timer precision",
-                    "shouldBeDefault": true
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
                 },
                 "privacy.partition.network_state.ocsp_cache": {
                     "value": true,
-                    "title": "Enable OCSP cache",
-                    "shouldBeDefault": true
+                    "title": "Partition the OCSP cache",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
                 },
                 "privacy.partition.network_state.ocsp_cache.pbmode": {
                     "value": true,
-                    "title": "Enable OCSP cache (Private browsing)",
-                    "shouldBeDefault": true
+                    "title": "Partition the OCSP cache in Private Browsing",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
                 },
                 "gfx.bundled-fonts.activate": {
                     "value": 1,
-                    "title": "Always load bundled fonts"
+                    "title": "Prefer bundled fonts over system fonts"
+                },
+                "dom.storage_access.auto_grants": {
+                    "value": false,
+                    "title": "Disable automatic storage access grants",
+                    "description": "Prevents websites from automatically gaining storage access through heuristics"
+                },
+                "privacy.restrict3rdpartystorage.heuristic.navigation": {
+                    "value": false,
+                    "title": "Disable navigation-based storage access heuristic"
+                },
+                "privacy.restrict3rdpartystorage.heuristic.redirect": {
+                    "value": false,
+                    "title": "Disable redirect-based storage access heuristic"
+                },
+                "privacy.restrict3rdpartystorage.heuristic.window_open": {
+                    "value": false,
+                    "title": "Disable window-open-based storage access heuristic"
+                },
+                "privacy.resistFingerprinting.randomization.daily_reset.enabled": {
+                    "value": true,
+                    "title": "Reset fingerprinting randomization key daily",
+                    "description": "Resets the fingerprinting randomization key daily in addition to per-session",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "privacy.resistFingerprinting.randomization.daily_reset.private.enabled": {
+                    "value": true,
+                    "title": "Reset fingerprinting randomization key daily in Private Browsing",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "media.devices.enumerate.legacy.enabled": {
+                    "value": false,
+                    "title": "Disable legacy media device enumeration",
+                    "description": "Prevents enumeration of media devices which can be used for fingerprinting"
+                }
+            }
+        },
+        "WebGL": {
+            "description": "Keep WebGL available while spoofing identifying renderer details where possible",
+            "preferences": {
+                "webgl.disabled": {
+                    "value": false,
+                    "title": "Keep WebGL enabled",
+                    "shouldBeDefault": true
+                },
+                "webgl.enable-renderer-query": {
+                    "value": false,
+                    "title": "Disable WebGL renderer debug queries"
+                },
+                "webgl.override-unmasked-renderer": {
+                    "value": "Mozilla",
+                    "title": "Spoof WebGL renderer as Mozilla"
+                },
+                "webgl.override-unmasked-vendor": {
+                    "value": "Mozilla",
+                    "title": "Spoof WebGL vendor as Mozilla"
+                },
+                "webgl.sanitize-unmasked-renderer": {
+                    "value": false,
+                    "title": "Disable built-in WebGL renderer sanitization",
+                    "description": "The fixed vendor and renderer strings above are used instead"
+                },
+                "webgl.disable-fail-if-major-performance-caveat": {
+                    "value": true,
+                    "title": "Ignore major-performance-caveat blocking",
+                    "description": "Avoids disabling WebGL on devices Gecko marks as slow or unstable",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                }
+            }
+        },
+        "WebRTC": {
+            "description": "Keep WebRTC available with IP-leak mitigations and stricter routing behavior",
+            "preferences": {
+                "media.peerconnection.enabled": {
+                    "value": true,
+                    "title": "Enable WebRTC",
+                    "description": "Required for voice calls, video calls, and similar realtime features"
+                },
+                "media.peerconnection.ice.obfuscate_host_addresses": {
+                    "value": true,
+                    "title": "Obfuscate local IPs with mDNS"
+                },
+                "media.peerconnection.ice.default_address_only": {
+                    "value": true,
+                    "title": "Limit ICE candidates to the default route"
+                },
+                "media.peerconnection.ice.proxy_only_if_behind_proxy": {
+                    "value": true,
+                    "title": "Prefer proxy-compatible ICE when a proxy is set"
+                },
+                "media.peerconnection.mtransport_process": {
+                    "value": true,
+                    "title": "Isolate WebRTC media transport in separate process",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "media.peerconnection.ice.no_host": {
+                    "value": true,
+                    "title": "Never expose host candidates",
+                    "description": "May break some video calls",
+                    "requireUserOptIn": true
+                },
+                "media.peerconnection.ice.relay_only": {
+                    "value": true,
+                    "title": "Relay-only mode (no direct P2P)",
+                    "description": "Routes all traffic through relay servers, breaks direct peer-to-peer",
+                    "requireUserOptIn": true
                 }
             }
         },
         "Attack Surface Reduction": {
+            "description": "Reduce attack surface by disabling potentially dangerous features",
             "preferences": {
                 "pdfjs.enableScripting": {
                     "value": false,
-                    "title": "Disable PDFJS scripting"
+                    "title": "Disable PDF.js scripting"
                 },
                 "pdfjs.enableXfa": {
                     "value": false,
-                    "title": "Disable PDFJS XFA"
+                    "title": "Disable PDF.js XFA forms",
+                    "description": "XFA forms in PDFs can execute code and have been vectors for exploits"
                 },
                 "mathml.disabled": {
                     "value": true,
-                    "title": "Disable MathML (Mathematical Markup Language)"
+                    "title": "Disable MathML (Mathematical Markup Language)",
+                    "description": "MathML has been a source of browser exploits with limited legitimate use"
                 },
                 "gfx.font_rendering.graphite.enabled": {
                     "value": false,
-                    "title": "Disable graphite"
+                    "title": "Disable Graphite font rendering",
+                    "description": "Graphite font rendering has had multiple security vulnerabilities"
                 },
                 "javascript.options.ion": {
                     "value": false,
-                    "title": "Disable Ion"
+                    "title": "Disable IonMonkey JIT compiler"
                 },
                 "javascript.options.baselinejit": {
                     "value": false,
-                    "title": "Disable baseline JIT"
+                    "title": "Disable Baseline JIT compiler"
                 },
                 "javascript.options.jit_trustedprincipals": {
                     "value": false,
-                    "title": "Disable JIT trustedprincipals"
+                    "title": "Disable JIT for privileged code"
                 },
                 "javascript.options.asmjs": {
                     "value": false,
                     "title": "Disable asm.js"
                 },
-                "javascript.options.wasm": {
-                    "value": false,
-                    "title": "Disable web assembly",
-                    "requireUserOptIn": true
-                },
                 "accessibility.force_disabled": {
                     "value": 1,
-                    "title": "Disable Accessibility Services"
+                    "title": "Disable accessibility service integration",
+                    "description": "Prevents other apps from accessing browser content via accessibility APIs, reducing attack surface"
+                },
+                "gfx.font_rendering.opentype_svg.enabled": {
+                    "value": false,
+                    "title": "Disable SVG OpenType fonts",
+                    "requireUserOptIn": true
+                },
+                "dom.postMessage.sharedArrayBuffer.withCOOP_COEP": {
+                    "value": false,
+                    "title": "Disable SAB even with COOP/COEP",
+                    "requireUserOptIn": true
+                },
+                "dom.webshare.enabled": {
+                    "value": false,
+                    "title": "Disable Web Share API",
+                    "requireUserOptIn": true
+                },
+                "dom.sitepermsaddon-provider.enabled": {
+                    "value": false,
+                    "title": "Disable site-specific permission add-ons"
+                },
+                "permissions.default.midi": {
+                    "value": 2,
+                    "title": "Block WebMIDI",
+                    "requireUserOptIn": true
+                },
+                "javascript.options.wasm_optimizingjit": {
+                    "value": false,
+                    "title": "Disable WebAssembly optimizing JIT",
+                    "description": "Disables WASM-Ion (BaldrMonkey) JIT while keeping WebAssembly functional"
+                },
+                "javascript.options.native_regexp": {
+                    "value": false,
+                    "title": "Disable native regexp JIT",
+                    "description": "Disables irregexp JIT for regex evaluation, reducing attack surface from regex exploits"
+                },
+                "javascript.options.jithints": {
+                    "value": false,
+                    "title": "Disable JIT hints optimization",
+                    "description": "Disables eager baseline hints to reduce JIT attack surface"
+                },
+                "javascript.options.main_process_disable_jit": {
+                    "value": true,
+                    "title": "Disable all JITs for parent process",
+                    "description": "Disables JIT compilation for the critical parent/main process",
+                    "shouldBeDefault": true
+                }
+            }
+        },
+        "Extension Security": {
+            "description": "Control extension behavior and prevent fingerprinting via extensions",
+            "preferences": {
+                "extensions.getAddons.cache.enabled": {
+                    "value": false,
+                    "title": "Disable add-on metadata cache updates",
+                    "description": "Reduces background refreshes of extension metadata"
+                },
+                "privacy.resistFingerprinting.block_mozAddonManager": {
+                    "value": true,
+                    "title": "Block mozAddonManager exposure",
+                    "description": "Prevents websites from querying installed add-ons through this legacy API"
+                },
+                "extensions.postDownloadThirdPartyPrompt": {
+                    "value": false,
+                    "title": "Never bypass extension install prompts",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "extensions.webextensions.restrictedDomains": {
+                    "value": "",
+                    "title": "Remove restricted domain privileges"
+                },
+                "extensions.quarantinedDomains.enabled": {
+                    "value": true,
+                    "title": "Enable quarantined domains for extensions",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "extensions.userContextIsolation.enabled": {
+                    "value": true,
+                    "title": "Enable container isolation for extensions",
+                    "description": "Allows extensions to be isolated per container, enabling per-container extension control"
+                }
+            }
+        },
+        "Geolocation": {
+            "description": "Configure geolocation and region services to protect privacy",
+            "preferences": {
+                "geo.provider.network.url": {
+                    "value": "https://api.beacondb.net/v1/geolocate",
+                    "title": "Use BeaconDB for network geolocation",
+                    "description": "Replaces Google's geolocation service with the privacy-respecting BeaconDB"
+                },
+                "browser.region.network.url": {
+                    "value": "",
+                    "title": "Disable Mozilla GeoIP/Region Service",
+                    "description": "Prevents Firefox from monitoring the user's region/general location"
+                }
+            }
+        },
+        "API Restrictions": {
+            "description": "Disable privacy-invasive and fingerprintable APIs",
+            "preferences": {
+                "dom.battery.enabled": {
+                    "value": false,
+                    "title": "Disable Battery API",
+                    "description": "The Battery Status API can be used to fingerprint devices"
+                },
+                "dom.reporting.enabled": {
+                    "value": false,
+                    "title": "Disable Reporting API",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "dom.events.testing.asyncClipboard": {
+                    "value": false,
+                    "title": "Disable async Clipboard API",
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
+                },
+                "dom.webgpu.enabled": {
+                    "value": false,
+                    "title": "Disable WebGPU"
                 }
             }
         },
@@ -302,11 +1193,11 @@
                 },
                 "browser.privatebrowsing.forceMediaMemoryCache": {
                     "value": true,
-                    "title": "Set media cache in Private Browsing to in-memory"
+                    "title": "Keep media cache in memory for Private Browsing"
                 },
                 "media.memory_cache_max_size": {
                     "value": 65536,
-                    "title": "Increase in-memory media cache maximum size"
+                    "title": "Increase the in-memory media cache size"
                 },
                 "browser.sessionstore.privacy_level": {
                     "value": 2,
@@ -316,19 +1207,21 @@
             }
         },
         "PDFJS": {
+            "description": "Control built-in PDF viewer behavior and document restrictions",
             "preferences": {
                 "pdfjs.enableSignatureEditor": {
                     "value": true,
-                    "title": "Enable the ability to add signatures"
+                    "title": "Enable PDF signature editor"
                 },
                 "pdfjs.enablePermissions": {
                     "value": false,
                     "title": "Never allow documents to prevent copying text",
-                    "shouldBeDefault": true
+                    "shouldBeDefault": true,
+                    "enforceOnStartup": true
                 },
                 "pdfjs.externalLinkTarget": {
                     "value": 2,
-                    "title": "Open external links in new tabs/windows"
+                    "title": "Open PDF links in new tabs"
                 },
                 "pdfjs.sidebarViewOnLoad": {
                     "value": 2,
@@ -336,19 +1229,17 @@
                 }
             }
         },
-        "Miscelaneous": {
+        "Miscellaneous": {
+            "description": "Miscellaneous hardening and usability preferences",
             "preferences": {
                 "permissions.manager.defaultsUrl": {
                     "value": "",
-                    "title": "Remove special permissions for certain mozilla domains"
+                    "title": "Remove default special permissions for Mozilla domains"
                 },
                 "network.IDN_show_punycode": {
                     "value": true,
-                    "title": "Use Punycode in Internationalized Domain Names to eliminate possible spoofing"
-                },
-                "extensions.postDownloadThirdPartyPrompt": {
-                    "value": false,
-                    "title": "Disable bypassing 3rd party extension install prompts"
+                    "title": "Use Punycode in Internationalized Domain Names to eliminate possible spoofing",
+                    "description": "Prevents domain spoofing attacks using lookalike Unicode characters (e.g. xn--pypal-4ve.com vs paypal.com)"
                 },
                 "layout.css.visited_links_enabled": {
                     "value": false,
@@ -357,12 +1248,8 @@
                 },
                 "media.autoplay.default": {
                     "value": 5,
-                    "title": "Block media autoplay by default"
-                },
-                "webgl.disabled": {
-                    "value": true,
-                    "title": "Disable WebGL (Web Graphics Library)",
-                    "requireUserOptIn": true
+                    "title": "Block media autoplay by default",
+                    "description": "Blocks both audio and video autoplay"
                 }
             }
         }
