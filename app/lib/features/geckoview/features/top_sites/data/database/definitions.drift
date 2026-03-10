@@ -13,9 +13,8 @@ CREATE TABLE top_site (
 
 CREATE INDEX idx_top_site_order_key ON top_site(order_key);
 
-CREATE TABLE top_site_seed_state (
-  seed_id TEXT PRIMARY KEY NOT NULL,
-  applied_at DATETIME NOT NULL
+CREATE TABLE hidden_top_site (
+  url TEXT PRIMARY KEY NOT NULL MAPPED BY `const UriConverter()`
 );
 
 leadingOrderKey(:bucket AS INTEGER):

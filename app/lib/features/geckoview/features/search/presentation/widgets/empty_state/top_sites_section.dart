@@ -19,6 +19,8 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart'
+    show MdiIcons;
 import 'package:flutter_reorderable_grid_view/widgets/custom_draggable.dart';
 import 'package:flutter_reorderable_grid_view/widgets/reorderable_builder.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -221,8 +223,7 @@ class _ReorderableTopSitesGrid extends HookConsumerWidget {
                 if (newIndex < 0 || newIndex > localItems.value.length) return;
 
                 final items = localItems.value.toList();
-                final movedItem = items.removeAt(oldIndex);
-                if (movedItem.id == null) return;
+                var movedItem = items.removeAt(oldIndex);
 
                 final targetIndex = newIndex.clamp(0, items.length);
 
@@ -233,6 +234,41 @@ class _ReorderableTopSitesGrid extends HookConsumerWidget {
                 reorderBusy.value = true;
                 try {
                   final repo = ref.read(topSiteRepositoryProvider.notifier);
+
+                  // Auto-persist default sites that don't have an ID yet
+                  if (movedItem.id == null && movedItem.isDefault) {
+                    final id = await repo.ensureDefaultPersisted(
+                      title: movedItem.title,
+                      url: movedItem.url,
+                    );
+                    movedItem = TopSiteItem(
+                      id: id,
+                      title: movedItem.title,
+                      url: movedItem.url,
+                      source: movedItem.source,
+                      orderKey: movedItem.orderKey,
+                      createdAt: movedItem.createdAt,
+                    );
+                  }
+                  if (movedItem.id == null) return;
+
+                  // Ensure neighbors are persisted too
+                  for (var i = 0; i < items.length; i++) {
+                    if (items[i].id == null && items[i].isDefault) {
+                      final id = await repo.ensureDefaultPersisted(
+                        title: items[i].title,
+                        url: items[i].url,
+                      );
+                      items[i] = TopSiteItem(
+                        id: id,
+                        title: items[i].title,
+                        url: items[i].url,
+                        source: items[i].source,
+                        orderKey: items[i].orderKey,
+                        createdAt: items[i].createdAt,
+                      );
+                    }
+                  }
 
                   final String key;
                   if (targetIndex <= 0) {
@@ -483,10 +519,31 @@ class _TopSiteGridTileState extends State<_TopSiteGridTile> {
                     ),
                   ),
                 ),
+              if (widget.item.source == TopSiteSource.defaultSite)
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: colorScheme.primaryContainer,
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(10.0),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(3.0),
+                      child: Icon(
+                        MdiIcons.crown,
+                        size: 12,
+                        color: colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+                ),
               if (widget.showDragHandle)
                 Positioned(
                   top: 2,
-                  right: 2,
+                  left: 2,
                   child: Icon(
                     Icons.drag_indicator,
                     size: 16,
@@ -525,8 +582,6 @@ Future<void> _editItem(
   WidgetRef ref,
   TopSiteItem item,
 ) async {
-  if (item.id == null) return;
-
   final result = await showEditTopSiteDialog(
     context,
     initialTitle: item.title,
@@ -536,13 +591,25 @@ Future<void> _editItem(
   if (result == null || !context.mounted) return;
 
   try {
-    await ref
-        .read(topSiteRepositoryProvider.notifier)
-        .updatePersistedSite(
-          id: item.id!,
-          title: result.title,
-          url: result.url,
-        );
+    final repo = ref.read(topSiteRepositoryProvider.notifier);
+
+    // If the item has no ID (unpersisted default), persist it first
+    var id = item.id;
+    if (id == null && item.isDefault) {
+      id = await repo.ensureDefaultPersisted(
+        title: item.title,
+        url: item.url,
+      );
+    }
+    if (id == null) return;
+
+    // If the URL changed, hide the original so it doesn't reappear
+    // from the const defaults list.
+    if (item.url != result.url) {
+      await repo.hideDefaultSite(item.url);
+    }
+
+    await repo.updateSite(id: id, title: result.title, url: result.url);
     if (context.mounted) {
       ui_helper.showInfoMessage(context, 'Top site updated');
     }
@@ -558,12 +625,15 @@ Future<void> _removeItem(
   WidgetRef ref,
   TopSiteItem item,
 ) async {
-  if (item.id == null) return;
+  final repo = ref.read(topSiteRepositoryProvider.notifier);
 
   try {
-    await ref
-        .read(topSiteRepositoryProvider.notifier)
-        .removePersistedSite(item.id!);
+    if (item.id != null) {
+      await repo.removeSite(item.id!);
+    }
+    // Hide the URL so it doesn't reappear from the const defaults list
+    await repo.hideDefaultSite(item.url);
+
     if (context.mounted) {
       ui_helper.showInfoMessage(
         context,
@@ -572,9 +642,7 @@ Future<void> _removeItem(
           label: 'Undo',
           onPressed: () async {
             try {
-              await ref
-                  .read(topSiteRepositoryProvider.notifier)
-                  .addPinnedSite(title: item.title, url: item.url);
+              await repo.addPinnedSite(title: item.title, url: item.url);
             } catch (_) {}
           },
         ),

@@ -234,130 +234,101 @@ typedef $TopSiteProcessedTableManager =
       i1.TopSiteData,
       i0.PrefetchHooks Function()
     >;
-typedef $TopSiteSeedStateCreateCompanionBuilder =
-    i1.TopSiteSeedStateCompanion Function({
-      required String seedId,
-      required DateTime appliedAt,
-      i0.Value<int> rowid,
-    });
-typedef $TopSiteSeedStateUpdateCompanionBuilder =
-    i1.TopSiteSeedStateCompanion Function({
-      i0.Value<String> seedId,
-      i0.Value<DateTime> appliedAt,
+typedef $HiddenTopSiteCreateCompanionBuilder =
+    i1.HiddenTopSiteCompanion Function({required Uri url, i0.Value<int> rowid});
+typedef $HiddenTopSiteUpdateCompanionBuilder =
+    i1.HiddenTopSiteCompanion Function({
+      i0.Value<Uri> url,
       i0.Value<int> rowid,
     });
 
-class $TopSiteSeedStateFilterComposer
-    extends i0.Composer<i0.GeneratedDatabase, i1.TopSiteSeedState> {
-  $TopSiteSeedStateFilterComposer({
+class $HiddenTopSiteFilterComposer
+    extends i0.Composer<i0.GeneratedDatabase, i1.HiddenTopSite> {
+  $HiddenTopSiteFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  i0.ColumnFilters<String> get seedId => $composableBuilder(
-    column: $table.seedId,
-    builder: (column) => i0.ColumnFilters(column),
-  );
-
-  i0.ColumnFilters<DateTime> get appliedAt => $composableBuilder(
-    column: $table.appliedAt,
-    builder: (column) => i0.ColumnFilters(column),
-  );
+  i0.ColumnWithTypeConverterFilters<Uri, Uri, String> get url =>
+      $composableBuilder(
+        column: $table.url,
+        builder: (column) => i0.ColumnWithTypeConverterFilters(column),
+      );
 }
 
-class $TopSiteSeedStateOrderingComposer
-    extends i0.Composer<i0.GeneratedDatabase, i1.TopSiteSeedState> {
-  $TopSiteSeedStateOrderingComposer({
+class $HiddenTopSiteOrderingComposer
+    extends i0.Composer<i0.GeneratedDatabase, i1.HiddenTopSite> {
+  $HiddenTopSiteOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  i0.ColumnOrderings<String> get seedId => $composableBuilder(
-    column: $table.seedId,
-    builder: (column) => i0.ColumnOrderings(column),
-  );
-
-  i0.ColumnOrderings<DateTime> get appliedAt => $composableBuilder(
-    column: $table.appliedAt,
+  i0.ColumnOrderings<String> get url => $composableBuilder(
+    column: $table.url,
     builder: (column) => i0.ColumnOrderings(column),
   );
 }
 
-class $TopSiteSeedStateAnnotationComposer
-    extends i0.Composer<i0.GeneratedDatabase, i1.TopSiteSeedState> {
-  $TopSiteSeedStateAnnotationComposer({
+class $HiddenTopSiteAnnotationComposer
+    extends i0.Composer<i0.GeneratedDatabase, i1.HiddenTopSite> {
+  $HiddenTopSiteAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  i0.GeneratedColumn<String> get seedId =>
-      $composableBuilder(column: $table.seedId, builder: (column) => column);
-
-  i0.GeneratedColumn<DateTime> get appliedAt =>
-      $composableBuilder(column: $table.appliedAt, builder: (column) => column);
+  i0.GeneratedColumnWithTypeConverter<Uri, String> get url =>
+      $composableBuilder(column: $table.url, builder: (column) => column);
 }
 
-class $TopSiteSeedStateTableManager
+class $HiddenTopSiteTableManager
     extends
         i0.RootTableManager<
           i0.GeneratedDatabase,
-          i1.TopSiteSeedState,
-          i1.TopSiteSeedStateData,
-          i1.$TopSiteSeedStateFilterComposer,
-          i1.$TopSiteSeedStateOrderingComposer,
-          i1.$TopSiteSeedStateAnnotationComposer,
-          $TopSiteSeedStateCreateCompanionBuilder,
-          $TopSiteSeedStateUpdateCompanionBuilder,
+          i1.HiddenTopSite,
+          i1.HiddenTopSiteData,
+          i1.$HiddenTopSiteFilterComposer,
+          i1.$HiddenTopSiteOrderingComposer,
+          i1.$HiddenTopSiteAnnotationComposer,
+          $HiddenTopSiteCreateCompanionBuilder,
+          $HiddenTopSiteUpdateCompanionBuilder,
           (
-            i1.TopSiteSeedStateData,
+            i1.HiddenTopSiteData,
             i0.BaseReferences<
               i0.GeneratedDatabase,
-              i1.TopSiteSeedState,
-              i1.TopSiteSeedStateData
+              i1.HiddenTopSite,
+              i1.HiddenTopSiteData
             >,
           ),
-          i1.TopSiteSeedStateData,
+          i1.HiddenTopSiteData,
           i0.PrefetchHooks Function()
         > {
-  $TopSiteSeedStateTableManager(
-    i0.GeneratedDatabase db,
-    i1.TopSiteSeedState table,
-  ) : super(
+  $HiddenTopSiteTableManager(i0.GeneratedDatabase db, i1.HiddenTopSite table)
+    : super(
         i0.TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              i1.$TopSiteSeedStateFilterComposer($db: db, $table: table),
+              i1.$HiddenTopSiteFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              i1.$TopSiteSeedStateOrderingComposer($db: db, $table: table),
+              i1.$HiddenTopSiteOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              i1.$TopSiteSeedStateAnnotationComposer($db: db, $table: table),
+              i1.$HiddenTopSiteAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
-                i0.Value<String> seedId = const i0.Value.absent(),
-                i0.Value<DateTime> appliedAt = const i0.Value.absent(),
+                i0.Value<Uri> url = const i0.Value.absent(),
                 i0.Value<int> rowid = const i0.Value.absent(),
-              }) => i1.TopSiteSeedStateCompanion(
-                seedId: seedId,
-                appliedAt: appliedAt,
-                rowid: rowid,
-              ),
+              }) => i1.HiddenTopSiteCompanion(url: url, rowid: rowid),
           createCompanionCallback:
               ({
-                required String seedId,
-                required DateTime appliedAt,
+                required Uri url,
                 i0.Value<int> rowid = const i0.Value.absent(),
-              }) => i1.TopSiteSeedStateCompanion.insert(
-                seedId: seedId,
-                appliedAt: appliedAt,
-                rowid: rowid,
-              ),
+              }) => i1.HiddenTopSiteCompanion.insert(url: url, rowid: rowid),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
               .toList(),
@@ -366,25 +337,25 @@ class $TopSiteSeedStateTableManager
       );
 }
 
-typedef $TopSiteSeedStateProcessedTableManager =
+typedef $HiddenTopSiteProcessedTableManager =
     i0.ProcessedTableManager<
       i0.GeneratedDatabase,
-      i1.TopSiteSeedState,
-      i1.TopSiteSeedStateData,
-      i1.$TopSiteSeedStateFilterComposer,
-      i1.$TopSiteSeedStateOrderingComposer,
-      i1.$TopSiteSeedStateAnnotationComposer,
-      $TopSiteSeedStateCreateCompanionBuilder,
-      $TopSiteSeedStateUpdateCompanionBuilder,
+      i1.HiddenTopSite,
+      i1.HiddenTopSiteData,
+      i1.$HiddenTopSiteFilterComposer,
+      i1.$HiddenTopSiteOrderingComposer,
+      i1.$HiddenTopSiteAnnotationComposer,
+      $HiddenTopSiteCreateCompanionBuilder,
+      $HiddenTopSiteUpdateCompanionBuilder,
       (
-        i1.TopSiteSeedStateData,
+        i1.HiddenTopSiteData,
         i0.BaseReferences<
           i0.GeneratedDatabase,
-          i1.TopSiteSeedState,
-          i1.TopSiteSeedStateData
+          i1.HiddenTopSite,
+          i1.HiddenTopSiteData
         >,
       ),
-      i1.TopSiteSeedStateData,
+      i1.HiddenTopSiteData,
       i0.PrefetchHooks Function()
     >;
 
@@ -755,164 +726,130 @@ i0.Index get idxTopSiteOrderKey => i0.Index(
   'CREATE INDEX idx_top_site_order_key ON top_site (order_key)',
 );
 
-class TopSiteSeedState extends i0.Table
-    with i0.TableInfo<TopSiteSeedState, i1.TopSiteSeedStateData> {
+class HiddenTopSite extends i0.Table
+    with i0.TableInfo<HiddenTopSite, i1.HiddenTopSiteData> {
   @override
   final i0.GeneratedDatabase attachedDatabase;
   final String? _alias;
-  TopSiteSeedState(this.attachedDatabase, [this._alias]);
-  late final i0.GeneratedColumn<String> seedId = i0.GeneratedColumn<String>(
-    'seed_id',
-    aliasedName,
-    false,
-    type: i0.DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'PRIMARY KEY NOT NULL',
-  );
-  late final i0.GeneratedColumn<DateTime> appliedAt =
-      i0.GeneratedColumn<DateTime>(
-        'applied_at',
+  HiddenTopSite(this.attachedDatabase, [this._alias]);
+  late final i0.GeneratedColumnWithTypeConverter<Uri, String> url =
+      i0.GeneratedColumn<String>(
+        'url',
         aliasedName,
         false,
-        type: i0.DriftSqlType.dateTime,
+        type: i0.DriftSqlType.string,
         requiredDuringInsert: true,
-        $customConstraints: 'NOT NULL',
-      );
+        $customConstraints: 'PRIMARY KEY NOT NULL',
+      ).withConverter<Uri>(i1.HiddenTopSite.$converterurl);
   @override
-  List<i0.GeneratedColumn> get $columns => [seedId, appliedAt];
+  List<i0.GeneratedColumn> get $columns => [url];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'top_site_seed_state';
+  static const String $name = 'hidden_top_site';
   @override
-  Set<i0.GeneratedColumn> get $primaryKey => {seedId};
+  Set<i0.GeneratedColumn> get $primaryKey => {url};
   @override
-  i1.TopSiteSeedStateData map(
-    Map<String, dynamic> data, {
-    String? tablePrefix,
-  }) {
+  i1.HiddenTopSiteData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return i1.TopSiteSeedStateData(
-      seedId: attachedDatabase.typeMapping.read(
-        i0.DriftSqlType.string,
-        data['${effectivePrefix}seed_id'],
-      )!,
-      appliedAt: attachedDatabase.typeMapping.read(
-        i0.DriftSqlType.dateTime,
-        data['${effectivePrefix}applied_at'],
-      )!,
+    return i1.HiddenTopSiteData(
+      url: i1.HiddenTopSite.$converterurl.fromSql(
+        attachedDatabase.typeMapping.read(
+          i0.DriftSqlType.string,
+          data['${effectivePrefix}url'],
+        )!,
+      ),
     );
   }
 
   @override
-  TopSiteSeedState createAlias(String alias) {
-    return TopSiteSeedState(attachedDatabase, alias);
+  HiddenTopSite createAlias(String alias) {
+    return HiddenTopSite(attachedDatabase, alias);
   }
 
+  static i0.TypeConverter<Uri, String> $converterurl = const i3.UriConverter();
   @override
   bool get dontWriteConstraints => true;
 }
 
-class TopSiteSeedStateData extends i0.DataClass
-    implements i0.Insertable<i1.TopSiteSeedStateData> {
-  final String seedId;
-  final DateTime appliedAt;
-  const TopSiteSeedStateData({required this.seedId, required this.appliedAt});
+class HiddenTopSiteData extends i0.DataClass
+    implements i0.Insertable<i1.HiddenTopSiteData> {
+  final Uri url;
+  const HiddenTopSiteData({required this.url});
   @override
   Map<String, i0.Expression> toColumns(bool nullToAbsent) {
     final map = <String, i0.Expression>{};
-    map['seed_id'] = i0.Variable<String>(seedId);
-    map['applied_at'] = i0.Variable<DateTime>(appliedAt);
+    {
+      map['url'] = i0.Variable<String>(
+        i1.HiddenTopSite.$converterurl.toSql(url),
+      );
+    }
     return map;
   }
 
-  factory TopSiteSeedStateData.fromJson(
+  factory HiddenTopSiteData.fromJson(
     Map<String, dynamic> json, {
     i0.ValueSerializer? serializer,
   }) {
     serializer ??= i0.driftRuntimeOptions.defaultSerializer;
-    return TopSiteSeedStateData(
-      seedId: serializer.fromJson<String>(json['seed_id']),
-      appliedAt: serializer.fromJson<DateTime>(json['applied_at']),
-    );
+    return HiddenTopSiteData(url: serializer.fromJson<Uri>(json['url']));
   }
   @override
   Map<String, dynamic> toJson({i0.ValueSerializer? serializer}) {
     serializer ??= i0.driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'seed_id': serializer.toJson<String>(seedId),
-      'applied_at': serializer.toJson<DateTime>(appliedAt),
-    };
+    return <String, dynamic>{'url': serializer.toJson<Uri>(url)};
   }
 
-  i1.TopSiteSeedStateData copyWith({String? seedId, DateTime? appliedAt}) =>
-      i1.TopSiteSeedStateData(
-        seedId: seedId ?? this.seedId,
-        appliedAt: appliedAt ?? this.appliedAt,
-      );
-  TopSiteSeedStateData copyWithCompanion(i1.TopSiteSeedStateCompanion data) {
-    return TopSiteSeedStateData(
-      seedId: data.seedId.present ? data.seedId.value : this.seedId,
-      appliedAt: data.appliedAt.present ? data.appliedAt.value : this.appliedAt,
-    );
+  i1.HiddenTopSiteData copyWith({Uri? url}) =>
+      i1.HiddenTopSiteData(url: url ?? this.url);
+  HiddenTopSiteData copyWithCompanion(i1.HiddenTopSiteCompanion data) {
+    return HiddenTopSiteData(url: data.url.present ? data.url.value : this.url);
   }
 
   @override
   String toString() {
-    return (StringBuffer('TopSiteSeedStateData(')
-          ..write('seedId: $seedId, ')
-          ..write('appliedAt: $appliedAt')
+    return (StringBuffer('HiddenTopSiteData(')
+          ..write('url: $url')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(seedId, appliedAt);
+  int get hashCode => url.hashCode;
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is i1.TopSiteSeedStateData &&
-          other.seedId == this.seedId &&
-          other.appliedAt == this.appliedAt);
+      (other is i1.HiddenTopSiteData && other.url == this.url);
 }
 
-class TopSiteSeedStateCompanion
-    extends i0.UpdateCompanion<i1.TopSiteSeedStateData> {
-  final i0.Value<String> seedId;
-  final i0.Value<DateTime> appliedAt;
+class HiddenTopSiteCompanion extends i0.UpdateCompanion<i1.HiddenTopSiteData> {
+  final i0.Value<Uri> url;
   final i0.Value<int> rowid;
-  const TopSiteSeedStateCompanion({
-    this.seedId = const i0.Value.absent(),
-    this.appliedAt = const i0.Value.absent(),
+  const HiddenTopSiteCompanion({
+    this.url = const i0.Value.absent(),
     this.rowid = const i0.Value.absent(),
   });
-  TopSiteSeedStateCompanion.insert({
-    required String seedId,
-    required DateTime appliedAt,
+  HiddenTopSiteCompanion.insert({
+    required Uri url,
     this.rowid = const i0.Value.absent(),
-  }) : seedId = i0.Value(seedId),
-       appliedAt = i0.Value(appliedAt);
-  static i0.Insertable<i1.TopSiteSeedStateData> custom({
-    i0.Expression<String>? seedId,
-    i0.Expression<DateTime>? appliedAt,
+  }) : url = i0.Value(url);
+  static i0.Insertable<i1.HiddenTopSiteData> custom({
+    i0.Expression<String>? url,
     i0.Expression<int>? rowid,
   }) {
     return i0.RawValuesInsertable({
-      if (seedId != null) 'seed_id': seedId,
-      if (appliedAt != null) 'applied_at': appliedAt,
+      if (url != null) 'url': url,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
-  i1.TopSiteSeedStateCompanion copyWith({
-    i0.Value<String>? seedId,
-    i0.Value<DateTime>? appliedAt,
+  i1.HiddenTopSiteCompanion copyWith({
+    i0.Value<Uri>? url,
     i0.Value<int>? rowid,
   }) {
-    return i1.TopSiteSeedStateCompanion(
-      seedId: seedId ?? this.seedId,
-      appliedAt: appliedAt ?? this.appliedAt,
+    return i1.HiddenTopSiteCompanion(
+      url: url ?? this.url,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -920,11 +857,10 @@ class TopSiteSeedStateCompanion
   @override
   Map<String, i0.Expression> toColumns(bool nullToAbsent) {
     final map = <String, i0.Expression>{};
-    if (seedId.present) {
-      map['seed_id'] = i0.Variable<String>(seedId.value);
-    }
-    if (appliedAt.present) {
-      map['applied_at'] = i0.Variable<DateTime>(appliedAt.value);
+    if (url.present) {
+      map['url'] = i0.Variable<String>(
+        i1.HiddenTopSite.$converterurl.toSql(url.value),
+      );
     }
     if (rowid.present) {
       map['rowid'] = i0.Variable<int>(rowid.value);
@@ -934,9 +870,8 @@ class TopSiteSeedStateCompanion
 
   @override
   String toString() {
-    return (StringBuffer('TopSiteSeedStateCompanion(')
-          ..write('seedId: $seedId, ')
-          ..write('appliedAt: $appliedAt, ')
+    return (StringBuffer('HiddenTopSiteCompanion(')
+          ..write('url: $url, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();

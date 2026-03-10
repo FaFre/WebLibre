@@ -590,7 +590,7 @@ class _PinTopSiteTile extends HookConsumerWidget {
       () => url != null
           ? ref
                 .read(topSiteRepositoryProvider.notifier)
-                .isPersistedTopSiteUrl(url)
+                .isPinnedTopSiteUrl(url)
           : Future.value(false),
       [url],
     );

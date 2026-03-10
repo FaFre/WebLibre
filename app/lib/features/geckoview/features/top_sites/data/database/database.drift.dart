@@ -7,7 +7,7 @@ import 'package:weblibre/features/geckoview/features/top_sites/data/database/dao
     as i2;
 import 'package:weblibre/features/geckoview/features/top_sites/data/database/database.dart'
     as i3;
-import 'package:weblibre/features/geckoview/features/top_sites/data/database/daos/seed_state.dart'
+import 'package:weblibre/features/geckoview/features/top_sites/data/database/daos/hidden_top_site.dart'
     as i4;
 import 'package:drift/internal/modular.dart' as i5;
 import 'package:sqlite3/common.dart' as i6;
@@ -16,12 +16,13 @@ abstract class $TopSiteDatabase extends i0.GeneratedDatabase {
   $TopSiteDatabase(i0.QueryExecutor e) : super(e);
   $TopSiteDatabaseManager get managers => $TopSiteDatabaseManager(this);
   late final i1.TopSite topSite = i1.TopSite(this);
-  late final i1.TopSiteSeedState topSiteSeedState = i1.TopSiteSeedState(this);
+  late final i1.HiddenTopSite hiddenTopSite = i1.HiddenTopSite(this);
   late final i2.TopSiteDao topSiteDao = i2.TopSiteDao(
     this as i3.TopSiteDatabase,
   );
-  late final i4.TopSiteSeedStateDao topSiteSeedStateDao =
-      i4.TopSiteSeedStateDao(this as i3.TopSiteDatabase);
+  late final i4.HiddenTopSiteDao hiddenTopSiteDao = i4.HiddenTopSiteDao(
+    this as i3.TopSiteDatabase,
+  );
   i1.DefinitionsDrift get definitionsDrift => i5.ReadDatabaseContainer(
     this,
   ).accessor<i1.DefinitionsDrift>(i1.DefinitionsDrift.new);
@@ -32,7 +33,7 @@ abstract class $TopSiteDatabase extends i0.GeneratedDatabase {
   List<i0.DatabaseSchemaEntity> get allSchemaEntities => [
     topSite,
     i1.idxTopSiteOrderKey,
-    topSiteSeedState,
+    hiddenTopSite,
   ];
 }
 
@@ -41,8 +42,8 @@ class $TopSiteDatabaseManager {
   $TopSiteDatabaseManager(this._db);
   i1.$TopSiteTableManager get topSite =>
       i1.$TopSiteTableManager(_db, _db.topSite);
-  i1.$TopSiteSeedStateTableManager get topSiteSeedState =>
-      i1.$TopSiteSeedStateTableManager(_db, _db.topSiteSeedState);
+  i1.$HiddenTopSiteTableManager get hiddenTopSite =>
+      i1.$HiddenTopSiteTableManager(_db, _db.hiddenTopSite);
 }
 
 extension DefineFunctions on i6.CommonDatabase {

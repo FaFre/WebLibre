@@ -18,29 +18,37 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:drift/drift.dart';
-import 'package:weblibre/features/geckoview/features/top_sites/data/database/daos/seed_state.drift.dart';
+import 'package:weblibre/extensions/uri.dart';
+import 'package:weblibre/features/geckoview/features/top_sites/data/database/daos/hidden_top_site.drift.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/data/database/definitions.drift.dart';
 
 @DriftAccessor()
-class TopSiteSeedStateDao extends DatabaseAccessor<TopSiteDatabase>
-    with $TopSiteSeedStateDaoMixin {
-  TopSiteSeedStateDao(super.db);
+class HiddenTopSiteDao extends DatabaseAccessor<TopSiteDatabase>
+    with $HiddenTopSiteDaoMixin {
+  HiddenTopSiteDao(super.db);
 
-  Future<bool> hasSeed(String seedId) async {
-    final row =
-        await (db.topSiteSeedState.select()
-              ..where((t) => t.seedId.equals(seedId)))
-            .getSingleOrNull();
-    return row != null;
+  Future<Set<String>> getHiddenUrls() async {
+    final rows = await db.hiddenTopSite.select().get();
+    return rows.map((r) => r.url.normalized.toString()).toSet();
   }
 
-  Future<void> markSeedApplied(String seedId) {
-    return db.topSiteSeedState.insertOne(
-      TopSiteSeedStateCompanion.insert(
-        seedId: seedId,
-        appliedAt: DateTime.now(),
-      ),
+  Stream<Set<String>> watchHiddenUrls() {
+    return db.hiddenTopSite.select().watch().map(
+      (rows) => rows.map((r) => r.url.normalized.toString()).toSet(),
     );
+  }
+
+  Future<void> hideUrl(Uri url) {
+    return db.hiddenTopSite.insertOne(
+      HiddenTopSiteCompanion.insert(url: url.normalized),
+      mode: InsertMode.insertOrIgnore,
+    );
+  }
+
+  Future<void> unhideUrl(Uri url) {
+    return (db.hiddenTopSite.delete()
+          ..where((t) => t.url.equalsValue(url.normalized)))
+        .go();
   }
 }

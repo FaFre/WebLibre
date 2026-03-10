@@ -9,56 +9,6 @@ part of 'providers.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(topSiteDefaultSeeds)
-final topSiteDefaultSeedsProvider = TopSiteDefaultSeedsProvider._();
-
-final class TopSiteDefaultSeedsProvider
-    extends
-        $FunctionalProvider<
-          List<({String title, Uri url})>,
-          List<({String title, Uri url})>,
-          List<({String title, Uri url})>
-        >
-    with $Provider<List<({String title, Uri url})>> {
-  TopSiteDefaultSeedsProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'topSiteDefaultSeedsProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$topSiteDefaultSeedsHash();
-
-  @$internal
-  @override
-  $ProviderElement<List<({String title, Uri url})>> $createElement(
-    $ProviderPointer pointer,
-  ) => $ProviderElement(pointer);
-
-  @override
-  List<({String title, Uri url})> create(Ref ref) {
-    return topSiteDefaultSeeds(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(List<({String title, Uri url})> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<List<({String title, Uri url})>>(
-        value,
-      ),
-    );
-  }
-}
-
-String _$topSiteDefaultSeedsHash() =>
-    r'd15156e1ebe1896a11dc2d983db9fb90a2222380';
-
 @ProviderFor(topSiteList)
 final topSiteListProvider = TopSiteListFamily._();
 
@@ -136,10 +86,10 @@ final class TopSiteListFamily extends $Family
   String toString() => r'topSiteListProvider';
 }
 
-@ProviderFor(persistedTopSiteList)
-final persistedTopSiteListProvider = PersistedTopSiteListProvider._();
+@ProviderFor(pinnedTopSiteList)
+final pinnedTopSiteListProvider = PinnedTopSiteListProvider._();
 
-final class PersistedTopSiteListProvider
+final class PinnedTopSiteListProvider
     extends
         $FunctionalProvider<
           AsyncValue<List<TopSiteItem>>,
@@ -149,19 +99,19 @@ final class PersistedTopSiteListProvider
     with
         $FutureModifier<List<TopSiteItem>>,
         $StreamProvider<List<TopSiteItem>> {
-  PersistedTopSiteListProvider._()
+  PinnedTopSiteListProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'persistedTopSiteListProvider',
+        name: r'pinnedTopSiteListProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$persistedTopSiteListHash();
+  String debugGetCreateSourceHash() => _$pinnedTopSiteListHash();
 
   @$internal
   @override
@@ -171,9 +121,8 @@ final class PersistedTopSiteListProvider
 
   @override
   Stream<List<TopSiteItem>> create(Ref ref) {
-    return persistedTopSiteList(ref);
+    return pinnedTopSiteList(ref);
   }
 }
 
-String _$persistedTopSiteListHash() =>
-    r'f0f7f087dccc0cea8498811ea2ad2af5e6d3fbb8';
+String _$pinnedTopSiteListHash() => r'83adb6584ef738be14a2e0b55b33986ebb4520a9';

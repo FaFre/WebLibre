@@ -20,13 +20,13 @@
 import 'package:drift/drift.dart';
 import 'package:drift_dev/api/migrations_native.dart';
 import 'package:flutter/foundation.dart';
-import 'package:weblibre/features/geckoview/features/top_sites/data/database/daos/seed_state.dart';
+import 'package:weblibre/features/geckoview/features/top_sites/data/database/daos/hidden_top_site.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/data/database/daos/top_site.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/data/database/database.drift.dart';
 
 @DriftDatabase(
   include: {'definitions.drift'},
-  daos: [TopSiteDao, TopSiteSeedStateDao],
+  daos: [TopSiteDao, HiddenTopSiteDao],
 )
 class TopSiteDatabase extends $TopSiteDatabase {
   @override

@@ -19,8 +19,8 @@
  */
 import 'dart:async';
 
-import 'package:drift/drift.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:weblibre/core/uuid.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
@@ -36,92 +36,88 @@ part 'top_site_repository.g.dart';
 
 @Riverpod(keepAlive: true)
 class TopSiteRepository extends _$TopSiteRepository {
-  Future<void> ensureSeeded() async {
+  Stream<List<TopSiteItem>> watchTopSites({int limit = 8}) {
     final db = ref.read(topSiteDatabaseProvider);
-    final seeds = ref.read(topSiteDefaultSeedsProvider);
 
-    await db.transaction(() async {
-      final alreadySeeded = await db.topSiteSeedStateDao.hasSeed(
-        'initial-defaults-v1',
+    return CombineLatestStream.combine2(
+      db.topSiteDao.selectAllTopSites().watch(),
+      db.hiddenTopSiteDao.watchHiddenUrls(),
+      (List<TopSiteData> rows, Set<String> hiddenUrls) => (rows, hiddenUrls),
+    ).asyncMap((record) async {
+      final (rows, hiddenUrls) = record;
+      final persistedItems = rows.map(_mapRow).toList();
+      final persistedUrls = persistedItems
+          .map((s) => s.url.normalized.toString())
+          .toSet();
+
+      final defaultItems = _getVisibleDefaults(
+        persistedUrls: persistedUrls,
+        hiddenUrls: hiddenUrls,
       );
-      if (alreadySeeded) return;
 
-      final now = DateTime.now();
+      final combined = [...persistedItems, ...defaultItems];
+      final targetCount = limit < 0 ? 0 : limit;
 
-      for (var i = 0; i < seeds.length; i++) {
-        final orderKey = await db.topSiteDao
-            .generateTrailingOrderKey()
-            .getSingle();
-        // Insert one-by-one so trailing key advances
-        await db.topSite.insertOne(
-          TopSiteCompanion.insert(
-            id: uuid.v7(),
-            title: seeds[i].title,
-            url: seeds[i].url.normalized,
-            source: StoredTopSiteSource.seeded,
-            orderKey: orderKey,
-            createdAt: now,
-          ),
-        );
+      if (combined.length >= targetCount) {
+        return combined;
       }
 
-      await db.topSiteSeedStateDao.markSeedApplied('initial-defaults-v1');
+      final remaining = targetCount - combined.length;
+      final excludeUrls = {
+        ...persistedUrls,
+        ...defaultItems.map((s) => s.url.normalized.toString()),
+      };
+      final historyItems = await _getHistoryItems(
+        limit: remaining,
+        excludeUrls: excludeUrls,
+      );
+
+      return [...combined, ...historyItems];
     });
   }
 
   Future<List<TopSiteItem>> getTopSites({int limit = 8}) async {
-    final persisted = await _getPersistedItems();
-    final targetCount = limit < 0 ? 0 : limit;
+    final db = ref.read(topSiteDatabaseProvider);
+    final rows = await db.topSiteDao.getAllTopSites();
+    final hiddenUrls = await db.hiddenTopSiteDao.getHiddenUrls();
 
-    // Always keep all persisted items. The limit is only used as a history
-    // padding target.
-    if (persisted.length >= targetCount) {
-      return persisted;
-    }
+    final persistedItems = rows.map(_mapRow).toList();
+    final persistedUrls = persistedItems
+        .map((s) => s.url.normalized.toString())
+        .toSet();
 
-    final remaining = targetCount - persisted.length;
-    final historyItems = await _getHistoryItems(
-      limit: remaining,
-      excludeUrls: persisted.map((s) => s.url.normalized.toString()).toSet(),
+    final defaultItems = _getVisibleDefaults(
+      persistedUrls: persistedUrls,
+      hiddenUrls: hiddenUrls,
     );
 
-    return [...persisted, ...historyItems];
+    final combined = [...persistedItems, ...defaultItems];
+    final targetCount = limit < 0 ? 0 : limit;
+
+    if (combined.length >= targetCount) {
+      return combined;
+    }
+
+    final remaining = targetCount - combined.length;
+    final excludeUrls = {
+      ...persistedUrls,
+      ...defaultItems.map((s) => s.url.normalized.toString()),
+    };
+    final historyItems = await _getHistoryItems(
+      limit: remaining,
+      excludeUrls: excludeUrls,
+    );
+
+    return [...combined, ...historyItems];
   }
 
-  Stream<List<TopSiteItem>> watchTopSites({int limit = 8}) {
+  Stream<List<TopSiteItem>> watchPinnedTopSites() {
     final db = ref.read(topSiteDatabaseProvider);
-    return db.topSiteDao.selectPersistedTopSites().watch().asyncMap((
-      persistedRows,
-    ) async {
-      final persistedItems = persistedRows.map(_mapPersistedRow).toList();
-      final targetCount = limit < 0 ? 0 : limit;
-
-      // Always keep all persisted items. The limit is only used as a history
-      // padding target.
-      if (persistedItems.length >= targetCount) {
-        return persistedItems;
-      }
-
-      final remaining = targetCount - persistedItems.length;
-      final historyItems = await _getHistoryItems(
-        limit: remaining,
-        excludeUrls: persistedItems
-            .map((s) => s.url.normalized.toString())
-            .toSet(),
-      );
-
-      return [...persistedItems, ...historyItems];
-    });
-  }
-
-  Future<List<TopSiteItem>> getPersistedTopSites() {
-    return _getPersistedItems();
-  }
-
-  Stream<List<TopSiteItem>> watchPersistedTopSites() {
-    final db = ref.read(topSiteDatabaseProvider);
-    return db.topSiteDao.selectPersistedTopSites().watch().map(
-      (rows) => rows.map(_mapPersistedRow).toList(),
+    return db.topSiteDao.selectAllTopSites().watch().map(
+      (rows) => rows
+          .where((r) => r.source == StoredTopSiteSource.pinned)
+          .map(_mapRow)
+          .toList(),
     );
   }
 
@@ -137,6 +133,39 @@ class TopSiteRepository extends _$TopSiteRepository {
     return normalized;
   }
 
+  /// Persists a default site to the database so it can be reordered.
+  /// Returns the database ID.
+  Future<String> _persistDefault({
+    required String title,
+    required Uri url,
+    required String orderKey,
+  }) async {
+    final db = ref.read(topSiteDatabaseProvider);
+    final id = uuid.v7();
+    await db.topSiteDao.insertSite(
+      id: id,
+      title: title,
+      url: url,
+      source: StoredTopSiteSource.defaultSite,
+      orderKey: orderKey,
+    );
+    return id;
+  }
+
+  /// Ensures a default site is persisted in the database. If it already exists,
+  /// returns its existing ID. Otherwise inserts it with a trailing order key.
+  Future<String> ensureDefaultPersisted({
+    required String title,
+    required Uri url,
+  }) async {
+    final db = ref.read(topSiteDatabaseProvider);
+    final existing = await db.topSiteDao.getTopSiteByUrl(url);
+    if (existing != null) return existing.id;
+
+    final orderKey = await db.topSiteDao.generateTrailingOrderKey().getSingle();
+    return _persistDefault(title: title, url: url, orderKey: orderKey);
+  }
+
   Future<String> addPinnedSite({
     required String title,
     required Uri url,
@@ -144,8 +173,11 @@ class TopSiteRepository extends _$TopSiteRepository {
     _validateUrl(url);
     final db = ref.read(topSiteDatabaseProvider);
 
-    // Check if URL already exists as a persisted site
-    final existing = await db.topSiteDao.getPersistedTopSiteByUrl(url);
+    // If it was a hidden default, unhide it
+    await db.hiddenTopSiteDao.unhideUrl(url);
+
+    // Check if URL already exists
+    final existing = await db.topSiteDao.getTopSiteByUrl(url);
     if (existing != null) {
       final leadingKey = await db.topSiteDao
           .generateLeadingOrderKey()
@@ -161,16 +193,17 @@ class TopSiteRepository extends _$TopSiteRepository {
 
     final id = uuid.v7();
     final orderKey = await db.topSiteDao.generateLeadingOrderKey().getSingle();
-    await db.topSiteDao.insertPinnedSite(
+    await db.topSiteDao.insertSite(
       id: id,
       title: title,
       url: url,
+      source: StoredTopSiteSource.pinned,
       orderKey: orderKey,
     );
     return id;
   }
 
-  Future<void> updatePersistedSite({
+  Future<void> updateSite({
     required String id,
     required String title,
     required Uri url,
@@ -179,39 +212,47 @@ class TopSiteRepository extends _$TopSiteRepository {
     return ref
         .read(topSiteDatabaseProvider)
         .topSiteDao
-        .updatePersistedSite(id, title: title, url: url);
+        .updateSite(id, title: title, url: url);
   }
 
-  Future<void> removePersistedSite(String id) {
-    return ref.read(topSiteDatabaseProvider).topSiteDao.deletePersistedSite(id);
+  Future<void> removeSite(String id) {
+    return ref.read(topSiteDatabaseProvider).topSiteDao.deleteSite(id);
   }
 
-  Future<TopSiteItem?> getPersistedTopSiteByUrl(Uri url) async {
+  Future<void> hideDefaultSite(Uri url) {
+    return ref.read(topSiteDatabaseProvider).hiddenTopSiteDao.hideUrl(url);
+  }
+
+  Future<bool> isPinnedTopSiteUrl(Uri url) async {
     final row = await ref
         .read(topSiteDatabaseProvider)
         .topSiteDao
-        .getPersistedTopSiteByUrl(url);
-    return row != null ? _mapPersistedRow(row) : null;
-  }
-
-  Future<bool> isPersistedTopSiteUrl(Uri url) async {
-    final row = await ref
-        .read(topSiteDatabaseProvider)
-        .topSiteDao
-        .getPersistedTopSiteByUrl(url);
-    return row != null;
+        .getTopSiteByUrl(url);
+    return row != null && row.source == StoredTopSiteSource.pinned;
   }
 
   Future<bool> unpinSiteByUrl(Uri url) async {
-    final row = await ref
-        .read(topSiteDatabaseProvider)
-        .topSiteDao
-        .getPersistedTopSiteByUrl(url);
+    final db = ref.read(topSiteDatabaseProvider);
+    final row = await db.topSiteDao.getTopSiteByUrl(url);
     if (row == null) return false;
-    await ref
-        .read(topSiteDatabaseProvider)
-        .topSiteDao
-        .deletePersistedSite(row.id);
+
+    // If it was a pinned default, demote back to defaultSite source
+    final isDefaultUrl = defaultTopSites.any(
+      (d) => Uri.parse(d.url).normalized == url.normalized,
+    );
+    if (isDefaultUrl) {
+      final trailingKey = await db.topSiteDao
+          .generateTrailingOrderKey()
+          .getSingle();
+      await db.topSiteDao.promoteToSource(
+        row.id,
+        source: StoredTopSiteSource.defaultSite,
+        title: row.title,
+        orderKey: trailingKey,
+      );
+    } else {
+      await db.topSiteDao.deleteSite(row.id);
+    }
     return true;
   }
 
@@ -254,12 +295,24 @@ class TopSiteRepository extends _$TopSiteRepository {
         .getSingle();
   }
 
-  Future<List<TopSiteItem>> _getPersistedItems() async {
-    final rows = await ref
-        .read(topSiteDatabaseProvider)
-        .topSiteDao
-        .getPersistedTopSites();
-    return rows.map(_mapPersistedRow).toList();
+  List<TopSiteItem> _getVisibleDefaults({
+    required Set<String> persistedUrls,
+    required Set<String> hiddenUrls,
+  }) {
+    return defaultTopSites
+        .where((seed) {
+          final normalized = Uri.parse(seed.url).normalized.toString();
+          return !persistedUrls.contains(normalized) &&
+              !hiddenUrls.contains(normalized);
+        })
+        .map(
+          (seed) => TopSiteItem(
+            title: seed.title,
+            url: Uri.parse(seed.url),
+            source: TopSiteSource.defaultSite,
+          ),
+        )
+        .toList();
   }
 
   Future<List<TopSiteItem>> _getHistoryItems({
@@ -291,21 +344,19 @@ class TopSiteRepository extends _$TopSiteRepository {
     return items;
   }
 
-  TopSiteItem _mapPersistedRow(TopSiteData row) {
+  TopSiteItem _mapRow(TopSiteData row) {
     return TopSiteItem(
       id: row.id,
       title: row.title,
       url: row.url,
-      source: row.source == StoredTopSiteSource.seeded
-          ? TopSiteSource.seeded
-          : TopSiteSource.pinned,
+      source: row.source == StoredTopSiteSource.pinned
+          ? TopSiteSource.pinned
+          : TopSiteSource.defaultSite,
       orderKey: row.orderKey,
       createdAt: row.createdAt,
     );
   }
 
   @override
-  void build() {
-    unawaited(ensureSeeded());
-  }
+  void build() {}
 }

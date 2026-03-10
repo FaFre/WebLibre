@@ -29,36 +29,30 @@ class TopSiteDao extends DatabaseAccessor<TopSiteDatabase>
     with $TopSiteDaoMixin {
   TopSiteDao(super.db);
 
-  Selectable<TopSiteData> selectPersistedTopSites() {
+  Selectable<TopSiteData> selectAllTopSites() {
     return db.topSite.select()..orderBy([(t) => OrderingTerm.asc(t.orderKey)]);
   }
 
-  Future<List<TopSiteData>> getPersistedTopSites() {
-    return selectPersistedTopSites().get();
+  Future<List<TopSiteData>> getAllTopSites() {
+    return selectAllTopSites().get();
   }
 
-  Future<TopSiteData?> getPersistedTopSiteById(String id) {
+  Future<TopSiteData?> getTopSiteById(String id) {
     return (db.topSite.select()..where((t) => t.id.equals(id)))
         .getSingleOrNull();
   }
 
-  Future<TopSiteData?> getPersistedTopSiteByUrl(Uri url) {
+  Future<TopSiteData?> getTopSiteByUrl(Uri url) {
     return (db.topSite.select()
           ..where((t) => t.url.equalsValue(url.normalized)))
         .getSingleOrNull();
   }
 
-  Future<int> countPersistedSites() async {
-    final count = db.topSite.id.count();
-    final query = db.selectOnly(db.topSite)..addColumns([count]);
-    final result = await query.getSingle();
-    return result.read(count)!;
-  }
-
-  Future<int> insertPinnedSite({
+  Future<int> insertSite({
     required String id,
     required String title,
     required Uri url,
+    required StoredTopSiteSource source,
     required String orderKey,
   }) {
     return db.topSite.insertOne(
@@ -66,20 +60,14 @@ class TopSiteDao extends DatabaseAccessor<TopSiteDatabase>
         id: id,
         title: title,
         url: url.normalized,
-        source: StoredTopSiteSource.pinned,
+        source: source,
         orderKey: orderKey,
         createdAt: DateTime.now(),
       ),
     );
   }
 
-  Future<void> insertSeededSites(List<TopSiteCompanion> rows) {
-    return db.batch((batch) {
-      batch.insertAll(db.topSite, rows);
-    });
-  }
-
-  Future<int> updatePersistedSite(
+  Future<int> updateSite(
     String id, {
     required String title,
     required Uri url,
@@ -89,7 +77,7 @@ class TopSiteDao extends DatabaseAccessor<TopSiteDatabase>
     );
   }
 
-  Future<int> deletePersistedSite(String id) {
+  Future<int> deleteSite(String id) {
     return (db.topSite.delete()..where((t) => t.id.equals(id))).go();
   }
 

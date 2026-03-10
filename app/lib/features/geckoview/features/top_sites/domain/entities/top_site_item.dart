@@ -43,8 +43,13 @@ class TopSiteItem with FastEquatable {
     this.historyPlaceId,
   });
 
-  bool get isPersisted =>
-      source == TopSiteSource.seeded || source == TopSiteSource.pinned;
+  bool get isPinned => source == TopSiteSource.pinned;
+
+  bool get isDefault => source == TopSiteSource.defaultSite;
+
+  bool get isHistory => source == TopSiteSource.history;
+
+  bool get isPersisted => isPinned || isDefault;
 
   bool get isReorderable => isPersisted;
 

@@ -23,14 +23,20 @@ import 'package:weblibre/features/geckoview/features/top_sites/domain/repositori
 
 part 'providers.g.dart';
 
-@Riverpod(keepAlive: true)
-List<({String title, Uri url})> topSiteDefaultSeeds(Ref ref) {
-  return [
-    (title: 'Wikipedia', url: Uri.parse('https://wikipedia.org')),
-    (title: 'OpenStreetMap', url: Uri.parse('https://www.openstreetmap.org')),
-    (title: 'Project Gutenberg', url: Uri.parse('https://www.gutenberg.org/')),
-  ];
-}
+const defaultTopSites = [
+  (title: 'Wikipedia', url: 'https://wikipedia.org/'),
+  (title: 'OpenStreetMap', url: 'https://www.openstreetmap.org/'),
+  (
+    title:
+        'Internet Archive: Digital Library of Free & Borrowable Texts, Movies, Music & Wayback Machine',
+    url: 'https://archive.org/',
+  ),
+  (
+    title: 'Mozilla - Internet for people, not profit',
+    url: 'https://www.mozilla.org/',
+  ),
+  (title: 'Tor Project | Anonymity Online', url: 'https://www.torproject.org/'),
+];
 
 @Riverpod()
 Stream<List<TopSiteItem>> topSiteList(Ref ref, {int limit = 8}) {
@@ -40,6 +46,6 @@ Stream<List<TopSiteItem>> topSiteList(Ref ref, {int limit = 8}) {
 }
 
 @Riverpod()
-Stream<List<TopSiteItem>> persistedTopSiteList(Ref ref) {
-  return ref.watch(topSiteRepositoryProvider.notifier).watchPersistedTopSites();
+Stream<List<TopSiteItem>> pinnedTopSiteList(Ref ref) {
+  return ref.watch(topSiteRepositoryProvider.notifier).watchPinnedTopSites();
 }
