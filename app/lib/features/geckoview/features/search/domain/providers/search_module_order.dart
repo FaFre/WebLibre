@@ -19,6 +19,8 @@
  */
 import 'dart:convert';
 
+import 'package:fast_equatable/fast_equatable.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -27,14 +29,30 @@ import 'package:weblibre/features/user/data/providers.dart';
 
 part 'search_module_order.g.dart';
 
-typedef ModuleOrderEntry = ({SearchModuleType type, bool visible});
+@JsonSerializable()
+class ModuleOrderEntry with FastEquatable {
+  final SearchModuleType type;
+  final bool visible;
+
+  ModuleOrderEntry({required this.type, required this.visible});
+
+  factory ModuleOrderEntry.fromJson(Map<String, dynamic> json) =>
+      _$ModuleOrderEntryFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ModuleOrderEntryToJson(this);
+
+  @override
+  List<Object?> get hashParameters => [type, visible];
+}
 
 List<ModuleOrderEntry> _mergeWithDefaults(
   List<ModuleOrderEntry>? persisted,
   List<SearchModuleType> defaults,
 ) {
   if (persisted == null) {
-    return defaults.map((type) => (type: type, visible: true)).toList();
+    return defaults
+        .map((type) => ModuleOrderEntry(type: type, visible: true))
+        .toList();
   }
 
   final defaultSet = defaults.toSet();
@@ -44,7 +62,7 @@ List<ModuleOrderEntry> _mergeWithDefaults(
   final persistedTypes = result.map((e) => e.type).toSet();
   for (final type in defaults) {
     if (!persistedTypes.contains(type)) {
-      result.add((type: type, visible: true));
+      result.add(ModuleOrderEntry(type: type, visible: true));
     }
   }
   return result;
@@ -63,7 +81,10 @@ class SearchModuleOrder extends _$SearchModuleOrder {
   void toggleVisibility(SearchModuleType type) {
     state = [
       for (final e in state)
-        if (e.type == type) (type: e.type, visible: !e.visible) else e,
+        if (e.type == type)
+          ModuleOrderEntry(type: e.type, visible: !e.visible)
+        else
+          e,
     ];
   }
 
@@ -72,20 +93,13 @@ class SearchModuleOrder extends _$SearchModuleOrder {
     persist(
       ref.watch(riverpodDatabaseStorageProvider),
       key: group.key,
-      encode: (state) => jsonEncode(
-        state
-            .map((e) => {'type': e.type.name, 'visible': e.visible})
-            .toList(),
-      ),
+      encode: (state) => jsonEncode(state.map((e) => e.toJson()).toList()),
       decode: (encoded) {
         final decoded = (jsonDecode(encoded) as List<dynamic>)
             .cast<Map<String, dynamic>>()
             .map((e) {
               try {
-                return (
-                  type: SearchModuleType.values.byName(e['type']! as String),
-                  visible: e['visible']! as bool,
-                );
+                return ModuleOrderEntry.fromJson(e);
               } catch (_) {
                 return null;
               }
@@ -99,7 +113,7 @@ class SearchModuleOrder extends _$SearchModuleOrder {
 
     return stateOrNull ??
         group.defaultModules
-            .map((type) => (type: type, visible: true))
+            .map((type) => ModuleOrderEntry(type: type, visible: true))
             .toList();
   }
 }

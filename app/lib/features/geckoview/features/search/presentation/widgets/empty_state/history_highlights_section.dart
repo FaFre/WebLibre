@@ -31,10 +31,13 @@ class HistoryHighlightsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final highlightsAsync = ref.watch(searchEmptyHistoryHighlightsProvider());
-    final highlights = highlightsAsync.value ?? [];
+    final highlights = ref.watch(
+      searchEmptyHistoryHighlightsProvider().select(
+        (value) => value.value ?? [],
+      ),
+    );
 
-    if (highlightsAsync.hasValue && highlights.isEmpty) {
+    if (highlights.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
 

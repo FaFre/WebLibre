@@ -3,6 +3,35 @@
 part of 'search_module_order.dart';
 
 // **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+ModuleOrderEntry _$ModuleOrderEntryFromJson(Map<String, dynamic> json) =>
+    ModuleOrderEntry(
+      type: $enumDecode(_$SearchModuleTypeEnumMap, json['type']),
+      visible: json['visible'] as bool,
+    );
+
+Map<String, dynamic> _$ModuleOrderEntryToJson(ModuleOrderEntry instance) =>
+    <String, dynamic>{
+      'type': _$SearchModuleTypeEnumMap[instance.type]!,
+      'visible': instance.visible,
+    };
+
+const _$SearchModuleTypeEnumMap = {
+  SearchModuleType.tabs: 'tabs',
+  SearchModuleType.articles: 'articles',
+  SearchModuleType.bookmarks: 'bookmarks',
+  SearchModuleType.history: 'history',
+  SearchModuleType.historyHighlights: 'historyHighlights',
+  SearchModuleType.topSites: 'topSites',
+  SearchModuleType.recentHistory: 'recentHistory',
+  SearchModuleType.recentArticles: 'recentArticles',
+  SearchModuleType.recentTabs: 'recentTabs',
+  SearchModuleType.containers: 'containers',
+};
+
+// **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
@@ -58,7 +87,7 @@ final class SearchModuleOrderProvider
   }
 }
 
-String _$searchModuleOrderHash() => r'eeea86534497671a12c1383cbf251a8df797c1fc';
+String _$searchModuleOrderHash() => r'245c933174b1808b2cb27c4c375fac4edd12d727';
 
 final class SearchModuleOrderFamily extends $Family
     with

@@ -73,12 +73,13 @@ class TopSitesSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final topSitesAsync = ref.watch(
-      topSiteListProvider(limit: _topSitesMaxLimit),
+    final topSites = ref.watch(
+      topSiteListProvider(
+        limit: _topSitesMaxLimit,
+      ).select((value) => value.value ?? []),
     );
-    final topSites = topSitesAsync.value ?? [];
 
-    if (topSitesAsync.hasValue && topSites.isEmpty) {
+    if (topSites.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
 
@@ -335,7 +336,7 @@ class _ReorderableTopSitesGrid extends HookConsumerWidget {
   }
 }
 
-class _TopSiteGridTile extends StatelessWidget {
+class _TopSiteGridTile extends StatefulWidget {
   final TopSiteItem item;
   final VoidCallback onTap;
   final VoidCallback? onPin;
@@ -356,151 +357,147 @@ class _TopSiteGridTile extends StatelessWidget {
   static const _borderRadius = BorderRadius.all(Radius.circular(12.0));
 
   @override
+  State<_TopSiteGridTile> createState() => _TopSiteGridTileState();
+}
+
+class _TopSiteGridTileState extends State<_TopSiteGridTile> {
+  final _menuController = MenuController();
+
+  bool get _hasMenu =>
+      (widget.item.isPersisted &&
+          (widget.onEdit != null || widget.onRemove != null)) ||
+      (!widget.item.isPersisted && widget.onPin != null);
+
+  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Material(
-      color: colorScheme.surfaceContainerHigh,
-      borderRadius: _borderRadius,
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        borderRadius: _borderRadius,
-        onTap: onTap,
-        onLongPress: _hasMenu ? () => _showContextMenu(context) : null,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8.0,
-                vertical: 10.0,
-              ),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final titleStyle = textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurface,
-                  );
-                  final lineHeight =
-                      (titleStyle?.fontSize ?? 12.0) *
-                      (titleStyle?.height ?? 1.2);
-                  const textLines = 2;
-                  const gap = 6.0;
-                  const minIconSize = 18.0;
-                  const textHeightPadding = 16.0;
-                  final minTextHeight = lineHeight + textHeightPadding;
-                  final maxTextHeight =
-                      lineHeight * textLines + textHeightPadding;
-                  final iconSize = (constraints.maxHeight - minTextHeight - gap)
-                      .clamp(minIconSize, _iconSize);
+    return MenuAnchor(
+      controller: _menuController,
+      menuChildren: [
+        if (!widget.item.isPersisted && widget.onPin != null)
+          MenuItemButton(onPressed: widget.onPin, child: const Text('Pin')),
+        if (widget.item.isPersisted && widget.onEdit != null)
+          MenuItemButton(onPressed: widget.onEdit, child: const Text('Edit')),
+        if (widget.item.isPersisted && widget.onRemove != null)
+          MenuItemButton(
+            onPressed: widget.onRemove,
+            child: const Text('Remove'),
+          ),
+      ],
+      child: Material(
+        color: colorScheme.surfaceContainerHigh,
+        borderRadius: _TopSiteGridTile._borderRadius,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          borderRadius: _TopSiteGridTile._borderRadius,
+          onTap: widget.onTap,
+          onLongPress: _hasMenu ? () => _menuController.open() : null,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8.0,
+                  vertical: 10.0,
+                ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final titleStyle = textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurface,
+                    );
+                    final lineHeight =
+                        (titleStyle?.fontSize ?? 12.0) *
+                        (titleStyle?.height ?? 1.2);
+                    const textLines = 2;
+                    const gap = 6.0;
+                    const minIconSize = 18.0;
+                    const textHeightPadding = 16.0;
+                    final minTextHeight = lineHeight + textHeightPadding;
+                    final maxTextHeight =
+                        lineHeight * textLines + textHeightPadding;
+                    final iconSize =
+                        (constraints.maxHeight - minTextHeight - gap).clamp(
+                          minIconSize,
+                          _TopSiteGridTile._iconSize,
+                        );
 
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Align(
-                        child: SizedBox.square(
-                          dimension: iconSize,
-                          child: RepaintBoundary(
-                            child: ClipRRect(
-                              borderRadius: const BorderRadius.all(
-                                Radius.circular(8.0),
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Align(
+                          child: SizedBox.square(
+                            dimension: iconSize,
+                            child: RepaintBoundary(
+                              child: ClipRRect(
+                                borderRadius: const BorderRadius.all(
+                                  Radius.circular(8.0),
+                                ),
+                                child: UrlIcon([
+                                  widget.item.url,
+                                ], iconSize: iconSize),
                               ),
-                              child: UrlIcon([item.url], iconSize: iconSize),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: gap),
-                      Flexible(
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(maxHeight: maxTextHeight),
-                          child: Text(
-                            item.title,
-                            maxLines: textLines,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                            style: titleStyle,
+                        const SizedBox(height: gap),
+                        Flexible(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxHeight: maxTextHeight,
+                            ),
+                            child: Text(
+                              widget.item.title,
+                              maxLines: textLines,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: titleStyle,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  );
-                },
+                      ],
+                    );
+                  },
+                ),
               ),
-            ),
-            if (item.source == TopSiteSource.pinned)
-              Positioned(
-                top: 4,
-                right: 4,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: colorScheme.primaryContainer,
-                    borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(3.0),
-                    child: Icon(
-                      Icons.push_pin,
-                      size: 12,
-                      color: colorScheme.onPrimaryContainer,
+              if (widget.item.source == TopSiteSource.pinned)
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: colorScheme.primaryContainer,
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(10.0),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(3.0),
+                      child: Icon(
+                        Icons.push_pin,
+                        size: 12,
+                        color: colorScheme.onPrimaryContainer,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            if (showDragHandle)
-              Positioned(
-                top: 2,
-                right: 2,
-                child: Icon(
-                  Icons.drag_indicator,
-                  size: 16,
-                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+              if (widget.showDragHandle)
+                Positioned(
+                  top: 2,
+                  right: 2,
+                  child: Icon(
+                    Icons.drag_indicator,
+                    size: 16,
+                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
-  }
-
-  bool get _hasMenu =>
-      (item.isPersisted && (onEdit != null || onRemove != null)) ||
-      (!item.isPersisted && onPin != null);
-
-  Future<void> _showContextMenu(BuildContext context) async {
-    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
-    final position = renderBox.localToGlobal(Offset.zero);
-    final size = renderBox.size;
-
-    final value = await showMenu<String>(
-      context: context,
-      position: RelativeRect.fromLTRB(
-        position.dx,
-        position.dy + size.height,
-        position.dx + size.width,
-        position.dy + size.height,
-      ),
-      items: [
-        if (!item.isPersisted && onPin != null)
-          const PopupMenuItem(value: 'pin', child: Text('Pin')),
-        if (item.isPersisted && onEdit != null)
-          const PopupMenuItem(value: 'edit', child: Text('Edit')),
-        if (item.isPersisted && onRemove != null)
-          const PopupMenuItem(value: 'remove', child: Text('Remove')),
-      ],
-    );
-
-    switch (value) {
-      case 'pin':
-        onPin?.call();
-      case 'edit':
-        onEdit?.call();
-      case 'remove':
-        onRemove?.call();
-      default:
-        break;
-    }
   }
 }
 

@@ -31,10 +31,11 @@ class RecentHistorySection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final historyAsync = ref.watch(searchEmptyRecentHistoryProvider());
-    final visits = historyAsync.value ?? [];
+    final visits = ref.watch(
+      searchEmptyRecentHistoryProvider().select((value) => value.value ?? []),
+    );
 
-    if (historyAsync.hasValue && visits.isEmpty) {
+    if (visits.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
 

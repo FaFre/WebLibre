@@ -37,10 +37,13 @@ class RecentFeedArticlesSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final articlesAsync = ref.watch(searchEmptyRecentFeedArticlesProvider());
-    final articles = articlesAsync.value ?? [];
+    final articles = ref.watch(
+      searchEmptyRecentFeedArticlesProvider().select(
+        (value) => value.value ?? [],
+      ),
+    );
 
-    if (articlesAsync.hasValue && articles.isEmpty) {
+    if (articles.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
 
