@@ -30,6 +30,7 @@ import 'package:weblibre/features/geckoview/features/top_sites/data/providers.da
 import 'package:weblibre/features/geckoview/features/top_sites/domain/entities/top_site_item.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/domain/entities/top_site_source.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/domain/providers.dart';
+import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
 part 'top_site_repository.g.dart';
 
@@ -81,9 +82,7 @@ class TopSiteRepository extends _$TopSiteRepository {
     final remaining = targetCount - persisted.length;
     final historyItems = await _getHistoryItems(
       limit: remaining,
-      excludeUrls: persisted
-          .map((s) => s.url.normalized.toString())
-          .toSet(),
+      excludeUrls: persisted.map((s) => s.url.normalized.toString()).toSet(),
     );
 
     return [...persisted, ...historyItems];
@@ -126,10 +125,23 @@ class TopSiteRepository extends _$TopSiteRepository {
     );
   }
 
+  static Uri _validateUrl(Uri url) {
+    final normalized = url.normalized;
+    final parsed = uri_parser.tryParseUrl(
+      normalized.toString(),
+      eagerParsing: true,
+    );
+    if (parsed == null) {
+      throw ArgumentError.value(url.toString(), 'url', 'Invalid URL');
+    }
+    return normalized;
+  }
+
   Future<String> addPinnedSite({
     required String title,
     required Uri url,
   }) async {
+    _validateUrl(url);
     final db = ref.read(topSiteDatabaseProvider);
 
     // Check if URL already exists as a persisted site
@@ -163,6 +175,7 @@ class TopSiteRepository extends _$TopSiteRepository {
     required String title,
     required Uri url,
   }) {
+    _validateUrl(url);
     return ref
         .read(topSiteDatabaseProvider)
         .topSiteDao

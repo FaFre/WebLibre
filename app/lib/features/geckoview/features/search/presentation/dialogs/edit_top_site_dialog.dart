@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
 Future<({String title, Uri url})?> showEditTopSiteDialog(
   BuildContext context, {
@@ -94,8 +95,11 @@ class _EditTopSiteDialogState extends State<_EditTopSiteDialog> {
                 if (value == null || value.trim().isEmpty) {
                   return 'URL cannot be empty';
                 }
-                final uri = Uri.tryParse(value.trim());
-                if (uri == null || !uri.hasScheme || uri.host.isEmpty) {
+                final parsed = uri_parser.tryParseUrl(
+                  value.trim(),
+                  eagerParsing: true,
+                );
+                if (parsed == null) {
                   return 'Enter a valid URL';
                 }
                 return null;
@@ -112,7 +116,11 @@ class _EditTopSiteDialogState extends State<_EditTopSiteDialog> {
         TextButton(
           onPressed: () {
             if (_formKey.currentState?.validate() == true) {
-              final url = Uri.parse(_urlController.text.trim());
+              final url = uri_parser.tryParseUrl(
+                _urlController.text.trim(),
+                eagerParsing: true,
+              );
+              if (url == null) return;
               Navigator.pop(
                 context,
                 (title: _titleController.text.trim(), url: url),

@@ -25,7 +25,8 @@ class UriConverter extends TypeConverter<Uri, String> {
 
   @override
   Uri fromSql(String fromDb) {
-    return uri_parser.tryParseUrl(fromDb, eagerParsing: true)!;
+    return uri_parser.tryParseUrl(fromDb, eagerParsing: true) ??
+        Uri.parse(fromDb);
   }
 
   @override
