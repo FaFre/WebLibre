@@ -86,6 +86,8 @@ abstract class _$PreferenceSettingCWProxy {
 
   PreferenceSetting shouldBeDefault(bool shouldBeDefault);
 
+  PreferenceSetting enforceOnStartup(bool enforceOnStartup);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `PreferenceSetting(...).copyWith.fieldName(value)`.
   ///
@@ -100,6 +102,7 @@ abstract class _$PreferenceSettingCWProxy {
     GeckoPref? current,
     bool requireUserOptIn,
     bool shouldBeDefault,
+    bool enforceOnStartup,
   });
 }
 
@@ -132,6 +135,10 @@ class _$PreferenceSettingCWProxyImpl implements _$PreferenceSettingCWProxy {
       call(shouldBeDefault: shouldBeDefault);
 
   @override
+  PreferenceSetting enforceOnStartup(bool enforceOnStartup) =>
+      call(enforceOnStartup: enforceOnStartup);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `PreferenceSetting(...).copyWith.fieldName(value)`.
   ///
@@ -146,6 +153,7 @@ class _$PreferenceSettingCWProxyImpl implements _$PreferenceSettingCWProxy {
     Object? current = const $CopyWithPlaceholder(),
     Object? requireUserOptIn = const $CopyWithPlaceholder(),
     Object? shouldBeDefault = const $CopyWithPlaceholder(),
+    Object? enforceOnStartup = const $CopyWithPlaceholder(),
   }) {
     return PreferenceSetting(
       value: value == const $CopyWithPlaceholder() || value == null
@@ -176,6 +184,12 @@ class _$PreferenceSettingCWProxyImpl implements _$PreferenceSettingCWProxy {
           ? _value.shouldBeDefault
           // ignore: cast_nullable_to_non_nullable
           : shouldBeDefault as bool,
+      enforceOnStartup:
+          enforceOnStartup == const $CopyWithPlaceholder() ||
+              enforceOnStartup == null
+          ? _value.enforceOnStartup
+          // ignore: cast_nullable_to_non_nullable
+          : enforceOnStartup as bool,
     );
   }
 }
@@ -199,6 +213,7 @@ PreferenceSetting _$PreferenceSettingFromJson(Map<String, dynamic> json) =>
       description: json['description'] as String?,
       requireUserOptIn: json['requireUserOptIn'] as bool? ?? false,
       shouldBeDefault: json['shouldBeDefault'] as bool? ?? false,
+      enforceOnStartup: json['enforceOnStartup'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$PreferenceSettingToJson(PreferenceSetting instance) =>
@@ -208,4 +223,5 @@ Map<String, dynamic> _$PreferenceSettingToJson(PreferenceSetting instance) =>
       'description': instance.description,
       'requireUserOptIn': instance.requireUserOptIn,
       'shouldBeDefault': instance.shouldBeDefault,
+      'enforceOnStartup': instance.enforceOnStartup,
     };

@@ -9,6 +9,62 @@ part of 'preference_settings.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
+@ProviderFor(StartupPreferenceEnforcementService)
+final startupPreferenceEnforcementServiceProvider =
+    StartupPreferenceEnforcementServiceProvider._();
+
+final class StartupPreferenceEnforcementServiceProvider
+    extends $NotifierProvider<StartupPreferenceEnforcementService, void> {
+  StartupPreferenceEnforcementServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'startupPreferenceEnforcementServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() =>
+      _$startupPreferenceEnforcementServiceHash();
+
+  @$internal
+  @override
+  StartupPreferenceEnforcementService create() =>
+      StartupPreferenceEnforcementService();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(void value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<void>(value),
+    );
+  }
+}
+
+String _$startupPreferenceEnforcementServiceHash() =>
+    r'107cdcf7550b7977b53a3cf7419861cdcac0fe3a';
+
+abstract class _$StartupPreferenceEnforcementService extends $Notifier<void> {
+  void build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<void, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<void, void>,
+              void,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(_preferenceSettingContent)
 final _preferenceSettingContentProvider = _PreferenceSettingContentProvider._();
 

@@ -29,9 +29,15 @@ class GeckoEngineSettingsService {
     );
   }
 
-  Future<void> trackingProtectionPolicy(TrackingProtectionPolicy state) {
+  Future<void> trackingProtectionPolicy(
+    TrackingProtectionPolicy state, {
+    required ContentBlocking contentBlocking,
+  }) {
     return _api.updateRuntimeSettings(
-      GeckoEngineSettings(trackingProtectionPolicy: state),
+      GeckoEngineSettings(
+        trackingProtectionPolicy: state,
+        contentBlocking: contentBlocking,
+      ),
     );
   }
 
@@ -39,6 +45,7 @@ class GeckoEngineSettingsService {
   /// Use this when in CUSTOM mode and any custom setting changes.
   Future<void> customTrackingProtectionPolicy({
     required TrackingProtectionPolicy trackingProtectionPolicy,
+    required ContentBlocking contentBlocking,
     bool? blockCookies,
     CustomCookiePolicy? customCookiePolicy,
     bool? blockTrackingContent,
@@ -54,6 +61,7 @@ class GeckoEngineSettingsService {
     return _api.updateRuntimeSettings(
       GeckoEngineSettings(
         trackingProtectionPolicy: trackingProtectionPolicy,
+        contentBlocking: contentBlocking,
         blockCookies: blockCookies,
         customCookiePolicy: customCookiePolicy,
         blockTrackingContent: blockTrackingContent,

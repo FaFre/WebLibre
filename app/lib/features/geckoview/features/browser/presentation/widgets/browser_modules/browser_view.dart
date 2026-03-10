@@ -489,11 +489,11 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
     ref.listenManual(
       fireImmediately: true,
-      engineSettingsReplicationServiceProvider,
+      preferenceFixatorProvider,
       (previous, next) {},
       onError: (error, stackTrace) {
         logger.e(
-          'Error listening to engineSettingsReplicationServiceProvider',
+          'Error listening to preferenceFixatorProvider',
           error: error,
           stackTrace: stackTrace,
         );
@@ -515,11 +515,11 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
     ref.listenManual(
       fireImmediately: true,
-      preferenceFixatorProvider,
+      engineSettingsReplicationServiceProvider,
       (previous, next) {},
       onError: (error, stackTrace) {
         logger.e(
-          'Error listening to preferenceFixatorProvider',
+          'Error listening to engineSettingsReplicationServiceProvider',
           error: error,
           stackTrace: stackTrace,
         );

@@ -65,6 +65,7 @@ class PreferenceSetting with FastEquatable {
 
   final bool requireUserOptIn;
   final bool shouldBeDefault;
+  final bool enforceOnStartup;
 
   PreferenceSetting({
     required this.value,
@@ -73,6 +74,7 @@ class PreferenceSetting with FastEquatable {
     this.current,
     this.requireUserOptIn = false,
     this.shouldBeDefault = false,
+    this.enforceOnStartup = false,
   });
 
   factory PreferenceSetting.fromJson(Map<String, dynamic> json) =>
@@ -88,5 +90,6 @@ class PreferenceSetting with FastEquatable {
     description,
     requireUserOptIn,
     shouldBeDefault,
+    enforceOnStartup,
   ];
 }

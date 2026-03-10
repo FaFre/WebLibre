@@ -11,6 +11,7 @@ import androidx.preference.PreferenceManager
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.R
 import eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode
+import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMode as PigeonBounceTrackingProtectionMode
 import eu.weblibre.flutter_mozilla_components.pigeons.ColorScheme
 import eu.weblibre.flutter_mozilla_components.pigeons.CookieBannerHandlingMode
 import eu.weblibre.flutter_mozilla_components.pigeons.CustomCookiePolicy
@@ -30,6 +31,41 @@ import mozilla.components.concept.engine.mediaquery.PreferredColorScheme
 import mozilla.components.feature.addons.logger
 import mozilla.components.feature.session.SettingsUseCases
 import mozilla.components.feature.session.TrackingProtectionUseCases
+
+internal fun PigeonBounceTrackingProtectionMode.toEngineBounceTrackingProtectionMode():
+    EngineSession.BounceTrackingProtectionMode =
+    when (this) {
+        PigeonBounceTrackingProtectionMode.ENABLED ->
+            EngineSession.BounceTrackingProtectionMode.ENABLED
+        PigeonBounceTrackingProtectionMode.DISABLED ->
+            EngineSession.BounceTrackingProtectionMode.DISABLED
+        PigeonBounceTrackingProtectionMode.ENABLED_STANDBY ->
+            EngineSession.BounceTrackingProtectionMode.ENABLED_STANDBY
+        PigeonBounceTrackingProtectionMode.ENABLED_DRY_RUN ->
+            EngineSession.BounceTrackingProtectionMode.ENABLED_DRY_RUN
+    }
+
+internal fun TrackingProtectionPolicy.withBounceTrackingProtectionMode(
+    bounceTrackingProtectionMode: PigeonBounceTrackingProtectionMode,
+): TrackingProtectionPolicy {
+    val updatedPolicy = TrackingProtectionPolicy.select(
+        trackingCategories = trackingCategories,
+        cookiePolicy = cookiePolicy,
+        cookiePolicyPrivateMode = cookiePolicyPrivateMode,
+        strictSocialTrackingProtection = strictSocialTrackingProtection,
+        cookiePurging = cookiePurging,
+        bounceTrackingProtectionMode =
+            bounceTrackingProtectionMode.toEngineBounceTrackingProtectionMode(),
+        allowListBaselineTrackingProtection = allowListBaselineTrackingProtection,
+        allowListConvenienceTrackingProtection = allowListConvenienceTrackingProtection,
+    )
+
+    return when {
+        useForPrivateSessions && !useForRegularSessions -> updatedPolicy.forPrivateSessionsOnly()
+        !useForPrivateSessions && useForRegularSessions -> updatedPolicy.forRegularSessionsOnly()
+        else -> updatedPolicy
+    }
+}
 
 /**
  * Implementation of GeckoEngineSettingsApi that manages engine-specific settings
@@ -218,8 +254,11 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
             }
             components.core.engineSettings.queryParameterStrippingAllowList = settings.contentBlocking.queryParameterStrippingAllowList
             components.core.engineSettings.queryParameterStrippingStripList = settings.contentBlocking.queryParameterStrippingStripList
-
-            //TODO: Add bounce tracking protection when available
+            components.core.engineSettings.trackingProtectionPolicy =
+                (components.core.engineSettings.trackingProtectionPolicy
+                    ?: TrackingProtectionPolicy.select()).withBounceTrackingProtectionMode(
+                    settings.contentBlocking.bounceTrackingProtectionMode,
+                )
         }
         if(settings.enterpriseRootsEnabled != null) {
             components.core.engineSettings.enterpriseRootsEnabled = settings.enterpriseRootsEnabled;

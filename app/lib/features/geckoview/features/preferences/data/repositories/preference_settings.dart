@@ -31,6 +31,59 @@ import 'package:weblibre/features/geckoview/features/tabs/utils/setting_groups_s
 part 'preference_settings.g.dart';
 
 @Riverpod(keepAlive: true)
+class StartupPreferenceEnforcementService
+    extends _$StartupPreferenceEnforcementService {
+  Future<void> apply() async {
+    final content = await ref.read(_preferenceSettingContentProvider.future);
+    final groups = deserializePreferenceSettingGroups(
+      PreferencePartition.user,
+      content,
+    );
+
+    final startupPrefs = {
+      for (final group in groups.values)
+        ...Map.fromEntries(
+          group.settings.entries
+              .where(
+                (entry) =>
+                    entry.value.enforceOnStartup &&
+                    !entry.value.requireUserOptIn,
+              )
+              .map((entry) => MapEntry(entry.key, entry.value.value)),
+        ),
+    };
+
+    if (startupPrefs.isEmpty) {
+      return;
+    }
+
+    final currentPrefs = await GeckoPrefService().getPrefs(
+      startupPrefs.keys.toList(),
+    );
+
+    // Respect persisted user opt-outs by only enforcing startup values if the
+    // profile already carries the same user-branch value.
+    final prefsToEnforce = Map.fromEntries(
+      startupPrefs.entries.where((entry) {
+        final current = currentPrefs[entry.key];
+        if (current == null) {
+          return true;
+        }
+
+        return current.hasUserChangedValue && current.userValue == entry.value;
+      }),
+    );
+
+    if (prefsToEnforce.isNotEmpty) {
+      await GeckoPrefService().applyPrefs(prefsToEnforce);
+    }
+  }
+
+  @override
+  void build() {}
+}
+
+@Riverpod(keepAlive: true)
 Future<Map<String, dynamic>> _preferenceSettingContent(Ref ref) async {
   return await rootBundle
           .loadString('assets/preferences/settings.json')

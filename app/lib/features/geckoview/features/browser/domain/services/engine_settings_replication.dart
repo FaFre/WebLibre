@@ -24,6 +24,7 @@ import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
+import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
@@ -143,6 +144,7 @@ class EngineSettingsReplicationService
                   TrackingProtectionPolicy.custom) {
                 await _service.customTrackingProtectionPolicy(
                   trackingProtectionPolicy: settings.trackingProtectionPolicy,
+                  contentBlocking: settings.contentBlocking,
                   blockCookies: settings.blockCookies,
                   customCookiePolicy: settings.customCookiePolicy,
                   blockTrackingContent: settings.blockTrackingContent,
@@ -160,6 +162,7 @@ class EngineSettingsReplicationService
               } else {
                 await _service.trackingProtectionPolicy(
                   settings.trackingProtectionPolicy,
+                  contentBlocking: settings.contentBlocking,
                 );
               }
             }
@@ -237,8 +240,7 @@ class EngineSettingsReplicationService
                   );
             }
             // Web Content Settings
-            if (previous.value?.webFontsEnabled !=
-                settings.webFontsEnabled) {
+            if (previous.value?.webFontsEnabled != settings.webFontsEnabled) {
               await _service.webFontsEnabled(settings.webFontsEnabled);
             }
             if (previous.value?.automaticFontSizeAdjustment !=
@@ -247,8 +249,7 @@ class EngineSettingsReplicationService
                 settings.automaticFontSizeAdjustment,
               );
             }
-            if (previous.value?.fontSizeFactor !=
-                settings.fontSizeFactor) {
+            if (previous.value?.fontSizeFactor != settings.fontSizeFactor) {
               await _service.fontSizeFactor(settings.fontSizeFactor);
             }
             if (previous.value?.fontInflationEnabled !=
@@ -267,8 +268,7 @@ class EngineSettingsReplicationService
             if (previous.value?.lnaBlocking != settings.lnaBlocking) {
               await _service.lnaBlocking(settings.lnaBlocking);
             }
-            if (previous.value?.lnaBlockTrackers !=
-                settings.lnaBlockTrackers) {
+            if (previous.value?.lnaBlockTrackers != settings.lnaBlockTrackers) {
               await _service.lnaBlockTrackers(settings.lnaBlockTrackers);
             }
             if (previous.value?.lnaEnabled != settings.lnaEnabled) {
@@ -276,6 +276,9 @@ class EngineSettingsReplicationService
             }
           } else {
             await _service.setDefaultSettings(settings);
+            await ref
+                .read(startupPreferenceEnforcementServiceProvider.notifier)
+                .apply();
             await ref
                 .read(preferenceFixatorProvider.notifier)
                 .register('pdfjs.disabled', !settings.enablePdfJs);

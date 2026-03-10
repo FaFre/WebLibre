@@ -67,8 +67,16 @@ object EngineProvider {
                 }
             )
 
-            contentBlocking.queryParameterStrippingAllowList(components.contentBlocking.queryParameterStrippingAllowList)
-            contentBlocking.queryParameterStrippingStripList(components.contentBlocking.queryParameterStrippingStripList)
+            if (components.contentBlocking.queryParameterStrippingAllowList.isNotEmpty()) {
+                contentBlocking.queryParameterStrippingAllowList(
+                    components.contentBlocking.queryParameterStrippingAllowList,
+                )
+            }
+            if (components.contentBlocking.queryParameterStrippingStripList.isNotEmpty()) {
+                contentBlocking.queryParameterStrippingStripList(
+                    components.contentBlocking.queryParameterStrippingStripList,
+                )
+            }
 
 //            if (isCrashReportActive) {
 //                builder.crashHandler(CrashHandlerService::class.java)
