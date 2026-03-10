@@ -63,6 +63,9 @@ class BangSearch extends _$BangSearch {
   Stream<List<BangData>> build() {
     _streamController = StreamController();
 
+    // Emit initial empty list so UI doesn't show loading state
+    _streamController.add([]);
+
     ref.onDispose(() async {
       await _streamController.close();
     });

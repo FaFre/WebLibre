@@ -70,7 +70,7 @@ class FindInPageAction extends BaseSelectionAction {
   FindInPageAction(PerformAction action)
     : super(
         id: 'CUSTOM_CONTEXT_MENU_FIND_IN_PAGE',
-        title: 'Find in page',
+        title: 'Find in Page',
         performAction: action,
       );
 }

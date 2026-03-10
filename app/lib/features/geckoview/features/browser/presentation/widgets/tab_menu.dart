@@ -119,7 +119,7 @@ class TabMenu extends HookConsumerWidget {
                   .show();
             },
             leadingIcon: const Icon(Icons.search),
-            child: const Text('Find in page'),
+            child: const Text('Find in Page'),
           ),
         if (enableReaderMode)
           ReaderButton(
@@ -183,7 +183,7 @@ class TabMenu extends HookConsumerWidget {
             replacement: MenuItemButton(
               closeOnActivate: false,
               leadingIcon: const Icon(Icons.rss_feed),
-              child: const Text('Fetch Feeds'),
+              child: const Text('Fetch Feeds on Page'),
               onPressed: () {
                 showFeeds.value = true;
               },

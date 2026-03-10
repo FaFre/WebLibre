@@ -85,7 +85,7 @@ class FindInPageWidget extends HookConsumerWidget {
                     autofocus: true,
                     autocorrect: false,
                     decoration: const InputDecoration.collapsed(
-                      hintText: 'Find in page',
+                      hintText: 'Find in Page',
                     ),
                     keyboardType: TextInputType.text,
                     onChanged: onSearchTextChanged,

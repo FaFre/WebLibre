@@ -384,14 +384,10 @@ class _PageActionsCard extends HookConsumerWidget {
         ),
         _buildDivider(),
 
-        // Pin/Unpin Top Site
-        _PinTopSiteTile(selectedTabId: selectedTabId),
-        _buildDivider(),
-
         // Find in page
         ListTile(
           leading: const Icon(Icons.search),
-          title: const Text('Find in page'),
+          title: const Text('Find in Page'),
           onTap: () {
             ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
             ref
@@ -657,21 +653,26 @@ class _TranslatePageTile extends ConsumerWidget {
 
     final isTranslated = translationState?.isTranslated ?? false;
 
-    return ListTile(
-      leading: Icon(
-        Icons.translate,
-        color: isTranslated ? Theme.of(context).colorScheme.primary : null,
-      ),
-      title: Text(isTranslated ? 'Translated' : 'Translate Page'),
-      onTap: () async {
-        Navigator.pop(context);
-        if (context.mounted) {
-          await showTranslationBottomSheet(
-            context,
-            selectedTabId: selectedTabId,
-          );
-        }
-      },
+    return Column(
+      children: [
+        _buildDivider(),
+        ListTile(
+          leading: Icon(
+            Icons.translate,
+            color: isTranslated ? Theme.of(context).colorScheme.primary : null,
+          ),
+          title: Text(isTranslated ? 'Translated' : 'Translate Page'),
+          onTap: () async {
+            Navigator.pop(context);
+            if (context.mounted) {
+              await showTranslationBottomSheet(
+                context,
+                selectedTabId: selectedTabId,
+              );
+            }
+          },
+        ),
+      ],
     );
   }
 }
@@ -691,7 +692,7 @@ class _FetchFeedsTile extends HookConsumerWidget {
           _buildDivider(),
           ListTile(
             leading: const Icon(Icons.rss_feed),
-            title: const Text('Fetch Feeds'),
+            title: const Text('Fetch Feeds on Page'),
             onTap: () {
               showFeeds.value = true;
             },
@@ -786,7 +787,9 @@ class _TabActionsCard extends HookConsumerWidget {
           ListTile(
             leading: const Icon(Icons.more_horiz),
             title: const Text('More'),
-            subtitle: const Text('Clone Tab, Export, Fetch Feeds'),
+            subtitle: const Text(
+              'Clone Tab, Export, Pin Top Site, Fetch Feeds',
+            ),
             trailing: const Icon(Icons.expand_more),
             onTap: () => showMore.value = true,
           )
@@ -794,6 +797,8 @@ class _TabActionsCard extends HookConsumerWidget {
           _CloneTabExpansion(selectedTabId: selectedTabId),
           _buildDivider(),
           _ExportExpansion(selectedTabId: selectedTabId),
+          _buildDivider(),
+          _PinTopSiteTile(selectedTabId: selectedTabId),
           _FetchFeedsTile(selectedTabId: selectedTabId),
         ],
       ],
