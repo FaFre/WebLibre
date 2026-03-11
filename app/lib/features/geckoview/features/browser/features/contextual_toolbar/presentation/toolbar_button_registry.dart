@@ -319,7 +319,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
   ToolbarButtonDefinition(
     spec: duplicateTabToolbarButtonSpec,
     label: 'Duplicate Tab',
-    icon: MdiIcons.tabPlus,
+    icon: MdiIcons.contentDuplicate,
     builder: (scope, context, ref) {
       return scope.isPreview
           ? CloneTabButtonView(onPressed: () {}, onLongPress: () {})

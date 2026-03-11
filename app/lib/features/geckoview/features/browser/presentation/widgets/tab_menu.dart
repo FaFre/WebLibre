@@ -358,7 +358,7 @@ class TabMenu extends HookConsumerWidget {
                   },
                 ),
             ],
-            leadingIcon: const Icon(MdiIcons.tabPlus),
+            leadingIcon: const Icon(MdiIcons.contentDuplicate),
             child: const Text('Clone Tab'),
           ),
         if (enableContainer && settings.showContainerUi)

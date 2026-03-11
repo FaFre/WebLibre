@@ -817,7 +817,7 @@ class _CloneTabExpansion extends ConsumerWidget {
     return Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
-        leading: const Icon(MdiIcons.tabPlus),
+        leading: const Icon(MdiIcons.contentDuplicate),
         title: const Text('Clone Tab'),
         children: [
           _buildSubTile(

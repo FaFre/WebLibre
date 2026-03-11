@@ -117,7 +117,10 @@ class ContextualToolbarView extends StatelessWidget {
           child: Row(
             children: buttons
                 .map(
-                  (button) => SizedBox(width: _minButtonWidth, child: button),
+                  (button) => SizedBox(
+                    width: _minButtonWidth,
+                    child: Center(child: button),
+                  ),
                 )
                 .toList(),
           ),
