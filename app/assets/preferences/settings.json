@@ -611,7 +611,8 @@
                 "network.http.basic_http_auth.enabled": {
                     "value": false,
                     "title": "Disable Basic HTTP authentication",
-                    "description": "Basic auth sends credentials in plaintext; only use with HTTPS"
+                    "description": "Basic auth sends credentials in plaintext; only use with HTTPS",
+                    "requireUserOptIn": true
                 },
                 "browser.send_pings": {
                     "value": false,
@@ -768,7 +769,8 @@
                 "security.mixed_content.upgrade_display_content": {
                     "value": true,
                     "title": "Upgrade mixed display content to HTTPS",
-                    "description": "Automatically upgrades insecure HTTP content to HTTPS when possible"
+                    "description": "Automatically upgrades insecure HTTP content to HTTPS when possible",
+                    "requireUserOptIn": true
                 },
                 "network.http.http3.enable_0rtt": {
                     "value": false,
@@ -851,19 +853,23 @@
                 "dom.storage_access.auto_grants": {
                     "value": false,
                     "title": "Disable automatic storage access grants",
-                    "description": "Prevents websites from automatically gaining storage access through heuristics"
+                    "description": "Prevents websites from automatically gaining storage access through heuristics",
+                    "requireUserOptIn": true
                 },
                 "privacy.restrict3rdpartystorage.heuristic.navigation": {
                     "value": false,
-                    "title": "Disable navigation-based storage access heuristic"
+                    "title": "Disable navigation-based storage access heuristic",
+                    "requireUserOptIn": true
                 },
                 "privacy.restrict3rdpartystorage.heuristic.redirect": {
                     "value": false,
-                    "title": "Disable redirect-based storage access heuristic"
+                    "title": "Disable redirect-based storage access heuristic",
+                    "requireUserOptIn": true
                 },
                 "privacy.restrict3rdpartystorage.heuristic.window_open": {
                     "value": false,
-                    "title": "Disable window-open-based storage access heuristic"
+                    "title": "Disable window-open-based storage access heuristic",
+                    "requireUserOptIn": true
                 }
             }
         },
@@ -903,23 +909,6 @@
                 "gfx.bundled-fonts.activate": {
                     "value": 1,
                     "title": "Prefer bundled fonts over system fonts"
-                },
-                "dom.storage_access.auto_grants": {
-                    "value": false,
-                    "title": "Disable automatic storage access grants",
-                    "description": "Prevents websites from automatically gaining storage access through heuristics"
-                },
-                "privacy.restrict3rdpartystorage.heuristic.navigation": {
-                    "value": false,
-                    "title": "Disable navigation-based storage access heuristic"
-                },
-                "privacy.restrict3rdpartystorage.heuristic.redirect": {
-                    "value": false,
-                    "title": "Disable redirect-based storage access heuristic"
-                },
-                "privacy.restrict3rdpartystorage.heuristic.window_open": {
-                    "value": false,
-                    "title": "Disable window-open-based storage access heuristic"
                 },
                 "privacy.resistFingerprinting.randomization.daily_reset.enabled": {
                     "value": true,
@@ -1039,11 +1028,15 @@
                 },
                 "javascript.options.ion": {
                     "value": false,
-                    "title": "Disable IonMonkey JIT compiler"
+                    "title": "Disable IonMonkey JIT compiler",
+                    "description": "Severe performance impact - disables JS optimization",
+                    "requireUserOptIn": true
                 },
                 "javascript.options.baselinejit": {
                     "value": false,
-                    "title": "Disable Baseline JIT compiler"
+                    "title": "Disable Baseline JIT compiler",
+                    "description": "Severe performance impact - disables JS optimization",
+                    "requireUserOptIn": true
                 },
                 "javascript.options.jit_trustedprincipals": {
                     "value": false,
