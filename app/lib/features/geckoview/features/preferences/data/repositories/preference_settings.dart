@@ -25,6 +25,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/models/preference_setting.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/setting_groups_serializer.dart';
 
@@ -75,7 +76,14 @@ class StartupPreferenceEnforcementService
     );
 
     if (prefsToEnforce.isNotEmpty) {
-      await GeckoPrefService().applyPrefs(prefsToEnforce);
+      try {
+        await GeckoPrefService().applyPrefs(prefsToEnforce);
+      } catch (e) {
+        logger.w(
+          'Failed to enforce startup preferences, will retry on next launch',
+          error: e,
+        );
+      }
     }
   }
 

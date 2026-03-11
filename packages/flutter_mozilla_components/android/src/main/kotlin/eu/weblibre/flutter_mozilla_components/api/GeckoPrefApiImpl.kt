@@ -94,80 +94,81 @@ class GeckoPrefApiImpl : GeckoPrefApi, BrowserPrefObserverDelegate {
         prefs: Map<String, Any>,
         callback: (Result<Map<String, GeckoPref>>) -> Unit
     ) {
-        var fault: Boolean = false;
+        if (prefs.isEmpty()) {
+            callback(Result.success(emptyMap()))
+            return
+        }
 
-        for (pref in prefs) {
+        val entries = prefs.entries.toList()
+
+        fun applyNext(index: Int) {
+            if (index >= entries.size) {
+                getPrefs(prefs.keys.toList(), callback = callback)
+                return
+            }
+
+            val pref = entries[index]
+
+            fun onSuccess() = applyNext(index + 1)
+            fun onError(e: Exception) = callback(Result.failure(e))
+
             when (pref.value) {
                 is String -> components.core.engine.setBrowserPref(
                     pref.key,
                     pref.value as String,
                     Branch.USER,
-                    onSuccess = {},
-                    onError = {
-                        callback(Result.failure(Exception("${it.message} ${it.cause}")))
-                        fault = true
-                    }
+                    onSuccess = { onSuccess() },
+                    onError = { onError(Exception("${it.message} ${it.cause}")) }
                 )
 
                 is Boolean -> components.core.engine.setBrowserPref(
                     pref.key,
                     pref.value as Boolean,
                     Branch.USER,
-                    onSuccess = {},
-                    onError = {
-                        callback(Result.failure(Exception("${it.message} ${it.cause}")))
-                        fault = true
-                    }
+                    onSuccess = { onSuccess() },
+                    onError = { onError(Exception("${it.message} ${it.cause}")) }
                 )
 
                 is Long -> components.core.engine.setBrowserPref(
                     pref.key,
                     (pref.value as Long).toInt(),
                     Branch.USER,
-                    onSuccess = {},
-                    onError = {
-                        callback(Result.failure(Exception("${it.message} ${it.cause}")))
-                        fault = true
-                    }
+                    onSuccess = { onSuccess() },
+                    onError = { onError(Exception("${it.message} ${it.cause}")) }
                 )
 
                 else -> {
-                    callback(Result.failure(Exception("Unsupported value type: ${pref.value::class.simpleName}")))
-                    fault = true
+                    onError(Exception("Unsupported value type: ${pref.value::class.simpleName}"))
                 }
-            }
-
-            if (fault) {
-                return;
             }
         }
 
-        getPrefs(
-            prefs.keys.toList(),
-            callback = callback
-        )
+        applyNext(0)
     }
 
     @OptIn(ExperimentalAndroidComponentsApi::class)
     override fun resetPrefs(preferenceNames: List<String>, callback: (Result<Unit>) -> Unit) {
-        var fault: Boolean = false;
-
-        for (pref in preferenceNames) {
-            components.core.engine.clearBrowserUserPref(
-                pref = pref,
-                onSuccess = { },
-                onError = {
-                    callback(Result.failure(Exception("${it.message} ${it.cause}")))
-                    fault = true
-                }
-            )
-
-            if (fault) {
-                return;
-            }
+        if (preferenceNames.isEmpty()) {
+            callback(Result.success(Unit))
+            return
         }
 
-        callback(Result.success(Unit))
+        fun resetNext(index: Int) {
+            if (index >= preferenceNames.size) {
+                callback(Result.success(Unit))
+                return
+            }
+
+            components.core.engine.clearBrowserUserPref(
+                pref = preferenceNames[index],
+                onSuccess = { resetNext(index + 1) },
+                onError = {
+                    callback(Result.failure(Exception("${it.message} ${it.cause}")))
+                }
+            )
+        }
+
+        resetNext(0)
     }
 
     override fun startObserveChanges() {
