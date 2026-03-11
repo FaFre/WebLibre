@@ -252,6 +252,10 @@ class GeckoSessionApiImpl : GeckoSessionApi {
                 ?: throw IllegalStateException("No active engine view")
             val view = engineView.asView()
 
+            if (!view.hasFocus()) {
+                view.requestFocus()
+            }
+
             val downEvent = android.view.KeyEvent(
                 android.view.KeyEvent.ACTION_DOWN, keyCode.toInt()
             )
