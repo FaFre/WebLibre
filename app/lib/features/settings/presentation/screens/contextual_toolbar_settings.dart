@@ -286,7 +286,7 @@ class _ToolbarPreviewDelegate extends SliverPersistentHeaderDelegate {
   ) {
     return ColoredBox(
       color: Theme.of(context).colorScheme.surfaceContainer,
-      child: IgnorePointer(child: _ToolbarPreview(configs: configs)),
+      child: _ToolbarPreview(configs: configs),
     );
   }
 
