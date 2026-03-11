@@ -93,6 +93,10 @@ part of 'routes.dart';
       name: 'UnshortenerSettingsRoute',
       path: 'unshortener',
     ),
+    TypedGoRoute<ContextualToolbarSettingsRoute>(
+      name: 'ContextualToolbarSettingsRoute',
+      path: 'contextual_toolbar',
+    ),
   ],
 )
 class SettingsRoute extends GoRouteData with $SettingsRoute {
@@ -255,5 +259,15 @@ class UnshortenerSettingsRoute extends GoRouteData
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const UnshortenerSettingsScreen();
+  }
+}
+
+class ContextualToolbarSettingsRoute extends GoRouteData
+    with $ContextualToolbarSettingsRoute {
+  const ContextualToolbarSettingsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const ContextualToolbarSettingsScreen();
   }
 }

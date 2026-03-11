@@ -27,6 +27,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
 
 import 'package:weblibre/core/filesystem.dart';
+import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
 import 'package:weblibre/features/user/data/database/database.dart';
 import 'package:weblibre/features/user/data/database/riverpod_storage.dart';
 
@@ -43,7 +44,12 @@ UserDatabase userDatabase(Ref ref) {
         await applyWorkaroundToOpenSqlite3OnOldAndroidVersions();
       }
 
-      return NativeDatabase.createInBackground(file);
+      return NativeDatabase.createInBackground(
+        file,
+        setup: (database) {
+          registerLexorankFunctions(database);
+        },
+      );
     }),
   );
 

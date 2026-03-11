@@ -25,10 +25,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
-import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
@@ -36,16 +34,13 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_bar_buttons.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_menu_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_shortcut_menu.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/share_bottom_sheet.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_creation_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
@@ -460,90 +455,6 @@ class QuickTabSwitcherItem with FastEquatable {
   ];
 }
 
-class ContextualToolbar extends HookConsumerWidget {
-  const ContextualToolbar({
-    super.key,
-    required this.selectedTabId,
-    required this.displayedSheet,
-  });
-
-  final String? selectedTabId;
-  final Sheet? displayedSheet;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tabState = ref.watch(tabStateProvider(selectedTabId));
-
-    return ContextualToolbarView(
-      canGoBack:
-          tabState?.historyState.canGoBack == true ||
-          tabState?.isLoading == true,
-      canGoForward: tabState?.historyState.canGoForward == true,
-      onBookmarksTap: () async {
-        await BookmarkListRoute(entryGuid: BookmarkRoot.root.id).push(context);
-      },
-      backButton: NavigateBackButton(
-        selectedTabId: selectedTabId,
-        isLoading: tabState?.isLoading ?? false,
-      ),
-      forwardButton: NavigateForwardButton(selectedTabId: selectedTabId),
-      shareButton: ShareMenuButton(selectedTabId: selectedTabId),
-      addTabButton: const AddTabButton(),
-      tabsCountButton: TabsCountButton(
-        selectedTabId: selectedTabId,
-        displayedSheet: displayedSheet,
-        showLongPressMenu: false,
-      ),
-      navigationButton: NavigationMenuButton(selectedTabId: selectedTabId),
-    );
-  }
-}
-
-class ContextualToolbarView extends StatelessWidget {
-  const ContextualToolbarView({
-    super.key,
-    required this.canGoBack,
-    required this.canGoForward,
-    required this.onBookmarksTap,
-    required this.backButton,
-    required this.forwardButton,
-    required this.shareButton,
-    required this.addTabButton,
-    required this.tabsCountButton,
-    required this.navigationButton,
-  });
-
-  final bool canGoBack;
-  final bool canGoForward;
-  final VoidCallback onBookmarksTap;
-  final Widget backButton;
-  final Widget forwardButton;
-  final Widget shareButton;
-  final Widget addTabButton;
-  final Widget tabsCountButton;
-  final Widget navigationButton;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        if (canGoBack)
-          backButton
-        else
-          IconButton(
-            onPressed: onBookmarksTap,
-            icon: const Icon(MdiIcons.bookmarkMultiple),
-          ),
-        if (canGoForward) forwardButton else shareButton,
-        addTabButton,
-        tabsCountButton,
-        navigationButton,
-      ],
-    );
-  }
-}
-
 class QuickTabSwitcher extends HookConsumerWidget {
   final QuickTabSwitcherMode quickTabSwitcherMode;
 
@@ -756,194 +667,6 @@ class QuickTabSwitcherView extends StatelessWidget {
               itemWrap: itemWrapBuilder,
               availableItems: availableItems,
             ),
-      ),
-    );
-  }
-}
-
-class ShareMenuButton extends StatelessWidget {
-  final String? selectedTabId;
-
-  const ShareMenuButton({super.key, required this.selectedTabId});
-
-  @override
-  Widget build(BuildContext context) {
-    return ShareMenuButtonView(
-      onPressed: () async {
-        final tabId = selectedTabId;
-        if (tabId != null) {
-          await showShareBottomSheet(context, selectedTabId: tabId);
-        }
-      },
-    );
-  }
-}
-
-class ShareMenuButtonView extends StatelessWidget {
-  const ShareMenuButtonView({super.key, this.onPressed});
-
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(onPressed: onPressed, icon: const Icon(Icons.share));
-  }
-}
-
-class NavigationMenuButton extends StatelessWidget {
-  final String? selectedTabId;
-
-  const NavigationMenuButton({super.key, required this.selectedTabId});
-
-  @override
-  Widget build(BuildContext context) {
-    return NavigationMenuButtonView(
-      onTap: () async {
-        await showBrowserMenuSheet(context);
-      },
-    );
-  }
-}
-
-class NavigationMenuButtonView extends StatelessWidget {
-  const NavigationMenuButtonView({super.key, this.onTap});
-
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return ToolbarButton(onTap: onTap, child: const Icon(Icons.more_vert));
-  }
-}
-
-class AddTabButton extends HookConsumerWidget {
-  const AddTabButton({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tabMenuController = useMenuController();
-
-    return TabCreationMenu(
-      controller: tabMenuController,
-      child: AddTabButtonView(
-        onPressed: () async {
-          final settings = ref.read(generalSettingsWithDefaultsProvider);
-
-          await SearchRoute(
-            tabType:
-                ref.read(selectedTabTypeProvider) ??
-                settings.effectiveDefaultCreateTabType,
-          ).push(context);
-
-          if (context.mounted) {
-            const BrowserRoute().go(context);
-          }
-        },
-        onLongPress: () {
-          if (tabMenuController.isOpen) {
-            tabMenuController.close();
-          } else {
-            tabMenuController.open();
-          }
-        },
-      ),
-    );
-  }
-}
-
-class AddTabButtonView extends StatelessWidget {
-  const AddTabButtonView({super.key, this.onPressed, this.onLongPress});
-
-  final VoidCallback? onPressed;
-  final VoidCallback? onLongPress;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: onPressed,
-      icon: const Icon(MdiIcons.tabPlus),
-      onLongPress: onLongPress,
-    );
-  }
-}
-
-class TabsCountButtonView extends StatelessWidget {
-  const TabsCountButtonView({
-    super.key,
-    required this.isActive,
-    required this.onTap,
-    this.onLongPress,
-    this.buttonBuilder,
-  });
-
-  final bool isActive;
-  final VoidCallback onTap;
-  final VoidCallback? onLongPress;
-  final Widget Function(
-    bool isActive,
-    VoidCallback onTap,
-    VoidCallback? onLongPress,
-  )?
-  buttonBuilder;
-
-  @override
-  Widget build(BuildContext context) {
-    return (buttonBuilder != null)
-        ? buttonBuilder!(isActive, onTap, onLongPress)
-        : TabsActionButton(
-            isActive: isActive,
-            onTap: onTap,
-            onLongPress: onLongPress,
-          );
-  }
-}
-
-class TabsCountButton extends HookConsumerWidget {
-  const TabsCountButton({
-    super.key,
-    required this.selectedTabId,
-    required this.displayedSheet,
-    required this.showLongPressMenu,
-  });
-
-  final String? selectedTabId;
-  final Sheet? displayedSheet;
-  final bool showLongPressMenu;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tabMenuController = useMenuController();
-
-    return TabCreationMenu(
-      controller: tabMenuController,
-      child: TabsCountButtonView(
-        isActive: displayedSheet is ViewTabsSheet,
-        onTap: () async {
-          final tabViewBottomSheet = ref
-              .read(generalSettingsWithDefaultsProvider)
-              .tabViewBottomSheet;
-
-          if (tabViewBottomSheet) {
-            if (displayedSheet case ViewTabsSheet()) {
-              ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
-            } else {
-              ref
-                  .read(bottomSheetControllerProvider.notifier)
-                  .show(ViewTabsSheet());
-            }
-          } else {
-            await const TabViewRoute().push(context);
-          }
-        },
-        onLongPress: showLongPressMenu
-            ? () {
-                if (tabMenuController.isOpen) {
-                  tabMenuController.close();
-                } else {
-                  tabMenuController.open();
-                }
-              }
-            : null,
       ),
     );
   }

@@ -1476,6 +1476,11 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       name: 'UnshortenerSettingsRoute',
       factory: $UnshortenerSettingsRoute._fromState,
     ),
+    GoRouteData.$route(
+      path: 'contextual_toolbar',
+      name: 'ContextualToolbarSettingsRoute',
+      factory: $ContextualToolbarSettingsRoute._fromState,
+    ),
   ],
 );
 
@@ -1909,6 +1914,27 @@ mixin $UnshortenerSettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/unshortener');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $ContextualToolbarSettingsRoute on GoRouteData {
+  static ContextualToolbarSettingsRoute _fromState(GoRouterState state) =>
+      const ContextualToolbarSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/contextual_toolbar');
 
   @override
   void go(BuildContext context) => context.go(location);

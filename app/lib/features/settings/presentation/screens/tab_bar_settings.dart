@@ -22,8 +22,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/security.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_bar_buttons.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
@@ -77,6 +80,7 @@ class _TabBarLayoutSection extends StatelessWidget {
         _TabBarLayoutModeSection(),
         _ShowExtensionShortcutTile(),
         _ShowContextualTabBarTile(),
+        _CustomizeToolbarButtonsTile(),
         _AutoHideTabBarTile(),
         _ShowQuickTabSwitcherBarTile(),
         _QuickTabSwitcherModeSection(),
@@ -232,24 +236,22 @@ class _TabBarPreviewCard extends HookWidget {
 
     Widget buildContextualToolbar() {
       return ContextualToolbarView(
-        canGoBack: true,
-        canGoForward: false,
-        onBookmarksTap: () {},
-        backButton: NavigateBackButtonView(
-          canGoBack: true,
-          isLoading: false,
-          onPressed: () {},
-          onLongPress: () {},
-        ),
-        forwardButton: NavigateForwardButtonView(
-          canGoForward: true,
-          onPressed: () {},
-          onLongPress: () {},
-        ),
-        shareButton: ShareMenuButtonView(onPressed: () {}),
-        addTabButton: AddTabButtonView(onPressed: () {}, onLongPress: () {}),
-        tabsCountButton: tabCountButton,
-        navigationButton: NavigationMenuButtonView(onTap: () {}),
+        buttons: [
+          NavigateBackButtonView(
+            canGoBack: true,
+            isLoading: false,
+            onPressed: () {},
+            onLongPress: () {},
+          ),
+          NavigateForwardButtonView(
+            canGoForward: true,
+            onPressed: () {},
+            onLongPress: () {},
+          ),
+          AddTabButtonView(onPressed: () {}, onLongPress: () {}),
+          tabCountButton,
+          NavigationMenuButtonView(onTap: () {}),
+        ],
       );
     }
 
@@ -609,6 +611,29 @@ class _ShowContextualTabBarTile extends HookConsumerWidget {
               (currentSettings) =>
                   currentSettings.copyWith.tabBarShowContextualBar(value),
             );
+      },
+    );
+  }
+}
+
+class _CustomizeToolbarButtonsTile extends HookConsumerWidget {
+  const _CustomizeToolbarButtonsTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tabBarShowContextualBar = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.tabBarShowContextualBar,
+      ),
+    );
+
+    return ListTile(
+      leading: const Icon(Icons.tune),
+      title: const Text('Customize Toolbar Buttons'),
+      trailing: const Icon(Icons.chevron_right),
+      enabled: tabBarShowContextualBar,
+      onTap: () async {
+        await const ContextualToolbarSettingsRoute().push(context);
       },
     );
   }

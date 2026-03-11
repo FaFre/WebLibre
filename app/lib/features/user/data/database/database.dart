@@ -24,16 +24,17 @@ import 'package:flutter/foundation.dart';
 import 'package:weblibre/features/user/data/database/daos/cache.dart';
 import 'package:weblibre/features/user/data/database/daos/onboarding.dart';
 import 'package:weblibre/features/user/data/database/daos/setting.dart';
+import 'package:weblibre/features/user/data/database/daos/toolbar_button_config.dart';
 import 'package:weblibre/features/user/data/database/database.drift.dart';
 import 'package:weblibre/features/user/data/database/database.steps.dart';
 
 @DriftDatabase(
   include: {'definitions.drift'},
-  daos: [SettingDao, CacheDao, OnboardingDao],
+  daos: [SettingDao, CacheDao, OnboardingDao, ToolbarButtonConfigDao],
 )
 class UserDatabase extends $UserDatabase {
   @override
-  final int schemaVersion = 2;
+  final int schemaVersion = 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -45,6 +46,8 @@ class UserDatabase extends $UserDatabase {
       }
 
       await customStatement('PRAGMA foreign_keys = ON;');
+
+      await onAfterOpen?.call(this);
     },
     onUpgrade: (m, from, to) async {
       // Following the advice from https://drift.simonbinder.eu/Migrations/api/#general-tips
@@ -73,11 +76,17 @@ class UserDatabase extends $UserDatabase {
     },
   );
 
-  UserDatabase(super.e);
+  UserDatabase(super.e, {this.onAfterOpen});
+
+  final Future<void> Function(UserDatabase db)? onAfterOpen;
 
   static final _upgrade = migrationSteps(
     from1To2: (m, schema) async {
       await m.createTable(schema.riverpod);
+    },
+    from2To3: (m, schema) async {
+      await m.createTable(schema.toolbarButtonConfigs);
+      await m.createIndex(schema.idxToolbarOrderKey);
     },
   );
 }

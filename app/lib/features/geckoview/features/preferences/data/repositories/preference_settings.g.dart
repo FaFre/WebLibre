@@ -45,7 +45,7 @@ final class StartupPreferenceEnforcementServiceProvider
 }
 
 String _$startupPreferenceEnforcementServiceHash() =>
-    r'107cdcf7550b7977b53a3cf7419861cdcac0fe3a';
+    r'5cfe5aec33a9e9e077704ff519c10b0398c5085d';
 
 abstract class _$StartupPreferenceEnforcementService extends $Notifier<void> {
   void build();

@@ -22,6 +22,61 @@ CREATE TABLE riverpod (
   destroyKey TEXT
 ) WITHOUT ROWID;
 
+CREATE TABLE toolbar_button_configs (
+  button_id   TEXT NOT NULL PRIMARY KEY,
+  order_key   TEXT NOT NULL,
+  is_visible  BOOLEAN NOT NULL DEFAULT TRUE,
+  fallback_id TEXT REFERENCES toolbar_button_configs(button_id) ON DELETE SET NULL
+);
+
+CREATE INDEX idx_toolbar_order_key ON toolbar_button_configs(order_key);
+
+toolbarLeadingOrderKey(:bucket AS INTEGER):
+  SELECT lexo_rank_previous(
+    :bucket,
+    (
+      SELECT order_key
+      FROM toolbar_button_configs
+      ORDER BY order_key
+      LIMIT 1
+    )
+  );
+
+toolbarTrailingOrderKey(:bucket AS INTEGER):
+  SELECT lexo_rank_next(
+    :bucket,
+    (
+      SELECT order_key
+      FROM toolbar_button_configs
+      ORDER BY order_key DESC
+      LIMIT 1
+    )
+  );
+
+toolbarOrderKeyAfterButton(:button_id AS TEXT):
+  WITH ordered_table AS (
+    SELECT
+      button_id,
+      order_key,
+      LEAD(order_key) OVER (ORDER BY order_key) AS next_order_key
+    FROM toolbar_button_configs
+  )
+  SELECT lexo_rank_reorder_after(order_key, next_order_key)
+  FROM ordered_table
+  WHERE button_id = :button_id;
+
+toolbarOrderKeyBeforeButton(:button_id AS TEXT):
+  WITH ordered_table AS (
+    SELECT
+      button_id,
+      order_key,
+      LAG(order_key) OVER (ORDER BY order_key) AS prev_order_key
+    FROM toolbar_button_configs
+  )
+  SELECT lexo_rank_reorder_before(order_key, prev_order_key)
+  FROM ordered_table
+  WHERE button_id = :button_id;
+
 evictCacheEntries:
   DELETE FROM icon_cache 
   WHERE rowid IN (

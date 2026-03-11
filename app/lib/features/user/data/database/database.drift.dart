@@ -8,8 +8,10 @@ import 'package:weblibre/features/user/data/database/database.dart' as i3;
 import 'package:weblibre/features/user/data/database/daos/cache.dart' as i4;
 import 'package:weblibre/features/user/data/database/daos/onboarding.dart'
     as i5;
-import 'package:drift/internal/modular.dart' as i6;
-import 'package:sqlite3/common.dart' as i7;
+import 'package:weblibre/features/user/data/database/daos/toolbar_button_config.dart'
+    as i6;
+import 'package:drift/internal/modular.dart' as i7;
+import 'package:sqlite3/common.dart' as i8;
 
 abstract class $UserDatabase extends i0.GeneratedDatabase {
   $UserDatabase(i0.QueryExecutor e) : super(e);
@@ -18,12 +20,16 @@ abstract class $UserDatabase extends i0.GeneratedDatabase {
   late final i1.IconCache iconCache = i1.IconCache(this);
   late final i1.Onboarding onboarding = i1.Onboarding(this);
   late final i1.Riverpod riverpod = i1.Riverpod(this);
+  late final i1.ToolbarButtonConfigs toolbarButtonConfigs =
+      i1.ToolbarButtonConfigs(this);
   late final i2.SettingDao settingDao = i2.SettingDao(this as i3.UserDatabase);
   late final i4.CacheDao cacheDao = i4.CacheDao(this as i3.UserDatabase);
   late final i5.OnboardingDao onboardingDao = i5.OnboardingDao(
     this as i3.UserDatabase,
   );
-  i1.DefinitionsDrift get definitionsDrift => i6.ReadDatabaseContainer(
+  late final i6.ToolbarButtonConfigDao toolbarButtonConfigDao =
+      i6.ToolbarButtonConfigDao(this as i3.UserDatabase);
+  i1.DefinitionsDrift get definitionsDrift => i7.ReadDatabaseContainer(
     this,
   ).accessor<i1.DefinitionsDrift>(i1.DefinitionsDrift.new);
   @override
@@ -35,6 +41,8 @@ abstract class $UserDatabase extends i0.GeneratedDatabase {
     iconCache,
     onboarding,
     riverpod,
+    toolbarButtonConfigs,
+    i1.idxToolbarOrderKey,
   ];
 }
 
@@ -49,9 +57,11 @@ class $UserDatabaseManager {
       i1.$OnboardingTableManager(_db, _db.onboarding);
   i1.$RiverpodTableManager get riverpod =>
       i1.$RiverpodTableManager(_db, _db.riverpod);
+  i1.$ToolbarButtonConfigsTableManager get toolbarButtonConfigs =>
+      i1.$ToolbarButtonConfigsTableManager(_db, _db.toolbarButtonConfigs);
 }
 
-extension DefineFunctions on i7.CommonDatabase {
+extension DefineFunctions on i8.CommonDatabase {
   void defineFunctions({
     required String Function(int, String?) lexoRankNext,
     required String Function(int, String?) lexoRankPrevious,
@@ -60,7 +70,7 @@ extension DefineFunctions on i7.CommonDatabase {
   }) {
     createFunction(
       functionName: 'lexo_rank_next',
-      argumentCount: const i7.AllowedArgumentCount(2),
+      argumentCount: const i8.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as int;
         final arg1 = args[1] as String?;
@@ -69,7 +79,7 @@ extension DefineFunctions on i7.CommonDatabase {
     );
     createFunction(
       functionName: 'lexo_rank_previous',
-      argumentCount: const i7.AllowedArgumentCount(2),
+      argumentCount: const i8.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as int;
         final arg1 = args[1] as String?;
@@ -78,7 +88,7 @@ extension DefineFunctions on i7.CommonDatabase {
     );
     createFunction(
       functionName: 'lexo_rank_reorder_after',
-      argumentCount: const i7.AllowedArgumentCount(2),
+      argumentCount: const i8.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as String?;
         final arg1 = args[1] as String?;
@@ -87,7 +97,7 @@ extension DefineFunctions on i7.CommonDatabase {
     );
     createFunction(
       functionName: 'lexo_rank_reorder_before',
-      argumentCount: const i7.AllowedArgumentCount(2),
+      argumentCount: const i8.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as String?;
         final arg1 = args[1] as String?;

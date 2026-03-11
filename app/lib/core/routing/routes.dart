@@ -60,6 +60,7 @@ import 'package:weblibre/features/settings/presentation/screens/addon_collection
 import 'package:weblibre/features/settings/presentation/screens/advanced_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/appearance_display_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/bang_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/contextual_toolbar_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/custom_tracking_protection.dart';
 import 'package:weblibre/features/settings/presentation/screens/doh_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/error_logs_screen.dart';
