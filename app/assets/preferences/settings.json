@@ -1106,11 +1106,6 @@
                     "title": "Disable add-on metadata cache updates",
                     "description": "Reduces background refreshes of extension metadata"
                 },
-                "privacy.resistFingerprinting.block_mozAddonManager": {
-                    "value": true,
-                    "title": "Block mozAddonManager exposure",
-                    "description": "Prevents websites from querying installed add-ons through this legacy API"
-                },
                 "extensions.postDownloadThirdPartyPrompt": {
                     "value": false,
                     "title": "Never bypass extension install prompts",

@@ -892,6 +892,7 @@ class GeckoEngineSettings {
   final bool? fissionEnabled;
   final bool? isolatedProcessEnabled;
   final bool? appZygoteProcessEnabled;
+  final bool? extensionsWebAPIEnabled;
 
   // Local Network Access (LNA) Settings
   final bool? lnaBlocking;
@@ -937,6 +938,7 @@ class GeckoEngineSettings {
     this.fissionEnabled,
     this.isolatedProcessEnabled,
     this.appZygoteProcessEnabled,
+    this.extensionsWebAPIEnabled,
     this.lnaBlocking,
     this.lnaBlockTrackers,
     this.lnaEnabled,

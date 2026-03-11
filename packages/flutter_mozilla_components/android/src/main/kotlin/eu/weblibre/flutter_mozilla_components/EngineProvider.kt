@@ -85,7 +85,7 @@ object EngineProvider {
             // About config it's no longer enabled by default
             builder.aboutConfigEnabled(true)
             builder.extensionsProcessEnabled(true)
-            builder.extensionsWebAPIEnabled(false)
+            builder.extensionsWebAPIEnabled(true)
             //builder.debugLogging(components.logLevel == Log.Priority.DEBUG)
             builder.consoleOutput(components.logLevel == Log.Priority.DEBUG)
             builder.contentBlocking(contentBlocking.build())
@@ -96,6 +96,7 @@ object EngineProvider {
                 settings.fissionEnabled?.let { builder.fissionEnabled(it) }
                 settings.isolatedProcessEnabled?.let { builder.isolatedProcessEnabled(it) }
                 settings.appZygoteProcessEnabled?.let { builder.appZygoteProcessEnabled(it) }
+                settings.extensionsWebAPIEnabled?.let { builder.extensionsWebAPIEnabled(it) }
                 settings.displayDensityOverride?.let { builder.displayDensityOverride(it.toFloat()) }
                 val screenWidth = settings.screenWidthOverride
                 val screenHeight = settings.screenHeightOverride

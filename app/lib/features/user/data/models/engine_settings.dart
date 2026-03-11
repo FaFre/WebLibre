@@ -123,6 +123,8 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   bool get isolatedProcessEnabled => super.isolatedProcessEnabled!;
   @override
   bool get appZygoteProcessEnabled => super.appZygoteProcessEnabled!;
+  @override
+  bool get extensionsWebAPIEnabled => super.extensionsWebAPIEnabled!;
 
   final QueryParameterStripping queryParameterStripping;
 
@@ -202,6 +204,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required super.fissionEnabled,
     required super.isolatedProcessEnabled,
     required super.appZygoteProcessEnabled,
+    required super.extensionsWebAPIEnabled,
     required super.lnaBlocking,
     required super.lnaBlockTrackers,
     required super.lnaEnabled,
@@ -252,6 +255,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     bool? fissionEnabled,
     bool? isolatedProcessEnabled,
     bool? appZygoteProcessEnabled,
+    bool? extensionsWebAPIEnabled,
     bool? lnaBlocking,
     bool? lnaBlockTrackers,
     bool? lnaEnabled,
@@ -317,6 +321,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
          fissionEnabled: fissionEnabled ?? true,
          isolatedProcessEnabled: isolatedProcessEnabled ?? false,
          appZygoteProcessEnabled: appZygoteProcessEnabled ?? false,
+         extensionsWebAPIEnabled: extensionsWebAPIEnabled ?? true,
          lnaBlocking: lnaBlocking,
          lnaBlockTrackers: lnaBlockTrackers,
          lnaEnabled: lnaEnabled,
@@ -381,6 +386,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     fissionEnabled,
     isolatedProcessEnabled,
     appZygoteProcessEnabled,
+    extensionsWebAPIEnabled,
     lnaBlocking,
     lnaBlockTrackers,
     lnaEnabled,

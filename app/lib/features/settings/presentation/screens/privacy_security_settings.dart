@@ -206,6 +206,7 @@ class _AdvancedSection extends StatelessWidget {
         _FissionEnabledTile(),
         _IsolatedProcessEnabledTile(),
         _AppZygoteProcessEnabledTile(),
+        _ExtensionsWebAPIEnabledTile(),
       ],
     );
   }
@@ -830,6 +831,39 @@ class _AppZygoteProcessEnabledTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.appZygoteProcessEnabled(value),
+            );
+        if (context.mounted) {
+          await _showRestartDialog(context, ref);
+        }
+      },
+    );
+  }
+}
+
+class _ExtensionsWebAPIEnabledTile extends HookConsumerWidget {
+  const _ExtensionsWebAPIEnabledTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final extensionsWebAPIEnabled = ref.watch(
+      engineSettingsWithDefaultsProvider.select(
+        (s) => s.extensionsWebAPIEnabled,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Extensions Web API'),
+      subtitle: const Text(
+        'Enable mozAddonManager API exposure for web content and extension pages. Requires app restart.',
+      ),
+      secondary: const Icon(Icons.extension),
+      value: extensionsWebAPIEnabled,
+      onChanged: (value) async {
+        await ref
+            .read(saveEngineSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.extensionsWebAPIEnabled(value),
             );
         if (context.mounted) {
           await _showRestartDialog(context, ref);

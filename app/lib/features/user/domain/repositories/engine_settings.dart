@@ -212,6 +212,10 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
+      'extensionsWebAPIEnabled': settings['extensionsWebAPIEnabled']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
       // LNA Settings
       'lnaBlocking': settings['lnaBlocking']?.readAs(
         DriftSqlType.bool,

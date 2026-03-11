@@ -2721,6 +2721,7 @@ class GeckoEngineSettings {
     this.fissionEnabled,
     this.isolatedProcessEnabled,
     this.appZygoteProcessEnabled,
+    this.extensionsWebAPIEnabled,
     this.lnaBlocking,
     this.lnaBlockTrackers,
     this.lnaEnabled,
@@ -2814,6 +2815,8 @@ class GeckoEngineSettings {
 
   bool? appZygoteProcessEnabled;
 
+  bool? extensionsWebAPIEnabled;
+
   bool? lnaBlocking;
 
   bool? lnaBlockTrackers;
@@ -2860,6 +2863,7 @@ class GeckoEngineSettings {
       fissionEnabled,
       isolatedProcessEnabled,
       appZygoteProcessEnabled,
+      extensionsWebAPIEnabled,
       lnaBlocking,
       lnaBlockTrackers,
       lnaEnabled,
@@ -2910,9 +2914,10 @@ class GeckoEngineSettings {
       fissionEnabled: result[35] as bool?,
       isolatedProcessEnabled: result[36] as bool?,
       appZygoteProcessEnabled: result[37] as bool?,
-      lnaBlocking: result[38] as bool?,
-      lnaBlockTrackers: result[39] as bool?,
-      lnaEnabled: result[40] as bool?,
+      extensionsWebAPIEnabled: result[38] as bool?,
+      lnaBlocking: result[39] as bool?,
+      lnaBlockTrackers: result[40] as bool?,
+      lnaEnabled: result[41] as bool?,
     );
   }
 

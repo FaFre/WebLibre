@@ -117,6 +117,8 @@ abstract class _$EngineSettingsCWProxy {
 
   EngineSettings appZygoteProcessEnabled(bool? appZygoteProcessEnabled);
 
+  EngineSettings extensionsWebAPIEnabled(bool? extensionsWebAPIEnabled);
+
   EngineSettings lnaBlocking(bool? lnaBlocking);
 
   EngineSettings lnaBlockTrackers(bool? lnaBlockTrackers);
@@ -175,6 +177,7 @@ abstract class _$EngineSettingsCWProxy {
     bool? fissionEnabled,
     bool? isolatedProcessEnabled,
     bool? appZygoteProcessEnabled,
+    bool? extensionsWebAPIEnabled,
     bool? lnaBlocking,
     bool? lnaBlockTrackers,
     bool? lnaEnabled,
@@ -384,6 +387,10 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
       call(appZygoteProcessEnabled: appZygoteProcessEnabled);
 
   @override
+  EngineSettings extensionsWebAPIEnabled(bool? extensionsWebAPIEnabled) =>
+      call(extensionsWebAPIEnabled: extensionsWebAPIEnabled);
+
+  @override
   EngineSettings lnaBlocking(bool? lnaBlocking) =>
       call(lnaBlocking: lnaBlocking);
 
@@ -449,6 +456,7 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? fissionEnabled = const $CopyWithPlaceholder(),
     Object? isolatedProcessEnabled = const $CopyWithPlaceholder(),
     Object? appZygoteProcessEnabled = const $CopyWithPlaceholder(),
+    Object? extensionsWebAPIEnabled = const $CopyWithPlaceholder(),
     Object? lnaBlocking = const $CopyWithPlaceholder(),
     Object? lnaBlockTrackers = const $CopyWithPlaceholder(),
     Object? lnaEnabled = const $CopyWithPlaceholder(),
@@ -662,6 +670,11 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.appZygoteProcessEnabled
           // ignore: cast_nullable_to_non_nullable
           : appZygoteProcessEnabled as bool?,
+      extensionsWebAPIEnabled:
+          extensionsWebAPIEnabled == const $CopyWithPlaceholder()
+          ? _value.extensionsWebAPIEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : extensionsWebAPIEnabled as bool?,
       lnaBlocking: lnaBlocking == const $CopyWithPlaceholder()
           ? _value.lnaBlocking
           // ignore: cast_nullable_to_non_nullable
@@ -781,6 +794,7 @@ EngineSettings _$EngineSettingsFromJson(
   fissionEnabled: json['fissionEnabled'] as bool?,
   isolatedProcessEnabled: json['isolatedProcessEnabled'] as bool?,
   appZygoteProcessEnabled: json['appZygoteProcessEnabled'] as bool?,
+  extensionsWebAPIEnabled: json['extensionsWebAPIEnabled'] as bool?,
   lnaBlocking: json['lnaBlocking'] as bool?,
   lnaBlockTrackers: json['lnaBlockTrackers'] as bool?,
   lnaEnabled: json['lnaEnabled'] as bool?,
@@ -839,6 +853,7 @@ Map<String, dynamic> _$EngineSettingsToJson(
   'fissionEnabled': instance.fissionEnabled,
   'isolatedProcessEnabled': instance.isolatedProcessEnabled,
   'appZygoteProcessEnabled': instance.appZygoteProcessEnabled,
+  'extensionsWebAPIEnabled': instance.extensionsWebAPIEnabled,
   'queryParameterStripping':
       _$QueryParameterStrippingEnumMap[instance.queryParameterStripping]!,
   'bounceTrackingProtectionMode':

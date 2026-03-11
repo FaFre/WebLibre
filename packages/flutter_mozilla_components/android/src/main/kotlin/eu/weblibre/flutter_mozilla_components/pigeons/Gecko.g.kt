@@ -2303,6 +2303,7 @@ data class GeckoEngineSettings (
   val fissionEnabled: Boolean? = null,
   val isolatedProcessEnabled: Boolean? = null,
   val appZygoteProcessEnabled: Boolean? = null,
+  val extensionsWebAPIEnabled: Boolean? = null,
   val lnaBlocking: Boolean? = null,
   val lnaBlockTrackers: Boolean? = null,
   val lnaEnabled: Boolean? = null
@@ -2348,10 +2349,11 @@ data class GeckoEngineSettings (
       val fissionEnabled = pigeonVar_list[35] as Boolean?
       val isolatedProcessEnabled = pigeonVar_list[36] as Boolean?
       val appZygoteProcessEnabled = pigeonVar_list[37] as Boolean?
-      val lnaBlocking = pigeonVar_list[38] as Boolean?
-      val lnaBlockTrackers = pigeonVar_list[39] as Boolean?
-      val lnaEnabled = pigeonVar_list[40] as Boolean?
-      return GeckoEngineSettings(javascriptEnabled, trackingProtectionPolicy, httpsOnlyMode, globalPrivacyControlEnabled, preferredColorScheme, cookieBannerHandlingMode, cookieBannerHandlingModePrivateBrowsing, cookieBannerHandlingGlobalRules, cookieBannerHandlingGlobalRulesSubFrames, webContentIsolationStrategy, userAgent, contentBlocking, enterpriseRootsEnabled, dohSettings, fingerprintingProtectionOverrides, locales, blockCookies, customCookiePolicy, blockTrackingContent, trackingContentScope, blockCryptominers, blockFingerprinters, blockRedirectTrackers, blockSuspectedFingerprinters, suspectedFingerprintersScope, allowListBaseline, allowListConvenience, webFontsEnabled, automaticFontSizeAdjustment, fontSizeFactor, fontInflationEnabled, displayDensityOverride, screenWidthOverride, screenHeightOverride, inputAutoZoomEnabled, fissionEnabled, isolatedProcessEnabled, appZygoteProcessEnabled, lnaBlocking, lnaBlockTrackers, lnaEnabled)
+      val extensionsWebAPIEnabled = pigeonVar_list[38] as Boolean?
+      val lnaBlocking = pigeonVar_list[39] as Boolean?
+      val lnaBlockTrackers = pigeonVar_list[40] as Boolean?
+      val lnaEnabled = pigeonVar_list[41] as Boolean?
+      return GeckoEngineSettings(javascriptEnabled, trackingProtectionPolicy, httpsOnlyMode, globalPrivacyControlEnabled, preferredColorScheme, cookieBannerHandlingMode, cookieBannerHandlingModePrivateBrowsing, cookieBannerHandlingGlobalRules, cookieBannerHandlingGlobalRulesSubFrames, webContentIsolationStrategy, userAgent, contentBlocking, enterpriseRootsEnabled, dohSettings, fingerprintingProtectionOverrides, locales, blockCookies, customCookiePolicy, blockTrackingContent, trackingContentScope, blockCryptominers, blockFingerprinters, blockRedirectTrackers, blockSuspectedFingerprinters, suspectedFingerprintersScope, allowListBaseline, allowListConvenience, webFontsEnabled, automaticFontSizeAdjustment, fontSizeFactor, fontInflationEnabled, displayDensityOverride, screenWidthOverride, screenHeightOverride, inputAutoZoomEnabled, fissionEnabled, isolatedProcessEnabled, appZygoteProcessEnabled, extensionsWebAPIEnabled, lnaBlocking, lnaBlockTrackers, lnaEnabled)
     }
   }
   fun toList(): List<Any?> {
@@ -2394,6 +2396,7 @@ data class GeckoEngineSettings (
       fissionEnabled,
       isolatedProcessEnabled,
       appZygoteProcessEnabled,
+      extensionsWebAPIEnabled,
       lnaBlocking,
       lnaBlockTrackers,
       lnaEnabled,
