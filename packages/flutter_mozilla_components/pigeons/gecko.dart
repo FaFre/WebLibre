@@ -1378,6 +1378,8 @@ abstract class GeckoSessionApi {
 
   @async
   Uint8List? requestScreenshot(bool sendBack);
+
+  void dispatchKeyEvent({required int keyCode});
 }
 
 @HostApi()

@@ -18,26 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-enum ToolbarButtonId {
-  back,
-  forward,
-  bookmarks,
-  share,
-  addTab,
-  tabsCount,
-  navigationMenu,
-  reload,
-  readerMode,
-  desktop,
-  translation,
-  findInPage,
-  closeTab,
-  inputUrl,
-  duplicateTab,
-  increaseFont,
-  decreaseFont,
-  moveToBackground,
-  pageUp,
-  pageDown,
-  font,
-}
+const fontSizeStep = 0.1;
+const fontSizeMin = 0.5;
+const fontSizeMax = 3.0;
+const fontSizeDefault = 1.0;

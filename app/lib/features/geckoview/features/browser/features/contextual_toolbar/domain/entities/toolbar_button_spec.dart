@@ -71,6 +71,82 @@ const navigationMenuToolbarButtonSpec = ToolbarButtonSpec(
   defaultVisible: true,
 );
 
+const reloadToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.reload,
+  defaultVisible: false,
+);
+
+const readerModeToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.readerMode,
+  defaultVisible: false,
+  canBeFallbackTarget: false,
+);
+
+const desktopToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.desktop,
+  defaultVisible: false,
+);
+
+const translationToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.translation,
+  defaultVisible: false,
+  canBeFallbackTarget: false,
+);
+
+const findInPageToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.findInPage,
+  defaultVisible: false,
+);
+
+const closeTabToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.closeTab,
+  defaultVisible: false,
+  canBeFallbackTarget: false,
+);
+
+const inputUrlToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.inputUrl,
+  defaultVisible: false,
+);
+
+const duplicateTabToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.duplicateTab,
+  defaultVisible: false,
+);
+
+const increaseFontToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.increaseFont,
+  defaultVisible: false,
+);
+
+const decreaseFontToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.decreaseFont,
+  defaultVisible: false,
+);
+
+const moveToBackgroundToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.moveToBackground,
+  defaultVisible: false,
+  canBeFallbackTarget: false,
+);
+
+const pageUpToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.pageUp,
+  defaultVisible: false,
+  canBeFallbackTarget: false,
+);
+
+const pageDownToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.pageDown,
+  defaultVisible: false,
+  canBeFallbackTarget: false,
+);
+
+const fontToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.font,
+  defaultVisible: false,
+);
+
 const toolbarButtonSpecs = [
   backToolbarButtonSpec,
   forwardToolbarButtonSpec,
@@ -79,6 +155,20 @@ const toolbarButtonSpecs = [
   addTabToolbarButtonSpec,
   tabsCountToolbarButtonSpec,
   navigationMenuToolbarButtonSpec,
+  reloadToolbarButtonSpec,
+  readerModeToolbarButtonSpec,
+  desktopToolbarButtonSpec,
+  translationToolbarButtonSpec,
+  findInPageToolbarButtonSpec,
+  closeTabToolbarButtonSpec,
+  inputUrlToolbarButtonSpec,
+  duplicateTabToolbarButtonSpec,
+  increaseFontToolbarButtonSpec,
+  decreaseFontToolbarButtonSpec,
+  moveToBackgroundToolbarButtonSpec,
+  pageUpToolbarButtonSpec,
+  pageDownToolbarButtonSpec,
+  fontToolbarButtonSpec,
 ];
 
 final Map<String, ToolbarButtonSpec> toolbarButtonSpecsById = {

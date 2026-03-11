@@ -245,6 +245,28 @@ class GeckoSessionApiImpl : GeckoSessionApi {
         }
     }
 
+    override fun dispatchKeyEvent(keyCode: Long) {
+        try {
+            logger.debug("$TAG: Dispatching key event with keyCode: $keyCode")
+            val engineView = components.activeEngineView
+                ?: throw IllegalStateException("No active engine view")
+            val view = engineView.asView()
+
+            val downEvent = android.view.KeyEvent(
+                android.view.KeyEvent.ACTION_DOWN, keyCode.toInt()
+            )
+            view.dispatchKeyEvent(downEvent)
+
+            val upEvent = android.view.KeyEvent(
+                android.view.KeyEvent.ACTION_UP, keyCode.toInt()
+            )
+            view.dispatchKeyEvent(upEvent)
+        } catch (e: Exception) {
+            logger.error("$TAG: Failed to dispatch key event", e)
+            throw e
+        }
+    }
+
     override fun requestScreenshot(sendBack: Boolean, callback: (Result<ByteArray?>) -> Unit) {
         try {
             val tab = components.core.store.state.selectedTab

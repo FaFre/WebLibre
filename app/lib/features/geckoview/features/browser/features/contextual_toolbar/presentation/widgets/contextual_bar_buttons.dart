@@ -20,17 +20,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_menu_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/share_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_creation_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart'
+    as tab_data;
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
+import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class ShareMenuButton extends StatelessWidget {
   final String? selectedTabId;
@@ -138,6 +145,112 @@ class AddTabButtonView extends StatelessWidget {
   }
 }
 
+class CloneTabButton extends HookConsumerWidget {
+  const CloneTabButton({super.key, required this.selectedTabId});
+
+  final String? selectedTabId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tabMenuController = useMenuController();
+
+    return CloneTabMenu(
+      controller: tabMenuController,
+      selectedTabId: selectedTabId,
+      child: CloneTabButtonView(
+        onPressed: selectedTabId == null
+            ? null
+            : () => _cloneCurrentTabMode(context, ref, selectedTabId!),
+        onLongPress: selectedTabId == null
+            ? null
+            : () {
+                if (tabMenuController.isOpen) {
+                  tabMenuController.close();
+                } else {
+                  tabMenuController.open();
+                }
+              },
+      ),
+    );
+  }
+}
+
+class CloneTabButtonView extends StatelessWidget {
+  const CloneTabButtonView({super.key, this.onPressed, this.onLongPress});
+
+  final VoidCallback? onPressed;
+  final VoidCallback? onLongPress;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: onPressed,
+      onLongPress: onLongPress,
+      icon: const Icon(MdiIcons.contentDuplicate),
+    );
+  }
+}
+
+class CloneTabMenu extends HookConsumerWidget {
+  const CloneTabMenu({
+    super.key,
+    required this.child,
+    required this.controller,
+    required this.selectedTabId,
+  });
+
+  final Widget child;
+  final MenuController controller;
+  final String? selectedTabId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final showIsolatedTabUi = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (value) => value.showIsolatedTabUi,
+      ),
+    );
+
+    return MenuAnchor(
+      controller: controller,
+      builder: (context, controller, child) {
+        return child!;
+      },
+      menuChildren: [
+        MenuItemButton(
+          leadingIcon: const Icon(MdiIcons.tab),
+          onPressed: selectedTabId == null
+              ? null
+              : () => _cloneTabAsRegular(context, ref, selectedTabId!),
+          child: const Text('Clone as Regular'),
+        ),
+        MenuItemButton(
+          leadingIcon: Icon(
+            MdiIcons.dominoMask,
+            color: AppColors.of(context).privateTabPurple,
+          ),
+          onPressed: selectedTabId == null
+              ? null
+              : () => _cloneTabAsPrivate(context, ref, selectedTabId!),
+          child: const Text('Clone as Private'),
+        ),
+        if (showIsolatedTabUi)
+          MenuItemButton(
+            leadingIcon: Icon(
+              MdiIcons.snowflake,
+              color: AppColors.of(context).isolatedTabTeal,
+            ),
+            onPressed: selectedTabId == null
+                ? null
+                : () => _cloneTabAsIsolated(context, ref, selectedTabId!),
+            child: const Text('Clone as Isolated'),
+          ),
+      ],
+      child: child,
+    );
+  }
+}
+
 class TabsCountButtonView extends StatelessWidget {
   const TabsCountButtonView({
     super.key,
@@ -166,6 +279,124 @@ class TabsCountButtonView extends StatelessWidget {
             onTap: onTap,
             onLongPress: onLongPress,
           );
+  }
+}
+
+Future<void> _cloneCurrentTabMode(
+  BuildContext context,
+  WidgetRef ref,
+  String selectedTabId,
+) async {
+  final containerData = await ref
+      .read(tab_data.tabDataRepositoryProvider.notifier)
+      .getTabContainerData(selectedTabId);
+
+  final tabId = await ref
+      .read(tabRepositoryProvider.notifier)
+      .duplicateTab(
+        selectTabId: selectedTabId,
+        containerData: containerData,
+        selectTab: false,
+      );
+
+  if (context.mounted) {
+    final repo = ref.read(tabRepositoryProvider.notifier);
+    ui_helper.showTabSwitchMessage(
+      context,
+      onSwitch: () => repo.selectTab(tabId),
+    );
+  }
+}
+
+Future<void> _cloneTabAsRegular(
+  BuildContext context,
+  WidgetRef ref,
+  String selectedTabId,
+) {
+  return _cloneTabAsMode(context, ref, selectedTabId, mode: TabMode.regular);
+}
+
+Future<void> _cloneTabAsPrivate(
+  BuildContext context,
+  WidgetRef ref,
+  String selectedTabId,
+) {
+  return _cloneTabAsMode(context, ref, selectedTabId, mode: TabMode.private);
+}
+
+Future<void> _cloneTabAsIsolated(
+  BuildContext context,
+  WidgetRef ref,
+  String selectedTabId,
+) {
+  return _cloneTabAsMode(
+    context,
+    ref,
+    selectedTabId,
+    mode: TabMode.newIsolated(),
+  );
+}
+
+Future<void> _cloneTabAsMode(
+  BuildContext context,
+  WidgetRef ref,
+  String selectedTabId, {
+  required TabMode mode,
+}) async {
+  final tabState = ref.read(tabStateProvider(selectedTabId));
+  if (tabState == null) return;
+
+  final containerData = await ref
+      .read(tab_data.tabDataRepositoryProvider.notifier)
+      .getTabContainerData(selectedTabId);
+  final repo = ref.read(tabRepositoryProvider.notifier);
+
+  final tabId = switch (mode) {
+    RegularTabMode() =>
+      tabState.tabMode is RegularTabMode
+          ? await repo.duplicateTab(
+              selectTabId: selectedTabId,
+              containerData: containerData,
+              selectTab: false,
+            )
+          : await repo.addTab(
+              tabMode: TabMode.regular,
+              url: tabState.url,
+              containerSelection: containerData == null
+                  ? const TabContainerSelection.unassigned()
+                  : TabContainerSelection.specific(containerData),
+              selectTab: false,
+            ),
+    PrivateTabMode() =>
+      tabState.tabMode is PrivateTabMode
+          ? await repo.duplicateTab(
+              selectTabId: selectedTabId,
+              containerData: containerData,
+              selectTab: false,
+            )
+          : await repo.addTab(
+              tabMode: TabMode.private,
+              url: tabState.url,
+              containerSelection: containerData == null
+                  ? const TabContainerSelection.unassigned()
+                  : TabContainerSelection.specific(containerData),
+              selectTab: false,
+            ),
+    IsolatedTabMode() => await repo.addTab(
+      tabMode: TabMode.newIsolated(),
+      url: tabState.url,
+      containerSelection: containerData == null
+          ? const TabContainerSelection.unassigned()
+          : TabContainerSelection.specific(containerData),
+      selectTab: false,
+    ),
+  };
+
+  if (context.mounted) {
+    ui_helper.showTabSwitchMessage(
+      context,
+      onSwitch: () => repo.selectTab(tabId),
+    );
   }
 }
 

@@ -117,6 +117,10 @@ class GeckoSessionService {
     return _api.requestScreenshot(sendBack);
   }
 
+  Future<void> dispatchKeyEvent({required int keyCode}) {
+    return _api.dispatchKeyEvent(keyCode: keyCode);
+  }
+
   Future<void> updateLastAccess({
     String? tabId, //If null = current tab
     DateTime? lastAccess, //If null datetime.now

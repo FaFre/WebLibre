@@ -5401,6 +5401,7 @@ interface GeckoSessionApi {
   fun purgeHistory()
   fun updateLastAccess(tabId: String?, lastAccess: Long?)
   fun requestScreenshot(sendBack: Boolean, callback: (Result<ByteArray?>) -> Unit)
+  fun dispatchKeyEvent(keyCode: Long)
 
   companion object {
     /** The codec used by GeckoSessionApi. */
@@ -5727,6 +5728,24 @@ interface GeckoSessionApi {
                 reply.reply(GeckoPigeonUtils.wrapResult(data))
               }
             }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoSessionApi.dispatchKeyEvent$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val keyCodeArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              api.dispatchKeyEvent(keyCodeArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)

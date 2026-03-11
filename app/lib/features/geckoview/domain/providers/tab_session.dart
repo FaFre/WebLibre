@@ -96,6 +96,16 @@ class TabSession extends _$TabSession {
     return _sessionService.translateRestore();
   }
 
+  Future<void> pageUp() {
+    // Android KeyEvent.KEYCODE_PAGE_UP = 92
+    return _sessionService.dispatchKeyEvent(keyCode: 92);
+  }
+
+  Future<void> pageDown() {
+    // Android KeyEvent.KEYCODE_PAGE_DOWN = 93
+    return _sessionService.dispatchKeyEvent(keyCode: 93);
+  }
+
   @override
   void build({required String? tabId}) {
     _sessionService = (tabId != null)
