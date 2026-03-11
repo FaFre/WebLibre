@@ -31,19 +31,19 @@ dependencies:
   flutter_auto_size_text: ^5.0.0
   flutter_hooks: ^0.21.3+1
   flutter_markdown: ^0.7.7+1
-  flutter_material_design_icons: ^1.1.7447
+  flutter_material_design_icons: ^2.0.0+7447
   flutter_mozilla_components:
     path: ../packages/flutter_mozilla_components
   flutter_reorderable_grid_view: ^5.5.3
   flutter_slidable: ^4.0.3
-  flutter_svg: ^2.2.3
+  flutter_svg: ^2.2.4
   flutter_tor:
     path: ../packages/flutter_tor
   go_router: ^17.1.0
   google_fonts: ^8.0.2
   graphview: ^1.5.1
   home_widget: ^0.9.0
-  hooks_riverpod: ^3.2.1
+  hooks_riverpod: ^3.3.1
   html: ^0.15.6
   http: ^1.6.0
   intl: ^0.20.2
@@ -84,7 +84,7 @@ dependencies:
   speech_to_text_dialog:
     path: ../packages/speech_to_text_dialog
   sqlite3: ^2.9.4
-  sqlite3_flutter_libs: 0.5.41
+  sqlite3_flutter_libs: "0.5.41"
   synchronized: ^3.4.0
   text_scroll: ^0.2.1
   timeago: ^3.7.1
