@@ -505,7 +505,7 @@ class BrowserScreen extends HookConsumerWidget {
 
     // Theme with dynamic snackbar margin to position above bottom toolbar
     final themeData = Theme.of(context).copyWith(
-      bottomSheetTheme: BottomSheetThemeData(
+      bottomSheetTheme: Theme.of(context).bottomSheetTheme.copyWith(
         constraints: BoxConstraints(
           maxWidth:
               MediaQuery.of(context).size.width -

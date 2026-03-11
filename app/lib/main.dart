@@ -163,6 +163,11 @@ class _MainWidget extends HookConsumerWidget {
         (value) => value.disableAnimations,
       ),
     );
+    final showModalBarrier = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (value) => value.showModalBarrier,
+      ),
+    );
 
     useOnInitialization(() async {
       await CountryCodes.init();
@@ -286,6 +291,12 @@ class _MainWidget extends HookConsumerWidget {
             pageTransitionsTheme: disableAnimations
                 ? _noAnimationPageTransitionsTheme
                 : null,
+            dialogTheme: DialogThemeData(
+              barrierColor: showModalBarrier ? null : Colors.transparent,
+            ),
+            bottomSheetTheme: BottomSheetThemeData(
+              modalBarrierColor: showModalBarrier ? null : Colors.transparent,
+            ),
             extensions: const <ThemeExtension<dynamic>>[AppColors.light],
           ),
           darkTheme: ThemeData(
@@ -294,6 +305,12 @@ class _MainWidget extends HookConsumerWidget {
             pageTransitionsTheme: disableAnimations
                 ? _noAnimationPageTransitionsTheme
                 : null,
+            dialogTheme: DialogThemeData(
+              barrierColor: showModalBarrier ? null : Colors.transparent,
+            ),
+            bottomSheetTheme: BottomSheetThemeData(
+              modalBarrierColor: showModalBarrier ? null : Colors.transparent,
+            ),
             extensions: const <ThemeExtension<dynamic>>[AppColors.dark],
           ),
           themeMode: themeMode,

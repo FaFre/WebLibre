@@ -56,6 +56,10 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
+      'showModalBarrier': settings['showModalBarrier']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
       'enableReadability': settings['enableReadability']?.readAs(
         DriftSqlType.bool,
         db.typeMapping,

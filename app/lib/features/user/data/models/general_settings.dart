@@ -69,6 +69,7 @@ class GeneralSettings with FastEquatable {
   final ThemeMode themeMode;
   final double uiScaleFactor;
   final bool disableAnimations;
+  final bool showModalBarrier;
   final bool enableReadability;
   final bool enforceReadability;
   final Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit;
@@ -119,6 +120,7 @@ class GeneralSettings with FastEquatable {
     required this.themeMode,
     required this.uiScaleFactor,
     required this.disableAnimations,
+    required this.showModalBarrier,
     required this.enableReadability,
     required this.enforceReadability,
     required this.deleteBrowsingDataOnQuit,
@@ -168,6 +170,7 @@ class GeneralSettings with FastEquatable {
     ThemeMode? themeMode,
     double? uiScaleFactor,
     bool? disableAnimations,
+    bool? showModalBarrier,
     bool? enableReadability,
     bool? enforceReadability,
     this.deleteBrowsingDataOnQuit,
@@ -214,6 +217,7 @@ class GeneralSettings with FastEquatable {
   }) : themeMode = themeMode ?? ThemeMode.dark,
        uiScaleFactor = uiScaleFactor ?? defaultUiScaleFactor,
        disableAnimations = disableAnimations ?? false,
+       showModalBarrier = showModalBarrier ?? true,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
        defaultSearchProvider = defaultSearchProvider ?? _fallbackSearchProvider,
@@ -293,6 +297,7 @@ class GeneralSettings with FastEquatable {
     themeMode,
     uiScaleFactor,
     disableAnimations,
+    showModalBarrier,
     enableReadability,
     enforceReadability,
     deleteBrowsingDataOnQuit,

@@ -13,6 +13,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings disableAnimations(bool disableAnimations);
 
+  GeneralSettings showModalBarrier(bool showModalBarrier);
+
   GeneralSettings enableReadability(bool enableReadability);
 
   GeneralSettings enforceReadability(bool enforceReadability);
@@ -128,6 +130,7 @@ abstract class _$GeneralSettingsCWProxy {
     ThemeMode themeMode,
     double uiScaleFactor,
     bool disableAnimations,
+    bool showModalBarrier,
     bool enableReadability,
     bool enforceReadability,
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
@@ -191,6 +194,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings disableAnimations(bool disableAnimations) =>
       call(disableAnimations: disableAnimations);
+
+  @override
+  GeneralSettings showModalBarrier(bool showModalBarrier) =>
+      call(showModalBarrier: showModalBarrier);
 
   @override
   GeneralSettings enableReadability(bool enableReadability) =>
@@ -389,6 +396,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? themeMode = const $CopyWithPlaceholder(),
     Object? uiScaleFactor = const $CopyWithPlaceholder(),
     Object? disableAnimations = const $CopyWithPlaceholder(),
+    Object? showModalBarrier = const $CopyWithPlaceholder(),
     Object? enableReadability = const $CopyWithPlaceholder(),
     Object? enforceReadability = const $CopyWithPlaceholder(),
     Object? deleteBrowsingDataOnQuit = const $CopyWithPlaceholder(),
@@ -450,6 +458,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.disableAnimations
           // ignore: cast_nullable_to_non_nullable
           : disableAnimations as bool,
+      showModalBarrier:
+          showModalBarrier == const $CopyWithPlaceholder() ||
+              showModalBarrier == null
+          ? _value.showModalBarrier
+          // ignore: cast_nullable_to_non_nullable
+          : showModalBarrier as bool,
       enableReadability:
           enableReadability == const $CopyWithPlaceholder() ||
               enableReadability == null
@@ -726,6 +740,7 @@ GeneralSettings _$GeneralSettingsFromJson(
   themeMode: $enumDecodeNullable(_$ThemeModeEnumMap, json['themeMode']),
   uiScaleFactor: (json['uiScaleFactor'] as num?)?.toDouble(),
   disableAnimations: json['disableAnimations'] as bool?,
+  showModalBarrier: json['showModalBarrier'] as bool?,
   enableReadability: json['enableReadability'] as bool?,
   enforceReadability: json['enforceReadability'] as bool?,
   deleteBrowsingDataOnQuit: (json['deleteBrowsingDataOnQuit'] as List<dynamic>?)
@@ -815,6 +830,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'themeMode': _$ThemeModeEnumMap[instance.themeMode]!,
   'uiScaleFactor': instance.uiScaleFactor,
   'disableAnimations': instance.disableAnimations,
+  'showModalBarrier': instance.showModalBarrier,
   'enableReadability': instance.enableReadability,
   'enforceReadability': instance.enforceReadability,
   'deleteBrowsingDataOnQuit': instance.deleteBrowsingDataOnQuit

@@ -33,7 +33,7 @@ class DialogPage<T> extends Page<T> {
   const DialogPage({
     required this.builder,
     this.anchorPoint,
-    this.barrierColor = Colors.black54,
+    this.barrierColor,
     this.barrierDismissible = true,
     this.barrierLabel,
     this.useSafeArea = true,

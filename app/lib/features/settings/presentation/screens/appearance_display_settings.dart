@@ -69,6 +69,7 @@ class _VisualSection extends StatelessWidget {
         SettingSection(name: 'Visual'),
         _UiZoomSection(),
         _DisableAnimationsTile(),
+        _ShowModalBarrierTile(),
         _ThemeSection(),
       ],
     );
@@ -171,6 +172,34 @@ class _DisableAnimationsTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.disableAnimations(value),
+            );
+      },
+    );
+  }
+}
+
+class _ShowModalBarrierTile extends HookConsumerWidget {
+  const _ShowModalBarrierTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final showModalBarrier = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.showModalBarrier),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Show Modal Barrier'),
+      subtitle: const Text(
+        'Dim the background behind dialogs and bottom sheets',
+      ),
+      secondary: const Icon(Icons.layers),
+      value: showModalBarrier,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.showModalBarrier(value),
             );
       },
     );

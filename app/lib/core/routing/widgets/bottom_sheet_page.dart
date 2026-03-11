@@ -54,6 +54,8 @@ class BottomSheetPage<T> extends Page<T> {
     shape: Theme.of(context).bottomSheetTheme.shape,
     clipBehavior: Clip.antiAlias,
     constraints: Theme.of(context).bottomSheetTheme.constraints,
+    modalBarrierColor:
+        barrierColor ?? Theme.of(context).bottomSheetTheme.modalBarrierColor,
     isScrollControlled: isScrollControlled,
     isDismissible: barrierDismissible,
     useSafeArea: useSafeArea,
