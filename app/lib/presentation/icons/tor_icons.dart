@@ -19,57 +19,37 @@
  */
 import 'package:flutter/widgets.dart';
 
-enum TorIcons implements IconData {
-  authority(0xf101),
-  badexit(0xf102),
-  bridge(0xf103),
-  country(0xf104),
-  directory(0xf105),
-  exit(0xf106),
-  experimental(0xf107),
-  fallbackdir(0xf108),
-  fast(0xf109),
-  fingerprint(0xf10a),
-  guard(0xf10b),
-  hibernating(0xf10c),
-  hsdir(0xf10d),
-  ipv4(0xf10e),
-  ipv6exit(0xf10f),
-  ipv6(0xf110),
-  noedconsensus(0xf111),
-  notrecommended(0xf112),
-  onionAlt(0xf113),
-  onion(0xf114),
-  outdated(0xf115),
-  reachableipv4(0xf116),
-  reachableipv6(0xf117),
-  relay(0xf118),
-  running(0xf119),
-  stable(0xf11a),
-  tshirt(0xf11b),
-  unmeasured(0xf11c),
-  unreachableipv4(0xf11d),
-  unreachableipv6(0xf11e),
-  v2dir(0xf11f),
-  valid(0xf120);
-
-  const TorIcons(this.codePoint);
-
-  @override
-  final int codePoint;
-
-  @override
-  String get fontFamily => 'TorIcons';
-
-  @override
-  List<String>? get fontFamilyFallback => null;
-
-  @override
-  String? get fontPackage => null;
-
-  @override
-  bool get matchTextDirection => false;
-
-  @override
-  String toString() => 'TorIcons.$name';
+abstract class TorIcons {
+  static const IconData authority = IconData(0xf101, fontFamily: 'TorIcons');
+  static const IconData badexit = IconData(0xf102, fontFamily: 'TorIcons');
+  static const IconData bridge = IconData(0xf103, fontFamily: 'TorIcons');
+  static const IconData country = IconData(0xf104, fontFamily: 'TorIcons');
+  static const IconData directory = IconData(0xf105, fontFamily: 'TorIcons');
+  static const IconData exit = IconData(0xf106, fontFamily: 'TorIcons');
+  static const IconData experimental = IconData(0xf107, fontFamily: 'TorIcons');
+  static const IconData fallbackdir = IconData(0xf108, fontFamily: 'TorIcons');
+  static const IconData fast = IconData(0xf109, fontFamily: 'TorIcons');
+  static const IconData fingerprint = IconData(0xf10a, fontFamily: 'TorIcons');
+  static const IconData guard = IconData(0xf10b, fontFamily: 'TorIcons');
+  static const IconData hibernating = IconData(0xf10c, fontFamily: 'TorIcons');
+  static const IconData hsdir = IconData(0xf10d, fontFamily: 'TorIcons');
+  static const IconData ipv4 = IconData(0xf10e, fontFamily: 'TorIcons');
+  static const IconData ipv6exit = IconData(0xf10f, fontFamily: 'TorIcons');
+  static const IconData ipv6 = IconData(0xf110, fontFamily: 'TorIcons');
+  static const IconData noedconsensus = IconData(0xf111, fontFamily: 'TorIcons');
+  static const IconData notrecommended = IconData(0xf112, fontFamily: 'TorIcons');
+  static const IconData onionAlt = IconData(0xf113, fontFamily: 'TorIcons');
+  static const IconData onion = IconData(0xf114, fontFamily: 'TorIcons');
+  static const IconData outdated = IconData(0xf115, fontFamily: 'TorIcons');
+  static const IconData reachableipv4 = IconData(0xf116, fontFamily: 'TorIcons');
+  static const IconData reachableipv6 = IconData(0xf117, fontFamily: 'TorIcons');
+  static const IconData relay = IconData(0xf118, fontFamily: 'TorIcons');
+  static const IconData running = IconData(0xf119, fontFamily: 'TorIcons');
+  static const IconData stable = IconData(0xf11a, fontFamily: 'TorIcons');
+  static const IconData tshirt = IconData(0xf11b, fontFamily: 'TorIcons');
+  static const IconData unmeasured = IconData(0xf11c, fontFamily: 'TorIcons');
+  static const IconData unreachableipv4 = IconData(0xf11d, fontFamily: 'TorIcons');
+  static const IconData unreachableipv6 = IconData(0xf11e, fontFamily: 'TorIcons');
+  static const IconData v2dir = IconData(0xf11f, fontFamily: 'TorIcons');
+  static const IconData valid = IconData(0xf120, fontFamily: 'TorIcons');
 }

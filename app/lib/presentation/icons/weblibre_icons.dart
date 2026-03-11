@@ -19,28 +19,8 @@
  */
 import 'package:flutter/widgets.dart';
 
-enum WebLibreIcons implements IconData {
-  privateTab(0xEA01),
-  tabOptions(0xEA02),
-  tabType(0xEA03);
-
-  const WebLibreIcons(this.codePoint);
-
-  @override
-  final int codePoint;
-
-  @override
-  String get fontFamily => 'WebLibre';
-
-  @override
-  List<String>? get fontFamilyFallback => null;
-
-  @override
-  String? get fontPackage => null;
-
-  @override
-  bool get matchTextDirection => false;
-
-  @override
-  String toString() => 'WebLibreIcons.$name';
+abstract class WebLibreIcons {
+  static const IconData privateTab = IconData(0xEA01, fontFamily: 'WebLibre');
+  static const IconData tabOptions = IconData(0xEA02, fontFamily: 'WebLibre');
+  static const IconData tabType = IconData(0xEA03, fontFamily: 'WebLibre');
 }

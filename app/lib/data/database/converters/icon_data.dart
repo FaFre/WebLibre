@@ -30,8 +30,15 @@ class IconDataJsonConverter
   @override
   IconData fromJson(Map<String, dynamic> json) {
     return IconData(
+      // Lint ignores: This feature purposefully does not support tree-shaking.
+      // If this code is included in a Flutter AOT compilation it will increase
+      // the app-size by 2 MB if the cupertino/material icon libraries are
+      // imported anywhere.
+      // ignore: non_const_argument_for_const_parameter
       json['codePoint'] as int,
+      // ignore: non_const_argument_for_const_parameter
       fontFamily: json['fontFamily'] as String,
+      // ignore: non_const_argument_for_const_parameter
       fontPackage: json['fontPackage'] as String,
     );
   }
