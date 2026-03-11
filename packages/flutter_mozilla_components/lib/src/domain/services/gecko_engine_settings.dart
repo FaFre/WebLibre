@@ -176,9 +176,7 @@ class GeckoEngineSettingsService {
 
   // LNA Settings
   Future<void> lnaBlocking(bool? state) {
-    return _api.updateRuntimeSettings(
-      GeckoEngineSettings(lnaBlocking: state),
-    );
+    return _api.updateRuntimeSettings(GeckoEngineSettings(lnaBlocking: state));
   }
 
   Future<void> lnaBlockTrackers(bool? state) {
@@ -188,9 +186,7 @@ class GeckoEngineSettingsService {
   }
 
   Future<void> lnaEnabled(bool? state) {
-    return _api.updateRuntimeSettings(
-      GeckoEngineSettings(lnaEnabled: state),
-    );
+    return _api.updateRuntimeSettings(GeckoEngineSettings(lnaEnabled: state));
   }
 
   Future<void> setPullToRefreshEnabled(bool enabled) {

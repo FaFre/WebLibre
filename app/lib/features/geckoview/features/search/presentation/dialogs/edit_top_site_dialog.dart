@@ -27,10 +27,8 @@ Future<({String title, Uri url})?> showEditTopSiteDialog(
 }) {
   return showDialog<({String title, Uri url})>(
     context: context,
-    builder: (context) => _EditTopSiteDialog(
-      initialTitle: initialTitle,
-      initialUrl: initialUrl,
-    ),
+    builder: (context) =>
+        _EditTopSiteDialog(initialTitle: initialTitle, initialUrl: initialUrl),
   );
 }
 
@@ -121,10 +119,10 @@ class _EditTopSiteDialogState extends State<_EditTopSiteDialog> {
                 eagerParsing: true,
               );
               if (url == null) return;
-              Navigator.pop(
-                context,
-                (title: _titleController.text.trim(), url: url),
-              );
+              Navigator.pop(context, (
+                title: _titleController.text.trim(),
+                url: url,
+              ));
             }
           },
           child: const Text('Save'),

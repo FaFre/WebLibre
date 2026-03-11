@@ -596,10 +596,7 @@ Future<void> _editItem(
     // If the item has no ID (unpersisted default), persist it first
     var id = item.id;
     if (id == null && item.isDefault) {
-      id = await repo.ensureDefaultPersisted(
-        title: item.title,
-        url: item.url,
-      );
+      id = await repo.ensureDefaultPersisted(title: item.title, url: item.url);
     }
     if (id == null) return;
 

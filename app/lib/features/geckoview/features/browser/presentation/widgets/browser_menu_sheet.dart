@@ -588,9 +588,7 @@ class _PinTopSiteTile extends HookConsumerWidget {
 
     final isPinned = useCachedFuture(
       () => url != null
-          ? ref
-                .read(topSiteRepositoryProvider.notifier)
-                .isPinnedTopSiteUrl(url)
+          ? ref.read(topSiteRepositoryProvider.notifier).isPinnedTopSiteUrl(url)
           : Future.value(false),
       [url],
     );

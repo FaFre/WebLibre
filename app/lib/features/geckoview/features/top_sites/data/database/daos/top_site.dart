@@ -67,11 +67,7 @@ class TopSiteDao extends DatabaseAccessor<TopSiteDatabase>
     );
   }
 
-  Future<int> updateSite(
-    String id, {
-    required String title,
-    required Uri url,
-  }) {
+  Future<int> updateSite(String id, {required String title, required Uri url}) {
     return (db.topSite.update()..where((t) => t.id.equals(id))).write(
       TopSiteCompanion(title: Value(title), url: Value(url.normalized)),
     );

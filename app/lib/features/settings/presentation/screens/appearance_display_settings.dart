@@ -544,8 +544,7 @@ class _FontSizeFactorSlider extends HookConsumerWidget {
                   onChangeEnd: automaticFontSizeAdjustment
                       ? null
                       : (value) async {
-                          final rounded =
-                              (value * 10).round() / 10;
+                          final rounded = (value * 10).round() / 10;
                           sliderValue.value = rounded;
                           await ref
                               .read(

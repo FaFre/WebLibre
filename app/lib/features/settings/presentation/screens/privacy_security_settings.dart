@@ -873,17 +873,14 @@ class _LnaEnabledTile extends HookConsumerWidget {
 
     return SwitchListTile.adaptive(
       title: const Text('Local Network Access'),
-      subtitle: const Text(
-        'Enable local network and device access blocking',
-      ),
+      subtitle: const Text('Enable local network and device access blocking'),
       secondary: const Icon(MdiIcons.lanDisconnect),
       value: lnaEnabled ?? false,
       onChanged: (value) async {
         await ref
             .read(saveEngineSettingsControllerProvider.notifier)
             .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.lnaEnabled(value),
+              (currentSettings) => currentSettings.copyWith.lnaEnabled(value),
             );
       },
     );

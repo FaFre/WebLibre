@@ -46,9 +46,8 @@ class SearchModuleReorderView extends ConsumerWidget {
                   ),
                 ),
                 TextButton(
-                  onPressed: () => ref
-                      .read(searchReorderModeProvider.notifier)
-                      .deactivate(),
+                  onPressed: () =>
+                      ref.read(searchReorderModeProvider.notifier).deactivate(),
                   child: const Text('Done'),
                 ),
               ],
@@ -70,9 +69,7 @@ class SearchModuleReorderView extends ConsumerWidget {
               child: ListTile(
                 leading: IconButton(
                   icon: Icon(
-                    entry.visible
-                        ? Icons.visibility
-                        : Icons.visibility_off,
+                    entry.visible ? Icons.visibility : Icons.visibility_off,
                     color: entry.visible
                         ? colorScheme.primary
                         : colorScheme.onSurfaceVariant,

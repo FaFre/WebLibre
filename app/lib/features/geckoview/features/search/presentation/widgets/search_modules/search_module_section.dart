@@ -64,11 +64,8 @@ class SearchModuleSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final moduleOrder = ref.watch(
-      searchModuleOrderProvider(moduleType.group),
-    );
-    final isVisible = moduleOrder
-        .any((e) => e.type == moduleType && e.visible);
+    final moduleOrder = ref.watch(searchModuleOrderProvider(moduleType.group));
+    final isVisible = moduleOrder.any((e) => e.type == moduleType && e.visible);
     if (!isVisible) {
       return MultiSliver(children: const []);
     }
