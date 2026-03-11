@@ -49,7 +49,59 @@ class WebEngineHardeningScreen extends HookConsumerWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Web Engine Hardening')),
+      appBar: AppBar(
+        title: const Text('Web Engine Hardening'),
+        actions: [
+          MenuAnchor(
+            menuChildren: [
+              MenuItemButton(
+                leadingIcon: const Icon(Icons.restore),
+                child: const Text('Reset all preferences'),
+                onPressed: () async {
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Reset all preferences?'),
+                      content: const Text(
+                        'This will reset all user-defined web engine preferences to their defaults.',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: const Text('Reset'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirmed == true) {
+                    await ref
+                        .read(
+                          unifiedPreferenceSettingsRepositoryProvider(
+                            PreferencePartition.user,
+                          ).notifier,
+                        )
+                        .reset();
+                  }
+                },
+              ),
+            ],
+            builder: (context, controller, child) => IconButton(
+              icon: const Icon(Icons.more_vert),
+              onPressed: () {
+                if (controller.isOpen) {
+                  controller.close();
+                } else {
+                  controller.open();
+                }
+              },
+            ),
+          ),
+        ],
+      ),
       body: preferenceGroups.when(
         skipLoadingOnReload: true,
         data: (data) {
