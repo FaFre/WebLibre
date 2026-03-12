@@ -106,6 +106,16 @@ class TabSession extends _$TabSession {
     return _sessionService.dispatchKeyEvent(keyCode: 93);
   }
 
+  Future<void> scrollToTop() {
+    // Android KeyEvent.KEYCODE_MOVE_HOME = 122
+    return _sessionService.dispatchKeyEvent(keyCode: 122);
+  }
+
+  Future<void> scrollToBottom() {
+    // Android KeyEvent.KEYCODE_MOVE_END = 123
+    return _sessionService.dispatchKeyEvent(keyCode: 123);
+  }
+
   @override
   void build({required String? tabId}) {
     _sessionService = (tabId != null)

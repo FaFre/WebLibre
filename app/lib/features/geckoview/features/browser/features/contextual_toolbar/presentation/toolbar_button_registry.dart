@@ -353,6 +353,16 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
                       .pageUp();
                 }
               },
+        onLongPress: scope.isPreview
+            ? () {}
+            : () async {
+                final tabId = scope.selectedTabId;
+                if (tabId != null) {
+                  await ref
+                      .read(tabSessionProvider(tabId: tabId).notifier)
+                      .scrollToTop();
+                }
+              },
         icon: const Icon(MdiIcons.chevronDoubleUp),
       );
     },
@@ -371,6 +381,16 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
                   await ref
                       .read(tabSessionProvider(tabId: tabId).notifier)
                       .pageDown();
+                }
+              },
+        onLongPress: scope.isPreview
+            ? () {}
+            : () async {
+                final tabId = scope.selectedTabId;
+                if (tabId != null) {
+                  await ref
+                      .read(tabSessionProvider(tabId: tabId).notifier)
+                      .scrollToBottom();
                 }
               },
         icon: const Icon(MdiIcons.chevronDoubleDown),
