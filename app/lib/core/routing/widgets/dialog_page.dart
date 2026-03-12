@@ -50,7 +50,11 @@ class DialogPage<T> extends Page<T> {
     settings: this,
     builder: builder,
     anchorPoint: anchorPoint,
-    barrierColor: barrierColor,
+    barrierColor:
+        barrierColor ??
+        DialogTheme.of(context).barrierColor ??
+        Theme.of(context).dialogTheme.barrierColor ??
+        Colors.black54,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel,
     useSafeArea: useSafeArea,
