@@ -48,6 +48,7 @@ import 'package:weblibre/features/geckoview/domain/providers/web_extensions_stat
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/content_selection_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/history_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/translation_bottom_sheet.dart';
@@ -319,9 +320,7 @@ class _NavigationRow extends HookConsumerWidget {
                     .where((id) => id != selectedTabId)
                     .toList();
                 if (otherIds.isNotEmpty) {
-                  await ref
-                      .read(tabRepositoryProvider.notifier)
-                      .closeTabs(otherIds);
+                  await closeTabsWithConfirmation(context, ref, otherIds);
                 }
                 if (context.mounted) {
                   Navigator.pop(context);
@@ -339,9 +338,7 @@ class _NavigationRow extends HookConsumerWidget {
                       .map((e) => e.key)
                       .toList();
                   if (sameHostIds.isNotEmpty) {
-                    await ref
-                        .read(tabRepositoryProvider.notifier)
-                        .closeTabs(sameHostIds);
+                    await closeTabsWithConfirmation(context, ref, sameHostIds);
                   }
                   if (context.mounted) {
                     Navigator.pop(context);

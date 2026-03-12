@@ -29,6 +29,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
 import 'package:weblibre/features/geckoview/features/browser/utils/grid_calculations.dart';
@@ -139,32 +140,14 @@ class _TabTreePreview extends HookConsumerWidget {
                 final tabs = await ref
                     .read(tabDataRepositoryProvider.notifier)
                     .getTabDescendants(entity.rootId);
+                if (!context.mounted) return;
 
-                final allStates = ref.read(tabStatesProvider);
-                final isolatedContextInCloseSet = <String, int>{};
-
-                for (final tabId in tabs.keys) {
-                  final contextId = allStates[tabId]?.isolationContextId;
-                  if (contextId == null) continue;
-                  isolatedContextInCloseSet[contextId] =
-                      (isolatedContextInCloseSet[contextId] ?? 0) + 1;
-                }
-
-                final groupsToDelete = isolatedContextInCloseSet.entries.where((
-                  entry,
-                ) {
-                  final totalInGroup = allStates.values
-                      .where((state) => state.isolationContextId == entry.key)
-                      .length;
-                  return totalInGroup == entry.value;
-                }).length;
-
-                if (groupsToDelete > 0 && context.mounted) {
-                  final confirmed = await ui_helper.confirmIsolatedTabClose(
-                    context,
-                    groupCount: groupsToDelete,
-                  );
-                  if (!confirmed) return;
+                if (!await confirmBulkTabCloseIfNeeded(
+                  context,
+                  ref,
+                  tabs.keys,
+                )) {
+                  return;
                 }
 
                 await ref

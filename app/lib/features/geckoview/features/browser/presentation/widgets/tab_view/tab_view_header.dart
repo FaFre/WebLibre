@@ -41,6 +41,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/services/bro
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/bookmark_all_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/select_folder_dialog.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/clear_container_data_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/close_all_private_tabs_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/close_all_tabs_dialog.dart';
@@ -846,34 +847,17 @@ class TabViewHeader extends HookConsumerWidget {
                                             .getFilteredTabIds(
                                               selectedContainerId,
                                             );
+                                        if (!context.mounted) return;
 
                                         if (filteredIds.isEmpty) return;
 
                                         // Check for isolated tabs
-                                        final allStates = ref.read(
-                                          tabStatesProvider,
-                                        );
-                                        final isolatedContextIds = filteredIds
-                                            .map((id) => allStates[id])
-                                            .where(
-                                              (s) =>
-                                                  s != null &&
-                                                  s.tabMode
-                                                      is IsolatedTabMode &&
-                                                  s.isolationContextId != null,
-                                            )
-                                            .map((s) => s!.isolationContextId!)
-                                            .toSet();
-
-                                        if (isolatedContextIds.isNotEmpty &&
-                                            context.mounted) {
-                                          final confirmed = await ui_helper
-                                              .confirmIsolatedTabClose(
-                                                context,
-                                                groupCount:
-                                                    isolatedContextIds.length,
-                                              );
-                                          if (!confirmed) return;
+                                        if (!await confirmBulkTabCloseIfNeeded(
+                                          context,
+                                          ref,
+                                          filteredIds,
+                                        )) {
+                                          return;
                                         }
 
                                         await ref

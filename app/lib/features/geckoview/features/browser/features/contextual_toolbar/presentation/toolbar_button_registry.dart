@@ -36,6 +36,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/entities/fon
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_spec.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/models/contextual_toolbar_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_bar_buttons.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_shortcut_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/font_size_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
@@ -542,9 +543,7 @@ class _CloseTabToolbarButton extends HookConsumerWidget {
                 .where((id) => id != scope.selectedTabId)
                 .toList();
             if (otherIds.isNotEmpty) {
-              await ref
-                  .read(tabRepositoryProvider.notifier)
-                  .closeTabs(otherIds);
+              await closeTabsWithConfirmation(context, ref, otherIds);
             }
           },
           child: const Text('Close Others'),
@@ -559,9 +558,7 @@ class _CloseTabToolbarButton extends HookConsumerWidget {
                   .map((e) => e.key)
                   .toList();
               if (sameHostIds.isNotEmpty) {
-                await ref
-                    .read(tabRepositoryProvider.notifier)
-                    .closeTabs(sameHostIds);
+                await closeTabsWithConfirmation(context, ref, sameHostIds);
               }
             },
             child: const Text('Close from Same Host'),
