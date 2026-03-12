@@ -232,7 +232,8 @@ class SearchScreen extends HookConsumerWidget {
         final measuredHeight = getTextFieldHeight(textFieldKey);
 
         if (measuredHeight != null) {
-          preferredHeight.value = measuredHeight;
+          // Add 2px to account for SearchField container border
+          preferredHeight.value = measuredHeight + 2;
           return;
         }
       }
@@ -458,7 +459,7 @@ class SearchScreen extends HookConsumerWidget {
                 title: isEditMode
                     ? null
                     : Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Builder(
                           builder: (context) {
                             final tabTypeSwitcher = Focus(
@@ -529,111 +530,105 @@ class SearchScreen extends HookConsumerWidget {
                       ),
                 bottom: PreferredSize(
                   preferredSize: Size.fromHeight(preferredHeight.value),
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 16.0),
-                    child: SearchField(
-                      textFieldKey: textFieldKey,
-                      showBangIcon: showBangIcon,
-                      textEditingController: searchTextController,
-                      focusNode: searchFocusNode,
-                      maxLines: isEditMode ? 3 : 1,
-                      autofocus: true,
-                      label: const Text('Search or enter URL'),
-                      unfocusOnTapOutside: false,
-                      onSubmitted: (value) async {
-                        if (value.isNotEmpty) {
-                          final classification = classifyAddressBarInput(value);
-                          Uri? newUrl;
-                          String? searchQuery;
+                  child: SearchField(
+                    textFieldKey: textFieldKey,
+                    showBangIcon: showBangIcon,
+                    textEditingController: searchTextController,
+                    focusNode: searchFocusNode,
+                    maxLines: isEditMode ? 3 : 1,
+                    autofocus: true,
+                    label: const Text('Search or enter URL'),
+                    unfocusOnTapOutside: false,
+                    onSubmitted: (value) async {
+                      if (value.isNotEmpty) {
+                        final classification = classifyAddressBarInput(value);
+                        Uri? newUrl;
+                        String? searchQuery;
 
-                          switch (classification) {
-                            case NavigateInputClassification(:final uri):
-                              newUrl = uri;
-                            case SearchInputClassification(:final query):
-                              searchQuery = query;
-                            case InvalidInputClassification():
-                              if (context.mounted) {
-                                ui_helper.showErrorMessage(
-                                  context,
-                                  'Invalid address',
-                                );
-                              }
-                              return;
-                          }
-
-                          if (newUrl == null && searchQuery != null) {
-                            // Read from both providers - use site if set, otherwise global
-                            final siteBang = isEditMode
-                                ? ref.read(
-                                    selectedBangDataProvider(
-                                      domain: existingTabState.url.host,
-                                    ),
-                                  )
-                                : null;
-                            final globalBang = ref.read(
-                              selectedBangDataProvider(),
-                            );
-                            final bang =
-                                siteBang ??
-                                globalBang ??
-                                await ref.read(
-                                  defaultSearchBangDataProvider.future,
-                                );
-
-                            if (bang != null) {
-                              newUrl = bang.getTemplateUrl(searchQuery);
-
-                              if (!privateTabMode) {
-                                await ref
-                                    .read(bangSearchProvider.notifier)
-                                    .triggerBangSearch(bang, searchQuery);
-                              }
-                            }
-                          }
-
-                          if (newUrl != null) {
-                            if (isEditMode) {
-                              // Load into existing tab
-                              await ref
-                                  .read(
-                                    tabSessionProvider(tabId: tabId).notifier,
-                                  )
-                                  .loadUrl(url: newUrl);
-                            } else {
-                              // Create new tab
-                              await ref
-                                  .read(tabRepositoryProvider.notifier)
-                                  .addTab(
-                                    url: newUrl,
-                                    tabMode: effectiveTabMode,
-                                    parentId:
-                                        (selectedTabType.value == TabType.child)
-                                        ? ref.read(selectedTabProvider)
-                                        : null,
-                                    launchedFromIntent: launchedFromIntent,
-                                    selectTab: true,
-                                    containerSelection:
-                                        selectedContainer == null
-                                        ? const TabContainerSelection.unassigned()
-                                        : TabContainerSelection.specific(
-                                            selectedContainer,
-                                          ),
-                                  );
-                            }
-
+                        switch (classification) {
+                          case NavigateInputClassification(:final uri):
+                            newUrl = uri;
+                          case SearchInputClassification(:final query):
+                            searchQuery = query;
+                          case InvalidInputClassification():
                             if (context.mounted) {
-                              ref
-                                  .read(bottomSheetControllerProvider.notifier)
-                                  .requestDismiss();
+                              ui_helper.showErrorMessage(
+                                context,
+                                'Invalid address',
+                              );
+                            }
+                            return;
+                        }
 
-                              const BrowserRoute().go(context);
+                        if (newUrl == null && searchQuery != null) {
+                          // Read from both providers - use site if set, otherwise global
+                          final siteBang = isEditMode
+                              ? ref.read(
+                                  selectedBangDataProvider(
+                                    domain: existingTabState.url.host,
+                                  ),
+                                )
+                              : null;
+                          final globalBang = ref.read(
+                            selectedBangDataProvider(),
+                          );
+                          final bang =
+                              siteBang ??
+                              globalBang ??
+                              await ref.read(
+                                defaultSearchBangDataProvider.future,
+                              );
+
+                          if (bang != null) {
+                            newUrl = bang.getTemplateUrl(searchQuery);
+
+                            if (!privateTabMode) {
+                              await ref
+                                  .read(bangSearchProvider.notifier)
+                                  .triggerBangSearch(bang, searchQuery);
                             }
                           }
                         }
-                      },
-                      activeBang: activeBang,
-                      showSuggestions: true,
-                    ),
+
+                        if (newUrl != null) {
+                          if (isEditMode) {
+                            // Load into existing tab
+                            await ref
+                                .read(tabSessionProvider(tabId: tabId).notifier)
+                                .loadUrl(url: newUrl);
+                          } else {
+                            // Create new tab
+                            await ref
+                                .read(tabRepositoryProvider.notifier)
+                                .addTab(
+                                  url: newUrl,
+                                  tabMode: effectiveTabMode,
+                                  parentId:
+                                      (selectedTabType.value == TabType.child)
+                                      ? ref.read(selectedTabProvider)
+                                      : null,
+                                  launchedFromIntent: launchedFromIntent,
+                                  selectTab: true,
+                                  containerSelection: selectedContainer == null
+                                      ? const TabContainerSelection.unassigned()
+                                      : TabContainerSelection.specific(
+                                          selectedContainer,
+                                        ),
+                                );
+                          }
+
+                          if (context.mounted) {
+                            ref
+                                .read(bottomSheetControllerProvider.notifier)
+                                .requestDismiss();
+
+                            const BrowserRoute().go(context);
+                          }
+                        }
+                      }
+                    },
+                    activeBang: activeBang,
+                    showSuggestions: true,
                   ),
                 ),
               ),

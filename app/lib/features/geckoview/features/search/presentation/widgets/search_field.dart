@@ -107,72 +107,91 @@ class SearchField extends HookConsumerWidget {
       );
     }
 
-    return AutoSuggestTextField(
-      controller: textEditingController,
-      suggestion: suggestion.value,
-      enableIMEPersonalizedLearning: !incognitoEnabled,
-      focusNode: safeFocusNode,
-      maxLines: maxLines,
-      textFieldKey: textFieldKey,
-      textInputAction: (maxLines == null || maxLines! > 1)
-          ? TextInputAction.done
-          : null,
-      minLines: minLines,
-      autofocus: autofocus,
-      decoration: InputDecoration(
-        border: InputBorder.none,
-        prefixIcon: (showBangIcon && activeBang != null)
-            ? Padding(
-                padding: const EdgeInsetsDirectional.all(12.0),
-                child: UrlIcon([activeBang!.getDefaultUrl()], iconSize: 24.0),
-              )
-            : null,
-        label: label,
-        hint: hint,
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-        suffixIcon: hasText
-            ? IconButton(
-                onPressed: () {
-                  textEditingController.clear();
-                },
-                icon: const Icon(Icons.clear),
-              )
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  QrScannerButton(
-                    onScanResult: (scanResult) {
-                      if (scanResult?.code != null) {
-                        textEditingController.text = scanResult!.code!;
-                      }
-                    },
-                  ),
-                  SpeechToTextButton(
-                    onTextReceived: (data) {
-                      textEditingController.text = data;
-                    },
-                  ),
-                ],
-              ),
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8.0),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
-      onTapOutside: unfocusOnTapOutside
-          ? (event) {
-              safeFocusNode.unfocus();
-            }
-          : null,
-      onSubmitted: onSubmitted,
-      onTap: () {
-        if (suggestion.value != null) {
-          unawaited(HapticFeedback.lightImpact());
+      child: AutoSuggestTextField(
+        controller: textEditingController,
+        suggestion: suggestion.value,
+        enableIMEPersonalizedLearning: !incognitoEnabled,
+        focusNode: safeFocusNode,
+        maxLines: maxLines,
+        textFieldKey: textFieldKey,
+        textInputAction: (maxLines == null || maxLines! > 1)
+            ? TextInputAction.done
+            : null,
+        minLines: minLines,
+        autofocus: autofocus,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          contentPadding: const EdgeInsetsDirectional.fromSTEB(12, 12, 0, 12),
+          prefixIcon: (showBangIcon && activeBang != null)
+              ? Padding(
+                  padding: const EdgeInsetsDirectional.all(12.0),
+                  child: UrlIcon([activeBang!.getDefaultUrl()], iconSize: 24.0),
+                )
+              : null,
+          label: label,
+          hint: hint,
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+          suffixIconConstraints: const BoxConstraints(minHeight: 48),
+          suffixIcon: hasText
+              ? Padding(
+                  padding: const EdgeInsetsDirectional.only(end: 8.0),
+                  child: IconButton(
+                    onPressed: () {
+                      textEditingController.clear();
+                    },
+                    icon: const Icon(Icons.clear),
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsetsDirectional.only(end: 8.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      QrScannerButton(
+                        onScanResult: (scanResult) {
+                          if (scanResult?.code != null) {
+                            textEditingController.text = scanResult!.code!;
+                          }
+                        },
+                      ),
+                      SpeechToTextButton(
+                        onTextReceived: (data) {
+                          textEditingController.text = data;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+        ),
+        onTapOutside: unfocusOnTapOutside
+            ? (event) {
+                safeFocusNode.unfocus();
+              }
+            : null,
+        onSubmitted: onSubmitted,
+        onTap: () {
+          if (suggestion.value != null) {
+            unawaited(HapticFeedback.lightImpact());
 
-          textEditingController.text = suggestion.value!;
-          textEditingController.selection = TextSelection.collapsed(
-            offset: suggestion.value!.length,
-          );
+            textEditingController.text = suggestion.value!;
+            textEditingController.selection = TextSelection.collapsed(
+              offset: suggestion.value!.length,
+            );
 
-          suggestion.value = null;
-        }
-      },
+            suggestion.value = null;
+          }
+        },
+      ),
     );
   }
 }
