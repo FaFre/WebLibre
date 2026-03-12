@@ -40,4 +40,5 @@ enum ToolbarButtonId {
   pageUp,
   pageDown,
   font,
+  extensionShortcut,
 }

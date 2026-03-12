@@ -234,8 +234,8 @@ class GridTabPreview extends HookConsumerWidget {
                             onPressed: () {
                               onDeleteAll?.call(tabState.url.host);
                             },
-                            leadingIcon: const Icon(MdiIcons.closeBoxMultiple),
-                            child: Text('Close all from ${tabState.url.host}'),
+                            leadingIcon: const Icon(Icons.language),
+                            child: const Text('Close from Same Host'),
                           ),
                         ],
                         child: SizedBox(
@@ -567,8 +567,8 @@ class ListTabPreview extends HookConsumerWidget {
                         onPressed: () {
                           onDeleteAll?.call(tabState.url.host);
                         },
-                        leadingIcon: const Icon(MdiIcons.closeBoxMultiple),
-                        child: Text('Close all from ${tabState.url.host}'),
+                        leadingIcon: const Icon(Icons.language),
+                        child: const Text('Close from Same Host'),
                       ),
                     ],
                     child: IconButton(

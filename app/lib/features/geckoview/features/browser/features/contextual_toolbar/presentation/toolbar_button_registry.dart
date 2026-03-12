@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -27,11 +28,15 @@ import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/font_size_constants.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_spec.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/models/contextual_toolbar_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_bar_buttons.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_shortcut_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/font_size_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
@@ -112,18 +117,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: bookmarksToolbarButtonSpec,
     label: 'Bookmarks',
     icon: MdiIcons.bookmarkMultiple,
-    builder: (scope, context, ref) {
-      return IconButton(
-        onPressed: scope.isPreview
-            ? () {}
-            : () async {
-                await BookmarkListRoute(
-                  entryGuid: BookmarkRoot.root.id,
-                ).push(context);
-              },
-        icon: const Icon(MdiIcons.bookmarkMultiple),
-      );
-    },
+    builder: (scope, context, ref) => _BookmarkToolbarButton(scope: scope),
   ),
   ToolbarButtonDefinition(
     spec: shareToolbarButtonSpec,
@@ -177,21 +171,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: reloadToolbarButtonSpec,
     label: 'Reload',
     icon: Icons.refresh,
-    builder: (scope, context, ref) {
-      return IconButton(
-        onPressed: scope.isPreview
-            ? () {}
-            : () async {
-                final tabId = scope.selectedTabId;
-                if (tabId != null) {
-                  await ref
-                      .read(tabSessionProvider(tabId: tabId).notifier)
-                      .reload();
-                }
-              },
-        icon: const Icon(Icons.refresh),
-      );
-    },
+    builder: (scope, context, ref) => _ReloadToolbarButton(scope: scope),
   ),
   ToolbarButtonDefinition(
     spec: readerModeToolbarButtonSpec,
@@ -276,14 +256,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: closeTabToolbarButtonSpec,
     label: 'Close Tab',
     icon: MdiIcons.tabMinus,
-    builder: (scope, context, ref) {
-      return IconButton(
-        onPressed: scope.isPreview
-            ? () {}
-            : () => _closeTab(context, ref, scope.selectedTabId),
-        icon: const Icon(MdiIcons.tabMinus),
-      );
-    },
+    builder: (scope, context, ref) => _CloseTabToolbarButton(scope: scope),
   ),
   ToolbarButtonDefinition(
     spec: inputUrlToolbarButtonSpec,
@@ -417,6 +390,24 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
       return _FontToolbarButton(selectedTabId: scope.selectedTabId);
     },
   ),
+  ToolbarButtonDefinition(
+    spec: extensionShortcutToolbarButtonSpec,
+    label: 'Extensions',
+    icon: MdiIcons.puzzle,
+    isPrimaryAvailable: (scope, ref) => ref
+        .read(
+          webExtensionsStateProvider(
+            WebExtensionActionType.browser,
+          ).select((value) => value.values),
+        )
+        .isNotEmpty,
+    builder: (scope, context, ref) {
+      if (scope.isPreview) {
+        return IconButton(onPressed: () {}, icon: const Icon(MdiIcons.puzzle));
+      }
+      return const _ExtensionShortcutToolbarButton();
+    },
+  ),
 ];
 
 final Map<String, ToolbarButtonDefinition> toolbarButtonRegistryById = {
@@ -448,6 +439,224 @@ Future<void> _closeTab(
     ui_helper.showTabUndoClose(
       context,
       ref.read(tabRepositoryProvider.notifier).undoClose,
+    );
+  }
+}
+
+class _ExtensionShortcutToolbarButton extends HookConsumerWidget {
+  const _ExtensionShortcutToolbarButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final menuController = useMemoized(MenuController.new);
+
+    return ExtensionShortcutMenu(
+      controller: menuController,
+      child: IconButton(
+        onPressed: menuController.open,
+        icon: const Icon(MdiIcons.puzzle),
+      ),
+    );
+  }
+}
+
+class _ReloadToolbarButton extends HookConsumerWidget {
+  final ContextualToolbarScope scope;
+
+  const _ReloadToolbarButton({required this.scope});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final menuController = useMemoized(MenuController.new);
+
+    return MenuAnchor(
+      controller: menuController,
+      builder: (context, controller, child) => child!,
+      menuChildren: [
+        MenuItemButton(
+          leadingIcon: const Icon(Icons.refresh),
+          onPressed: () async {
+            final tabId = scope.selectedTabId;
+            if (tabId != null) {
+              await ref
+                  .read(tabSessionProvider(tabId: tabId).notifier)
+                  .reload(flags: LoadUrlFlags.BYPASS_CACHE);
+            }
+          },
+          child: const Text('Hard Refresh'),
+        ),
+      ],
+      child: IconButton(
+        onPressed: scope.isPreview
+            ? () {}
+            : () async {
+                final tabId = scope.selectedTabId;
+                if (tabId != null) {
+                  await ref
+                      .read(tabSessionProvider(tabId: tabId).notifier)
+                      .reload();
+                }
+              },
+        onLongPress: scope.isPreview ? null : menuController.open,
+        icon: const Icon(Icons.refresh),
+      ),
+    );
+  }
+}
+
+class _CloseTabToolbarButton extends HookConsumerWidget {
+  final ContextualToolbarScope scope;
+
+  const _CloseTabToolbarButton({required this.scope});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final menuController = useMemoized(MenuController.new);
+    final host = ref.watch(
+      tabStateProvider(scope.selectedTabId).select((s) => s?.url.host),
+    );
+
+    return MenuAnchor(
+      controller: menuController,
+      builder: (context, controller, child) => child!,
+      menuChildren: [
+        MenuItemButton(
+          leadingIcon: const Icon(Icons.tab),
+          onPressed: () async {
+            final tabStates = ref.read(tabStatesProvider);
+            final otherIds = tabStates.keys
+                .where((id) => id != scope.selectedTabId)
+                .toList();
+            if (otherIds.isNotEmpty) {
+              await ref
+                  .read(tabRepositoryProvider.notifier)
+                  .closeTabs(otherIds);
+            }
+          },
+          child: const Text('Close Others'),
+        ),
+        if (host != null && host.isNotEmpty)
+          MenuItemButton(
+            leadingIcon: const Icon(Icons.language),
+            onPressed: () async {
+              final tabStates = ref.read(tabStatesProvider);
+              final sameHostIds = tabStates.entries
+                  .where((e) => e.value.url.host == host)
+                  .map((e) => e.key)
+                  .toList();
+              if (sameHostIds.isNotEmpty) {
+                await ref
+                    .read(tabRepositoryProvider.notifier)
+                    .closeTabs(sameHostIds);
+              }
+            },
+            child: const Text('Close from Same Host'),
+          ),
+      ],
+      child: IconButton(
+        onPressed: scope.isPreview
+            ? () {}
+            : () => _closeTab(context, ref, scope.selectedTabId),
+        onLongPress: scope.isPreview ? null : menuController.open,
+        icon: const Icon(MdiIcons.tabMinus),
+      ),
+    );
+  }
+}
+
+class _BookmarkToolbarButton extends HookConsumerWidget {
+  final ContextualToolbarScope scope;
+
+  const _BookmarkToolbarButton({required this.scope});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final menuController = useMemoized(MenuController.new);
+
+    final tabUrl = scope.tabState?.url;
+    final bookmarkable = tabUrl != null && !scope.isPreview;
+
+    // Walk the in-memory bookmark tree to find GUIDs for the current URL.
+    final existingGuids = ref.watch(
+      bookmarksRepositoryProvider.select((async) {
+        final result = <String>[];
+
+        if (!bookmarkable) return const <String>[];
+
+        final root = async.value;
+        if (root == null) return const <String>[];
+
+        void collect(BookmarkItem item) {
+          if (item is BookmarkEntry && item.url == tabUrl) {
+            result.add(item.guid);
+          }
+
+          if (item is BookmarkFolder) {
+            for (final child in item.children ?? const <BookmarkItem>[]) {
+              collect(child);
+            }
+          }
+        }
+
+        collect(root);
+
+        return result;
+      }),
+    );
+
+    final isBookmarked = existingGuids.isNotEmpty;
+
+    return MenuAnchor(
+      controller: menuController,
+      builder: (context, controller, child) => child!,
+      menuChildren: [
+        if (isBookmarked)
+          MenuItemButton(
+            leadingIcon: const Icon(MdiIcons.bookmarkRemove),
+            onPressed: () async {
+              for (final guid in existingGuids) {
+                await ref
+                    .read(bookmarksRepositoryProvider.notifier)
+                    .delete(guid);
+              }
+              if (context.mounted) {
+                ui_helper.showInfoMessage(context, 'Bookmark removed');
+              }
+            },
+            child: const Text('Remove Bookmark'),
+          )
+        else
+          MenuItemButton(
+            leadingIcon: const Icon(MdiIcons.bookmarkPlus),
+            onPressed: !bookmarkable
+                ? null
+                : () async {
+                    await ref
+                        .read(bookmarksRepositoryProvider.notifier)
+                        .addBookmark(
+                          parentGuid: BookmarkRoot.mobile.id,
+                          url: tabUrl,
+                          title: scope.tabState!.titleOrAuthority,
+                        );
+
+                    if (context.mounted) {
+                      ui_helper.showInfoMessage(context, 'Bookmark added');
+                    }
+                  },
+            child: const Text('Add Bookmark'),
+          ),
+      ],
+      child: IconButton(
+        onPressed: scope.isPreview
+            ? () {}
+            : () async {
+                await BookmarkListRoute(
+                  entryGuid: BookmarkRoot.root.id,
+                ).push(context);
+              },
+        onLongPress: scope.isPreview ? null : menuController.open,
+        icon: const Icon(MdiIcons.bookmarkMultiple),
+      ),
     );
   }
 }

@@ -31,8 +31,6 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings createChildTabsOption(bool createChildTabsOption);
 
-  GeneralSettings showExtensionShortcut(bool showExtensionShortcut);
-
   GeneralSettings enableLocalAiFeatures(bool enableLocalAiFeatures);
 
   GeneralSettings showContainerUi(bool showContainerUi);
@@ -54,8 +52,6 @@ abstract class _$GeneralSettingsCWProxy {
   GeneralSettings historyAutoCleanInterval(Duration historyAutoCleanInterval);
 
   GeneralSettings tabViewBottomSheet(bool tabViewBottomSheet);
-
-  GeneralSettings tabBarReaderView(bool tabBarReaderView);
 
   GeneralSettings tabBarShowContextualBar(bool tabBarShowContextualBar);
 
@@ -137,7 +133,6 @@ abstract class _$GeneralSettingsCWProxy {
     BangKey? defaultSearchProvider,
     SearchSuggestionProviders defaultSearchSuggestionsProvider,
     bool createChildTabsOption,
-    bool showExtensionShortcut,
     bool enableLocalAiFeatures,
     bool showContainerUi,
     bool showIsolatedTabUi,
@@ -147,7 +142,6 @@ abstract class _$GeneralSettingsCWProxy {
     TabBarSwipeAction tabBarSwipeAction,
     Duration historyAutoCleanInterval,
     bool tabViewBottomSheet,
-    bool tabBarReaderView,
     bool tabBarShowContextualBar,
     bool tabBarShowQuickTabSwitcherBar,
     TabBarPosition tabBarPosition,
@@ -226,10 +220,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(createChildTabsOption: createChildTabsOption);
 
   @override
-  GeneralSettings showExtensionShortcut(bool showExtensionShortcut) =>
-      call(showExtensionShortcut: showExtensionShortcut);
-
-  @override
   GeneralSettings enableLocalAiFeatures(bool enableLocalAiFeatures) =>
       call(enableLocalAiFeatures: enableLocalAiFeatures);
 
@@ -266,10 +256,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings tabViewBottomSheet(bool tabViewBottomSheet) =>
       call(tabViewBottomSheet: tabViewBottomSheet);
-
-  @override
-  GeneralSettings tabBarReaderView(bool tabBarReaderView) =>
-      call(tabBarReaderView: tabBarReaderView);
 
   @override
   GeneralSettings tabBarShowContextualBar(bool tabBarShowContextualBar) =>
@@ -403,7 +389,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? defaultSearchProvider = const $CopyWithPlaceholder(),
     Object? defaultSearchSuggestionsProvider = const $CopyWithPlaceholder(),
     Object? createChildTabsOption = const $CopyWithPlaceholder(),
-    Object? showExtensionShortcut = const $CopyWithPlaceholder(),
     Object? enableLocalAiFeatures = const $CopyWithPlaceholder(),
     Object? showContainerUi = const $CopyWithPlaceholder(),
     Object? showIsolatedTabUi = const $CopyWithPlaceholder(),
@@ -413,7 +398,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? tabBarSwipeAction = const $CopyWithPlaceholder(),
     Object? historyAutoCleanInterval = const $CopyWithPlaceholder(),
     Object? tabViewBottomSheet = const $CopyWithPlaceholder(),
-    Object? tabBarReaderView = const $CopyWithPlaceholder(),
     Object? tabBarShowContextualBar = const $CopyWithPlaceholder(),
     Object? tabBarShowQuickTabSwitcherBar = const $CopyWithPlaceholder(),
     Object? tabBarPosition = const $CopyWithPlaceholder(),
@@ -498,12 +482,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.createChildTabsOption
           // ignore: cast_nullable_to_non_nullable
           : createChildTabsOption as bool,
-      showExtensionShortcut:
-          showExtensionShortcut == const $CopyWithPlaceholder() ||
-              showExtensionShortcut == null
-          ? _value.showExtensionShortcut
-          // ignore: cast_nullable_to_non_nullable
-          : showExtensionShortcut as bool,
       enableLocalAiFeatures:
           enableLocalAiFeatures == const $CopyWithPlaceholder() ||
               enableLocalAiFeatures == null
@@ -558,12 +536,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.tabViewBottomSheet
           // ignore: cast_nullable_to_non_nullable
           : tabViewBottomSheet as bool,
-      tabBarReaderView:
-          tabBarReaderView == const $CopyWithPlaceholder() ||
-              tabBarReaderView == null
-          ? _value.tabBarReaderView
-          // ignore: cast_nullable_to_non_nullable
-          : tabBarReaderView as bool,
       tabBarShowContextualBar:
           tabBarShowContextualBar == const $CopyWithPlaceholder() ||
               tabBarShowContextualBar == null
@@ -754,7 +726,6 @@ GeneralSettings _$GeneralSettingsFromJson(
     json['defaultSearchSuggestionsProvider'],
   ),
   createChildTabsOption: json['createChildTabsOption'] as bool?,
-  showExtensionShortcut: json['showExtensionShortcut'] as bool?,
   enableLocalAiFeatures: json['enableLocalAiFeatures'] as bool?,
   showContainerUi: json['showContainerUi'] as bool?,
   showIsolatedTabUi: json['showIsolatedTabUi'] as bool?,
@@ -777,7 +748,6 @@ GeneralSettings _$GeneralSettingsFromJson(
           microseconds: (json['historyAutoCleanInterval'] as num).toInt(),
         ),
   tabViewBottomSheet: json['tabViewBottomSheet'] as bool?,
-  tabBarReaderView: json['tabBarReaderView'] as bool?,
   tabBarShowContextualBar: json['tabBarShowContextualBar'] as bool?,
   tabBarShowQuickTabSwitcherBar: json['tabBarShowQuickTabSwitcherBar'] as bool?,
   tabBarPosition: $enumDecodeNullable(
@@ -843,7 +813,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
       _$SearchSuggestionProvidersEnumMap[instance
           .defaultSearchSuggestionsProvider]!,
   'createChildTabsOption': instance.createChildTabsOption,
-  'showExtensionShortcut': instance.showExtensionShortcut,
   'enableLocalAiFeatures': instance.enableLocalAiFeatures,
   'showContainerUi': instance.showContainerUi,
   'showIsolatedTabUi': instance.showIsolatedTabUi,
@@ -855,7 +824,6 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'tabBarSwipeAction': _$TabBarSwipeActionEnumMap[instance.tabBarSwipeAction]!,
   'historyAutoCleanInterval': instance.historyAutoCleanInterval.inMicroseconds,
   'tabViewBottomSheet': instance.tabViewBottomSheet,
-  'tabBarReaderView': instance.tabBarReaderView,
   'tabBarShowContextualBar': instance.tabBarShowContextualBar,
   'tabBarShowQuickTabSwitcherBar': instance.tabBarShowQuickTabSwitcherBar,
   'tabBarPosition': _$TabBarPositionEnumMap[instance.tabBarPosition]!,

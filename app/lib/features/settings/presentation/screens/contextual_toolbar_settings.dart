@@ -27,6 +27,7 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/models/contextual_toolbar_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/toolbar_button_registry.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart';
 
 class ContextualToolbarSettingsScreen extends HookConsumerWidget {
@@ -273,10 +274,12 @@ class _ToolbarPreviewDelegate extends SliverPersistentHeaderDelegate {
 
   final List<ToolbarButtonConfig> configs;
 
+  static const _previewHeight = BrowserTabBar.contextualToolabarHeight;
+
   @override
-  double get minExtent => 56.0;
+  double get minExtent => _previewHeight;
   @override
-  double get maxExtent => 56.0;
+  double get maxExtent => _previewHeight;
 
   @override
   Widget build(
@@ -284,9 +287,12 @@ class _ToolbarPreviewDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    return ColoredBox(
-      color: Theme.of(context).colorScheme.surfaceContainer,
-      child: _ToolbarPreview(configs: configs),
+    return SizedBox(
+      height: maxExtent,
+      child: ColoredBox(
+        color: Theme.of(context).colorScheme.surfaceContainer,
+        child: _ToolbarPreview(configs: configs),
+      ),
     );
   }
 

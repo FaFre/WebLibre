@@ -44,8 +44,8 @@ class TabSession extends _$TabSession {
     return _sessionService.stopLoading();
   }
 
-  Future<void> reload() {
-    return _sessionService.reload();
+  Future<void> reload({LoadUrlFlags flags = LoadUrlFlags.NONE}) {
+    return _sessionService.reload(flags: flags);
   }
 
   Future<void> goBack() {

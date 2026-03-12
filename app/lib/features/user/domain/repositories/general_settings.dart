@@ -84,10 +84,6 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
-      'showExtensionShortcut': settings['showExtensionShortcut']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
       'enableLocalAiFeatures': settings['enableLocalAiFeatures']?.readAs(
         DriftSqlType.bool,
         db.typeMapping,
@@ -121,10 +117,6 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         db.typeMapping,
       ),
       'tabViewBottomSheet': settings['tabViewBottomSheet']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'tabBarReaderView': settings['tabBarReaderView']?.readAs(
         DriftSqlType.bool,
         db.typeMapping,
       ),

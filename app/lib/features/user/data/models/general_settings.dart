@@ -77,7 +77,6 @@ class GeneralSettings with FastEquatable {
   final BangKey? defaultSearchProvider;
   final SearchSuggestionProviders defaultSearchSuggestionsProvider;
   final bool createChildTabsOption;
-  final bool showExtensionShortcut;
   final bool enableLocalAiFeatures;
   final bool showContainerUi;
   final bool showIsolatedTabUi;
@@ -88,7 +87,6 @@ class GeneralSettings with FastEquatable {
   final TabBarSwipeAction tabBarSwipeAction;
   final Duration historyAutoCleanInterval;
   final bool tabViewBottomSheet;
-  final bool tabBarReaderView;
   final bool tabBarShowContextualBar;
   final bool tabBarShowQuickTabSwitcherBar;
   final TabBarPosition tabBarPosition;
@@ -127,7 +125,6 @@ class GeneralSettings with FastEquatable {
     required this.defaultSearchProvider,
     required this.defaultSearchSuggestionsProvider,
     required this.createChildTabsOption,
-    required this.showExtensionShortcut,
     required this.enableLocalAiFeatures,
     required this.showContainerUi,
     required this.showIsolatedTabUi,
@@ -137,7 +134,6 @@ class GeneralSettings with FastEquatable {
     required this.tabBarSwipeAction,
     required this.historyAutoCleanInterval,
     required this.tabViewBottomSheet,
-    required this.tabBarReaderView,
     required this.tabBarShowContextualBar,
     required this.tabBarShowQuickTabSwitcherBar,
     required this.tabBarPosition,
@@ -177,7 +173,6 @@ class GeneralSettings with FastEquatable {
     BangKey? defaultSearchProvider,
     SearchSuggestionProviders? defaultSearchSuggestionsProvider,
     bool? createChildTabsOption,
-    bool? showExtensionShortcut,
     bool? enableLocalAiFeatures,
     bool? showContainerUi,
     bool? showIsolatedTabUi,
@@ -187,7 +182,6 @@ class GeneralSettings with FastEquatable {
     TabBarSwipeAction? tabBarSwipeAction,
     Duration? historyAutoCleanInterval,
     bool? tabViewBottomSheet,
-    bool? tabBarReaderView,
     bool? tabBarShowContextualBar,
     bool? tabBarShowQuickTabSwitcherBar,
     TabBarPosition? tabBarPosition,
@@ -224,7 +218,6 @@ class GeneralSettings with FastEquatable {
        defaultSearchSuggestionsProvider =
            defaultSearchSuggestionsProvider ?? _fallbackAutocompleteProvider,
        createChildTabsOption = createChildTabsOption ?? false,
-       showExtensionShortcut = showExtensionShortcut ?? false,
        enableLocalAiFeatures = enableLocalAiFeatures ?? true,
        showContainerUi = showContainerUi ?? true,
        showIsolatedTabUi = showIsolatedTabUi ?? true,
@@ -237,7 +230,6 @@ class GeneralSettings with FastEquatable {
        historyAutoCleanInterval =
            historyAutoCleanInterval ?? const Duration(days: 90),
        tabViewBottomSheet = tabViewBottomSheet ?? false,
-       tabBarReaderView = tabBarReaderView ?? false,
        tabBarShowContextualBar = tabBarShowContextualBar ?? true,
        tabBarShowQuickTabSwitcherBar = tabBarShowQuickTabSwitcherBar ?? true,
        tabBarPosition = tabBarPosition ?? TabBarPosition.bottom,
@@ -304,7 +296,6 @@ class GeneralSettings with FastEquatable {
     defaultSearchProvider,
     defaultSearchSuggestionsProvider,
     createChildTabsOption,
-    showExtensionShortcut,
     enableLocalAiFeatures,
     showContainerUi,
     showIsolatedTabUi,
@@ -314,7 +305,6 @@ class GeneralSettings with FastEquatable {
     tabBarSwipeAction,
     historyAutoCleanInterval,
     tabViewBottomSheet,
-    tabBarReaderView,
     tabBarShowContextualBar,
     tabBarShowQuickTabSwitcherBar,
     tabBarPosition,

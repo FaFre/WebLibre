@@ -78,7 +78,6 @@ class _TabBarLayoutSection extends StatelessWidget {
       children: [
         _TabBarPositionSection(),
         _TabBarLayoutModeSection(),
-        _ShowExtensionShortcutTile(),
         _ShowContextualTabBarTile(),
         _CustomizeToolbarButtonsTile(),
         _AutoHideTabBarTile(),
@@ -256,12 +255,6 @@ class _TabBarPreviewCard extends HookWidget {
     }
 
     final mainToolbarActions = <Widget>[
-      if (settings.showExtensionShortcut)
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(MdiIcons.puzzle),
-          tooltip: 'Extensions',
-        ),
       if (showMainToolbarActionButtons) tabCountButton,
       if (showMainToolbarActionButtons) NavigationMenuButtonView(onTap: () {}),
     ];
@@ -634,34 +627,6 @@ class _CustomizeToolbarButtonsTile extends HookConsumerWidget {
       enabled: tabBarShowContextualBar,
       onTap: () async {
         await const ContextualToolbarSettingsRoute().push(context);
-      },
-    );
-  }
-}
-
-class _ShowExtensionShortcutTile extends HookConsumerWidget {
-  const _ShowExtensionShortcutTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final showExtensionShortcut = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.showExtensionShortcut,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Show Extension Shortcut'),
-      subtitle: const Text('Display an extension menu directly on the tab bar'),
-      secondary: const Icon(MdiIcons.puzzleHeart),
-      value: showExtensionShortcut,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.showExtensionShortcut(value),
-            );
       },
     );
   }

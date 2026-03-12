@@ -91,7 +91,6 @@ class _ContentViewingSection extends StatelessWidget {
         SettingSection(name: 'Content Viewing'),
         _PdfViewerTile(),
         _EnableReaderModeTile(),
-        _ReaderModeInTabBarTile(),
         _EnforceReaderModeTile(),
       ],
     );
@@ -412,34 +411,6 @@ class _EnforceReaderModeTile extends HookConsumerWidget {
                   );
             }
           : null,
-    );
-  }
-}
-
-class _ReaderModeInTabBarTile extends HookConsumerWidget {
-  const _ReaderModeInTabBarTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tabBarReaderView = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.tabBarReaderView),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Reader Mode in Tab Bar'),
-      subtitle: const Text(
-        'Show reader mode button in the tab bar instead of only in the tab menu',
-      ),
-      secondary: const Icon(MdiIcons.bookHeart),
-      value: tabBarReaderView,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.tabBarReaderView(value),
-            );
-      },
     );
   }
 }

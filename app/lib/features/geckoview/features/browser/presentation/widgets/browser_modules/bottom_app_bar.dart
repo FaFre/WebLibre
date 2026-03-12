@@ -28,28 +28,23 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_id.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_bar_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_shortcut_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
-import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
-import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
@@ -72,8 +67,6 @@ class BrowserTopAppBar extends StatelessWidget {
       displayedSheet: null,
       showContextualToolbar: false,
       showQuickTabSwitcherBar: false,
-      showMainToolbarNavigationButton: !showContextualToolbar,
-      showMainToolbarTabsCount: !showContextualToolbar,
     );
   }
 
@@ -108,8 +101,6 @@ class BrowserBottomAppBar extends StatelessWidget {
       showMainToolbar: showMainToolbar,
       showContextualToolbar: showContextualToolbar,
       showQuickTabSwitcherBar: showQuickTabSwitcherBar,
-      showMainToolbarNavigationButton: !showContextualToolbar,
-      showMainToolbarTabsCount: !showContextualToolbar,
     );
   }
 
@@ -137,17 +128,12 @@ class BrowserTabBar extends HookConsumerWidget {
   final bool showQuickTabSwitcherBar;
   final Sheet? displayedSheet;
 
-  final bool showMainToolbarTabsCount;
-  final bool showMainToolbarNavigationButton;
-
   const BrowserTabBar({
     super.key,
     required this.showMainToolbar,
     required this.displayedSheet,
     required this.showContextualToolbar,
     required this.showQuickTabSwitcherBar,
-    required this.showMainToolbarTabsCount,
-    required this.showMainToolbarNavigationButton,
   });
 
   static const contextualToolabarHeight = 54.0;
@@ -180,10 +166,30 @@ class BrowserTabBar extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final extensionMenuController = useMenuController();
-
     final selectedTabId = ref.watch(selectedTabProvider);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
+
+    // Determine which buttons are actually visible in the contextual toolbar
+    // so we only hide them from the main toolbar when they're genuinely present there.
+    final contextualConfigs = ref
+        .watch(effectiveToolbarButtonConfigsProvider)
+        .value;
+
+    final tabsCountInContextual =
+        showContextualToolbar &&
+        contextualConfigs.any(
+          (c) => c.buttonId == ToolbarButtonId.tabsCount.name && c.isVisible,
+        );
+
+    final menuInContextual =
+        showContextualToolbar &&
+        contextualConfigs.any(
+          (c) =>
+              c.buttonId == ToolbarButtonId.navigationMenu.name && c.isVisible,
+        );
+
+    final showMainToolbarTabsCount = !tabsCountInContextual;
+    final showMainToolbarNavigationButton = !menuInContextual;
 
     final containerColor = ref.watch(
       watchTabContainerDataProvider(
@@ -191,7 +197,6 @@ class BrowserTabBar extends HookConsumerWidget {
       ).select((data) => data.value?.color),
     );
 
-    final showExtensionShortcut = settings.showExtensionShortcut;
     final quickTabSwitcherMode = settings.effectiveUiQuickTabSwitcherMode();
 
     final tabBarPosition = settings.tabBarPosition;
@@ -221,58 +226,6 @@ class BrowserTabBar extends HookConsumerWidget {
                 : const AppBarTitle()
           : null,
       actions: [
-        if (showTabTitle)
-          Consumer(
-            builder: (context, ref, child) {
-              final tabBarReaderView = ref.watch(
-                generalSettingsWithDefaultsProvider.select(
-                  (value) => value.tabBarReaderView,
-                ),
-              );
-
-              final readerabilityStateActive = ref.watch(
-                selectedTabStateProvider.select(
-                  (state) =>
-                      (state?.readerableState ?? ReaderableState.$default())
-                          .active,
-                ),
-              );
-
-              return Visibility(
-                visible: tabBarReaderView || readerabilityStateActive,
-                child: ReaderButton(
-                  buttonBuilder: (isLoading, readerActive, icon) =>
-                      ToolbarButton(
-                        onTap: isLoading
-                            ? null
-                            : () async {
-                                await ref
-                                    .read(
-                                      readerableScreenControllerProvider
-                                          .notifier,
-                                    )
-                                    .toggleReaderView(!readerActive);
-                              },
-                        child: icon,
-                      ),
-                ),
-              );
-            },
-          ),
-        if (showExtensionShortcut)
-          ExtensionShortcutMenu(
-            controller: extensionMenuController,
-            child: ToolbarButton(
-              onTap: () {
-                if (extensionMenuController.isOpen) {
-                  extensionMenuController.close();
-                } else {
-                  extensionMenuController.open();
-                }
-              },
-              child: const Icon(MdiIcons.puzzle),
-            ),
-          ),
         if (showMainToolbarTabsCount)
           TabsCountButton(
             selectedTabId: selectedTabId,
