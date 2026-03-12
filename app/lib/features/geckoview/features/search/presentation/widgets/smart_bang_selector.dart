@@ -164,21 +164,97 @@ class _TabbedBangSelector extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tabController = useTabController(initialLength: 2);
+    final tabIndex = useState(0);
+
+    useEffect(
+      () {
+        void listener() => tabIndex.value = tabController.index;
+        tabController.addListener(listener);
+        return () => tabController.removeListener(listener);
+      },
+      [tabController],
+    );
+
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Tab bar - full width
-        SizedBox(
-          height: 32,
-          width: double.infinity,
-          child: TabBar(
-            controller: tabController,
-            dividerColor: Colors.transparent,
-            tabs: const [
-              Tab(text: 'Search On This Site'),
-              Tab(text: 'All Providers'),
-            ],
+        // Animated sliding pill toggle
+        Padding(
+          padding: const EdgeInsets.only(right: 16.0),
+          child: Container(
+            height: 36,
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Stack(
+              children: [
+                AnimatedAlign(
+                  alignment: tabIndex.value == 1
+                      ? Alignment.centerRight
+                      : Alignment.centerLeft,
+                  duration: disableAnimations
+                      ? Duration.zero
+                      : const Duration(milliseconds: 250),
+                  curve: Curves.easeOutCubic,
+                  child: FractionallySizedBox(
+                    widthFactor: 0.5,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => tabController.animateTo(0),
+                        child: Center(
+                          child: Text(
+                            'Search On This Site',
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: tabIndex.value == 0
+                                  ? colorScheme.onPrimaryContainer
+                                  : colorScheme.onSurfaceVariant,
+                              fontWeight: tabIndex.value == 0
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => tabController.animateTo(1),
+                        child: Center(
+                          child: Text(
+                            'All Providers',
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: tabIndex.value == 1
+                                  ? colorScheme.onPrimaryContainer
+                                  : colorScheme.onSurfaceVariant,
+                              fontWeight: tabIndex.value == 1
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
         // Tab content
