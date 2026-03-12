@@ -453,7 +453,13 @@ class _ExtensionShortcutToolbarButton extends HookConsumerWidget {
     return ExtensionShortcutMenu(
       controller: menuController,
       child: IconButton(
-        onPressed: menuController.open,
+        onPressed: () {
+          if (menuController.isOpen) {
+            menuController.close();
+          } else {
+            menuController.open();
+          }
+        },
         icon: const Icon(MdiIcons.puzzle),
       ),
     );
@@ -497,7 +503,15 @@ class _ReloadToolbarButton extends HookConsumerWidget {
                       .reload();
                 }
               },
-        onLongPress: scope.isPreview ? null : menuController.open,
+        onLongPress: scope.isPreview
+            ? null
+            : () {
+                if (menuController.isOpen) {
+                  menuController.close();
+                } else {
+                  menuController.open();
+                }
+              },
         icon: const Icon(Icons.refresh),
       ),
     );
@@ -557,7 +571,15 @@ class _CloseTabToolbarButton extends HookConsumerWidget {
         onPressed: scope.isPreview
             ? () {}
             : () => _closeTab(context, ref, scope.selectedTabId),
-        onLongPress: scope.isPreview ? null : menuController.open,
+        onLongPress: scope.isPreview
+            ? null
+            : () {
+                if (menuController.isOpen) {
+                  menuController.close();
+                } else {
+                  menuController.open();
+                }
+              },
         icon: const Icon(MdiIcons.tabMinus),
       ),
     );
@@ -654,7 +676,15 @@ class _BookmarkToolbarButton extends HookConsumerWidget {
                   entryGuid: BookmarkRoot.root.id,
                 ).push(context);
               },
-        onLongPress: scope.isPreview ? null : menuController.open,
+        onLongPress: scope.isPreview
+            ? null
+            : () {
+                if (menuController.isOpen) {
+                  menuController.close();
+                } else {
+                  menuController.open();
+                }
+              },
         icon: const Icon(MdiIcons.bookmarkMultiple),
       ),
     );

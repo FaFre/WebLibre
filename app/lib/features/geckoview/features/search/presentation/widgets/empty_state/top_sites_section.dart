@@ -429,7 +429,15 @@ class _TopSiteGridTileState extends State<_TopSiteGridTile> {
         child: InkWell(
           borderRadius: _TopSiteGridTile._borderRadius,
           onTap: widget.onTap,
-          onLongPress: _hasMenu ? () => _menuController.open() : null,
+          onLongPress: _hasMenu
+              ? () {
+                  if (_menuController.isOpen) {
+                    _menuController.close();
+                  } else {
+                    _menuController.open();
+                  }
+                }
+              : null,
           child: Stack(
             fit: StackFit.expand,
             children: [

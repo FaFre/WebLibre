@@ -274,7 +274,9 @@ class _NavigationRow extends HookConsumerWidget {
             onLongPress: isLoading || history?.canGoBack != true
                 ? null
                 : () {
-                    if (!backMenuController.isOpen) {
+                    if (backMenuController.isOpen) {
+                      backMenuController.close();
+                    } else {
                       backMenuController.open();
                     }
                   },
@@ -297,7 +299,9 @@ class _NavigationRow extends HookConsumerWidget {
             onLongPress: history?.canGoForward != true
                 ? null
                 : () {
-                    if (!forwardMenuController.isOpen) {
+                    if (forwardMenuController.isOpen) {
+                      forwardMenuController.close();
+                    } else {
                       forwardMenuController.open();
                     }
                   },
@@ -379,7 +383,13 @@ class _NavigationRow extends HookConsumerWidget {
                 );
               }
             },
-            onLongPress: closeMenuController.open,
+            onLongPress: () {
+              if (closeMenuController.isOpen) {
+                closeMenuController.close();
+              } else {
+                closeMenuController.open();
+              }
+            },
           ),
         ),
         MenuAnchor(
@@ -408,7 +418,13 @@ class _NavigationRow extends HookConsumerWidget {
                   .reload();
               if (context.mounted) Navigator.pop(context);
             },
-            onLongPress: reloadMenuController.open,
+            onLongPress: () {
+              if (reloadMenuController.isOpen) {
+                reloadMenuController.close();
+              } else {
+                reloadMenuController.open();
+              }
+            },
           ),
         ),
       ],

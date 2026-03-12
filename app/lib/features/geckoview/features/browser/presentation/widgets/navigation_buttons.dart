@@ -102,7 +102,9 @@ class NavigateForwardButton extends HookConsumerWidget {
           menuControllerToClose?.close();
         },
         onLongPress: () {
-          if (!historyMenuController.isOpen) {
+          if (historyMenuController.isOpen) {
+            historyMenuController.close();
+          } else {
             historyMenuController.open();
           }
         },
@@ -160,7 +162,9 @@ class NavigateBackButton extends HookConsumerWidget {
           menuControllerToClose?.close();
         },
         onLongPress: () {
-          if (!historyMenuController.isOpen) {
+          if (historyMenuController.isOpen) {
+            historyMenuController.close();
+          } else {
             historyMenuController.open();
           }
         },

@@ -44,7 +44,11 @@ class FingerprintSettingsScreen extends HookConsumerWidget {
             builder: (context, controller, child) {
               return IconButton(
                 onPressed: () {
-                  controller.open();
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
+                  }
                 },
                 icon: const Icon(Icons.more_vert),
               );
