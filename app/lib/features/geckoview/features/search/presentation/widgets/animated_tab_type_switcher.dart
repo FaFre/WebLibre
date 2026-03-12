@@ -126,6 +126,7 @@ class _Segment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -140,7 +141,9 @@ class _Segment extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
+        duration: disableAnimations
+            ? Duration.zero
+            : const Duration(milliseconds: 300),
         curve: Curves.easeOutCubic,
         color: bgColor,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -149,7 +152,9 @@ class _Segment extends StatelessWidget {
           children: [
             Icon(icon, color: fgColor, size: 18),
             AnimatedSize(
-              duration: const Duration(milliseconds: 300),
+              duration: disableAnimations
+                  ? Duration.zero
+                  : const Duration(milliseconds: 300),
               curve: Curves.easeOutCubic,
               child: isSelected
                   ? Padding(

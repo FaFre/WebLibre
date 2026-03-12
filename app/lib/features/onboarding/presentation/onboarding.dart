@@ -47,6 +47,7 @@ class OnboardingScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
 
     final pageController = usePageController();
 
@@ -95,10 +96,14 @@ class OnboardingScreen extends HookConsumerWidget {
                     visible: currentPage.value > 0,
                     child: TextButton.icon(
                       onPressed: () async {
-                        await pageController.previousPage(
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.easeInOut,
-                        );
+                        if (disableAnimations) {
+                          pageController.jumpToPage(currentPage.value - 1);
+                        } else {
+                          await pageController.previousPage(
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeInOut,
+                          );
+                        }
                       },
                       icon: const Icon(Icons.chevron_left),
                       label: const Text('Previous'),
@@ -121,10 +126,14 @@ class OnboardingScreen extends HookConsumerWidget {
                   Expanded(
                     child: TextButton.icon(
                       onPressed: () async {
-                        await pageController.nextPage(
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.easeInOut,
-                        );
+                        if (disableAnimations) {
+                          pageController.jumpToPage(currentPage.value + 1);
+                        } else {
+                          await pageController.nextPage(
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeInOut,
+                          );
+                        }
                       },
                       iconAlignment: IconAlignment.end,
                       icon: const Icon(Icons.chevron_right),

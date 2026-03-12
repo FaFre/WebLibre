@@ -67,6 +67,7 @@ class _MaterialPickerState extends State<MaterialPicker> {
 
   @override
   Widget build(BuildContext context) {
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
     final isPortrait =
         MediaQuery.of(context).orientation == Orientation.portrait ||
         widget.portraitOnly;
@@ -143,7 +144,9 @@ class _MaterialPickerState extends State<MaterialPicker> {
                               : const EdgeInsets.fromLTRB(7, 0, 7, 0),
                           child: Align(
                             child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 300),
+                              duration: disableAnimations
+                                  ? Duration.zero
+                                  : const Duration(milliseconds: 300),
                               width: 25,
                               height: 25,
                               decoration: BoxDecoration(
@@ -235,7 +238,9 @@ class _MaterialPickerState extends State<MaterialPicker> {
                       child: Align(
                         child: AnimatedContainer(
                           curve: Curves.fastOutSlowIn,
-                          duration: const Duration(milliseconds: 500),
+                          duration: disableAnimations
+                              ? Duration.zero
+                              : const Duration(milliseconds: 500),
                           width: isPortrait
                               ? (_currentShading == color ? 250 : 230)
                               : (_currentShading == color ? 50 : 30),
@@ -308,9 +313,9 @@ class _MaterialPickerState extends State<MaterialPicker> {
                                         ],
                                       )
                                     : AnimatedOpacity(
-                                        duration: const Duration(
-                                          milliseconds: 300,
-                                        ),
+                                        duration: disableAnimations
+                                            ? Duration.zero
+                                            : const Duration(milliseconds: 300),
                                         opacity: _currentShading == color
                                             ? 1
                                             : 0,

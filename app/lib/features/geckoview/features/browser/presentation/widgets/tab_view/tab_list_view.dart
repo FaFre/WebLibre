@@ -204,6 +204,7 @@ class _TabListView extends HookConsumerWidget {
   }
 
   Widget _buildLocalTabsView(BuildContext context, WidgetRef ref) {
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
     final containerId = ref.watch(selectedContainerProvider);
     final canManualReorder = ref.watch(canManualTabReorderProvider);
     final reorderEnabled = tabsReorderable && canManualReorder;
@@ -263,13 +264,17 @@ class _TabListView extends HookConsumerWidget {
                 scrollController.position.maxScrollExtent,
               );
 
-              unawaited(
-                scrollController.animateTo(
-                  targetOffset,
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeInOut,
-                ),
-              );
+              if (disableAnimations) {
+                scrollController.jumpTo(targetOffset);
+              } else {
+                unawaited(
+                  scrollController.animateTo(
+                    targetOffset,
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut,
+                  ),
+                );
+              }
 
               didInitialScroll.value = true;
             } else {
@@ -465,6 +470,7 @@ class ViewTabListWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
     final isSyncedScope = ref.watch(
       effectiveTabsTrayScopeProvider.select(
         (scope) => scope == TabsTrayScope.synced,
@@ -477,15 +483,18 @@ class ViewTabListWidget extends HookConsumerWidget {
 
     // Delay initialization to ignore initial animations
     useEffect(() {
-      final timer = Timer(const Duration(milliseconds: 500), () {
-        isInitialized.value = true;
-        // Initialize lastSheetSize with current size
-        if (draggableScrollableController?.isAttached == true) {
-          lastSheetSize.value = draggableScrollableController!.size;
-        }
-      });
+      final timer = Timer(
+        disableAnimations ? Duration.zero : const Duration(milliseconds: 500),
+        () {
+          isInitialized.value = true;
+          // Initialize lastSheetSize with current size
+          if (draggableScrollableController?.isAttached == true) {
+            lastSheetSize.value = draggableScrollableController!.size;
+          }
+        },
+      );
       return timer.cancel;
-    }, []);
+    }, [disableAnimations]);
 
     // Listen to DraggableScrollableController for sheet size changes
     useEffect(() {
@@ -572,11 +581,15 @@ class ViewTabListWidget extends HookConsumerWidget {
         ),
         if (showNewTabFab && !isSyncedScope)
           AnimatedSlide(
-            duration: const Duration(milliseconds: 200),
+            duration: disableAnimations
+                ? Duration.zero
+                : const Duration(milliseconds: 200),
             offset: isFabVisible.value ? Offset.zero : const Offset(0, 2),
             curve: Curves.easeInOut,
             child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 200),
+              duration: disableAnimations
+                  ? Duration.zero
+                  : const Duration(milliseconds: 200),
               opacity: isFabVisible.value ? 1.0 : 0.0,
               child: Padding(
                 padding: const EdgeInsets.only(

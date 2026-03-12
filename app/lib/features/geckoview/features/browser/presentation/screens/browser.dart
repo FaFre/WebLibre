@@ -683,6 +683,9 @@ class BrowserScreen extends HookConsumerWidget {
               // Layer 5: Page load progress indicator (animates with toolbar visibility)
               Consumer(
                 builder: (context, ref, child) {
+                  final disableAnimations = MediaQuery.disableAnimationsOf(
+                    context,
+                  );
                   final toolbarState = ref.watch(
                     toolbarVisibilityControllerProvider(selectedTabId),
                   );
@@ -691,7 +694,9 @@ class BrowserScreen extends HookConsumerWidget {
                       (!tabInFullScreen &&
                           toolbarState == ToolbarVisibility.visible);
                   return AnimatedPositioned(
-                    duration: _AnimatedToolbar._kAnimationDuration,
+                    duration: disableAnimations
+                        ? Duration.zero
+                        : _AnimatedToolbar._kAnimationDuration,
                     curve: Curves.easeInOutQuart,
                     left: 0,
                     right: 0,
@@ -730,6 +735,9 @@ class BrowserScreen extends HookConsumerWidget {
               // Layer 6: Find in Page widget (above toolbar or keyboard, whichever is higher)
               Consumer(
                 builder: (context, ref, child) {
+                  final disableAnimations = MediaQuery.disableAnimationsOf(
+                    context,
+                  );
                   final toolbarState = ref.watch(
                     toolbarVisibilityControllerProvider(selectedTabId),
                   );
@@ -738,7 +746,9 @@ class BrowserScreen extends HookConsumerWidget {
                       (!tabInFullScreen &&
                           toolbarState == ToolbarVisibility.visible);
                   return AnimatedPositioned(
-                    duration: _AnimatedToolbar._kAnimationDuration,
+                    duration: disableAnimations
+                        ? Duration.zero
+                        : _AnimatedToolbar._kAnimationDuration,
                     curve: Curves.easeInOutQuart,
                     left: 0,
                     right: 0,
@@ -1111,17 +1121,22 @@ class _SiteSettingsSheet extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
     final draggableScrollableController = useDraggableScrollableController();
 
     void handleClearSiteDataExpansion(bool isExpanded) {
       if (isExpanded) {
-        unawaited(
-          draggableScrollableController.animateTo(
-            1.0,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.decelerate,
-          ),
-        );
+        if (disableAnimations) {
+          draggableScrollableController.jumpTo(1.0);
+        } else {
+          unawaited(
+            draggableScrollableController.animateTo(
+              1.0,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.decelerate,
+            ),
+          );
+        }
       }
     }
 

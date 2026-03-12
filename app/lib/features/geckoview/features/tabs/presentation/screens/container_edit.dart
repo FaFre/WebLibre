@@ -70,6 +70,7 @@ class ContainerEditScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
     final selectedColor = useState(initialContainer.color);
     final contextualIdentity = useState(
       initialContainer.metadata.contextualIdentity,
@@ -136,7 +137,9 @@ class ContainerEditScreen extends HookConsumerWidget {
                         prefixIcon: Padding(
                           padding: const EdgeInsets.all(10.0),
                           child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
+                            duration: disableAnimations
+                                ? Duration.zero
+                                : const Duration(milliseconds: 300),
                             height: 24,
                             width: 24,
                             decoration: BoxDecoration(

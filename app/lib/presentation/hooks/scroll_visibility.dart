@@ -44,43 +44,59 @@ ValueNotifier<bool> useScrollVisibility(
   double hideThreshold = 5.0,
   double showThreshold = 5.0,
   Duration initializationDelay = const Duration(milliseconds: 1000),
+  bool disableAnimations = false,
 }) {
   final isVisible = useState(true);
   final lastScrollOffset = useRef(0.0);
   final isInitialized = useRef(false);
 
-  useEffect(() {
-    // Start timer to enable scroll listener after initialization delay
-    final timer = Timer(initializationDelay, () {
-      isInitialized.value = true;
-    });
+  useEffect(
+    () {
+      // Start timer to enable scroll listener after initialization delay
+      final timer = Timer(
+        disableAnimations ? Duration.zero : initializationDelay,
+        () {
+          if (scrollController.hasClients) {
+            lastScrollOffset.value = scrollController.offset;
+          }
+          isInitialized.value = true;
+        },
+      );
 
-    void scrollListener() {
-      // Ignore scroll events until initialization is complete
-      if (!isInitialized.value) return;
+      void scrollListener() {
+        // Ignore scroll events until initialization is complete
+        if (!isInitialized.value) return;
 
-      final currentOffset = scrollController.offset;
-      final difference = currentOffset - lastScrollOffset.value;
+        final currentOffset = scrollController.offset;
+        final difference = currentOffset - lastScrollOffset.value;
 
-      // Hide when scrolling down beyond threshold
-      if (difference > hideThreshold && isVisible.value) {
-        isVisible.value = false;
+        // Hide when scrolling down beyond threshold
+        if (difference > hideThreshold && isVisible.value) {
+          isVisible.value = false;
+        }
+        // Show when scrolling up beyond threshold or at top
+        else if ((difference < -showThreshold || currentOffset <= 0) &&
+            !isVisible.value) {
+          isVisible.value = true;
+        }
+
+        lastScrollOffset.value = currentOffset;
       }
-      // Show when scrolling up beyond threshold or at top
-      else if ((difference < -showThreshold || currentOffset <= 0) &&
-          !isVisible.value) {
-        isVisible.value = true;
-      }
 
-      lastScrollOffset.value = currentOffset;
-    }
-
-    scrollController.addListener(scrollListener);
-    return () {
-      timer.cancel();
-      scrollController.removeListener(scrollListener);
-    };
-  }, [scrollController, hideThreshold, showThreshold, initializationDelay]);
+      scrollController.addListener(scrollListener);
+      return () {
+        timer.cancel();
+        scrollController.removeListener(scrollListener);
+      };
+    },
+    [
+      scrollController,
+      hideThreshold,
+      showThreshold,
+      initializationDelay,
+      disableAnimations,
+    ],
+  );
 
   return isVisible;
 }

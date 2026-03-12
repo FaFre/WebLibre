@@ -211,6 +211,9 @@ class ViewTabTreesWidget extends HookConsumerWidget {
               child: HookConsumer(
                 builder: (context, ref, child) {
                   final screenWidth = MediaQuery.of(context).size.width;
+                  final disableAnimations = MediaQuery.disableAnimationsOf(
+                    context,
+                  );
 
                   final containerId = ref.watch(selectedContainerProvider);
 
@@ -265,13 +268,17 @@ class ViewTabTreesWidget extends HookConsumerWidget {
                       final offset = (index ~/ 2) * itemSize.height;
 
                       if (offset != scrollController.offset) {
-                        unawaited(
-                          scrollController.animateTo(
-                            offset,
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeInOut,
-                          ),
-                        );
+                        if (disableAnimations) {
+                          scrollController.jumpTo(offset);
+                        } else {
+                          unawaited(
+                            scrollController.animateTo(
+                              offset,
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeInOut,
+                            ),
+                          );
+                        }
                       }
                     }
 

@@ -24,14 +24,19 @@ void useSyncPageWithTab(
   TabController tabController,
   PageController pageController, {
   void Function(int index)? onIndexChanged,
+  bool disableAnimations = false,
 }) {
   useEffect(() {
     Future<void> syncPage() async {
-      await pageController.animateToPage(
-        tabController.index,
-        curve: Curves.linear,
-        duration: const Duration(milliseconds: 300),
-      );
+      if (disableAnimations) {
+        pageController.jumpToPage(tabController.index);
+      } else {
+        await pageController.animateToPage(
+          tabController.index,
+          curve: Curves.linear,
+          duration: const Duration(milliseconds: 300),
+        );
+      }
       onIndexChanged?.call(tabController.index);
     }
 
@@ -39,7 +44,10 @@ void useSyncPageWithTab(
       if (!tabController.indexIsChanging) {
         final index = pageController.page!.round();
 
-        tabController.animateTo(index);
+        tabController.animateTo(
+          index,
+          duration: disableAnimations ? Duration.zero : kTabScrollDuration,
+        );
         onIndexChanged?.call(index);
       }
     }
@@ -51,5 +59,5 @@ void useSyncPageWithTab(
       tabController.removeListener(syncPage);
       pageController.removeListener(syncTab);
     };
-  }, [tabController, pageController]);
+  }, [tabController, pageController, disableAnimations]);
 }

@@ -35,6 +35,7 @@ class TabViewScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
     final tabsViewMode = ref.watch(tabsViewModeControllerProvider);
     final tabsReorderable = ref.watch(tabsReorderableControllerProvider);
 
@@ -51,7 +52,10 @@ class TabViewScreen extends HookConsumerWidget {
     final scrollController = useScrollController(keys: [tabsReorderable]);
 
     // Track FAB visibility based on scroll direction
-    final isFabVisible = useScrollVisibility(scrollController);
+    final isFabVisible = useScrollVisibility(
+      scrollController,
+      disableAnimations: disableAnimations,
+    );
 
     return Dialog.fullscreen(
       child: Scaffold(
@@ -87,11 +91,15 @@ class TabViewScreen extends HookConsumerWidget {
         floatingActionButton: isSyncedScope
             ? null
             : AnimatedSlide(
-                duration: const Duration(milliseconds: 200),
+                duration: disableAnimations
+                    ? Duration.zero
+                    : const Duration(milliseconds: 200),
                 offset: isFabVisible.value ? Offset.zero : const Offset(0, 2),
                 curve: Curves.easeInOut,
                 child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 200),
+                  duration: disableAnimations
+                      ? Duration.zero
+                      : const Duration(milliseconds: 200),
                   opacity: isFabVisible.value ? 1.0 : 0.0,
                   child: FloatingActionButton(
                     onPressed: () async {

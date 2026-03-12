@@ -54,6 +54,7 @@ class SearchModuleHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
     final isCollapsed = displayState == SearchModuleDisplayState.collapsed;
     final isExpanded = displayState == SearchModuleDisplayState.expanded;
     final showTrailing = !isCollapsed && totalCount > previewLimit;
@@ -75,7 +76,9 @@ class SearchModuleHeader extends StatelessWidget {
                     const SizedBox(width: 8),
                     AnimatedRotation(
                       turns: isCollapsed ? -0.25 : 0,
-                      duration: const Duration(milliseconds: 200),
+                      duration: disableAnimations
+                          ? Duration.zero
+                          : const Duration(milliseconds: 200),
                       child: Icon(
                         Icons.expand_more,
                         size: 20,

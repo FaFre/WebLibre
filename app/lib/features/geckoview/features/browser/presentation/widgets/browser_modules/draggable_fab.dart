@@ -47,6 +47,7 @@ class DraggableFab extends HookConsumerWidget {
     final mediaQuery = MediaQuery.of(context);
     final screenSize = mediaQuery.size;
     final padding = mediaQuery.padding;
+    final disableAnimations = mediaQuery.disableAnimations;
 
     final isDragging = useState(false);
     final customOffset = useState<Offset?>(null);
@@ -98,7 +99,9 @@ class DraggableFab extends HookConsumerWidget {
           dragStartPosition.value = null;
         },
         child: AnimatedScale(
-          duration: const Duration(milliseconds: 150),
+          duration: disableAnimations
+              ? Duration.zero
+              : const Duration(milliseconds: 150),
           scale: isDragging.value ? 1.1 : 1.0,
           child: child,
         ),
