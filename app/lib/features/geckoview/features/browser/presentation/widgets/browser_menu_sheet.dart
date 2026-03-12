@@ -49,6 +49,7 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/content_selection_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/history_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/translation_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
@@ -72,6 +73,7 @@ import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/controllers/website_title.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
+import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
 import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -224,84 +226,190 @@ class _NavigationRow extends HookConsumerWidget {
     final history = ref.watch(
       tabStateProvider(selectedTabId).select((value) => value?.historyState),
     );
+    final host = ref.watch(
+      tabStateProvider(selectedTabId).select((value) => value?.url.host),
+    );
     final isLoading = ref.watch(
       tabStateProvider(
         selectedTabId,
       ).select((state) => state?.isLoading ?? false),
     );
+    final isReaderActive = ref.watch(
+      tabStateProvider(
+        selectedTabId,
+      ).select((state) => state?.readerableState.active ?? false),
+    );
+
+    final backMenuController = useMenuController();
+    final forwardMenuController = useMenuController();
+    final closeMenuController = useMenuController();
+    final reloadMenuController = useMenuController();
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildNavIcon(
-          icon: isLoading ? Icons.close : Icons.arrow_back,
-          label: isLoading ? 'Stop' : 'Back',
-          disabled: !isLoading && history?.canGoBack != true,
-          onTap: () async {
-            final controller = ref.read(
-              tabSessionProvider(tabId: selectedTabId).notifier,
-            );
-            if (isLoading) {
-              await controller.stopLoading();
-            } else {
-              await controller.goBack();
-            }
-            if (context.mounted) Navigator.pop(context);
-          },
-        ),
-        _buildNavIcon(
-          icon: Icons.arrow_forward,
-          label: 'Forward',
-          disabled: history?.canGoForward != true,
-          onTap: () async {
-            await ref
-                .read(tabSessionProvider(tabId: selectedTabId).notifier)
-                .goForward();
-            if (context.mounted) Navigator.pop(context);
-          },
-        ),
-        _buildNavIcon(
-          icon: MdiIcons.tabMinus,
-          label: 'Close Tab',
-          onTap: () async {
-            final tabState = ref.read(tabStateProvider(selectedTabId));
-            if (tabState != null && tabState.tabMode is IsolatedTabMode) {
-              final allStates = ref.read(tabStatesProvider);
-              final groupCount = allStates.values
-                  .where(
-                    (s) => s.isolationContextId == tabState.isolationContextId,
-                  )
-                  .length;
-              if (groupCount <= 1 && context.mounted) {
-                final confirmed = await ui_helper.confirmIsolatedTabClose(
-                  context,
-                );
-                if (!confirmed) return;
-              }
-            }
-
-            await ref
-                .read(tabRepositoryProvider.notifier)
-                .closeTab(selectedTabId);
-
-            if (context.mounted) {
-              Navigator.pop(context);
-              ui_helper.showTabUndoClose(
-                context,
-                ref.read(tabRepositoryProvider.notifier).undoClose,
+        HistoryMenu(
+          selectedTabId: selectedTabId,
+          controller: backMenuController,
+          direction: HistoryMenuDirection.back,
+          child: _buildNavIcon(
+            icon: isLoading ? Icons.close : Icons.arrow_back,
+            label: isLoading ? 'Stop' : 'Back',
+            disabled: !isLoading && history?.canGoBack != true,
+            onTap: () async {
+              final controller = ref.read(
+                tabSessionProvider(tabId: selectedTabId).notifier,
               );
-            }
-          },
+              if (isLoading) {
+                await controller.stopLoading();
+              } else if (isReaderActive) {
+                await ref
+                    .read(readerableScreenControllerProvider.notifier)
+                    .toggleReaderView(false);
+              } else {
+                await controller.goBack();
+              }
+              if (context.mounted) Navigator.pop(context);
+            },
+            onLongPress: isLoading || history?.canGoBack != true
+                ? null
+                : () {
+                    if (!backMenuController.isOpen) {
+                      backMenuController.open();
+                    }
+                  },
+          ),
         ),
-        _buildNavIcon(
-          icon: Icons.refresh,
-          label: 'Reload',
-          onTap: () async {
-            await ref
-                .read(tabSessionProvider(tabId: selectedTabId).notifier)
-                .reload();
-            if (context.mounted) Navigator.pop(context);
-          },
+        HistoryMenu(
+          selectedTabId: selectedTabId,
+          controller: forwardMenuController,
+          direction: HistoryMenuDirection.forward,
+          child: _buildNavIcon(
+            icon: Icons.arrow_forward,
+            label: 'Forward',
+            disabled: history?.canGoForward != true,
+            onTap: () async {
+              await ref
+                  .read(tabSessionProvider(tabId: selectedTabId).notifier)
+                  .goForward();
+              if (context.mounted) Navigator.pop(context);
+            },
+            onLongPress: history?.canGoForward != true
+                ? null
+                : () {
+                    if (!forwardMenuController.isOpen) {
+                      forwardMenuController.open();
+                    }
+                  },
+          ),
+        ),
+        MenuAnchor(
+          controller: closeMenuController,
+          builder: (context, controller, child) => child!,
+          menuChildren: [
+            MenuItemButton(
+              leadingIcon: const Icon(Icons.tab),
+              onPressed: () async {
+                final tabStates = ref.read(tabStatesProvider);
+                final otherIds = tabStates.keys
+                    .where((id) => id != selectedTabId)
+                    .toList();
+                if (otherIds.isNotEmpty) {
+                  await ref
+                      .read(tabRepositoryProvider.notifier)
+                      .closeTabs(otherIds);
+                }
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('Close Others'),
+            ),
+            if (host != null && host.isNotEmpty)
+              MenuItemButton(
+                leadingIcon: const Icon(Icons.language),
+                onPressed: () async {
+                  final tabStates = ref.read(tabStatesProvider);
+                  final sameHostIds = tabStates.entries
+                      .where((e) => e.value.url.host == host)
+                      .map((e) => e.key)
+                      .toList();
+                  if (sameHostIds.isNotEmpty) {
+                    await ref
+                        .read(tabRepositoryProvider.notifier)
+                        .closeTabs(sameHostIds);
+                  }
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                  }
+                },
+                child: const Text('Close from Same Host'),
+              ),
+          ],
+          child: _buildNavIcon(
+            icon: MdiIcons.tabMinus,
+            label: 'Close Tab',
+            onTap: () async {
+              final tabState = ref.read(tabStateProvider(selectedTabId));
+              if (tabState != null && tabState.tabMode is IsolatedTabMode) {
+                final allStates = ref.read(tabStatesProvider);
+                final groupCount = allStates.values
+                    .where(
+                      (s) =>
+                          s.isolationContextId == tabState.isolationContextId,
+                    )
+                    .length;
+                if (groupCount <= 1 && context.mounted) {
+                  final confirmed = await ui_helper.confirmIsolatedTabClose(
+                    context,
+                  );
+                  if (!confirmed) return;
+                }
+              }
+
+              await ref
+                  .read(tabRepositoryProvider.notifier)
+                  .closeTab(selectedTabId);
+
+              if (context.mounted) {
+                Navigator.pop(context);
+                ui_helper.showTabUndoClose(
+                  context,
+                  ref.read(tabRepositoryProvider.notifier).undoClose,
+                );
+              }
+            },
+            onLongPress: closeMenuController.open,
+          ),
+        ),
+        MenuAnchor(
+          controller: reloadMenuController,
+          builder: (context, controller, child) => child!,
+          menuChildren: [
+            MenuItemButton(
+              leadingIcon: const Icon(Icons.refresh),
+              onPressed: () async {
+                await ref
+                    .read(tabSessionProvider(tabId: selectedTabId).notifier)
+                    .reload(flags: LoadUrlFlags.BYPASS_CACHE);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('Hard Refresh'),
+            ),
+          ],
+          child: _buildNavIcon(
+            icon: Icons.refresh,
+            label: 'Reload',
+            onTap: () async {
+              await ref
+                  .read(tabSessionProvider(tabId: selectedTabId).notifier)
+                  .reload();
+              if (context.mounted) Navigator.pop(context);
+            },
+            onLongPress: reloadMenuController.open,
+          ),
         ),
       ],
     );
@@ -312,12 +420,14 @@ class _NavigationRow extends HookConsumerWidget {
     required String label,
     bool disabled = false,
     required VoidCallback onTap,
+    VoidCallback? onLongPress,
   }) {
     return Builder(
       builder: (context) {
         final colorScheme = Theme.of(context).colorScheme;
         return InkWell(
           onTap: disabled ? null : onTap,
+          onLongPress: disabled ? null : onLongPress,
           borderRadius: BorderRadius.circular(8),
           child: Padding(
             padding: const EdgeInsets.symmetric(
