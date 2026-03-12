@@ -166,14 +166,11 @@ class _TabbedBangSelector extends HookConsumerWidget {
     final tabController = useTabController(initialLength: 2);
     final tabIndex = useState(0);
 
-    useEffect(
-      () {
-        void listener() => tabIndex.value = tabController.index;
-        tabController.addListener(listener);
-        return () => tabController.removeListener(listener);
-      },
-      [tabController],
-    );
+    useEffect(() {
+      void listener() => tabIndex.value = tabController.index;
+      tabController.addListener(listener);
+      return () => tabController.removeListener(listener);
+    }, [tabController]);
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -184,7 +181,7 @@ class _TabbedBangSelector extends HookConsumerWidget {
       children: [
         // Animated sliding pill toggle
         Padding(
-          padding: const EdgeInsets.only(right: 16.0),
+          padding: const EdgeInsets.only(right: 12.0),
           child: Container(
             height: 36,
             decoration: BoxDecoration(

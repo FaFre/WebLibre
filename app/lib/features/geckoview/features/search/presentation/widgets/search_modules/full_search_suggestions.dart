@@ -91,7 +91,7 @@ class FullSearchTermSuggestions extends HookConsumerWidget {
       children: [
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.only(left: 16.0),
+            padding: const EdgeInsets.only(left: 12.0, top: 12.0),
             child: SmartBangSelector(
               domain: domain,
               searchTextController: searchTextController,
@@ -168,7 +168,7 @@ class _SuggestionsContent extends StatelessWidget {
                 slivers: [
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 16.0),
+                      padding: const EdgeInsets.only(left: 12.0),
                       child: Wrap(
                         spacing: 8.0,
                         children: [
@@ -193,7 +193,7 @@ class _SuggestionsContent extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.only(left: 16.0, top: 8.0),
+      padding: const EdgeInsets.only(left: 12.0, top: 8.0),
       child: SizedBox(
         height: 44,
         child: FadingScroll(
