@@ -377,6 +377,7 @@ class BrowserTabBarView extends StatelessWidget {
 class QuickTabSwitcherItem with FastEquatable {
   final Color? color;
   final String id;
+  final bool isActive;
   final TabMode tabMode;
   final bool isHistory;
   final bool isPinned;
@@ -387,6 +388,7 @@ class QuickTabSwitcherItem with FastEquatable {
   QuickTabSwitcherItem({
     required this.color,
     required this.id,
+    required this.isActive,
     required this.tabMode,
     required this.isHistory,
     required this.isPinned,
@@ -399,6 +401,7 @@ class QuickTabSwitcherItem with FastEquatable {
   List<Object?> get hashParameters => [
     color,
     id,
+    isActive,
     tabMode,
     isHistory,
     isPinned,
@@ -435,19 +438,21 @@ class QuickTabSwitcher extends HookConsumerWidget {
     final tabStates = ref.watch(
       quickTabSwitcherTabStatesProvider(quickTabSwitcherMode),
     );
+    final selectedTabId = ref.watch(selectedTabProvider);
     final historySuggestions = ref
         .watch(quickTabSwitcherHistorySuggestionsProvider(quickTabSwitcherMode))
         .value;
     final availableItems = tabStates.value
         .map<QuickTabSwitcherItem>(
           (state) => QuickTabSwitcherItem(
+            color: state.$2?.color,
             id: state.$1.id,
+            isActive: state.$1.id == selectedTabId,
             title: state.$1.titleOrAuthority,
             tabMode: state.$1.tabMode,
             isHistory: false,
             isPinned: pinnedTabIds?.contains(state.$1.id) ?? false,
             url: state.$1.url,
-            color: state.$2?.color,
             avatar: TabIcon(tabState: state.$1, iconSize: 20),
           ),
         )
@@ -456,27 +461,38 @@ class QuickTabSwitcher extends HookConsumerWidget {
             final url = Uri.parse(state.url);
 
             return QuickTabSwitcherItem(
+              color: null,
               id: state.url,
+              isActive: false,
               title: state.title ?? url.authority,
               tabMode: TabMode.regular,
               isHistory: true,
               isPinned: false,
               url: url,
-              color: null,
               avatar: UrlIcon([url], iconSize: 20),
             );
           }),
         )
         .toList();
 
+    final activeItem = availableItems.firstWhere(
+      (item) => item.isActive,
+      orElse: () => availableItems.first,
+    );
+
     final chipScrollController = useScrollController();
 
     return QuickTabSwitcherView(
       availableItems: availableItems,
+      activeItem: activeItem.isActive ? activeItem : null,
       scrollController: chipScrollController,
       showTitles: showTitles,
       showIsolatedTabUi: showIsolatedTabUi,
       onSelected: (item) async {
+        if (!item.isHistory && item.isActive) {
+          return;
+        }
+
         Future<void>? animation;
         if (disableAnimations) {
           chipScrollController.jumpTo(0);
@@ -533,6 +549,7 @@ class QuickTabSwitcherView extends StatelessWidget {
   const QuickTabSwitcherView({
     super.key,
     required this.availableItems,
+    required this.activeItem,
     required this.scrollController,
     required this.showTitles,
     required this.showIsolatedTabUi,
@@ -541,6 +558,7 @@ class QuickTabSwitcherView extends StatelessWidget {
   });
 
   final List<QuickTabSwitcherItem> availableItems;
+  final QuickTabSwitcherItem? activeItem;
   final ScrollController scrollController;
   final bool showTitles;
   final bool showIsolatedTabUi;
@@ -564,8 +582,11 @@ class QuickTabSwitcherView extends StatelessWidget {
         child:
             SelectableChips<QuickTabSwitcherItem, QuickTabSwitcherItem, String>(
               enableDelete: false,
+              sortSelectedFirst: false,
               scrollController: scrollController,
               itemId: (item) => item.id,
+              selectedItem: activeItem,
+              selectedBorderColor: Theme.of(context).colorScheme.primary,
               labelPadding: (item) =>
                   (!showTitles &&
                       !item.isHistory &&

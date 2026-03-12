@@ -273,9 +273,11 @@ EquatableValue<List<TabStateWithContainer>> quickTabSwitcherTabStates(
       ref.watch(selectedContainerTabStatesWithContainerProvider).value,
   };
 
-  return EquatableValue(
-    tabStates.where((state) => state.$1.id != selectedTabId).toList(),
-  );
+  return EquatableValue(switch (effectiveMode) {
+    QuickTabSwitcherMode.lastUsedTabs =>
+      tabStates.where((state) => state.$1.id != selectedTabId).toList(),
+    QuickTabSwitcherMode.containerTabs => tabStates,
+  });
 }
 
 @Riverpod()

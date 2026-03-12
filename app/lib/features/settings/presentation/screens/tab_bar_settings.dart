@@ -162,6 +162,7 @@ class _TabBarPreviewCard extends HookWidget {
     final previewQuickItems = <QuickTabSwitcherItem>[
       QuickTabSwitcherItem(
         id: 'regular-preview-tab',
+        isActive: true,
         title: 'News',
         tabMode: TabMode.regular,
         isHistory: false,
@@ -176,6 +177,7 @@ class _TabBarPreviewCard extends HookWidget {
       ),
       QuickTabSwitcherItem(
         id: 'private-preview-tab',
+        isActive: false,
         title: 'Private',
         tabMode: TabMode.private,
         isHistory: false,
@@ -187,6 +189,7 @@ class _TabBarPreviewCard extends HookWidget {
       if (settings.showIsolatedTabUi)
         QuickTabSwitcherItem(
           id: 'isolated-preview-tab',
+          isActive: false,
           title: 'Bank',
           tabMode: TabMode.isolated('preview-isolated-context'),
           isHistory: false,
@@ -198,6 +201,7 @@ class _TabBarPreviewCard extends HookWidget {
       if (settings.quickTabSwitcherShowHistorySuggestions)
         QuickTabSwitcherItem(
           id: 'history-preview-tab',
+          isActive: false,
           title: 'Search',
           tabMode: TabMode.regular,
           isHistory: true,
@@ -225,6 +229,7 @@ class _TabBarPreviewCard extends HookWidget {
     Widget buildQuickTabSwitcher() {
       return QuickTabSwitcherView(
         availableItems: previewQuickItems,
+        activeItem: previewQuickItems.firstWhere((item) => item.isActive),
         scrollController: quickTabsController,
         showTitles: settings.quickTabSwitcherShowTitles,
         showIsolatedTabUi: settings.showIsolatedTabUi,
