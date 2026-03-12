@@ -204,8 +204,6 @@ class _AdvancedSection extends StatelessWidget {
         SettingSection(name: 'Advanced'),
         _WebEngineHardeningTile(),
         _FissionEnabledTile(),
-        _IsolatedProcessEnabledTile(),
-        _AppZygoteProcessEnabledTile(),
         _ExtensionsWebAPIEnabledTile(),
       ],
     );
@@ -765,72 +763,6 @@ class _FissionEnabledTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.fissionEnabled(value),
-            );
-        if (context.mounted) {
-          await _showRestartDialog(context, ref);
-        }
-      },
-    );
-  }
-}
-
-class _IsolatedProcessEnabledTile extends HookConsumerWidget {
-  const _IsolatedProcessEnabledTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isolatedProcessEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.isolatedProcessEnabled,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Isolated Content Process'),
-      subtitle: const Text(
-        'Run web content in an isolated process. Requires app restart.',
-      ),
-      secondary: const Icon(MdiIcons.shieldCheck),
-      value: isolatedProcessEnabled,
-      onChanged: (value) async {
-        await ref
-            .read(saveEngineSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.isolatedProcessEnabled(value),
-            );
-        if (context.mounted) {
-          await _showRestartDialog(context, ref);
-        }
-      },
-    );
-  }
-}
-
-class _AppZygoteProcessEnabledTile extends HookConsumerWidget {
-  const _AppZygoteProcessEnabledTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appZygoteProcessEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.appZygoteProcessEnabled,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('App Zygote Process'),
-      subtitle: const Text(
-        'Preload content service via App Zygote for faster isolated process startup. Requires Android 10+ and app restart.',
-      ),
-      secondary: const Icon(MdiIcons.rocketLaunch),
-      value: appZygoteProcessEnabled,
-      onChanged: (value) async {
-        await ref
-            .read(saveEngineSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.appZygoteProcessEnabled(value),
             );
         if (context.mounted) {
           await _showRestartDialog(context, ref);

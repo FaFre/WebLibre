@@ -35,6 +35,7 @@ import 'package:weblibre/features/settings/presentation/dialogs/user_agent_resta
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
+import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
@@ -57,6 +58,7 @@ class AdvancedSettingsScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               children: const [
                 _ContentBehaviorSection(),
+                _ExperimentalSection(),
                 _ExtensionsSection(),
                 _StorageDebuggingSection(),
                 _ResetSection(),
@@ -95,6 +97,21 @@ class _ExtensionsSection extends StatelessWidget {
         SettingSection(name: 'Extensions'),
         _InstallLocalAddonTile(),
         _AddonCollectionTile(),
+      ],
+    );
+  }
+}
+
+class _ExperimentalSection extends StatelessWidget {
+  const _ExperimentalSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        SettingSection(name: 'Experimental'),
+        _IsolatedProcessEnabledTile(),
+        _AppZygoteProcessEnabledTile(),
       ],
     );
   }
@@ -286,6 +303,72 @@ class _EnterpriseRootsTile extends HookConsumerWidget {
   }
 }
 
+class _IsolatedProcessEnabledTile extends HookConsumerWidget {
+  const _IsolatedProcessEnabledTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isolatedProcessEnabled = ref.watch(
+      engineSettingsWithDefaultsProvider.select(
+        (s) => s.isolatedProcessEnabled,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Isolated Content Process'),
+      subtitle: const Text(
+        'Run web content in an isolated process. Requires app restart.',
+      ),
+      secondary: const Icon(MdiIcons.shieldCheck),
+      value: isolatedProcessEnabled,
+      onChanged: (value) async {
+        await ref
+            .read(saveEngineSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.isolatedProcessEnabled(value),
+            );
+        if (context.mounted) {
+          await _showRestartDialog(context, ref);
+        }
+      },
+    );
+  }
+}
+
+class _AppZygoteProcessEnabledTile extends HookConsumerWidget {
+  const _AppZygoteProcessEnabledTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appZygoteProcessEnabled = ref.watch(
+      engineSettingsWithDefaultsProvider.select(
+        (s) => s.appZygoteProcessEnabled,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('App Zygote Process'),
+      subtitle: const Text(
+        'Preload content service via App Zygote for faster isolated process startup. Requires Android 10+ and app restart.',
+      ),
+      secondary: const Icon(MdiIcons.rocketLaunch),
+      value: appZygoteProcessEnabled,
+      onChanged: (value) async {
+        await ref
+            .read(saveEngineSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.appZygoteProcessEnabled(value),
+            );
+        if (context.mounted) {
+          await _showRestartDialog(context, ref);
+        }
+      },
+    );
+  }
+}
+
 class _IconCacheTile extends HookConsumerWidget {
   const _IconCacheTile();
 
@@ -426,5 +509,12 @@ class _ResetUITile extends ConsumerWidget {
         label: const Text('Reset'),
       ),
     );
+  }
+}
+
+Future<void> _showRestartDialog(BuildContext context, WidgetRef ref) async {
+  final result = await showQuitBrowserDialog(context);
+  if (result == true && context.mounted) {
+    await exitApp(ProviderScope.containerOf(context));
   }
 }
