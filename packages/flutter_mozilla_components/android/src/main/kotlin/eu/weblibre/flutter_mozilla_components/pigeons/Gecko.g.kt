@@ -2468,18 +2468,21 @@ sealed class HitResult
  * Generated class from Pigeon that represents data sent in messages.
  */
 data class UnknownHitResult (
-  val src: String
+  val src: String,
+  val linkText: String? = null
 ) : HitResult()
  {
   companion object {
     fun fromList(pigeonVar_list: List<Any?>): UnknownHitResult {
       val src = pigeonVar_list[0] as String
-      return UnknownHitResult(src)
+      val linkText = pigeonVar_list[1] as String?
+      return UnknownHitResult(src, linkText)
     }
   }
   fun toList(): List<Any?> {
     return listOf(
       src,
+      linkText,
     )
   }
   override fun equals(other: Any?): Boolean {

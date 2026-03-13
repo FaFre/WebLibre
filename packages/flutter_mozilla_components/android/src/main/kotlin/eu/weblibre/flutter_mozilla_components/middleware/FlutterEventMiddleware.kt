@@ -104,7 +104,7 @@ class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Midd
                             is HitResult.IMAGE -> ImageHitResult(result.src, result.title)
                             is HitResult.IMAGE_SRC -> ImageSrcHitResult(result.src, result.uri)
                             is HitResult.PHONE -> PhoneHitResult(result.src)
-                            is HitResult.UNKNOWN -> UnknownHitResult(result.src)
+                            is HitResult.UNKNOWN -> UnknownHitResult(result.src, result.linkText)
                             is HitResult.VIDEO -> VideoHitResult(result.src, result.title)
                         }
                     ) { _ -> }

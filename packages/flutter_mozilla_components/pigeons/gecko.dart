@@ -968,8 +968,9 @@ sealed class HitResult {}
 /// Default type if we're unable to match the type to anything. It may or may not have a src.
 class UnknownHitResult extends HitResult {
   final String src;
+  final String? linkText;
 
-  UnknownHitResult(this.src);
+  UnknownHitResult(this.src, {this.linkText});
 }
 
 /// If the HTML element was of type 'HTMLImageElement'.

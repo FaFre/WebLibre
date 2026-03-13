@@ -36,6 +36,13 @@ extension HitResultJson on HitResult {
 }
 
 extension HitResultX on HitResult {
+  String? getLinkText() {
+    return switch (this) {
+      UnknownHitResult(linkText: final linkText) => linkText,
+      _ => null,
+    };
+  }
+
   Uri? tryGetLink() {
     const maxTitleLength = 2500;
 
@@ -91,6 +98,8 @@ extension HitResultX on HitResult {
 
   bool get hasLink => tryGetLink() != null;
 
+  bool get hasLinkText => getLinkText()?.isNotEmpty == true;
+
   bool isImage() {
     return (this is ImageHitResult || this is ImageSrcHitResult) && hasSrc;
   }
@@ -131,7 +140,10 @@ extension HitResultX on HitResult {
 
   HitResult withCleanedLink(String cleanedUrl) {
     return switch (this) {
-      UnknownHitResult() => UnknownHitResult(src: cleanedUrl),
+      UnknownHitResult(:final linkText) => UnknownHitResult(
+        src: cleanedUrl,
+        linkText: linkText,
+      ),
       ImageSrcHitResult(:final src) => ImageSrcHitResult(
         src: src,
         uri: cleanedUrl,

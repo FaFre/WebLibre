@@ -3009,13 +3009,17 @@ sealed class HitResult {
 class UnknownHitResult extends HitResult {
   UnknownHitResult({
     required this.src,
+    this.linkText,
   });
 
   String src;
 
+  String? linkText;
+
   List<Object?> _toList() {
     return <Object?>[
       src,
+      linkText,
     ];
   }
 
@@ -3026,6 +3030,7 @@ class UnknownHitResult extends HitResult {
     result as List<Object?>;
     return UnknownHitResult(
       src: result[0]! as String,
+      linkText: result[1] as String?,
     );
   }
 

@@ -28,6 +28,7 @@ import 'package:weblibre/features/geckoview/features/contextmenu/presentation/ca
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/copy_image.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/copy_image_location.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/copy_link.dart';
+import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/copy_link_text.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/launch_external.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/open_image_new_tab.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/open_in_container.dart';
@@ -112,6 +113,8 @@ class ContextMenuDialog extends HookConsumerWidget {
         if (showContainerUi && OpenInContainer.isSupported(effective))
           OpenInContainer(hitResult: effective),
         if (CopyLink.isSupported(effective)) CopyLink(hitResult: effective),
+        if (CopyLinkText.isSupported(effective))
+          CopyLinkText(hitResult: effective),
         if (SaveFile.isSupported(effective)) SaveFile(hitResult: effective),
         if (ShareLink.isSupported(effective)) ShareLink(hitResult: effective),
         if (ShareImage.isSupported(effective)) ShareImage(hitResult: effective),
