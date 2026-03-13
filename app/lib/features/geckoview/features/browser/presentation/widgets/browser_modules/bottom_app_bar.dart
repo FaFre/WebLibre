@@ -67,6 +67,8 @@ class BrowserTopAppBar extends StatelessWidget {
       displayedSheet: null,
       showContextualToolbar: false,
       showQuickTabSwitcherBar: false,
+      hideMainToolbarButtonsDuplicatedInContextualToolbar:
+          showContextualToolbar,
     );
   }
 
@@ -101,6 +103,8 @@ class BrowserBottomAppBar extends StatelessWidget {
       showMainToolbar: showMainToolbar,
       showContextualToolbar: showContextualToolbar,
       showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+      hideMainToolbarButtonsDuplicatedInContextualToolbar:
+          showContextualToolbar,
     );
   }
 
@@ -127,6 +131,7 @@ class BrowserTabBar extends HookConsumerWidget {
   final bool showContextualToolbar;
   final bool showQuickTabSwitcherBar;
   final Sheet? displayedSheet;
+  final bool hideMainToolbarButtonsDuplicatedInContextualToolbar;
 
   const BrowserTabBar({
     super.key,
@@ -134,6 +139,7 @@ class BrowserTabBar extends HookConsumerWidget {
     required this.displayedSheet,
     required this.showContextualToolbar,
     required this.showQuickTabSwitcherBar,
+    this.hideMainToolbarButtonsDuplicatedInContextualToolbar = false,
   });
 
   static const contextualToolabarHeight = 54.0;
@@ -176,13 +182,13 @@ class BrowserTabBar extends HookConsumerWidget {
         .value;
 
     final tabsCountInContextual =
-        showContextualToolbar &&
+        hideMainToolbarButtonsDuplicatedInContextualToolbar &&
         contextualConfigs.any(
           (c) => c.buttonId == ToolbarButtonId.tabsCount.name && c.isVisible,
         );
 
     final menuInContextual =
-        showContextualToolbar &&
+        hideMainToolbarButtonsDuplicatedInContextualToolbar &&
         contextualConfigs.any(
           (c) =>
               c.buttonId == ToolbarButtonId.navigationMenu.name && c.isVisible,
