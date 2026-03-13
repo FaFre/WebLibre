@@ -424,7 +424,6 @@ class QuickTabSwitcher extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final disableAnimations = MediaQuery.disableAnimationsOf(context);
     final showIsolatedTabUi = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.showIsolatedTabUi),
     );
@@ -498,17 +497,6 @@ class QuickTabSwitcher extends HookConsumerWidget {
         if (!item.isHistory && item.isActive) {
           return;
         }
-
-        Future<void>? animation;
-        if (disableAnimations) {
-          chipScrollController.jumpTo(0);
-        } else {
-          animation = chipScrollController.animateTo(
-            0,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOutBack,
-          );
-        }
         if (item.isHistory) {
           await ref
               .read(tabRepositoryProvider.notifier)
@@ -516,7 +504,6 @@ class QuickTabSwitcher extends HookConsumerWidget {
         } else {
           await ref.read(tabRepositoryProvider.notifier).selectTab(item.id);
         }
-        await animation;
       },
       itemWrapBuilder: (child, item) {
         if (item.isHistory) {
