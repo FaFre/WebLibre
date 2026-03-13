@@ -45,6 +45,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/providers/li
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/engine_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/proxy_settings_replication.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tabs_empty.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
@@ -108,8 +109,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     useOnInitialization(() async {
       await ref
           .read(generalSettingsRepositoryProvider.notifier)
@@ -292,12 +291,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
               },
             ),
           ),
-          if (!hasTab)
-            Positioned.fill(
-              child: SizedBox.expand(
-                child: Container(color: colorScheme.surfaceContainerHighest),
-              ),
-            ),
+          if (!hasTab) const Positioned.fill(child: TabsEmptyPlaceholder()),
         ],
       ),
     );

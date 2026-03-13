@@ -115,6 +115,7 @@ flutter:
     - assets/images/
     - assets/landing/
     - assets/preferences/
+    - assets/quotes/
   fonts:
     - family: TorIcons
       fonts:

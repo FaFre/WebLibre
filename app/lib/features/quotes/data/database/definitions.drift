@@ -1,0 +1,6 @@
+CREATE TABLE quotes (
+  author TEXT NOT NULL,
+  quote TEXT NOT NULL,
+  source TEXT,
+  tags TEXT
+);

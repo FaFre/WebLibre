@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'tab.dart';
+part of 'quotes.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,28 +9,28 @@ part of 'tab.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(TabRepository)
-final tabRepositoryProvider = TabRepositoryProvider._();
+@ProviderFor(QuotesRepository)
+final quotesRepositoryProvider = QuotesRepositoryProvider._();
 
-final class TabRepositoryProvider
-    extends $NotifierProvider<TabRepository, void> {
-  TabRepositoryProvider._()
+final class QuotesRepositoryProvider
+    extends $NotifierProvider<QuotesRepository, void> {
+  QuotesRepositoryProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'tabRepositoryProvider',
+        name: r'quotesRepositoryProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$tabRepositoryHash();
+  String debugGetCreateSourceHash() => _$quotesRepositoryHash();
 
   @$internal
   @override
-  TabRepository create() => TabRepository();
+  QuotesRepository create() => QuotesRepository();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(void value) {
@@ -41,9 +41,9 @@ final class TabRepositoryProvider
   }
 }
 
-String _$tabRepositoryHash() => r'22fdd97ad7f235590926915169c9e7230de94bdb';
+String _$quotesRepositoryHash() => r'2e30c503da5619a1d15918029908890738bf5aab';
 
-abstract class _$TabRepository extends $Notifier<void> {
+abstract class _$QuotesRepository extends $Notifier<void> {
   void build();
   @$mustCallSuper
   @override

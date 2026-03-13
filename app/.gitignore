@@ -30,6 +30,7 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+assets/quotes/quotes.db
 
 # Android related
 **/android/**/gradle-wrapper.jar

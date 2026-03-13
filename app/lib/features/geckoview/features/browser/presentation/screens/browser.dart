@@ -43,6 +43,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/providers.da
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/keep_tab_dialog.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/providers/browser_viewport_toolbar_insets.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_fab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_view.dart';
@@ -429,8 +430,25 @@ class BrowserScreen extends HookConsumerWidget {
     final lastToolbarMaxHeightPx = useRef<int?>(null);
 
     useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref
+            .read(browserViewportToolbarInsetsControllerProvider.notifier)
+            .reset();
+      });
+
+      return null;
+    }, []);
+
+    useEffect(() {
       if (lastToolbarMaxHeightPx.value != effectiveToolbarHeightPx) {
         lastToolbarMaxHeightPx.value = effectiveToolbarHeightPx;
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref
+              .read(browserViewportToolbarInsetsControllerProvider.notifier)
+              .setDynamicToolbarMaxHeight(effectiveToolbarHeightPx);
+        });
+
         unawaited(
           viewportService.setDynamicToolbarMaxHeight(effectiveToolbarHeightPx),
         );
@@ -465,6 +483,13 @@ class BrowserScreen extends HookConsumerWidget {
 
       if (targetClippingPx != lastClippingPx.value) {
         lastClippingPx.value = targetClippingPx;
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref
+              .read(browserViewportToolbarInsetsControllerProvider.notifier)
+              .setVerticalClipping(targetClippingPx);
+        });
+
         unawaited(viewportService.setVerticalClipping(targetClippingPx));
       }
     }
