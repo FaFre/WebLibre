@@ -83,6 +83,7 @@ class SearchScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appColors = AppColors.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     final formKey = useMemoized(() => GlobalKey<FormState>());
 
     final createChildTabsOption = ref.watch(
@@ -454,6 +455,10 @@ class SearchScreen extends HookConsumerWidget {
                 floating: true,
                 pinned: true,
                 automaticallyImplyLeading: false,
+                backgroundColor: colorScheme.surface,
+                scrolledUnderElevation: 0,
+                shadowColor: Colors.transparent,
+                surfaceTintColor: Colors.transparent,
                 toolbarHeight: isEditMode ? 0 : kToolbarHeight,
                 titleSpacing: 0.0,
                 title: isEditMode

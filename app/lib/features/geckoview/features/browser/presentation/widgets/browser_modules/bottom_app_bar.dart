@@ -111,11 +111,13 @@ class BrowserBottomAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Material(
-      elevation: 3.0,
-      surfaceTintColor: Theme.of(context).colorScheme.surfaceTint,
-      color: Theme.of(context).colorScheme.surfaceContainer,
+      elevation: 0,
+      shadowColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
+      color: colorScheme.surfaceContainer,
       child: Padding(
         padding: EdgeInsets.only(bottom: bottomPadding),
         child: SizedBox(height: _size.height, child: _tabBar),
@@ -343,6 +345,8 @@ class BrowserTabBarView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return GestureDetector(
       // Tap handling moved to AppBarTitle for split icon/title behavior
       onHorizontalDragStart: onHorizontalDragStart,
@@ -365,10 +369,14 @@ class BrowserTabBarView extends StatelessWidget {
               child: AppBar(
                 primary: false,
                 automaticallyImplyLeading: false,
+                backgroundColor:
+                    backgroundColor ?? colorScheme.surfaceContainer,
+                scrolledUnderElevation: 0,
+                shadowColor: Colors.transparent,
+                surfaceTintColor: Colors.transparent,
                 titleSpacing: 0.0,
                 leadingWidth: 40.0,
                 toolbarHeight: kToolbarHeight,
-                backgroundColor: backgroundColor,
                 title: title,
                 actions: actions,
               ),
