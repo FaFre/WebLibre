@@ -49,13 +49,13 @@ class PrivacySecuritySettingsScreen extends StatelessWidget {
               controller: controller,
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               children: const [
-                _PrivacyModesSection(),
                 _TrackingProtectionSection(),
-                _OpenLinkModulesSection(),
+                _FingerprintingSection(),
                 _ConnectionSecuritySection(),
-                _LocalNetworkAccessSection(),
+                _NetworkProtectionSection(),
+                _PrivacySignalsSection(),
                 _DataManagementSection(),
-                _AdvancedSection(),
+                _AdvancedSecuritySection(),
               ],
             );
           },
@@ -65,16 +65,17 @@ class PrivacySecuritySettingsScreen extends StatelessWidget {
   }
 }
 
-class _PrivacyModesSection extends StatelessWidget {
-  const _PrivacyModesSection();
+class _FingerprintingSection extends StatelessWidget {
+  const _FingerprintingSection();
 
   @override
   Widget build(BuildContext context) {
     return const Column(
       children: [
-        SettingSection(name: 'Privacy Modes'),
-        _IncognitoModeSection(),
-        _GlobalPrivacyControlTile(),
+        SettingSection(name: 'Fingerprinting'),
+        _BrowserLanguagesTile(),
+        _FingerprintProtectionTile(),
+        _ResistFingerprintingTile(),
       ],
     );
   }
@@ -129,51 +130,17 @@ class _ConnectionSecuritySection extends StatelessWidget {
   }
 }
 
-class _OpenLinkModulesSection extends StatelessWidget {
-  const _OpenLinkModulesSection();
+class _PrivacySignalsSection extends StatelessWidget {
+  const _PrivacySignalsSection();
 
   @override
   Widget build(BuildContext context) {
     return const Column(
       children: [
-        SettingSection(name: 'Open Link Modules'),
-        _UrlCleanerSettingsTile(),
-        _UnshortenerSettingsTile(),
+        SettingSection(name: 'Privacy Signals & Modes'),
+        _IncognitoModeSection(),
+        _GlobalPrivacyControlTile(),
       ],
-    );
-  }
-}
-
-class _UrlCleanerSettingsTile extends StatelessWidget {
-  const _UrlCleanerSettingsTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: const Icon(MdiIcons.broom),
-      title: const Text('URL Cleaner'),
-      subtitle: const Text('Tracking removal rules and catalog updates'),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () async {
-        await UrlCleanerSettingsRoute().push(context);
-      },
-    );
-  }
-}
-
-class _UnshortenerSettingsTile extends StatelessWidget {
-  const _UnshortenerSettingsTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: const Icon(MdiIcons.linkVariant),
-      title: const Text('Unshortener'),
-      subtitle: const Text('Short link resolver and API token'),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () async {
-        await UnshortenerSettingsRoute().push(context);
-      },
     );
   }
 }
@@ -194,14 +161,14 @@ class _DataManagementSection extends StatelessWidget {
   }
 }
 
-class _AdvancedSection extends StatelessWidget {
-  const _AdvancedSection();
+class _AdvancedSecuritySection extends StatelessWidget {
+  const _AdvancedSecuritySection();
 
   @override
   Widget build(BuildContext context) {
     return const Column(
       children: [
-        SettingSection(name: 'Advanced'),
+        SettingSection(name: 'Advanced Security'),
         _WebEngineHardeningTile(),
         _FissionEnabledTile(),
         _ExtensionsWebAPIEnabledTile(),
@@ -812,18 +779,85 @@ Future<void> _showRestartDialog(BuildContext context, WidgetRef ref) async {
   }
 }
 
-class _LocalNetworkAccessSection extends StatelessWidget {
-  const _LocalNetworkAccessSection();
+class _NetworkProtectionSection extends StatelessWidget {
+  const _NetworkProtectionSection();
 
   @override
   Widget build(BuildContext context) {
     return const Column(
       children: [
-        SettingSection(name: 'Local Network / Device Access Blocking'),
+        SettingSection(name: 'Network Protection'),
         _LnaEnabledTile(),
         _LnaBlockingTile(),
         _LnaBlockTrackersTile(),
       ],
+    );
+  }
+}
+
+class _BrowserLanguagesTile extends StatelessWidget {
+  const _BrowserLanguagesTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: const Text('Browser Languages'),
+      subtitle: const Text(
+        'Configure language preferences exposed to websites',
+      ),
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 8.0,
+        horizontal: 16.0,
+      ),
+      leading: const Icon(Icons.translate),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () async {
+        await LocaleSettingsRoute().push(context);
+      },
+    );
+  }
+}
+
+class _FingerprintProtectionTile extends StatelessWidget {
+  const _FingerprintProtectionTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: const Text('Fingerprint Protection'),
+      subtitle: const Text('Granular control over browser fingerprinting'),
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 8.0,
+        horizontal: 16.0,
+      ),
+      leading: const Icon(MdiIcons.fingerprint),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () async {
+        await FingerprintSettingsRoute().push(context);
+      },
+    );
+  }
+}
+
+class _ResistFingerprintingTile extends StatelessWidget {
+  const _ResistFingerprintingTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: const Text('Resist Fingerprinting'),
+      subtitle: const Text('Advanced fingerprinting protection hardening'),
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 8.0,
+        horizontal: 16.0,
+      ),
+      leading: const Icon(MdiIcons.shieldLock),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () async {
+        await const WebEngineHardeningGroupRoute(
+          group: 'Resist Fingerprinting',
+        ).push(context);
+      },
     );
   }
 }

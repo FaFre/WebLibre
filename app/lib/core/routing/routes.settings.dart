@@ -23,33 +23,41 @@ part of 'routes.dart';
   name: 'SettingsRoute',
   path: '/settings',
   routes: [
-    TypedGoRoute<AppearanceDisplaySettingsRoute>(
-      name: 'AppearanceDisplaySettingsRoute',
-      path: 'appearance_display',
+    TypedGoRoute<GeneralSettingsRoute>(
+      name: 'GeneralSettingsRoute',
+      path: 'general',
     ),
-    TypedGoRoute<TabBarSettingsRoute>(
-      name: 'TabBarSettingsRoute',
-      path: 'tab_bar',
+    TypedGoRoute<BrowsingSettingsRoute>(
+      name: 'BrowsingSettingsRoute',
+      path: 'browsing',
     ),
     TypedGoRoute<PrivacySecuritySettingsRoute>(
       name: 'PrivacySecuritySettingsRoute',
       path: 'privacy_security',
     ),
-    TypedGoRoute<SearchContentSettingsRoute>(
-      name: 'SearchContentSettingsRoute',
-      path: 'search_content',
+    TypedGoRoute<ToolbarLayoutSettingsRoute>(
+      name: 'ToolbarLayoutSettingsRoute',
+      path: 'toolbar_layout',
     ),
-    TypedGoRoute<TabsBehaviorSettingsRoute>(
-      name: 'TabsBehaviorSettingsRoute',
-      path: 'tabs_behavior',
+    TypedGoRoute<WebContentSettingsRoute>(
+      name: 'WebContentSettingsRoute',
+      path: 'web_content',
     ),
-    TypedGoRoute<FingerprintingSettingsRoute>(
-      name: 'FingerprintingSettingsRoute',
-      path: 'fingerprinting',
+    TypedGoRoute<SearchSettingsRoute>(
+      name: 'SearchSettingsRoute',
+      path: 'search',
+    ),
+    TypedGoRoute<ExtensionsSettingsRoute>(
+      name: 'ExtensionsSettingsRoute',
+      path: 'extensions',
     ),
     TypedGoRoute<AdvancedSettingsRoute>(
       name: 'AdvancedSettingsRoute',
       path: 'advanced',
+    ),
+    TypedGoRoute<ExperimentalSettingsRoute>(
+      name: 'ExperimentalSettingsRoute',
+      path: 'experimental',
     ),
     TypedGoRoute<BangSettingsRoute>(name: 'BangSettingsRoute', path: 'bang'),
     TypedGoRoute<WebEngineHardeningRoute>(
@@ -106,18 +114,17 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
   }
 }
 
-class AppearanceDisplaySettingsRoute extends GoRouteData
-    with $AppearanceDisplaySettingsRoute {
+class GeneralSettingsRoute extends GoRouteData with $GeneralSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const AppearanceDisplaySettingsScreen();
+    return const GeneralSettingsScreen();
   }
 }
 
-class TabBarSettingsRoute extends GoRouteData with $TabBarSettingsRoute {
+class BrowsingSettingsRoute extends GoRouteData with $BrowsingSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const TabBarSettingsScreen();
+    return const BrowsingSettingsScreen();
   }
 }
 
@@ -129,27 +136,34 @@ class PrivacySecuritySettingsRoute extends GoRouteData
   }
 }
 
-class SearchContentSettingsRoute extends GoRouteData
-    with $SearchContentSettingsRoute {
+class ToolbarLayoutSettingsRoute extends GoRouteData
+    with $ToolbarLayoutSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const SearchContentSettingsScreen();
+    return const ToolbarLayoutSettingsScreen();
   }
 }
 
-class TabsBehaviorSettingsRoute extends GoRouteData
-    with $TabsBehaviorSettingsRoute {
+class WebContentSettingsRoute extends GoRouteData
+    with $WebContentSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const TabsBehaviorSettingsScreen();
+    return const WebContentSettingsScreen();
   }
 }
 
-class FingerprintingSettingsRoute extends GoRouteData
-    with $FingerprintingSettingsRoute {
+class SearchSettingsRoute extends GoRouteData with $SearchSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const FingerprintingSettingsScreen();
+    return const SearchSettingsScreen();
+  }
+}
+
+class ExtensionsSettingsRoute extends GoRouteData
+    with $ExtensionsSettingsRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const ExtensionsSettingsScreen();
   }
 }
 
@@ -157,6 +171,14 @@ class AdvancedSettingsRoute extends GoRouteData with $AdvancedSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const AdvancedSettingsScreen();
+  }
+}
+
+class ExperimentalSettingsRoute extends GoRouteData
+    with $ExperimentalSettingsRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const ExperimentalSettingsScreen();
   }
 }
 

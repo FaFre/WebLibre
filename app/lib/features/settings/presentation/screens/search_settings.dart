@@ -29,18 +29,16 @@ import 'package:weblibre/features/settings/presentation/controllers/save_setting
 import 'package:weblibre/features/settings/presentation/widgets/bang_icon.dart';
 import 'package:weblibre/features/settings/presentation/widgets/default_search_selector.dart';
 import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
-import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
-class SearchContentSettingsScreen extends StatelessWidget {
-  const SearchContentSettingsScreen({super.key});
+class SearchSettingsScreen extends StatelessWidget {
+  const SearchSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Search & Content')),
+      appBar: AppBar(title: const Text('Search')),
       body: SafeArea(
         child: FadingScroll(
           fadingSize: 25,
@@ -49,10 +47,9 @@ class SearchContentSettingsScreen extends StatelessWidget {
               controller: controller,
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               children: const [
-                _SearchSection(),
-                _ContentViewingSection(),
-                _ContentEnhancementSection(),
-                _ExtensionsSection(),
+                _ProvidersSection(),
+                _BangShortcutsSection(),
+                _HistorySuggestionsSection(),
               ],
             );
           },
@@ -62,64 +59,46 @@ class SearchContentSettingsScreen extends StatelessWidget {
   }
 }
 
-class _SearchSection extends StatelessWidget {
-  const _SearchSection();
+class _ProvidersSection extends StatelessWidget {
+  const _ProvidersSection();
 
   @override
   Widget build(BuildContext context) {
     return const Column(
       children: [
-        SettingSection(name: 'Search'),
+        SettingSection(name: 'Providers'),
         _DefaultSearchProviderSection(),
-        _CustomSearchEnginesTile(),
-        _BangsTile(),
         _AutocompleteProviderSection(),
+        _CustomSearchEnginesTile(),
+      ],
+    );
+  }
+}
+
+class _BangShortcutsSection extends StatelessWidget {
+  const _BangShortcutsSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        SettingSection(name: 'Bang Shortcuts'),
+        _BangsTile(),
+      ],
+    );
+  }
+}
+
+class _HistorySuggestionsSection extends StatelessWidget {
+  const _HistorySuggestionsSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        SettingSection(name: 'History & Suggestions'),
         _MaxSearchHistoryEntriesSection(),
         _AllowClipboardAccessTile(),
-      ],
-    );
-  }
-}
-
-class _ContentViewingSection extends StatelessWidget {
-  const _ContentViewingSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Content Viewing'),
-        _PdfViewerTile(),
-        _EnableReaderModeTile(),
-        _EnforceReaderModeTile(),
-      ],
-    );
-  }
-}
-
-class _ContentEnhancementSection extends StatelessWidget {
-  const _ContentEnhancementSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Content Enhancement'),
-        _OnDeviceAiTile(),
-      ],
-    );
-  }
-}
-
-class _ExtensionsSection extends StatelessWidget {
-  const _ExtensionsSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Extensions'),
-        _AddonCollectionTile(),
       ],
     );
   }
@@ -243,8 +222,8 @@ class _BangsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: const Text('Bangs'),
-      subtitle: const Text('Search shortcuts management'),
+      title: const Text('Bang Settings'),
+      subtitle: const Text('Manage bang repositories and usage data'),
       contentPadding: const EdgeInsets.symmetric(
         vertical: 8.0,
         horizontal: 16.0,
@@ -320,147 +299,6 @@ class _MaxSearchHistoryEntriesSection extends HookConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _OnDeviceAiTile extends HookConsumerWidget {
-  const _OnDeviceAiTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final enableLocalAiFeatures = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.enableLocalAiFeatures,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('On Device AI'),
-      subtitle: const Text(
-        'Local on-device features including container topic and tab suggestions',
-      ),
-      secondary: const Icon(MdiIcons.creation),
-      value: enableLocalAiFeatures,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.enableLocalAiFeatures(value),
-            );
-      },
-    );
-  }
-}
-
-class _EnableReaderModeTile extends HookConsumerWidget {
-  const _EnableReaderModeTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final enableReadability = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.enableReadability),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Enable Reader Mode'),
-      subtitle: const Text(
-        'Optional browser app bar tool that extracts and simplifies web pages for improved readability by removing ads, sidebars, and other non-essential elements.',
-      ),
-      secondary: const Icon(MdiIcons.bookOpen),
-      value: enableReadability,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.enableReadability(value),
-            );
-      },
-    );
-  }
-}
-
-class _EnforceReaderModeTile extends HookConsumerWidget {
-  const _EnforceReaderModeTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final enableReadability = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.enableReadability),
-    );
-    final enforceReadability = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.enforceReadability),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Enforce Reader Mode'),
-      subtitle: const Text(
-        'Override readability probability of websites and always show Reader Mode capabilities even the site might not be compatible.',
-      ),
-      secondary: const Icon(MdiIcons.bookCheck),
-      value: enableReadability && enforceReadability,
-      onChanged: enableReadability
-          ? (value) async {
-              await ref
-                  .read(saveGeneralSettingsControllerProvider.notifier)
-                  .save(
-                    (currentSettings) =>
-                        currentSettings.copyWith.enforceReadability(value),
-                  );
-            }
-          : null,
-    );
-  }
-}
-
-class _PdfViewerTile extends HookConsumerWidget {
-  const _PdfViewerTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final enablePdfJs = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.enablePdfJs),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Built-in PDF Viewer'),
-      subtitle: const Text(
-        'Open PDF files directly in the browser without downloading',
-      ),
-      secondary: const Icon(MdiIcons.filePdfBox),
-      value: enablePdfJs,
-      onChanged: (value) async {
-        await ref
-            .read(saveEngineSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) => currentSettings.copyWith.enablePdfJs(value),
-            );
-      },
-    );
-  }
-}
-
-class _AddonCollectionTile extends StatelessWidget {
-  const _AddonCollectionTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: const Text('Custom Extension Collection'),
-      subtitle: const Text(
-        'Custom Add-on Collections are curated lists of extensions that users can create and share.',
-      ),
-      contentPadding: const EdgeInsets.symmetric(
-        vertical: 8.0,
-        horizontal: 16.0,
-      ),
-      leading: const Icon(MdiIcons.puzzle),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () async {
-        await AddonCollectionRoute().push(context);
-      },
     );
   }
 }

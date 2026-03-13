@@ -33,18 +33,19 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
+import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
-class TabBarSettingsScreen extends HookConsumerWidget {
-  const TabBarSettingsScreen({super.key});
+class ToolbarLayoutSettingsScreen extends HookConsumerWidget {
+  const ToolbarLayoutSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Tab Bar')),
+      appBar: AppBar(title: const Text('Toolbar & Layout')),
       body: SafeArea(
         child: FadingScroll(
           fadingSize: 25,
@@ -58,7 +59,7 @@ class TabBarSettingsScreen extends HookConsumerWidget {
                 ),
                 const SliverPadding(
                   padding: EdgeInsets.symmetric(horizontal: 12.0),
-                  sliver: SliverToBoxAdapter(child: _TabBarLayoutSection()),
+                  sliver: SliverToBoxAdapter(child: _ToolbarLayoutContent()),
                 ),
               ],
             );
@@ -69,22 +70,28 @@ class TabBarSettingsScreen extends HookConsumerWidget {
   }
 }
 
-class _TabBarLayoutSection extends StatelessWidget {
-  const _TabBarLayoutSection();
+class _ToolbarLayoutContent extends StatelessWidget {
+  const _ToolbarLayoutContent();
 
   @override
   Widget build(BuildContext context) {
     return const Column(
       children: [
+        SettingSection(name: 'Tab Bar'),
         _TabBarPositionSection(),
         _TabBarLayoutModeSection(),
+        _AutoHideTabBarTile(),
+        SettingSection(name: 'Contextual Toolbar'),
         _ShowContextualTabBarTile(),
         _CustomizeToolbarButtonsTile(),
-        _AutoHideTabBarTile(),
+        SettingSection(name: 'Quick Tab Switcher'),
         _ShowQuickTabSwitcherBarTile(),
         _QuickTabSwitcherModeSection(),
         _QuickTabSwitcherHistorySuggestionsTile(),
         _QuickTabSwitcherShowTitlesTile(),
+        SettingSection(name: 'Tab View'),
+        _BottomSheetTabViewTile(),
+        _TabListShowFaviconsTile(),
       ],
     );
   }
@@ -93,7 +100,7 @@ class _TabBarLayoutSection extends StatelessWidget {
 class _TabBarPreviewHeaderDelegate extends SliverPersistentHeaderDelegate {
   const _TabBarPreviewHeaderDelegate({required this.settings});
 
-  static const _kPreviewBaseHeight = 160.0;
+  static const _kPreviewBaseHeight = 164.0;
 
   final GeneralSettings settings;
 
@@ -321,7 +328,9 @@ class _TabBarPreviewCard extends HookWidget {
           children: [
             const ListTile(
               title: Text('Live Preview'),
-              subtitle: Text('Reflects your current tab bar settings'),
+              subtitle: Text(
+                'Reflects your current toolbar and layout settings',
+              ),
               leading: Icon(MdiIcons.televisionGuide),
               contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
             ),
@@ -596,7 +605,7 @@ class _ShowContextualTabBarTile extends HookConsumerWidget {
     );
 
     return SwitchListTile.adaptive(
-      title: const Text('Show Contextual Tab Bar'),
+      title: const Text('Show Contextual Toolbar'),
       subtitle: const Text(
         'Show additional bottom toolbar for navigation and actions',
       ),
@@ -740,6 +749,62 @@ class _AutoHideTabBarTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.autoHideTabBar(value),
+            );
+      },
+    );
+  }
+}
+
+class _BottomSheetTabViewTile extends HookConsumerWidget {
+  const _BottomSheetTabViewTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tabViewBottomSheet = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.tabViewBottomSheet),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Bottom Sheet Tab View'),
+      subtitle: const Text(
+        'Display tabs in a bottom sheet instead of fullscreen',
+      ),
+      secondary: const Icon(MdiIcons.dockBottom),
+      value: tabViewBottomSheet,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.tabViewBottomSheet(value),
+            );
+      },
+    );
+  }
+}
+
+class _TabListShowFaviconsTile extends HookConsumerWidget {
+  const _TabListShowFaviconsTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tabListShowFavicons = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.tabListShowFavicons),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Show Favicons in List View'),
+      subtitle: const Text(
+        'Display website icons instead of page thumbnails in tab list view',
+      ),
+      secondary: const Icon(MdiIcons.web),
+      value: tabListShowFavicons,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.tabListShowFavicons(value),
             );
       },
     );

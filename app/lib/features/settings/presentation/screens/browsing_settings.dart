@@ -31,13 +31,13 @@ import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
-class TabsBehaviorSettingsScreen extends StatelessWidget {
-  const TabsBehaviorSettingsScreen({super.key});
+class BrowsingSettingsScreen extends StatelessWidget {
+  const BrowsingSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Tabs & Behavior')),
+      appBar: AppBar(title: const Text('Browsing')),
       body: SafeArea(
         child: FadingScroll(
           fadingSize: 25,
@@ -46,10 +46,9 @@ class TabsBehaviorSettingsScreen extends StatelessWidget {
               controller: controller,
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               children: const [
-                _TabCreationSection(),
-                _TabOrganizationSection(),
-                _TabInteractionSection(),
-                _DownloadsSection(),
+                _TabsSection(),
+                _NavigationSection(),
+                _ExternalLinksSection(),
               ],
             );
           },
@@ -59,31 +58,16 @@ class TabsBehaviorSettingsScreen extends StatelessWidget {
   }
 }
 
-class _TabCreationSection extends StatelessWidget {
-  const _TabCreationSection();
+class _TabsSection extends StatelessWidget {
+  const _TabsSection();
 
   @override
   Widget build(BuildContext context) {
     return const Column(
       children: [
-        SettingSection(name: 'Tab Creation'),
+        SettingSection(name: 'Tabs'),
         _NewTabDefaultSection(),
         _NewTabPositionSection(),
-        _ExternalLinkHandlingSection(),
-        _AppLinksModeSection(),
-      ],
-    );
-  }
-}
-
-class _TabOrganizationSection extends StatelessWidget {
-  const _TabOrganizationSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Tab Organization'),
         _ShowContainerUiTile(),
         _ShowIsolatedTabUiTile(),
         _CreateChildTabsTile(),
@@ -92,15 +76,34 @@ class _TabOrganizationSection extends StatelessWidget {
   }
 }
 
-class _TabInteractionSection extends StatelessWidget {
-  const _TabInteractionSection();
+class _NavigationSection extends StatelessWidget {
+  const _NavigationSection();
 
   @override
   Widget build(BuildContext context) {
     return const Column(
       children: [
-        SettingSection(name: 'Tab Interaction'),
+        SettingSection(name: 'Navigation'),
+        _PullToRefreshTile(),
+        _DoubleBackCloseTabTile(),
         _TabBarSwipeBehaviorSection(),
+        _AppLinksModeSection(),
+      ],
+    );
+  }
+}
+
+class _ExternalLinksSection extends StatelessWidget {
+  const _ExternalLinksSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        SettingSection(name: 'External Links'),
+        _ExternalLinkHandlingSection(),
+        _UrlCleanerSettingsTile(),
+        _UnshortenerSettingsTile(),
       ],
     );
   }
@@ -528,43 +531,89 @@ class _AppLinksModeSection extends HookConsumerWidget {
   }
 }
 
-class _DownloadsSection extends StatelessWidget {
-  const _DownloadsSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Downloads'),
-        _ExternalDownloadManagerTile(),
-      ],
-    );
-  }
-}
-
-class _ExternalDownloadManagerTile extends HookConsumerWidget {
-  const _ExternalDownloadManagerTile();
+class _PullToRefreshTile extends HookConsumerWidget {
+  const _PullToRefreshTile();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final useExternalDownloadManager = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.useExternalDownloadManager,
-      ),
+    final pullToRefreshEnabled = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.pullToRefreshEnabled),
     );
 
     return SwitchListTile.adaptive(
-      title: const Text('Use external download manager'),
-      subtitle: const Text('Manage downloads with another app'),
-      secondary: const Icon(MdiIcons.download),
-      value: useExternalDownloadManager,
+      title: const Text('Pull to Refresh'),
+      subtitle: const Text('Swipe down on pages to reload them'),
+      secondary: const Icon(MdiIcons.gestureSwipeDown),
+      value: pullToRefreshEnabled,
       onChanged: (value) async {
         await ref
             .read(saveGeneralSettingsControllerProvider.notifier)
             .save(
               (currentSettings) =>
-                  currentSettings.copyWith.useExternalDownloadManager(value),
+                  currentSettings.copyWith.pullToRefreshEnabled(value),
             );
+      },
+    );
+  }
+}
+
+class _DoubleBackCloseTabTile extends HookConsumerWidget {
+  const _DoubleBackCloseTabTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final doubleBackCloseTab = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.doubleBackCloseTab),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Double Back to Close Tab'),
+      subtitle: const Text(
+        'When enabled, press back twice to close the tab. When disabled, back button only navigates page history.',
+      ),
+      secondary: const Icon(MdiIcons.gestureDoubleTap),
+      value: doubleBackCloseTab,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.doubleBackCloseTab(value),
+            );
+      },
+    );
+  }
+}
+
+class _UrlCleanerSettingsTile extends StatelessWidget {
+  const _UrlCleanerSettingsTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: const Icon(MdiIcons.broom),
+      title: const Text('URL Cleaner'),
+      subtitle: const Text('Tracking removal rules and catalog updates'),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () async {
+        await UrlCleanerSettingsRoute().push(context);
+      },
+    );
+  }
+}
+
+class _UnshortenerSettingsTile extends StatelessWidget {
+  const _UnshortenerSettingsTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: const Icon(MdiIcons.linkVariant),
+      title: const Text('Unshortener'),
+      subtitle: const Text('Short link resolver and API token'),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () async {
+        await UnshortenerSettingsRoute().push(context);
       },
     );
   }

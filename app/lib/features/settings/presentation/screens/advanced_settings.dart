@@ -29,13 +29,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/providers/app_state.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/install_local_addon_dialog.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/dialogs/user_agent_restart_dialog.dart';
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
-import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
@@ -57,11 +55,9 @@ class AdvancedSettingsScreen extends StatelessWidget {
               controller: controller,
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               children: const [
-                _ContentBehaviorSection(),
+                _ContentIdentitySection(),
                 _ExperimentalSection(),
-                _ExtensionsSection(),
-                _StorageDebuggingSection(),
-                _ResetSection(),
+                _DeveloperToolsSection(),
               ],
             );
           },
@@ -71,32 +67,17 @@ class AdvancedSettingsScreen extends StatelessWidget {
   }
 }
 
-class _ContentBehaviorSection extends StatelessWidget {
-  const _ContentBehaviorSection();
+class _ContentIdentitySection extends StatelessWidget {
+  const _ContentIdentitySection();
 
   @override
   Widget build(BuildContext context) {
     return const Column(
       children: [
-        SettingSection(name: 'Content Behavior'),
+        SettingSection(name: 'Content & Identity'),
         _JavaScriptTile(),
         _UserAgentTile(),
         _EnterpriseRootsTile(),
-      ],
-    );
-  }
-}
-
-class _ExtensionsSection extends StatelessWidget {
-  const _ExtensionsSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Extensions'),
-        _InstallLocalAddonTile(),
-        _AddonCollectionTile(),
       ],
     );
   }
@@ -110,91 +91,23 @@ class _ExperimentalSection extends StatelessWidget {
     return const Column(
       children: [
         SettingSection(name: 'Experimental'),
-        _IsolatedProcessEnabledTile(),
-        _AppZygoteProcessEnabledTile(),
+        _ExperimentalSettingsTile(),
       ],
     );
   }
 }
 
-class _InstallLocalAddonTile extends StatelessWidget {
-  const _InstallLocalAddonTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomListTile(
-      title: 'Install from File',
-      subtitle: 'Install an extension from a local .xpi file',
-      prefix: Padding(
-        padding: const EdgeInsets.only(right: 16.0),
-        child: Icon(
-          MdiIcons.puzzle,
-          size: 24,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
-      ),
-      suffix: FilledButton.icon(
-        onPressed: () async {
-          await showInstallLocalAddonDialog(context);
-        },
-        icon: const Icon(Icons.file_open),
-        label: const Text('Install'),
-      ),
-    );
-  }
-}
-
-class _AddonCollectionTile extends StatelessWidget {
-  const _AddonCollectionTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomListTile(
-      title: 'Custom Collection',
-      subtitle: 'Use a custom Mozilla addon collection',
-      prefix: Padding(
-        padding: const EdgeInsets.only(right: 16.0),
-        child: Icon(
-          MdiIcons.folderMultiple,
-          size: 24,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
-      ),
-      suffix: FilledButton.icon(
-        onPressed: () async {
-          await AddonCollectionRoute().push(context);
-        },
-        icon: const Icon(Icons.settings),
-        label: const Text('Configure'),
-      ),
-    );
-  }
-}
-
-class _StorageDebuggingSection extends StatelessWidget {
-  const _StorageDebuggingSection();
+class _DeveloperToolsSection extends StatelessWidget {
+  const _DeveloperToolsSection();
 
   @override
   Widget build(BuildContext context) {
     return const Column(
       children: [
-        SettingSection(name: 'Storage & Debugging'),
+        SettingSection(name: 'Developer Tools'),
         _IconCacheTile(),
         _ErrorLogsTile(),
         _DartVmTile(),
-      ],
-    );
-  }
-}
-
-class _ResetSection extends StatelessWidget {
-  const _ResetSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Reset'),
         _ResetUITile(),
       ],
     );
@@ -303,67 +216,22 @@ class _EnterpriseRootsTile extends HookConsumerWidget {
   }
 }
 
-class _IsolatedProcessEnabledTile extends HookConsumerWidget {
-  const _IsolatedProcessEnabledTile();
+class _ExperimentalSettingsTile extends StatelessWidget {
+  const _ExperimentalSettingsTile();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isolatedProcessEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.isolatedProcessEnabled,
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: const Text('Experimental Features'),
+      subtitle: const Text('Low-level runtime features and startup behavior'),
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 8.0,
+        horizontal: 16.0,
       ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Isolated Content Process'),
-      subtitle: const Text(
-        'Run web content in an isolated process. Requires app restart.',
-      ),
-      secondary: const Icon(MdiIcons.shieldCheck),
-      value: isolatedProcessEnabled,
-      onChanged: (value) async {
-        await ref
-            .read(saveEngineSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.isolatedProcessEnabled(value),
-            );
-        if (context.mounted) {
-          await _showRestartDialog(context, ref);
-        }
-      },
-    );
-  }
-}
-
-class _AppZygoteProcessEnabledTile extends HookConsumerWidget {
-  const _AppZygoteProcessEnabledTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appZygoteProcessEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.appZygoteProcessEnabled,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('App Zygote Process'),
-      subtitle: const Text(
-        'Preload content service via App Zygote for faster isolated process startup. Requires Android 10+ and app restart.',
-      ),
-      secondary: const Icon(MdiIcons.rocketLaunch),
-      value: appZygoteProcessEnabled,
-      onChanged: (value) async {
-        await ref
-            .read(saveEngineSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.appZygoteProcessEnabled(value),
-            );
-        if (context.mounted) {
-          await _showRestartDialog(context, ref);
-        }
+      leading: const Icon(MdiIcons.flaskOutline),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () async {
+        await ExperimentalSettingsRoute().push(context);
       },
     );
   }
@@ -509,12 +377,5 @@ class _ResetUITile extends ConsumerWidget {
         label: const Text('Reset'),
       ),
     );
-  }
-}
-
-Future<void> _showRestartDialog(BuildContext context, WidgetRef ref) async {
-  final result = await showQuitBrowserDialog(context);
-  if (result == true && context.mounted) {
-    await exitApp(ProviderScope.containerOf(context));
   }
 }

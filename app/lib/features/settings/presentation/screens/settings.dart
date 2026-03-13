@@ -37,12 +37,14 @@ class SettingsScreen extends HookConsumerWidget {
             controller: controller,
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             children: const [
-              _AppearanceDisplayTile(),
+              _GeneralTile(),
+              _BrowsingTile(),
+              _ToolbarLayoutTile(),
+              _WebContentTile(),
+              _SearchTile(),
               _PrivacySecurityTile(),
-              _SearchContentTile(),
-              _TabsBehaviorTile(),
+              _ExtensionsTile(),
               _SyncTile(),
-              _FingerprintingTile(),
               _AdvancedTile(),
             ],
           );
@@ -52,8 +54,8 @@ class SettingsScreen extends HookConsumerWidget {
   }
 }
 
-class _AppearanceDisplayTile extends StatelessWidget {
-  const _AppearanceDisplayTile();
+class _GeneralTile extends StatelessWidget {
+  const _GeneralTile();
 
   @override
   Widget build(BuildContext context) {
@@ -61,16 +63,66 @@ class _AppearanceDisplayTile extends StatelessWidget {
       color: Theme.of(context).colorScheme.surfaceContainerHigh,
       clipBehavior: Clip.antiAlias,
       child: ListTile(
-        title: const Text('Appearance & Display'),
-        subtitle: const Text('Theme, tabs, toolbars, gestures'),
+        title: const Text('General'),
+        subtitle: const Text('Appearance, language, downloads'),
         contentPadding: const EdgeInsets.symmetric(
           vertical: 8.0,
           horizontal: 16.0,
         ),
-        leading: const Icon(Icons.palette),
+        leading: const Icon(Icons.tune),
         trailing: const Icon(Icons.chevron_right),
         onTap: () async {
-          await AppearanceDisplaySettingsRoute().push(context);
+          await GeneralSettingsRoute().push(context);
+        },
+      ),
+    );
+  }
+}
+
+class _BrowsingTile extends StatelessWidget {
+  const _BrowsingTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        title: const Text('Browsing'),
+        subtitle: const Text('Tabs, navigation, external links'),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 8.0,
+          horizontal: 16.0,
+        ),
+        leading: const Icon(MdiIcons.compassOutline),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () async {
+          await BrowsingSettingsRoute().push(context);
+        },
+      ),
+    );
+  }
+}
+
+class _ToolbarLayoutTile extends StatelessWidget {
+  const _ToolbarLayoutTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        title: const Text('Toolbar & Layout'),
+        subtitle: const Text('Tab bar, toolbar, quick switcher, tab view'),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 8.0,
+          horizontal: 16.0,
+        ),
+        leading: const Icon(MdiIcons.viewDashboardOutline),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () async {
+          await ToolbarLayoutSettingsRoute().push(context);
         },
       ),
     );
@@ -102,8 +154,8 @@ class _PrivacySecurityTile extends StatelessWidget {
   }
 }
 
-class _SearchContentTile extends StatelessWidget {
-  const _SearchContentTile();
+class _WebContentTile extends StatelessWidget {
+  const _WebContentTile();
 
   @override
   Widget build(BuildContext context) {
@@ -111,8 +163,33 @@ class _SearchContentTile extends StatelessWidget {
       color: Theme.of(context).colorScheme.surfaceContainerHigh,
       clipBehavior: Clip.antiAlias,
       child: ListTile(
-        title: const Text('Search & Content'),
-        subtitle: const Text('Search providers, reader mode, AI'),
+        title: const Text('Web Content'),
+        subtitle: const Text('Page display, PDF, reader mode, AI'),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 8.0,
+          horizontal: 16.0,
+        ),
+        leading: const Icon(MdiIcons.fileDocumentOutline),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () async {
+          await WebContentSettingsRoute().push(context);
+        },
+      ),
+    );
+  }
+}
+
+class _SearchTile extends StatelessWidget {
+  const _SearchTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        title: const Text('Search'),
+        subtitle: const Text('Providers, bangs, search history'),
         contentPadding: const EdgeInsets.symmetric(
           vertical: 8.0,
           horizontal: 16.0,
@@ -120,15 +197,15 @@ class _SearchContentTile extends StatelessWidget {
         leading: const Icon(MdiIcons.magnify),
         trailing: const Icon(Icons.chevron_right),
         onTap: () async {
-          await SearchContentSettingsRoute().push(context);
+          await SearchSettingsRoute().push(context);
         },
       ),
     );
   }
 }
 
-class _TabsBehaviorTile extends StatelessWidget {
-  const _TabsBehaviorTile();
+class _ExtensionsTile extends StatelessWidget {
+  const _ExtensionsTile();
 
   @override
   Widget build(BuildContext context) {
@@ -136,41 +213,16 @@ class _TabsBehaviorTile extends StatelessWidget {
       color: Theme.of(context).colorScheme.surfaceContainerHigh,
       clipBehavior: Clip.antiAlias,
       child: ListTile(
-        title: const Text('Tabs & Behavior'),
-        subtitle: const Text('New tab defaults, link handling'),
+        title: const Text('Extensions'),
+        subtitle: const Text('Install and manage extension sources'),
         contentPadding: const EdgeInsets.symmetric(
           vertical: 8.0,
           horizontal: 16.0,
         ),
-        leading: const Icon(MdiIcons.tab),
+        leading: const Icon(MdiIcons.puzzleOutline),
         trailing: const Icon(Icons.chevron_right),
         onTap: () async {
-          await TabsBehaviorSettingsRoute().push(context);
-        },
-      ),
-    );
-  }
-}
-
-class _FingerprintingTile extends StatelessWidget {
-  const _FingerprintingTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: Theme.of(context).colorScheme.surfaceContainerHigh,
-      clipBehavior: Clip.antiAlias,
-      child: ListTile(
-        title: const Text('Fingerprinting'),
-        subtitle: const Text('Language, fingerprint protection'),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 8.0,
-          horizontal: 16.0,
-        ),
-        leading: const Icon(MdiIcons.fingerprint),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () async {
-          await FingerprintingSettingsRoute().push(context);
+          await ExtensionsSettingsRoute().push(context);
         },
       ),
     );
