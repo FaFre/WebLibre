@@ -68,6 +68,12 @@ jobs:
           npm ci
           npx webpack
 
+      - name: Build readability
+        working-directory: packages/flutter_mozilla_components/javascript/readability
+        run: |
+          npm ci
+          npx webpack
+
       - name: Create key file
         working-directory: app
         run: |
