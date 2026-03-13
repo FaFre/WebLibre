@@ -191,21 +191,34 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
         )
         .toList();
 
+    final longPressActions = def.longPressActions;
+
     return Material(
       color: Colors.transparent,
       child: ListTile(
         leading: Icon(def.icon),
         title: Text(def.label),
-        subtitle: hasStatefulFallback
-            ? _FallbackPicker(
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (hasStatefulFallback)
+              _FallbackPicker(
                 current: ToolbarFallbackChoice.fromStored(config.fallbackId),
                 options: fallbackOptions,
                 onChanged: (newFallback) => repository.assignFallback(
                   config.buttonId,
                   (newFallback ?? ToolbarFallbackNone()).toStoredFallbackId(),
                 ),
-              )
-            : null,
+              ),
+            if (longPressActions.isNotEmpty)
+              _LongPressHint(
+                buttonLabel: def.label,
+                icon: def.icon,
+                actions: longPressActions,
+              ),
+          ],
+        ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -228,6 +241,121 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
   }
 }
 
+class _LongPressHint extends StatelessWidget {
+  const _LongPressHint({
+    required this.buttonLabel,
+    required this.icon,
+    required this.actions,
+  });
+
+  final String buttonLabel;
+  final IconData icon;
+  final List<String> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(4),
+      onTap: () => _showLongPressDetails(context),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.touch_app,
+              size: 14,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                'Long press available',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontSize: 12,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.info_outline,
+              size: 14,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showLongPressDetails(BuildContext context) async {
+    await showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(icon, color: Theme.of(context).colorScheme.primary),
+                    const SizedBox(width: 12),
+                    Text(
+                      '$buttonLabel Long Press',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Press and hold this button to access:',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ...actions.map(
+                  (action) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.touch_app,
+                          size: 18,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            action,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _FallbackPicker extends StatelessWidget {
   const _FallbackPicker({
     required this.current,
@@ -245,6 +373,8 @@ class _FallbackPicker extends StatelessWidget {
       value: current,
       hint: const Text('No fallback'),
       isExpanded: true,
+      isDense: true,
+      padding: const EdgeInsets.symmetric(vertical: 2.0),
       underline: const SizedBox.shrink(),
       items: [
         DropdownMenuItem(

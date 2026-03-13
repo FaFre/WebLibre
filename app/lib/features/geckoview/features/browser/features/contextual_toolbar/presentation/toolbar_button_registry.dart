@@ -64,6 +64,7 @@ class ToolbarButtonDefinition {
     WidgetRef ref,
   )
   builder;
+  final List<String> longPressActions;
 
   const ToolbarButtonDefinition({
     required this.spec,
@@ -71,6 +72,7 @@ class ToolbarButtonDefinition {
     required this.icon,
     this.isPrimaryAvailable,
     required this.builder,
+    this.longPressActions = const [],
   });
 }
 
@@ -82,6 +84,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     isPrimaryAvailable: (scope, ref) =>
         scope.tabState?.historyState.canGoBack == true ||
         scope.tabState?.isLoading == true,
+    longPressActions: ['History Menu (Previous pages)'],
     builder: (scope, context, ref) {
       if (scope.isPreview) {
         return NavigateBackButtonView(
@@ -103,6 +106,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     icon: Icons.arrow_forward,
     isPrimaryAvailable: (scope, ref) =>
         scope.tabState?.historyState.canGoForward == true,
+    longPressActions: ['History Menu (Forward pages)'],
     builder: (scope, context, ref) {
       if (scope.isPreview) {
         return NavigateForwardButtonView(
@@ -118,6 +122,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: bookmarksToolbarButtonSpec,
     label: 'Bookmarks',
     icon: MdiIcons.bookmarkMultiple,
+    longPressActions: ['Add Bookmark', 'Remove Bookmark'],
     builder: (scope, context, ref) => _BookmarkToolbarButton(scope: scope),
   ),
   ToolbarButtonDefinition(
@@ -132,6 +137,12 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: addTabToolbarButtonSpec,
     label: 'New Tab',
     icon: MdiIcons.tabPlus,
+    longPressActions: [
+      'Add Regular Tab',
+      'Add Child Tab',
+      'Add Private Tab',
+      'Add Isolated Tab',
+    ],
     builder: (scope, context, ref) => scope.isPreview
         ? AddTabButtonView(onPressed: () {}, onLongPress: () {})
         : const AddTabButton(),
@@ -140,6 +151,12 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: tabsCountToolbarButtonSpec,
     label: 'Tabs',
     icon: MdiIcons.tab,
+    longPressActions: [
+      'Add Regular Tab',
+      'Add Child Tab',
+      'Add Private Tab',
+      'Add Isolated Tab',
+    ],
     builder: (scope, context, ref) => scope.isPreview
         ? TabsCountButtonView(
             isActive: false,
@@ -172,6 +189,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: reloadToolbarButtonSpec,
     label: 'Reload',
     icon: Icons.refresh,
+    longPressActions: ['Hard Refresh (bypass cache)'],
     builder: (scope, context, ref) => _ReloadToolbarButton(scope: scope),
   ),
   ToolbarButtonDefinition(
@@ -223,6 +241,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: translationToolbarButtonSpec,
     label: 'Translate',
     icon: Icons.translate,
+    longPressActions: ['Show Translation Options'],
     isPrimaryAvailable: (scope, ref) {
       final engineState = ref.read(translationEngineStateProvider);
       final readerActive = scope.tabState?.readerableState.active ?? false;
@@ -257,6 +276,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: closeTabToolbarButtonSpec,
     label: 'Close Tab',
     icon: MdiIcons.tabMinus,
+    longPressActions: ['Close Others', 'Close from Same Host'],
     builder: (scope, context, ref) => _CloseTabToolbarButton(scope: scope),
   ),
   ToolbarButtonDefinition(
@@ -294,6 +314,11 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: duplicateTabToolbarButtonSpec,
     label: 'Duplicate Tab',
     icon: MdiIcons.contentDuplicate,
+    longPressActions: [
+      'Clone as Regular',
+      'Clone as Private',
+      'Clone as Isolated',
+    ],
     builder: (scope, context, ref) {
       return scope.isPreview
           ? CloneTabButtonView(onPressed: () {}, onLongPress: () {})
@@ -341,6 +366,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: pageUpToolbarButtonSpec,
     label: 'Page Up',
     icon: MdiIcons.chevronDoubleUp,
+    longPressActions: ['Scroll to Top'],
     builder: (scope, context, ref) {
       return IconButton(
         onPressed: scope.isPreview
@@ -371,6 +397,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: pageDownToolbarButtonSpec,
     label: 'Page Down',
     icon: MdiIcons.chevronDoubleDown,
+    longPressActions: ['Scroll to Bottom'],
     builder: (scope, context, ref) {
       return IconButton(
         onPressed: scope.isPreview
@@ -415,6 +442,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: extensionShortcutToolbarButtonSpec,
     label: 'Extensions',
     icon: MdiIcons.puzzle,
+    longPressActions: ['Extensions Menu'],
     isPrimaryAvailable: (scope, ref) => ref
         .read(
           webExtensionsStateProvider(
