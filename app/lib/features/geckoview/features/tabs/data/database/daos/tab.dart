@@ -30,6 +30,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
 
 class SyncTabsResult {
   final Set<String> deletedIsolationContextIds;
@@ -139,6 +140,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   Future<String> _generateOrderKey({
     required Value<String?> parentId,
     required Value<String?> containerId,
+    required NewTabPosition newTabPosition,
   }) async {
     if (parentId.value.isNotEmpty) {
       return await db.containerDao
@@ -148,15 +150,23 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
               .generateLeadingOrderKey(containerId.value)
               .getSingle();
     } else {
-      return db.containerDao
-          .generateLeadingOrderKey(containerId.value)
-          .getSingle();
+      return switch (newTabPosition) {
+        NewTabPosition.first =>
+          db.containerDao
+              .generateLeadingOrderKey(containerId.value)
+              .getSingle(),
+        NewTabPosition.end =>
+          db.containerDao
+              .generateTrailingOrderKey(containerId.value)
+              .getSingle(),
+      };
     }
   }
 
   Future<String> upsertTabTransactional(
     Future<String> Function() createTab, {
     required Value<String?> parentId,
+    NewTabPosition newTabPosition = NewTabPosition.first,
     Value<String?> containerId = const Value.absent(),
     Value<String?> orderKey = const Value.absent(),
     Value<Uri?> url = const Value.absent(),
@@ -167,7 +177,11 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
       final tabId = await createTab();
       final currentOrderKey =
           orderKey.value ??
-          await _generateOrderKey(parentId: parentId, containerId: containerId);
+          await _generateOrderKey(
+            parentId: parentId,
+            containerId: containerId,
+            newTabPosition: newTabPosition,
+          );
       final Value<TabModeDbValue> persistedTabMode = tabMode.present
           ? Value(tabMode.value.toDbValue())
           : const Value.absent();
@@ -211,6 +225,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     String tabId, {
     required TabSource source,
     required Value<String?> parentId,
+    NewTabPosition newTabPosition = NewTabPosition.first,
     Value<String?> containerId = const Value.absent(),
     Value<String?> orderKey = const Value.absent(),
     Value<Uri?> url = const Value.absent(),
@@ -220,7 +235,11 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     return db.transaction(() async {
       final currentOrderKey =
           orderKey.value ??
-          await _generateOrderKey(parentId: parentId, containerId: containerId);
+          await _generateOrderKey(
+            parentId: parentId,
+            containerId: containerId,
+            newTabPosition: newTabPosition,
+          );
       final Value<TabModeDbValue> persistedTabMode = tabMode.present
           ? Value(tabMode.value.toDbValue())
           : const Value.absent();

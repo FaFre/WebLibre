@@ -41,6 +41,8 @@ abstract class _$GeneralSettingsCWProxy {
     TabType storedDefaultCreateTabType,
   );
 
+  GeneralSettings newTabPosition(NewTabPosition newTabPosition);
+
   GeneralSettings tabIntentOpenSetting(
     TabIntentOpenSetting tabIntentOpenSetting,
   );
@@ -137,6 +139,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool showContainerUi,
     bool showIsolatedTabUi,
     TabType storedDefaultCreateTabType,
+    NewTabPosition newTabPosition,
     TabIntentOpenSetting tabIntentOpenSetting,
     bool autoHideTabBar,
     TabBarSwipeAction tabBarSwipeAction,
@@ -235,6 +238,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings storedDefaultCreateTabType(
     TabType storedDefaultCreateTabType,
   ) => call(storedDefaultCreateTabType: storedDefaultCreateTabType);
+
+  @override
+  GeneralSettings newTabPosition(NewTabPosition newTabPosition) =>
+      call(newTabPosition: newTabPosition);
 
   @override
   GeneralSettings tabIntentOpenSetting(
@@ -393,6 +400,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? showContainerUi = const $CopyWithPlaceholder(),
     Object? showIsolatedTabUi = const $CopyWithPlaceholder(),
     Object? storedDefaultCreateTabType = const $CopyWithPlaceholder(),
+    Object? newTabPosition = const $CopyWithPlaceholder(),
     Object? tabIntentOpenSetting = const $CopyWithPlaceholder(),
     Object? autoHideTabBar = const $CopyWithPlaceholder(),
     Object? tabBarSwipeAction = const $CopyWithPlaceholder(),
@@ -506,6 +514,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.storedDefaultCreateTabType
           // ignore: cast_nullable_to_non_nullable
           : storedDefaultCreateTabType as TabType,
+      newTabPosition:
+          newTabPosition == const $CopyWithPlaceholder() ||
+              newTabPosition == null
+          ? _value.newTabPosition
+          // ignore: cast_nullable_to_non_nullable
+          : newTabPosition as NewTabPosition,
       tabIntentOpenSetting:
           tabIntentOpenSetting == const $CopyWithPlaceholder() ||
               tabIntentOpenSetting == null
@@ -733,6 +747,10 @@ GeneralSettings _$GeneralSettingsFromJson(
     _$TabTypeEnumMap,
     json['defaultCreateTabType'],
   ),
+  newTabPosition: $enumDecodeNullable(
+    _$NewTabPositionEnumMap,
+    json['newTabPosition'],
+  ),
   tabIntentOpenSetting: $enumDecodeNullable(
     _$TabIntentOpenSettingEnumMap,
     json['tabIntentOpenSetting'],
@@ -818,6 +836,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'showIsolatedTabUi': instance.showIsolatedTabUi,
   'defaultCreateTabType':
       _$TabTypeEnumMap[instance.storedDefaultCreateTabType]!,
+  'newTabPosition': _$NewTabPositionEnumMap[instance.newTabPosition]!,
   'tabIntentOpenSetting':
       _$TabIntentOpenSettingEnumMap[instance.tabIntentOpenSetting]!,
   'autoHideTabBar': instance.autoHideTabBar,
@@ -883,6 +902,11 @@ const _$TabTypeEnumMap = {
   TabType.private: 'private',
   TabType.child: 'child',
   TabType.isolated: 'isolated',
+};
+
+const _$NewTabPositionEnumMap = {
+  NewTabPosition.first: 'first',
+  NewTabPosition.end: 'end',
 };
 
 const _$TabIntentOpenSettingEnumMap = {

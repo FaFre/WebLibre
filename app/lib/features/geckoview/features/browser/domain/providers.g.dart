@@ -601,7 +601,7 @@ final class QuickTabSwitcherTabStatesProvider
 }
 
 String _$quickTabSwitcherTabStatesHash() =>
-    r'2627bcd25718472f0c8057e836d76bdaa7317c1c';
+    r'd83ea34d366238681baaad0b36699ee0742edc3d';
 
 final class QuickTabSwitcherTabStatesFamily extends $Family
     with

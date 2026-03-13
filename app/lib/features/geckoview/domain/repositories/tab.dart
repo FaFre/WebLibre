@@ -42,6 +42,8 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/tor/domain/repositories/tor_proxy.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/debouncer.dart';
 
 part 'tab.g.dart';
@@ -64,6 +66,14 @@ class TabRepository extends _$TabRepository {
 
   void clearLaunchedFromIntent(String tabId) {
     _tabFromIntent.remove(tabId);
+  }
+
+  NewTabPosition _newTabPositionForParent(String? parentId) {
+    if (parentId != null) {
+      return NewTabPosition.first;
+    }
+
+    return ref.read(generalSettingsWithDefaultsProvider).newTabPosition;
   }
 
   Future<String?> _resolveParentIdForContext({
@@ -122,6 +132,7 @@ class TabRepository extends _$TabRepository {
     final effectiveContextId = tabMode is IsolatedTabMode
         ? effectiveIsolationContextId
         : assignedContainer?.metadata.contextualIdentity;
+    final newTabPosition = _newTabPositionForParent(validatedParentId);
 
     final newTabId = await tabDao.upsertTabTransactional(
       () {
@@ -139,6 +150,7 @@ class TabRepository extends _$TabRepository {
         );
       },
       parentId: Value(validatedParentId),
+      newTabPosition: newTabPosition,
       containerId: Value(assignedContainer?.id),
       url: Value(url),
       tabMode: Value(tabMode),
@@ -171,7 +183,6 @@ class TabRepository extends _$TabRepository {
         tabs: tabs,
         selectTabId: selectTabId,
       );
-
       // Build sets for validation
       final creatingTabIds = createdTabIds.toSet();
       final parentIdsToValidate = tabs
@@ -204,6 +215,7 @@ class TabRepository extends _$TabRepository {
           tabId,
           parentId: Value(validatedParentId),
           source: TabSource.manual,
+          newTabPosition: _newTabPositionForParent(validatedParentId),
           containerId: Value(assignedContainer?.id),
           url: Value(Uri.tryParse(tab.url)),
           tabMode: Value(
@@ -254,6 +266,7 @@ class TabRepository extends _$TabRepository {
         );
       },
       parentId: const Value.absent(),
+      newTabPosition: _newTabPositionForParent(null),
       containerId: Value(containerData?.id),
       tabMode: Value(duplicateTabMode),
     );
@@ -597,6 +610,7 @@ class TabRepository extends _$TabRepository {
           tabId,
           parentId: const Value.absent(),
           source: TabSource.addedEvent,
+          newTabPosition: _newTabPositionForParent(null),
           containerId: Value(containerId),
         );
       },

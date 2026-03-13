@@ -68,6 +68,7 @@ class _TabCreationSection extends StatelessWidget {
       children: [
         SettingSection(name: 'Tab Creation'),
         _NewTabDefaultSection(),
+        _NewTabPositionSection(),
         _ExternalLinkHandlingSection(),
         _AppLinksModeSection(),
       ],
@@ -246,6 +247,59 @@ class _ExternalLinkHandlingSection extends HookConsumerWidget {
                   selectedBackgroundColor: appColors.privateSelectionOverlay,
                 ),
                 TabIntentOpenSetting.ask => null,
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NewTabPositionSection extends HookConsumerWidget {
+  const _NewTabPositionSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final newTabPosition = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.newTabPosition),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const ListTile(
+            title: Text('New Tab Position'),
+            subtitle: Text('Choose where newly created tabs appear by default'),
+            leading: Icon(MdiIcons.reorderHorizontal),
+            contentPadding: EdgeInsets.zero,
+          ),
+          Center(
+            child: SegmentedButton(
+              showSelectedIcon: false,
+              segments: const [
+                ButtonSegment(
+                  value: NewTabPosition.first,
+                  label: Text('First'),
+                  icon: Icon(MdiIcons.arrowCollapseLeft),
+                ),
+                ButtonSegment(
+                  value: NewTabPosition.end,
+                  label: Text('End'),
+                  icon: Icon(MdiIcons.arrowCollapseRight),
+                ),
+              ],
+              selected: {newTabPosition},
+              onSelectionChanged: (value) async {
+                await ref
+                    .read(saveGeneralSettingsControllerProvider.notifier)
+                    .save(
+                      (currentSettings) =>
+                          currentSettings.copyWith.newTabPosition(value.first),
+                    );
               },
             ),
           ),

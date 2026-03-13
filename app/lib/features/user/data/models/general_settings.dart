@@ -45,6 +45,8 @@ enum QuickTabSwitcherMode { lastUsedTabs, containerTabs }
 
 enum TabIntentOpenSetting { regular, private, ask }
 
+enum NewTabPosition { first, end }
+
 enum TabBarPosition { top, bottom }
 
 enum TabBarLayout { withTitle, compact }
@@ -82,6 +84,7 @@ class GeneralSettings with FastEquatable {
   final bool showIsolatedTabUi;
   @JsonKey(name: 'defaultCreateTabType')
   final TabType storedDefaultCreateTabType;
+  final NewTabPosition newTabPosition;
   final TabIntentOpenSetting tabIntentOpenSetting;
   final bool autoHideTabBar;
   final TabBarSwipeAction tabBarSwipeAction;
@@ -129,6 +132,7 @@ class GeneralSettings with FastEquatable {
     required this.showContainerUi,
     required this.showIsolatedTabUi,
     required this.storedDefaultCreateTabType,
+    required this.newTabPosition,
     required this.tabIntentOpenSetting,
     required this.autoHideTabBar,
     required this.tabBarSwipeAction,
@@ -177,6 +181,7 @@ class GeneralSettings with FastEquatable {
     bool? showContainerUi,
     bool? showIsolatedTabUi,
     TabType? storedDefaultCreateTabType,
+    NewTabPosition? newTabPosition,
     TabIntentOpenSetting? tabIntentOpenSetting,
     bool? autoHideTabBar,
     TabBarSwipeAction? tabBarSwipeAction,
@@ -223,6 +228,7 @@ class GeneralSettings with FastEquatable {
        showIsolatedTabUi = showIsolatedTabUi ?? true,
        storedDefaultCreateTabType =
            storedDefaultCreateTabType ?? TabType.regular,
+       newTabPosition = newTabPosition ?? NewTabPosition.first,
        tabIntentOpenSetting = tabIntentOpenSetting ?? TabIntentOpenSetting.ask,
        autoHideTabBar = autoHideTabBar ?? true,
        tabBarSwipeAction =
@@ -300,6 +306,7 @@ class GeneralSettings with FastEquatable {
     showContainerUi,
     showIsolatedTabUi,
     storedDefaultCreateTabType,
+    newTabPosition,
     tabIntentOpenSetting,
     autoHideTabBar,
     tabBarSwipeAction,
