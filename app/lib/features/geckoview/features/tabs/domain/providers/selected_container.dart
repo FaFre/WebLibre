@@ -17,7 +17,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:riverpod/experimental/persist.dart';
+import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
@@ -27,6 +32,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/user/data/providers.dart';
 
 part 'selected_container.g.dart';
 
@@ -73,6 +79,22 @@ class SelectedContainer extends _$SelectedContainer {
 
   @override
   String? build() {
+    final persistCompleter = Completer();
+
+    final persistResult = persist(
+      ref.watch(riverpodDatabaseStorageProvider),
+      key: 'SelectedContainer',
+      encode: (state) => jsonEncode([state]),
+      decode: (encoded) =>
+          (jsonDecode(encoded) as List<dynamic>).first as String?,
+    );
+
+    unawaited(
+      (persistResult.future ?? Future.value()).whenComplete(
+        () => persistCompleter.complete(),
+      ),
+    );
+
     ref.listen(
       fireImmediately: true,
       watchContainersWithCountProvider,
@@ -97,6 +119,10 @@ class SelectedContainer extends _$SelectedContainer {
       selectedTabProvider,
       (previous, next) async {
         if (next != null) {
+          if (!persistCompleter.isCompleted) {
+            await persistCompleter.future;
+          }
+
           final tabData = await ref
               .read(tabDataRepositoryProvider.notifier)
               .getTabDataById(next);
@@ -121,7 +147,7 @@ class SelectedContainer extends _$SelectedContainer {
       },
     );
 
-    return null;
+    return stateOrNull;
   }
 }
 
