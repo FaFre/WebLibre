@@ -30,6 +30,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import mozilla.components.browser.storage.sync.GlobalPlacesDependencyProvider
+import mozilla.components.browser.session.storage.RecoverableBrowserState
+import mozilla.components.browser.state.action.RestoreCompleteAction
+import mozilla.components.browser.state.action.TabListAction
 import mozilla.components.browser.state.action.CustomTabListAction
 import mozilla.components.browser.state.selector.findCustomTab
 import mozilla.components.concept.engine.selection.SelectionActionDelegate
@@ -100,9 +103,31 @@ object GlobalComponents {
     }
 
     @DelicateCoroutinesApi
-    private fun restoreBrowserState(newComponents: Components) =
+    private fun restoreBrowserState(
+        newComponents: Components,
+        restoreTabsWithoutResumingSelection: Boolean,
+    ) =
         GlobalScope.launch(Dispatchers.Main) {
-            newComponents.useCases.tabsUseCases.restore(newComponents.core.sessionStorage)
+            if (restoreTabsWithoutResumingSelection) {
+                val restoredState = newComponents.core.sessionStorage.restore { true }
+
+                if (restoredState != null) {
+                    newComponents.useCases.tabsUseCases.restore(
+                        state = RecoverableBrowserState(
+                            tabs = restoredState.tabs,
+                            // Intentionally do not resume the previously selected tab during the
+                            // first full setup. We restore the tab list, but let startup open in
+                            // its neutral/default state instead of jumping back into prior content.
+                            selectedTabId = null,
+                        ),
+                        restoreLocation = TabListAction.RestoreAction.RestoreLocation.BEGINNING,
+                    )
+                }
+
+                newComponents.core.store.dispatch(RestoreCompleteAction)
+            } else {
+                newComponents.useCases.tabsUseCases.restore(newComponents.core.sessionStorage)
+            }
 
             newComponents.core.sessionStorage.autoSave(newComponents.core.store)
                 .periodicallyInForeground(interval = 30, unit = TimeUnit.SECONDS)
@@ -198,7 +223,11 @@ object GlobalComponents {
                 }
             }
 
-            val restoreJob = restoreBrowserState(newComponents)
+            val isFirstFullSetup = previousMode != ComponentsMode.FULL
+            val restoreJob = restoreBrowserState(
+                newComponents,
+                restoreTabsWithoutResumingSelection = isFirstFullSetup,
+            )
             if (previousCustomTabs.isNotEmpty()) {
                 restoreJob.invokeOnCompletion {
                     GlobalScope.launch(Dispatchers.Main) {

@@ -33,6 +33,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/provid
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 
 class CompactAppBarTitle extends ConsumerWidget {
@@ -41,13 +42,21 @@ class CompactAppBarTitle extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tabState = ref.watch(selectedTabStateProvider);
+    final selectedTabType = ref.watch(selectedTabTypeProvider);
+    final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final isTabTuneledAsync = ref.watch(isTabTunneledProvider(tabState?.id));
     final showSiteSettingsBadge = ref.watch(
       showSiteSettingsBadgeProvider.select((value) => value.value == true),
     );
 
     if (tabState == null) {
-      return const SizedBox.shrink();
+      return _EmptyAppBarAddressField(
+        onTap: () async {
+          await SearchRoute(
+            tabType: selectedTabType ?? settings.effectiveDefaultCreateTabType,
+          ).push(context);
+        },
+      );
     }
 
     return CompactAppBarTitleView(
@@ -178,13 +187,21 @@ class AppBarTitle extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tabState = ref.watch(selectedTabStateProvider);
+    final selectedTabType = ref.watch(selectedTabTypeProvider);
+    final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final isTabTuneledAsync = ref.watch(isTabTunneledProvider(tabState?.id));
     final showSiteSettingsBadge = ref.watch(
       showSiteSettingsBadgeProvider.select((value) => value.value == true),
     );
 
     if (tabState == null) {
-      return const SizedBox.shrink();
+      return _EmptyAppBarAddressField(
+        onTap: () async {
+          await SearchRoute(
+            tabType: selectedTabType ?? settings.effectiveDefaultCreateTabType,
+          ).push(context);
+        },
+      );
     }
 
     return AppBarTitleView(
@@ -357,6 +374,41 @@ class _SecurityStatusIcon extends StatelessWidget {
     }
 
     return Icon(MdiIcons.timerSand, size: size);
+  }
+}
+
+class _EmptyAppBarAddressField extends StatelessWidget {
+  const _EmptyAppBarAddressField({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            'Search or enter URL',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

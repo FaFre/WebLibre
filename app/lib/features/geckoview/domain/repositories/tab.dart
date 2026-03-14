@@ -286,6 +286,20 @@ class TabRepository extends _$TabRepository {
     return false;
   }
 
+  Future<bool> resumeLatestTab() async {
+    final latestTab = await ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .getTabsFifo(limit: 1)
+        .getSingleOrNull();
+
+    if (!ref.mounted || latestTab == null) {
+      return false;
+    }
+
+    return selectTab(latestTab.id);
+  }
+
   Future<bool> selectPreviousTab(
     String tabId, {
     String? containerId,

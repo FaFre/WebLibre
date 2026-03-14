@@ -114,7 +114,6 @@ class BrowserBottomAppBar extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Material(
-      elevation: 0,
       shadowColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
       color: colorScheme.surfaceContainer,
@@ -211,8 +210,7 @@ class BrowserTabBar extends HookConsumerWidget {
 
     final dragStartPosition = useRef(Offset.zero);
 
-    final showTabTitle =
-        selectedTabId != null && displayedSheet is! ViewTabsSheet;
+    final showTabTitle = displayedSheet is! ViewTabsSheet;
 
     final backgroundColor =
         (settings.showContainerUi &&

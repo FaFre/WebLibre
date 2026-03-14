@@ -1,21 +1,30 @@
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/providers/browser_viewport_toolbar_insets.dart';
 import 'package:weblibre/features/quotes/data/database/definitions.drift.dart';
 import 'package:weblibre/features/quotes/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
-class TabsEmptyPlaceholder extends ConsumerWidget {
-  const TabsEmptyPlaceholder();
+class BrowserHome extends ConsumerWidget {
+  const BrowserHome({super.key});
 
   static const _brandPurple = Color(0xFF9C83F8);
   static const _brandYellow = Color(0xFFFBDC6B);
   static const _brandGrey = Color(0xFFA7A7A7);
+
+  static const _auraPurple = Color(0xFF2C2543);
+  static const _auraGold = Color(0xFF3C3827);
+  static const _auraShadow = Color(0xFF222224);
+  static const _auraShadowHighlight = Color(0xFF2D2D31);
+  static const _auraTint = Color(0xFF000000);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,6 +32,9 @@ class TabsEmptyPlaceholder extends ConsumerWidget {
     final colorScheme = theme.colorScheme;
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final quoteAsync = ref.watch(randomQuoteProvider);
+    final hasTabs = ref.watch(
+      tabListProvider.select((tabs) => tabs.value.isNotEmpty),
+    );
     final viewportToolbarInsets = ref.watch(
       browserViewportToolbarInsetsControllerProvider,
     );
@@ -38,6 +50,14 @@ class TabsEmptyPlaceholder extends ConsumerWidget {
       ).push(context);
     }
 
+    Future<void> viewTabs() {
+      return const TabViewRoute().push(context);
+    }
+
+    Future<void> resumeLatestTab() async {
+      await ref.read(tabRepositoryProvider.notifier).resumeLatestTab();
+    }
+
     return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -45,12 +65,15 @@ class TabsEmptyPlaceholder extends ConsumerWidget {
           end: Alignment.bottomRight,
           colors: [
             Color.alphaBlend(
-              _brandPurple.withValues(alpha: 0.06),
+              _auraPurple.withValues(alpha: 0.38),
               colorScheme.surfaceContainerLowest,
             ),
-            colorScheme.surface,
             Color.alphaBlend(
-              _brandYellow.withValues(alpha: 0.05),
+              _auraShadow.withValues(alpha: 0.72),
+              colorScheme.surface,
+            ),
+            Color.alphaBlend(
+              _auraGold.withValues(alpha: 0.34),
               colorScheme.surfaceContainerHigh,
             ),
           ],
@@ -59,25 +82,33 @@ class TabsEmptyPlaceholder extends ConsumerWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Align(
-            alignment: const Alignment(-0.9, -0.95),
+          const Positioned(
+            top: -70,
+            left: -120,
+            child: _BackdropOrb(width: 400, height: 400, color: _auraPurple),
+          ),
+          const Positioned(
+            top: 220,
+            right: -150,
+            child: _BackdropOrb(width: 340, height: 340, color: _auraGold),
+          ),
+          const Positioned(
+            bottom: 18,
+            left: -8,
             child: _BackdropOrb(
-              size: 220,
-              color: _brandPurple.withValues(alpha: 0.14),
+              width: 320,
+              height: 320,
+              color: _auraShadowHighlight,
             ),
           ),
-          Align(
-            alignment: const Alignment(1.0, -0.35),
-            child: _BackdropOrb(
-              size: 180,
-              color: _brandYellow.withValues(alpha: 0.14),
-            ),
-          ),
-          Align(
-            alignment: const Alignment(-0.75, 0.9),
-            child: _BackdropOrb(
-              size: 160,
-              color: _brandGrey.withValues(alpha: 0.12),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 72, sigmaY: 72),
+                  child: ColoredBox(color: _auraTint.withValues(alpha: 0.12)),
+                ),
+              ),
             ),
           ),
           LayoutBuilder(
@@ -148,23 +179,25 @@ class TabsEmptyPlaceholder extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(height: 24),
-                          Text(
-                            'WebLibre is ready',
-                            textAlign: TextAlign.center,
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.w700,
+                          if (!hasTabs) ...[
+                            Text(
+                              'WebLibre is ready',
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            'A browser that respects you. Open a tab and experience the web, libre.',
-                            textAlign: TextAlign.center,
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                              height: 1.45,
+                            const SizedBox(height: 10),
+                            Text(
+                              'A browser that respects you. Open a tab and experience the web, libre.',
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                                height: 1.45,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 28),
+                            const SizedBox(height: 28),
+                          ],
                           Container(
                             width: double.infinity,
                             padding: const EdgeInsets.all(20),
@@ -238,10 +271,29 @@ class TabsEmptyPlaceholder extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(height: 24),
-                          FilledButton.icon(
-                            onPressed: openNewTab,
-                            icon: const Icon(Icons.add_rounded),
-                            label: const Text('Open new tab'),
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            spacing: 12,
+                            runSpacing: 12,
+                            children: [
+                              if (hasTabs)
+                                OutlinedButton.icon(
+                                  onPressed: viewTabs,
+                                  icon: const Icon(Icons.tab_rounded),
+                                  label: const Text('View tabs'),
+                                ),
+                              FilledButton.icon(
+                                onPressed: openNewTab,
+                                icon: const Icon(Icons.add_rounded),
+                                label: const Text('New tab'),
+                              ),
+                              if (hasTabs)
+                                FilledButton.tonalIcon(
+                                  onPressed: resumeLatestTab,
+                                  icon: const Icon(Icons.history_rounded),
+                                  label: const Text('Resume last tab'),
+                                ),
+                            ],
                           ),
                         ],
                       ),
@@ -310,17 +362,22 @@ class _QuoteBlock extends StatelessWidget {
 }
 
 class _BackdropOrb extends StatelessWidget {
-  final double size;
+  final double width;
+  final double height;
   final Color color;
 
-  const _BackdropOrb({required this.size, required this.color});
+  const _BackdropOrb({
+    required this.width,
+    required this.height,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
     return IgnorePointer(
       child: Container(
-        width: size,
-        height: size,
+        width: width,
+        height: height,
         decoration: BoxDecoration(shape: BoxShape.circle, color: color),
       ),
     );
