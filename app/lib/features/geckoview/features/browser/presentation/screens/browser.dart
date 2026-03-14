@@ -817,6 +817,9 @@ class _SheetContainer extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+    final modalBarrierColor =
+        Theme.of(context).bottomSheetTheme.modalBarrierColor ??
+        colorScheme.scrim.withValues(alpha: 0.5);
 
     bool dismissOnThreshold(DraggableScrollableNotification notification) {
       if (notification.extent <= 0.1) {
@@ -833,7 +836,7 @@ class _SheetContainer extends HookConsumerWidget {
         ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
       },
       child: ColoredBox(
-        color: colorScheme.scrim.withValues(alpha: 0.5),
+        color: modalBarrierColor,
         child: GestureDetector(
           onTap: () {}, // Prevent tap from propagating to parent
           child: Align(
