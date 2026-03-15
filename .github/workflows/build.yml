@@ -77,7 +77,7 @@ jobs:
       - name: Setup Flutter dependencies
         run: |
           dart pub global activate melos
-          melos bootstrap --no-select
+          melos bootstrap
 
       - name: Build browser
         run: melos run build-browser --no-select
