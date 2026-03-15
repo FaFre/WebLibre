@@ -16,7 +16,7 @@
   </a>
 </p>
 
-WebLibre is an independent privacy-focused browser for Android built on [Mozilla's Gecko Engine](https://en.wikipedia.org/wiki/Gecko_(software)) and [Mozilla Android Components](https://mozac.org/). It offers a fully-featured web browser with extension support, enhanced by powerful privacy features, local AI assistance (opt-in), and advanced tab organization tools.
+WebLibre is an independent privacy-focused browser for Android built on [Mozilla's Gecko Engine](https://en.wikipedia.org/wiki/Gecko_(software)) and [Mozilla Android Components](https://mozac.org/). WebLibre is shipped with very strong privacy and security defaults out of the box, including innovative solutions to organize and isolate daily browsing.
 
 <p align="center">
   <a href="https://liberapay.com/FaFre/donate">
@@ -27,12 +27,15 @@ WebLibre is an independent privacy-focused browser for Android built on [Mozilla
   </a>
 </p>
 
-> **📱 Early Access**
-> WebLibre is under active development with frequent updates and new features. The browser is production-capable for early adopters who value privacy and are willing to help shape its future.
+> **Early Access**
+>
+> WebLibre is under active development with frequent updates and new features. The current focus is on feature development, so don't be surprised if there are some janks here and there. Although quite a few use the browser as a daily driver already, be aware of breaking changes!
 
 ## Join the WebLibre Community
 
-**Your voice matters.** Since WebLibre respects your privacy by design—no tracking, no telemetry—we depend on community feedback to improve. Here's how you can get involved:
+**Your voice matters.** WebLibre is a privacy oriented project and we don't believe in tracking or telemetry. That's why we decided to depend (the old school way) on community feedback to improve, whcih is taken very seriously!
+
+Here's how you can get involved:
 
 - **[Feedback Platform](https://feedback.weblibre.eu/)** - Vote on features, share ideas, and help prioritize development
 - **[Matrix Chat](https://matrix.to/#/#weblibre:unredacted.org)** - Get support, discuss ideas, and connect with other users
@@ -44,8 +47,9 @@ Whether you've discovered a bug, have a feature request, or want to share your e
 
 A core mission of WebLibre is to shield users from third-party surveillance—whether by ISPs, tracking companies, or other entities seeking to monitor or collect data on your browsing habits. WebLibre achieves this through a suite of optional privacy features, including:
 
-- [**Web Engine Hardening:**](https://docs.weblibre.eu/Privacy--and--Security#hardening--advanced-controls) Strengthens the browser’s core to resist tracking and fingerprinting techniques.
-- [**Cookie Isolation:**](https://docs.weblibre.eu/Tabs/Containers/Features/Container-Cookie-Contexts) Ensures cookies are separated by container or context, preventing cross-site tracking.
+- [**Web Engine Hardening:**](https://docs.weblibre.eu/Privacy--and--Security#hardening--advanced-controls) Strengthens the browser’s core to resist tracking and fingerprinting techniques. Reduce attack vectors and enforce highest security standards when contacting remote services.
+- **DNS over HTTPS:** Enables you to choose a secure way of resolving domain names with a provider of your choice (Quad9 is used by default)
+- [**Cookie Isolation:**](https://docs.weblibre.eu/Tabs/Containers/Features/Container-Cookie-Contexts) Ensures cookies are separated by container or tab, preventing cross-site tracking by design.
 - [**Content Blocking:**](https://docs.weblibre.eu/Privacy--and--Security#content-blocking) Blocks ads, trackers, and other unwanted content by default.
 - [**Tor Proxying:**](https://docs.weblibre.eu/Tabs/Containers/Features/Tor-Proxy) Allows you to selectively route browsing traffic through the Tor network for enhanced anonymity.
 - [**Local Search Engine:**](https://docs.weblibre.eu/Personal-Local-Search-Engine) whenever possible, your device handles search and retrieval, minimizing the need to contact remote services.
