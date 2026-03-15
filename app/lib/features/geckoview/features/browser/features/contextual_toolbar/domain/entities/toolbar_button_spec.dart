@@ -51,6 +51,11 @@ const bookmarksToolbarButtonSpec = ToolbarButtonSpec(
   defaultVisible: false,
 );
 
+const bookmarkToggleToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.bookmarkToggle,
+  defaultVisible: false,
+);
+
 const shareToolbarButtonSpec = ToolbarButtonSpec(
   id: ToolbarButtonId.share,
   defaultVisible: false,
@@ -157,6 +162,7 @@ const toolbarButtonSpecs = [
   backToolbarButtonSpec,
   forwardToolbarButtonSpec,
   bookmarksToolbarButtonSpec,
+  bookmarkToggleToolbarButtonSpec,
   shareToolbarButtonSpec,
   addTabToolbarButtonSpec,
   tabsCountToolbarButtonSpec,

@@ -22,6 +22,7 @@ enum ToolbarButtonId {
   back,
   forward,
   bookmarks,
+  bookmarkToggle,
   share,
   addTab,
   tabsCount,

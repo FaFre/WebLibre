@@ -47,12 +47,14 @@ class ShareMenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ShareMenuButtonView(
-      onPressed: () async {
-        final tabId = selectedTabId;
-        if (tabId != null) {
-          await showShareBottomSheet(context, selectedTabId: tabId);
-        }
-      },
+      onPressed: selectedTabId == null
+          ? null
+          : () async {
+              await showShareBottomSheet(
+                context,
+                selectedTabId: selectedTabId!,
+              );
+            },
     );
   }
 }

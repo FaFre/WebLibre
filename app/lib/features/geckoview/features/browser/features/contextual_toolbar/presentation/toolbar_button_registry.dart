@@ -126,9 +126,18 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     builder: (scope, context, ref) => _BookmarkToolbarButton(scope: scope),
   ),
   ToolbarButtonDefinition(
+    spec: bookmarkToggleToolbarButtonSpec,
+    label: 'Bookmark',
+    icon: Icons.bookmark_border,
+    longPressActions: ['Open Bookmarks'],
+    builder: (scope, context, ref) =>
+        _BookmarkToggleToolbarButton(scope: scope),
+  ),
+  ToolbarButtonDefinition(
     spec: shareToolbarButtonSpec,
     label: 'Share',
     icon: Icons.share,
+    isPrimaryAvailable: (scope, ref) => scope.selectedTabId != null,
     builder: (scope, context, ref) => scope.isPreview
         ? ShareMenuButtonView(onPressed: () {})
         : ShareMenuButton(selectedTabId: scope.selectedTabId),
@@ -190,6 +199,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     label: 'Reload',
     icon: Icons.refresh,
     longPressActions: ['Hard Refresh (bypass cache)'],
+    isPrimaryAvailable: (scope, ref) => scope.selectedTabId != null,
     builder: (scope, context, ref) => _ReloadToolbarButton(scope: scope),
   ),
   ToolbarButtonDefinition(
@@ -227,6 +237,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: desktopToolbarButtonSpec,
     label: 'Desktop Site',
     icon: Icons.desktop_windows,
+    isPrimaryAvailable: (scope, ref) => scope.selectedTabId != null,
     builder: (scope, context, ref) {
       if (scope.isPreview) {
         return IconButton(
@@ -243,6 +254,10 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     icon: Icons.translate,
     longPressActions: ['Show Translation Options'],
     isPrimaryAvailable: (scope, ref) {
+      if (scope.selectedTabId == null) {
+        return false;
+      }
+
       final engineState = ref.read(translationEngineStateProvider);
       final readerActive = scope.tabState?.readerableState.active ?? false;
       return !readerActive && engineState?.isEngineSupported == true;
@@ -258,6 +273,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: findInPageToolbarButtonSpec,
     label: 'Find in Page',
     icon: Icons.search,
+    isPrimaryAvailable: (scope, ref) => scope.selectedTabId != null,
     builder: (scope, context, ref) {
       return IconButton(
         onPressed: scope.isPreview
@@ -277,6 +293,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     label: 'Close Tab',
     icon: MdiIcons.tabMinus,
     longPressActions: ['Close Others', 'Close from Same Host'],
+    isPrimaryAvailable: (scope, ref) => scope.selectedTabId != null,
     builder: (scope, context, ref) => _CloseTabToolbarButton(scope: scope),
   ),
   ToolbarButtonDefinition(
@@ -319,6 +336,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
       'Clone as Private',
       'Clone as Isolated',
     ],
+    isPrimaryAvailable: (scope, ref) => scope.selectedTabId != null,
     builder: (scope, context, ref) {
       return scope.isPreview
           ? CloneTabButtonView(onPressed: () {}, onLongPress: () {})
@@ -367,6 +385,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     label: 'Page Up',
     icon: MdiIcons.chevronDoubleUp,
     longPressActions: ['Scroll to Top'],
+    isPrimaryAvailable: (scope, ref) => scope.selectedTabId != null,
     builder: (scope, context, ref) {
       return IconButton(
         onPressed: scope.isPreview
@@ -398,6 +417,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     label: 'Page Down',
     icon: MdiIcons.chevronDoubleDown,
     longPressActions: ['Scroll to Bottom'],
+    isPrimaryAvailable: (scope, ref) => scope.selectedTabId != null,
     builder: (scope, context, ref) {
       return IconButton(
         onPressed: scope.isPreview
@@ -643,32 +663,10 @@ class _BookmarkToolbarButton extends HookConsumerWidget {
     final tabUrl = scope.tabState?.url;
     final bookmarkable = tabUrl != null && !scope.isPreview;
 
-    // Walk the in-memory bookmark tree to find GUIDs for the current URL.
     final existingGuids = ref.watch(
-      bookmarksRepositoryProvider.select((async) {
-        final result = <String>[];
-
-        if (!bookmarkable) return const <String>[];
-
-        final root = async.value;
-        if (root == null) return const <String>[];
-
-        void collect(BookmarkItem item) {
-          if (item is BookmarkEntry && item.url == tabUrl) {
-            result.add(item.guid);
-          }
-
-          if (item is BookmarkFolder) {
-            for (final child in item.children ?? const <BookmarkItem>[]) {
-              collect(child);
-            }
-          }
-        }
-
-        collect(root);
-
-        return result;
-      }),
+      bookmarksRepositoryProvider.select(
+        (async) => _bookmarkGuidsForUrl(async.value, tabUrl, bookmarkable),
+      ),
     );
 
     final isBookmarked = existingGuids.isNotEmpty;
@@ -734,6 +732,94 @@ class _BookmarkToolbarButton extends HookConsumerWidget {
       ),
     );
   }
+}
+
+class _BookmarkToggleToolbarButton extends ConsumerWidget {
+  final ContextualToolbarScope scope;
+
+  const _BookmarkToggleToolbarButton({required this.scope});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tabUrl = scope.tabState?.url;
+    final bookmarkable = tabUrl != null && !scope.isPreview;
+    final existingGuids = ref.watch(
+      bookmarksRepositoryProvider.select(
+        (async) => _bookmarkGuidsForUrl(async.value, tabUrl, bookmarkable),
+      ),
+    );
+    final isBookmarked = existingGuids.isNotEmpty;
+
+    return IconButton(
+      tooltip: isBookmarked ? 'Remove bookmark' : 'Add bookmark',
+      onPressed: scope.isPreview
+          ? () {}
+          : !bookmarkable
+          ? null
+          : () async {
+              if (isBookmarked) {
+                for (final guid in existingGuids) {
+                  await ref
+                      .read(bookmarksRepositoryProvider.notifier)
+                      .delete(guid);
+                }
+
+                if (context.mounted) {
+                  ui_helper.showInfoMessage(context, 'Bookmark removed');
+                }
+
+                return;
+              }
+
+              await ref
+                  .read(bookmarksRepositoryProvider.notifier)
+                  .addBookmark(
+                    parentGuid: BookmarkRoot.mobile.id,
+                    url: tabUrl,
+                    title: scope.tabState!.titleOrAuthority,
+                  );
+
+              if (context.mounted) {
+                ui_helper.showInfoMessage(context, 'Bookmark added');
+              }
+            },
+      onLongPress: scope.isPreview
+          ? null
+          : () async {
+              await BookmarkListRoute(
+                entryGuid: BookmarkRoot.root.id,
+              ).push(context);
+            },
+      icon: Icon(isBookmarked ? Icons.bookmark : Icons.bookmark_border),
+    );
+  }
+}
+
+List<String> _bookmarkGuidsForUrl(
+  BookmarkItem? root,
+  Uri? tabUrl,
+  bool bookmarkable,
+) {
+  final result = <String>[];
+
+  if (!bookmarkable || root == null || tabUrl == null) {
+    return result;
+  }
+
+  void collect(BookmarkItem item) {
+    if (item is BookmarkEntry && item.url == tabUrl) {
+      result.add(item.guid);
+    }
+
+    if (item is BookmarkFolder) {
+      for (final child in item.children ?? const <BookmarkItem>[]) {
+        collect(child);
+      }
+    }
+  }
+
+  collect(root);
+  return result;
 }
 
 Future<void> _adjustFontSize(
@@ -814,9 +900,9 @@ class _DesktopModeToolbarButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (selectedTabId == null) {
-      return IconButton(
-        onPressed: () {},
-        icon: const Icon(Icons.desktop_windows),
+      return const IconButton(
+        onPressed: null,
+        icon: Icon(Icons.desktop_windows),
       );
     }
 
