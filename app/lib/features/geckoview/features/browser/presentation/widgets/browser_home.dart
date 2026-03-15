@@ -9,6 +9,9 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/providers/browser_viewport_toolbar_insets.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/quotes/data/database/definitions.drift.dart';
 import 'package:weblibre/features/quotes/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -39,6 +42,18 @@ class BrowserHome extends ConsumerWidget {
       browserViewportToolbarInsetsControllerProvider,
     );
 
+    final containerData = ref.watch(
+      selectedContainerDataProvider.select((value) => value.value),
+    );
+    final hasContainerTabs = ref.watch(
+      selectedContainerTabCountProvider.select(
+        (data) => switch (data) {
+          AsyncData(:final value) => value > 0,
+          _ => false,
+        },
+      ),
+    );
+
     final pixelRatio = MediaQuery.devicePixelRatioOf(context);
 
     final bottomViewportInset =
@@ -56,6 +71,13 @@ class BrowserHome extends ConsumerWidget {
 
     Future<void> resumeLatestTab() async {
       await ref.read(tabRepositoryProvider.notifier).resumeLatestTab();
+    }
+
+    Future<void> resumeLatestContainerTab() async {
+      final containerId = ref.read(selectedContainerProvider);
+      await ref
+          .read(tabRepositoryProvider.notifier)
+          .resumeLatestContainerTab(containerId);
     }
 
     return DecoratedBox(
@@ -135,49 +157,10 @@ class BrowserHome extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Container(
-                            width: 112,
-                            height: 112,
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(32),
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  Color.alphaBlend(
-                                    _brandPurple.withValues(alpha: 0.18),
-                                    colorScheme.surfaceContainerHighest,
-                                  ),
-                                  Color.alphaBlend(
-                                    _brandYellow.withValues(alpha: 0.12),
-                                    colorScheme.surfaceContainer,
-                                  ),
-                                ],
-                              ),
-                              border: Border.all(
-                                color: colorScheme.outlineVariant.withValues(
-                                  alpha: 0.45,
-                                ),
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: colorScheme.shadow.withValues(
-                                    alpha: 0.08,
-                                  ),
-                                  blurRadius: 32,
-                                  offset: const Offset(0, 18),
-                                ),
-                              ],
-                            ),
-                            child: Center(
-                              child: SvgPicture.asset(
-                                'assets/icon/icon.svg',
-                                width: 72,
-                                height: 72,
-                              ),
-                            ),
-                          ),
+                          if (containerData != null)
+                            _ContainerHeader(container: containerData)
+                          else
+                            _BrandHeader(colorScheme: colorScheme),
                           const SizedBox(height: 24),
                           if (!hasTabs) ...[
                             Text(
@@ -190,6 +173,28 @@ class BrowserHome extends ConsumerWidget {
                             const SizedBox(height: 10),
                             Text(
                               'A browser that respects you. Open a tab and experience the web, libre.',
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                                height: 1.45,
+                              ),
+                            ),
+                            const SizedBox(height: 28),
+                          ] else if (containerData != null) ...[
+                            Text(
+                              containerData.name?.isNotEmpty == true
+                                  ? containerData.name!
+                                  : 'Container',
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              hasContainerTabs
+                                  ? 'No matching tab selected'
+                                  : 'No open tabs in this container',
                               textAlign: TextAlign.center,
                               style: theme.textTheme.bodyLarge?.copyWith(
                                 color: colorScheme.onSurfaceVariant,
@@ -287,7 +292,13 @@ class BrowserHome extends ConsumerWidget {
                                 icon: const Icon(Icons.add_rounded),
                                 label: const Text('New tab'),
                               ),
-                              if (hasTabs)
+                              if (hasContainerTabs)
+                                FilledButton.tonalIcon(
+                                  onPressed: resumeLatestContainerTab,
+                                  icon: const Icon(Icons.history_rounded),
+                                  label: const Text('Resume last tab'),
+                                )
+                              else if (hasTabs && containerData == null)
                                 FilledButton.tonalIcon(
                                   onPressed: resumeLatestTab,
                                   icon: const Icon(Icons.history_rounded),
@@ -304,6 +315,102 @@ class BrowserHome extends ConsumerWidget {
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _BrandHeader extends StatelessWidget {
+  final ColorScheme colorScheme;
+
+  const _BrandHeader({required this.colorScheme});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 112,
+      height: 112,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(32),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color.alphaBlend(
+              BrowserHome._brandPurple.withValues(alpha: 0.18),
+              colorScheme.surfaceContainerHighest,
+            ),
+            Color.alphaBlend(
+              BrowserHome._brandYellow.withValues(alpha: 0.12),
+              colorScheme.surfaceContainer,
+            ),
+          ],
+        ),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.45),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.shadow.withValues(alpha: 0.08),
+            blurRadius: 32,
+            offset: const Offset(0, 18),
+          ),
+        ],
+      ),
+      child: Center(
+        child: SvgPicture.asset('assets/icon/icon.svg', width: 72, height: 72),
+      ),
+    );
+  }
+}
+
+class _ContainerHeader extends StatelessWidget {
+  final ContainerData container;
+
+  const _ContainerHeader({required this.container});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final containerColor = container.color;
+
+    return Container(
+      width: 112,
+      height: 112,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(32),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color.alphaBlend(
+              ContainerColors.forChip(containerColor),
+              colorScheme.surfaceContainerHighest,
+            ),
+            Color.alphaBlend(
+              containerColor.withValues(alpha: 0.12),
+              colorScheme.surfaceContainer,
+            ),
+          ],
+        ),
+        border: Border.all(
+          color: Color.alphaBlend(
+            containerColor.withValues(alpha: 0.25),
+            colorScheme.outlineVariant.withValues(alpha: 0.45),
+          ),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.shadow.withValues(alpha: 0.08),
+            blurRadius: 32,
+            offset: const Offset(0, 18),
+          ),
+        ],
+      ),
+      child: Center(
+        child: SvgPicture.asset('assets/icon/icon.svg', width: 72, height: 72),
       ),
     );
   }

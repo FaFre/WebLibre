@@ -26,6 +26,7 @@ import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
@@ -163,6 +164,37 @@ Stream<ContainerData?> selectedContainerData(Ref ref) {
   }
 
   return Stream.value(null);
+}
+
+/// Whether the browser home screen should be displayed instead of the
+/// active tab's content.
+///
+/// Returns `true` when any of the following hold:
+/// 1. No tab is selected at all (app just started or all tabs closed).
+/// 2. The selected tab belongs to a different container than the currently
+///    selected container – this implies the user manually switched
+///    containers after selecting a tab, because tab selection automatically
+///    syncs the selected container to match the tab's container.
+///
+/// Condition (2) also implicitly covers the case where the selected
+/// container has zero tabs: if the container has no tabs, the selected tab
+/// (if any) necessarily belongs to a different container.
+@Riverpod()
+bool shouldShowBrowserHome(Ref ref) {
+  final selectedTab = ref.watch(selectedTabProvider);
+
+  // No tab selected → always show home.
+  if (selectedTab == null) return true;
+
+  final selectedContainer = ref.watch(selectedContainerProvider);
+  final tabContainerId = ref.watch(selectedTabContainerIdProvider);
+
+  // Once we know the tab's container, compare with the selected container.
+  return switch (tabContainerId) {
+    AsyncData(:final value) => value != selectedContainer,
+    // While loading, keep the current view to avoid flashing.
+    _ => false,
+  };
 }
 
 @Riverpod()

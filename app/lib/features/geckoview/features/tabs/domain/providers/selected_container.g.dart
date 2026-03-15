@@ -41,7 +41,7 @@ final class SelectedContainerProvider
   }
 }
 
-String _$selectedContainerHash() => r'1e2c67dc70fedb2b910640fbfbe09f2c4806894b';
+String _$selectedContainerHash() => r'3d30966f0b8a8ee091afb48fb045be2274f4f417';
 
 abstract class _$SelectedContainer extends $Notifier<String?> {
   String? build();
@@ -100,6 +100,89 @@ final class SelectedContainerDataProvider
 
 String _$selectedContainerDataHash() =>
     r'1ec86a82e1fc4823a867285f05036c903633a165';
+
+/// Whether the browser home screen should be displayed instead of the
+/// active tab's content.
+///
+/// Returns `true` when any of the following hold:
+/// 1. No tab is selected at all (app just started or all tabs closed).
+/// 2. The selected tab belongs to a different container than the currently
+///    selected container – this implies the user manually switched
+///    containers after selecting a tab, because tab selection automatically
+///    syncs the selected container to match the tab's container.
+///
+/// Condition (2) also implicitly covers the case where the selected
+/// container has zero tabs: if the container has no tabs, the selected tab
+/// (if any) necessarily belongs to a different container.
+
+@ProviderFor(shouldShowBrowserHome)
+final shouldShowBrowserHomeProvider = ShouldShowBrowserHomeProvider._();
+
+/// Whether the browser home screen should be displayed instead of the
+/// active tab's content.
+///
+/// Returns `true` when any of the following hold:
+/// 1. No tab is selected at all (app just started or all tabs closed).
+/// 2. The selected tab belongs to a different container than the currently
+///    selected container – this implies the user manually switched
+///    containers after selecting a tab, because tab selection automatically
+///    syncs the selected container to match the tab's container.
+///
+/// Condition (2) also implicitly covers the case where the selected
+/// container has zero tabs: if the container has no tabs, the selected tab
+/// (if any) necessarily belongs to a different container.
+
+final class ShouldShowBrowserHomeProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Whether the browser home screen should be displayed instead of the
+  /// active tab's content.
+  ///
+  /// Returns `true` when any of the following hold:
+  /// 1. No tab is selected at all (app just started or all tabs closed).
+  /// 2. The selected tab belongs to a different container than the currently
+  ///    selected container – this implies the user manually switched
+  ///    containers after selecting a tab, because tab selection automatically
+  ///    syncs the selected container to match the tab's container.
+  ///
+  /// Condition (2) also implicitly covers the case where the selected
+  /// container has zero tabs: if the container has no tabs, the selected tab
+  /// (if any) necessarily belongs to a different container.
+  ShouldShowBrowserHomeProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'shouldShowBrowserHomeProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$shouldShowBrowserHomeHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return shouldShowBrowserHome(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$shouldShowBrowserHomeHash() =>
+    r'644344c9abe06e0273dad584e75a53dc417781ad';
 
 @ProviderFor(selectedContainerTabCount)
 final selectedContainerTabCountProvider = SelectedContainerTabCountProvider._();

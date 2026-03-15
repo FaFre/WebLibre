@@ -34,7 +34,6 @@ import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/services/search_history_cleanup.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/browser_extension.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
@@ -50,6 +49,7 @@ import 'package:weblibre/features/geckoview/features/history/domain/repositories
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
@@ -150,9 +150,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       }
     });
 
-    final hasTab = ref.watch(
-      selectedTabProvider.select((value) => value != null),
-    );
+    final showHome = ref.watch(shouldShowBrowserHomeProvider);
 
     final topRoute = ref.watch(currentTopRouteProvider);
     final androidInfoAsync = ref.watch(androidDeviceInfoProvider);
@@ -291,7 +289,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
               },
             ),
           ),
-          if (!hasTab) const Positioned.fill(child: BrowserHome()),
+          if (showHome) const Positioned.fill(child: BrowserHome()),
         ],
       ),
     );
