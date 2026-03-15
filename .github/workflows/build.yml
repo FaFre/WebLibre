@@ -62,18 +62,6 @@ jobs:
           bundle config path vendor/bundle
           bundle install
 
-      - name: Build container proxy
-        working-directory: packages/flutter_mozilla_components/javascript/container_proxy
-        run: |
-          npm ci
-          npx webpack
-
-      - name: Build readability
-        working-directory: packages/flutter_mozilla_components/javascript/readability
-        run: |
-          npm ci
-          npx webpack
-
       - name: Create key file
         working-directory: app
         run: |
@@ -87,14 +75,12 @@ jobs:
           cache: true
 
       - name: Setup Flutter dependencies
-        working-directory: app
         run: |
           dart pub global activate melos
-          melos bootstrap
+          melos bootstrap --no-select
 
-      - name: Build APK
-        working-directory: app
-        run: flutter build apk --release --target-platform android-arm,android-arm64 --split-per-abi --no-tree-shake-icons
+      - name: Build browser
+        run: melos run build-browser --no-select
 
       - name: Build App Bundle
         if: steps.build-type.outputs.is_prerelease == 'false'

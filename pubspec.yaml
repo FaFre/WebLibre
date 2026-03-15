@@ -67,3 +67,18 @@ melos:
     format:
       description: Format all Dart files in the workspace
       exec: dart format .
+    build-browser:
+      description: Run all preparation scripts and build APK + App Bundle
+      run: |
+        set -e
+        echo "=== Running preparation scripts ==="
+        sh scripts/build-container-proxy.sh
+        sh scripts/build-readability.sh
+        bash scripts/download_bangs.sh
+        python3 scripts/build_quotes_db.py
+        sh scripts/update-bridges.sh
+        sh scripts/update-url-cleaner-catalog.sh
+        sh scripts/update-url-shorteners.sh
+        echo "=== Building APK ==="
+        cd app
+        flutter build apk --release --target-platform android-arm,android-arm64 --split-per-abi --no-tree-shake-icons
