@@ -69,25 +69,27 @@ class TrackingProtectionExceptionsScreen extends HookConsumerWidget {
           ),
         ],
       ),
-      body: exceptionsAsync.when(
-        data: (exceptions) {
-          if (exceptions.isEmpty) {
-            return const _EmptyState();
-          }
+      body: SafeArea(
+        child: exceptionsAsync.when(
+          data: (exceptions) {
+            if (exceptions.isEmpty) {
+              return const _EmptyState();
+            }
 
-          return ListView.builder(
-            itemCount: exceptions.length,
-            itemBuilder: (context, index) {
-              final exception = exceptions[index];
-              return _ExceptionTile(
-                exception: exception,
-                onDelete: () => _deleteException(context, ref, exception),
-              );
-            },
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => _ErrorState(error: error.toString()),
+            return ListView.builder(
+              itemCount: exceptions.length,
+              itemBuilder: (context, index) {
+                final exception = exceptions[index];
+                return _ExceptionTile(
+                  exception: exception,
+                  onDelete: () => _deleteException(context, ref, exception),
+                );
+              },
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => _ErrorState(error: error.toString()),
+        ),
       ),
     );
   }

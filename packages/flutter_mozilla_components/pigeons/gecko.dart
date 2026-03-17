@@ -1149,6 +1149,8 @@ abstract class GeckoBrowserApi {
     required bool private,
     required String? contextId,
   });
+  bool isDefaultBrowser();
+  void requestDefaultBrowser();
 }
 
 enum SyncEngineValue { history, bookmarks, tabs }

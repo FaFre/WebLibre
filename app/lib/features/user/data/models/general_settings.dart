@@ -239,7 +239,7 @@ class GeneralSettings with FastEquatable {
        tabBarShowContextualBar = tabBarShowContextualBar ?? true,
        tabBarShowQuickTabSwitcherBar = tabBarShowQuickTabSwitcherBar ?? true,
        tabBarPosition = tabBarPosition ?? TabBarPosition.bottom,
-       tabBarLayout = tabBarLayout ?? TabBarLayout.withTitle,
+       tabBarLayout = tabBarLayout ?? TabBarLayout.compact,
        quickTabSwitcherMode =
            quickTabSwitcherMode ?? QuickTabSwitcherMode.lastUsedTabs,
        pullToRefreshEnabled = pullToRefreshEnabled ?? true,

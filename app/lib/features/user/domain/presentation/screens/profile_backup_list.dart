@@ -39,57 +39,61 @@ class ProfileBackupListScreen extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Backups')),
-      body: backupListAsync.when(
-        data: (backupList) {
-          return ListView.builder(
-            itemCount: backupList.length,
-            itemBuilder: (context, index) {
-              final file = backupList[index];
-              final match = _filenamePattern.firstMatch(p.basename(file.path));
-
-              if (match != null) {
-                final profileName = match.group(1)!;
-                final datePart = match.group(2)!;
-
-                // Reparse into DateTime
-                final dateTime = UserBackupService.dateFormatter.decode(
-                  datePart,
+      body: SafeArea(
+        child: backupListAsync.when(
+          data: (backupList) {
+            return ListView.builder(
+              itemCount: backupList.length,
+              itemBuilder: (context, index) {
+                final file = backupList[index];
+                final match = _filenamePattern.firstMatch(
+                  p.basename(file.path),
                 );
 
-                return ListTile(
-                  key: ValueKey(file.path),
-                  title: Text(profileName),
-                  subtitle: Text(
-                    ref.read(formatProvider.notifier).fullDateTime(dateTime),
-                  ),
-                  onTap: () async {
-                    await RestoreProfileRoute(
-                      backupFilePath: file.path,
-                    ).push(context);
-                  },
-                );
-              } else {
-                return ListTile(
-                  key: ValueKey(file.path),
-                  title: Text(p.basename(file.path)),
-                  onTap: () async {
-                    await RestoreProfileRoute(
-                      backupFilePath: file.path,
-                    ).push(context);
-                  },
-                );
-              }
-            },
-          );
-        },
-        error: (error, stackTrace) => FailureWidget(
-          title: 'Failed to get backups',
-          exception: error,
-          onRetry: () {
-            ref.invalidate(backupListProvider);
+                if (match != null) {
+                  final profileName = match.group(1)!;
+                  final datePart = match.group(2)!;
+
+                  // Reparse into DateTime
+                  final dateTime = UserBackupService.dateFormatter.decode(
+                    datePart,
+                  );
+
+                  return ListTile(
+                    key: ValueKey(file.path),
+                    title: Text(profileName),
+                    subtitle: Text(
+                      ref.read(formatProvider.notifier).fullDateTime(dateTime),
+                    ),
+                    onTap: () async {
+                      await RestoreProfileRoute(
+                        backupFilePath: file.path,
+                      ).push(context);
+                    },
+                  );
+                } else {
+                  return ListTile(
+                    key: ValueKey(file.path),
+                    title: Text(p.basename(file.path)),
+                    onTap: () async {
+                      await RestoreProfileRoute(
+                        backupFilePath: file.path,
+                      ).push(context);
+                    },
+                  );
+                }
+              },
+            );
           },
+          error: (error, stackTrace) => FailureWidget(
+            title: 'Failed to get backups',
+            exception: error,
+            onRetry: () {
+              ref.invalidate(backupListProvider);
+            },
+          ),
+          loading: () => const Center(child: CircularProgressIndicator()),
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
       ),
     );
   }

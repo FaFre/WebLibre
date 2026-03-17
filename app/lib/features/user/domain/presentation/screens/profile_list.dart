@@ -46,35 +46,38 @@ class ProfileListScreen extends HookConsumerWidget {
           ),
         ],
       ),
-      body: usersAsync.when(
-        skipLoadingOnReload: true,
-        data: (profiles) => ListView.builder(
-          itemCount: profiles.length,
-          itemBuilder: (context, index) {
-            final profile = profiles[index];
-            final isSelected = filesystem.selectedProfile == profile.uuidValue;
+      body: SafeArea(
+        child: usersAsync.when(
+          skipLoadingOnReload: true,
+          data: (profiles) => ListView.builder(
+            itemCount: profiles.length,
+            itemBuilder: (context, index) {
+              final profile = profiles[index];
+              final isSelected =
+                  filesystem.selectedProfile == profile.uuidValue;
 
-            return ListTile(
-              enabled: !isSelected,
-              leading: const Icon(Icons.person),
-              title: Text(profile.name),
-              subtitle: isSelected ? const Text('Active') : null,
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () async {
-                await EditProfileRoute(
-                  profile: jsonEncode(profile.toJson()),
-                ).push(context);
-              },
-            );
-          },
-        ),
-        error: (error, stackTrace) => Center(
-          child: FailureWidget(
-            title: 'Failed to load Profiles',
-            exception: error,
+              return ListTile(
+                enabled: !isSelected,
+                leading: const Icon(Icons.person),
+                title: Text(profile.name),
+                subtitle: isSelected ? const Text('Active') : null,
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () async {
+                  await EditProfileRoute(
+                    profile: jsonEncode(profile.toJson()),
+                  ).push(context);
+                },
+              );
+            },
           ),
+          error: (error, stackTrace) => Center(
+            child: FailureWidget(
+              title: 'Failed to load Profiles',
+              exception: error,
+            ),
+          ),
+          loading: () => const Center(child: CircularProgressIndicator()),
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {

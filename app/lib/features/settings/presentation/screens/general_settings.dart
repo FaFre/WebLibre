@@ -20,11 +20,15 @@
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
+    show GeckoBrowserService;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
+import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/presentation/hooks/cached_future.dart';
 
 class GeneralSettingsScreen extends StatelessWidget {
   const GeneralSettingsScreen({super.key});
@@ -40,10 +44,75 @@ class GeneralSettingsScreen extends StatelessWidget {
             return ListView(
               controller: controller,
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              children: const [_AppearanceSection(), _DownloadsSection()],
+              children: const [
+                _DefaultBrowserSection(),
+                _AppearanceSection(),
+                _DownloadsSection(),
+              ],
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _DefaultBrowserSection extends StatelessWidget {
+  const _DefaultBrowserSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        SettingSection(name: 'Default Browser'),
+        _DefaultBrowserTile(),
+      ],
+    );
+  }
+}
+
+class _DefaultBrowserTile extends HookConsumerWidget {
+  const _DefaultBrowserTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final defaultBrowserRefreshKey = useState(0);
+
+    useOnAppLifecycleStateChange((previous, current) {
+      if (current == AppLifecycleState.resumed) {
+        defaultBrowserRefreshKey.value++;
+      }
+    });
+
+    final isDefault = useCachedFuture(
+      () => GeckoBrowserService().isDefaultBrowser(),
+      [defaultBrowserRefreshKey.value],
+    );
+
+    final isCurrentDefaultBrowser = isDefault.data == true;
+
+    return CustomListTile(
+      title: 'Default Browser',
+      subtitle: isCurrentDefaultBrowser
+          ? 'WebLibre is your default browser'
+          : 'Set WebLibre as your default browser',
+      prefix: Padding(
+        padding: const EdgeInsets.only(right: 16.0),
+        child: Icon(
+          Icons.public,
+          size: 24,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+      ),
+      suffix: FilledButton.icon(
+        onPressed: isCurrentDefaultBrowser
+            ? null
+            : () async {
+                await GeckoBrowserService().requestDefaultBrowser();
+                defaultBrowserRefreshKey.value++;
+              },
+        icon: Icon(isCurrentDefaultBrowser ? Icons.check : Icons.open_in_new),
+        label: Text(isCurrentDefaultBrowser ? 'Default' : 'Set'),
       ),
     );
   }

@@ -59,21 +59,23 @@ class LockScreen extends HookConsumerWidget {
     });
 
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(MdiIcons.lock, size: 64),
-            const SizedBox(height: 16),
-            const Text('Profile is locked'),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              style: FilledButton.styleFrom(minimumSize: const Size(160, 40)),
-              icon: const Icon(MdiIcons.fingerprint),
-              label: Text(isAuthenticating.value ? 'Unlocking...' : 'Unlock'),
-              onPressed: isAuthenticating.value ? null : authenticate,
-            ),
-          ],
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(MdiIcons.lock, size: 64),
+              const SizedBox(height: 16),
+              const Text('Profile is locked'),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                style: FilledButton.styleFrom(minimumSize: const Size(160, 40)),
+                icon: const Icon(MdiIcons.fingerprint),
+                label: Text(isAuthenticating.value ? 'Unlocking...' : 'Unlock'),
+                onPressed: isAuthenticating.value ? null : authenticate,
+              ),
+            ],
+          ),
         ),
       ),
     );

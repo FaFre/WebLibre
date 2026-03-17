@@ -18,28 +18,390 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/features/onboarding/domain/entities/onboarding_mode.dart';
+import 'package:weblibre/features/onboarding/domain/providers.dart';
+import 'package:weblibre/presentation/widgets/browser_page.dart';
 
-class WelcomePage extends StatelessWidget {
-  const WelcomePage({super.key});
+class WelcomePage extends ConsumerWidget {
+  final bool isReturningUser;
+
+  const WelcomePage({super.key, this.isReturningUser = false});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    final selectedMode = ref.watch(onboardingModeProvider);
+    final accepted = ref.watch(eulaAcceptedProvider);
+
+    return BrowserPage(
+      child: BrowserPageContent(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            BrandHeader(colorScheme: colorScheme),
+            const SizedBox(height: 24),
+            Text(
+              isReturningUser ? 'Welcome back!' : 'WebLibre is ready',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            if (isReturningUser) ...[
+              const SizedBox(height: 16),
+              _UpdateNotice(colorScheme: colorScheme, theme: theme),
+            ],
+            if (!isReturningUser) ...[
+              const SizedBox(height: 40),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Choose your onboarding experience:',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              _ModeOption(
+                mode: OnboardingMode.express,
+                title: 'Quick Start',
+                subtitle: 'Use recommended defaults and get browsing.',
+                icon: Icons.bolt,
+                selected: selectedMode == OnboardingMode.express,
+                onTap: () => ref
+                    .read(onboardingModeProvider.notifier)
+                    .select(OnboardingMode.express),
+              ),
+              const SizedBox(height: 12),
+              _ModeOption(
+                mode: OnboardingMode.detailed,
+                title: 'Custom Setup',
+                subtitle: 'Configure DNS, toolbar, extensions, and more.',
+                icon: Icons.tune,
+                selected: selectedMode == OnboardingMode.detailed,
+                onTap: () => ref
+                    .read(onboardingModeProvider.notifier)
+                    .select(OnboardingMode.detailed),
+              ),
+            ],
+            const SizedBox(height: 40),
+            _EulaCheckbox(
+              accepted: accepted,
+              onAcceptedChanged: (value) =>
+                  ref.read(eulaAcceptedProvider.notifier).accept(value),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _UpdateNotice extends StatelessWidget {
+  final ColorScheme colorScheme;
+  final ThemeData theme;
+
+  const _UpdateNotice({required this.colorScheme, required this.theme});
 
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 24),
-        FractionallySizedBox(
-          widthFactor: 0.5,
-          child: SvgPicture.asset('assets/icon/icon.svg'),
-        ),
-        const SizedBox(height: 24),
-        Text(
-          'The Privacy-Focused Browser',
-          softWrap: true,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headlineMedium,
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: colorScheme.primaryContainer.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: colorScheme.primary.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.auto_awesome,
+                    color: BrowserPage.brandYellow,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'A lot has changed!',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'This update includes significant changes that require '
+                'you to review your settings. Please walk through the '
+                'following pages to revalidate your configuration.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.extension,
+                    size: 16,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Please re-check your extensions after this update '
+                      'due to known migration issues.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.shield_outlined,
+                    size: 16,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Your existing settings will not be overridden '
+                      'unless you explicitly change them during this setup.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ],
+    );
+  }
+}
+
+class _ModeOption extends StatelessWidget {
+  final OnboardingMode mode;
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _ModeOption({
+    required this.mode,
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: selected
+              ? colorScheme.primaryContainer.withValues(alpha: 0.4)
+              : colorScheme.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: selected ? colorScheme.primary : Colors.transparent,
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: selected
+                  ? BrowserPage.brandYellow
+                  : colorScheme.onSurfaceVariant,
+              size: 28,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: selected
+                          ? colorScheme.onSurface
+                          : colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: selected
+                          ? colorScheme.onSurfaceVariant
+                          : colorScheme.outline,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (selected) Icon(Icons.check_circle, color: colorScheme.primary),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EulaCheckbox extends StatelessWidget {
+  final bool accepted;
+  final ValueChanged<bool> onAcceptedChanged;
+
+  const _EulaCheckbox({
+    required this.accepted,
+    required this.onAcceptedChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return CheckboxListTile.adaptive(
+      contentPadding: EdgeInsets.zero,
+      value: accepted,
+      controlAffinity: ListTileControlAffinity.leading,
+      onChanged: (value) => onAcceptedChanged(value ?? false),
+      title: Wrap(
+        children: [
+          Text(
+            'I have read and accept the ',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          GestureDetector(
+            onTap: () => _showLegalDocument(
+              context,
+              title: 'End User License Agreement',
+              assetPath: 'assets/legal/EULA.md',
+            ),
+            child: Text(
+              'EULA',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: BrowserPage.brandYellow,
+                decoration: TextDecoration.underline,
+                decorationColor: BrowserPage.brandYellow,
+              ),
+            ),
+          ),
+          Text(
+            ' and ',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          GestureDetector(
+            onTap: () => _showLegalDocument(
+              context,
+              title: 'Privacy Policy',
+              assetPath: 'assets/legal/PRIVACY_POLICY.md',
+            ),
+            child: Text(
+              'Privacy Policy',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: BrowserPage.brandYellow,
+                decoration: TextDecoration.underline,
+                decorationColor: BrowserPage.brandYellow,
+              ),
+            ),
+          ),
+          Text(
+            '.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showLegalDocument(
+    BuildContext context, {
+    required String title,
+    required String assetPath,
+  }) async {
+    final content = await rootBundle.loadString(assetPath);
+
+    if (!context.mounted) return;
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (context, scrollController) => Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: Markdown(controller: scrollController, data: content),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -56,4 +56,12 @@ class GeckoBrowserService {
       contextId: contextId,
     );
   }
+
+  Future<bool> isDefaultBrowser() {
+    return _api.isDefaultBrowser();
+  }
+
+  Future<void> requestDefaultBrowser() {
+    return _api.requestDefaultBrowser();
+  }
 }

@@ -45,70 +45,75 @@ class ContainerSelectionScreen extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Select Container')),
-      body: Skeletonizer(
-        enabled: containersAsync.isLoading,
-        child: containersAsync.when(
-          skipLoadingOnReload: true,
-          data: (containers) => FadingScroll(
-            fadingSize: 25,
-            builder: (context, controller) {
-              return ListView.builder(
-                controller: controller,
-                itemCount: containers.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return ListTileTheme(
-                      selectedColor: Theme.of(
-                        context,
-                      ).colorScheme.onPrimaryContainer,
-                      selectedTileColor: Theme.of(
-                        context,
-                      ).colorScheme.primaryContainer,
-                      child: ListTile(
-                        selected: selectedContainerId == null,
-                        leading: CircleAvatar(
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.surfaceContainerHighest,
-                          child: const Icon(MdiIcons.folderHidden),
+      body: SafeArea(
+        child: Skeletonizer(
+          enabled: containersAsync.isLoading,
+          child: containersAsync.when(
+            skipLoadingOnReload: true,
+            data: (containers) => FadingScroll(
+              fadingSize: 25,
+              builder: (context, controller) {
+                return ListView.builder(
+                  controller: controller,
+                  itemCount: containers.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return ListTileTheme(
+                        selectedColor: Theme.of(
+                          context,
+                        ).colorScheme.onPrimaryContainer,
+                        selectedTileColor: Theme.of(
+                          context,
+                        ).colorScheme.primaryContainer,
+                        child: ListTile(
+                          selected: selectedContainerId == null,
+                          leading: CircleAvatar(
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHighest,
+                            child: const Icon(MdiIcons.folderHidden),
+                          ),
+                          title: const Text('Unassigned'),
+                          onTap: () {
+                            context.pop<ContainerSelectionResult>(
+                              const ContainerSelectionResult.unassigned(),
+                            );
+                          },
                         ),
-                        title: const Text('Unassigned'),
-                        onTap: () {
-                          context.pop<ContainerSelectionResult>(
-                            const ContainerSelectionResult.unassigned(),
-                          );
-                        },
-                      ),
-                    );
-                  }
-
-                  final container = containers[index - 1];
-                  return ContainerListTile(
-                    container,
-                    isSelected: container.id == selectedContainerId,
-                    onTap: () {
-                      context.pop<ContainerSelectionResult>(
-                        ContainerSelectionResult.selected(container.id),
                       );
-                    },
-                  );
-                },
-              );
-            },
-          ),
-          error: (error, stackTrace) => Center(
-            child: FailureWidget(
-              title: 'Failed to load containers',
-              exception: error,
-              onRetry: () => ref.invalidate(watchContainersWithCountProvider),
+                    }
+
+                    final container = containers[index - 1];
+                    return ContainerListTile(
+                      container,
+                      isSelected: container.id == selectedContainerId,
+                      onTap: () {
+                        context.pop<ContainerSelectionResult>(
+                          ContainerSelectionResult.selected(container.id),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
             ),
-          ),
-          loading: () => ListView.builder(
-            itemCount: 3,
-            itemBuilder: (context, index) => ContainerListTile(
-              ContainerData(id: Namespace.nil.value, color: Colors.transparent),
-              isSelected: false,
-              onTap: null,
+            error: (error, stackTrace) => Center(
+              child: FailureWidget(
+                title: 'Failed to load containers',
+                exception: error,
+                onRetry: () => ref.invalidate(watchContainersWithCountProvider),
+              ),
+            ),
+            loading: () => ListView.builder(
+              itemCount: 3,
+              itemBuilder: (context, index) => ContainerListTile(
+                ContainerData(
+                  id: Namespace.nil.value,
+                  color: Colors.transparent,
+                ),
+                isSelected: false,
+                onTap: null,
+              ),
             ),
           ),
         ),

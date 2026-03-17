@@ -29,33 +29,35 @@ class BangMenuScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(title: const Text('Bangs')),
-      body: ListView(
-        children: [
-          ListTile(
-            leading: const Icon(MdiIcons.accountAlert),
-            title: const Text('Manage User Bangs'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () async {
-              await const UserBangsRoute().push(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.search),
-            title: const Text('Search Bangs'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () async {
-              await const BangSearchRoute().push(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(MdiIcons.fileTree),
-            title: const Text('Browse Categories'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () async {
-              await const BangCategoriesRoute().push(context);
-            },
-          ),
-        ],
+      body: SafeArea(
+        child: ListView(
+          children: [
+            ListTile(
+              leading: const Icon(MdiIcons.accountAlert),
+              title: const Text('Manage User Bangs'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () async {
+                await const UserBangsRoute().push(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.search),
+              title: const Text('Search Bangs'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () async {
+                await const BangSearchRoute().push(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(MdiIcons.fileTree),
+              title: const Text('Browse Categories'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () async {
+                await const BangCategoriesRoute().push(context);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

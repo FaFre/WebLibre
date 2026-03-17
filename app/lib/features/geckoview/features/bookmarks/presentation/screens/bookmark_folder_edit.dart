@@ -99,69 +99,71 @@ class BookmarkFolderEditScreen extends HookConsumerWidget {
           ),
         ],
       ),
-      body: Form(
-        key: formKey,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-          child: ListView(
-            children: [
-              TextFormField(
-                controller: nameTextController,
-                decoration: const InputDecoration(
-                  label: Text('Name'),
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                ),
-                validator: validateRequired,
-              ),
-              const SizedBox(height: 16),
-              if (!isBookmarkRoot) ...[
-                FolderTreePicker(
-                  selectedFolderGuid: currentParentGuid,
-                  excludeFolderGuids: folder != null
-                      ? {folder!.guid}
-                      : const {},
-                  entryGuid: BookmarkRoot.root.id,
-                ),
-                if (folder == null) ...[
-                  const SizedBox(height: 8),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('Add to top'),
-                    value: addToTop.value,
-                    onChanged: (value) => addToTop.value = value,
+      body: SafeArea(
+        child: Form(
+          key: formKey,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: ListView(
+              children: [
+                TextFormField(
+                  controller: nameTextController,
+                  decoration: const InputDecoration(
+                    label: Text('Name'),
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
-                ],
+                  validator: validateRequired,
+                ),
                 const SizedBox(height: 16),
-              ],
-              if (folder != null)
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                      foregroundColor: Theme.of(context).colorScheme.error,
-                      iconColor: Theme.of(context).colorScheme.error,
-                    ),
-                    label: const Text('Delete'),
-                    icon: const Icon(Icons.delete),
-                    onPressed: () async {
-                      final result = await showDeleteFolderDialog(context);
-
-                      if (result == true) {
-                        await ref
-                            .read(bookmarksRepositoryProvider.notifier)
-                            .delete(folder!.guid);
-
-                        if (context.mounted) {
-                          context.pop();
-                        }
-                      }
-                    },
+                if (!isBookmarkRoot) ...[
+                  FolderTreePicker(
+                    selectedFolderGuid: currentParentGuid,
+                    excludeFolderGuids: folder != null
+                        ? {folder!.guid}
+                        : const {},
+                    entryGuid: BookmarkRoot.root.id,
                   ),
-                ),
-            ],
+                  if (folder == null) ...[
+                    const SizedBox(height: 8),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Add to top'),
+                      value: addToTop.value,
+                      onChanged: (value) => addToTop.value = value,
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                ],
+                if (folder != null)
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                        foregroundColor: Theme.of(context).colorScheme.error,
+                        iconColor: Theme.of(context).colorScheme.error,
+                      ),
+                      label: const Text('Delete'),
+                      icon: const Icon(Icons.delete),
+                      onPressed: () async {
+                        final result = await showDeleteFolderDialog(context);
+
+                        if (result == true) {
+                          await ref
+                              .read(bookmarksRepositoryProvider.notifier)
+                              .delete(folder!.guid);
+
+                          if (context.mounted) {
+                            context.pop();
+                          }
+                        }
+                      },
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

@@ -20,16 +20,34 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/settings/presentation/widgets/doh_settings_content.dart';
+import 'package:weblibre/presentation/widgets/browser_page.dart';
 
-class DohSettingsScreen extends HookConsumerWidget {
-  const DohSettingsScreen({super.key});
+class DohSettingsPage extends HookConsumerWidget {
+  const DohSettingsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('DNS over HTTPS')),
-      body: const SafeArea(
-        child: SingleChildScrollView(child: DohSettingsContent()),
+    final theme = Theme.of(context);
+
+    return BrowserPage(
+      child: BrowserPageContent(
+        child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 24),
+          Center(
+            child: Text(
+              'DNS over HTTPS',
+              style: theme.textTheme.headlineMedium,
+            ),
+          ),
+          const SizedBox(height: 24),
+          const ListTileTheme(
+            contentPadding: EdgeInsets.zero,
+            child: DohSettingsContent(),
+          ),
+        ],
+      ),
       ),
     );
   }

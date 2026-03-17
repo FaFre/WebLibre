@@ -124,29 +124,33 @@ class ProfileEditScreen extends HookConsumerWidget {
           ),
         ],
       ),
-      body: Form(
-        key: formKey,
-        child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-          children: [
-            TextFormField(
-              controller: nameTextController,
-              decoration: const InputDecoration(
-                label: Text('Name'),
-                floatingLabelBehavior: FloatingLabelBehavior.always,
+      body: SafeArea(
+        child: Form(
+          key: formKey,
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            children: [
+              TextFormField(
+                controller: nameTextController,
+                decoration: const InputDecoration(
+                  label: Text('Name'),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                ),
+                validator: validateProfileName,
               ),
-              validator: validateProfileName,
-            ),
-            const SizedBox(height: 24),
-            _AuthSection(
-              authSettings: authSettings.value,
-              onAuthSettingsChanged: (newSettings) {
-                authSettings.value = newSettings;
-              },
-            ),
-            const SizedBox(height: 24),
-            if (profile != null) ...[_ProfileActionsSection(profile: profile!)],
-          ],
+              const SizedBox(height: 24),
+              _AuthSection(
+                authSettings: authSettings.value,
+                onAuthSettingsChanged: (newSettings) {
+                  authSettings.value = newSettings;
+                },
+              ),
+              const SizedBox(height: 24),
+              if (profile != null) ...[
+                _ProfileActionsSection(profile: profile!),
+              ],
+            ],
+          ),
         ),
       ),
     );

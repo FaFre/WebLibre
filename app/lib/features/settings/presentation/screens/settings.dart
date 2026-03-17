@@ -30,25 +30,27 @@ class SettingsScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
-      body: FadingScroll(
-        fadingSize: 25,
-        builder: (context, controller) {
-          return ListView(
-            controller: controller,
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            children: const [
-              _GeneralTile(),
-              _BrowsingTile(),
-              _ToolbarLayoutTile(),
-              _WebContentTile(),
-              _SearchTile(),
-              _PrivacySecurityTile(),
-              _ExtensionsTile(),
-              _SyncTile(),
-              _AdvancedTile(),
-            ],
-          );
-        },
+      body: SafeArea(
+        child: FadingScroll(
+          fadingSize: 25,
+          builder: (context, controller) {
+            return ListView(
+              controller: controller,
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              children: const [
+                _GeneralTile(),
+                _BrowsingTile(),
+                _ToolbarLayoutTile(),
+                _WebContentTile(),
+                _SearchTile(),
+                _PrivacySecurityTile(),
+                _ExtensionsTile(),
+                _SyncTile(),
+                _AdvancedTile(),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

@@ -68,107 +68,112 @@ class ProfileRestoreScreen extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Restore Backup')),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-        child: Form(
-          key: formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                controller: passwordTextController,
-                enabled: !disableInteraction,
-                enableSuggestions: false,
-                autocorrect: false,
-                enableIMEPersonalizedLearning: false,
-                keyboardType: TextInputType.visiblePassword,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                ),
-                validator: (value) {
-                  return validateRequired(value, message: 'Password required');
-                },
-              ),
-              const SizedBox(height: 16),
-              RadioGroup(
-                groupValue: restoreTarget.value,
-                onChanged: (value) {
-                  if (value != null) {
-                    restoreTarget.value = value;
-                  }
-                },
-                child: Column(
-                  children: [
-                    RadioListTile(
-                      enabled: !disableInteraction,
-                      value: RestoreTarget.createNew,
-                      title: const Text('Create New User'),
-                      subtitle: const Text('Restore backup as a new user'),
-                    ),
-                    RadioListTile(
-                      enabled: !disableInteraction,
-                      value: RestoreTarget.createOrOverride,
-                      title: const Text('Restore & Replace'),
-                      subtitle: const Text(
-                        'Restore backup and overwrite existing user if present',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (restoreTarget.value == RestoreTarget.createNew)
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+          child: Form(
+            key: formKey,
+            child: ListView(
+              children: [
                 TextFormField(
-                  controller: nameTextController,
+                  controller: passwordTextController,
                   enabled: !disableInteraction,
+                  enableSuggestions: false,
+                  autocorrect: false,
+                  enableIMEPersonalizedLearning: false,
+                  keyboardType: TextInputType.visiblePassword,
+                  obscureText: true,
                   decoration: const InputDecoration(
-                    label: Text('Name'),
+                    labelText: 'Password',
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
-                  validator: validateProfileName,
+                  validator: (value) {
+                    return validateRequired(
+                      value,
+                      message: 'Password required',
+                    );
+                  },
                 ),
-              const SizedBox(height: 16),
-              if (disableInteraction)
-                const Column(
-                  children: [
-                    LinearProgressIndicator(),
-                    Text('Restoring Backup'),
-                  ],
-                )
-              else
-                FilledButton.icon(
-                  icon: const Icon(MdiIcons.backupRestore),
-                  onPressed: () {
-                    if (formKey.currentState?.validate() ?? false) {
-                      restoreFuture.value = switch (restoreTarget.value) {
-                        RestoreTarget.createOrOverride =>
-                          ref
-                              .read(userBackupServiceProvider.notifier)
-                              .restoreAndCreateOrOverride(
-                                backupFile,
-                                password: passwordTextController.text,
-                                confirmOverrideCallback: () {
-                                  if (context.mounted) {
-                                    return showOverrideProfileDialog(context);
-                                  } else {
-                                    throw Exception('Override failed');
-                                  }
-                                },
-                              ),
-                        RestoreTarget.createNew =>
-                          ref
-                              .read(userBackupServiceProvider.notifier)
-                              .restoreAndCreateNew(
-                                backupFile,
-                                profileName: nameTextController.text,
-                                password: passwordTextController.text,
-                              ),
-                      };
+                const SizedBox(height: 16),
+                RadioGroup(
+                  groupValue: restoreTarget.value,
+                  onChanged: (value) {
+                    if (value != null) {
+                      restoreTarget.value = value;
                     }
                   },
-                  label: const Text('Restore'),
+                  child: Column(
+                    children: [
+                      RadioListTile(
+                        enabled: !disableInteraction,
+                        value: RestoreTarget.createNew,
+                        title: const Text('Create New User'),
+                        subtitle: const Text('Restore backup as a new user'),
+                      ),
+                      RadioListTile(
+                        enabled: !disableInteraction,
+                        value: RestoreTarget.createOrOverride,
+                        title: const Text('Restore & Replace'),
+                        subtitle: const Text(
+                          'Restore backup and overwrite existing user if present',
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-            ],
+                if (restoreTarget.value == RestoreTarget.createNew)
+                  TextFormField(
+                    controller: nameTextController,
+                    enabled: !disableInteraction,
+                    decoration: const InputDecoration(
+                      label: Text('Name'),
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
+                    ),
+                    validator: validateProfileName,
+                  ),
+                const SizedBox(height: 16),
+                if (disableInteraction)
+                  const Column(
+                    children: [
+                      LinearProgressIndicator(),
+                      Text('Restoring Backup'),
+                    ],
+                  )
+                else
+                  FilledButton.icon(
+                    icon: const Icon(MdiIcons.backupRestore),
+                    onPressed: () {
+                      if (formKey.currentState?.validate() ?? false) {
+                        restoreFuture.value = switch (restoreTarget.value) {
+                          RestoreTarget.createOrOverride =>
+                            ref
+                                .read(userBackupServiceProvider.notifier)
+                                .restoreAndCreateOrOverride(
+                                  backupFile,
+                                  password: passwordTextController.text,
+                                  confirmOverrideCallback: () {
+                                    if (context.mounted) {
+                                      return showOverrideProfileDialog(context);
+                                    } else {
+                                      throw Exception('Override failed');
+                                    }
+                                  },
+                                ),
+                          RestoreTarget.createNew =>
+                            ref
+                                .read(userBackupServiceProvider.notifier)
+                                .restoreAndCreateNew(
+                                  backupFile,
+                                  profileName: nameTextController.text,
+                                  password: passwordTextController.text,
+                                ),
+                        };
+                      }
+                    },
+                    label: const Text('Restore'),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

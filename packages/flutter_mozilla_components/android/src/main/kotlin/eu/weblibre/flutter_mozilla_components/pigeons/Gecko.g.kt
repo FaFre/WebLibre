@@ -4845,6 +4845,8 @@ interface GeckoBrowserApi {
   fun showNativeFragment(): Boolean
   fun onTrimMemory(level: Long)
   fun openInCustomTab(url: String, private: Boolean, contextId: String?)
+  fun isDefaultBrowser(): Boolean
+  fun requestDefaultBrowser()
 
   companion object {
     /** The codec used by GeckoBrowserApi. */
@@ -4937,6 +4939,37 @@ interface GeckoBrowserApi {
             val contextIdArg = args[2] as String?
             val wrapped: List<Any?> = try {
               api.openInCustomTab(urlArg, privateArg, contextIdArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserApi.isDefaultBrowser$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.isDefaultBrowser())
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserApi.requestDefaultBrowser$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              api.requestDefaultBrowser()
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)

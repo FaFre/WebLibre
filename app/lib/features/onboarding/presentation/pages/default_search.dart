@@ -29,6 +29,7 @@ import 'package:weblibre/features/settings/presentation/controllers/save_setting
 import 'package:weblibre/features/settings/presentation/widgets/bang_icon.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/presentation/widgets/browser_page.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
@@ -61,12 +62,13 @@ class DefaultSearchPage extends HookConsumerWidget {
           );
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: bangs.when(
+    return BrowserPage(
+      child: BrowserPageContent(
+        child: bangs.when(
         skipLoadingOnReload: true,
         data: (availableBangs) {
-          return ListView(
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 24),
               Center(
@@ -171,6 +173,7 @@ class DefaultSearchPage extends HookConsumerWidget {
           ),
         ),
         loading: () => const SizedBox(height: 48, width: double.infinity),
+      ),
       ),
     );
   }

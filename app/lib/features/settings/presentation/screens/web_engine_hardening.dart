@@ -102,86 +102,88 @@ class WebEngineHardeningScreen extends HookConsumerWidget {
           ),
         ],
       ),
-      body: preferenceGroups.when(
-        skipLoadingOnReload: true,
-        data: (data) {
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Card(
-                  color: theme.colorScheme.primaryContainer,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SwitchListTile(
-                      value: allGroupsActive,
-                      title: Text(
-                        'Complete Hardening',
-                        style: TextStyle(
-                          color: theme.colorScheme.onPrimaryContainer,
+      body: SafeArea(
+        child: preferenceGroups.when(
+          skipLoadingOnReload: true,
+          data: (data) {
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Card(
+                    color: theme.colorScheme.primaryContainer,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: SwitchListTile(
+                        value: allGroupsActive,
+                        title: Text(
+                          'Complete Hardening',
+                          style: TextStyle(
+                            color: theme.colorScheme.onPrimaryContainer,
+                          ),
                         ),
-                      ),
-                      onChanged: (value) async {
-                        final notifier = ref.read(
-                          unifiedPreferenceSettingsRepositoryProvider(
-                            PreferencePartition.user,
-                          ).notifier,
-                        );
+                        onChanged: (value) async {
+                          final notifier = ref.read(
+                            unifiedPreferenceSettingsRepositoryProvider(
+                              PreferencePartition.user,
+                            ).notifier,
+                          );
 
-                        if (value) {
-                          await notifier.apply();
-                        } else {
-                          await notifier.reset();
-                        }
-                      },
+                          if (value) {
+                            await notifier.apply();
+                          } else {
+                            await notifier.reset();
+                          }
+                        },
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Expanded(
-                child: ListView(
-                  children: data.entries.map((group) {
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: ListTile(
-                            title: Text(group.key),
-                            subtitle: group.value.description.mapNotNull(
-                              (description) => Text(description),
-                            ),
-                            leading: Badge(
-                              isLabelVisible: group.value.hasInactiveOptional,
-                              child: HardeningGroupIcon(
-                                isActive: group.value.isActiveOrOptional,
-                                isPartlyActive: group.value.isPartlyActive,
+                Expanded(
+                  child: ListView(
+                    children: data.entries.map((group) {
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: ListTile(
+                              title: Text(group.key),
+                              subtitle: group.value.description.mapNotNull(
+                                (description) => Text(description),
                               ),
+                              leading: Badge(
+                                isLabelVisible: group.value.hasInactiveOptional,
+                                child: HardeningGroupIcon(
+                                  isActive: group.value.isActiveOrOptional,
+                                  isPartlyActive: group.value.isPartlyActive,
+                                ),
+                              ),
+                              trailing: const Icon(Icons.chevron_right),
+                              onTap: () async {
+                                await WebEngineHardeningGroupRoute(
+                                  group: group.key,
+                                ).push(context);
+                              },
                             ),
-                            trailing: const Icon(Icons.chevron_right),
-                            onTap: () async {
-                              await WebEngineHardeningGroupRoute(
-                                group: group.key,
-                              ).push(context);
-                            },
                           ),
-                        ),
-                      ],
-                    );
-                  }).toList(),
+                        ],
+                      );
+                    }).toList(),
+                  ),
                 ),
+              ],
+            );
+          },
+          error: (error, stackTrace) => FailureWidget(
+            title: 'Could not load preference settings',
+            exception: error,
+            onRetry: () => ref.refresh(
+              unifiedPreferenceSettingsRepositoryProvider(
+                PreferencePartition.user,
               ),
-            ],
-          );
-        },
-        error: (error, stackTrace) => FailureWidget(
-          title: 'Could not load preference settings',
-          exception: error,
-          onRetry: () => ref.refresh(
-            unifiedPreferenceSettingsRepositoryProvider(
-              PreferencePartition.user,
             ),
           ),
+          loading: () => const Center(child: CircularProgressIndicator()),
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
       ),
     );
   }

@@ -17,20 +17,29 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/settings/presentation/widgets/doh_settings_content.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/onboarding/domain/entities/onboarding_mode.dart';
 
-class DohSettingsScreen extends HookConsumerWidget {
-  const DohSettingsScreen({super.key});
+part 'providers.g.dart';
 
+@Riverpod()
+class OnboardingModeNotifier extends _$OnboardingModeNotifier {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('DNS over HTTPS')),
-      body: const SafeArea(
-        child: SingleChildScrollView(child: DohSettingsContent()),
-      ),
-    );
+  OnboardingMode build() => OnboardingMode.detailed;
+
+  // ignore: use_setters_to_change_properties
+  void select(OnboardingMode mode) {
+    state = mode;
+  }
+}
+
+@Riverpod()
+class EulaAcceptedNotifier extends _$EulaAcceptedNotifier {
+  @override
+  bool build() => false;
+
+  // ignore: use_setters_to_change_properties
+  void accept(bool value) {
+    state = value;
   }
 }

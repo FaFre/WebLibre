@@ -115,6 +115,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
     companion object {
         private const val TAG = "GeckoBrowserApiImpl"
         private const val FRAGMENT_CONTAINER_ID = 0xBEEF
+        private const val REQUEST_CODE_BROWSER_ROLE = 1
 
         private var isGeckoInitialized = false
     }
@@ -424,4 +425,33 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
 
         logger.debug("$TAG: Opened custom tab ${tab.id} for $url (private=$`private`)")
     }
+
+    override fun isDefaultBrowser(): Boolean {
+        val currentActivity = requireNotNull(activity) { "Activity not attached" }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            val roleManager = currentActivity.getSystemService(android.app.role.RoleManager::class.java)
+            return roleManager.isRoleHeld(android.app.role.RoleManager.ROLE_BROWSER)
+        }
+        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("http://"))
+        val resolveInfo = currentActivity.packageManager.resolveActivity(intent, android.content.pm.PackageManager.MATCH_DEFAULT_ONLY)
+        return resolveInfo?.activityInfo?.packageName == currentActivity.packageName
+    }
+
+    override fun requestDefaultBrowser() {
+        val currentActivity = requireNotNull(activity) { "Activity not attached" }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            val roleManager = currentActivity.getSystemService(android.app.role.RoleManager::class.java)
+            if (roleManager.isRoleAvailable(android.app.role.RoleManager.ROLE_BROWSER) &&
+                !roleManager.isRoleHeld(android.app.role.RoleManager.ROLE_BROWSER)) {
+                currentActivity.startActivityForResult(
+                    roleManager.createRequestRoleIntent(android.app.role.RoleManager.ROLE_BROWSER),
+                    REQUEST_CODE_BROWSER_ROLE
+                )
+                return
+            }
+        }
+        val intent = android.content.Intent(android.provider.Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)
+        currentActivity.startActivity(intent)
+    }
+
 }

@@ -42,7 +42,7 @@ final class OnboardingRepositoryProvider
 }
 
 String _$onboardingRepositoryHash() =>
-    r'937a5fe08c09cc0475270d3707bfb6f087bcf123';
+    r'd16657963415392840cdba9f4bcc724963f6da63';
 
 abstract class _$OnboardingRepository extends $Notifier<void> {
   void build();

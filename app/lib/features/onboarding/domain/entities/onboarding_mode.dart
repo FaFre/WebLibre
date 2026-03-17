@@ -17,20 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/settings/presentation/widgets/doh_settings_content.dart';
 
-class DohSettingsScreen extends HookConsumerWidget {
-  const DohSettingsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('DNS over HTTPS')),
-      body: const SafeArea(
-        child: SingleChildScrollView(child: DohSettingsContent()),
-      ),
-    );
-  }
+enum OnboardingMode {
+  express,
+  detailed,
 }

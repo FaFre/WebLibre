@@ -24,7 +24,7 @@ part 'onboarding.g.dart';
 
 @Riverpod(keepAlive: true)
 class OnboardingRepository extends _$OnboardingRepository {
-  static const targetRevision = 2;
+  static const targetRevision = 3;
 
   Future<int?> getCurrentRevision() {
     return ref
@@ -43,7 +43,7 @@ class OnboardingRepository extends _$OnboardingRepository {
 
   Future<bool> isOutdated() async {
     final current = await getCurrentRevision();
-    return current != targetRevision;
+    return current == null || current < targetRevision;
   }
 
   @override

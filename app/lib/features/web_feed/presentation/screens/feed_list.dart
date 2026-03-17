@@ -66,34 +66,36 @@ class FeedListScreen extends HookConsumerWidget {
           ),
         ],
       ),
-      body: feeds.when(
-        skipLoadingOnReload: true,
-        data: (feeds) {
-          return RefreshIndicator(
-            onRefresh: () async {
-              await ref
-                  .read(fetchArticlesControllerProvider.notifier)
-                  .fetchAllArticles();
-            },
-            child: ListView.builder(
-              itemCount: feeds.length,
-              itemBuilder: (context, i) {
-                return FeedCard(feed: feeds[i]);
+      body: SafeArea(
+        child: feeds.when(
+          skipLoadingOnReload: true,
+          data: (feeds) {
+            return RefreshIndicator(
+              onRefresh: () async {
+                await ref
+                    .read(fetchArticlesControllerProvider.notifier)
+                    .fetchAllArticles();
+              },
+              child: ListView.builder(
+                itemCount: feeds.length,
+                itemBuilder: (context, i) {
+                  return FeedCard(feed: feeds[i]);
+                },
+              ),
+            );
+          },
+          error: (error, stackTrace) => Center(
+            child: FailureWidget(
+              title: 'Failed to load Feeds',
+              exception: error,
+              onRetry: () {
+                // ignore: unused_result
+                ref.refresh(feedListProvider);
               },
             ),
-          );
-        },
-        error: (error, stackTrace) => Center(
-          child: FailureWidget(
-            title: 'Failed to load Feeds',
-            exception: error,
-            onRetry: () {
-              // ignore: unused_result
-              ref.refresh(feedListProvider);
-            },
           ),
+          loading: () => const Center(child: CircularProgressIndicator()),
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
       ),
       floatingActionButton: FloatingActionButton.extended(
         label: const Text('Feed'),

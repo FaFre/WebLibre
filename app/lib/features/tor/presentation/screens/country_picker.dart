@@ -99,38 +99,40 @@ class CountryPickerScreen extends HookWidget {
           ),
         ),
       ),
-      body: ListView.builder(
-        itemCount: filteredCountries.length + 1,
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            final isSelected = selectedCountryCode == null;
+      body: SafeArea(
+        child: ListView.builder(
+          itemCount: filteredCountries.length + 1,
+          itemBuilder: (context, index) {
+            if (index == 0) {
+              final isSelected = selectedCountryCode == null;
+              return ListTile(
+                leading: const SizedBox(
+                  width: 32,
+                  height: 24,
+                  child: Center(child: Icon(Icons.public)),
+                ),
+                title: const Text('Automatic'),
+                trailing: isSelected ? const Icon(Icons.check) : null,
+                onTap: () => context.pop(automaticCountry),
+              );
+            }
+
+            final country = filteredCountries[index - 1];
+            final isSelected = country.alpha2Code == selectedCountryCode;
+
             return ListTile(
-              leading: const SizedBox(
-                width: 32,
-                height: 24,
-                child: Center(child: Icon(Icons.public)),
-              ),
-              title: const Text('Automatic'),
+              leading: country.alpha2Code != null
+                  ? CountryFlag.fromCountryCode(
+                      country.alpha2Code!,
+                      theme: const EmojiTheme(size: 28),
+                    )
+                  : const SizedBox(width: 32),
+              title: Text(country.label),
               trailing: isSelected ? const Icon(Icons.check) : null,
-              onTap: () => context.pop(automaticCountry),
+              onTap: () => context.pop(country.alpha2Code),
             );
-          }
-
-          final country = filteredCountries[index - 1];
-          final isSelected = country.alpha2Code == selectedCountryCode;
-
-          return ListTile(
-            leading: country.alpha2Code != null
-                ? CountryFlag.fromCountryCode(
-                    country.alpha2Code!,
-                    theme: const EmojiTheme(size: 28),
-                  )
-                : const SizedBox(width: 32),
-            title: Text(country.label),
-            trailing: isSelected ? const Icon(Icons.check) : null,
-            onTap: () => context.pop(country.alpha2Code),
-          );
-        },
+          },
+        ),
       ),
     );
   }

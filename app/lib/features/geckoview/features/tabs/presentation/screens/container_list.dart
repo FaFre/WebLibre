@@ -44,131 +44,135 @@ class ContainerListScreen extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Containers')),
-      body: Skeletonizer(
-        enabled: containersAsync.isLoading,
-        child: containersAsync.when(
-          skipLoadingOnReload: true,
-          data: (containers) => FadingScroll(
-            fadingSize: 25,
-            builder: (context, controller) {
-              return ListView.builder(
-                controller: controller,
-                itemCount: containers.length,
-                itemBuilder: (context, index) {
-                  final container = containers[index];
-                  return Slidable(
-                    key: ValueKey(container.id),
-                    startActionPane: ActionPane(
-                      motion: const ScrollMotion(),
-                      children: [
-                        if (container.id != selectedContainer)
-                          SlidableAction(
-                            onPressed: (context) async {
-                              final result = await ref
-                                  .read(selectedContainerProvider.notifier)
-                                  .setContainerId(container.id);
+      body: SafeArea(
+        child: Skeletonizer(
+          enabled: containersAsync.isLoading,
+          child: containersAsync.when(
+            skipLoadingOnReload: true,
+            data: (containers) => FadingScroll(
+              fadingSize: 25,
+              builder: (context, controller) {
+                return ListView.builder(
+                  controller: controller,
+                  itemCount: containers.length,
+                  itemBuilder: (context, index) {
+                    final container = containers[index];
+                    return Slidable(
+                      key: ValueKey(container.id),
+                      startActionPane: ActionPane(
+                        motion: const ScrollMotion(),
+                        children: [
+                          if (container.id != selectedContainer)
+                            SlidableAction(
+                              onPressed: (context) async {
+                                final result = await ref
+                                    .read(selectedContainerProvider.notifier)
+                                    .setContainerId(container.id);
 
-                              if (context.mounted &&
-                                  result ==
-                                      SetContainerResult.successHasProxy) {
-                                final shouldStartProxy = await ref
-                                    .read(startProxyControllerProvider.notifier)
-                                    .shouldPromptProxyStart();
-
-                                if (!context.mounted || !shouldStartProxy) {
-                                  return;
-                                }
-
-                                final dialogResult = await showDialog<bool>(
-                                  context: context,
-                                  builder: (context) {
-                                    return const TorDialog();
-                                  },
-                                );
-
-                                if (dialogResult == true) {
-                                  await ref
+                                if (context.mounted &&
+                                    result ==
+                                        SetContainerResult.successHasProxy) {
+                                  final shouldStartProxy = await ref
                                       .read(
                                         startProxyControllerProvider.notifier,
                                       )
-                                      .startProxy();
+                                      .shouldPromptProxyStart();
+
+                                  if (!context.mounted || !shouldStartProxy) {
+                                    return;
+                                  }
+
+                                  final dialogResult = await showDialog<bool>(
+                                    context: context,
+                                    builder: (context) {
+                                      return const TorDialog();
+                                    },
+                                  );
+
+                                  if (dialogResult == true) {
+                                    await ref
+                                        .read(
+                                          startProxyControllerProvider.notifier,
+                                        )
+                                        .startProxy();
+                                  }
                                 }
-                              }
-                            },
-                            foregroundColor: Theme.of(
-                              context,
-                            ).colorScheme.onPrimaryContainer,
-                            backgroundColor: Theme.of(
-                              context,
-                            ).colorScheme.primaryContainer,
-                            icon: Icons.check,
-                            label: 'Select',
-                          )
-                        else
+                              },
+                              foregroundColor: Theme.of(
+                                context,
+                              ).colorScheme.onPrimaryContainer,
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primaryContainer,
+                              icon: Icons.check,
+                              label: 'Select',
+                            )
+                          else
+                            SlidableAction(
+                              onPressed: (context) {
+                                ref
+                                    .read(selectedContainerProvider.notifier)
+                                    .clearContainer();
+                              },
+                              foregroundColor: Theme.of(
+                                context,
+                              ).colorScheme.onPrimaryContainer,
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primaryContainer,
+                              icon: Icons.close,
+                              label: 'Unselect',
+                            ),
+                        ],
+                      ),
+                      endActionPane: ActionPane(
+                        motion: const ScrollMotion(),
+                        children: [
                           SlidableAction(
-                            onPressed: (context) {
-                              ref
-                                  .read(selectedContainerProvider.notifier)
-                                  .clearContainer();
+                            onPressed: (context) async {
+                              await ref
+                                  .read(containerRepositoryProvider.notifier)
+                                  .deleteContainer(container.id);
                             },
-                            foregroundColor: Theme.of(
-                              context,
-                            ).colorScheme.onPrimaryContainer,
                             backgroundColor: Theme.of(
                               context,
-                            ).colorScheme.primaryContainer,
-                            icon: Icons.close,
-                            label: 'Unselect',
+                            ).colorScheme.errorContainer,
+                            foregroundColor: Theme.of(
+                              context,
+                            ).colorScheme.onErrorContainer,
+                            icon: Icons.delete,
+                            label: 'Delete',
                           ),
-                      ],
-                    ),
-                    endActionPane: ActionPane(
-                      motion: const ScrollMotion(),
-                      children: [
-                        SlidableAction(
-                          onPressed: (context) async {
-                            await ref
-                                .read(containerRepositoryProvider.notifier)
-                                .deleteContainer(container.id);
-                          },
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.errorContainer,
-                          foregroundColor: Theme.of(
-                            context,
-                          ).colorScheme.onErrorContainer,
-                          icon: Icons.delete,
-                          label: 'Delete',
-                        ),
-                      ],
-                    ),
-                    child: ContainerListTile(
-                      container,
-                      isSelected: container.id == selectedContainer,
-                      onTap: () async {
-                        await ContainerEditRoute(
-                          containerData: jsonEncode(container.toJson()),
-                        ).push(context);
-                      },
-                    ),
-                  );
-                },
-              );
-            },
-          ),
-          error: (error, stackTrace) => Center(
-            child: FailureWidget(
-              title: 'Failed to load containers',
-              exception: error,
-              onRetry: () => ref.invalidate(watchContainersWithCountProvider),
+                        ],
+                      ),
+                      child: ContainerListTile(
+                        container,
+                        isSelected: container.id == selectedContainer,
+                        onTap: () async {
+                          await ContainerEditRoute(
+                            containerData: jsonEncode(container.toJson()),
+                          ).push(context);
+                        },
+                      ),
+                    );
+                  },
+                );
+              },
             ),
-          ),
-          loading: () => ListView.builder(
-            itemCount: 3,
-            itemBuilder: (context, index) => ContainerListTile(
-              ContainerData(id: 'null', color: Colors.transparent),
-              onTap: null,
-              isSelected: false,
+            error: (error, stackTrace) => Center(
+              child: FailureWidget(
+                title: 'Failed to load containers',
+                exception: error,
+                onRetry: () => ref.invalidate(watchContainersWithCountProvider),
+              ),
+            ),
+            loading: () => ListView.builder(
+              itemCount: 3,
+              itemBuilder: (context, index) => ContainerListTile(
+                ContainerData(id: 'null', color: Colors.transparent),
+                onTap: null,
+                isSelected: false,
+              ),
             ),
           ),
         ),
