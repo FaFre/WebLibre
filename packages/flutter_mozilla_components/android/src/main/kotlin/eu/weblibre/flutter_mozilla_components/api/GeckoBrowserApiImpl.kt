@@ -134,26 +134,27 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         _flutterPluginBinding = flutterPluginBinding
         _flutterEvents = GeckoStateEvents(_flutterPluginBinding.binaryMessenger)
 
+        // Register platform view factory once per engine binding.
+        // The factory resolves the current activity lazily via activityProvider,
+        // so it always uses the latest activity after recreation/config changes.
+        _flutterPluginBinding.platformViewRegistry.registerViewFactory(
+            "eu.weblibre/gecko", GeckoViewFactory(
+                activityProvider = { this.activity },
+                FRAGMENT_CONTAINER_ID,
+                _flutterEvents
+            )
+        )
+        isPlatformViewRegistered = true
+
         isGeckoInitialized = false
     }
 
     fun attachActivity(activity: Activity) {
         this.activity = activity
-
-        _flutterPluginBinding.platformViewRegistry.registerViewFactory(
-            "eu.weblibre/gecko", GeckoViewFactory(
-                activity,
-                FRAGMENT_CONTAINER_ID,
-                _flutterEvents
-            )
-        )
-
-        isPlatformViewRegistered = true
     }
 
     fun detachActivity() {
         this.activity = null
-        isPlatformViewRegistered = false
     }
 
     override fun getGeckoVersion(): String {

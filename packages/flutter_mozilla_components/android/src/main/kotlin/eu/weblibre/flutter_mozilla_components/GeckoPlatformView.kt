@@ -18,13 +18,15 @@ import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.platform.PlatformViewFactory
 
 class GeckoViewFactory(
-    private val activity: Activity,
+    private val activityProvider: () -> Activity?,
     private val containerId: Int,
     private val flutterEvents: GeckoStateEvents
     ) : PlatformViewFactory(
     StandardMessageCodec.INSTANCE) {
     override fun create(context: Context?, id: Int, args: Any?): PlatformView {
-        return NativeFragmentView(this.activity, this.containerId, this.flutterEvents)
+        val activity = activityProvider()
+            ?: throw IllegalStateException("No activity available when creating GeckoView platform view")
+        return NativeFragmentView(activity, this.containerId, this.flutterEvents)
     }
 }
 

@@ -35,7 +35,7 @@ class TorManager(
     private var controlConnection: TorControlConnection? = null
     private var torService: TorService? = null
 
-    val pluggableTransportManager = PluggableTransportManager(context)
+    val pluggableTransportManager = PluggableTransportManager.getInstance(context)
     private val geoIpManager = GeoIpManager(context)
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())

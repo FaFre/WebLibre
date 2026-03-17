@@ -199,9 +199,20 @@ class TorService : Service() {
         super.onDestroy()
         Log.d(TAG, "Service destroyed")
 
-        scope.launch {
-            torManager?.destroy()
-        }
+        // Stop pluggable transports synchronously to release Go references.
+        // Previously this was scope.launch { torManager?.destroy() } followed by
+        // scope.cancel(), which meant the cleanup coroutine was immediately cancelled
+        // and never ran — causing "trackGoRef called with Java refnum" crashes when
+        // TorService was recreated and tried to create a new IPtProxy.Controller.
+        //
+        // Note: We only stop transports here. The PluggableTransportManager singleton
+        // and its Controller persist across service restarts by design.
+        // Full TorManager.destroy() is not called because it would deadlock
+        // (cleanup() uses runBlocking(Dispatchers.Main) while onDestroy runs on Main).
+        torManager?.pluggableTransportManager?.stopAll()
+
+        torManager = null
+        logHandler = null
         scope.cancel()
     }
 }

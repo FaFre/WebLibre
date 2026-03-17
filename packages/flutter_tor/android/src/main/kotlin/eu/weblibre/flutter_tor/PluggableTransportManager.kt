@@ -10,8 +10,14 @@ import java.io.File
 /**
  * Manages pluggable transports via IPtProxy
  * Supports: obfs4, snowflake, meek, webtunnel
+ *
+ * IMPORTANT: This is a process-level singleton. The IPtProxy.Controller (Go object bound
+ * via gomobile) uses reference tracking that breaks if multiple Controller instances are
+ * created in the same process. By keeping a single PluggableTransportManager (and thus a
+ * single lazy Controller), we avoid "trackGoRef called with Java refnum" crashes when
+ * TorService is destroyed and recreated.
  */
-class PluggableTransportManager(private val context: Context) {
+class PluggableTransportManager private constructor(private val context: Context) {
 
     companion object {
         private const val TAG = "PTManager"
@@ -23,6 +29,17 @@ class PluggableTransportManager(private val context: Context) {
         private val SNOWFLAKE_FRONTS = listOf("foursquare.com", "github.githubassets.com")
         private val SNOWFLAKE_AMP_FRONTS = listOf("www.google.com")
         private const val SNOWFLAKE_ICE_SERVERS = "stun:stun.l.google.com:19302,stun:stun.antisip.com:3478,stun:stun.bluesip.net:3478,stun:stun.dus.net:3478,stun:stun.epygi.com:3478,stun:stun.sonetel.com:3478,stun:stun.uls.co.za:3478,stun:stun.voipgate.com:3478,stun:stun.voys.nl:3478"
+
+        @Volatile
+        private var instance: PluggableTransportManager? = null
+
+        fun getInstance(context: Context): PluggableTransportManager {
+            return instance ?: synchronized(this) {
+                instance ?: PluggableTransportManager(context.applicationContext).also {
+                    instance = it
+                }
+            }
+        }
     }
 
     private val stateDir = File(context.cacheDir, "iptproxy")
