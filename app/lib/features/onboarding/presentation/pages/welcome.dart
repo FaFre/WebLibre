@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/onboarding/domain/entities/onboarding_mode.dart';
 import 'package:weblibre/features/onboarding/domain/providers.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
@@ -130,9 +131,9 @@ class _UpdateNotice extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.auto_awesome,
-                    color: BrowserPage.brandYellow,
+                    color: AppColors.of(context).brandLink,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
@@ -244,7 +245,7 @@ class _ModeOption extends StatelessWidget {
             Icon(
               icon,
               color: selected
-                  ? BrowserPage.brandYellow
+                  ? AppColors.of(context).brandLink
                   : colorScheme.onSurfaceVariant,
               size: 28,
             ),
@@ -320,9 +321,9 @@ class _EulaCheckbox extends StatelessWidget {
             child: Text(
               'EULA',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: BrowserPage.brandYellow,
+                color: AppColors.of(context).brandLink,
                 decoration: TextDecoration.underline,
-                decorationColor: BrowserPage.brandYellow,
+                decorationColor: AppColors.of(context).brandLink,
               ),
             ),
           ),
@@ -341,9 +342,9 @@ class _EulaCheckbox extends StatelessWidget {
             child: Text(
               'Privacy Policy',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: BrowserPage.brandYellow,
+                color: AppColors.of(context).brandLink,
                 decoration: TextDecoration.underline,
-                decorationColor: BrowserPage.brandYellow,
+                decorationColor: AppColors.of(context).brandLink,
               ),
             ),
           ),

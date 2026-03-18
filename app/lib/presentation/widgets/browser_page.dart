@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/app_colors.dart';
 
 class BrowserPage extends ConsumerWidget {
   final double bottomViewportInset;
@@ -11,20 +12,11 @@ class BrowserPage extends ConsumerWidget {
 
   const BrowserPage({super.key, this.bottomViewportInset = 0, required this.child});
 
-  static const brandPurple = Color(0xFF9C83F8);
-  static const brandYellow = Color(0xFFFBDC6B);
-  static const brandGrey = Color(0xFFA7A7A7);
-
-  static const auraPurple = Color(0xFF2C2543);
-  static const auraGold = Color(0xFF3C3827);
-  static const auraShadow = Color(0xFF222224);
-  static const auraShadowHighlight = Color(0xFF2D2D31);
-  static const auraTint = Color(0xFF000000);
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final appColors = AppColors.of(context);
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -33,15 +25,15 @@ class BrowserPage extends ConsumerWidget {
           end: Alignment.bottomRight,
           colors: [
             Color.alphaBlend(
-              auraPurple.withValues(alpha: 0.38),
+              appColors.auraPurple.withValues(alpha: 0.38),
               colorScheme.surfaceContainerLowest,
             ),
             Color.alphaBlend(
-              auraShadow.withValues(alpha: 0.72),
+              appColors.auraShadow.withValues(alpha: 0.72),
               colorScheme.surface,
             ),
             Color.alphaBlend(
-              auraGold.withValues(alpha: 0.34),
+              appColors.auraGold.withValues(alpha: 0.34),
               colorScheme.surfaceContainerHigh,
             ),
           ],
@@ -50,23 +42,23 @@ class BrowserPage extends ConsumerWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          const Positioned(
+          Positioned(
             top: -70,
             left: -120,
-            child: _BackdropOrb(width: 400, height: 400, color: auraPurple),
+            child: _BackdropOrb(width: 400, height: 400, color: appColors.auraPurple),
           ),
-          const Positioned(
+          Positioned(
             top: 220,
             right: -150,
-            child: _BackdropOrb(width: 340, height: 340, color: auraGold),
+            child: _BackdropOrb(width: 340, height: 340, color: appColors.auraGold),
           ),
-          const Positioned(
+          Positioned(
             bottom: 18,
             left: -8,
             child: _BackdropOrb(
               width: 320,
               height: 320,
-              color: auraShadowHighlight,
+              color: appColors.auraShadowHighlight,
             ),
           ),
           Positioned.fill(
@@ -74,7 +66,7 @@ class BrowserPage extends ConsumerWidget {
               child: ClipRect(
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 72, sigmaY: 72),
-                  child: ColoredBox(color: auraTint.withValues(alpha: 0.12)),
+                  child: ColoredBox(color: appColors.auraTint.withValues(alpha: 0.12)),
                 ),
               ),
             ),
@@ -146,11 +138,11 @@ class BrandHeader extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             Color.alphaBlend(
-              BrowserPage.brandPurple.withValues(alpha: 0.18),
+              AppColors.brandPurple.withValues(alpha: 0.18),
               colorScheme.surfaceContainerHighest,
             ),
             Color.alphaBlend(
-              BrowserPage.brandYellow.withValues(alpha: 0.12),
+              AppColors.brandYellow.withValues(alpha: 0.12),
               colorScheme.surfaceContainer,
             ),
           ],

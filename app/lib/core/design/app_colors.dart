@@ -22,19 +22,25 @@ import 'package:flutter/material.dart';
 @immutable
 class AppColors extends ThemeExtension<AppColors> {
   const AppColors._({
-    this.seedColor = const Color(0xFF167C80),
-    this.privateTabPurple = const Color(0xFF8000D7),
-    this.privateTabBackground = const Color(0xFF25003E),
-    this.privateTabForeground = const Color(0xFFFFFFFF),
-    this.privateSelectionOverlay = const Color(0x648000D7),
-    this.isolatedTabTeal = const Color(0xFF00897B),
-    this.isolatedTabBackground = const Color(0xFF003D36),
-    this.isolatedTabForeground = const Color(0xFFFFFFFF),
-    this.isolatedSelectionOverlay = const Color(0x6400897B),
-    this.torPurple = const Color(0xFF7D4698),
-    this.torActiveGreen = const Color(0xFF68B030),
-    this.torBackgroundGrey = const Color(0xFF333A41),
-    this.warningAmber = const Color(0xFFFFA000),
+    required this.seedColor,
+    required this.privateTabPurple,
+    required this.privateTabBackground,
+    required this.privateTabForeground,
+    required this.privateSelectionOverlay,
+    required this.isolatedTabTeal,
+    required this.isolatedTabBackground,
+    required this.isolatedTabForeground,
+    required this.isolatedSelectionOverlay,
+    required this.torPurple,
+    required this.torActiveGreen,
+    required this.torBackgroundGrey,
+    required this.warningAmber,
+    required this.auraPurple,
+    required this.auraGold,
+    required this.auraShadow,
+    required this.auraShadowHighlight,
+    required this.auraTint,
+    required this.brandLink,
   });
 
   final Color seedColor;
@@ -50,9 +56,63 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color torActiveGreen;
   final Color torBackgroundGrey;
   final Color warningAmber;
+  final Color auraPurple;
+  final Color auraGold;
+  final Color auraShadow;
+  final Color auraShadowHighlight;
+  final Color auraTint;
+  final Color brandLink;
 
-  static const light = AppColors._();
-  static const dark = AppColors._();
+  /// Brand colors derived from the logo (constant across themes).
+  static const brandPurple = Color(0xFF9C83F8);
+  static const brandYellow = Color(0xFFFBDC6B);
+  static const brandGrey = Color(0xFFA7A7A7);
+
+  static const light = AppColors._(
+    seedColor: Color(0xFF167C80),
+    privateTabPurple: Color(0xFF8000D7),
+    privateTabBackground: Color(0xFFF3E5F5),
+    privateTabForeground: Color(0xFF4A0072),
+    privateSelectionOverlay: Color(0x648000D7),
+    isolatedTabTeal: Color(0xFF00897B),
+    isolatedTabBackground: Color(0xFFE0F2F1),
+    isolatedTabForeground: Color(0xFF004D40),
+    isolatedSelectionOverlay: Color(0x6400897B),
+    torPurple: Color(0xFF7D4698),
+    torActiveGreen: Color(0xFF68B030),
+    torBackgroundGrey: Color(0xFFECEFF1),
+    warningAmber: Color(0xFFFFA000),
+    // Aura: brand colors lightened toward white
+    auraPurple: Color(0xFFE0D6FC),
+    auraGold: Color(0xFFFDF1D6),
+    auraShadow: Color(0xFFEDEDF0),
+    auraShadowHighlight: Color(0xFFE2E2E7),
+    auraTint: Color(0xFFFFFFFF),
+    brandLink: Color(0xFF7A5AF0),
+  );
+
+  static const dark = AppColors._(
+    seedColor: Color(0xFF167C80),
+    privateTabPurple: Color(0xFF8000D7),
+    privateTabBackground: Color(0xFF25003E),
+    privateTabForeground: Color(0xFFFFFFFF),
+    privateSelectionOverlay: Color(0x648000D7),
+    isolatedTabTeal: Color(0xFF00897B),
+    isolatedTabBackground: Color(0xFF003D36),
+    isolatedTabForeground: Color(0xFFFFFFFF),
+    isolatedSelectionOverlay: Color(0x6400897B),
+    torPurple: Color(0xFF7D4698),
+    torActiveGreen: Color(0xFF68B030),
+    torBackgroundGrey: Color(0xFF333A41),
+    warningAmber: Color(0xFFFFA000),
+    // Aura: brand colors darkened toward black
+    auraPurple: Color(0xFF2C2543),
+    auraGold: Color(0xFF3C3827),
+    auraShadow: Color(0xFF222224),
+    auraShadowHighlight: Color(0xFF2D2D31),
+    auraTint: Color(0xFF000000),
+    brandLink: Color(0xFFFBDC6B),
+  );
 
   @override
   AppColors copyWith({
@@ -69,6 +129,12 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? torActiveGreen,
     Color? torBackgroundGrey,
     Color? warningAmber,
+    Color? auraPurple,
+    Color? auraGold,
+    Color? auraShadow,
+    Color? auraShadowHighlight,
+    Color? auraTint,
+    Color? brandLink,
   }) {
     return AppColors._(
       seedColor: seedColor ?? this.seedColor,
@@ -88,6 +154,12 @@ class AppColors extends ThemeExtension<AppColors> {
       torActiveGreen: torActiveGreen ?? this.torActiveGreen,
       torBackgroundGrey: torBackgroundGrey ?? this.torBackgroundGrey,
       warningAmber: warningAmber ?? this.warningAmber,
+      auraPurple: auraPurple ?? this.auraPurple,
+      auraGold: auraGold ?? this.auraGold,
+      auraShadow: auraShadow ?? this.auraShadow,
+      auraShadowHighlight: auraShadowHighlight ?? this.auraShadowHighlight,
+      auraTint: auraTint ?? this.auraTint,
+      brandLink: brandLink ?? this.brandLink,
     );
   }
 
@@ -143,6 +215,16 @@ class AppColors extends ThemeExtension<AppColors> {
         t,
       )!,
       warningAmber: Color.lerp(warningAmber, other.warningAmber, t)!,
+      auraPurple: Color.lerp(auraPurple, other.auraPurple, t)!,
+      auraGold: Color.lerp(auraGold, other.auraGold, t)!,
+      auraShadow: Color.lerp(auraShadow, other.auraShadow, t)!,
+      auraShadowHighlight: Color.lerp(
+        auraShadowHighlight,
+        other.auraShadowHighlight,
+        t,
+      )!,
+      auraTint: Color.lerp(auraTint, other.auraTint, t)!,
+      brandLink: Color.lerp(brandLink, other.brandLink, t)!,
     );
   }
 
