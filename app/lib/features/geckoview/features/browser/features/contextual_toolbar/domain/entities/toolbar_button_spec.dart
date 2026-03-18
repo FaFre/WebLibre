@@ -158,6 +158,12 @@ const extensionShortcutToolbarButtonSpec = ToolbarButtonSpec(
   canBeFallbackTarget: false,
 );
 
+const quitToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.quit,
+  defaultVisible: false,
+  canBeFallbackTarget: false,
+);
+
 const toolbarButtonSpecs = [
   backToolbarButtonSpec,
   forwardToolbarButtonSpec,
@@ -182,6 +188,7 @@ const toolbarButtonSpecs = [
   pageDownToolbarButtonSpec,
   fontToolbarButtonSpec,
   extensionShortcutToolbarButtonSpec,
+  quitToolbarButtonSpec,
 ];
 
 final Map<String, ToolbarButtonSpec> toolbarButtonSpecsById = {

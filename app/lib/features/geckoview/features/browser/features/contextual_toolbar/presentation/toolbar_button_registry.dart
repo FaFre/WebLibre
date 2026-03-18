@@ -47,8 +47,10 @@ import 'package:weblibre/features/geckoview/features/readerview/presentation/con
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
+import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/move_to_background.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -475,6 +477,30 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
         return IconButton(onPressed: () {}, icon: const Icon(MdiIcons.puzzle));
       }
       return const _ExtensionShortcutToolbarButton();
+    },
+  ),
+  ToolbarButtonDefinition(
+    spec: quitToolbarButtonSpec,
+    label: 'Quit',
+    icon: MdiIcons.power,
+    longPressActions: ['Quit without confirmation'],
+    builder: (scope, context, ref) {
+      return IconButton(
+        onPressed: scope.isPreview
+            ? () {}
+            : () async {
+                final result = await showQuitBrowserDialog(context);
+                if (result == true) {
+                  await exitApp(ref.container);
+                }
+              },
+        onLongPress: scope.isPreview
+            ? null
+            : () async {
+                await exitApp(ref.container);
+              },
+        icon: const Icon(MdiIcons.power),
+      );
     },
   ),
 ];
