@@ -9,11 +9,12 @@ package eu.weblibre.flutter_mozilla_components.feature
 import android.os.Build
 import android.view.View
 import android.view.ViewTreeObserver
-import android.view.WindowInsets
-import androidx.core.graphics.Insets
+import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsAnimationCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsCompat.Type.ime
+import androidx.core.view.WindowInsetsCompat.Type.navigationBars
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportEvents
 import mozilla.components.support.base.log.logger.Logger
@@ -22,12 +23,18 @@ import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
 /**
  * Feature that detects keyboard visibility changes and reports them to Flutter.
  *
- * Uses WindowInsets API for accurate keyboard detection on Android 11+ (API 30+),
+ * Uses WindowInsets API with animation-bounds-based height calculation on Android 11+ (API 30+),
  * with fallback to ViewTreeObserver.OnGlobalLayoutListener for older versions.
+ *
+ * The animation-bounds approach works around known
+ * Android bugs where live insets during animation don't reflect the full keyboard height
+ * (including suggestion bar/toolbar).
  */
 class KeyboardVisibilityFeature(
     private val flutterEvents: GeckoViewportEvents
-) {
+) : WindowInsetsAnimationCompat.Callback(DISPATCH_MODE_CONTINUE_ON_SUBTREE),
+    OnApplyWindowInsetsListener {
+
     companion object {
         private const val TAG = "KeyboardVisibilityFeature"
     }
@@ -37,13 +44,15 @@ class KeyboardVisibilityFeature(
     private var rootView: View? = null
     private var lastKeyboardHeight: Int = 0
     private var lastKeyboardVisible: Boolean = false
-    private var isAnimating: Boolean = false
+
+    // State tracking for animation-bounds-based keyboard height
+    private var areKeyboardInsetsDeferred = false
+    private var isKeyboardShowingUp = false
+    private var keyboardAnimationInProgress = false
+    private var keyboardHeight = 0 // full target height from animation bounds
 
     // For legacy keyboard detection (pre-API 30)
     private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
-
-    // For modern keyboard animation tracking (API 30+)
-    private var insetsAnimationCallback: WindowInsetsAnimationCompat.Callback? = null
 
     /**
      * Start observing keyboard visibility changes on the given root view.
@@ -52,13 +61,11 @@ class KeyboardVisibilityFeature(
         rootView = view
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            setupModernKeyboardDetection(view)
+            ViewCompat.setWindowInsetsAnimationCallback(view, this)
+            ViewCompat.setOnApplyWindowInsetsListener(view, this)
         } else {
             setupLegacyKeyboardDetection(view)
         }
-
-        // Also set up WindowInsets listener for immediate state
-        setupInsetsListener(view)
 
         logger.debug("$TAG: Started keyboard visibility detection")
     }
@@ -71,68 +78,116 @@ class KeyboardVisibilityFeature(
             globalLayoutListener?.let {
                 view.viewTreeObserver.removeOnGlobalLayoutListener(it)
             }
-            insetsAnimationCallback?.let {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 ViewCompat.setWindowInsetsAnimationCallback(view, null)
+                ViewCompat.setOnApplyWindowInsetsListener(view, null)
             }
         }
 
         globalLayoutListener = null
-        insetsAnimationCallback = null
         rootView = null
 
         logger.debug("$TAG: Stopped keyboard visibility detection")
     }
 
-    /**
-     * Modern keyboard detection using WindowInsetsAnimation (API 30+).
-     * This provides smooth animation callbacks during keyboard show/hide.
-     */
-    private fun setupModernKeyboardDetection(view: View) {
-        insetsAnimationCallback = object : WindowInsetsAnimationCompat.Callback(DISPATCH_MODE_STOP) {
-            override fun onPrepare(animation: WindowInsetsAnimationCompat) {
-                super.onPrepare(animation)
-                if (animation.typeMask and WindowInsetsCompat.Type.ime() != 0) {
-                    isAnimating = true
-                }
+    // --- WindowInsetsAnimationCompat.Callback implementation (API 30+) ---
+
+    override fun onPrepare(animation: WindowInsetsAnimationCompat) {
+        if (animation.typeMask and ime() != 0) {
+            areKeyboardInsetsDeferred = true
+        }
+    }
+
+    override fun onStart(
+        animation: WindowInsetsAnimationCompat,
+        bounds: WindowInsetsAnimationCompat.BoundsCompat,
+    ): WindowInsetsAnimationCompat.BoundsCompat {
+        if (animation.typeMask and ime() != 0) {
+            keyboardAnimationInProgress = true
+
+            // Workaround for https://issuetracker.google.com/issues/361027506
+            // Compute the keyboard height based on the animation bounds, not live insets.
+            // This correctly includes suggestion bar / toolbar height.
+            keyboardHeight = bounds.upperBound.bottom - bounds.lowerBound.bottom
+
+            // Workaround for https://issuetracker.google.com/issues/369223558
+            // We expect the keyboard to have a bigger height than the OS navigation bar.
+            if (keyboardHeight <= getNavbarHeight()) {
+                keyboardHeight = 0
             }
 
-            override fun onProgress(
-                insets: WindowInsetsCompat,
-                runningAnimations: MutableList<WindowInsetsAnimationCompat>
-            ): WindowInsetsCompat {
-                // Find IME animation
-                val imeAnimation = runningAnimations.find {
-                    it.typeMask and WindowInsetsCompat.Type.ime() != 0
-                }
+            notifyKeyboardChange(
+                calculateKeyboardHeight(keyboardHeight, getNavbarHeight()),
+                isKeyboardShowingUp,
+                isAnimating = true,
+            )
+        }
 
-                if (imeAnimation != null) {
-                    val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
-                    val navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+        return super.onStart(animation, bounds)
+    }
 
-                    // Keyboard height is IME height minus navigation bar (which is included)
-                    val keyboardHeight = (imeInsets.bottom - navInsets.bottom).coerceAtLeast(0)
+    override fun onProgress(
+        insets: WindowInsetsCompat,
+        runningAnimations: MutableList<WindowInsetsAnimationCompat>,
+    ): WindowInsetsCompat {
+        if (!keyboardAnimationInProgress) return insets
 
-                    // During animation, report height changes
-                    if (keyboardHeight != lastKeyboardHeight) {
-                        notifyKeyboardChange(keyboardHeight, keyboardHeight > 0, isAnimating = true)
-                    }
-                }
-
-                return insets
+        runningAnimations.firstOrNull { it.typeMask and ime() != 0 }?.let { imeAnimation ->
+            // Ensure the fraction grows when keyboard is showing and shrinks when hiding
+            val fraction = when (isKeyboardShowingUp) {
+                true -> imeAnimation.interpolatedFraction
+                false -> 1 - imeAnimation.interpolatedFraction
             }
 
-            override fun onEnd(animation: WindowInsetsAnimationCompat) {
-                super.onEnd(animation)
-                if (animation.typeMask and WindowInsetsCompat.Type.ime() != 0) {
-                    isAnimating = false
-                    // Send final state
-                    notifyKeyboardChange(lastKeyboardHeight, lastKeyboardVisible, isAnimating = false)
-                }
+            val currentHeight = calculateKeyboardHeight(
+                (keyboardHeight * fraction).toInt(),
+                getNavbarHeight(),
+            )
+
+            if (currentHeight != lastKeyboardHeight) {
+                notifyKeyboardChange(currentHeight, currentHeight > 0, isAnimating = true)
             }
         }
 
-        ViewCompat.setWindowInsetsAnimationCallback(view, insetsAnimationCallback)
+        return insets
     }
+
+    override fun onEnd(animation: WindowInsetsAnimationCompat) {
+        keyboardAnimationInProgress = false
+
+        if (areKeyboardInsetsDeferred && (animation.typeMask and ime()) != 0) {
+            areKeyboardInsetsDeferred = false
+
+            // Re-dispatch insets now that animation is complete.
+            // This triggers onApplyWindowInsets with the final state.
+            rootView?.let { view ->
+                ViewCompat.getRootWindowInsets(view)?.let { insets ->
+                    ViewCompat.dispatchApplyWindowInsets(view, insets)
+                }
+            }
+        }
+    }
+
+    // --- OnApplyWindowInsetsListener implementation (API 30+) ---
+
+    override fun onApplyWindowInsets(
+        view: View,
+        insets: WindowInsetsCompat,
+    ): WindowInsetsCompat {
+        isKeyboardShowingUp = insets.isVisible(ime())
+
+        if (!areKeyboardInsetsDeferred) {
+            val height = calculateKeyboardHeight(
+                insets.getInsets(ime()).bottom,
+                getNavbarHeight(),
+            )
+            notifyKeyboardChange(height, isKeyboardShowingUp, isAnimating = false)
+        }
+
+        return insets
+    }
+
+    // --- Legacy keyboard detection (pre-API 30) ---
 
     /**
      * Legacy keyboard detection using ViewTreeObserver (pre-API 30).
@@ -141,8 +196,8 @@ class KeyboardVisibilityFeature(
         globalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
             val insets = ViewCompat.getRootWindowInsets(view) ?: return@OnGlobalLayoutListener
 
-            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
-            val navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            val imeInsets = insets.getInsets(ime())
+            val navInsets = insets.getInsets(navigationBars())
 
             val keyboardHeight = (imeInsets.bottom - navInsets.bottom).coerceAtLeast(0)
             val isVisible = keyboardHeight > 0
@@ -155,29 +210,16 @@ class KeyboardVisibilityFeature(
         view.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
     }
 
-    /**
-     * Set up WindowInsets listener for immediate keyboard state.
-     */
-    private fun setupInsetsListener(view: View) {
-        ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
-            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
-            val navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+    // --- Helper methods ---
 
-            val keyboardHeight = if (imeVisible) {
-                (imeInsets.bottom - navInsets.bottom).coerceAtLeast(0)
-            } else {
-                0
-            }
+    private fun getNavbarHeight(): Int =
+        rootView?.let {
+            ViewCompat.getRootWindowInsets(it)
+                ?.getInsets(navigationBars())?.bottom
+        } ?: 0
 
-            // Only notify if not currently animating (animation callbacks handle that)
-            if (!isAnimating && (keyboardHeight != lastKeyboardHeight || imeVisible != lastKeyboardVisible)) {
-                notifyKeyboardChange(keyboardHeight, imeVisible, isAnimating = false)
-            }
-
-            insets
-        }
-    }
+    private fun calculateKeyboardHeight(rawHeight: Int, navbarHeight: Int): Int =
+        (rawHeight - navbarHeight).coerceAtLeast(0)
 
     /**
      * Notify Flutter about keyboard visibility change.
@@ -208,9 +250,9 @@ class KeyboardVisibilityFeature(
         rootView?.let { view ->
             val insets = ViewCompat.getRootWindowInsets(view) ?: return
 
-            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
-            val navInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            val imeVisible = insets.isVisible(ime())
+            val imeInsets = insets.getInsets(ime())
+            val navInsets = insets.getInsets(navigationBars())
 
             val keyboardHeight = if (imeVisible) {
                 (imeInsets.bottom - navInsets.bottom).coerceAtLeast(0)
