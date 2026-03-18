@@ -23,12 +23,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:weblibre/core/providers/defaults.dart';
 import 'package:weblibre/core/providers/router.dart';
-import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/onboarding/domain/entities/onboarding_mode.dart';
 import 'package:weblibre/features/onboarding/domain/providers.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/abstract/i_form_page.dart';
@@ -199,16 +195,6 @@ class OnboardingScreen extends HookConsumerWidget {
                           await ref
                               .read(onboardingRepositoryProvider.notifier)
                               .pushRevision(targetRevision);
-
-                          await ref
-                              .read(tabRepositoryProvider.notifier)
-                              .addTab(
-                                url: ref.read(docsUriProvider),
-                                tabMode: TabMode.regular,
-                                containerSelection:
-                                    const TabContainerSelection.unassigned(),
-                                selectTab: true,
-                              );
 
                           ref.invalidate(routerProvider);
                         },

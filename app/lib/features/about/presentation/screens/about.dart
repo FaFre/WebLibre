@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/providers/defaults.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/about/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
@@ -104,7 +105,7 @@ class AboutDialogScreen extends HookConsumerWidget {
             await ref
                 .read(tabRepositoryProvider.notifier)
                 .addTab(
-                  url: Uri.https('docs.weblibre.eu'),
+                  url: ref.read(docsUriProvider),
                   tabMode: TabMode.regular,
                   selectTab: true,
                 );
