@@ -1,0 +1,73 @@
+GeckoView 148.0.2
+
+**Major New Features**
+
+- **Progressive Web App (PWA) Support** - Install compatible websites directly to your home screen as standalone apps. PWAs open in their own window with their own icon, and remember which profile and container they belong to.
+
+- **Custom Tabs Integration** - Other Android apps can now open links in WebLibre using a lightweight browser overlay. Includes a close button to instantly return to the calling app, with support for private browsing mode.
+
+- **Built-in Page Translation** - Translate any webpage into your preferred language - locally on your device. The browser automatically detects the page language and offers translation options.
+
+- **Firefox Sync** - Connect your Firefox account to sync bookmarks, open tabs, and browsing history across all your devices. Set up via QR code or direct sign-in. Send tabs to your other devices and view tabs open on synced devices.
+
+- **URL Cleaner & Unshortener** - Automatically removes tracking parameters from URLs and reveals the final destination of shortened links. Based on ClearURLs rules with automatic weekly updates.
+
+- **Isolated Tabs** - A new tab type that runs in complete isolation from your other browsing, perfect for sensitive tasks like banking.
+
+- **New Browser Home Screen** - The empty tab screen is now a proper home experience with inspirational quotes, quick actions, and container-aware content.
+
+- **Dedicated Extensions Settings** - New screen to install extensions from local .xpi files and configure custom Mozilla addon collections.
+
+- **Tor Country Picker** - New searchable country picker with flags for selecting Tor entry and exit node countries.
+
+**Search & Navigation**
+
+- **Top Sites Grid** - Your most-visited sites in a customizable grid. Pin favorites, edit titles, drag to reorder, and hide unwanted sites.
+- **Customizable Search Modules** - Reorder and toggle search sections (Top Sites, Recent Tabs, History, Bookmarks, Containers).
+- **Bookmark Search** - Search your saved bookmarks directly from the search bar.
+- **Animated Tab Type Switcher** - Smooth pill-style selector for regular, private, and isolated tabs.
+
+**Export & Share**
+
+- **Print & Export Pages** - Print any webpage or save as PDF. Export page content as Markdown (clean reader content or full page), or copy as Markdown to clipboard.
+
+**Tab Management**
+
+- **Tab Filtering & Sorting** - Filter by type (regular, private, isolated) and sort by title, URL, or date range.
+- **Drag-and-Drop Container Creation** - Drag one tab onto another to create a new container with AI-suggested names.
+- **Tab List Options** - Show favicons instead of thumbnails, show/hide tab titles in quick switcher.
+
+**Privacy & Security Hardening**
+
+- **Certificate Transparency** - Enforce CT checks and CRLite for certificate revocation.
+- **WebGL Privacy** - Spoof renderer and vendor information.
+- **WebRTC IP Leak Prevention** - mDNS obfuscation, relay-only mode options.
+- **Safe Browsing** - Toggle malware and phishing protection.
+- **Geolocation Privacy** - Uses BeaconDB instead of Mozilla's service.
+- **API Restrictions** - Battery API, Reporting API, and WebGPU disabled by default.
+
+**New Settings**
+
+- **UI Scale Factor** - Adjust overall interface size.
+- **Font Size Control** - Scale web page text from 50% to 300%.
+- **Disable Animations** - Reduce motion for accessibility.
+- **Experimental Process Isolation** - Isolated content process and App Zygote for enhanced security.
+- **Reset All Preferences** - One-tap button to restore all settings to their defaults.
+
+**Customization**
+
+- **Configurable Toolbar Buttons** - Reorder, enable/disable, reset to defaults.
+- **Long-Press Actions** - Additional actions on toolbar buttons.
+
+**Improvements**
+
+- **Improved Keyboard Handling** - Better height calculation prevents hidden content.
+- **Unified Bottom Sheet Menu** - Navigation drawer replaced with consolidated bottom sheet.
+- **Settings Reorganization** - Clearer categories: General, Browsing, Web Content, Search, Extensions, Privacy & Security, Advanced, Experimental.
+- **Enhanced Onboarding** - DNS over HTTPS, toolbar customization, and privacy hardening options.
+
+**Removed**
+
+- Navigation drawer (replaced by bottom sheet menu)
+- Auto-launch docs after onboarding
+- Dismiss confirmation on bottom app bar
