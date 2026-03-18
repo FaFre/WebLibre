@@ -31,9 +31,8 @@ import org.mozilla.geckoview.GeckoRuntimeSettings
 object EngineProvider {
     private var runtime: GeckoRuntime? = null
 
-    private val components by lazy {
-        requireNotNull(GlobalComponents.components) { "Components not initialized" }
-    }
+    private val components: Components
+        get() = requireNotNull(GlobalComponents.components) { "Components not initialized" }
 
     @Synchronized
     fun getOrCreateRuntime(context: Context): GeckoRuntime {
@@ -147,5 +146,14 @@ object EngineProvider {
         Logger.debug("Fetching Client")
         val runtime = getOrCreateRuntime(context)
         return GeckoViewFetchClient(context, runtime)
+    }
+
+    @Synchronized
+    fun shutdown() {
+        runtime?.let {
+            Logger.debug("Shutting down GeckoRuntime")
+            it.shutdown()
+            runtime = null
+        }
     }
 }

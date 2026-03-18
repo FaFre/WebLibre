@@ -64,4 +64,8 @@ class GeckoBrowserService {
   Future<void> requestDefaultBrowser() {
     return _api.requestDefaultBrowser();
   }
+
+  Future<void> shutdown() {
+    return _api.shutdown();
+  }
 }

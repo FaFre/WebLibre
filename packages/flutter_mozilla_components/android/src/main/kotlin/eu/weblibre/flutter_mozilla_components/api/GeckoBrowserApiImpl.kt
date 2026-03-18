@@ -12,6 +12,7 @@ import android.view.View
 import androidx.fragment.app.FragmentActivity
 import eu.weblibre.flutter_mozilla_components.BrowserFragment
 import eu.weblibre.flutter_mozilla_components.GeckoViewFactory
+import eu.weblibre.flutter_mozilla_components.EngineProvider
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.ProfileContext
 import eu.weblibre.flutter_mozilla_components.activities.ExternalAppBrowserActivity
@@ -453,6 +454,51 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         }
         val intent = android.content.Intent(android.provider.Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)
         currentActivity.startActivity(intent)
+    }
+
+    override fun shutdown() {
+        logger.debug("$TAG: Shutting down GeckoView engine")
+
+        // 1. Remove the browser fragment so its onDestroyView runs while the
+        //    runtime is still alive. This tears down EngineView, features, and
+        //    clears component references cleanly.
+        try {
+            val fragmentActivity = activity as? FragmentActivity
+            if (fragmentActivity != null && !fragmentActivity.isFinishing && !fragmentActivity.isDestroyed) {
+                val fm = fragmentActivity.supportFragmentManager
+                if (!fm.isStateSaved) {
+                    val existing = fm.findFragmentById(FRAGMENT_CONTAINER_ID)
+                    if (existing != null) {
+                        fm.beginTransaction().remove(existing).commitNow()
+                        logger.debug("$TAG: Browser fragment removed")
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            logger.error("$TAG: Error removing browser fragment", e)
+        }
+
+        // 2. Stop component-level services
+        try {
+            GlobalComponents.components?.let { components ->
+                // Stop the FxA web channel feature
+                runCatching { components.services.fxaWebChannelFeature.stop() }
+
+                // Close the account manager
+                runCatching { components.backgroundServices.accountManager.close() }
+            }
+        } catch (e: Exception) {
+            logger.error("$TAG: Error during component shutdown", e)
+        }
+
+        // 3. Shutdown GeckoRuntime (safe now that no views reference it)
+        try {
+            EngineProvider.shutdown()
+        } catch (e: Exception) {
+            logger.error("$TAG: Error shutting down GeckoRuntime", e)
+        }
+
+        isGeckoInitialized = false
     }
 
 }

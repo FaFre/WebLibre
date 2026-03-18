@@ -24,7 +24,7 @@ import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
-
+import 'package:weblibre/core/database_registry.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/features/web_feed/data/database/database.dart';
 
@@ -44,6 +44,8 @@ FeedDatabase feedDatabase(Ref ref) {
       return NativeDatabase.createInBackground(file);
     }),
   );
+
+  DatabaseRegistry.instance.register('feed', db);
 
   ref.onDispose(() async {
     await db.close();

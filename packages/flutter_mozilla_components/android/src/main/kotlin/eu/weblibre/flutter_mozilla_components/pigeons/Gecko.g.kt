@@ -4847,6 +4847,7 @@ interface GeckoBrowserApi {
   fun openInCustomTab(url: String, private: Boolean, contextId: String?)
   fun isDefaultBrowser(): Boolean
   fun requestDefaultBrowser()
+  fun shutdown()
 
   companion object {
     /** The codec used by GeckoBrowserApi. */
@@ -4970,6 +4971,22 @@ interface GeckoBrowserApi {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
               api.requestDefaultBrowser()
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserApi.shutdown$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              api.shutdown()
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)

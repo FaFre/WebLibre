@@ -49,4 +49,4 @@ final class TopSiteDatabaseProvider
   }
 }
 
-String _$topSiteDatabaseHash() => r'6371e1784bd1272bdfc656caaa56e786e7503c78';
+String _$topSiteDatabaseHash() => r'bee041ef1b144ce63c38080b2534e4109399fa6f';

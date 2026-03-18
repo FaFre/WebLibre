@@ -25,7 +25,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:path/path.dart' as p;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
-
+import 'package:weblibre/core/database_registry.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/features/quotes/data/database/database.dart';
 
@@ -58,6 +58,8 @@ QuotesDatabase quotesDatabase(Ref ref) {
       return NativeDatabase.createInBackground(file);
     }),
   );
+
+  DatabaseRegistry.instance.register('quotes', db);
 
   ref.onDispose(() async {
     await db.close();

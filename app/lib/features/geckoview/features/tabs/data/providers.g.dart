@@ -48,4 +48,4 @@ final class TabDatabaseProvider
   }
 }
 
-String _$tabDatabaseHash() => r'337dbcf30bd57dcee409aec0aa93f1f6f2783368';
+String _$tabDatabaseHash() => r'c40af8d5e17f61abcf14ea096ace3d0c2fb3d8d8';
