@@ -120,6 +120,7 @@ dependencies {
     implementation "org.mozilla.components:feature-accounts-push:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-awesomebar:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-customtabs:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:feature-contextmenu:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-downloads:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-media:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-tabs:$mozillaComponentsVersion"

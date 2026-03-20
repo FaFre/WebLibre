@@ -25,6 +25,8 @@ import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
 import eu.weblibre.flutter_mozilla_components.widget.CustomTabToolbar
 import eu.weblibre.flutter_mozilla_components.widget.CustomTabToolbarFeature
+import mozilla.components.feature.contextmenu.ContextMenuCandidate
+import mozilla.components.feature.contextmenu.ContextMenuFeature
 import mozilla.components.browser.state.selector.findCustomTab
 import mozilla.components.browser.state.state.ExternalAppType
 import mozilla.components.concept.engine.EngineView
@@ -46,6 +48,7 @@ import mozilla.components.support.ktx.android.arch.lifecycle.addObservers
 class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
 
     private val customTabsToolbarFeature = ViewBoundFeatureWrapper<CustomTabToolbarFeature>()
+    private val contextMenuFeature = ViewBoundFeatureWrapper<ContextMenuFeature>()
     private val hideToolbarFeature = ViewBoundFeatureWrapper<WebAppHideToolbarFeature>()
     private val windowFeature = ViewBoundFeatureWrapper<CustomTabWindowFeature>()
 
@@ -78,10 +81,40 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
         }
     }
 
+    private fun createContextMenuCandidates(view: View): List<ContextMenuCandidate> {
+        return listOf(
+            ContextMenuCandidate.createCopyLinkCandidate(requireContext(), view),
+            ContextMenuCandidate.createShareLinkCandidate(requireContext()),
+            ContextMenuCandidate.createSaveImageCandidate(
+                requireContext(),
+                components.useCases.contextMenuUseCases,
+            ),
+            ContextMenuCandidate.createSaveVideoAudioCandidate(
+                requireContext(),
+                components.useCases.contextMenuUseCases,
+            ),
+            ContextMenuCandidate.createCopyImageLocationCandidate(requireContext(), view),
+        )
+    }
+
     override fun onEngineSetupComplete() {
         val sessionId = customTabSessionId ?: return
         val store = components.core.store
         val customTab = store.state.findCustomTab(sessionId) ?: return
+        val engineView = components.externalAppEngineView ?: return
+
+        contextMenuFeature.set(
+            feature = ContextMenuFeature(
+                fragmentManager = parentFragmentManager,
+                store = store,
+                candidates = createContextMenuCandidates(requireView()),
+                engineView = engineView,
+                useCases = components.useCases.contextMenuUseCases,
+                tabId = sessionId,
+            ),
+            owner = this,
+            view = requireView(),
+        )
 
         val isPwaOrTwa = customTab.config.externalAppType == ExternalAppType.PROGRESSIVE_WEB_APP ||
             customTab.config.externalAppType == ExternalAppType.TRUSTED_WEB_ACTIVITY

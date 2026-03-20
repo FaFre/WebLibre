@@ -8,6 +8,7 @@ import android.content.Context
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.Engine
 import mozilla.components.feature.app.links.AppLinksUseCases
+import mozilla.components.feature.contextmenu.ContextMenuUseCases
 import mozilla.components.feature.downloads.DownloadsUseCases
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.session.SettingsUseCases
@@ -46,6 +47,11 @@ class UseCases(
      * Use cases related to the downloads feature.
      */
     val downloadsUseCases: DownloadsUseCases by lazy { DownloadsUseCases(store, context) }
+
+    /**
+     * Use cases related to the context menu feature.
+     */
+    val contextMenuUseCases: ContextMenuUseCases by lazy { ContextMenuUseCases(store) }
 
     /**
      * Use cases related to Custom Tabs.
