@@ -79,7 +79,13 @@ jobs:
           dart pub global activate melos
           melos bootstrap
 
-      - name: Build browser
+      - name: Update external assets
+        run: melos run update-assets --no-select
+
+      - name: Build components
+        run: melos run build-components --no-select
+
+      - name: Build APK
         run: melos run build-browser --no-select
 
       - name: Build App Bundle
