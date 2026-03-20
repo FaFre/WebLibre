@@ -29,6 +29,9 @@ import 'package:weblibre/features/geckoview/domain/providers.dart';
 part 'browser_addon.g.dart';
 
 const _signatureRequiredPref = 'xpinstall.signatures.required';
+const _installRequireBuiltInCertsPref =
+    'extensions.install.requireBuiltInCerts';
+const _updateRequireBuiltInCertsPref = 'extensions.update.requireBuiltInCerts';
 
 @Riverpod(keepAlive: true)
 class BrowserAddonService extends _$BrowserAddonService {
@@ -73,6 +76,13 @@ class BrowserAddonService extends _$BrowserAddonService {
     bool allowUnsigned = false,
   }) async {
     final prefService = GeckoPrefService();
+    final unsignedInstallPrefs = {
+      _signatureRequiredPref: false,
+      _installRequireBuiltInCertsPref: false,
+      _updateRequireBuiltInCertsPref: false,
+    };
+
+    Map<String, Object>? previousUnsignedInstallPrefs;
 
     try {
       // Validate file exists and has .xpi extension
@@ -88,7 +98,25 @@ class BrowserAddonService extends _$BrowserAddonService {
 
       // Temporarily disable signature requirement if user allows unsigned
       if (allowUnsigned) {
-        await prefService.applyPrefs({_signatureRequiredPref: false});
+        final existingPrefs = await prefService.getPrefs(
+          unsignedInstallPrefs.keys.toList(),
+        );
+
+        previousUnsignedInstallPrefs = {
+          for (final entry in existingPrefs.entries)
+            if (entry.value.value case final Object value) entry.key: value,
+        };
+
+        await prefService.applyPrefs(unsignedInstallPrefs);
+
+        final appliedPrefs = await prefService.getPrefs(
+          unsignedInstallPrefs.keys.toList(),
+        );
+
+        logger.i(
+          'Prepared unsigned add-on install prefs: '
+          '${appliedPrefs.map((key, value) => MapEntry(key, value.value))}',
+        );
       }
 
       try {
@@ -101,8 +129,8 @@ class BrowserAddonService extends _$BrowserAddonService {
         return true;
       } finally {
         // Always restore signature requirement
-        if (allowUnsigned) {
-          await prefService.applyPrefs({_signatureRequiredPref: true});
+        if (allowUnsigned && previousUnsignedInstallPrefs != null) {
+          await prefService.applyPrefs(previousUnsignedInstallPrefs);
         }
       }
     } catch (e, s) {

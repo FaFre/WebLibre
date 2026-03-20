@@ -88,7 +88,7 @@ class _InstallLocalAddonSheet extends HookConsumerWidget {
         if (errorString.contains('NotSigned') ||
             errorString.contains('SIGNEDSTATE')) {
           errorMessage.value =
-              'This extension is not signed by Mozilla. Enable "Allow unsigned extensions" to install it.';
+              'This extension is not signed by Mozilla. Enable "Allow unsigned extensions" to retry.';
         } else {
           errorMessage.value = 'Installation failed: $errorString';
         }
