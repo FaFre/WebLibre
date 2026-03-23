@@ -60,7 +60,7 @@ You are solely responsible for your use of the Software, the content you access 
 
 ## 5. Privacy and Security
 
-Our privacy practices are described in the Privacy Policy available at https://docs.weblibre.eu/Legal/Privacy-Policy.
+Our privacy practices are described in the Privacy Policy available at https://docs.weblibre.eu/weblibre/privacy-policy.html.
 
 The Software may include privacy, security, filtering, backup, synchronization, routing, or other protective features. These features are provided on a best-effort basis only. They are not guarantees of anonymity, confidentiality, security, legality, availability, or fitness for any particular purpose. Their effectiveness depends on factors outside OnDevice UG's control, including device security, third-party services, network conditions, regional restrictions, user settings, and modified builds.
 

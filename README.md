@@ -47,42 +47,42 @@ Whether you've discovered a bug, have a feature request, or want to share your e
 
 A core mission of WebLibre is to shield users from third-party surveillance—whether by ISPs, tracking companies, or other entities seeking to monitor or collect data on your browsing habits. WebLibre achieves this through a suite of optional privacy features, including:
 
-- [**Web Engine Hardening:**](https://docs.weblibre.eu/Privacy--and--Security#hardening--advanced-controls) Strengthens the browser’s core to resist tracking and fingerprinting techniques. Reduce attack vectors and enforce highest security standards when contacting remote services.
-- **DNS over HTTPS:** Enables you to choose a secure way of resolving domain names with a provider of your choice (Quad9 is used by default)
-- [**Cookie Isolation:**](https://docs.weblibre.eu/Tabs/Containers/Features/Container-Cookie-Contexts) Ensures cookies are separated by container or tab, preventing cross-site tracking by design.
-- [**Content Blocking:**](https://docs.weblibre.eu/Privacy--and--Security#content-blocking) Blocks ads, trackers, and other unwanted content by default.
-- [**Tor Proxying:**](https://docs.weblibre.eu/Tabs/Containers/Features/Tor-Proxy) Allows you to selectively route browsing traffic through the Tor network for enhanced anonymity.
-- [**Local Search Engine:**](https://docs.weblibre.eu/Personal-Local-Search-Engine) whenever possible, your device handles search and retrieval, minimizing the need to contact remote services.
+- [**Web Engine Hardening:**](https://docs.weblibre.eu/weblibre/privacy/web-engine-hardening.html) Strengthens the browser’s core to resist tracking and fingerprinting techniques. Reduce attack vectors and enforce highest security standards when contacting remote services.
+- [**DNS over HTTPS:**](https://docs.weblibre.eu/weblibre/privacy/dns-over-https.html) Enables you to choose a secure way of resolving domain names with a provider of your choice (Quad9 is used by default)
+- [**Cookie Isolation:**](https://docs.weblibre.eu/weblibre/tabs/containers.html) Ensures cookies are separated by container or tab, preventing cross-site tracking by design.
+- [**Content Blocking:**](https://docs.weblibre.eu/weblibre/privacy/tracking-protection.html) Blocks ads, trackers, and other unwanted content by default.
+- [**Tor Proxying:**](https://docs.weblibre.eu/weblibre/tor.html) Allows you to selectively route browsing traffic through the Tor network for enhanced anonymity.
+- [**Local Search Engine:**](https://docs.weblibre.eu/weblibre/search/local-search.html) whenever possible, your device handles search and retrieval, minimizing the need to contact remote services.
 
 By combining these tools, WebLibre empowers you to browse the web freely and privately, minimizing exposure to unwanted monitoring and giving you genuine control over your online experience.
 
 ## Features
 
-### Multi-User Profiles
+### [Multi-User Profiles](https://docs.weblibre.eu/weblibre/profiles.html)
 
 - **Complete Profile Isolation** - Separate browsing data, extensions, and settings per user
 - **Profile Backups** - Export and restore individual user profiles with all associated data
 - **Independent Configurations** - Each profile maintains its own containers, extensions, privacy settings, and preferences
 
-### [Tab Management](https://docs.weblibre.eu/Tabs/Tab-Management)
+### [Tab Management](https://docs.weblibre.eu/weblibre/tabs/tab-management.html)
 
-- [**Tab Containers:**](https://docs.weblibre.eu/Tabs/Containers/Container) Organize tabs into isolated containers for enhanced privacy and workflow management:
-    - [**Container Cookie Contexts:**](https://docs.weblibre.eu/Tabs/Containers/Features/Container-Cookie-Contexts) Separate "cookie jars" for each container
-    - [**Tor Proxy:**](https://docs.weblibre.eu/Tabs/Containers/Features/Tor-Proxy) Route container traffic through the Tor network for anonymous browsing.
-    - [**Biometric Authentication:**](https://docs.weblibre.eu/Tabs/Containers/Features/Biometric-authentication) Restrict access to containers using fingerprint or face recognition
+- [**Tab Containers:**](https://docs.weblibre.eu/weblibre/tabs/containers.html) Organize tabs into isolated containers for enhanced privacy and workflow management:
+    - [**Container Cookie Contexts:**](https://docs.weblibre.eu/weblibre/tabs/containers.html) Separate "cookie jars" for each container
+    - [**Tor Proxy:**](https://docs.weblibre.eu/weblibre/tor.html) Route container traffic through the Tor network for anonymous browsing.
+    - [**Biometric Authentication:**](https://docs.weblibre.eu/weblibre/app-lock.html) Restrict access to containers using fingerprint or face recognition
     - **Site Assignments:** Automatically route specific domains to designated containers
-- [**Tree View Navigation:**](https://docs.weblibre.eu/Tabs/Tree-View-Navigation) Visualize and manage complex tab hierarchies with parent-child relationships
-- [**Local AI Assistance:**](https://docs.weblibre.eu/Tabs/Containers/Features/On-Device-AI) Use on-device AI models to intelligently group related tabs into new containers
+- [**Tree View Navigation:**](https://docs.weblibre.eu/weblibre/tabs/tree-view.html) Visualize and manage complex tab hierarchies with parent-child relationships
+- [**Local AI Assistance:**](https://docs.weblibre.eu/weblibre/on-device-ai.html) Use on-device AI models to intelligently group related tabs into new containers
 - **Flexible Tab Views:** Choose between list view, grid view, or tree view with tab hierarchy
 
-### [Personal Local Search Engine](https://docs.weblibre.eu/Personal-Local-Search-Engine)
+### [Personal Local Search Engine](https://docs.weblibre.eu/weblibre/search/local-search.html)
 
 - **Unified Search:** Instantly search across:
     - **Open Tabs:** By title, address, and full page content (no size limits)
     - **Bookmarks:** Search your saved bookmarks by title, URL, and folder
-    - **Web Feeds:** Aggregate and search your favorite news sites and blogs with full content indexing
+    - [**Web Feeds:**](https://docs.weblibre.eu/weblibre/web-feeds.html) Aggregate and search your favorite news sites and blogs with full content indexing
     - **Browsing History:** Quickly find previously visited sites by title or address
-    - **[Bangs](https://docs.weblibre.eu/Bangs):** Use thousands of built-in shortcuts for direct on-site search
+    - **[Bangs](https://docs.weblibre.eu/weblibre/search/bangs.html):** Use thousands of built-in shortcuts for direct on-site search
 - **Custom Search Engines:** Create your own bang shortcuts for frequently used search engines and websites
 - **Local-First Search:** All indexing and search operations happen on your device—your data never leaves your control
 
@@ -91,12 +91,13 @@ By combining these tools, WebLibre empowers you to browse the web freely and pri
 - **No Tracking:** WebLibre does not track or monitor your browsing.
 - **Local Data Storage:** All your data stays on your device.
 - **Tor Integration:** Route container or private tab traffic through the Tor network for greater anonymity.
-- **Ad and Content Blocking:** Optional content blocker (uBlock Origin) installation during onboarding.
+- [**Extensions:**](https://docs.weblibre.eu/weblibre/extensions.html) Optional content blocker (uBlock Origin) installation during onboarding.
 - **Web Engine Hardening:** Comprehensive and easy-to-use privacy and security presets for the Gecko Web-Engine.
 - **DNS over HTTPS (DoH):** Encrypted DNS with predefined or custom resolver options
 - **Container Data Isolation:** Clear container data for isolated containers
+- [**Firefox Sync:**](https://docs.weblibre.eu/weblibre/firefox-sync.html) Sync bookmarks, history, and more across devices
 
-### [Small Web Discovery](https://docs.weblibre.eu/small-web)
+### [Small Web Discovery](https://docs.weblibre.eu/weblibre/small-web.html)
 
 - **Discover the Small Web:** A dedicated browsing mode for discovering personal blogs, indie creators, and handcrafted websites — the hidden corners of the internet made by real people
 - **Kagi Small Web:** Browse curated content from thousands of community-vetted personal blogs, indie YouTube channels, and web comics across five modes (Web, Appreciated, Videos, Code, Comics)
@@ -107,11 +108,13 @@ By combining these tools, WebLibre empowers you to browse the web freely and pri
 ### Productivity & Content Management
 
 - **Bookmark Management** - Import/export bookmarks (JSON/HTML format)
-- **Export Page Content** - Save web pages as PDF or Markdown
+- [**Export Page Content**](https://docs.weblibre.eu/weblibre/page-export.html) - Save web pages as PDF or Markdown
 
 ---
 
 ## Getting Started
+
+See the **[Quick Start Guide](https://docs.weblibre.eu/weblibre/quick-start.html)** or **[First Launch Guide](https://docs.weblibre.eu/weblibre/getting-started.html)** for detailed setup instructions.
 
 1. **Download & Install** WebLibre on your Android device
 2. **Set Up Your Profile:** Create your first user profile during onboarding
