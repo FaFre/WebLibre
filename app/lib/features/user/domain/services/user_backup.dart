@@ -38,9 +38,88 @@ part 'user_backup.g.dart';
 @Riverpod(keepAlive: true)
 class UserBackupService extends _$UserBackupService {
   static final dateFormatter = FixedDateTimeFormatter('YYYY-MM-DD_hhmmss');
+  static const _excludedBackupRelativePaths = {'cache'};
 
   static final _safUtil = SafUtil();
   static final _safStream = SafStream();
+
+  bool _isExcludedBackupPath(String relativePath) {
+    final normalizedPath = p.normalize(relativePath);
+
+    for (final excludedPath in _excludedBackupRelativePaths) {
+      if (normalizedPath == excludedPath ||
+          p.isWithin(excludedPath, normalizedPath)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  Future<void> _copyCuratedBackupSource(
+    Directory rootDirectory,
+    Directory sourceDirectory,
+    Directory targetDirectory,
+  ) async {
+    await targetDirectory.create(recursive: true);
+
+    await for (final entity in sourceDirectory.list(followLinks: false)) {
+      final relativePath = p.relative(entity.path, from: rootDirectory.path);
+
+      if (_isExcludedBackupPath(relativePath)) {
+        continue;
+      }
+
+      final targetPath = p.join(targetDirectory.path, p.basename(entity.path));
+
+      if (entity is Directory) {
+        await _copyCuratedBackupSource(
+          rootDirectory,
+          entity,
+          Directory(targetPath),
+        );
+      } else if (entity is File) {
+        await entity.copy(targetPath);
+      } else if (entity is Link) {
+        await Link(targetPath).create(await entity.target());
+      }
+    }
+  }
+
+  Future<Directory> _prepareBackupSourceDirectory(
+    Directory sourceDirectory, {
+    required bool skipCaches,
+  }) async {
+    if (!skipCaches) {
+      return sourceDirectory;
+    }
+
+    final tempDirectory = await getTemporaryDirectory();
+    final curatedDirectory = Directory(
+      p.join(
+        tempDirectory.path,
+        'backup_source_${DateTime.now().microsecondsSinceEpoch}',
+      ),
+    );
+
+    try {
+      await _copyCuratedBackupSource(
+        sourceDirectory,
+        sourceDirectory,
+        curatedDirectory,
+      );
+      return curatedDirectory;
+    } catch (_) {
+      try {
+        if (await curatedDirectory.exists()) {
+          await curatedDirectory.delete(recursive: true);
+        }
+      } catch (_) {
+        // Ignore cleanup errors for partially copied backup sources.
+      }
+      rethrow;
+    }
+  }
 
   Uri _requireBackupDirectoryUri() {
     final uri = ref.read(backupDirectoryUriProvider);
@@ -61,18 +140,26 @@ class UserBackupService extends _$UserBackupService {
     Profile profile, {
     required String password,
     required bool integrityCheck,
+    required bool skipCaches,
   }) async {
     final dirUri = _requireBackupDirectoryUri();
     final timestamp = dateFormatter.encode(DateTime.now());
     final fileName = 'backup_${profile.name}_$timestamp.weblibre';
+    final sourceDirectory = filesystem.getProfileDir(profile.uuidValue);
 
     final tempDir = await getTemporaryDirectory();
     final tempFile = File(p.join(tempDir.path, fileName));
+    Directory? curatedSourceDirectory;
 
     try {
+      curatedSourceDirectory = await _prepareBackupSourceDirectory(
+        sourceDirectory,
+        skipCaches: skipCaches,
+      );
+
       final backup = SecureArchivePack(
         outputFile: tempFile,
-        sourceDirectory: filesystem.getProfileDir(profile.uuidValue),
+        sourceDirectory: curatedSourceDirectory,
         argon2Params: Argon2Params.memoryConstrained(),
       );
 
@@ -97,6 +184,20 @@ class UserBackupService extends _$UserBackupService {
           error: e,
           stackTrace: s,
         );
+      }
+      if (curatedSourceDirectory != null &&
+          curatedSourceDirectory.path != sourceDirectory.path) {
+        try {
+          if (await curatedSourceDirectory.exists()) {
+            await curatedSourceDirectory.delete(recursive: true);
+          }
+        } catch (e, s) {
+          logger.w(
+            'Failed to cleanup curated backup directory: ${curatedSourceDirectory.path}',
+            error: e,
+            stackTrace: s,
+          );
+        }
       }
     }
   }

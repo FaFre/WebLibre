@@ -43,6 +43,7 @@ class ProfileBackupScreen extends HookConsumerWidget {
     final passwordController = useMemoized(() => FancyPasswordController());
 
     final integrityVerification = useState(true);
+    final skipCaches = useState(false);
     final skipPasswordConfirmation = useState(false);
 
     final backupFuture = useState<Future<bool>?>(null);
@@ -111,6 +112,19 @@ class ProfileBackupScreen extends HookConsumerWidget {
                     'Automatically check that backups are complete and restorable',
                   ),
                 ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: skipCaches.value,
+                  onChanged: disableInteraction
+                      ? null
+                      : (value) {
+                          skipCaches.value = value;
+                        },
+                  title: const Text('Skip Cache Directories'),
+                  subtitle: const Text(
+                    'Leave out temporary browser caches like page, icon, and thumbnail data to keep backups smaller',
+                  ),
+                ),
                 ExpansionTile(
                   enabled: !disableInteraction,
                   childrenPadding: EdgeInsets.zero,
@@ -175,6 +189,7 @@ class ProfileBackupScreen extends HookConsumerWidget {
                               profile,
                               password: passwordTextController.text,
                               integrityCheck: integrityVerification.value,
+                              skipCaches: skipCaches.value,
                             );
                       }
                     },
