@@ -70,6 +70,8 @@ dependencies:
   riverpod_annotation: ^4.0.2
   rss_dart: ^1.0.14
   rxdart: ^0.28.0
+  saf_stream: ^2.0.0
+  saf_util: ^2.0.0
   secure_archive:
     git:
       url: https://github.com/FaFre/secure_archive.git

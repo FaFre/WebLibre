@@ -167,11 +167,13 @@ final backupListProvider = BackupListProvider._();
 final class BackupListProvider
     extends
         $FunctionalProvider<
-          AsyncValue<List<File>>,
-          List<File>,
-          FutureOr<List<File>>
+          AsyncValue<List<SafDocumentFile>>,
+          List<SafDocumentFile>,
+          FutureOr<List<SafDocumentFile>>
         >
-    with $FutureModifier<List<File>>, $FutureProvider<List<File>> {
+    with
+        $FutureModifier<List<SafDocumentFile>>,
+        $FutureProvider<List<SafDocumentFile>> {
   BackupListProvider._()
     : super(
         from: null,
@@ -188,13 +190,14 @@ final class BackupListProvider
 
   @$internal
   @override
-  $FutureProviderElement<List<File>> $createElement($ProviderPointer pointer) =>
-      $FutureProviderElement(pointer);
+  $FutureProviderElement<List<SafDocumentFile>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<List<File>> create(Ref ref) {
+  FutureOr<List<SafDocumentFile>> create(Ref ref) {
     return backupList(ref);
   }
 }
 
-String _$backupListHash() => r'6fdfbb5293df11aa37ed74f4fcf9bd78591d770f';
+String _$backupListHash() => r'cdce1b5f195f0c9b72132f7da0c9d173dfc119eb';

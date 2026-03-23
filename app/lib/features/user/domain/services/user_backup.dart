@@ -23,10 +23,14 @@ import 'package:convert/convert.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:saf_stream/saf_stream.dart';
+import 'package:saf_util/saf_util.dart';
+import 'package:saf_util/saf_util_platform_interface.dart';
 import 'package:secure_archive/secure_archive.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/domain/entities/profile.dart';
+import 'package:weblibre/features/user/domain/providers/backup_directory.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
 
 part 'user_backup.g.dart';
@@ -35,29 +39,22 @@ part 'user_backup.g.dart';
 class UserBackupService extends _$UserBackupService {
   static final dateFormatter = FixedDateTimeFormatter('YYYY-MM-DD_hhmmss');
 
-  Future<Directory> getBackupDirectory() async {
-    return Directory(
-      p.join(
-        await getExternalStorageDirectory().then(
-          (dir) => Directory(
-            dir!.path.replaceFirst('/data/', '/media/'),
-          ).parent.path,
-        ),
-        'Backup',
-      ),
-    );
+  static final _safUtil = SafUtil();
+  static final _safStream = SafStream();
+
+  Uri _requireBackupDirectoryUri() {
+    final uri = ref.read(backupDirectoryUriProvider);
+    if (uri == null) {
+      throw Exception('No backup directory configured');
+    }
+    return uri;
   }
 
-  Stream<File> getBackupListStream() async* {
-    final backupDirectory = await getBackupDirectory();
-
-    if (!await backupDirectory.exists()) return;
-
-    await for (final entity in backupDirectory.list(recursive: true)) {
-      if (entity is File) {
-        yield entity;
-      }
-    }
+  Future<List<SafDocumentFile>> getBackupList(Uri dirUri) async {
+    final files = await _safUtil.list(dirUri.toString());
+    return files
+        .where((f) => !f.isDir && f.name.endsWith('.weblibre'))
+        .toList();
   }
 
   Future<bool> createUserBackup(
@@ -65,40 +62,62 @@ class UserBackupService extends _$UserBackupService {
     required String password,
     required bool integrityCheck,
   }) async {
+    final dirUri = _requireBackupDirectoryUri();
     final timestamp = dateFormatter.encode(DateTime.now());
+    final fileName = 'backup_${profile.name}_$timestamp.weblibre';
 
-    final outputFile = File(
-      p.join(
-        await getBackupDirectory().then((dir) => dir.path),
-        'backup_${profile.name}_$timestamp.weblibre',
-      ),
-    );
+    final tempDir = await getTemporaryDirectory();
+    final tempFile = File(p.join(tempDir.path, fileName));
 
-    await outputFile.parent.create(recursive: true);
+    try {
+      final backup = SecureArchivePack(
+        outputFile: tempFile,
+        sourceDirectory: filesystem.getProfileDir(profile.uuidValue),
+        argon2Params: Argon2Params.memoryConstrained(),
+      );
 
-    final backup = SecureArchivePack(
-      outputFile: outputFile,
-      sourceDirectory: filesystem.getProfileDir(profile.uuidValue),
-      argon2Params: Argon2Params.memoryConstrained(),
-    );
+      await backup.pack(password, integrityCheck: integrityCheck);
 
-    await backup.pack(password, integrityCheck: integrityCheck);
+      await _safStream.pasteLocalFile(
+        tempFile.path,
+        dirUri.toString(),
+        fileName,
+        'application/octet-stream',
+      );
 
-    return true;
+      return true;
+    } finally {
+      try {
+        if (await tempFile.exists()) {
+          await tempFile.delete();
+        }
+      } catch (e, s) {
+        logger.w(
+          'Failed to cleanup temporary backup file: ${tempFile.path}',
+          error: e,
+          stackTrace: s,
+        );
+      }
+    }
   }
 
   Future<bool> restoreAndCreateNew(
-    File backupFile, {
+    Uri backupFileUri, {
     required String profileName,
     required String password,
   }) async {
+    final tempDir = await getTemporaryDirectory();
+    final tempFile = File(p.join(tempDir.path, 'restore_temp.weblibre'));
+
     final outputDirectory = Directory(
-      p.join(filesystem.profilesDir.path, p.basename(backupFile.path)),
+      p.join(filesystem.profilesDir.path, 'restore_temp'),
     );
 
     try {
+      await _safStream.copyToLocalFile(backupFileUri.toString(), tempFile.path);
+
       final backup = SecureArchiveUnpack(
-        inputFile: backupFile,
+        inputFile: tempFile,
         outputDirectory: outputDirectory,
         argon2Params: Argon2Params.memoryConstrained(),
       );
@@ -115,6 +134,17 @@ class UserBackupService extends _$UserBackupService {
       return true;
     } finally {
       try {
+        if (await tempFile.exists()) {
+          await tempFile.delete();
+        }
+      } catch (e, s) {
+        logger.w(
+          'Failed to cleanup temporary restore file: ${tempFile.path}',
+          error: e,
+          stackTrace: s,
+        );
+      }
+      try {
         if (await outputDirectory.exists()) {
           await outputDirectory.delete(recursive: true);
         }
@@ -129,17 +159,22 @@ class UserBackupService extends _$UserBackupService {
   }
 
   Future<bool> restoreAndCreateOrOverride(
-    File backupFile, {
+    Uri backupFileUri, {
     required String password,
     required FutureOr<bool?> Function() confirmOverrideCallback,
   }) async {
+    final tempDir = await getTemporaryDirectory();
+    final tempFile = File(p.join(tempDir.path, 'restore_temp.weblibre'));
+
     final outputDirectory = Directory(
-      p.join(filesystem.profilesDir.path, p.basename(backupFile.path)),
+      p.join(filesystem.profilesDir.path, 'restore_temp'),
     );
 
     try {
+      await _safStream.copyToLocalFile(backupFileUri.toString(), tempFile.path);
+
       final backup = SecureArchiveUnpack(
-        inputFile: backupFile,
+        inputFile: tempFile,
         outputDirectory: outputDirectory,
         argon2Params: Argon2Params.memoryConstrained(),
       );
@@ -178,6 +213,17 @@ class UserBackupService extends _$UserBackupService {
       return true;
     } finally {
       try {
+        if (await tempFile.exists()) {
+          await tempFile.delete();
+        }
+      } catch (e, s) {
+        logger.w(
+          'Failed to cleanup temporary restore file: ${tempFile.path}',
+          error: e,
+          stackTrace: s,
+        );
+      }
+      try {
         if (await outputDirectory.exists()) {
           await outputDirectory.delete(recursive: true);
         }
@@ -188,6 +234,55 @@ class UserBackupService extends _$UserBackupService {
           stackTrace: s,
         );
       }
+    }
+  }
+
+  Future<int> migrateOldBackups(Uri newDirUri) async {
+    try {
+      final oldDir = Directory(
+        p.join(
+          await getExternalStorageDirectory().then(
+            (dir) => Directory(
+              dir!.path.replaceFirst('/data/', '/media/'),
+            ).parent.path,
+          ),
+          'Backup',
+        ),
+      );
+
+      if (!await oldDir.exists()) return 0;
+
+      var count = 0;
+      await for (final entity in oldDir.list()) {
+        if (entity is File && entity.path.endsWith('.weblibre')) {
+          try {
+            await _safStream.pasteLocalFile(
+              entity.path,
+              newDirUri.toString(),
+              p.basename(entity.path),
+              'application/octet-stream',
+            );
+            await entity.delete();
+            count++;
+          } catch (e, s) {
+            logger.w(
+              'Failed to migrate backup: ${entity.path}',
+              error: e,
+              stackTrace: s,
+            );
+          }
+        }
+      }
+
+      // Clean up old directory if empty
+      if (await oldDir.list().isEmpty) {
+        await oldDir.delete();
+      }
+
+      return count;
+    } catch (e, s) {
+      logger.w('Failed to migrate old backups', error: e, stackTrace: s);
+      return 0;
     }
   }
 

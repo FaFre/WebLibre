@@ -22,9 +22,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:saf_util/saf_util.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/password_confirmation_dialog.dart';
+import 'package:weblibre/features/user/domain/providers/backup_directory.dart';
 import 'package:weblibre/features/user/domain/services/user_backup.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -154,6 +156,17 @@ class ProfileBackupScreen extends HookConsumerWidget {
 
                             return;
                           }
+                        }
+
+                        if (ref.read(backupDirectoryUriProvider) == null) {
+                          final dir = await SafUtil().pickDirectory(
+                            writePermission: true,
+                            persistablePermission: true,
+                          );
+                          if (dir == null) return;
+                          ref
+                              .read(backupDirectoryUriProvider.notifier)
+                              .set(Uri.parse(dir.uri));
                         }
 
                         backupFuture.value = ref

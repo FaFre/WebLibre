@@ -17,16 +17,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:io';
-
 import 'package:exceptions/exceptions.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:saf_util/saf_util_platform_interface.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 import 'package:weblibre/features/user/domain/entities/fingerprint_overrides.dart';
+import 'package:weblibre/features/user/domain/providers/backup_directory.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
@@ -78,9 +78,9 @@ Future<Profile> selectedProfile(Ref ref) async {
 }
 
 @Riverpod()
-Future<List<File>> backupList(Ref ref) {
-  return ref
-      .watch(userBackupServiceProvider.notifier)
-      .getBackupListStream()
-      .toList();
+Future<List<SafDocumentFile>> backupList(Ref ref) async {
+  final dirUri = ref.watch(backupDirectoryUriProvider);
+  if (dirUri == null) return [];
+
+  return ref.watch(userBackupServiceProvider.notifier).getBackupList(dirUri);
 }

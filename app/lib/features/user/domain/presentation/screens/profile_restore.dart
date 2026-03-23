@@ -17,8 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -32,9 +30,9 @@ import 'package:weblibre/utils/ui_helper.dart';
 enum RestoreTarget { createOrOverride, createNew }
 
 class ProfileRestoreScreen extends HookConsumerWidget {
-  final File backupFile;
+  final Uri backupFileUri;
 
-  const ProfileRestoreScreen({super.key, required this.backupFile});
+  const ProfileRestoreScreen({super.key, required this.backupFileUri});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -149,7 +147,7 @@ class ProfileRestoreScreen extends HookConsumerWidget {
                             ref
                                 .read(userBackupServiceProvider.notifier)
                                 .restoreAndCreateOrOverride(
-                                  backupFile,
+                                  backupFileUri,
                                   password: passwordTextController.text,
                                   confirmOverrideCallback: () {
                                     if (context.mounted) {
@@ -163,7 +161,7 @@ class ProfileRestoreScreen extends HookConsumerWidget {
                             ref
                                 .read(userBackupServiceProvider.notifier)
                                 .restoreAndCreateNew(
-                                  backupFile,
+                                  backupFileUri,
                                   profileName: nameTextController.text,
                                   password: passwordTextController.text,
                                 ),

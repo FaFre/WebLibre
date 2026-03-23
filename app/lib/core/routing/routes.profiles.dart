@@ -83,13 +83,13 @@ class BackupProfileRoute extends GoRouteData with $BackupProfileRoute {
 }
 
 class RestoreProfileRoute extends GoRouteData with $RestoreProfileRoute {
-  final String backupFilePath;
+  final String backupFileUri;
 
-  const RestoreProfileRoute({required this.backupFilePath});
+  const RestoreProfileRoute({required this.backupFileUri});
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return ProfileRestoreScreen(backupFile: File(backupFilePath));
+    return ProfileRestoreScreen(backupFileUri: Uri.parse(backupFileUri));
   }
 }
 

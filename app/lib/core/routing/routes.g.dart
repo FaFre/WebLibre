@@ -1297,7 +1297,7 @@ mixin $ProfileBackupListRoute on GoRouteData {
 mixin $RestoreProfileRoute on GoRouteData {
   static RestoreProfileRoute _fromState(GoRouterState state) =>
       RestoreProfileRoute(
-        backupFilePath: state.uri.queryParameters['backup-file-path']!,
+        backupFileUri: state.uri.queryParameters['backup-file-uri']!,
       );
 
   RestoreProfileRoute get _self => this as RestoreProfileRoute;
@@ -1305,7 +1305,7 @@ mixin $RestoreProfileRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
     '/profiles/restore',
-    queryParams: {'backup-file-path': _self.backupFilePath},
+    queryParams: {'backup-file-uri': _self.backupFileUri},
   );
 
   @override

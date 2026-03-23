@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'user_backup.dart';
+part of 'backup_directory.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,51 +9,52 @@ part of 'user_backup.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(UserBackupService)
-final userBackupServiceProvider = UserBackupServiceProvider._();
+@ProviderFor(BackupDirectoryUri)
+final backupDirectoryUriProvider = BackupDirectoryUriProvider._();
 
-final class UserBackupServiceProvider
-    extends $NotifierProvider<UserBackupService, void> {
-  UserBackupServiceProvider._()
+final class BackupDirectoryUriProvider
+    extends $NotifierProvider<BackupDirectoryUri, Uri?> {
+  BackupDirectoryUriProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'userBackupServiceProvider',
+        name: r'backupDirectoryUriProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$userBackupServiceHash();
+  String debugGetCreateSourceHash() => _$backupDirectoryUriHash();
 
   @$internal
   @override
-  UserBackupService create() => UserBackupService();
+  BackupDirectoryUri create() => BackupDirectoryUri();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(void value) {
+  Override overrideWithValue(Uri? value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<void>(value),
+      providerOverride: $SyncValueProvider<Uri?>(value),
     );
   }
 }
 
-String _$userBackupServiceHash() => r'74cd6fd9818a8350a91b1225d904e23f48bc9e30';
+String _$backupDirectoryUriHash() =>
+    r'4e5f4e7bde90b2a92c559afe8774ed5ee503277d';
 
-abstract class _$UserBackupService extends $Notifier<void> {
-  void build();
+abstract class _$BackupDirectoryUri extends $Notifier<Uri?> {
+  Uri? build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<void, void>;
+    final ref = this.ref as $Ref<Uri?, Uri?>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<void, void>,
-              void,
+              AnyNotifier<Uri?, Uri?>,
+              Uri?,
               Object?,
               Object?
             >;
