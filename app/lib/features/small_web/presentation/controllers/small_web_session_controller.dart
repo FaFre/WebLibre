@@ -165,6 +165,17 @@ class SmallWebSessionController extends _$SmallWebSessionController {
     });
 
     if (persistFuture.future != null) {
+      unawaited(
+        persistFuture.future!.whenComplete(() {
+          //When nothing got decoded dont stay stale
+          if (stateOrNull == null || state.isLoading) {
+            state = AsyncData(
+              SmallWebSessionState.initial(SmallWebSourceKind.kagi),
+            );
+          }
+        }),
+      );
+
       return const AsyncLoading();
     }
 
