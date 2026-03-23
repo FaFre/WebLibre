@@ -18,7 +18,4 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-enum OnboardingMode {
-  express,
-  detailed,
-}
+enum OnboardingMode { express, detailed }

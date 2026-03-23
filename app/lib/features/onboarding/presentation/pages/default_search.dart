@@ -65,115 +65,117 @@ class DefaultSearchPage extends HookConsumerWidget {
     return BrowserPage(
       child: BrowserPageContent(
         child: bangs.when(
-        skipLoadingOnReload: true,
-        data: (availableBangs) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 24),
-              Center(
-                child: Text('Search', style: theme.textTheme.headlineMedium),
-              ),
-              const SizedBox(height: 24),
-              const ListTile(
-                title: Text('Default Search Provider'),
-                leading: Icon(MdiIcons.cloudSearch),
-                contentPadding: EdgeInsets.zero,
-              ),
-              if (activeBang != null)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: FilterChip(
-                    showCheckmark: false,
-                    label: Text(activeBang.websiteName),
-                    avatar: UrlIcon([activeBang.getDefaultUrl()], iconSize: 20),
-                    selected: true,
-                    onSelected: (value) {},
-                  ),
+          skipLoadingOnReload: true,
+          data: (availableBangs) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 24),
+                Center(
+                  child: Text('Search', style: theme.textTheme.headlineMedium),
                 ),
-              const Divider(),
-              Wrap(
-                spacing: 8.0,
-                children: [
-                  ...availableBangs.map(
-                    (bang) => FilterChip(
+                const SizedBox(height: 24),
+                const ListTile(
+                  title: Text('Default Search Provider'),
+                  leading: Icon(MdiIcons.cloudSearch),
+                  contentPadding: EdgeInsets.zero,
+                ),
+                if (activeBang != null)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: FilterChip(
                       showCheckmark: false,
-                      label: Text(bang.websiteName),
-                      avatar: UrlIcon([bang.getDefaultUrl()], iconSize: 20),
-                      selected: activeBang?.trigger == bang.trigger,
-                      onSelected: (selected) async {
-                        if (selected) {
-                          await updateSearchProvider(bang.toKey());
+                      label: Text(activeBang.websiteName),
+                      avatar: UrlIcon([
+                        activeBang.getDefaultUrl(),
+                      ], iconSize: 20),
+                      selected: true,
+                      onSelected: (value) {},
+                    ),
+                  ),
+                const Divider(),
+                Wrap(
+                  spacing: 8.0,
+                  children: [
+                    ...availableBangs.map(
+                      (bang) => FilterChip(
+                        showCheckmark: false,
+                        label: Text(bang.websiteName),
+                        avatar: UrlIcon([bang.getDefaultUrl()], iconSize: 20),
+                        selected: activeBang?.trigger == bang.trigger,
+                        onSelected: (selected) async {
+                          if (selected) {
+                            await updateSearchProvider(bang.toKey());
+                          }
+                        },
+                      ),
+                    ),
+                    ActionChip(
+                      label: const Text('Search more'),
+                      avatar: const Icon(Icons.search),
+                      onPressed: () async {
+                        final trigger = await const BangSearchRoute()
+                            .push<BangKey?>(context);
+
+                        if (trigger != null) {
+                          await updateSearchProvider(trigger);
                         }
                       },
                     ),
-                  ),
-                  ActionChip(
-                    label: const Text('Search more'),
-                    avatar: const Icon(Icons.search),
-                    onPressed: () async {
-                      final trigger = await const BangSearchRoute()
-                          .push<BangKey?>(context);
-
-                      if (trigger != null) {
-                        await updateSearchProvider(trigger);
-                      }
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              const ListTile(
-                title: Text('Default Autocomplete Provider'),
-                leading: Icon(MdiIcons.weatherCloudyArrowRight),
-                contentPadding: EdgeInsets.zero,
-              ),
-              DropdownMenu<SearchSuggestionProviders>(
-                initialSelection: activeAutosuggest,
-                inputDecorationTheme: InputDecorationTheme(
-                  prefixIconConstraints: BoxConstraints.tight(
-                    const Size.square(24),
-                  ),
+                  ],
                 ),
-                width: double.infinity,
-                leadingIcon: activeAutosuggest.relatedBang.mapNotNull(
-                  (trigger) => BangIcon(trigger: trigger),
+                const SizedBox(height: 24),
+                const ListTile(
+                  title: Text('Default Autocomplete Provider'),
+                  leading: Icon(MdiIcons.weatherCloudyArrowRight),
+                  contentPadding: EdgeInsets.zero,
                 ),
-                dropdownMenuEntries: SearchSuggestionProviders.values.map((
-                  provider,
-                ) {
-                  return DropdownMenuEntry(
-                    value: provider,
-                    label: provider.label,
-                    leadingIcon: provider.relatedBang.mapNotNull(
-                      (trigger) => BangIcon(trigger: trigger),
+                DropdownMenu<SearchSuggestionProviders>(
+                  initialSelection: activeAutosuggest,
+                  inputDecorationTheme: InputDecorationTheme(
+                    prefixIconConstraints: BoxConstraints.tight(
+                      const Size.square(24),
                     ),
-                  );
-                }).toList(),
-                onSelected: (value) async {
-                  if (value != null) {
-                    await ref
-                        .read(saveGeneralSettingsControllerProvider.notifier)
-                        .save(
-                          (currentSettings) => currentSettings.copyWith
-                              .defaultSearchSuggestionsProvider(value),
-                        );
-                  }
-                },
-              ),
-            ],
-          );
-        },
-        error: (error, stackTrace) => Center(
-          child: FailureWidget(
-            title: 'Could not load search engines',
-            exception: error,
-            onRetry: () =>
-                ref.refresh(bangListProvider(triggers: defaultBangs)),
+                  ),
+                  width: double.infinity,
+                  leadingIcon: activeAutosuggest.relatedBang.mapNotNull(
+                    (trigger) => BangIcon(trigger: trigger),
+                  ),
+                  dropdownMenuEntries: SearchSuggestionProviders.values.map((
+                    provider,
+                  ) {
+                    return DropdownMenuEntry(
+                      value: provider,
+                      label: provider.label,
+                      leadingIcon: provider.relatedBang.mapNotNull(
+                        (trigger) => BangIcon(trigger: trigger),
+                      ),
+                    );
+                  }).toList(),
+                  onSelected: (value) async {
+                    if (value != null) {
+                      await ref
+                          .read(saveGeneralSettingsControllerProvider.notifier)
+                          .save(
+                            (currentSettings) => currentSettings.copyWith
+                                .defaultSearchSuggestionsProvider(value),
+                          );
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+          error: (error, stackTrace) => Center(
+            child: FailureWidget(
+              title: 'Could not load search engines',
+              exception: error,
+              onRetry: () =>
+                  ref.refresh(bangListProvider(triggers: defaultBangs)),
+            ),
           ),
+          loading: () => const SizedBox(height: 48, width: double.infinity),
         ),
-        loading: () => const SizedBox(height: 48, width: double.infinity),
-      ),
       ),
     );
   }

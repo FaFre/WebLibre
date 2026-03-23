@@ -47,7 +47,10 @@ class UBlockOptInPage extends HookConsumerWidget implements IFormPage {
               SvgPicture.asset('assets/images/ublock.svg'),
               const SizedBox(height: 8),
               Center(
-                child: Text('uBlock Origin', style: theme.textTheme.headlineMedium),
+                child: Text(
+                  'uBlock Origin',
+                  style: theme.textTheme.headlineMedium,
+                ),
               ),
               const SizedBox(height: 24),
               const MarkdownBody(

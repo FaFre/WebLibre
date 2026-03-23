@@ -72,9 +72,7 @@ class FontSizeBottomSheet extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: Card(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .surfaceContainerHighest,
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   child: Padding(
                     padding: const EdgeInsets.all(12),
                     child: Row(

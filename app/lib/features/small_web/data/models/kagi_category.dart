@@ -59,19 +59,12 @@ class KagiCategories {
 
     final rawGroups = json['groups'] as Map<String, dynamic>;
     final groups = rawGroups.map(
-      (name, slugs) => MapEntry(
-        name,
-        (slugs as List<dynamic>).cast<String>(),
-      ),
+      (name, slugs) => MapEntry(name, (slugs as List<dynamic>).cast<String>()),
     );
 
     final rawRemap = json['remap'] as Map<String, dynamic>;
     final remap = rawRemap.cast<String, String>();
 
-    return KagiCategories(
-      categories: categories,
-      groups: groups,
-      remap: remap,
-    );
+    return KagiCategories(categories: categories, groups: groups, remap: remap);
   }
 }

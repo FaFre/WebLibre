@@ -10,7 +10,11 @@ class BrowserPage extends ConsumerWidget {
   final double bottomViewportInset;
   final Widget child;
 
-  const BrowserPage({super.key, this.bottomViewportInset = 0, required this.child});
+  const BrowserPage({
+    super.key,
+    this.bottomViewportInset = 0,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -45,12 +49,20 @@ class BrowserPage extends ConsumerWidget {
           Positioned(
             top: -70,
             left: -120,
-            child: _BackdropOrb(width: 400, height: 400, color: appColors.auraPurple),
+            child: _BackdropOrb(
+              width: 400,
+              height: 400,
+              color: appColors.auraPurple,
+            ),
           ),
           Positioned(
             top: 220,
             right: -150,
-            child: _BackdropOrb(width: 340, height: 340, color: appColors.auraGold),
+            child: _BackdropOrb(
+              width: 340,
+              height: 340,
+              color: appColors.auraGold,
+            ),
           ),
           Positioned(
             bottom: 18,
@@ -66,7 +78,9 @@ class BrowserPage extends ConsumerWidget {
               child: ClipRect(
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 72, sigmaY: 72),
-                  child: ColoredBox(color: appColors.auraTint.withValues(alpha: 0.12)),
+                  child: ColoredBox(
+                    color: appColors.auraTint.withValues(alpha: 0.12),
+                  ),
                 ),
               ),
             ),
@@ -94,12 +108,7 @@ class BrowserPageContent extends StatelessWidget {
       builder: (context, constraints) {
         return SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(
-            24,
-            32,
-            24,
-            32 + bottomViewportInset,
-          ),
+          padding: EdgeInsets.fromLTRB(24, 32, 24, 32 + bottomViewportInset),
           child: ConstrainedBox(
             constraints: BoxConstraints(
               minHeight: math.max(

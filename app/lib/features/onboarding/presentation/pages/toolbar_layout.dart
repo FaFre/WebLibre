@@ -52,7 +52,10 @@ class ToolbarLayoutPage extends HookConsumerWidget {
               settings: settings,
               backgroundColor: Colors.transparent,
               compact: true,
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12.0,
+                vertical: 8.0,
+              ),
             ),
           ),
           SliverPadding(

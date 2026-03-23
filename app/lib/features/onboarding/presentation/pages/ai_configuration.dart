@@ -82,10 +82,11 @@ class AiConfigurationPage extends HookConsumerWidget {
                   children: [
                     TextSpan(
                       text: 'Things to keep in mind\n\n',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onError,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(
+                            color: Theme.of(context).colorScheme.onError,
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                     const TextSpan(text: '• '),
                     const TextSpan(

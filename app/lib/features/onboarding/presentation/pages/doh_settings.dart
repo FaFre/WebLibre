@@ -32,22 +32,22 @@ class DohSettingsPage extends HookConsumerWidget {
     return BrowserPage(
       child: BrowserPageContent(
         child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 24),
-          Center(
-            child: Text(
-              'DNS over HTTPS',
-              style: theme.textTheme.headlineMedium,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 24),
+            Center(
+              child: Text(
+                'DNS over HTTPS',
+                style: theme.textTheme.headlineMedium,
+              ),
             ),
-          ),
-          const SizedBox(height: 24),
-          const ListTileTheme(
-            contentPadding: EdgeInsets.zero,
-            child: DohSettingsContent(),
-          ),
-        ],
-      ),
+            const SizedBox(height: 24),
+            const ListTileTheme(
+              contentPadding: EdgeInsets.zero,
+              child: DohSettingsContent(),
+            ),
+          ],
+        ),
       ),
     );
   }
