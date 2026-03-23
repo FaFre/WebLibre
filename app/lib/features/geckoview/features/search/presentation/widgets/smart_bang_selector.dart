@@ -32,6 +32,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/providers.da
 import 'package:weblibre/features/geckoview/features/search/presentation/dialogs/reset_bang_dialog.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
+import 'package:weblibre/presentation/widgets/sliding_pill_toggle.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
@@ -172,86 +173,16 @@ class _TabbedBangSelector extends HookConsumerWidget {
       return () => tabController.removeListener(listener);
     }, [tabController]);
 
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final disableAnimations = MediaQuery.disableAnimationsOf(context);
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         // Animated sliding pill toggle
         Padding(
           padding: const EdgeInsets.only(right: 12.0),
-          child: Container(
-            height: 36,
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Stack(
-              children: [
-                AnimatedAlign(
-                  alignment: tabIndex.value == 1
-                      ? Alignment.centerRight
-                      : Alignment.centerLeft,
-                  duration: disableAnimations
-                      ? Duration.zero
-                      : const Duration(milliseconds: 250),
-                  curve: Curves.easeOutCubic,
-                  child: FractionallySizedBox(
-                    widthFactor: 0.5,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                    ),
-                  ),
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () => tabController.animateTo(0),
-                        child: Center(
-                          child: Text(
-                            'Search On This Site',
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              color: tabIndex.value == 0
-                                  ? colorScheme.onPrimaryContainer
-                                  : colorScheme.onSurfaceVariant,
-                              fontWeight: tabIndex.value == 0
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () => tabController.animateTo(1),
-                        child: Center(
-                          child: Text(
-                            'All Providers',
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              color: tabIndex.value == 1
-                                  ? colorScheme.onPrimaryContainer
-                                  : colorScheme.onSurfaceVariant,
-                              fontWeight: tabIndex.value == 1
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+          child: SlidingPillToggle(
+            selectedIndex: tabIndex.value,
+            labels: const ['Search On This Site', 'All Providers'],
+            onChanged: (index) => tabController.animateTo(index),
           ),
         ),
         // Tab content

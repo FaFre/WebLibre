@@ -40,6 +40,9 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/contro
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
+import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
+import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
@@ -52,6 +55,8 @@ class BrowserTopAppBar extends StatelessWidget {
   final bool showMainToolbar;
   final bool showContextualToolbar;
   final bool showQuickTabSwitcherBar;
+  final bool isSmallWebMode;
+  final bool enableGestures;
 
   late final BrowserTabBar _tabBar;
   late final _size = Size.fromHeight(_tabBar.getToolbarHeight());
@@ -61,12 +66,16 @@ class BrowserTopAppBar extends StatelessWidget {
     required this.showMainToolbar,
     required this.showContextualToolbar,
     required this.showQuickTabSwitcherBar,
+    required this.isSmallWebMode,
+    this.enableGestures = true,
   }) {
     _tabBar = BrowserTabBar(
       showMainToolbar: showMainToolbar,
       displayedSheet: null,
       showContextualToolbar: false,
       showQuickTabSwitcherBar: false,
+      isSmallWebMode: isSmallWebMode,
+      enableGestures: enableGestures,
       hideMainToolbarButtonsDuplicatedInContextualToolbar:
           showContextualToolbar,
     );
@@ -86,7 +95,9 @@ class BrowserBottomAppBar extends StatelessWidget {
   final bool showMainToolbar;
   final bool showContextualToolbar;
   final bool showQuickTabSwitcherBar;
+  final bool isSmallWebMode;
   final Sheet? displayedSheet;
+  final bool enableGestures;
 
   late final BrowserTabBar _tabBar;
   late final _size = Size.fromHeight(_tabBar.getToolbarHeight());
@@ -97,12 +108,16 @@ class BrowserBottomAppBar extends StatelessWidget {
     required this.displayedSheet,
     required this.showContextualToolbar,
     required this.showQuickTabSwitcherBar,
+    required this.isSmallWebMode,
+    this.enableGestures = true,
   }) {
     _tabBar = BrowserTabBar(
       displayedSheet: displayedSheet,
       showMainToolbar: showMainToolbar,
       showContextualToolbar: showContextualToolbar,
       showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+      isSmallWebMode: isSmallWebMode,
+      enableGestures: enableGestures,
       hideMainToolbarButtonsDuplicatedInContextualToolbar:
           showContextualToolbar,
     );
@@ -133,6 +148,8 @@ class BrowserTabBar extends HookConsumerWidget {
   final bool showQuickTabSwitcherBar;
   final Sheet? displayedSheet;
   final bool hideMainToolbarButtonsDuplicatedInContextualToolbar;
+  final bool isSmallWebMode;
+  final bool enableGestures;
 
   const BrowserTabBar({
     super.key,
@@ -140,6 +157,8 @@ class BrowserTabBar extends HookConsumerWidget {
     required this.displayedSheet,
     required this.showContextualToolbar,
     required this.showQuickTabSwitcherBar,
+    required this.isSmallWebMode,
+    required this.enableGestures,
     this.hideMainToolbarButtonsDuplicatedInContextualToolbar = false,
   });
 
@@ -195,8 +214,9 @@ class BrowserTabBar extends HookConsumerWidget {
               c.buttonId == ToolbarButtonId.navigationMenu.name && c.isVisible,
         );
 
-    final showMainToolbarTabsCount = !tabsCountInContextual;
-    final showMainToolbarNavigationButton = !menuInContextual;
+    final showMainToolbarTabsCount = !isSmallWebMode && !tabsCountInContextual;
+    final showMainToolbarNavigationButton =
+        !isSmallWebMode && !menuInContextual;
 
     final containerColor = ref.watch(
       watchTabContainerDataProvider(
@@ -232,6 +252,19 @@ class BrowserTabBar extends HookConsumerWidget {
                 : const AppBarTitle()
           : null,
       actions: [
+        if (isSmallWebMode)
+          ReaderButton(
+            buttonBuilder: (isLoading, readerActive, icon) => ToolbarButton(
+              onTap: isLoading
+                  ? null
+                  : () async {
+                      await ref
+                          .read(readerableScreenControllerProvider.notifier)
+                          .toggleReaderView(!readerActive);
+                    },
+              child: icon,
+            ),
+          ),
         if (showMainToolbarTabsCount)
           TabsCountButton(
             selectedTabId: selectedTabId,
@@ -248,61 +281,76 @@ class BrowserTabBar extends HookConsumerWidget {
         selectedTabId: selectedTabId,
         displayedSheet: displayedSheet,
       ),
-      onHorizontalDragStart: (details) {
-        dragStartPosition.value = details.globalPosition;
-      },
-      onHorizontalDragEnd: (details) async {
-        final distance = dragStartPosition.value - details.globalPosition;
+      onHorizontalDragStart: !enableGestures
+          ? null
+          : (details) {
+              dragStartPosition.value = details.globalPosition;
+            },
+      onHorizontalDragEnd: !enableGestures
+          ? null
+          : (details) async {
+              final distance = dragStartPosition.value - details.globalPosition;
 
-        if (distance.dx.abs() > 50 && distance.dy.abs() < 20) {
-          final selectedTab = ref.read(selectedTabProvider);
-          final setting = await ref
-              .read(generalSettingsRepositoryProvider.notifier)
-              .fetchSettings();
+              if (distance.dx.abs() > 50 && distance.dy.abs() < 20) {
+                final selectedTab = ref.read(selectedTabProvider);
+                final setting = await ref
+                    .read(generalSettingsRepositoryProvider.notifier)
+                    .fetchSettings();
 
-          if (selectedTab != null) {
-            switch (setting.tabBarSwipeAction) {
-              case TabBarSwipeAction.switchLastOpened:
-                await ref
-                    .read(tabRepositoryProvider.notifier)
-                    .selectPreviouslyOpenedTab(selectedTab);
-              case TabBarSwipeAction.navigateOrderedTabs:
-                if (distance.dx < 0) {
-                  await ref
-                      .read(tabRepositoryProvider.notifier)
-                      .selectPreviousTab(selectedTab);
-                } else {
-                  await ref
-                      .read(tabRepositoryProvider.notifier)
-                      .selectNextTab(selectedTab);
+                if (selectedTab != null) {
+                  switch (setting.tabBarSwipeAction) {
+                    case TabBarSwipeAction.switchLastOpened:
+                      await ref
+                          .read(tabRepositoryProvider.notifier)
+                          .selectPreviouslyOpenedTab(selectedTab);
+                    case TabBarSwipeAction.navigateOrderedTabs:
+                      if (distance.dx < 0) {
+                        await ref
+                            .read(tabRepositoryProvider.notifier)
+                            .selectPreviousTab(selectedTab);
+                      } else {
+                        await ref
+                            .read(tabRepositoryProvider.notifier)
+                            .selectNextTab(selectedTab);
+                      }
+                  }
                 }
-            }
-          }
-        }
-      },
-      onVerticalDragStart: (details) {
-        dragStartPosition.value = details.globalPosition;
-      },
-      onVerticalDragEnd: (details) {
-        final distance = dragStartPosition.value - details.globalPosition;
+              }
+            },
+      onVerticalDragStart: !enableGestures
+          ? null
+          : (details) {
+              dragStartPosition.value = details.globalPosition;
+            },
+      onVerticalDragEnd: !enableGestures
+          ? null
+          : (details) {
+              final distance = dragStartPosition.value - details.globalPosition;
 
-        // Swipe direction for dismiss depends on toolbar position:
-        // - Bottom bar: swipe down to dismiss (positive distance.dy)
-        // - Top bar: swipe up to dismiss (negative distance.dy)
-        const dismissThreshold = kToolbarHeight * 0.5;
-        final shouldDismiss = switch (tabBarPosition) {
-          TabBarPosition.bottom =>
-            distance.dy.isNegative && distance.dy.abs() > dismissThreshold,
-          TabBarPosition.top =>
-            !distance.dy.isNegative && distance.dy.abs() > dismissThreshold,
-        };
-        if (shouldDismiss && ref.read(bottomSheetControllerProvider) == null) {
-          unawaited(HapticFeedback.lightImpact());
-          ref
-              .read(toolbarVisibilityControllerProvider(selectedTabId).notifier)
-              .dismiss();
-        }
-      },
+              // Swipe direction for dismiss depends on toolbar position:
+              // - Bottom bar: swipe down to dismiss (positive distance.dy)
+              // - Top bar: swipe up to dismiss (negative distance.dy)
+              const dismissThreshold = kToolbarHeight * 0.5;
+              final shouldDismiss = switch (tabBarPosition) {
+                TabBarPosition.bottom =>
+                  distance.dy.isNegative &&
+                      distance.dy.abs() > dismissThreshold,
+                TabBarPosition.top =>
+                  !distance.dy.isNegative &&
+                      distance.dy.abs() > dismissThreshold,
+              };
+              if (shouldDismiss &&
+                  ref.read(bottomSheetControllerProvider) == null) {
+                unawaited(HapticFeedback.lightImpact());
+                ref
+                    .read(
+                      toolbarVisibilityControllerProvider(
+                        selectedTabId,
+                      ).notifier,
+                    )
+                    .dismiss();
+              }
+            },
     );
   }
 }

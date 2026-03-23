@@ -159,11 +159,13 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       data: (androidInfo) {
         if (androidInfo == null) {
           // Not Android, always show GeckoView based on route
-          return topRoute is GoRoute && topRoute.name == BrowserRoute.name;
+          return topRoute is GoRoute &&
+              topRoute.name == BrowserRoute.name;
         }
         // Android: only apply visibility fix on Android 12 and lower (API <= 31)
         if (androidInfo.sdkInt <= 31) {
-          return topRoute is GoRoute && topRoute.name == BrowserRoute.name;
+          return topRoute is GoRoute &&
+              topRoute.name == BrowserRoute.name;
         }
         // Android 13+: always show GeckoView
         return true;

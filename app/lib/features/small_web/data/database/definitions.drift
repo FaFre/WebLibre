@@ -1,0 +1,124 @@
+import 'package:weblibre/data/database/converters/uri.dart';
+import 'package:weblibre/data/database/converters/string_list.dart';
+import 'package:weblibre/features/small_web/data/models/small_web_source_kind.dart';
+import 'package:weblibre/features/small_web/data/models/wander_console_source.dart';
+
+CREATE TABLE small_web_items (
+  id TEXT NOT NULL PRIMARY KEY,
+  url TEXT NOT NULL UNIQUE MAPPED BY `const UriConverter()`,
+  title TEXT,
+  domain TEXT NOT NULL,
+  author TEXT,
+  summary TEXT,
+  published_at DATETIME,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) AS SmallWebItem;
+
+CREATE TABLE small_web_memberships (
+  id TEXT NOT NULL PRIMARY KEY,
+  item_id TEXT NOT NULL REFERENCES small_web_items(id) ON DELETE CASCADE,
+  source_kind ENUM(SmallWebSourceKind) NOT NULL,
+  mode TEXT,
+  console_url TEXT MAPPED BY `const UriConverterNullable()`,
+  categories TEXT NOT NULL DEFAULT '[]' MAPPED BY `const StringListConverter()`,
+  fetched_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(item_id, source_kind, mode, console_url)
+) AS SmallWebMembership;
+
+CREATE INDEX idx_membership_source_mode ON small_web_memberships (source_kind, mode);
+CREATE INDEX idx_membership_item ON small_web_memberships (item_id);
+
+CREATE TABLE wander_consoles (
+  url TEXT NOT NULL PRIMARY KEY MAPPED BY `const UriConverter()`,
+  wander_js_url TEXT NOT NULL MAPPED BY `const UriConverter()`,
+  last_fetched_at DATETIME,
+  last_fetch_failed BOOL,
+  discovered_from_url TEXT MAPPED BY `const UriConverterNullable()`,
+  source ENUM(WanderConsoleSource) NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) AS WanderConsole;
+
+CREATE TABLE wander_console_neighbors (
+  source_console_url TEXT NOT NULL REFERENCES wander_consoles(url) ON DELETE CASCADE,
+  target_console_url TEXT NOT NULL,
+  discovered_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (source_console_url, target_console_url)
+) AS WanderConsoleNeighbor;
+
+CREATE TABLE small_web_visits (
+  id TEXT NOT NULL PRIMARY KEY,
+  item_id TEXT NOT NULL REFERENCES small_web_items(id) ON DELETE CASCADE,
+  source_kind ENUM(SmallWebSourceKind) NOT NULL,
+  mode TEXT,
+  console_url TEXT MAPPED BY `const UriConverterNullable()`,
+  visited_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) AS SmallWebVisit;
+
+CREATE INDEX idx_visit_mode ON small_web_visits (source_kind, mode, visited_at);
+CREATE INDEX idx_visit_item ON small_web_visits (item_id);
+
+getDiscoverableKagiItems:
+  SELECT i.* FROM small_web_items i
+  INNER JOIN small_web_memberships m ON m.item_id = i.id
+  WHERE m.source_kind = :sourceKind
+    AND m.mode = :mode
+    AND (:category IS NULL OR EXISTS (
+      SELECT 1 FROM json_each(m.categories) WHERE value = :category
+    ))
+    AND i.id NOT IN (
+      SELECT v.item_id FROM small_web_visits v
+      WHERE v.source_kind = :sourceKind AND v.mode = :mode
+      ORDER BY v.visited_at DESC LIMIT 20
+    );
+
+getRecentVisits:
+  SELECT v.*, i.url, i.title, i.domain
+  FROM small_web_visits v
+  INNER JOIN small_web_items i ON i.id = v.item_id
+  WHERE v.source_kind = :sourceKind
+    AND ((:mode IS NULL AND v.mode IS NULL) OR v.mode = :mode)
+  ORDER BY v.visited_at DESC
+  LIMIT :limit;
+
+getDiscoveredConsoleUrls:
+  SELECT url FROM wander_consoles ORDER BY created_at DESC LIMIT :limit;
+
+getWanderPagesForConsole:
+  SELECT i.* FROM small_web_items i
+  INNER JOIN small_web_memberships m ON m.item_id = i.id
+  WHERE m.source_kind = :sourceKind AND m.console_url = CAST(:consoleUrl AS TEXT);
+
+getConsoleNeighborCount:
+  SELECT COUNT(*) AS c FROM wander_console_neighbors WHERE source_console_url = :consoleUrl;
+
+getAllModeItemCounts:
+  SELECT source_kind, mode, COUNT(*) AS c
+  FROM small_web_memberships
+  GROUP BY source_kind, mode;
+
+getRecentVisitItemIds:
+  SELECT DISTINCT item_id FROM small_web_visits
+  WHERE source_kind = :sourceKind
+    AND ((:mode IS NULL AND mode IS NULL) OR mode = :mode)
+  ORDER BY visited_at DESC
+  LIMIT :limit;
+
+getNeighborConsolesWithPageCounts:
+  SELECT wc.url, wc.last_fetched_at, wc.last_fetch_failed,
+    (SELECT COUNT(*) FROM small_web_memberships m
+     WHERE m.source_kind = :sourceKind AND m.console_url = CAST(wc.url AS TEXT)) AS page_count
+  FROM wander_console_neighbors n
+  INNER JOIN wander_consoles wc ON CAST(wc.url AS TEXT) = n.target_console_url
+  WHERE n.source_console_url = :sourceConsoleUrl
+    AND COALESCE(wc.last_fetch_failed, 0) = 0
+  ORDER BY page_count DESC;
+
+getAllConsolesWithPageCounts:
+  SELECT wc.url, wc.last_fetched_at, wc.last_fetch_failed,
+    (SELECT COUNT(*) FROM small_web_memberships m
+     WHERE m.source_kind = :sourceKind AND m.console_url = CAST(wc.url AS TEXT)) AS page_count
+  FROM wander_consoles wc
+  WHERE COALESCE(wc.last_fetch_failed, 0) = 0
+    AND (:query = '' OR CAST(wc.url AS TEXT) LIKE '%' || :query || '%')
+  ORDER BY page_count DESC;

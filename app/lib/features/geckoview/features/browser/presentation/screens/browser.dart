@@ -56,6 +56,8 @@ import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
+import 'package:weblibre/features/small_web/presentation/controllers/small_web_mode_controller.dart';
+import 'package:weblibre/features/small_web/presentation/widgets/small_web_browser_overlay.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -115,6 +117,8 @@ class _TabBar extends HookConsumerWidget {
   final bool showQuickTabSwitcherBar;
   final Stream<Offset>? pointerMoveEvents;
   final TabBarPosition tabBarPosition;
+  final bool isSmallWebMode;
+  final bool enableGestures;
 
   const _TabBar({
     required this.showMainToolbar,
@@ -122,6 +126,8 @@ class _TabBar extends HookConsumerWidget {
     required this.showQuickTabSwitcherBar,
     required this.tabBarPosition,
     required this.pointerMoveEvents,
+    required this.isSmallWebMode,
+    this.enableGestures = true,
   });
 
   @override
@@ -205,12 +211,15 @@ class _TabBar extends HookConsumerWidget {
         showMainToolbar: showMainToolbar,
         showContextualToolbar: showContextualToolbar,
         showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+        isSmallWebMode: isSmallWebMode,
+        enableGestures: enableGestures,
       ),
       TabBarPosition.bottom => BrowserBottomAppBar(
         displayedSheet: displayedSheet,
         showMainToolbar: showMainToolbar,
         showContextualToolbar: showContextualToolbar,
         showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+        isSmallWebMode: isSmallWebMode,
       ),
     };
   }
@@ -233,23 +242,33 @@ class BrowserScreen extends HookConsumerWidget {
 
     final overlayController = useOverlayPortalController();
 
-    final tabBarPosition = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.tabBarPosition,
-      ),
+    final isSmallWebActive = ref.watch(
+      smallWebModeControllerProvider.select((value) => value != null),
     );
 
-    final showContextualToolbar = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.tabBarShowContextualBar,
-      ),
-    );
+    final tabBarPosition = isSmallWebActive
+        ? TabBarPosition.top
+        : ref.watch(
+            generalSettingsWithDefaultsProvider.select(
+              (value) => value.tabBarPosition,
+            ),
+          );
 
-    final showQuickTabSwitcherBar = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.tabBarShowQuickTabSwitcherBar,
-      ),
-    );
+    final showContextualToolbar =
+        !isSmallWebActive &&
+        ref.watch(
+          generalSettingsWithDefaultsProvider.select(
+            (value) => value.tabBarShowContextualBar,
+          ),
+        );
+
+    final showQuickTabSwitcherBar =
+        !isSmallWebActive &&
+        ref.watch(
+          generalSettingsWithDefaultsProvider.select(
+            (value) => value.tabBarShowQuickTabSwitcherBar,
+          ),
+        );
     final quickTabSwitcherMode = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (value) => value.effectiveUiQuickTabSwitcherMode(),
@@ -261,11 +280,13 @@ class BrowserScreen extends HookConsumerWidget {
     final displayQuickTabSwitcherBar =
         showQuickTabSwitcherBar && (quickTabSwitcherHasResults.value ?? false);
 
-    final autoHideTabBar = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.autoHideTabBar,
-      ),
-    );
+    final autoHideTabBar =
+        !isSmallWebActive &&
+        ref.watch(
+          generalSettingsWithDefaultsProvider.select(
+            (value) => value.autoHideTabBar,
+          ),
+        );
 
     ref.listen(overlayControllerProvider, (previous, next) {
       if (next != null) {
@@ -338,13 +359,21 @@ class BrowserScreen extends HookConsumerWidget {
     final bottomSafeArea = MediaQuery.of(context).padding.bottom;
 
     // Calculate bottom toolbar size for FAB and sheet positioning
-    // Pass actual displayedSheet to get correct height when ViewTabsSheet hides main toolbar
-    final bottomAppBarContentSize = BrowserBottomAppBar(
-      showMainToolbar: tabBarPosition == TabBarPosition.bottom,
-      showContextualToolbar: showContextualToolbar,
-      showQuickTabSwitcherBar: displayQuickTabSwitcherBar,
-      displayedSheet: displayedSheet,
-    ).preferredSize;
+    final Size bottomAppBarContentSize;
+    if (isSmallWebActive) {
+      bottomAppBarContentSize = const Size.fromHeight(
+        SmallWebBrowserOverlay.barHeight,
+      );
+    } else {
+      // Pass actual displayedSheet to get correct height when ViewTabsSheet hides main toolbar
+      bottomAppBarContentSize = BrowserBottomAppBar(
+        showMainToolbar: tabBarPosition == TabBarPosition.bottom,
+        showContextualToolbar: showContextualToolbar,
+        showQuickTabSwitcherBar: displayQuickTabSwitcherBar,
+        isSmallWebMode: false,
+        displayedSheet: displayedSheet,
+      ).preferredSize;
+    }
     // Total height includes safe area padding
     final bottomAppBarTotalHeight =
         bottomAppBarContentSize.height + bottomSafeArea;
@@ -355,6 +384,8 @@ class BrowserScreen extends HookConsumerWidget {
       showMainToolbar: tabBarPosition == TabBarPosition.top,
       showContextualToolbar: showContextualToolbar,
       showQuickTabSwitcherBar: displayQuickTabSwitcherBar,
+      isSmallWebMode: isSmallWebActive,
+      enableGestures: !isSmallWebActive,
     ).preferredSize;
     final topAppBarTotalHeight = topAppBarContentSize.height + topSafeArea;
 
@@ -623,36 +654,49 @@ class BrowserScreen extends HookConsumerWidget {
                 ),
 
               // Layer 2: Bottom Toolbar (overlay, slides in/out)
+              // In small web mode, show the discovery overlay instead
               Positioned(
                 left: 0,
                 right: 0,
                 bottom: 0,
-                child: Consumer(
-                  builder: (context, ref, _) {
-                    final toolbarState = ref.watch(
-                      toolbarVisibilityControllerProvider(selectedTabId),
-                    );
-                    final visible =
-                        sheetDisplayed ||
-                        (!tabInFullScreen &&
-                            toolbarState == ToolbarVisibility.visible);
-                    return _AnimatedToolbar(
-                      position: TabBarPosition.bottom,
-                      visible: visible,
-                      child: _TabBar(
-                        tabBarPosition: TabBarPosition.bottom,
-                        showMainToolbar:
-                            tabBarPosition == TabBarPosition.bottom,
-                        showContextualToolbar: showContextualToolbar,
-                        showQuickTabSwitcherBar: displayQuickTabSwitcherBar,
-                        pointerMoveEvents:
-                            tabBarPosition == TabBarPosition.bottom
-                            ? pointerMoveEventsController.stream
-                            : null,
+                child: isSmallWebActive
+                    ? _AnimatedToolbar(
+                        position: TabBarPosition.bottom,
+                        visible: !tabInFullScreen,
+                        child: Material(
+                          color: Theme.of(context).colorScheme.surfaceContainer,
+                          elevation: 3,
+                          child: const SmallWebBrowserOverlay(),
+                        ),
+                      )
+                    : Consumer(
+                        builder: (context, ref, _) {
+                          final toolbarState = ref.watch(
+                            toolbarVisibilityControllerProvider(selectedTabId),
+                          );
+                          final visible =
+                              sheetDisplayed ||
+                              (!tabInFullScreen &&
+                                  toolbarState == ToolbarVisibility.visible);
+                          return _AnimatedToolbar(
+                            position: TabBarPosition.bottom,
+                            visible: visible,
+                            child: _TabBar(
+                              tabBarPosition: TabBarPosition.bottom,
+                              showMainToolbar:
+                                  tabBarPosition == TabBarPosition.bottom,
+                              showContextualToolbar: showContextualToolbar,
+                              showQuickTabSwitcherBar:
+                                  displayQuickTabSwitcherBar,
+                              isSmallWebMode: false,
+                              pointerMoveEvents:
+                                  tabBarPosition == TabBarPosition.bottom
+                                  ? pointerMoveEventsController.stream
+                                  : null,
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
               ),
 
               // Layer 3: Top Toolbar (overlay, slides in/out) - only when position is top
@@ -678,7 +722,11 @@ class BrowserScreen extends HookConsumerWidget {
                           showMainToolbar: true,
                           showContextualToolbar: showContextualToolbar,
                           showQuickTabSwitcherBar: displayQuickTabSwitcherBar,
-                          pointerMoveEvents: pointerMoveEventsController.stream,
+                          isSmallWebMode: isSmallWebActive,
+                          enableGestures: !isSmallWebActive,
+                          pointerMoveEvents: isSmallWebActive
+                              ? null
+                              : pointerMoveEventsController.stream,
                         ),
                       );
                     },

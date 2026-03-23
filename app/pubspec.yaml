@@ -117,6 +117,7 @@ flutter:
     - assets/preferences/
     - assets/legal/
     - assets/quotes/
+    - assets/small_web/
   fonts:
     - family: TorIcons
       fonts:

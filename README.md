@@ -96,6 +96,14 @@ By combining these tools, WebLibre empowers you to browse the web freely and pri
 - **DNS over HTTPS (DoH):** Encrypted DNS with predefined or custom resolver options
 - **Container Data Isolation:** Clear container data for isolated containers
 
+### [Small Web Discovery](https://docs.weblibre.eu/small-web)
+
+- **Discover the Small Web:** A dedicated browsing mode for discovering personal blogs, indie creators, and handcrafted websites — the hidden corners of the internet made by real people
+- **Kagi Small Web:** Browse curated content from thousands of community-vetted personal blogs, indie YouTube channels, and web comics across five modes (Web, Appreciated, Videos, Code, Comics)
+- **Wander Network:** Explore a decentralised network of personal websites where each site recommends pages and links to other sites, forming a growing web of discoveries
+- **Category Filters:** Narrow discoveries by topic — from Programming and Science to Art, Food, Travel, and more
+- **Discovery History:** Track and revisit pages you have found, with smart avoidance of recently seen content
+
 ### Productivity & Content Management
 
 - **Bookmark Management** - Import/export bookmarks (JSON/HTML format)

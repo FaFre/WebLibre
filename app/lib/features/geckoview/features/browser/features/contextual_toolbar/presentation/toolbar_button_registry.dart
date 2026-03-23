@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -30,8 +31,8 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/domain/utils/bookmark_tree_utils.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/font_size_constants.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_spec.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/models/contextual_toolbar_scope.dart';
@@ -689,11 +690,17 @@ class _BookmarkToolbarButton extends HookConsumerWidget {
     final tabUrl = scope.tabState?.url;
     final bookmarkable = tabUrl != null && !scope.isPreview;
 
-    final existingGuids = ref.watch(
-      bookmarksRepositoryProvider.select(
-        (async) => _bookmarkGuidsForUrl(async.value, tabUrl, bookmarkable),
-      ),
-    );
+    final existingGuids = ref
+        .watch(
+          bookmarksRepositoryProvider.select(
+            (async) => EquatableValue(
+              bookmarkable
+                  ? bookmarkGuidsForUrl(async.value, tabUrl)
+                  : const <String>[],
+            ),
+          ),
+        )
+        .value;
 
     final isBookmarked = existingGuids.isNotEmpty;
 
@@ -769,11 +776,18 @@ class _BookmarkToggleToolbarButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tabUrl = scope.tabState?.url;
     final bookmarkable = tabUrl != null && !scope.isPreview;
-    final existingGuids = ref.watch(
-      bookmarksRepositoryProvider.select(
-        (async) => _bookmarkGuidsForUrl(async.value, tabUrl, bookmarkable),
-      ),
-    );
+    final existingGuids = ref
+        .watch(
+          bookmarksRepositoryProvider.select(
+            (async) => EquatableValue(
+              bookmarkable
+                  ? bookmarkGuidsForUrl(async.value, tabUrl)
+                  : const <String>[],
+            ),
+          ),
+        )
+        .value;
+
     final isBookmarked = existingGuids.isNotEmpty;
 
     return IconButton(
@@ -819,33 +833,6 @@ class _BookmarkToggleToolbarButton extends ConsumerWidget {
       icon: Icon(isBookmarked ? Icons.bookmark : Icons.bookmark_border),
     );
   }
-}
-
-List<String> _bookmarkGuidsForUrl(
-  BookmarkItem? root,
-  Uri? tabUrl,
-  bool bookmarkable,
-) {
-  final result = <String>[];
-
-  if (!bookmarkable || root == null || tabUrl == null) {
-    return result;
-  }
-
-  void collect(BookmarkItem item) {
-    if (item is BookmarkEntry && item.url == tabUrl) {
-      result.add(item.guid);
-    }
-
-    if (item is BookmarkFolder) {
-      for (final child in item.children ?? const <BookmarkItem>[]) {
-        collect(child);
-      }
-    }
-  }
-
-  collect(root);
-  return result;
 }
 
 Future<void> _adjustFontSize(

@@ -1,7 +1,7 @@
 # WebLibre Privacy Policy
 
-**Version 1.2**
-**Last Updated:** 2026-03-15
+**Version 1.3**
+**Last Updated:** 2026-03-22
 
 **Controller:**
 OnDevice UG (haftungsbeschränkt)
@@ -135,7 +135,19 @@ If you use speech-to-text or voice-input features, WebLibre invokes Android's sp
 
 **Legal basis:** Consent (Art. 6(1)(a) GDPR) — you choose to invoke the feature.
 
-### 3.13 QR Scanning and Camera-Based Pairing (Optional)
+### 3.13 Small Web Discovery (Optional)
+
+When you use Small Web mode, WebLibre fetches content from third-party sources to help you discover independent websites and personal blogs.
+
+**Kagi Small Web:** WebLibre fetches publicly available Atom feeds from Kagi (`kagi.com`) to retrieve curated lists of personal blog posts, indie videos, code projects, and web comics. Feed content is cached locally on your device.
+
+**Wander:** WebLibre fetches small JavaScript files (`wander.js`) from independently operated personal websites that participate in the Wander network. These files contain lists of recommended pages and links to other participating sites. Your device connects directly to each console host.
+
+**Data sent:** Standard HTTP(S) requests to Kagi's feed endpoints and to Wander console hosts. Your IP address is visible to these servers. Discovered content (URLs, titles, authors, summaries) is stored locally on your device. No account or personal data is sent beyond what is included in standard HTTP requests.
+
+**Legal basis:** Consent (Art. 6(1)(a) GDPR) — you choose to enter Small Web mode and initiate discovery.
+
+### 3.14 QR Scanning and Camera-Based Pairing (Optional)
 
 If you use QR scanning features (such as pairing a Firefox Sync account from a desktop browser), the app uses the device camera locally to scan the code.
 
@@ -167,7 +179,7 @@ Where applicable under the GDPR, we process personal data on one or more of the 
 
 **Summary of legal bases:**
 
-- **Consent** (Art. 6(1)(a) GDPR) — for optional features you choose to enable, such as search suggestions (3.2), Firefox Sync (3.4), DNS-over-HTTPS (3.5), URL unshortening (3.8), Tor routing (3.9), URL cleaner catalog updates (3.11), voice input (3.12), and QR scanning (3.13);
+- **Consent** (Art. 6(1)(a) GDPR) — for optional features you choose to enable, such as search suggestions (3.2), Firefox Sync (3.4), DNS-over-HTTPS (3.5), URL unshortening (3.8), Tor routing (3.9), URL cleaner catalog updates (3.11), voice input (3.12), Small Web discovery (3.13), and QR scanning (3.14);
 - **Contract performance** (Art. 6(1)(b) GDPR) — for features inherent to the service you requested, such as web browsing (3.1), search queries (3.3), extension installation (3.7), and feed fetching (3.10);
 - **Legitimate interest** (Art. 6(1)(f) GDPR) — for security and protection features such as tracking protection and safe browsing (3.6);
 - **Legal obligation** (Art. 6(1)(c) GDPR) — where required by applicable law;

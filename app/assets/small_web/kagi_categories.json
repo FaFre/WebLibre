@@ -1,0 +1,148 @@
+{
+  "categories": {
+    "ai": {
+      "label": "AI",
+      "description": "LLMs · agents · prompts · AI ethics · AI safety",
+      "emoji": "✨"
+    },
+    "programming": {
+      "label": "Programming",
+      "description": "Code · frameworks · devtools · APIs · tutorials · open source",
+      "emoji": "🧩"
+    },
+    "tech": {
+      "label": "Technology",
+      "description": "Tech news · gadgets · apps · platforms · social media",
+      "emoji": "📱"
+    },
+    "infra": {
+      "label": "Sysadmin & Security",
+      "description": "Servers · cloud · containers · networking · infosec · privacy",
+      "emoji": "🛡️"
+    },
+    "web": {
+      "label": "Web & Internet",
+      "description": "The open web · RSS · blogging · IndieWeb · web standards",
+      "emoji": "🕸️"
+    },
+    "hardware": {
+      "label": "Hardware",
+      "description": "Electronics · home lab · PCB design · keyboards · audio gear",
+      "emoji": "🎛️"
+    },
+    "diy": {
+      "label": "DIY & Making",
+      "description": "Woodworking · metalworking · 3D printing · home · maker",
+      "emoji": "🛠️"
+    },
+    "retro": {
+      "label": "Retro",
+      "description": "Vintage computers · DOS · BBS · demoscene · old software",
+      "emoji": "💾"
+    },
+    "science": {
+      "label": "Science",
+      "description": "Physics · biology · math · space · climate · research",
+      "emoji": "⚛️"
+    },
+    "humanities": {
+      "label": "Humanities",
+      "description": "History · philosophy · linguistics · archaeology · classics",
+      "emoji": "🏺"
+    },
+    "essays": {
+      "label": "Essays",
+      "description": "Long-form reflective writing that defies topic categories",
+      "emoji": "🪶"
+    },
+    "art": {
+      "label": "Art & Design",
+      "description": "Visual art · illustration · typography · creative writing",
+      "emoji": "🌊"
+    },
+    "photography": {
+      "label": "Photography",
+      "description": "Photographic craft · technique · gear · film · photo essays",
+      "emoji": "🌄"
+    },
+    "culture": {
+      "label": "Pop Culture",
+      "description": "Film · TV · music · books · comics",
+      "emoji": "🎭"
+    },
+    "gaming": {
+      "label": "Gaming",
+      "description": "Video games · game dev · modding · interactive fiction",
+      "emoji": "🕹️"
+    },
+    "politics": {
+      "label": "Politics",
+      "description": "Government · legislation · international relations",
+      "emoji": "🎤"
+    },
+    "economy": {
+      "label": "Economy",
+      "description": "Markets · finance · labor economics · trade · analysis",
+      "emoji": "🎲"
+    },
+    "society": {
+      "label": "Society",
+      "description": "Discrimination · civil rights · social structure",
+      "emoji": "👥"
+    },
+    "life": {
+      "label": "Life & Personal",
+      "description": "Diary · weeknotes · parenting · pets · link roundups",
+      "emoji": "☀️"
+    },
+    "food": {
+      "label": "Food & Drink",
+      "description": "Recipes · cooking · restaurants · coffee · wine · baking",
+      "emoji": "🧑‍🍳"
+    },
+    "travel": {
+      "label": "Travel & Outdoors",
+      "description": "Trip reports · hiking · nature · birdwatching · gardening",
+      "emoji": "✈️"
+    },
+    "health": {
+      "label": "Health & Fitness",
+      "description": "Fitness · nutrition · mental health · longevity",
+      "emoji": "🏃"
+    }
+  },
+  "groups": {
+    "Tech & Science": [
+      "ai",
+      "science",
+      "programming",
+      "diy",
+      "tech",
+      "hardware",
+      "infra",
+      "web"
+    ],
+    "Culture & Creative": [
+      "health",
+      "art",
+      "essays",
+      "humanities",
+      "retro",
+      "photography",
+      "culture",
+      "gaming"
+    ],
+    "Life & World": [
+      "society",
+      "life",
+      "food",
+      "travel",
+      "politics",
+      "economy"
+    ]
+  },
+  "remap": {
+    "sysadmin": "infra",
+    "security": "infra"
+  }
+}

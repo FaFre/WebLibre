@@ -114,6 +114,7 @@ class GeneralSettings with FastEquatable {
   final bool urlCleanerAutoUpdate;
   final int? urlCleanerLastCheckEpochMs;
   final bool urlCleanerLastUpdateWasAuto;
+  final TabType smallWebTabType;
   final bool unshortenerEnabled;
   final String unshortenerToken;
 
@@ -162,6 +163,7 @@ class GeneralSettings with FastEquatable {
     required this.urlCleanerAutoUpdate,
     required this.urlCleanerLastCheckEpochMs,
     required this.urlCleanerLastUpdateWasAuto,
+    required this.smallWebTabType,
     required this.unshortenerEnabled,
     required this.unshortenerToken,
   });
@@ -211,6 +213,7 @@ class GeneralSettings with FastEquatable {
     bool? urlCleanerAutoUpdate,
     this.urlCleanerLastCheckEpochMs,
     bool? urlCleanerLastUpdateWasAuto,
+    TabType? smallWebTabType,
     bool? unshortenerEnabled,
     String? unshortenerToken,
   }) : themeMode = themeMode ?? ThemeMode.dark,
@@ -267,6 +270,7 @@ class GeneralSettings with FastEquatable {
            'https://rules2.clearurls.xyz/rules.minify.hash',
        urlCleanerAutoUpdate = urlCleanerAutoUpdate ?? false,
        urlCleanerLastUpdateWasAuto = urlCleanerLastUpdateWasAuto ?? false,
+       smallWebTabType = smallWebTabType ?? TabType.private,
        unshortenerEnabled = unshortenerEnabled ?? false,
        unshortenerToken = unshortenerToken ?? '';
 
@@ -336,6 +340,7 @@ class GeneralSettings with FastEquatable {
     urlCleanerAutoUpdate,
     urlCleanerLastCheckEpochMs,
     urlCleanerLastUpdateWasAuto,
+    smallWebTabType,
     unshortenerEnabled,
     unshortenerToken,
   ];

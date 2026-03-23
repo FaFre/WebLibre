@@ -67,6 +67,7 @@ class _TabsSection extends StatelessWidget {
       children: [
         SettingSection(name: 'Tabs'),
         _NewTabDefaultSection(),
+        _SmallWebTabDefaultSection(),
         _NewTabPositionSection(),
         _ShowContainerUiTile(),
         _ShowIsolatedTabUiTile(),
@@ -171,6 +172,85 @@ class _NewTabDefaultSection extends HookConsumerWidget {
                     );
               },
               style: switch (defaultCreateTabType) {
+                TabType.regular => null,
+                TabType.private => SegmentedButton.styleFrom(
+                  selectedBackgroundColor: appColors.privateSelectionOverlay,
+                ),
+                TabType.child => null,
+                TabType.isolated => SegmentedButton.styleFrom(
+                  selectedBackgroundColor: appColors.isolatedSelectionOverlay,
+                ),
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SmallWebTabDefaultSection extends HookConsumerWidget {
+  const _SmallWebTabDefaultSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appColors = AppColors.of(context);
+    final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final smallWebTabType = settings.smallWebTabType;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const ListTile(
+            title: Text('Small Web Tab Default'),
+            subtitle: Text('Choose the tab type used when entering Small Web'),
+            leading: Icon(Icons.explore),
+            contentPadding: EdgeInsets.zero,
+          ),
+          Center(
+            child: SegmentedButton(
+              showSelectedIcon: false,
+              segments: [
+                const ButtonSegment(
+                  value: TabType.regular,
+                  label: Text('Regular'),
+                  icon: Icon(MdiIcons.tab),
+                ),
+                ButtonSegment(
+                  value: TabType.private,
+                  label: const Text('Private'),
+                  icon: Icon(
+                    MdiIcons.dominoMask,
+                    color: smallWebTabType == TabType.private
+                        ? null
+                        : appColors.privateTabPurple,
+                  ),
+                ),
+                if (settings.showIsolatedTabUi)
+                  ButtonSegment(
+                    value: TabType.isolated,
+                    label: const Text('Isolated'),
+                    icon: Icon(
+                      MdiIcons.snowflake,
+                      color: smallWebTabType == TabType.isolated
+                          ? null
+                          : appColors.isolatedTabTeal,
+                    ),
+                  ),
+              ],
+              selected: {smallWebTabType},
+              onSelectionChanged: (value) async {
+                await ref
+                    .read(saveGeneralSettingsControllerProvider.notifier)
+                    .save(
+                      (currentSettings) =>
+                          currentSettings.copyWith.smallWebTabType(value.first),
+                    );
+              },
+              style: switch (smallWebTabType) {
                 TabType.regular => null,
                 TabType.private => SegmentedButton.styleFrom(
                   selectedBackgroundColor: appColors.privateSelectionOverlay,

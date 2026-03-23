@@ -48,4 +48,4 @@ final class FeedDatabaseProvider
   }
 }
 
-String _$feedDatabaseHash() => r'182dd4203290835fc2188627db08fb0491bd91b2';
+String _$feedDatabaseHash() => r'1ecae87a3de5b2d43136fdb73411727b0b217621';

@@ -66,6 +66,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/domain/repositories/top_site_repository.dart';
+import 'package:weblibre/features/small_web/presentation/controllers/small_web_mode_controller.dart';
 import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
@@ -1918,7 +1919,19 @@ class _QuickLinksGrid extends ConsumerWidget {
               }),
             ),
             const SizedBox(width: 8),
-            const Expanded(child: SizedBox.shrink()),
+            Expanded(
+              child: _buildGridItem(
+                context,
+                Icons.explore,
+                'Small Web',
+                () async {
+                  Navigator.pop(context);
+                  await ref
+                      .read(smallWebModeControllerProvider.notifier)
+                      .enter();
+                },
+              ),
+            ),
             const SizedBox(width: 8),
             const Expanded(child: SizedBox.shrink()),
           ],

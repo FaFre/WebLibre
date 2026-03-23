@@ -140,3 +140,23 @@ void _collectAllDescendantGuids(BookmarkFolder folder, Set<String> result) {
     }
   }
 }
+
+/// Returns GUIDs of all bookmark entries matching [url] in the tree.
+List<String> bookmarkGuidsForUrl(BookmarkItem? root, Uri? url) {
+  final result = <String>[];
+  if (root == null || url == null) return result;
+
+  void collect(BookmarkItem item) {
+    if (item is BookmarkEntry && item.url == url) {
+      result.add(item.guid);
+    }
+    if (item is BookmarkFolder) {
+      for (final child in item.children ?? const <BookmarkItem>[]) {
+        collect(child);
+      }
+    }
+  }
+
+  collect(root);
+  return result;
+}

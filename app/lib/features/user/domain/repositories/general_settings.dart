@@ -213,6 +213,10 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
           ?.readAs(DriftSqlType.int, db.typeMapping),
       'urlCleanerLastUpdateWasAuto': settings['urlCleanerLastUpdateWasAuto']
           ?.readAs(DriftSqlType.bool, db.typeMapping),
+      'smallWebTabType': settings['smallWebTabType']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
       'unshortenerEnabled': settings['unshortenerEnabled']?.readAs(
         DriftSqlType.bool,
         db.typeMapping,
