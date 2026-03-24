@@ -309,17 +309,23 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
     ref.listenManual(
       selectedTabStateProvider.select(
-        (state) => (tabId: state?.id, isLoading: state?.isLoading),
+        (state) => (
+          tabId: state?.id,
+          isLoading: state?.isLoading,
+          isFullScreen: state?.isFullScreen,
+        ),
       ),
       (previous, next) {
-        if (previous?.tabId != next.tabId || next.isLoading == true) {
+        if (previous?.tabId != next.tabId ||
+            next.isLoading == true ||
+            next.isFullScreen == true) {
           _periodicScreenshotUpdate?.cancel();
           _periodicScreenshotUpdate = null;
           _timerPaused = false;
+          return;
         }
 
-        if (next.isLoading == false &&
-            (_periodicScreenshotUpdate?.isActive ?? false) == false) {
+        if ((_periodicScreenshotUpdate?.isActive ?? false) == false) {
           _timerPaused = false;
           _periodicScreenshotUpdate?.cancel();
           _periodicScreenshotUpdate = Timer.periodic(
