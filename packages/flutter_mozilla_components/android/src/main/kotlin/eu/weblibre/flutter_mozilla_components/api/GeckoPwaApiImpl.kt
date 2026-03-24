@@ -342,7 +342,7 @@ class GeckoPwaApiImpl(
             currentUrl = currentUrl,
             name = name,
             shortName = shortName,
-            display = display?.name?.lowercase(),
+            display = display?.name?.lowercase()?.replace("_", "-"),
             themeColor = themeColor?.let { String.format("#%06X", 0xFFFFFF and it) },
             backgroundColor = backgroundColor?.let { String.format("#%06X", 0xFFFFFF and it) },
             scope = scope,

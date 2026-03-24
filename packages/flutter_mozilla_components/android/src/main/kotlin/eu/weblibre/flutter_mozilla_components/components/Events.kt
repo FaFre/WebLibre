@@ -320,7 +320,7 @@ class Events(
                         currentUrl = currentUrl,
                         name = manifest.name,
                         shortName = manifest.shortName,
-                        display = manifest.display?.name?.lowercase(),
+                        display = manifest.display?.name?.lowercase()?.replace("_", "-"),
                         themeColor = manifest.themeColor?.let { String.format("#%06X", 0xFFFFFF and it) },
                         backgroundColor = manifest.backgroundColor?.let { String.format("#%06X", 0xFFFFFF and it) },
                         scope = manifest.scope,
