@@ -37,6 +37,7 @@ class ToolbarLayoutContent extends StatelessWidget {
         _TabBarPositionSection(),
         _TabBarLayoutModeSection(),
         _AutoHideTabBarTile(),
+        _TabBarLongPressUrlCopyTile(),
         SettingSection(name: 'Contextual Toolbar'),
         _ShowContextualTabBarTile(),
         _CustomizeToolbarButtonsTile(),
@@ -417,6 +418,36 @@ class _BottomSheetTabViewTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.tabViewBottomSheet(value),
+            );
+      },
+    );
+  }
+}
+
+class _TabBarLongPressUrlCopyTile extends HookConsumerWidget {
+  const _TabBarLongPressUrlCopyTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tabBarLongPressUrlCopy = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.tabBarLongPressUrlCopy,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Long Press URL to Copy'),
+      subtitle: const Text(
+        'Copy the page URL to clipboard when long pressing the address bar',
+      ),
+      secondary: const Icon(MdiIcons.contentCopy),
+      value: tabBarLongPressUrlCopy,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.tabBarLongPressUrlCopy(value),
             );
       },
     );

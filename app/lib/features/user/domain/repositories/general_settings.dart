@@ -217,6 +217,10 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.string,
         db.typeMapping,
       ),
+      'tabBarLongPressUrlCopy': settings['tabBarLongPressUrlCopy']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
       'unshortenerEnabled': settings['unshortenerEnabled']?.readAs(
         DriftSqlType.bool,
         db.typeMapping,

@@ -115,6 +115,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings smallWebTabType(TabType smallWebTabType);
 
+  GeneralSettings tabBarLongPressUrlCopy(bool tabBarLongPressUrlCopy);
+
   GeneralSettings unshortenerEnabled(bool unshortenerEnabled);
 
   GeneralSettings unshortenerToken(String unshortenerToken);
@@ -172,6 +174,7 @@ abstract class _$GeneralSettingsCWProxy {
     int? urlCleanerLastCheckEpochMs,
     bool urlCleanerLastUpdateWasAuto,
     TabType smallWebTabType,
+    bool tabBarLongPressUrlCopy,
     bool unshortenerEnabled,
     String unshortenerToken,
   });
@@ -377,6 +380,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(smallWebTabType: smallWebTabType);
 
   @override
+  GeneralSettings tabBarLongPressUrlCopy(bool tabBarLongPressUrlCopy) =>
+      call(tabBarLongPressUrlCopy: tabBarLongPressUrlCopy);
+
+  @override
   GeneralSettings unshortenerEnabled(bool unshortenerEnabled) =>
       call(unshortenerEnabled: unshortenerEnabled);
 
@@ -439,6 +446,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? urlCleanerLastCheckEpochMs = const $CopyWithPlaceholder(),
     Object? urlCleanerLastUpdateWasAuto = const $CopyWithPlaceholder(),
     Object? smallWebTabType = const $CopyWithPlaceholder(),
+    Object? tabBarLongPressUrlCopy = const $CopyWithPlaceholder(),
     Object? unshortenerEnabled = const $CopyWithPlaceholder(),
     Object? unshortenerToken = const $CopyWithPlaceholder(),
   }) {
@@ -707,6 +715,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.smallWebTabType
           // ignore: cast_nullable_to_non_nullable
           : smallWebTabType as TabType,
+      tabBarLongPressUrlCopy:
+          tabBarLongPressUrlCopy == const $CopyWithPlaceholder() ||
+              tabBarLongPressUrlCopy == null
+          ? _value.tabBarLongPressUrlCopy
+          // ignore: cast_nullable_to_non_nullable
+          : tabBarLongPressUrlCopy as bool,
       unshortenerEnabled:
           unshortenerEnabled == const $CopyWithPlaceholder() ||
               unshortenerEnabled == null
@@ -826,6 +840,7 @@ GeneralSettings _$GeneralSettingsFromJson(
     _$TabTypeEnumMap,
     json['smallWebTabType'],
   ),
+  tabBarLongPressUrlCopy: json['tabBarLongPressUrlCopy'] as bool?,
   unshortenerEnabled: json['unshortenerEnabled'] as bool?,
   unshortenerToken: json['unshortenerToken'] as String?,
 );
@@ -889,6 +904,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'urlCleanerLastCheckEpochMs': instance.urlCleanerLastCheckEpochMs,
   'urlCleanerLastUpdateWasAuto': instance.urlCleanerLastUpdateWasAuto,
   'smallWebTabType': _$TabTypeEnumMap[instance.smallWebTabType]!,
+  'tabBarLongPressUrlCopy': instance.tabBarLongPressUrlCopy,
   'unshortenerEnabled': instance.unshortenerEnabled,
   'unshortenerToken': instance.unshortenerToken,
 };

@@ -25,13 +25,21 @@ class UriBreadcrumb extends StatelessWidget {
   final Uri uri;
   final Widget? icon;
   final TextStyle? style;
+  final void Function()? onTooltipTriggered;
 
-  const UriBreadcrumb({super.key, required this.uri, this.icon, this.style});
+  const UriBreadcrumb({
+    super.key,
+    required this.uri,
+    this.icon,
+    this.style,
+    this.onTooltipTriggered,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Tooltip(
       message: uri.toString(),
+      onTriggered: onTooltipTriggered,
       child: DefaultTextStyle(
         style: style ?? DefaultTextStyle.of(context).style,
         child: FadingScroll(

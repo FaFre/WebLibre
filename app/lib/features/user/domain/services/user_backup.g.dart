@@ -41,7 +41,7 @@ final class UserBackupServiceProvider
   }
 }
 
-String _$userBackupServiceHash() => r'74cd6fd9818a8350a91b1225d904e23f48bc9e30';
+String _$userBackupServiceHash() => r'3746ae59d490e25a44815c125f30cd0981de555d';
 
 abstract class _$UserBackupService extends $Notifier<void> {
   void build();

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -64,6 +65,7 @@ class CompactAppBarTitle extends ConsumerWidget {
       isTabTunneled:
           isTabTuneledAsync.hasValue && isTabTuneledAsync.value == true,
       showSiteSettingsBadge: showSiteSettingsBadge,
+      longPressUrlCopy: settings.tabBarLongPressUrlCopy,
       onSiteSettingsTap: () {
         ref
             .read(bottomSheetControllerProvider.notifier)
@@ -89,6 +91,7 @@ class CompactAppBarTitleView extends StatelessWidget {
     required this.onSiteSettingsTap,
     required this.onTitleTap,
     this.tabIcon,
+    this.longPressUrlCopy = true,
   });
 
   final TabState tabState;
@@ -97,6 +100,7 @@ class CompactAppBarTitleView extends StatelessWidget {
   final VoidCallback onSiteSettingsTap;
   final VoidCallback onTitleTap;
   final Widget? tabIcon;
+  final bool longPressUrlCopy;
 
   @override
   Widget build(BuildContext context) {
@@ -168,6 +172,13 @@ class CompactAppBarTitleView extends StatelessWidget {
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurface,
                       ),
+                      onTooltipTriggered: longPressUrlCopy
+                          ? () async {
+                              await Clipboard.setData(
+                                ClipboardData(text: tabState.url.toString()),
+                              );
+                            }
+                          : null,
                     ),
                   ),
                 ],
@@ -209,6 +220,7 @@ class AppBarTitle extends ConsumerWidget {
       isTabTunneled:
           isTabTuneledAsync.hasValue && isTabTuneledAsync.value == true,
       showSiteSettingsBadge: showSiteSettingsBadge,
+      longPressUrlCopy: settings.tabBarLongPressUrlCopy,
       onSiteSettingsTap: () {
         ref
             .read(bottomSheetControllerProvider.notifier)
@@ -233,6 +245,7 @@ class AppBarTitleView extends StatelessWidget {
     required this.showSiteSettingsBadge,
     required this.onSiteSettingsTap,
     required this.onTitleTap,
+    required this.longPressUrlCopy,
     this.tabIcon,
   });
 
@@ -242,6 +255,7 @@ class AppBarTitleView extends StatelessWidget {
   final VoidCallback onSiteSettingsTap;
   final VoidCallback onTitleTap;
   final Widget? tabIcon;
+  final bool longPressUrlCopy;
 
   @override
   Widget build(BuildContext context) {
@@ -333,6 +347,13 @@ class AppBarTitleView extends StatelessWidget {
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurface,
                         ),
+                        onTooltipTriggered: longPressUrlCopy
+                            ? () async {
+                                await Clipboard.setData(
+                                  ClipboardData(text: tabState.url.toString()),
+                                );
+                              }
+                            : null,
                       ),
                     ),
                   ],

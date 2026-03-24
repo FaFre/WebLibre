@@ -355,6 +355,7 @@ class _RegularPreviewTitle extends StatelessWidget {
       onSiteSettingsTap: _noop,
       onTitleTap: _noop,
       tabIcon: const Icon(MdiIcons.web, size: 24),
+      longPressUrlCopy: false,
     );
   }
 }

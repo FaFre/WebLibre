@@ -115,6 +115,7 @@ class GeneralSettings with FastEquatable {
   final int? urlCleanerLastCheckEpochMs;
   final bool urlCleanerLastUpdateWasAuto;
   final TabType smallWebTabType;
+  final bool tabBarLongPressUrlCopy;
   final bool unshortenerEnabled;
   final String unshortenerToken;
 
@@ -164,6 +165,7 @@ class GeneralSettings with FastEquatable {
     required this.urlCleanerLastCheckEpochMs,
     required this.urlCleanerLastUpdateWasAuto,
     required this.smallWebTabType,
+    required this.tabBarLongPressUrlCopy,
     required this.unshortenerEnabled,
     required this.unshortenerToken,
   });
@@ -214,6 +216,7 @@ class GeneralSettings with FastEquatable {
     this.urlCleanerLastCheckEpochMs,
     bool? urlCleanerLastUpdateWasAuto,
     TabType? smallWebTabType,
+    bool? tabBarLongPressUrlCopy,
     bool? unshortenerEnabled,
     String? unshortenerToken,
   }) : themeMode = themeMode ?? ThemeMode.dark,
@@ -271,6 +274,7 @@ class GeneralSettings with FastEquatable {
        urlCleanerAutoUpdate = urlCleanerAutoUpdate ?? false,
        urlCleanerLastUpdateWasAuto = urlCleanerLastUpdateWasAuto ?? false,
        smallWebTabType = smallWebTabType ?? TabType.private,
+       tabBarLongPressUrlCopy = tabBarLongPressUrlCopy ?? true,
        unshortenerEnabled = unshortenerEnabled ?? false,
        unshortenerToken = unshortenerToken ?? '';
 
@@ -341,6 +345,7 @@ class GeneralSettings with FastEquatable {
     urlCleanerLastCheckEpochMs,
     urlCleanerLastUpdateWasAuto,
     smallWebTabType,
+    tabBarLongPressUrlCopy,
     unshortenerEnabled,
     unshortenerToken,
   ];
