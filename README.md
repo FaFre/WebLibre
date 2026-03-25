@@ -22,6 +22,12 @@ WebLibre is an independent privacy-focused browser for Android built on [Mozilla
   <a href="https://liberapay.com/FaFre/donate">
     <img alt="Donate using Liberapay" src="https://docs.weblibre.eu/weblibre/_images/badges/liberapay.svg">
   </a>
+  <a href="https://liberapay.com/FaFre/donate">
+    <img alt="Donate using Ko-fi" src="https://docs.weblibre.eu/weblibre/_images/badges/kofi.svg">
+  </a>
+  <a href="https://liberapay.com/FaFre/donate">
+    <img alt="Donate using GitHub Sponsors" src="https://docs.weblibre.eu/weblibre/_images/badges/github_sponsors.svg">
+  </a>
   <a href="#donation">
     <img alt="Donate using Monero" src="https://docs.weblibre.eu/weblibre/_images/badges/monero.svg">
   </a>
