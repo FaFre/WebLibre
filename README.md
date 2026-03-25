@@ -20,10 +20,13 @@ WebLibre is an independent privacy-focused browser for Android built on [Mozilla
 
 <p align="center">
   <a href="https://liberapay.com/FaFre/donate">
-    <img alt="Donate using Liberapay" src="https://docs.weblibre.eu/static/images/badges/liberapay.svg">
+    <img alt="Donate using Liberapay" src="https://docs.weblibre.eu/weblibre/_images/badges/liberapay.svg">
   </a>
   <a href="#donation">
-    <img alt="Donate using Monero" src="https://docs.weblibre.eu/static/images/badges/monero.svg">
+    <img alt="Donate using Monero" src="https://docs.weblibre.eu/weblibre/_images/badges/monero.svg">
+  </a>
+  <a href="#donation">
+    <img alt="Donate using Litecoin" src="https://docs.weblibre.eu/weblibre/_images/badges/litecoin.svg">
   </a>
 </p>
 
@@ -135,13 +138,13 @@ See the **[Quick Start Guide](https://docs.weblibre.eu/weblibre/quick-start.html
 
 <p align="center">
   <a href='https://github.com/FaFre/WebLibre/releases'>
-    <img height="100" alt='Get it on GitHub' src='https://docs.weblibre.eu/static/images/badges/github.png'/>
+    <img height="100" alt='Get it on GitHub' src='https://docs.weblibre.eu/weblibre/_images/badges/github.png'/>
   </a>
   <a href='https://f-droid.org/en/packages/eu.weblibre.gecko/'>
-    <img height="100" alt='Get it on F-Droid' src='https://docs.weblibre.eu/static/images/badges/fdroid.png'/>
+    <img height="100" alt='Get it on F-Droid' src='https://docs.weblibre.eu/weblibre/_images/badges/fdroid.png'/>
   </a>
   <a href='https://play.google.com/store/apps/details?id=eu.weblibre.gecko'>
-    <img height="100" alt='Get it on Google Play' src='https://docs.weblibre.eu/static/images/badges/google_play.png'/>
+    <img height="100" alt='Get it on Google Play' src='https://docs.weblibre.eu/weblibre/_images/badges/google_play.png'/>
   </a>
 </p>
 
@@ -174,4 +177,10 @@ If you find WebLibre useful and want to support its development, you can donate 
 
 ```
 89rpdkq1XJYJYUshjF23YZhJdNEpghrQTXnz7vxnrLVHGrrqXTZ6BdKbqgyQnNZCkxTDA4RfhDsUcF6eHAAqco4WDQR2cZF
+```
+
+### Litecoin
+
+```
+ltc1q0dtutc9zgkvffevwsz7s87379puk37hwn4un94
 ```
