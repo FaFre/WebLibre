@@ -314,17 +314,6 @@ class RecoverableTab {
   const RecoverableTab({this.engineSessionStateJson, required this.state});
 }
 
-/// A restored browser state, read from disk.
-class RecoverableBrowserState {
-  /// The list of restored tabs.
-  final List<RecoverableTab?> tabs;
-
-  /// The ID of the selected tab in [tabs]. Or `null` if no selection was restored.
-  final String? selectedTabId;
-
-  const RecoverableBrowserState({required this.tabs, this.selectedTabId});
-}
-
 /// Indicates what location the tabs should be restored at
 enum RestoreLocation {
   /// Restore tabs at the beginning of the tab list
@@ -1266,7 +1255,7 @@ abstract class GeckoSyncApi {
   List<SyncDevice> getDevices();
 
   @async
-  bool sendTabToDevice(String deviceId, String title, String url);
+  bool sendTabToDevice(String deviceId, String title, String url, bool private);
 
   @async
   void refreshDevices();
@@ -1445,10 +1434,6 @@ abstract class GeckoTabsApi {
   void restoreTabsByList({
     required List<RecoverableTab> tabs,
     required String? selectTabId,
-    required RestoreLocation restoreLocation,
-  });
-  void restoreTabsByBrowserState({
-    required RecoverableBrowserState state,
     required RestoreLocation restoreLocation,
   });
   //The calls with engin storage for restore are not supported at the moment
@@ -2486,5 +2471,10 @@ abstract class GeckoPwaApi {
   /// The [overrideShortcutName] allows customizing the shortcut label.
   /// Returns true if the shortcut was created successfully.
   @async
-  bool installBasicShortcut(String? tabId, String profileUuid, String? contextId, String? overrideShortcutName);
+  bool installBasicShortcut(
+    String? tabId,
+    String profileUuid,
+    String? contextId,
+    String? overrideShortcutName,
+  );
 }

@@ -32,6 +32,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/content_selection_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
@@ -377,6 +378,7 @@ class SendTabToDeviceMenuItemButton extends HookConsumerWidget {
                             deviceId: device.deviceId,
                             title: title,
                             url: tabState.url.toString(),
+                            private: tabState.tabMode == TabMode.private,
                           );
 
                       if (context.mounted) {

@@ -1513,6 +1513,7 @@ class _SendToDeviceExpansion extends ConsumerWidget {
                               deviceId: device.deviceId,
                               title: title,
                               url: tabState.url.toString(),
+                              private: tabState.tabMode == TabMode.private,
                             );
 
                         if (context.mounted) {

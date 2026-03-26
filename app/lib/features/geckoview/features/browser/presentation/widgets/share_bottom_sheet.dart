@@ -36,6 +36,7 @@ import 'package:weblibre/features/geckoview/features/open_link_tools/domain/enti
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/dialogs/tracking_details_dialog.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/hooks/url_cleaner_controller.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
@@ -426,6 +427,7 @@ class _SendToDeviceTile extends ConsumerWidget {
                               deviceId: device.deviceId,
                               title: title,
                               url: tabState.url.toString(),
+                              private: tabState.tabMode == TabMode.private,
                             );
 
                         if (context.mounted) {

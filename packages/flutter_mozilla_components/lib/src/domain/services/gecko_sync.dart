@@ -42,8 +42,13 @@ class GeckoSyncService {
     return _api.getDevices();
   }
 
-  Future<bool> sendTabToDevice(String deviceId, String title, String url) {
-    return _api.sendTabToDevice(deviceId, title, url);
+  Future<bool> sendTabToDevice(
+    String deviceId,
+    String title,
+    String url,
+    bool private,
+  ) {
+    return _api.sendTabToDevice(deviceId, title, url, private);
   }
 
   Future<void> refreshDevices() {

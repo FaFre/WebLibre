@@ -10,6 +10,7 @@ import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.TabContent
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.map
 import mozilla.components.browser.state.store.BrowserStore
@@ -87,7 +88,7 @@ class ReadabilityExtractFeature(
         extensionController.install(
             engine,
             onSuccess = { extension ->
-                sessionScope = store.flowScoped { flow ->
+                sessionScope = store.flowScoped(dispatcher = Dispatchers.Main) { flow ->
                     flow.map { it.tabs }
                         .filterChanged { it.engineState.engineSession }
                         .collect { state ->
@@ -102,7 +103,7 @@ class ReadabilityExtractFeature(
                         }
                 }
 
-                historyScope = store.flowScoped { flow ->
+                historyScope = store.flowScoped(dispatcher = Dispatchers.Main) { flow ->
                     flow.map { it.tabs }
                         .filterChanged { it.content.history }
                         .ifAnyChanged { arrayOf(it.content.history.currentIndex) }

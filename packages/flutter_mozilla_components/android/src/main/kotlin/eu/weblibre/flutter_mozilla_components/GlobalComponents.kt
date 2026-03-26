@@ -119,6 +119,7 @@ object GlobalComponents {
                             // first full setup. We restore the tab list, but let startup open in
                             // its neutral/default state instead of jumping back into prior content.
                             selectedTabId = null,
+                            tabPartitions = restoredState.tabPartitions
                         ),
                         restoreLocation = TabListAction.RestoreAction.RestoreLocation.BEGINNING,
                     )

@@ -86,7 +86,7 @@ class WebExtensionToolbarFeature(
             }
 
         iconJobDispatcher = iconHandler.asCoroutineDispatcher("WebExtensionIconDispatcher")
-        scope = store.flowScoped { flow ->
+        scope = store.flowScoped(dispatcher = Dispatchers.Main) { flow ->
             flow.ifAnyChanged { arrayOf(it.selectedTab, it.extensions) }
                 .collect { state ->
                     renderWebExtensionActions(state, state.selectedTab)

@@ -10,7 +10,6 @@ import eu.weblibre.flutter_mozilla_components.pigeons.AddTabParams
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.HistoryMetadataKey as PigeonHistoryMetadataKey
 import eu.weblibre.flutter_mozilla_components.pigeons.LoadUrlFlagsValue
-import eu.weblibre.flutter_mozilla_components.pigeons.RecoverableBrowserState as PigeonRecoverableBrowserState
 import eu.weblibre.flutter_mozilla_components.pigeons.RestoreLocation as PigeonRestoreLocation
 import eu.weblibre.flutter_mozilla_components.pigeons.RecoverableTab as PigeonRecoverableTab
 import eu.weblibre.flutter_mozilla_components.pigeons.SourceValue
@@ -597,25 +596,6 @@ class GeckoTabsApiImpl : GeckoTabsApi {
             logger.debug("$TAG: Restored ${tabs.size} tabs")
         } catch (e: Exception) {
             logger.error("$TAG: Failed to restore tabs", e)
-            throw e
-        }
-    }
-
-    override fun restoreTabsByBrowserState(
-        state: PigeonRecoverableBrowserState,
-        restoreLocation: PigeonRestoreLocation
-    ) {
-        try {
-            components.useCases.tabsUseCases.restore(
-                state = RecoverableBrowserState(
-                    selectedTabId = state.selectedTabId,
-                    tabs = state.tabs.filterNotNull().map { mapTab(it) }
-                ),
-                restoreLocation = mapRestoreLocation(restoreLocation)
-            )
-            logger.debug("$TAG: Restored browser state")
-        } catch (e: Exception) {
-            logger.error("$TAG: Failed to restore browser state", e)
             throw e
         }
     }

@@ -25,6 +25,7 @@ import mozilla.components.support.base.feature.LifecycleAwareFeature
 import mozilla.components.support.ktx.android.content.appVersionName
 import mozilla.components.ui.widgets.withCenterAlignedButtons
 import eu.weblibre.flutter_mozilla_components.R
+import kotlinx.coroutines.Dispatchers
 import mozilla.components.feature.addons.R as MozComp
 
 /**
@@ -47,7 +48,7 @@ class WebExtensionPromptFeature(
      * and opens / closes tabs as needed.
      */
     override fun start() {
-        scope = store.flowScoped { flow ->
+        scope = store.flowScoped(dispatcher = Dispatchers.Main) { flow ->
             flow.mapNotNull { state ->
                 state.webExtensionPromptRequest
             }.distinctUntilChanged().collect { promptRequest ->

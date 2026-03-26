@@ -26,6 +26,7 @@ import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
 import eu.weblibre.flutter_mozilla_components.R
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.mapNotNull
 import mozilla.components.browser.state.selector.findCustomTab
@@ -193,7 +194,7 @@ class CustomTabToolbar @JvmOverloads constructor(
         val sessionId = this.sessionId ?: return
         val store = this.store ?: return
 
-        urlScope = store.flowScoped { flow ->
+        urlScope = store.flowScoped(dispatcher = Dispatchers.Main) { flow ->
             flow
                 .mapNotNull { state -> state.findCustomTab(sessionId) }
                 .ifAnyChanged { tab -> arrayOf(tab.content.url) }
@@ -208,7 +209,7 @@ class CustomTabToolbar @JvmOverloads constructor(
         val sessionId = this.sessionId ?: return
         val store = this.store ?: return
 
-        titleScope = store.flowScoped { flow ->
+        titleScope = store.flowScoped(dispatcher = Dispatchers.Main) { flow ->
             flow
                 .mapNotNull { state -> state.findCustomTab(sessionId) }
                 .ifAnyChanged { tab -> arrayOf(tab.content.title) }
@@ -220,7 +221,7 @@ class CustomTabToolbar @JvmOverloads constructor(
         val sessionId = this.sessionId ?: return
         val store = this.store ?: return
 
-        securityScope = store.flowScoped { flow ->
+        securityScope = store.flowScoped(dispatcher = Dispatchers.Main) { flow ->
             flow
                 .mapNotNull { state -> state.findCustomTab(sessionId) }
                 .ifAnyChanged {

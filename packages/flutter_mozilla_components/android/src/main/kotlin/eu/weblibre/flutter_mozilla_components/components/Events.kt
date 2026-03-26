@@ -26,6 +26,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.TabContentState
 import eu.weblibre.flutter_mozilla_components.pigeons.TabTranslationStateData
 import eu.weblibre.flutter_mozilla_components.pigeons.TranslationEngineStateData
 import eu.weblibre.flutter_mozilla_components.pigeons.TranslationLanguage
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.debounce
@@ -50,7 +51,7 @@ class Events(
 
     @OptIn(FlowPreview::class)
     fun registerFlowEvents(stateFlow: Store<BrowserState, BrowserAction>) {
-        stateFlow.flowScoped { flow ->
+        stateFlow.flowScoped(dispatcher = Dispatchers.Main) { flow ->
             flow.map { state -> state.selectedTabId }
                 .distinctUntilChanged()
                 // Make sure this is sent after tabadded action and tab list change
@@ -63,7 +64,7 @@ class Events(
                 }
         }
 
-        stateFlow.flowScoped { flow ->
+        stateFlow.flowScoped(dispatcher = Dispatchers.Main) { flow ->
             var previousTabs = emptySet<String>()
             flow.mapNotNull { state -> state.tabs.map { tab -> tab.id } }
                 .distinctUntilChanged()
@@ -88,7 +89,7 @@ class Events(
                 }
         }
 
-        stateFlow.flowScoped { flow ->
+        stateFlow.flowScoped(dispatcher = Dispatchers.Main) { flow ->
             flow.mapNotNull { state -> state.tabs }
                 .filterChanged {
                     it.content
@@ -105,7 +106,7 @@ class Events(
                 }
         }
 
-        stateFlow.flowScoped { flow ->
+        stateFlow.flowScoped(dispatcher = Dispatchers.Main) { flow ->
             flow.mapNotNull { state -> state.tabs }
                 .filterChanged {
                     it.content.securityInfo
@@ -124,7 +125,7 @@ class Events(
                 }
         }
 
-        stateFlow.flowScoped { flow ->
+        stateFlow.flowScoped(dispatcher = Dispatchers.Main) { flow ->
             flow.mapNotNull { state -> state.tabs }
                 .filterChanged {
                     it.readerState
@@ -148,7 +149,7 @@ class Events(
                 }
         }
 
-        stateFlow.flowScoped { flow ->
+        stateFlow.flowScoped(dispatcher = Dispatchers.Main) { flow ->
             flow.mapNotNull { state -> state.tabs }
                 .filterChanged {
                     it.content
@@ -180,7 +181,7 @@ class Events(
                 }
         }
 
-        stateFlow.flowScoped { flow ->
+        stateFlow.flowScoped(dispatcher = Dispatchers.Main) { flow ->
             flow.mapNotNull { state -> state.tabs }
                 .filterChanged {
                     it.content
@@ -226,7 +227,7 @@ class Events(
         }
 
         // Translation engine state (browser-level)
-        stateFlow.flowScoped { flow ->
+        stateFlow.flowScoped(dispatcher = Dispatchers.Main) { flow ->
             flow.map { state -> state.translationEngine }
                 .distinctUntilChanged { old, new ->
                     old.isEngineSupported == new.isEngineSupported &&
@@ -253,7 +254,7 @@ class Events(
         }
 
         // Per-tab translation state
-        stateFlow.flowScoped { flow ->
+        stateFlow.flowScoped(dispatcher = Dispatchers.Main) { flow ->
             flow.mapNotNull { state -> state.tabs }
                 .filterChanged {
                     it.translationsState
@@ -291,7 +292,7 @@ class Events(
         }
 
         // PWA manifest availability events - following Fenix MenuPresenter pattern
-        stateFlow.flowScoped { flow ->
+        stateFlow.flowScoped(dispatcher = Dispatchers.Main) { flow ->
             flow.mapNotNull { state -> state.selectedTab }
                 .ifAnyChanged { tab ->
                     arrayOf(

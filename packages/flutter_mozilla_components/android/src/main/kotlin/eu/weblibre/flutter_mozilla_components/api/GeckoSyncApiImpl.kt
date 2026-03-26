@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import mozilla.components.concept.sync.DeviceCapability
 import mozilla.components.concept.sync.DeviceCommandOutgoing
 import mozilla.components.concept.sync.TabData
+import mozilla.components.concept.sync.TabPrivacy
 import mozilla.components.service.fxa.SyncEngine
 import mozilla.components.service.fxa.manager.SCOPE_PROFILE
 import mozilla.components.service.fxa.manager.SCOPE_SYNC
@@ -217,7 +218,8 @@ class GeckoSyncApiImpl : GeckoSyncApi {
         deviceId: String,
         title: String,
         url: String,
-        callback: (Result<Boolean>) -> Unit,
+        private: Boolean,
+        callback: (Result<Boolean>) -> Unit
     ) {
         coroutineScope.launch {
             runCatching {
@@ -237,6 +239,7 @@ class GeckoSyncApiImpl : GeckoSyncApi {
                     DeviceCommandOutgoing.SendTab(
                         title = title,
                         url = url,
+                        privacy = if (private) TabPrivacy.Private else TabPrivacy.Normal,
                     ),
                 )
             }.fold(

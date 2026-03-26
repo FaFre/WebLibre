@@ -6,15 +6,17 @@
 
 package eu.weblibre.flutter_mozilla_components.services
 
+import android.os.Environment
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.downloads.AbstractFetchDownloadService
-import mozilla.components.feature.downloads.DateTimeProvider
 import mozilla.components.feature.downloads.DefaultPackageNameProvider
 import mozilla.components.feature.downloads.DownloadEstimator
 import mozilla.components.feature.downloads.FileSizeFormatter
 import mozilla.components.feature.downloads.PackageNameProvider
 import mozilla.components.support.base.android.NotificationsDelegate
+import mozilla.components.support.utils.DefaultDownloadFileUtils
+import mozilla.components.support.utils.DownloadFileUtils
 
 class DownloadService : AbstractFetchDownloadService() {
     private val components by lazy {
@@ -29,6 +31,14 @@ class DownloadService : AbstractFetchDownloadService() {
     override val packageNameProvider: PackageNameProvider by lazy {
         DefaultPackageNameProvider(
             applicationContext
+        )
+    }
+    override val downloadFileUtils: DownloadFileUtils by lazy {
+        DefaultDownloadFileUtils(
+            context = applicationContext,
+            downloadLocation = {
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+            },
         )
     }
 }

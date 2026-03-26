@@ -247,8 +247,9 @@ class SyncRepository extends _$SyncRepository {
     required String deviceId,
     required String title,
     required String url,
+    required bool private,
   }) {
-    return _service.sendTabToDevice(deviceId, title, url);
+    return _service.sendTabToDevice(deviceId, title, url, private);
   }
 
   Future<bool> setDeviceName(String newName) async {

@@ -116,15 +116,6 @@ class GeckoTabService {
     );
   }
 
-  Future<void> restoreTabsByBrowserState({
-    required RecoverableBrowserState state,
-    RestoreLocation restoreLocation = RestoreLocation.end,
-  }) {
-    return _api.restoreTabsByBrowserState(
-      state: state,
-      restoreLocation: restoreLocation,
-    );
-  }
   //The calls with engin storage for restore are not supported at the moment
 
   //selectOrAddTab invokes splitted
