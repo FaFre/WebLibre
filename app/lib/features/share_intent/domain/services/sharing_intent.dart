@@ -45,6 +45,12 @@ final _sharingIntentTransformer =
           _ => null,
         };
 
+        // Extract container context from shortcut intents
+        final contextId =
+            intent.action == 'android.intent.action.VIEW'
+                ? intent.extra['pwa_context_id'] as String?
+                : null;
+
         if (data != null) {
           if (uri_to_file.isUriSupported(data)) {
             var path = data;
@@ -70,17 +76,23 @@ final _sharingIntentTransformer =
               final mimeType = mime.lookupMimeType(file.path);
               switch (mimeType) {
                 case 'application/pdf':
-                  sink.add(ReceivedIntentParameter(path, null));
+                  sink.add(
+                    ReceivedIntentParameter(path, null, contextId: contextId),
+                  );
                 default:
                   logger.w('Unhandled mime type: $mimeType');
               }
             } catch (e) {
               logger.e('Failed to convert URI to file: $e');
               // Fallback: pass the original URI
-              sink.add(ReceivedIntentParameter(data, null));
+              sink.add(
+                ReceivedIntentParameter(data, null, contextId: contextId),
+              );
             }
           } else {
-            sink.add(ReceivedIntentParameter(data, null));
+            sink.add(
+              ReceivedIntentParameter(data, null, contextId: contextId),
+            );
           }
         }
       },

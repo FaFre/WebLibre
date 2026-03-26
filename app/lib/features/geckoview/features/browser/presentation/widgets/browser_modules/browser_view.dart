@@ -32,6 +32,7 @@ import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/services/search_history_cleanup.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/browser_extension.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
@@ -355,6 +356,12 @@ class _BrowserViewState extends ConsumerState<BrowserView>
           final router = await ref.read(routerProvider.future);
           final settings = ref.read(generalSettingsWithDefaultsProvider);
 
+          // Resolve container from shortcut intent context ID
+          final containerSelection = await _resolveContainerSelection(
+            ref,
+            sharedContent.contextId,
+          );
+
           switch (settings.tabIntentOpenSetting) {
             case TabIntentOpenSetting.regular:
             case TabIntentOpenSetting.private:
@@ -371,6 +378,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                             : TabMode.regular,
                         launchedFromIntent: true,
                         selectTab: true,
+                        containerSelection: containerSelection,
                       );
                 case SharedText():
                   final bang =
@@ -641,4 +649,23 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
     super.dispose();
   }
+}
+
+/// Resolves a [TabContainerSelection] from a shortcut intent's context ID.
+/// Returns [TabContainerSelection.useSelected] if no contextId or container not found.
+Future<TabContainerSelection> _resolveContainerSelection(
+  WidgetRef ref,
+  String? contextId,
+) async {
+  if (contextId == null) return const TabContainerSelection.useSelected();
+
+  final container = await ref
+      .read(containerRepositoryProvider.notifier)
+      .getContainerByContextualIdentity(contextId);
+
+  if (container != null) {
+    return TabContainerSelection.specific(container);
+  }
+
+  return const TabContainerSelection.useSelected();
 }

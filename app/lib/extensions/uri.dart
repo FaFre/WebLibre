@@ -30,6 +30,8 @@ extension UriX on Uri {
   bool get isHttps => isScheme('https');
   bool get isHttpOrHttps => isHttp || isHttps;
 
+  bool get isLocalhost => host == 'localhost' || host == '127.0.0.1';
+
   /// Removes a bare root path (`/`) when there is no query or fragment, so
   /// that `https://example.com/` and `https://example.com` are treated as
   /// equivalent.

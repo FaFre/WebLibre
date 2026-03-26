@@ -48,6 +48,7 @@ class BrowsingSettingsScreen extends StatelessWidget {
               children: const [
                 _TabsSection(),
                 _NavigationSection(),
+                _HomeScreenSection(),
                 _ExternalLinksSection(),
               ],
             );
@@ -659,6 +660,49 @@ class _DoubleBackCloseTabTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.doubleBackCloseTab(value),
+            );
+      },
+    );
+  }
+}
+
+class _HomeScreenSection extends StatelessWidget {
+  const _HomeScreenSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        SettingSection(name: 'Home Screen'),
+        _AllowNonManifestPwaInstallTile(),
+      ],
+    );
+  }
+}
+
+class _AllowNonManifestPwaInstallTile extends HookConsumerWidget {
+  const _AllowNonManifestPwaInstallTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final allowNonManifestPwaInstall = ref.watch(
+      generalSettingsWithDefaultsProvider
+          .select((s) => s.allowNonManifestPwaInstall),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Install Sites as Apps'),
+      subtitle: const Text(
+        'Allow installing websites without a PWA manifest as standalone apps',
+      ),
+      secondary: const Icon(Icons.add_to_home_screen),
+      value: allowNonManifestPwaInstall,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.allowNonManifestPwaInstall(value),
             );
       },
     );

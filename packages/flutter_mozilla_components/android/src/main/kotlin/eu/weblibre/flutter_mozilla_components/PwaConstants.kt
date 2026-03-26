@@ -15,6 +15,11 @@ object PwaConstants {
     const val EXTRA_PWA_CONTEXT_ID = "pwa_context_id"
     const val EXTRA_PWA_TOKEN = "pwa_token"
     const val EXTRA_PWA_INSTALL_START_URL = "pwa_install_start_url"
+    const val EXTRA_SHORTCUT_TYPE = "shortcut_type"
+
+    // Shortcut type values
+    const val SHORTCUT_TYPE_BASIC = "basic"
+    const val SHORTCUT_TYPE_PWA = "pwa"
 
     // Profile and file paths
     const val CURRENT_PROFILE_FILE = "weblibre_profiles/current_profile"

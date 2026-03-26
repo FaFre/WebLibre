@@ -8943,6 +8943,20 @@ interface GeckoPwaApi {
   fun installWebApp(tabId: String?, profileUuid: String, contextId: String?, callback: (Result<Boolean>) -> Unit)
   /** Returns a list of all installed PWA manifests. */
   fun getInstalledWebApps(callback: (Result<List<PwaManifest>>) -> Unit)
+  /**
+   * Creates a basic bookmark shortcut on the home screen (no manifest required).
+   *
+   * Unlike [installWebApp], this creates a simple shortcut that opens
+   * in a regular browser tab rather than standalone PWA mode.
+   * Uses the page title and favicon for the shortcut.
+   *
+   * The [tabId] identifies which tab to create the shortcut for. If null, uses the selected tab.
+   * The [profileUuid] is the UUID of the current user profile.
+   * The [contextId] is the container's contextual identity (optional).
+   * The [overrideShortcutName] allows customizing the shortcut label.
+   * Returns true if the shortcut was created successfully.
+   */
+  fun installBasicShortcut(tabId: String?, profileUuid: String, contextId: String?, overrideShortcutName: String?, callback: (Result<Boolean>) -> Unit)
 
   companion object {
     /** The codec used by GeckoPwaApi. */
@@ -8980,6 +8994,29 @@ interface GeckoPwaApi {
         if (api != null) {
           channel.setMessageHandler { _, reply ->
             api.getInstalledWebApps{ result: Result<List<PwaManifest>> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoPwaApi.installBasicShortcut$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val tabIdArg = args[0] as String?
+            val profileUuidArg = args[1] as String
+            val contextIdArg = args[2] as String?
+            val overrideShortcutNameArg = args[3] as String?
+            api.installBasicShortcut(tabIdArg, profileUuidArg, contextIdArg, overrideShortcutNameArg) { result: Result<Boolean> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(GeckoPigeonUtils.wrapError(error))

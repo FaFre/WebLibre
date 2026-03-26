@@ -118,6 +118,7 @@ class GeneralSettings with FastEquatable {
   final bool tabBarLongPressUrlCopy;
   final bool unshortenerEnabled;
   final String unshortenerToken;
+  final bool allowNonManifestPwaInstall;
 
   GeneralSettings({
     required this.themeMode,
@@ -168,6 +169,7 @@ class GeneralSettings with FastEquatable {
     required this.tabBarLongPressUrlCopy,
     required this.unshortenerEnabled,
     required this.unshortenerToken,
+    required this.allowNonManifestPwaInstall,
   });
 
   GeneralSettings.withDefaults({
@@ -219,6 +221,7 @@ class GeneralSettings with FastEquatable {
     bool? tabBarLongPressUrlCopy,
     bool? unshortenerEnabled,
     String? unshortenerToken,
+    bool? allowNonManifestPwaInstall,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        uiScaleFactor = uiScaleFactor ?? defaultUiScaleFactor,
        disableAnimations = disableAnimations ?? false,
@@ -276,7 +279,8 @@ class GeneralSettings with FastEquatable {
        smallWebTabType = smallWebTabType ?? TabType.private,
        tabBarLongPressUrlCopy = tabBarLongPressUrlCopy ?? true,
        unshortenerEnabled = unshortenerEnabled ?? false,
-       unshortenerToken = unshortenerToken ?? '';
+       unshortenerToken = unshortenerToken ?? '',
+       allowNonManifestPwaInstall = allowNonManifestPwaInstall ?? false;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) =>
       _$GeneralSettingsFromJson(json);
@@ -348,5 +352,6 @@ class GeneralSettings with FastEquatable {
     tabBarLongPressUrlCopy,
     unshortenerEnabled,
     unshortenerToken,
+    allowNonManifestPwaInstall,
   ];
 }

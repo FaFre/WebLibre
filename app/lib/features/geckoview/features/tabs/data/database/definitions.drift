@@ -335,6 +335,11 @@ allAssignedSites WITH SiteAssignment:
   CROSS JOIN json_each(container.metadata, '$.assignedSites')
   WHERE value IS NOT NULL;
 
+containerByContextualIdentity:
+  SELECT * FROM container
+  WHERE container.metadata ->> '$.contextualIdentity' = :contextId
+  LIMIT 1;
+
 containersToClearOnExit:
   SELECT container.metadata ->> '$.contextualIdentity' AS contextual_identity
   FROM container

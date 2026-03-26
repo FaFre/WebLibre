@@ -22,9 +22,10 @@ import 'package:fast_equatable/fast_equatable.dart';
 class ReceivedIntentParameter with FastEquatable {
   final String? content;
   final String? tool;
+  final String? contextId;
 
-  ReceivedIntentParameter(this.content, this.tool);
+  ReceivedIntentParameter(this.content, this.tool, {this.contextId});
 
   @override
-  List<Object?> get hashParameters => [content, tool];
+  List<Object?> get hashParameters => [content, tool, contextId];
 }

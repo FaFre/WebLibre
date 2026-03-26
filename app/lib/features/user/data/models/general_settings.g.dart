@@ -121,6 +121,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings unshortenerToken(String unshortenerToken);
 
+  GeneralSettings allowNonManifestPwaInstall(bool allowNonManifestPwaInstall);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -177,6 +179,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool tabBarLongPressUrlCopy,
     bool unshortenerEnabled,
     String unshortenerToken,
+    bool allowNonManifestPwaInstall,
   });
 }
 
@@ -392,6 +395,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(unshortenerToken: unshortenerToken);
 
   @override
+  GeneralSettings allowNonManifestPwaInstall(bool allowNonManifestPwaInstall) =>
+      call(allowNonManifestPwaInstall: allowNonManifestPwaInstall);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -449,6 +456,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? tabBarLongPressUrlCopy = const $CopyWithPlaceholder(),
     Object? unshortenerEnabled = const $CopyWithPlaceholder(),
     Object? unshortenerToken = const $CopyWithPlaceholder(),
+    Object? allowNonManifestPwaInstall = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -733,6 +741,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.unshortenerToken
           // ignore: cast_nullable_to_non_nullable
           : unshortenerToken as String,
+      allowNonManifestPwaInstall:
+          allowNonManifestPwaInstall == const $CopyWithPlaceholder() ||
+              allowNonManifestPwaInstall == null
+          ? _value.allowNonManifestPwaInstall
+          // ignore: cast_nullable_to_non_nullable
+          : allowNonManifestPwaInstall as bool,
     );
   }
 }
@@ -843,6 +857,7 @@ GeneralSettings _$GeneralSettingsFromJson(
   tabBarLongPressUrlCopy: json['tabBarLongPressUrlCopy'] as bool?,
   unshortenerEnabled: json['unshortenerEnabled'] as bool?,
   unshortenerToken: json['unshortenerToken'] as String?,
+  allowNonManifestPwaInstall: json['allowNonManifestPwaInstall'] as bool?,
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -907,6 +922,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'tabBarLongPressUrlCopy': instance.tabBarLongPressUrlCopy,
   'unshortenerEnabled': instance.unshortenerEnabled,
   'unshortenerToken': instance.unshortenerToken,
+  'allowNonManifestPwaInstall': instance.allowNonManifestPwaInstall,
 };
 
 const _$ThemeModeEnumMap = {

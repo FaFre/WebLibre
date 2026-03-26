@@ -296,3 +296,129 @@ final class InstalledWebAppsProvider
 }
 
 String _$installedWebAppsHash() => r'ff185620ccd25bf6b71415e34e3e0c0f20d5e59d';
+
+/// Whether the current tab is on an HTTPS page (eligible for home screen shortcut).
+
+@ProviderFor(isCurrentTabShortcutable)
+final isCurrentTabShortcutableProvider = IsCurrentTabShortcutableProvider._();
+
+/// Whether the current tab is on an HTTPS page (eligible for home screen shortcut).
+
+final class IsCurrentTabShortcutableProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Whether the current tab is on an HTTPS page (eligible for home screen shortcut).
+  IsCurrentTabShortcutableProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'isCurrentTabShortcutableProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$isCurrentTabShortcutableHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return isCurrentTabShortcutable(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$isCurrentTabShortcutableHash() =>
+    r'a18fa837facc92397dacb79f38bdefd303ff5d00';
+
+/// Creates a basic bookmark shortcut on the home screen for the current tab.
+
+@ProviderFor(installBasicShortcut)
+final installBasicShortcutProvider = InstallBasicShortcutFamily._();
+
+/// Creates a basic bookmark shortcut on the home screen for the current tab.
+
+final class InstallBasicShortcutProvider
+    extends $FunctionalProvider<AsyncValue<bool>, bool, FutureOr<bool>>
+    with $FutureModifier<bool>, $FutureProvider<bool> {
+  /// Creates a basic bookmark shortcut on the home screen for the current tab.
+  InstallBasicShortcutProvider._({
+    required InstallBasicShortcutFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'installBasicShortcutProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$installBasicShortcutHash();
+
+  @override
+  String toString() {
+    return r'installBasicShortcutProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<bool> create(Ref ref) {
+    final argument = this.argument as String?;
+    return installBasicShortcut(ref, overrideName: argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is InstallBasicShortcutProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$installBasicShortcutHash() =>
+    r'aa8a96e94eac19e3e0b2a087bc6dde12d28f48f2';
+
+/// Creates a basic bookmark shortcut on the home screen for the current tab.
+
+final class InstallBasicShortcutFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<bool>, String?> {
+  InstallBasicShortcutFamily._()
+    : super(
+        retry: null,
+        name: r'installBasicShortcutProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Creates a basic bookmark shortcut on the home screen for the current tab.
+
+  InstallBasicShortcutProvider call({String? overrideName}) =>
+      InstallBasicShortcutProvider._(argument: overrideName, from: this);
+
+  @override
+  String toString() => r'installBasicShortcutProvider';
+}

@@ -681,8 +681,10 @@ class _AddToHomeScreenTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isInstallable = ref.watch(isCurrentTabInstallableProvider);
+    final isShortcutable = ref.watch(isCurrentTabShortcutableProvider);
 
-    if (!isInstallable) return const SizedBox.shrink();
+    // Show for installable PWAs or any HTTPS page
+    if (!isInstallable && !isShortcutable) return const SizedBox.shrink();
 
     return Column(
       children: [
@@ -691,7 +693,13 @@ class _AddToHomeScreenTile extends ConsumerWidget {
           leading: const Icon(Icons.add_to_home_screen),
           title: const Text('Add to Home Screen'),
           onTap: () async {
-            await showPwaInstallDialog(context, ref);
+            if (isInstallable) {
+              // Site has valid manifest — use existing PWA install flow
+              await showPwaInstallDialog(context, ref);
+            } else {
+              // No manifest — show shortcut choice dialog
+              await showShortcutInstallDialog(context, ref);
+            }
             if (context.mounted) Navigator.pop(context);
           },
         ),

@@ -211,15 +211,20 @@ class TabMenu extends HookConsumerWidget {
           Consumer(
             builder: (context, ref, child) {
               final isInstallable = ref.watch(isCurrentTabInstallableProvider);
+              final isShortcutable = ref.watch(isCurrentTabShortcutableProvider);
 
               return Visibility(
-                visible: isInstallable,
+                visible: isInstallable || isShortcutable,
                 child: MenuItemButton(
                   closeOnActivate: false,
                   leadingIcon: const Icon(Icons.add_to_home_screen),
                   child: const Text('Add to Home Screen'),
                   onPressed: () async {
-                    await showPwaInstallDialog(context, ref);
+                    if (isInstallable) {
+                      await showPwaInstallDialog(context, ref);
+                    } else {
+                      await showShortcutInstallDialog(context, ref);
+                    }
 
                     if (context.mounted) {
                       MenuController.maybeOf(context)?.close();

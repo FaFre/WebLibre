@@ -19,6 +19,8 @@
  */
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:nullability/nullability.dart';
+import 'package:weblibre/extensions/uri.dart';
 
 /// Display modes that are valid for installable PWAs per W3C spec.
 const _validDisplayModes = {
@@ -40,11 +42,16 @@ const _validDisplayModes = {
 /// 3. start_url is within the scope
 /// 4. prefer_related_applications is not true
 bool isManifestInstallable(PwaManifest manifest) {
+  final currentUrl = Uri.tryParse(manifest.currentUrl);
+  final startUrl = Uri.tryParse(manifest.startUrl);
+
+  if (currentUrl == null) {
+    return false;
+  }
+
   // Check HTTPS requirement (relaxed for localhost)
   final isSecure =
-      manifest.currentUrl.startsWith('https://') ||
-      manifest.currentUrl.startsWith('http://localhost') ||
-      manifest.currentUrl.startsWith('http://127.0.0.1');
+      currentUrl.isHttps || (currentUrl.isHttp && currentUrl.isLocalhost);
 
   if (!isSecure) {
     return false;
@@ -62,24 +69,23 @@ bool isManifestInstallable(PwaManifest manifest) {
 
   // W3C §1.10.6: start_url must be same-origin as the document URL
   final hasValidStartUrl =
-      manifest.startUrl.isNotEmpty &&
-      _isSameOrigin(manifest.startUrl, manifest.currentUrl);
+      startUrl != null && _isSameOrigin(startUrl, currentUrl);
 
   final hasValidDisplay =
       manifest.display != null &&
       _validDisplayModes.contains(manifest.display!.toLowerCase());
 
   // Check that start_url is within scope
-  final isInScope = _isStartUrlInScope(manifest.startUrl, manifest.scope);
+  final isInScope =
+      hasValidStartUrl &&
+      _isStartUrlInScope(startUrl, manifest.scope.mapNotNull(Uri.tryParse));
 
   return hasValidName && hasValidStartUrl && hasValidDisplay && isInScope;
 }
 
 /// Returns true if two URLs share the same origin (scheme + host + port).
-bool _isSameOrigin(String url1, String url2) {
+bool _isSameOrigin(Uri uri1, Uri uri2) {
   try {
-    final uri1 = Uri.parse(url1);
-    final uri2 = Uri.parse(url2);
     return uri1.scheme == uri2.scheme &&
         uri1.host == uri2.host &&
         uri1.port == uri2.port;
@@ -93,17 +99,13 @@ bool _isSameOrigin(String url1, String url2) {
 /// Per W3C spec: when scope is absent, the default scope is the start_url
 /// with its last path segment, query, and fragment removed.
 /// Scope matching uses path-prefix comparison on `/` boundaries.
-bool _isStartUrlInScope(String startUrl, String? scope) {
+bool _isStartUrlInScope(Uri startUri, Uri? scopeUri) {
   try {
-    final startUri = Uri.parse(startUrl);
-
-    if (scope == null || scope.isEmpty) {
+    if (scopeUri == null) {
       // Per W3C: default scope = start_url with filename/query/fragment removed
       // The start_url is trivially within its own default scope.
       return true;
     }
-
-    final scopeUri = Uri.parse(scope);
 
     // Must be same origin
     if (startUri.scheme != scopeUri.scheme ||

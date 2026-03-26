@@ -196,4 +196,12 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
   Selectable<String?> containersToClearOnExit() {
     return db.definitionsDrift.containersToClearOnExit();
   }
+
+  SingleOrNullSelectable<ContainerData> getContainerByContextualIdentity(
+    String contextId,
+  ) {
+    return db.definitionsDrift.containerByContextualIdentity(
+      contextId: contextId,
+    );
+  }
 }

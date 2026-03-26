@@ -89,8 +89,16 @@ class IntentReceiverActivity : Activity() {
         val profileUuid = intent.getStringExtra(PwaConstants.EXTRA_PWA_PROFILE_UUID)
         val contextId = intent.getStringExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID)
         val token = intent.getStringExtra(PwaConstants.EXTRA_PWA_TOKEN)
+        val shortcutType = intent.getStringExtra(PwaConstants.EXTRA_SHORTCUT_TYPE)
         if (profileUuid != null) {
             if (isTrustedPwaLaunch(intent, profileUuid, token)) {
+                // Basic shortcuts open in the regular browser, not as standalone PWA
+                if (shortcutType == PwaConstants.SHORTCUT_TYPE_BASIC) {
+                    Log.d(TAG, "Trusted basic shortcut, routing to regular browser: ${intent.dataString}")
+                    handleBasicShortcutIntent(intent, profileUuid)
+                    return
+                }
+
                 Log.d(TAG, "Trusted PWA intent with profile metadata: profileUuid=$profileUuid, contextId=$contextId")
                 handlePwaIntent(intent, profileUuid, contextId)
                 return
@@ -273,7 +281,11 @@ class IntentReceiverActivity : Activity() {
 
         if (currentProfileUuid != null && currentProfileUuid != profileUuid) {
             Log.d(TAG, "Profile mismatch: current=$currentProfileUuid, expected=$profileUuid")
-            showProfileMismatchDialog(url, contextId)
+            showProfileMismatchDialog(
+                intent = intent,
+                onProceed = { launchPwaWithContext(url, contextId) },
+                isPwa = true,
+            )
         } else {
             Log.d(TAG, "Profile match or indeterminate, launching PWA with contextId=$contextId")
             launchPwaWithContext(url, contextId)
@@ -300,26 +312,48 @@ class IntentReceiverActivity : Activity() {
     }
 
     /**
-     * Shows a dialog when the current profile doesn't match the PWA's installation profile.
+     * Handles basic shortcut intents with profile validation.
+     * Checks profile match and shows dialog if different, then forwards to regular browser.
+     */
+    private fun handleBasicShortcutIntent(intent: Intent, profileUuid: String) {
+        val currentProfileUuid = getCurrentProfileUuid()
+
+        if (currentProfileUuid != null && currentProfileUuid != profileUuid) {
+            Log.d(TAG, "Basic shortcut profile mismatch: current=$currentProfileUuid, expected=$profileUuid")
+            showProfileMismatchDialog(
+                intent = intent,
+                onProceed = { handleRegularIntent(it) },
+                isPwa = false,
+            )
+        } else {
+            Log.d(TAG, "Basic shortcut profile match or indeterminate, routing to browser")
+            handleRegularIntent(intent)
+        }
+    }
+
+    /**
+     * Shows a dialog when the current profile doesn't match the shortcut's installation profile.
      */
     private fun showProfileMismatchDialog(
-        url: String,
-        contextId: String?,
+        intent: Intent,
+        onProceed: (Intent) -> Unit,
+        isPwa: Boolean,
     ) {
-        val message = "This PWA was originally installed in a different profile. " +
+        val typeLabel = if (isPwa) "PWA" else "shortcut"
+        val message = "This $typeLabel was originally installed in a different profile. " +
             "Opening it here uses only your current profile's data and settings. " +
             "The original profile's app state and saved data will not be used.\n\n" +
             "Do you want to proceed anyway?"
 
         AlertDialog.Builder(this)
-            .setTitle("PWA Profile Mismatch")
+            .setTitle("Profile Mismatch")
             .setMessage(message)
             .setPositiveButton("Open in Current Profile") { _, _ ->
-                Log.d(TAG, "User chose to open PWA despite profile mismatch")
-                launchPwaWithContext(url, contextId)
+                Log.d(TAG, "User chose to open $typeLabel despite profile mismatch")
+                onProceed(intent)
             }
             .setNegativeButton("Cancel") { _, _ ->
-                Log.d(TAG, "User cancelled PWA launch due to profile mismatch")
+                Log.d(TAG, "User cancelled $typeLabel launch due to profile mismatch")
                 finish()
             }
             .setOnCancelListener {

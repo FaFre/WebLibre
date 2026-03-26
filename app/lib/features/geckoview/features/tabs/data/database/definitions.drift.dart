@@ -2601,6 +2601,16 @@ class DefinitionsDrift extends i9.ModularAccessor {
     );
   }
 
+  i0.Selectable<i1.ContainerData> containerByContextualIdentity({
+    required String contextId,
+  }) {
+    return customSelect(
+      'SELECT * FROM container WHERE container.metadata ->> \'\$.contextualIdentity\' = ?1 LIMIT 1',
+      variables: [i0.Variable<String>(contextId)],
+      readsFrom: {container},
+    ).asyncMap(container.mapFromRow);
+  }
+
   i0.Selectable<String?> containersToClearOnExit() {
     return customSelect(
       'SELECT container.metadata ->> \'\$.contextualIdentity\' AS contextual_identity FROM container WHERE json_extract(container.metadata, \'\$.clearDataOnExit\') = 1 AND container.metadata ->> \'\$.contextualIdentity\' IS NOT NULL',

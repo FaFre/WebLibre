@@ -86,11 +86,17 @@ class GeckoPwaApiImpl(
                     return@launch
                 }
 
-                val manifest = tab.content.webAppManifest
-                if (manifest == null) {
-                    logger.warn("No manifest found for tab ${tab.id}")
-                    callback(Result.success(false))
-                    return@launch
+                val manifest = tab.content.webAppManifest ?: run {
+                    // Generate a synthetic manifest for sites without one
+                    val url = tab.content.url
+                    val title = tab.content.title.ifBlank { url }
+                    logger.debug("Generating synthetic manifest for tab ${tab.id}: $url")
+                    WebAppManifest(
+                        name = title,
+                        startUrl = url,
+                        display = WebAppManifest.DisplayMode.STANDALONE,
+                        scope = extractScope(url),
+                    )
                 }
 
                 logger.debug("Installing web app for tab ${tab.id}: ${manifest.startUrl}")
@@ -161,6 +167,7 @@ class GeckoPwaApiImpl(
                 putExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID, contextId)
                 putExtra(PwaConstants.EXTRA_PWA_TOKEN, launchToken)
                 putExtra(PwaConstants.EXTRA_PWA_INSTALL_START_URL, manifest.startUrl)
+                putExtra(PwaConstants.EXTRA_SHORTCUT_TYPE, PwaConstants.SHORTCUT_TYPE_PWA)
             }
 
             val shortcut = ShortcutInfo.Builder(context, shortcutId).apply {
@@ -179,12 +186,34 @@ class GeckoPwaApiImpl(
                 }
             }.build()
 
+            // Update existing shortcut intent if one exists with the same ID
+            // (e.g. upgrading a basic shortcut to PWA). requestPinShortcut alone
+            // may reuse the cached intent on some launchers.
+            updateExistingShortcut(shortcutManager, shortcut)
+
             val success = shortcutManager.requestPinShortcut(shortcut, null)
             logger.debug("PWA shortcut creation result: $success")
             success
         } catch (e: Exception) {
             logger.error("Failed to create PWA shortcut", e)
             false
+        }
+    }
+
+    /**
+     * Updates an existing pinned/cached shortcut's intent and metadata.
+     * This is necessary because requestPinShortcut may reuse the old cached intent
+     * on some launchers instead of the new ShortcutInfo's intent.
+     */
+    private fun updateExistingShortcut(shortcutManager: ShortcutManager, shortcut: ShortcutInfo) {
+        try {
+            val existingIds = shortcutManager.pinnedShortcuts.map { it.id }.toSet()
+            if (shortcut.id in existingIds) {
+                shortcutManager.updateShortcuts(listOf(shortcut))
+                logger.debug("Updated existing pinned shortcut: ${shortcut.id}")
+            }
+        } catch (e: Exception) {
+            logger.debug("Could not update existing shortcut (may not exist): ${e.message}")
         }
     }
 
@@ -236,6 +265,158 @@ class GeckoPwaApiImpl(
         } catch (e: Exception) {
             logger.error("Failed to load PWA icon", e)
             Pair(null, false)
+        }
+    }
+
+    override fun installBasicShortcut(
+        tabId: String?,
+        profileUuid: String,
+        contextId: String?,
+        overrideShortcutName: String?,
+        callback: (Result<Boolean>) -> Unit
+    ) {
+        logger.debug("installBasicShortcut called for tabId: $tabId, profileUuid: $profileUuid")
+        coroutineScope.launch {
+            try {
+                val store = components.core.store
+                val tab = if (tabId != null) {
+                    store.state.findTab(tabId)
+                } else {
+                    store.state.selectedTab
+                }
+
+                if (tab == null) {
+                    logger.warn("Tab not found for installBasicShortcut: $tabId")
+                    callback(Result.success(false))
+                    return@launch
+                }
+
+                val success = createBasicShortcut(
+                    url = tab.content.url,
+                    title = overrideShortcutName ?: tab.content.title,
+                    tabIcon = tab.content.icon,
+                    profileUuid = profileUuid,
+                    contextId = contextId,
+                )
+
+                callback(Result.success(success))
+            } catch (e: Exception) {
+                logger.error("Failed to create basic shortcut", e)
+                callback(Result.failure(e))
+            }
+        }
+    }
+
+    /**
+     * Creates a basic bookmark-style shortcut that opens in a regular browser tab.
+     * Does not require or store a manifest.
+     */
+    private suspend fun createBasicShortcut(
+        url: String,
+        title: String,
+        tabIcon: Bitmap?,
+        profileUuid: String,
+        contextId: String?,
+    ): Boolean = withContext(Dispatchers.Main) {
+        try {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                logger.warn("Pinned shortcuts require Android O or later")
+                return@withContext false
+            }
+
+            val shortcutManager = context.getSystemService<ShortcutManager>()
+                ?: run {
+                    logger.error("ShortcutManager not available")
+                    return@withContext false
+                }
+
+            if (!shortcutManager.isRequestPinShortcutSupported) {
+                logger.warn("Pinning shortcuts is not supported")
+                return@withContext false
+            }
+
+            val shortcutId = generateShortcutId(url, profileUuid)
+            val launchToken = resolveLaunchToken(
+                shortcutManager = shortcutManager,
+                shortcutId = shortcutId,
+                startUrl = url,
+                profileUuid = profileUuid,
+            )
+
+            val shortLabel = title.ifBlank { url }
+
+            val shortcutIntent = Intent(context, IntentReceiverActivity::class.java).apply {
+                action = Intent.ACTION_VIEW
+                data = Uri.parse(url)
+                putExtra(PwaConstants.EXTRA_PWA_PROFILE_UUID, profileUuid)
+                putExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID, contextId)
+                putExtra(PwaConstants.EXTRA_PWA_TOKEN, launchToken)
+                putExtra(PwaConstants.EXTRA_PWA_INSTALL_START_URL, url)
+                putExtra(PwaConstants.EXTRA_SHORTCUT_TYPE, PwaConstants.SHORTCUT_TYPE_BASIC)
+            }
+
+            val icon = loadTabIcon(url, tabIcon)
+
+            val shortcut = ShortcutInfo.Builder(context, shortcutId).apply {
+                setShortLabel(shortLabel)
+                setLongLabel(shortLabel)
+                setIntent(shortcutIntent)
+                icon?.let { setIcon(it) }
+            }.build()
+
+            // Update existing shortcut intent if one exists with the same ID
+            updateExistingShortcut(shortcutManager, shortcut)
+
+            val success = shortcutManager.requestPinShortcut(shortcut, null)
+            logger.debug("Basic shortcut creation result: $success")
+            success
+        } catch (e: Exception) {
+            logger.error("Failed to create basic shortcut", e)
+            false
+        }
+    }
+
+    /**
+     * Loads an icon for the shortcut from the tab's favicon or BrowserIcons.
+     */
+    private suspend fun loadTabIcon(url: String, tabIcon: Bitmap?): Icon? = withContext(Dispatchers.IO) {
+        try {
+            // Try using the tab's existing favicon first
+            val bitmap = tabIcon?.takeUnless { it.isRecycled }
+                ?: run {
+                    // Fall back to loading via BrowserIcons
+                    val iconRequest = IconRequest(
+                        url = url,
+                        size = IconRequest.Size.LAUNCHER,
+                    )
+                    components.core.icons.loadIcon(iconRequest).await()?.bitmap
+                }
+
+            bitmap?.takeUnless { it.isRecycled }?.let {
+                val bitmapCopy = it.copy(it.config ?: Bitmap.Config.ARGB_8888, false)
+                Icon.createWithBitmap(bitmapCopy)
+            }
+        } catch (e: Exception) {
+            logger.error("Failed to load tab icon", e)
+            null
+        }
+    }
+
+    /**
+     * Extracts the scope from a URL (origin + path up to last segment).
+     */
+    private fun extractScope(url: String): String {
+        return try {
+            val uri = Uri.parse(url)
+            val path = uri.path ?: "/"
+            val scopePath = if (path.contains("/")) {
+                path.substringBeforeLast("/") + "/"
+            } else {
+                "/"
+            }
+            uri.buildUpon().path(scopePath).clearQuery().fragment(null).build().toString()
+        } catch (e: Exception) {
+            url
         }
     }
 

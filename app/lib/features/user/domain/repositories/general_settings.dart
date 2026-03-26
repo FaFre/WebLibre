@@ -229,6 +229,8 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.string,
         db.typeMapping,
       ),
+      'allowNonManifestPwaInstall': settings['allowNonManifestPwaInstall']
+          ?.readAs(DriftSqlType.bool, db.typeMapping),
     });
   }
 

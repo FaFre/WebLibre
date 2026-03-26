@@ -2473,4 +2473,18 @@ abstract class GeckoPwaApi {
   /// Returns a list of all installed PWA manifests.
   @async
   List<PwaManifest> getInstalledWebApps();
+
+  /// Creates a basic bookmark shortcut on the home screen (no manifest required).
+  ///
+  /// Unlike [installWebApp], this creates a simple shortcut that opens
+  /// in a regular browser tab rather than standalone PWA mode.
+  /// Uses the page title and favicon for the shortcut.
+  ///
+  /// The [tabId] identifies which tab to create the shortcut for. If null, uses the selected tab.
+  /// The [profileUuid] is the UUID of the current user profile.
+  /// The [contextId] is the container's contextual identity (optional).
+  /// The [overrideShortcutName] allows customizing the shortcut label.
+  /// Returns true if the shortcut was created successfully.
+  @async
+  bool installBasicShortcut(String? tabId, String profileUuid, String? contextId, String? overrideShortcutName);
 }

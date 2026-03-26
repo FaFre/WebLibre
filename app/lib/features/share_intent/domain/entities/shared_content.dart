@@ -21,37 +21,42 @@ import 'package:fast_equatable/fast_equatable.dart';
 import 'package:weblibre/utils/input_classification.dart';
 
 sealed class SharedContent with FastEquatable {
-  SharedContent();
+  final String? contextId;
 
-  factory SharedContent.parse(String content) {
+  SharedContent({this.contextId});
+
+  factory SharedContent.parse(String content, {String? contextId}) {
     if (parseSharedIntentUrl(content) case final Uri uri) {
-      return SharedUrl(uri);
+      return SharedUrl(uri, contextId: contextId);
     } else {
-      return SharedText(content);
+      return SharedText(content, contextId: contextId);
     }
   }
+
+  @override
+  List<Object?> get hashParameters => [contextId];
 }
 
 final class SharedUrl extends SharedContent {
   final Uri url;
 
-  SharedUrl(this.url);
+  SharedUrl(this.url, {super.contextId});
 
   @override
   String toString() => url.toString();
 
   @override
-  List<Object?> get hashParameters => [url];
+  List<Object?> get hashParameters => [url, ...super.hashParameters];
 }
 
 final class SharedText extends SharedContent {
   final String text;
 
-  SharedText(this.text);
+  SharedText(this.text, {super.contextId});
 
   @override
   String toString() => text;
 
   @override
-  List<Object?> get hashParameters => [text];
+  List<Object?> get hashParameters => [text, ...super.hashParameters];
 }

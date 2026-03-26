@@ -36,7 +36,10 @@ final _contentParserTransformer =
     StreamTransformer<ReceivedIntentParameter, SharedContent>.fromHandlers(
       handleData: (parameter, sink) {
         final parsed = parameter.content.mapNotNull(
-          (content) => SharedContent.parse(content),
+          (content) => SharedContent.parse(
+            content,
+            contextId: parameter.contextId,
+          ),
         );
 
         if (parsed != null) {

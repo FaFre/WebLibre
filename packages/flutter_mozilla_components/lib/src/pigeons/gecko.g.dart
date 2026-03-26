@@ -10665,4 +10665,42 @@ class GeckoPwaApi {
       return (pigeonVar_replyList[0] as List<Object?>?)!.cast<PwaManifest>();
     }
   }
+
+  /// Creates a basic bookmark shortcut on the home screen (no manifest required).
+  ///
+  /// Unlike [installWebApp], this creates a simple shortcut that opens
+  /// in a regular browser tab rather than standalone PWA mode.
+  /// Uses the page title and favicon for the shortcut.
+  ///
+  /// The [tabId] identifies which tab to create the shortcut for. If null, uses the selected tab.
+  /// The [profileUuid] is the UUID of the current user profile.
+  /// The [contextId] is the container's contextual identity (optional).
+  /// The [overrideShortcutName] allows customizing the shortcut label.
+  /// Returns true if the shortcut was created successfully.
+  Future<bool> installBasicShortcut(String? tabId, String profileUuid, String? contextId, String? overrideShortcutName) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoPwaApi.installBasicShortcut$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, profileUuid, contextId, overrideShortcutName]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as bool?)!;
+    }
+  }
 }

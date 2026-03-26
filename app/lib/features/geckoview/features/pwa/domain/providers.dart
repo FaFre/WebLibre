@@ -24,8 +24,10 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/filesystem.dart' show filesystem;
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/pwa_installability.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
@@ -120,4 +122,47 @@ Future<bool> installCurrentWebApp(Ref ref) async {
 @Riverpod()
 Future<List<PwaManifest>> installedWebApps(Ref ref) {
   return GeckoPwaApi().getInstalledWebApps();
+}
+
+/// Whether the current tab is on an HTTPS page (eligible for home screen shortcut).
+@Riverpod()
+bool isCurrentTabShortcutable(Ref ref) {
+  final selectedTabId = ref.watch(selectedTabProvider);
+  if (selectedTabId == null) return false;
+
+  final tabState = ref.watch(tabStateProvider(selectedTabId));
+  if (tabState == null) return false;
+
+  return tabState.url.isHttps ||
+      (tabState.url.isHttp && tabState.url.isLocalhost);
+}
+
+/// Creates a basic bookmark shortcut on the home screen for the current tab.
+@Riverpod()
+Future<bool> installBasicShortcut(Ref ref, {String? overrideName}) async {
+  final selectedTabId = ref.read(selectedTabProvider);
+
+  if (selectedTabId == null) {
+    throw StateError('No tab selected');
+  }
+
+  final profileUuid = filesystem.selectedProfile.uuid;
+
+  final selectedContainerId = ref.read(selectedContainerProvider);
+
+  String? contextId;
+  if (selectedContainerId != null) {
+    final containerRepository = ref.read(containerRepositoryProvider.notifier);
+    final containerData = await containerRepository.getContainerData(
+      selectedContainerId,
+    );
+    contextId = containerData?.metadata.contextualIdentity;
+  }
+
+  return GeckoPwaApi().installBasicShortcut(
+    selectedTabId,
+    profileUuid,
+    contextId,
+    overrideName,
+  );
 }

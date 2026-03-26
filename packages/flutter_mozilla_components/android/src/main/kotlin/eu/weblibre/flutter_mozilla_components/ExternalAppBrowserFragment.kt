@@ -309,7 +309,7 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
 
         val manifest = webAppManifestUrl?.ifEmpty { null }?.let { url ->
             components.core.webAppManifestStorage.getManifestCache(url)
-        }
+        } ?: customTab.content.webAppManifest
 
         windowFeature.set(
             feature = CustomTabWindowFeature(activity, store, sessionId),

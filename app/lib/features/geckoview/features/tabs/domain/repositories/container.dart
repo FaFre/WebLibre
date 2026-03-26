@@ -77,6 +77,14 @@ class ContainerRepository extends _$ContainerRepository {
         .getSingleOrNull();
   }
 
+  Future<ContainerData?> getContainerByContextualIdentity(String contextId) {
+    return ref
+        .read(tabDatabaseProvider)
+        .containerDao
+        .getContainerByContextualIdentity(contextId)
+        .getSingleOrNull();
+  }
+
   Future<List<String>> getContainerTabIds(String? id) {
     return ref
         .read(tabDatabaseProvider)
