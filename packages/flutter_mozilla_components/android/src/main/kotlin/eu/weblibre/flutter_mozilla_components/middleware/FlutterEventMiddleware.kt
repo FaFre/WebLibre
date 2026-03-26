@@ -25,6 +25,7 @@ import mozilla.components.browser.state.action.LastAccessAction
 import mozilla.components.browser.state.action.ReaderAction
 import mozilla.components.browser.state.action.TabListAction
 import mozilla.components.browser.state.action.WebExtensionAction
+import mozilla.components.browser.state.selector.findCustomTab
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.concept.engine.HitResult
 import mozilla.components.feature.addons.logger
@@ -93,21 +94,25 @@ class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Midd
                 }
             }
             is ContentAction.UpdateHitResultAction -> {
-                runOnUiThread {
-                    flutterEvents.onLongPress(
-                        EventSequence.next(),
-                        action.sessionId,
-                        when(val result = action.hitResult) {
-                            is HitResult.AUDIO -> AudioHitResult(result.src, result.title)
-                            is HitResult.EMAIL -> EmailHitResult(result.src)
-                            is HitResult.GEO -> GeoHitResult(result.src)
-                            is HitResult.IMAGE -> ImageHitResult(result.src, result.title)
-                            is HitResult.IMAGE_SRC -> ImageSrcHitResult(result.src, result.uri)
-                            is HitResult.PHONE -> PhoneHitResult(result.src)
-                            is HitResult.UNKNOWN -> UnknownHitResult(result.src, result.linkText)
-                            is HitResult.VIDEO -> VideoHitResult(result.src, result.title)
-                        }
-                    ) { _ -> }
+                // Skip forwarding to Flutter for custom tab sessions (PWAs, TWAs),
+                // as they handle context menus natively via ContextMenuFeature
+                if (store.state.findCustomTab(action.sessionId) == null) {
+                    runOnUiThread {
+                        flutterEvents.onLongPress(
+                            EventSequence.next(),
+                            action.sessionId,
+                            when(val result = action.hitResult) {
+                                is HitResult.AUDIO -> AudioHitResult(result.src, result.title)
+                                is HitResult.EMAIL -> EmailHitResult(result.src)
+                                is HitResult.GEO -> GeoHitResult(result.src)
+                                is HitResult.IMAGE -> ImageHitResult(result.src, result.title)
+                                is HitResult.IMAGE_SRC -> ImageSrcHitResult(result.src, result.uri)
+                                is HitResult.PHONE -> PhoneHitResult(result.src)
+                                is HitResult.UNKNOWN -> UnknownHitResult(result.src, result.linkText)
+                                is HitResult.VIDEO -> VideoHitResult(result.src, result.title)
+                            }
+                        ) { _ -> }
+                    }
                 }
             }
             is ContentAction.AddFindResultAction -> {
