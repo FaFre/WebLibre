@@ -23,6 +23,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
@@ -285,6 +286,9 @@ class EngineSettingsReplicationService
             await ref
                 .read(preferenceFixatorProvider.notifier)
                 .register('intl.accept_languages', settings.locales.join(','));
+
+            // Initialize unsigned extensions fixator from Gecko pref
+            await ref.read(allowUnsignedExtensionsProvider.future);
 
             initialSettingsSent = true;
           }

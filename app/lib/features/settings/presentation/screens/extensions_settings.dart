@@ -17,10 +17,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
+
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/install_local_addon_dialog.dart';
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
@@ -43,6 +48,8 @@ class ExtensionsSettingsScreen extends StatelessWidget {
                 SettingSection(name: 'Extensions'),
                 _InstallLocalAddonTile(),
                 _AddonCollectionTile(),
+                SettingSection(name: 'Security'),
+                _AllowUnsignedExtensionsTile(),
               ],
             );
           },
@@ -105,3 +112,154 @@ class _AddonCollectionTile extends StatelessWidget {
     );
   }
 }
+
+class _AllowUnsignedExtensionsTile extends ConsumerWidget {
+  const _AllowUnsignedExtensionsTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final allowUnsigned = ref.watch(allowUnsignedExtensionsProvider);
+
+    return Column(
+      children: [
+        SwitchListTile.adaptive(
+          title: const Text('Allow unsigned extensions'),
+          subtitle: const Text(
+            'Unsigned extensions have not been verified by Mozilla',
+          ),
+          secondary: const Icon(Icons.extension_off),
+          value: allowUnsigned.value ?? false,
+          onChanged: allowUnsigned.isLoading
+              ? null
+              : (value) async {
+                  if (value) {
+                    final confirmed =
+                        await _showAllowUnsignedConfirmationDialog(context);
+                    if (confirmed != true) return;
+                  }
+                  await ref
+                      .read(allowUnsignedExtensionsProvider.notifier)
+                      .setAllowUnsigned(allow: value);
+                },
+        ),
+        if (allowUnsigned.value == true)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(
+                  context,
+                ).colorScheme.errorContainer.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Theme.of(context).colorScheme.error),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber,
+                    color: Theme.of(context).colorScheme.error,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Only install unsigned extensions from sources you trust. '
+                      'They may contain malicious code.',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onErrorContainer,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+Future<bool?> _showAllowUnsignedConfirmationDialog(BuildContext context) {
+  return showDialog<bool>(
+    context: context,
+    builder: (context) => const _AllowUnsignedConfirmationDialog(),
+  );
+}
+
+class _AllowUnsignedConfirmationDialog extends HookWidget {
+  const _AllowUnsignedConfirmationDialog();
+
+  static const _countdownSeconds = 15;
+
+  @override
+  Widget build(BuildContext context) {
+    final remaining = useState(_countdownSeconds);
+
+    useEffect(() {
+      final timer = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (remaining.value > 0) {
+          remaining.value--;
+        }
+      });
+      return timer.cancel;
+    }, []);
+
+    final theme = Theme.of(context);
+    final canConfirm = remaining.value == 0;
+
+    return AlertDialog(
+      icon: Icon(
+        Icons.warning_amber_rounded,
+        color: theme.colorScheme.error,
+        size: 40,
+      ),
+      title: const Text('Allow unsigned extensions?'),
+      content: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(
+              text:
+                  "Warning: This significantly weakens your browser's security."
+                  '\n\n',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.error,
+              ),
+            ),
+            const TextSpan(
+              text:
+                  "Unsigned extensions bypass Mozilla's safety review process. "
+                  'Malicious extensions can:\n\n'
+                  '\u2022 Read and modify everything you see on any website\n'
+                  '\u2022 Steal passwords, banking details, and personal data\n'
+                  '\u2022 Monitor your browsing activity silently\n'
+                  '\u2022 Install additional malware on your device\n\n',
+            ),
+            const TextSpan(
+              text:
+                  'Only enable this if you are a developer installing your own '
+                  'extension or absolutely trust the source.',
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: canConfirm ? () => Navigator.of(context).pop(true) : null,
+          style: FilledButton.styleFrom(
+            backgroundColor: theme.colorScheme.error,
+            foregroundColor: theme.colorScheme.onError,
+          ),
+          child: Text(canConfirm ? 'Allow' : 'Allow (${remaining.value})'),
+        ),
+      ],
+    );
+  }
+}
+

@@ -40,7 +40,6 @@ class _InstallLocalAddonSheet extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedFile = useState<String?>(null);
-    final allowUnsigned = useState(false);
     final isInstalling = useState(false);
     final errorMessage = useState<String?>(null);
 
@@ -74,10 +73,7 @@ class _InstallLocalAddonSheet extends HookConsumerWidget {
       try {
         await ref
             .read(browserAddonServiceProvider.notifier)
-            .installFromFile(
-              selectedFile.value!,
-              allowUnsigned: allowUnsigned.value,
-            );
+            .installFromFile(selectedFile.value!);
 
         if (context.mounted) {
           showInfoMessage(context, 'Extension installed successfully');
@@ -88,7 +84,7 @@ class _InstallLocalAddonSheet extends HookConsumerWidget {
         if (errorString.contains('NotSigned') ||
             errorString.contains('SIGNEDSTATE')) {
           errorMessage.value =
-              'This extension is not signed by Mozilla. Enable "Allow unsigned extensions" to install it.';
+              'This extension is not signed by Mozilla. Enable "Allow unsigned extensions" in Extensions settings to install it.';
         } else {
           errorMessage.value = 'Installation failed: $errorString';
         }
@@ -153,53 +149,6 @@ class _InstallLocalAddonSheet extends HookConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Allow unsigned extensions'),
-              subtitle: const Text(
-                'Unsigned extensions have not been verified by Mozilla',
-              ),
-              value: allowUnsigned.value,
-              onChanged: isInstalling.value
-                  ? null
-                  : (value) => allowUnsigned.value = value,
-            ),
-            if (allowUnsigned.value) ...[
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.errorContainer.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.warning_amber,
-                      color: Theme.of(context).colorScheme.error,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Only install unsigned extensions from sources you trust. '
-                        'They may contain malicious code.',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onErrorContainer,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
             if (errorMessage.value != null) ...[
               const SizedBox(height: 8),
               Container(

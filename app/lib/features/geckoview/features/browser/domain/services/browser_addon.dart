@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -25,10 +26,42 @@ import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
 
 part 'browser_addon.g.dart';
 
 const _signatureRequiredPref = 'xpinstall.signatures.required';
+
+@Riverpod(keepAlive: true)
+class AllowUnsignedExtensions extends _$AllowUnsignedExtensions {
+  Future<void> setAllowUnsigned({required bool allow}) async {
+    final fixator = ref.read(preferenceFixatorProvider.notifier);
+    if (allow) {
+      await fixator.register(_signatureRequiredPref, false);
+    } else {
+      await fixator.unregister(_signatureRequiredPref);
+      await GeckoPrefService().applyPrefs({_signatureRequiredPref: true});
+    }
+    state = AsyncData(allow);
+  }
+
+  @override
+  FutureOr<bool> build() async {
+    final prefs =
+        await GeckoPrefService().getPrefs([_signatureRequiredPref]);
+    final pref = prefs[_signatureRequiredPref];
+    final allowUnsigned = pref?.value == false;
+
+    // Re-register with fixator to prevent Gecko from resetting
+    if (allowUnsigned) {
+      await ref
+          .read(preferenceFixatorProvider.notifier)
+          .register(_signatureRequiredPref, false);
+    }
+
+    return allowUnsigned;
+  }
+}
 
 @Riverpod(keepAlive: true)
 class BrowserAddonService extends _$BrowserAddonService {
@@ -68,12 +101,7 @@ class BrowserAddonService extends _$BrowserAddonService {
     }
   }
 
-  Future<bool> installFromFile(
-    String filePath, {
-    bool allowUnsigned = false,
-  }) async {
-    final prefService = GeckoPrefService();
-
+  Future<bool> installFromFile(String filePath) async {
     try {
       // Validate file exists and has .xpi extension
       final file = File(filePath);
@@ -86,25 +114,13 @@ class BrowserAddonService extends _$BrowserAddonService {
         throw Exception('Invalid file type. Expected .xpi file');
       }
 
-      // Temporarily disable signature requirement if user allows unsigned
-      if (allowUnsigned) {
-        await prefService.applyPrefs({_signatureRequiredPref: false});
-      }
+      // Create file:// URI and install
+      final fileUri = Uri.file(filePath);
+      if (!ref.mounted) return false;
 
-      try {
-        // Create file:// URI and install
-        final fileUri = Uri.file(filePath);
-        if (!ref.mounted) return false;
+      await ref.read(addonServiceProvider).installAddon(fileUri);
 
-        await ref.read(addonServiceProvider).installAddon(fileUri);
-
-        return true;
-      } finally {
-        // Always restore signature requirement
-        if (allowUnsigned) {
-          await prefService.applyPrefs({_signatureRequiredPref: true});
-        }
-      }
+      return true;
     } catch (e, s) {
       logger.e(
         'Failed installing from file: $filePath',
