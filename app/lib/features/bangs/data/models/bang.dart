@@ -21,6 +21,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:drift/drift.dart' show Expression, Insertable, Value;
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:nullability/nullability.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/bangs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
@@ -42,6 +43,10 @@ enum BangFormat {
   ///with one or the other.
   @JsonValue('url_encode_space_to_plus')
   urlEncodeSpaceToPlus,
+
+  ///When the bang is invoked with no query, open the snap domain (ad) instead of any path given in the template
+  @JsonValue('open_snap_domain')
+  openSnapDomain,
 }
 
 @JsonSerializable()
@@ -84,6 +89,10 @@ class Bang with FastEquatable implements Insertable<Bang> {
   @JsonKey(name: 'ts')
   final Set<String>? additionalTriggers;
 
+  ///Additional triggers that invoke this bang
+  @JsonKey(name: 'ad')
+  final String? snapDomain;
+
   @JsonKey(defaultValue: false)
   final bool searxngApi;
 
@@ -102,8 +111,16 @@ class Bang with FastEquatable implements Insertable<Bang> {
   }
 
   Uri getTemplateUrl(String? query) {
-    final url = (query != null)
-        ? urlTemplate.replaceAll(_templateQueryPlaceholder, formatQuery(query))
+    final queryEmpty = query.isEmpty;
+
+    if (queryEmpty && format?.contains(BangFormat.openSnapDomain) == true) {
+      if (snapDomain.isNotEmpty) {
+        return Uri.parse(snapDomain!);
+      }
+    }
+
+    final url = (!queryEmpty)
+        ? urlTemplate.replaceAll(_templateQueryPlaceholder, formatQuery(query!))
         : urlTemplate;
 
     var template = Uri.parse(url);
@@ -113,8 +130,8 @@ class Bang with FastEquatable implements Insertable<Bang> {
       ).replace(path: template.path, query: template.query);
     }
 
-    if (format?.contains(BangFormat.openBasePath) == true) {
-      return template.base;
+    if (queryEmpty && format?.contains(BangFormat.openBasePath) == true) {
+      template = template.base;
     }
 
     return template;
@@ -139,6 +156,7 @@ class Bang with FastEquatable implements Insertable<Bang> {
     this.subCategory,
     this.format,
     this.additionalTriggers,
+    this.snapDomain,
   });
 
   factory Bang.fromJson(Map<String, dynamic> json) => _$BangFromJson(json);
@@ -156,6 +174,7 @@ class Bang with FastEquatable implements Insertable<Bang> {
     subCategory,
     format,
     additionalTriggers,
+    snapDomain,
     searxngApi,
   ];
 
@@ -171,6 +190,7 @@ class Bang with FastEquatable implements Insertable<Bang> {
       subCategory: Value.absentIfNull(subCategory),
       format: Value.absentIfNull(format),
       additionalTriggers: Value.absentIfNull(additionalTriggers),
+      snapDomain: Value.absentIfNull(snapDomain),
     ).toColumns(nullToAbsent);
   }
 }

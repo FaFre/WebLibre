@@ -60,8 +60,6 @@ update_bangs() {
 
   fetch "https://raw.githubusercontent.com/FaFre/bangs/main/data/bangs.json" \
         "$dir/bangs.json"
-  fetch "https://raw.githubusercontent.com/FaFre/bangs/main/data/assistant_bangs.json" \
-        "$dir/assistant_bangs.json"
   fetch "https://raw.githubusercontent.com/FaFre/bangs/main/data/kagi_bangs.json" \
         "$dir/kagi_bangs.json"
   fetch "https://raw.githubusercontent.com/FaFre/bangs/refs/heads/custom/data/custom.json" \

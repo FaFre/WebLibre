@@ -26,6 +26,7 @@ typedef $BangTableCreateCompanionBuilder =
       i0.Value<Set<i1.BangFormat>?> format,
       i0.Value<Set<String>?> additionalTriggers,
       i0.Value<bool> searxngApi,
+      i0.Value<String?> snapDomain,
       i0.Value<int> rowid,
     });
 typedef $BangTableUpdateCompanionBuilder =
@@ -40,6 +41,7 @@ typedef $BangTableUpdateCompanionBuilder =
       i0.Value<Set<i1.BangFormat>?> format,
       i0.Value<Set<String>?> additionalTriggers,
       i0.Value<bool> searxngApi,
+      i0.Value<String?> snapDomain,
       i0.Value<int> rowid,
     });
 
@@ -108,6 +110,11 @@ class $BangTableFilterComposer
     column: $table.searxngApi,
     builder: (column) => i0.ColumnFilters(column),
   );
+
+  i0.ColumnFilters<String> get snapDomain => $composableBuilder(
+    column: $table.snapDomain,
+    builder: (column) => i0.ColumnFilters(column),
+  );
 }
 
 class $BangTableOrderingComposer
@@ -168,6 +175,11 @@ class $BangTableOrderingComposer
     column: $table.searxngApi,
     builder: (column) => i0.ColumnOrderings(column),
   );
+
+  i0.ColumnOrderings<String> get snapDomain => $composableBuilder(
+    column: $table.snapDomain,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
 }
 
 class $BangTableAnnotationComposer
@@ -219,6 +231,11 @@ class $BangTableAnnotationComposer
     column: $table.searxngApi,
     builder: (column) => column,
   );
+
+  i0.GeneratedColumn<String> get snapDomain => $composableBuilder(
+    column: $table.snapDomain,
+    builder: (column) => column,
+  );
 }
 
 class $BangTableTableManager
@@ -263,6 +280,7 @@ class $BangTableTableManager
                 i0.Value<Set<String>?> additionalTriggers =
                     const i0.Value.absent(),
                 i0.Value<bool> searxngApi = const i0.Value.absent(),
+                i0.Value<String?> snapDomain = const i0.Value.absent(),
                 i0.Value<int> rowid = const i0.Value.absent(),
               }) => i3.BangCompanion(
                 trigger: trigger,
@@ -275,6 +293,7 @@ class $BangTableTableManager
                 format: format,
                 additionalTriggers: additionalTriggers,
                 searxngApi: searxngApi,
+                snapDomain: snapDomain,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -290,6 +309,7 @@ class $BangTableTableManager
                 i0.Value<Set<String>?> additionalTriggers =
                     const i0.Value.absent(),
                 i0.Value<bool> searxngApi = const i0.Value.absent(),
+                i0.Value<String?> snapDomain = const i0.Value.absent(),
                 i0.Value<int> rowid = const i0.Value.absent(),
               }) => i3.BangCompanion.insert(
                 trigger: trigger,
@@ -302,6 +322,7 @@ class $BangTableTableManager
                 format: format,
                 additionalTriggers: additionalTriggers,
                 searxngApi: searxngApi,
+                snapDomain: snapDomain,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -1394,6 +1415,14 @@ class BangTable extends i0.Table with i0.TableInfo<BangTable, i1.Bang> {
     $customConstraints: 'NOT NULL DEFAULT FALSE',
     defaultValue: const i0.CustomExpression('FALSE'),
   );
+  late final i0.GeneratedColumn<String> snapDomain = i0.GeneratedColumn<String>(
+    'snap_domain',
+    aliasedName,
+    true,
+    type: i0.DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: '',
+  );
   @override
   List<i0.GeneratedColumn> get $columns => [
     trigger,
@@ -1406,6 +1435,7 @@ class BangTable extends i0.Table with i0.TableInfo<BangTable, i1.Bang> {
     format,
     additionalTriggers,
     searxngApi,
+    snapDomain,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1464,6 +1494,10 @@ class BangTable extends i0.Table with i0.TableInfo<BangTable, i1.Bang> {
           data['${effectivePrefix}additional_triggers'],
         ),
       ),
+      snapDomain: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}snap_domain'],
+      ),
     );
   }
 
@@ -1497,6 +1531,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
   final i0.Value<Set<i1.BangFormat>?> format;
   final i0.Value<Set<String>?> additionalTriggers;
   final i0.Value<bool> searxngApi;
+  final i0.Value<String?> snapDomain;
   final i0.Value<int> rowid;
   const BangCompanion({
     this.trigger = const i0.Value.absent(),
@@ -1509,6 +1544,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
     this.format = const i0.Value.absent(),
     this.additionalTriggers = const i0.Value.absent(),
     this.searxngApi = const i0.Value.absent(),
+    this.snapDomain = const i0.Value.absent(),
     this.rowid = const i0.Value.absent(),
   });
   BangCompanion.insert({
@@ -1522,6 +1558,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
     this.format = const i0.Value.absent(),
     this.additionalTriggers = const i0.Value.absent(),
     this.searxngApi = const i0.Value.absent(),
+    this.snapDomain = const i0.Value.absent(),
     this.rowid = const i0.Value.absent(),
   }) : trigger = i0.Value(trigger),
        group = i0.Value(group),
@@ -1539,6 +1576,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
     i0.Expression<String>? format,
     i0.Expression<String>? additionalTriggers,
     i0.Expression<bool>? searxngApi,
+    i0.Expression<String>? snapDomain,
     i0.Expression<int>? rowid,
   }) {
     return i0.RawValuesInsertable({
@@ -1552,6 +1590,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
       if (format != null) 'format': format,
       if (additionalTriggers != null) 'additional_triggers': additionalTriggers,
       if (searxngApi != null) 'searxng_api': searxngApi,
+      if (snapDomain != null) 'snap_domain': snapDomain,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1567,6 +1606,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
     i0.Value<Set<i1.BangFormat>?>? format,
     i0.Value<Set<String>?>? additionalTriggers,
     i0.Value<bool>? searxngApi,
+    i0.Value<String?>? snapDomain,
     i0.Value<int>? rowid,
   }) {
     return i3.BangCompanion(
@@ -1580,6 +1620,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
       format: format ?? this.format,
       additionalTriggers: additionalTriggers ?? this.additionalTriggers,
       searxngApi: searxngApi ?? this.searxngApi,
+      snapDomain: snapDomain ?? this.snapDomain,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1625,6 +1666,9 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
     if (searxngApi.present) {
       map['searxng_api'] = i0.Variable<bool>(searxngApi.value);
     }
+    if (snapDomain.present) {
+      map['snap_domain'] = i0.Variable<String>(snapDomain.value);
+    }
     if (rowid.present) {
       map['rowid'] = i0.Variable<int>(rowid.value);
     }
@@ -1644,6 +1688,7 @@ class BangCompanion extends i0.UpdateCompanion<i1.Bang> {
           ..write('format: $format, ')
           ..write('additionalTriggers: $additionalTriggers, ')
           ..write('searxngApi: $searxngApi, ')
+          ..write('snapDomain: $snapDomain, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3033,6 +3078,7 @@ class BangDataView extends i0.ViewInfo<i3.BangDataView, i6.BangData>
     format,
     additionalTriggers,
     searxngApi,
+    snapDomain,
     frequency,
     lastUsed,
   ];
@@ -3096,6 +3142,10 @@ class BangDataView extends i0.ViewInfo<i3.BangDataView, i6.BangData>
           i0.DriftSqlType.string,
           data['${effectivePrefix}additional_triggers'],
         ),
+      ),
+      snapDomain: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}snap_domain'],
       ),
       frequency: attachedDatabase.typeMapping.read(
         i0.DriftSqlType.int,
@@ -3176,6 +3226,12 @@ class BangDataView extends i0.ViewInfo<i3.BangDataView, i6.BangData>
     defaultConstraints: i0.GeneratedColumn.constraintIsAlways(
       'CHECK ("searxng_api" IN (0, 1))',
     ),
+  );
+  late final i0.GeneratedColumn<String> snapDomain = i0.GeneratedColumn<String>(
+    'snap_domain',
+    aliasedName,
+    true,
+    type: i0.DriftSqlType.string,
   );
   late final i0.GeneratedColumn<int> frequency = i0.GeneratedColumn<int>(
     'frequency',
@@ -3265,6 +3321,7 @@ class DefinitionsDrift extends i7.ModularAccessor {
         additionalTriggers: i3.BangTable.$converteradditionalTriggers.fromSql(
           row.readNullable<String>('additional_triggers'),
         ),
+        snapDomain: row.readNullable<String>('snap_domain'),
         frequency: row.readNullable<int>('frequency'),
         lastUsed: row.readNullable<DateTime>('last_used'),
       ),
@@ -3292,6 +3349,7 @@ class DefinitionsDrift extends i7.ModularAccessor {
         additionalTriggers: i3.BangTable.$converteradditionalTriggers.fromSql(
           row.readNullable<String>('additional_triggers'),
         ),
+        snapDomain: row.readNullable<String>('snap_domain'),
         frequency: row.readNullable<int>('frequency'),
         lastUsed: row.readNullable<DateTime>('last_used'),
       ),

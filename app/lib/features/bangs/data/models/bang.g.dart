@@ -27,6 +27,8 @@ abstract class _$BangCWProxy {
 
   Bang additionalTriggers(Set<String>? additionalTriggers);
 
+  Bang snapDomain(String? snapDomain);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `Bang(...).copyWith.fieldName(value)`.
   ///
@@ -45,6 +47,7 @@ abstract class _$BangCWProxy {
     String? subCategory,
     Set<BangFormat>? format,
     Set<String>? additionalTriggers,
+    String? snapDomain,
   });
 }
 
@@ -87,6 +90,9 @@ class _$BangCWProxyImpl implements _$BangCWProxy {
       call(additionalTriggers: additionalTriggers);
 
   @override
+  Bang snapDomain(String? snapDomain) => call(snapDomain: snapDomain);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `Bang(...).copyWith.fieldName(value)`.
   ///
@@ -105,6 +111,7 @@ class _$BangCWProxyImpl implements _$BangCWProxy {
     Object? subCategory = const $CopyWithPlaceholder(),
     Object? format = const $CopyWithPlaceholder(),
     Object? additionalTriggers = const $CopyWithPlaceholder(),
+    Object? snapDomain = const $CopyWithPlaceholder(),
   }) {
     return Bang(
       websiteName:
@@ -150,6 +157,10 @@ class _$BangCWProxyImpl implements _$BangCWProxy {
           ? _value.additionalTriggers
           // ignore: cast_nullable_to_non_nullable
           : additionalTriggers as Set<String>?,
+      snapDomain: snapDomain == const $CopyWithPlaceholder()
+          ? _value.snapDomain
+          // ignore: cast_nullable_to_non_nullable
+          : snapDomain as String?,
     );
   }
 }
@@ -179,6 +190,7 @@ Bang _$BangFromJson(Map<String, dynamic> json) => Bang(
   additionalTriggers: (json['ts'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toSet(),
+  snapDomain: json['ad'] as String?,
 );
 
 Map<String, dynamic> _$BangToJson(Bang instance) => <String, dynamic>{
@@ -190,6 +202,7 @@ Map<String, dynamic> _$BangToJson(Bang instance) => <String, dynamic>{
   'sc': instance.subCategory,
   'fmt': instance.format?.map((e) => _$BangFormatEnumMap[e]!).toList(),
   'ts': instance.additionalTriggers?.toList(),
+  'ad': instance.snapDomain,
   'searxngApi': instance.searxngApi,
 };
 
@@ -197,4 +210,5 @@ const _$BangFormatEnumMap = {
   BangFormat.openBasePath: 'open_base_path',
   BangFormat.urlEncodePlaceholder: 'url_encode_placeholder',
   BangFormat.urlEncodeSpaceToPlus: 'url_encode_space_to_plus',
+  BangFormat.openSnapDomain: 'open_snap_domain',
 };

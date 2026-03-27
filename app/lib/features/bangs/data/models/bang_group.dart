@@ -23,11 +23,6 @@ enum BangGroup {
         'https://raw.githubusercontent.com/FaFre/bangs/main/data/bangs.json',
     bundled: 'assets/bangs/bangs.json',
   ),
-  assistant(
-    remote:
-        'https://raw.githubusercontent.com/FaFre/bangs/main/data/assistant_bangs.json',
-    bundled: 'assets/bangs/assistant_bangs.json',
-  ),
   kagi(
     remote:
         'https://raw.githubusercontent.com/FaFre/bangs/main/data/kagi_bangs.json',

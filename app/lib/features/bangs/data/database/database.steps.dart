@@ -1045,10 +1045,263 @@ i1.GeneratedColumn<int> _column_40(String aliasedName) =>
       true,
       type: i1.DriftSqlType.int,
     );
+
+final class Schema5 extends i0.VersionedSchema {
+  Schema5({required super.database}) : super(version: 5);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    bang,
+    bangTriggers,
+    idxBangTriggersLookup,
+    bangTriggersAfterInsert,
+    bangTriggersAfterUpdate,
+    bangSync,
+    bangFrequency,
+    bangHistory,
+    bangFts,
+    bangTriggersFts,
+    bangDataView,
+    bangAfterInsert,
+    bangAfterDelete,
+    bangAfterUpdate,
+    bangTriggersAfterInsertFts,
+    bangTriggersAfterDeleteFts,
+    bangTriggersAfterUpdateFts,
+  ];
+  late final Shape15 bang = Shape15(
+    source: i0.VersionedTable(
+      entityName: 'bang',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY("trigger", "group")'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_4,
+        _column_5,
+        _column_6,
+        _column_7,
+        _column_26,
+        _column_32,
+        _column_41,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape7 bangTriggers = Shape7(
+    source: i0.VersionedTable(
+      entityName: 'bang_triggers',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'PRIMARY KEY("trigger", "group", additional_trigger)',
+        'FOREIGN KEY("trigger", "group")REFERENCES bang("trigger", "group")ON DELETE CASCADE',
+      ],
+      columns: [_column_0, _column_1, _column_28],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxBangTriggersLookup = i1.Index(
+    'idx_bang_triggers_lookup',
+    'CREATE INDEX idx_bang_triggers_lookup ON bang_triggers (additional_trigger, "group")',
+  );
+  final i1.Trigger bangTriggersAfterInsert = i1.Trigger(
+    'CREATE TRIGGER bang_triggers_after_insert AFTER INSERT ON bang WHEN new.additional_triggers IS NOT NULL BEGIN INSERT INTO bang_triggers ("trigger", "group", additional_trigger) SELECT new."trigger", new."group", json_each.value FROM json_each(new.additional_triggers);END',
+    'bang_triggers_after_insert',
+  );
+  final i1.Trigger bangTriggersAfterUpdate = i1.Trigger(
+    'CREATE TRIGGER bang_triggers_after_update AFTER UPDATE ON bang BEGIN DELETE FROM bang_triggers WHERE "trigger" = old."trigger" AND "group" = old."group";INSERT INTO bang_triggers ("trigger", "group", additional_trigger) SELECT new."trigger", new."group", json_each.value FROM json_each(new.additional_triggers)WHERE new.additional_triggers IS NOT NULL;END',
+    'bang_triggers_after_update',
+  );
+  late final Shape11 bangSync = Shape11(
+    source: i0.VersionedTable(
+      entityName: 'bang_sync',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_8, _column_33],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape12 bangFrequency = Shape12(
+    source: i0.VersionedTable(
+      entityName: 'bang_frequency',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'PRIMARY KEY("trigger", "group")',
+        'FOREIGN KEY("trigger", "group")REFERENCES bang("trigger", "group")ON DELETE CASCADE',
+      ],
+      columns: [_column_0, _column_1, _column_10, _column_34],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape13 bangHistory = Shape13(
+    source: i0.VersionedTable(
+      entityName: 'bang_history',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'FOREIGN KEY("trigger", "group")REFERENCES bang("trigger", "group")ON DELETE CASCADE',
+      ],
+      columns: [_column_12, _column_0, _column_1, _column_35],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape4 bangFts = Shape4(
+    source: i0.VersionedVirtualTable(
+      entityName: 'bang_fts',
+      moduleAndArgs:
+          'fts5(trigger, website_name, content=bang, prefix=\'2 3\')',
+      columns: [_column_36, _column_37],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape8 bangTriggersFts = Shape8(
+    source: i0.VersionedVirtualTable(
+      entityName: 'bang_triggers_fts',
+      moduleAndArgs:
+          'fts5(additional_trigger, content=bang_triggers, prefix=\'2 3\')',
+      columns: [_column_38],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape16 bangDataView = Shape16(
+    source: i0.VersionedView(
+      entityName: 'bang_data_view',
+      createViewStmt:
+          'CREATE VIEW bang_data_view AS SELECT b.*, bf.frequency, bf.last_used FROM bang AS b LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" AND b."group" = bf."group";',
+      columns: [
+        _column_16,
+        _column_17,
+        _column_18,
+        _column_19,
+        _column_20,
+        _column_21,
+        _column_22,
+        _column_23,
+        _column_30,
+        _column_39,
+        _column_42,
+        _column_24,
+        _column_40,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Trigger bangAfterInsert = i1.Trigger(
+    'CREATE TRIGGER bang_after_insert AFTER INSERT ON bang BEGIN INSERT INTO bang_fts ("rowid", "trigger", website_name) VALUES (new."rowid", new."trigger", new.website_name);END',
+    'bang_after_insert',
+  );
+  final i1.Trigger bangAfterDelete = i1.Trigger(
+    'CREATE TRIGGER bang_after_delete AFTER DELETE ON bang BEGIN INSERT INTO bang_fts (bang_fts, "rowid", "trigger", website_name) VALUES (\'delete\', old."rowid", old."trigger", old.website_name);END',
+    'bang_after_delete',
+  );
+  final i1.Trigger bangAfterUpdate = i1.Trigger(
+    'CREATE TRIGGER bang_after_update AFTER UPDATE ON bang BEGIN INSERT INTO bang_fts (bang_fts, "rowid", "trigger", website_name) VALUES (\'delete\', old."rowid", old."trigger", old.website_name);INSERT INTO bang_fts ("rowid", "trigger", website_name) VALUES (new."rowid", new."trigger", new.website_name);END',
+    'bang_after_update',
+  );
+  final i1.Trigger bangTriggersAfterInsertFts = i1.Trigger(
+    'CREATE TRIGGER bang_triggers_after_insert_fts AFTER INSERT ON bang_triggers BEGIN INSERT INTO bang_triggers_fts ("rowid", additional_trigger) VALUES (new."rowid", new.additional_trigger);END',
+    'bang_triggers_after_insert_fts',
+  );
+  final i1.Trigger bangTriggersAfterDeleteFts = i1.Trigger(
+    'CREATE TRIGGER bang_triggers_after_delete_fts AFTER DELETE ON bang_triggers BEGIN INSERT INTO bang_triggers_fts (bang_triggers_fts, "rowid", additional_trigger) VALUES (\'delete\', old."rowid", old.additional_trigger);END',
+    'bang_triggers_after_delete_fts',
+  );
+  final i1.Trigger bangTriggersAfterUpdateFts = i1.Trigger(
+    'CREATE TRIGGER bang_triggers_after_update_fts AFTER UPDATE ON bang_triggers BEGIN INSERT INTO bang_triggers_fts (bang_triggers_fts, "rowid", additional_trigger) VALUES (\'delete\', old."rowid", old.additional_trigger);INSERT INTO bang_triggers_fts ("rowid", additional_trigger) VALUES (new."rowid", new.additional_trigger);END',
+    'bang_triggers_after_update_fts',
+  );
+}
+
+class Shape15 extends i0.VersionedTable {
+  Shape15({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get trigger =>
+      columnsByName['trigger']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get group =>
+      columnsByName['group']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get websiteName =>
+      columnsByName['website_name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get domain =>
+      columnsByName['domain']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get urlTemplate =>
+      columnsByName['url_template']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get category =>
+      columnsByName['category']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get subCategory =>
+      columnsByName['sub_category']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get format =>
+      columnsByName['format']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get additionalTriggers =>
+      columnsByName['additional_triggers']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get searxngApi =>
+      columnsByName['searxng_api']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get snapDomain =>
+      columnsByName['snap_domain']! as i1.GeneratedColumn<String>;
+}
+
+i1.GeneratedColumn<String> _column_41(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'snap_domain',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: '',
+    );
+
+class Shape16 extends i0.VersionedView {
+  Shape16({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get trigger =>
+      columnsByName['trigger']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get group =>
+      columnsByName['group']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get websiteName =>
+      columnsByName['website_name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get domain =>
+      columnsByName['domain']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get urlTemplate =>
+      columnsByName['url_template']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get category =>
+      columnsByName['category']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get subCategory =>
+      columnsByName['sub_category']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get format =>
+      columnsByName['format']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get additionalTriggers =>
+      columnsByName['additional_triggers']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get searxngApi =>
+      columnsByName['searxng_api']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get snapDomain =>
+      columnsByName['snap_domain']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get frequency =>
+      columnsByName['frequency']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get lastUsed =>
+      columnsByName['last_used']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<String> _column_42(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'snap_domain',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+    );
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
   required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
+  required Future<void> Function(i1.Migrator m, Schema5 schema) from4To5,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -1067,6 +1320,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from3To4(migrator, schema);
         return 4;
+      case 4:
+        final schema = Schema5(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from4To5(migrator, schema);
+        return 5;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -1077,10 +1335,12 @@ i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
   required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
+  required Future<void> Function(i1.Migrator m, Schema5 schema) from4To5,
 }) => i0.VersionedSchema.stepByStepHelper(
   step: migrationSteps(
     from1To2: from1To2,
     from2To3: from2To3,
     from3To4: from3To4,
+    from4To5: from4To5,
   ),
 );

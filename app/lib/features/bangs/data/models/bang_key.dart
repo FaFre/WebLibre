@@ -46,7 +46,13 @@ class BangKey {
 
   static BangKey? tryFromString(String key) {
     try {
-      final [group, trigger] = key.split('::');
+      var [group, trigger] = key.split('::');
+
+      //Migrate to schema v5
+      if (group == 'assistant') {
+        group = BangGroup.kagi.name;
+      }
+
       return BangKey(
         group: BangGroup.values.firstWhere((g) => g.name == group),
         trigger: trigger,

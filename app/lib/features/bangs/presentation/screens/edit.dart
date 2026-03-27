@@ -107,6 +107,7 @@ class EditBangScreen extends HookConsumerWidget {
                   category: category.value,
                   subCategory: subCategory.value,
                   additionalTriggers: initialBang?.additionalTriggers,
+                  snapDomain: initialBang?.snapDomain,
                   format: formatFlags.value.isNotEmpty
                       ? formatFlags.value
                       : null,

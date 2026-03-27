@@ -25,12 +25,13 @@ import 'package:weblibre/features/bangs/data/database/daos/bang.dart';
 import 'package:weblibre/features/bangs/data/database/daos/sync.dart';
 import 'package:weblibre/features/bangs/data/database/database.drift.dart';
 import 'package:weblibre/features/bangs/data/database/database.steps.dart';
+import 'package:weblibre/features/bangs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/search/domain/fts_tokenizer.dart';
 
 @DriftDatabase(include: {'definitions.drift'}, daos: [BangDao, SyncDao])
 class BangDatabase extends $BangDatabase with PrefixQueryBuilderMixin {
   @override
-  final int schemaVersion = 4;
+  final int schemaVersion = 5;
 
   @override
   final int ftsTokenLimit = 6;
@@ -71,13 +72,55 @@ class BangDatabase extends $BangDatabase with PrefixQueryBuilderMixin {
         await validateDatabaseSchema();
       }
 
-      await customStatement('PRAGMA foreign_keys = ON');
-
       if (details.hadUpgrade && details.versionBefore != null) {
         if (details.versionBefore! < 3) {
           await bang.deleteWhere((t) => t.group.equals(3));
+          await bangTriggers.deleteWhere((t) => t.group.equals(3));
+          await bangSync.deleteWhere((t) => t.group.equals(3));
+          await bangFrequency.deleteWhere((t) => t.group.equals(3));
+          await bangHistory.deleteWhere((t) => t.group.equals(3));
+        } else if (details.versionBefore! < 5) {
+          await bang.deleteWhere((t) => t.group.equals(1));
+          await bangTriggers.deleteWhere((t) => t.group.equals(1));
+          await bangSync.deleteWhere((t) => t.group.equals(1));
+          await bangFrequency.deleteWhere((t) => t.group.equals(1));
+          await bangHistory.deleteWhere((t) => t.group.equals(1));
+
+          await (bang.update()..where((t) => t.group.isBiggerThanValue(0)))
+              .write(
+                BangCompanion.custom(group: bang.group - const Constant(1)),
+              );
+          await (bangTriggers.update()
+                ..where((t) => t.group.isBiggerThanValue(0)))
+              .write(
+                BangTriggersCompanion.custom(
+                  group: bangTriggers.group - const Constant(1),
+                ),
+              );
+          await (bangSync.update()..where((t) => t.group.isBiggerThanValue(0)))
+              .write(
+                BangSyncCompanion.custom(
+                  group: bangSync.group - const Constant(1),
+                ),
+              );
+          await (bangFrequency.update()
+                ..where((t) => t.group.isBiggerThanValue(0)))
+              .write(
+                BangFrequencyCompanion.custom(
+                  group: bangFrequency.group - const Constant(1),
+                ),
+              );
+          await (bangHistory.update()
+                ..where((t) => t.group.isBiggerThanValue(0)))
+              .write(
+                BangHistoryCompanion.custom(
+                  group: bangHistory.group - const Constant(1),
+                ),
+              );
         }
       }
+
+      await customStatement('PRAGMA foreign_keys = ON');
     },
   );
 
@@ -88,11 +131,13 @@ class BangDatabase extends $BangDatabase with PrefixQueryBuilderMixin {
       //Too many changes, we switch to a new database
     },
     from2To3: (m, schema) async {
-      final bangAtV3 = schema.bang;
-      await m.addColumn(bangAtV3, bangAtV3.searxngApi);
+      await m.addColumn(schema.bang, schema.bang.searxngApi);
     },
     from3To4: (m, schema) async {
       await m.alterTable(TableMigration(schema.bangHistory));
+    },
+    from4To5: (m, schema) async {
+      await m.addColumn(schema.bang, schema.bang.snapDomain);
     },
   );
 }

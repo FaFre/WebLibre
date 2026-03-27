@@ -25,6 +25,8 @@ abstract class _$BangDataCWProxy {
 
   BangData additionalTriggers(Set<String>? additionalTriggers);
 
+  BangData snapDomain(String? snapDomain);
+
   BangData frequency(int? frequency);
 
   BangData lastUsed(DateTime? lastUsed);
@@ -48,6 +50,7 @@ abstract class _$BangDataCWProxy {
     String? subCategory,
     Set<BangFormat>? format,
     Set<String>? additionalTriggers,
+    String? snapDomain,
     int? frequency,
     DateTime? lastUsed,
     BrowserIcon? icon,
@@ -90,6 +93,9 @@ class _$BangDataCWProxyImpl implements _$BangDataCWProxy {
       call(additionalTriggers: additionalTriggers);
 
   @override
+  BangData snapDomain(String? snapDomain) => call(snapDomain: snapDomain);
+
+  @override
   BangData frequency(int? frequency) => call(frequency: frequency);
 
   @override
@@ -116,6 +122,7 @@ class _$BangDataCWProxyImpl implements _$BangDataCWProxy {
     Object? subCategory = const $CopyWithPlaceholder(),
     Object? format = const $CopyWithPlaceholder(),
     Object? additionalTriggers = const $CopyWithPlaceholder(),
+    Object? snapDomain = const $CopyWithPlaceholder(),
     Object? frequency = const $CopyWithPlaceholder(),
     Object? lastUsed = const $CopyWithPlaceholder(),
     Object? icon = const $CopyWithPlaceholder(),
@@ -160,6 +167,10 @@ class _$BangDataCWProxyImpl implements _$BangDataCWProxy {
           ? _value.additionalTriggers
           // ignore: cast_nullable_to_non_nullable
           : additionalTriggers as Set<String>?,
+      snapDomain: snapDomain == const $CopyWithPlaceholder()
+          ? _value.snapDomain
+          // ignore: cast_nullable_to_non_nullable
+          : snapDomain as String?,
       frequency: frequency == const $CopyWithPlaceholder()
           ? _value.frequency
           // ignore: cast_nullable_to_non_nullable
