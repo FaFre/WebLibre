@@ -73,6 +73,8 @@ class BangDatabase extends $BangDatabase with PrefixQueryBuilderMixin {
       }
 
       if (details.hadUpgrade && details.versionBefore != null) {
+        await customStatement('PRAGMA foreign_keys = OFF');
+
         if (details.versionBefore! < 3) {
           await bang.deleteWhere((t) => t.group.equals(3));
           await bangTriggers.deleteWhere((t) => t.group.equals(3));
