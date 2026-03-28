@@ -1,3 +1,48 @@
+## 0.10.1
+### GeckoView 149.0
+
+**New Features**
+
+**Small Web Discovery**
+A brand new browsing mode to discover personal blogs, indie creators, and handcrafted websites from around the internet.
+- **Kagi Small Web** — Browse curated content from community-vetted sources in 5 modes: Web, Appreciated, Videos, Code, and Comics
+- **Wander Network** — Explore a decentralized network where personal websites recommend each other, forming a web of serendipitous discoveries
+- **Topic Filters** — Narrow discoveries by 22 categories including AI, Programming, Science, Art & Design, Gaming, Travel, and more
+- **Discovery History** — Track and revisit pages you've found, with smart avoidance of recently seen content
+
+**PWA (Progressive Web App) Support**
+- Install websites as standalone apps and create home screen shortcuts for quick access
+- Enhanced PWA installation dialog with more options
+- Fixed PWA display mode detection
+
+**Custom Backup Directory**
+- Choose where to store your profile backups — any folder on your device or external storage
+- Backups stored outside the app survive reinstallation
+- Old backups are automatically migrated when you select a new location
+- New "Skip Cache Directories" option significantly reduces backup file size
+
+**Permanent "Allow Unsigned Extensions" Setting**
+- Enable unsigned extensions permanently from Settings > Extensions > Security, instead of confirming each time
+- Includes security warnings and a confirmation dialog
+
+**Quality of Life**
+- Long press on tab bar URL to copy it to clipboard
+
+**Updates**
+
+- **Upgraded browser engine to Gecko 149.0** — Latest performance improvements and security fixes from Mozilla
+- **Updated bang data** with spec-enforced bang naming
+- **Consolidated bang groups** — The separate "assistant" bang group has been merged into the "kagi" group for simpler management (existing assistant bangs are automatically migrated)
+
+**Bug Fixes**
+
+- Fixed Small Web session occasionally showing stale/empty state after app restart
+- Fixed PWA display mode detection
+- Thumbnails are no longer captured while in fullscreen mode
+- Restored certificate requirement for installing unsigned extensions (security)
+- Fixed long press actions incorrectly forwarded in custom tabs
+- Show minimal context menu in PWA/custom tabs
+
 ## 0.10.0
 ### GeckoView 148.0.2
 
