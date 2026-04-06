@@ -3,7 +3,7 @@ name: weblibre_project
 environment:
   sdk: '>=3.8.0 <4.0.0'
 workspace:
-  - app/
+  - apps/weblibre/
   - packages/flutter_mozilla_components
   - packages/flutter_mozilla_components/example
   - packages/flutter_tor
@@ -81,5 +81,5 @@ melos:
       description: Build release APK split per ABI
       run: |
         set -e
-        cd app
+        cd apps/weblibre
         flutter build apk --release --target-platform android-arm,android-arm64 --split-per-abi --no-tree-shake-icons

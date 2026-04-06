@@ -55,7 +55,7 @@ fetch() {
 # ── asset groups ─────────────────────────────────────────────────────────────
 
 update_bangs() {
-  local dir="$REPO_ROOT/app/assets/bangs"
+  local dir="$REPO_ROOT/apps/weblibre/assets/bangs"
   log "Updating bangs..."
 
   fetch "https://raw.githubusercontent.com/FaFre/bangs/main/data/bangs.json" \
@@ -70,7 +70,7 @@ update_bangs() {
 }
 
 update_bridges() {
-  local dir="$REPO_ROOT/app/assets/preferences"
+  local dir="$REPO_ROOT/apps/weblibre/assets/preferences"
   log "Updating Tor bridges..."
 
   fetch "https://bridges.torproject.org/moat/circumvention/builtin" \
@@ -78,7 +78,7 @@ update_bridges() {
 }
 
 update_url_cleaner() {
-  local dir="$REPO_ROOT/app/assets/preferences"
+  local dir="$REPO_ROOT/apps/weblibre/assets/preferences"
   log "Updating URL cleaner catalog..."
 
   fetch "https://rules2.clearurls.xyz/data.minify.json" \
@@ -86,7 +86,7 @@ update_url_cleaner() {
 }
 
 update_url_shorteners() {
-  local dir="$REPO_ROOT/app/assets/preferences"
+  local dir="$REPO_ROOT/apps/weblibre/assets/preferences"
   log "Updating URL shortener list..."
 
   fetch "https://raw.githubusercontent.com/MISP/misp-warninglists/refs/heads/main/lists/url-shortener/list.json" \

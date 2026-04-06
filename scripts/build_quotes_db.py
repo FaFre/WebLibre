@@ -9,7 +9,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_TABLE_NAME = "quotes"
 DEFAULT_INPUT_PATH = REPO_ROOT / "scripts" / "quotes" / "quotes.json"
-DEFAULT_OUTPUT_PATH = REPO_ROOT / "app" / "assets" / "quotes" / "quotes.db"
+DEFAULT_OUTPUT_PATH = REPO_ROOT / "apps" / "weblibre" / "assets" / "quotes" / "quotes.db"
 
 
 def parse_args() -> argparse.Namespace:

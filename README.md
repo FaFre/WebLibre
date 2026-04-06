@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="250" src="app/assets/icon/icon.png" alt="WebLibre Logo">
+  <img width="250" src="apps/weblibre/assets/icon/icon.png" alt="WebLibre Logo">
 </p>
 
 # WebLibre: The Privacy-Focused Browser

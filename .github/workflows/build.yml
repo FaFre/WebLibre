@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       KEY_JKS: ${{ secrets.KEY_JKS }}
-      KEY_PATH: ${{ github.workspace }}/app/key.jks
+      KEY_PATH: ${{ github.workspace }}/apps/weblibre/key.jks
       KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
     permissions:
@@ -49,7 +49,7 @@ jobs:
         with:
           ruby-version: '3.3'
           bundler-cache: true
-          working-directory: app
+          working-directory: apps/weblibre
 
       - uses: actions/setup-node@v4
         with:
@@ -63,7 +63,7 @@ jobs:
           bundle install
 
       - name: Create key file
-        working-directory: app
+        working-directory: apps/weblibre
         run: |
           echo $KEY_JKS | base64 -di > key.jks
           chmod 600 key.jks
@@ -90,32 +90,32 @@ jobs:
 
       - name: Build App Bundle
         if: steps.build-type.outputs.is_prerelease == 'false'
-        working-directory: app
+        working-directory: apps/weblibre
         run: flutter build appbundle --target-platform android-arm,android-arm64 --no-tree-shake-icons
 
       - name: Create github artifact release (Prerelease)
         if: steps.build-type.outputs.is_prerelease == 'true'
         uses: ncipollo/release-action@v1.17.0
         with:
-          artifacts: "app/build/app/outputs/apk/release/*.apk"
+          artifacts: "apps/weblibre/build/app/outputs/apk/release/*.apk"
           prerelease: true
 
       - name: Create github artifact release (Full)
         if: steps.build-type.outputs.is_prerelease == 'false'
         uses: ncipollo/release-action@v1.17.0
         with:
-          artifacts: "app/build/app/outputs/apk/release/*.apk,app/build/app/outputs/bundle/release/app-release.aab"
+          artifacts: "apps/weblibre/build/app/outputs/apk/release/*.apk,apps/weblibre/build/app/outputs/bundle/release/app-release.aab"
 
       - name: Upload app bundle artifact
         if: steps.build-type.outputs.is_prerelease == 'false'
         uses: actions/upload-artifact@v4
         with:
           name: appbundle
-          path: app/build/app/outputs/bundle/release/app-release.aab
+          path: apps/weblibre/build/app/outputs/bundle/release/app-release.aab
 
       - name: Release to Google Play (internal)
         if: steps.build-type.outputs.is_prerelease == 'false'
-        working-directory: app
+        working-directory: apps/weblibre
         env:
           SUPPLY_PACKAGE_NAME: ${{ secrets.ANDROID_PACKAGE_NAME }}
           SUPPLY_JSON_KEY_DATA: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
@@ -126,5 +126,5 @@ jobs:
 
       - name: Cleanup
         if: always()
-        working-directory: app
+        working-directory: apps/weblibre
         run: rm -f key.jks
