@@ -5,15 +5,11 @@
             "preferences": {
                 "browser.safebrowsing.malware.enabled": {
                     "value": true,
-                    "title": "Enable malware protection",
-                    "shouldBeDefault": true,
-                    "enforceOnStartup": true
+                    "title": "Enable malware protection"
                 },
                 "browser.safebrowsing.phishing.enabled": {
                     "value": true,
-                    "title": "Enable phishing protection",
-                    "shouldBeDefault": true,
-                    "enforceOnStartup": true
+                    "title": "Enable phishing protection"
                 },
                 "browser.safebrowsing.downloads.remote.enabled": {
                     "value": false,
