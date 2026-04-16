@@ -289,6 +289,8 @@ object GlobalComponents {
         } else {
             restorePreviousCustomTabs()
         }
+
+        newComponents.push.initialize()
     }
 
     @Synchronized

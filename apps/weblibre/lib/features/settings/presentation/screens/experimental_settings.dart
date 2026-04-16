@@ -20,6 +20,7 @@
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
@@ -43,6 +44,8 @@ class ExperimentalSettingsScreen extends StatelessWidget {
               controller: controller,
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               children: const [
+                SettingSection(name: 'Web Push'),
+                _UnifiedPushDistributorTile(),
                 SettingSection(name: 'Runtime & Startup'),
                 _IsolatedProcessEnabledTile(),
                 _AppZygoteProcessEnabledTile(),
@@ -51,6 +54,41 @@ class ExperimentalSettingsScreen extends StatelessWidget {
           },
         ),
       ),
+    );
+  }
+}
+
+class _UnifiedPushDistributorTile extends StatelessWidget {
+  const _UnifiedPushDistributorTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: const Icon(MdiIcons.bellBadgeOutline),
+      title: const Text('Choose UnifiedPush Distributor'),
+      subtitle: const Text(
+        'Select the app that should deliver website push notifications to WebLibre.',
+      ),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () async {
+        final messenger = ScaffoldMessenger.of(context);
+        final success = await GeckoBrowserService()
+            .pickUnifiedPushDistributor();
+
+        if (!context.mounted) {
+          return;
+        }
+
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              success
+                  ? 'UnifiedPush distributor configured.'
+                  : 'Could not configure UnifiedPush. Install a distributor and try again.',
+            ),
+          ),
+        );
+      },
     );
   }
 }

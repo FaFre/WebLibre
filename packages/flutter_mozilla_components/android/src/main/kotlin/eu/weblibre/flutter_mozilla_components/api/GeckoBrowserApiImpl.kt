@@ -456,6 +456,23 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         currentActivity.startActivity(intent)
     }
 
+    override fun pickUnifiedPushDistributor(callback: (Result<Boolean>) -> Unit) {
+        val currentActivity = activity
+        if (currentActivity == null) {
+            callback(Result.success(false))
+            return
+        }
+
+        runCatching {
+            components.push.pickDistributor(currentActivity) { success ->
+                callback(Result.success(success))
+            }
+        }.onFailure { error ->
+            logger.error("$TAG: Failed to pick UnifiedPush distributor", error)
+            callback(Result.failure(error))
+        }
+    }
+
     override fun shutdown() {
         logger.debug("$TAG: Shutting down GeckoView engine")
 

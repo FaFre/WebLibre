@@ -5656,6 +5656,7 @@ interface GeckoBrowserApi {
   fun openInCustomTab(url: String, private: Boolean, contextId: String?)
   fun isDefaultBrowser(): Boolean
   fun requestDefaultBrowser()
+  fun pickUnifiedPushDistributor(callback: (Result<Boolean>) -> Unit)
   fun shutdown()
 
   companion object {
@@ -5785,6 +5786,24 @@ interface GeckoBrowserApi {
               GeckoPigeonUtils.wrapError(exception)
             }
             reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserApi.pickUnifiedPushDistributor$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.pickUnifiedPushDistributor{ result: Result<Boolean> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
           }
         } else {
           channel.setMessageHandler(null)

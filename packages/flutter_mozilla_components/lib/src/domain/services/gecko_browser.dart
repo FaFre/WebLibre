@@ -65,6 +65,10 @@ class GeckoBrowserService {
     return _api.requestDefaultBrowser();
   }
 
+  Future<bool> pickUnifiedPushDistributor() {
+    return _api.pickUnifiedPushDistributor();
+  }
+
   Future<void> shutdown() {
     return _api.shutdown();
   }

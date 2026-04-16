@@ -1140,6 +1140,8 @@ abstract class GeckoBrowserApi {
   });
   bool isDefaultBrowser();
   void requestDefaultBrowser();
+  @async
+  bool pickUnifiedPushDistributor();
   void shutdown();
 }
 
