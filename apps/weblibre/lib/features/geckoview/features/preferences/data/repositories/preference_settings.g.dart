@@ -279,7 +279,7 @@ final class _PreferenceSettingGroupFamily extends $Family
 }
 
 @ProviderFor(_PreferenceRepository)
-final _preferenceRepositoryProvider = _PreferenceRepositoryProvider._();
+final _preferenceRepositoryProvider = _PreferenceRepositoryFamily._();
 
 final class _PreferenceRepositoryProvider
     extends
@@ -287,19 +287,26 @@ final class _PreferenceRepositoryProvider
           _PreferenceRepository,
           Raw<Stream<Map<String, GeckoPref>>>
         > {
-  _PreferenceRepositoryProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'_preferenceRepositoryProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  _PreferenceRepositoryProvider._({
+    required _PreferenceRepositoryFamily super.from,
+    required PreferencePartition super.argument,
+  }) : super(
+         retry: null,
+         name: r'_preferenceRepositoryProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
   @override
   String debugGetCreateSourceHash() => _$_preferenceRepositoryHash();
+
+  @override
+  String toString() {
+    return r'_preferenceRepositoryProvider'
+        ''
+        '($argument)';
+  }
 
   @$internal
   @override
@@ -314,14 +321,52 @@ final class _PreferenceRepositoryProvider
       ),
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is _PreferenceRepositoryProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
 }
 
 String _$_preferenceRepositoryHash() =>
-    r'0f6812988a23407f6648e32fb1585984d2433bbc';
+    r'b7a0aab286dd1f8da758de5cf259ad0c14b733d9';
+
+final class _PreferenceRepositoryFamily extends $Family
+    with
+        $ClassFamilyOverride<
+          _PreferenceRepository,
+          Raw<Stream<Map<String, GeckoPref>>>,
+          Raw<Stream<Map<String, GeckoPref>>>,
+          Raw<Stream<Map<String, GeckoPref>>>,
+          PreferencePartition
+        > {
+  _PreferenceRepositoryFamily._()
+    : super(
+        retry: null,
+        name: r'_preferenceRepositoryProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  _PreferenceRepositoryProvider call(PreferencePartition partition) =>
+      _PreferenceRepositoryProvider._(argument: partition, from: this);
+
+  @override
+  String toString() => r'_preferenceRepositoryProvider';
+}
 
 abstract class _$PreferenceRepository
     extends $Notifier<Raw<Stream<Map<String, GeckoPref>>>> {
-  Raw<Stream<Map<String, GeckoPref>>> build();
+  late final _$args = ref.$arg as PreferencePartition;
+  PreferencePartition get partition => _$args;
+
+  Raw<Stream<Map<String, GeckoPref>>> build(PreferencePartition partition);
   @$mustCallSuper
   @override
   void runBuild() {
@@ -342,7 +387,7 @@ abstract class _$PreferenceRepository
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleCreate(ref, () => build(_$args));
   }
 }
 
@@ -396,7 +441,7 @@ final class UnifiedPreferenceSettingsRepositoryProvider
 }
 
 String _$unifiedPreferenceSettingsRepositoryHash() =>
-    r'800e74a051113b4ebc3631b6ade55d66cb7e1af1';
+    r'03c8c2f247974ff32bba14b4b34857a0f14f6f37';
 
 final class UnifiedPreferenceSettingsRepositoryFamily extends $Family
     with
@@ -509,7 +554,7 @@ final class PreferenceSettingsGroupRepositoryProvider
 }
 
 String _$preferenceSettingsGroupRepositoryHash() =>
-    r'8e025cdea5cef8a6ea029db6f9ebcd86abf906d8';
+    r'b5c439643ec78094122c33983e58d0977641832a';
 
 final class PreferenceSettingsGroupRepositoryFamily extends $Family
     with

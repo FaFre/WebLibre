@@ -9,14 +9,6 @@ import 'package:flutter_mozilla_components/src/pigeons/gecko.g.dart';
 final _apiInstance = GeckoPrefApi();
 
 class GeckoPrefService {
-  Future<List<String>> getPrefList() {
-    return _apiInstance.getPrefList();
-  }
-
-  Future<Map<String, GeckoPref>> getAllPrefs() async {
-    return _apiInstance.getPrefs(await getPrefList());
-  }
-
   Future<Map<String, GeckoPref>> getPrefs(List<String> prefs) {
     return _apiInstance.getPrefs(prefs);
   }

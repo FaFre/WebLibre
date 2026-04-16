@@ -8,59 +8,16 @@ package eu.weblibre.flutter_mozilla_components.api
 
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
-import eu.weblibre.flutter_mozilla_components.feature.PrefManagerFeature
-import eu.weblibre.flutter_mozilla_components.feature.ResultConsumer
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPref
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPrefApi
 import mozilla.components.ExperimentalAndroidComponentsApi
 import mozilla.components.concept.engine.preferences.Branch
 import mozilla.components.concept.engine.preferences.BrowserPrefObserverDelegate
 import mozilla.components.concept.engine.preferences.BrowserPreference
-import mozilla.components.support.ktx.android.org.json.toList
-import org.json.JSONObject
-import org.json.JSONArray
 
 class GeckoPrefApiImpl : GeckoPrefApi, BrowserPrefObserverDelegate {
     private val components by lazy {
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
-    }
-
-    private fun List<String>?.toJson(): JSONArray {
-        return JSONArray().apply {
-            this@toJson?.forEach { put(it) }
-        }
-    }
-
-    fun JSONObject.toMap(): Map<String, Any> {
-        val map = mutableMapOf<String, Any>()
-        val keys = this.keys()
-
-        while (keys.hasNext()) {
-            val key = keys.next()
-            when (val value = this.get(key)) {
-                is JSONObject -> map[key] = value.toMap()
-//                is JSONArray -> map[key] = value.toList()
-//                JSONObject.NULL -> map[key] = null
-                else -> map[key] = value
-            }
-        }
-
-        return map
-    }
-
-    override fun getPrefList(callback: (Result<List<String>>) -> Unit) {
-        PrefManagerFeature.scheduleRequest(
-            "getPrefList",
-            Unit,
-            object : ResultConsumer<JSONObject> {
-                override fun success(result: JSONObject) {
-                    callback(Result.success(result.getJSONArray("result").toList()))
-                }
-
-                override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-                    callback(Result.failure(Exception("$errorCode $errorMessage $errorDetails")))
-                }
-            })
     }
 
     @OptIn(ExperimentalAndroidComponentsApi::class)

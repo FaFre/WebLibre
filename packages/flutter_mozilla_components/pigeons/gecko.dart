@@ -1505,8 +1505,6 @@ class GeckoPref {
 @HostApi()
 abstract class GeckoPrefApi {
   @async
-  List<String> getPrefList();
-  @async
   Map<String, GeckoPref> getPrefs(List<String> preferenceFilter);
   @async
   Map<String, GeckoPref> applyPrefs(Map<String, Object> prefs);

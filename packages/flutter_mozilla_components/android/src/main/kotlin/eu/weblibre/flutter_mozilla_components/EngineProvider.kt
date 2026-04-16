@@ -7,7 +7,6 @@ package eu.weblibre.flutter_mozilla_components
 import android.content.Context
 import eu.weblibre.flutter_mozilla_components.feature.ContainerProxyFeature
 import eu.weblibre.flutter_mozilla_components.feature.CookieManagerFeature
-import eu.weblibre.flutter_mozilla_components.feature.PrefManagerFeature
 import eu.weblibre.flutter_mozilla_components.feature.BrowserExtensionFeature
 import eu.weblibre.flutter_mozilla_components.feature.MLEngineFeature
 import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMode
@@ -122,7 +121,6 @@ object EngineProvider {
         return GeckoEngine(context, defaultSettings, runtime).also {
             WebCompatFeature.install(it)
             //CookieManagerFeature.install(it)
-            PrefManagerFeature.install(it)
             ContainerProxyFeature.install(it, stateEvents)
             BrowserExtensionFeature.install(it, extensionEvents)
             MLEngineFeature.install(it)

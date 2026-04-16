@@ -125,11 +125,22 @@ Future<PreferenceSettingGroup> _preferenceSettingGroup(
 @Riverpod()
 class _PreferenceRepository extends _$PreferenceRepository {
   final _prefManager = GeckoPrefService();
-  // Use BehaviorSubject instead of StreamController
   late BehaviorSubject<Map<String, GeckoPref>> _prefSubject;
 
   Future<void> _updatePrefs() async {
-    final prefs = await _prefManager.getAllPrefs();
+    final groups = await ref.read(
+      _preferenceSettingGroupsProvider(partition).future,
+    );
+
+    final prefNames = groups.values
+        .map((group) => group.settings.keys)
+        .flattened
+        .toList();
+
+    final prefs = prefNames.isEmpty
+        ? <String, GeckoPref>{}
+        : await _prefManager.getPrefs(prefNames);
+
     _prefSubject.add(prefs);
   }
 
@@ -144,18 +155,28 @@ class _PreferenceRepository extends _$PreferenceRepository {
   }
 
   @override
-  Raw<Stream<Map<String, GeckoPref>>> build() {
+  Raw<Stream<Map<String, GeckoPref>>> build(
+    PreferencePartition partition,
+  ) async* {
+    final prefCompleter = Completer();
+
     _prefSubject = BehaviorSubject<Map<String, GeckoPref>>();
 
     ref.onDispose(() async {
       await _prefSubject.close();
     });
 
-    ref.onAddListener(() async {
-      await _updatePrefs();
+    ref.onAddListener(() {
+      if (prefCompleter.isCompleted) {
+        ref.invalidateSelf();
+      }
     });
 
-    return _prefSubject.stream;
+    await _updatePrefs().whenComplete(() {
+      prefCompleter.complete();
+    });
+
+    yield* _prefSubject.stream;
   }
 }
 
@@ -166,7 +187,7 @@ class UnifiedPreferenceSettingsRepository
 
   Future<void> apply() async {
     final preferenceRepository = ref.read(
-      _preferenceRepositoryProvider.notifier,
+      _preferenceRepositoryProvider(partition).notifier,
     );
 
     _statelessGroups = await ref.read(
@@ -187,7 +208,7 @@ class UnifiedPreferenceSettingsRepository
 
   Future<void> reset() async {
     final preferenceRepository = ref.read(
-      _preferenceRepositoryProvider.notifier,
+      _preferenceRepositoryProvider(partition).notifier,
     );
 
     _statelessGroups = await ref.read(
@@ -210,7 +231,7 @@ class UnifiedPreferenceSettingsRepository
       _preferenceSettingGroupsProvider(partition).future,
     );
 
-    final prefStream = ref.watch(_preferenceRepositoryProvider);
+    final prefStream = ref.watch(_preferenceRepositoryProvider(partition));
 
     yield* prefStream.map(
       (prefs) => _statelessGroups!.map(
@@ -235,7 +256,7 @@ class PreferenceSettingsGroupRepository
 
   Future<void> apply({List<String>? filter}) async {
     final preferenceRepository = ref.read(
-      _preferenceRepositoryProvider.notifier,
+      _preferenceRepositoryProvider(partition).notifier,
     );
 
     _statelessSettingGroup ??= await ref.read(
@@ -260,7 +281,7 @@ class PreferenceSettingsGroupRepository
 
   Future<void> reset({List<String>? filter}) async {
     final preferenceRepository = ref.read(
-      _preferenceRepositoryProvider.notifier,
+      _preferenceRepositoryProvider(partition).notifier,
     );
 
     _statelessSettingGroup ??= await ref.read(
@@ -288,7 +309,7 @@ class PreferenceSettingsGroupRepository
       _preferenceSettingGroupProvider(partition, groupName).future,
     );
 
-    final prefStream = ref.watch(_preferenceRepositoryProvider);
+    final prefStream = ref.watch(_preferenceRepositoryProvider(partition));
 
     yield* prefStream.map(
       (prefs) => _statelessSettingGroup!.copyWith.settings(
