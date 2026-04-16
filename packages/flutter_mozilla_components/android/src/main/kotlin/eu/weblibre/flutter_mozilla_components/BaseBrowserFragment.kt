@@ -42,6 +42,7 @@ import mozilla.components.feature.accounts.FxaWebChannelFeature
 import mozilla.components.feature.app.links.AppLinksFeature
 import mozilla.components.feature.downloads.DownloadsFeature
 import mozilla.components.feature.downloads.manager.FetchDownloadManager
+import mozilla.components.feature.downloads.temporary.CopyDownloadFeature
 import mozilla.components.feature.downloads.temporary.ShareResourceFeature
 import mozilla.components.feature.media.fullscreen.MediaSessionFullscreenFeature
 import mozilla.components.feature.privatemode.feature.SecureWindowFeature
@@ -75,6 +76,7 @@ import mozilla.components.support.webextensions.WebExtensionPopupObserver
 abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, ActivityResultHandler {
     protected val sessionFeature = ViewBoundFeatureWrapper<SessionFeature>()
     private val shareResourceFeature = ViewBoundFeatureWrapper<ShareResourceFeature>()
+    private val copyDownloadFeature = ViewBoundFeatureWrapper<CopyDownloadFeature>()
     private val downloadsFeature = ViewBoundFeatureWrapper<DownloadsFeature>()
     private val appLinksFeature = ViewBoundFeatureWrapper<AppLinksFeature>()
     private val promptFeature = ViewBoundFeatureWrapper<PromptFeature>()
@@ -272,6 +274,18 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     httpClient = components.core.client,
                     store = components.core.store,
                     tabId = sessionId,
+                ),
+                owner = this,
+                view = view,
+            )
+
+            copyDownloadFeature.set(
+                CopyDownloadFeature(
+                    context = components.profileApplicationContext,
+                    httpClient = components.core.client,
+                    store = components.core.store,
+                    tabId = sessionId,
+                    onCopyConfirmation = {},
                 ),
                 owner = this,
                 view = view,
