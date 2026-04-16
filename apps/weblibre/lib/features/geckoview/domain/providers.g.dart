@@ -325,7 +325,7 @@ final class EngineReadyStateProvider
   }
 }
 
-String _$engineReadyStateHash() => r'0483cc1638d6cc23f7a33b8cb7c52667b07f7eea';
+String _$engineReadyStateHash() => r'8582b3961f100e1c668db39912423f8bdf42b980';
 
 abstract class _$EngineReadyState extends $Notifier<bool> {
   bool build();
