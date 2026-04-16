@@ -42,6 +42,7 @@ import 'package:weblibre/core/providers/app_state.dart';
 import 'package:weblibre/core/providers/defaults.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/domain/services/app_initialization.dart';
+import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_feed/presentation/controllers/fetch_articles.dart';
@@ -206,6 +207,24 @@ class _MainWidget extends HookConsumerWidget {
       }
 
       await ref.read(appInitializationServiceProvider.notifier).initialize();
+
+      Future<void> preloadUrlCleanerCatalog() async {
+        if (!generalSettings.urlCleanerEnabled) {
+          return;
+        }
+
+        try {
+          await ref.read(urlCleanerCatalogServiceProvider.future);
+        } catch (e, s) {
+          logger.w(
+            'Failed preloading URL cleaner catalog',
+            error: e,
+            stackTrace: s,
+          );
+        }
+      }
+
+      unawaited(preloadUrlCleanerCatalog());
 
       if (!kDebugMode) {
         await BackgroundFetch.configure(

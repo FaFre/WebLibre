@@ -192,6 +192,38 @@ GeckoViewportService viewportService(Ref ref) {
 
 @Riverpod(keepAlive: true)
 class EngineReadyState extends _$EngineReadyState {
+  Future<bool> waitUntilReady({
+    Duration timeout = const Duration(seconds: 3),
+  }) async {
+    final eventService = ref.read(eventServiceProvider);
+    final currentState =
+        eventService.engineReadyStateEvents.valueOrNull ?? false;
+
+    if (currentState) {
+      return true;
+    }
+
+    try {
+      final ready = await eventService.engineReadyStateEvents
+          .firstWhere((value) => value == true)
+          .timeout(timeout);
+
+      if (ref.mounted) {
+        state = ready;
+      }
+
+      return ready;
+    } on TimeoutException {
+      logger.w('Waiting for engine ready state timed out');
+
+      if (ref.mounted) {
+        state = true;
+      }
+
+      return true;
+    }
+  }
+
   @override
   bool build() {
     final eventService = ref.watch(eventServiceProvider);
@@ -200,22 +232,7 @@ class EngineReadyState extends _$EngineReadyState {
         eventService.engineReadyStateEvents.valueOrNull ?? false;
 
     if (!currentState) {
-      unawaited(
-        eventService.engineReadyStateEvents
-            .firstWhere((value) => value == true)
-            .timeout(
-              const Duration(seconds: 3),
-              onTimeout: () {
-                logger.w('Waiting for engine ready state timed out');
-                return true;
-              },
-            )
-            .whenComplete(() {
-              if (ref.mounted) {
-                state = true;
-              }
-            }),
-      );
+      unawaited(waitUntilReady());
     }
 
     final sub = eventService.engineReadyStateEvents.listen((value) {

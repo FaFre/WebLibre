@@ -26,7 +26,6 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/received_intent_parameter.dart';
 import 'package:weblibre/features/app_widget/domain/services/home_widget.dart';
-import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
 import 'package:weblibre/features/share_intent/domain/services/sharing_intent.dart';
 
@@ -36,10 +35,8 @@ final _contentParserTransformer =
     StreamTransformer<ReceivedIntentParameter, SharedContent>.fromHandlers(
       handleData: (parameter, sink) {
         final parsed = parameter.content.mapNotNull(
-          (content) => SharedContent.parse(
-            content,
-            contextId: parameter.contextId,
-          ),
+          (content) =>
+              SharedContent.parse(content, contextId: parameter.contextId),
         );
 
         if (parsed != null) {
@@ -54,11 +51,6 @@ final _contentParserTransformer =
 class EngineBoundIntentStream extends _$EngineBoundIntentStream {
   @override
   Stream<SharedContent> build() {
-    final engineReady = ref.watch(engineReadyStateProvider);
-    if (!engineReady) {
-      return const Stream.empty();
-    }
-
     final sharingItentStream = ref.watch(sharingIntentStreamProvider);
     final appWidgetLaunchStream = ref.watch(appWidgetLaunchStreamProvider);
 

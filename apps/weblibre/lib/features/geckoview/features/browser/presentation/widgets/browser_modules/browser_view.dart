@@ -221,6 +221,8 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                 await widget.postInitializationStep?.call();
 
                 if (!_initializationCompleter.isCompleted) {
+                  _initializationCompleter.complete();
+
                   const quickActions = QuickActions();
 
                   //Debounce: https://github.com/flutter/flutter/issues/131121
@@ -284,8 +286,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                         localizedTitle: 'New Isolated Tab',
                       ),
                   ]);
-
-                  _initializationCompleter.complete();
                 }
               },
             ),
@@ -349,24 +349,24 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
     ref.listenManual(
       engineBoundIntentStreamProvider,
-      (previous, next) async {
-        await _initializationCompleter.future;
-
+      (previous, next) {
         next.whenData((sharedContent) async {
-          final router = await ref.read(routerProvider.future);
           final settings = ref.read(generalSettingsWithDefaultsProvider);
-
-          // Resolve container from shortcut intent context ID
-          final containerSelection = await _resolveContainerSelection(
-            ref,
-            sharedContent.contextId,
-          );
 
           switch (settings.tabIntentOpenSetting) {
             case TabIntentOpenSetting.regular:
             case TabIntentOpenSetting.private:
+              await ref
+                  .read(engineReadyStateProvider.notifier)
+                  .waitUntilReady();
+
               switch (sharedContent) {
                 case SharedUrl():
+                  final containerSelection = await _resolveContainerSelection(
+                    ref,
+                    sharedContent.contextId,
+                  );
+
                   await ref
                       .read(tabRepositoryProvider.notifier)
                       .addTab(
@@ -399,6 +399,8 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                       );
               }
             case TabIntentOpenSetting.ask:
+              final router = await ref.read(routerProvider.future);
+
               switch (sharedContent) {
                 case SharedUrl():
                   final route = OpenSharedContentRoute(
