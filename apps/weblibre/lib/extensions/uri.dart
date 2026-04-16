@@ -41,4 +41,59 @@ extension UriX on Uri {
     }
     return this;
   }
+
+  String get displayPath {
+    if (path.isEmpty) {
+      return '';
+    }
+
+    final segments = pathSegments.join('/');
+    final buffer = StringBuffer();
+
+    if (path.startsWith('/')) {
+      buffer.write('/');
+    }
+    buffer.write(segments);
+    if (path.length > 1 && path.endsWith('/')) {
+      buffer.write('/');
+    }
+
+    return buffer.toString();
+  }
+
+  String get displayString {
+    final buffer = StringBuffer();
+
+    if (scheme.isNotEmpty) {
+      buffer.write('$scheme:');
+    }
+    if (authority.isNotEmpty) {
+      buffer
+        ..write('//')
+        ..write(authority);
+    }
+    buffer.write(displayPath);
+    if (query.isNotEmpty) {
+      buffer
+        ..write('?')
+        ..write(query);
+    }
+    if (fragment.isNotEmpty) {
+      buffer
+        ..write('#')
+        ..write(fragment);
+    }
+
+    return buffer.toString();
+  }
+}
+
+extension UriStringX on String {
+  String get uriDisplayString {
+    final uri = Uri.tryParse(this);
+    if (uri == null || uri.toString() != this) {
+      return this;
+    }
+    return uri.displayString;
+  }
 }

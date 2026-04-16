@@ -20,6 +20,7 @@
 import 'package:collection/collection.dart';
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
+import 'package:weblibre/extensions/uri.dart';
 
 class UriBreadcrumb extends StatelessWidget {
   final Uri uri;
@@ -37,8 +38,10 @@ class UriBreadcrumb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pathSegments = uri.pathSegments;
+
     return Tooltip(
-      message: uri.toString(),
+      message: uri.displayString,
       onTriggered: onTooltipTriggered,
       child: DefaultTextStyle(
         style: style ?? DefaultTextStyle.of(context).style,
@@ -59,9 +62,9 @@ class UriBreadcrumb extends StatelessWidget {
                     overflow: TextOverflow.visible,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  if (uri.pathSegments.any((s) => s.isNotEmpty))
+                  if (pathSegments.any((s) => s.isNotEmpty))
                     Text(
-                      ' › ${uri.pathSegments.whereNot((s) => s.isEmpty).join(' › ')}',
+                      ' › ${pathSegments.whereNot((s) => s.isEmpty).join(' › ')}',
                       maxLines: 1,
                       softWrap: false,
                       overflow: TextOverflow.visible,

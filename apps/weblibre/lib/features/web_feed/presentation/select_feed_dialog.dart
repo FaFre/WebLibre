@@ -22,6 +22,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/web_feed/domain/providers.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
@@ -54,7 +55,7 @@ class SelectFeedDialog extends HookConsumerWidget {
                         title: Text(
                           data.feedData.title.whenNotEmpty ?? 'Unnamed Feed',
                         ),
-                        subtitle: Text(uri.toString()),
+                        subtitle: Text(uri.displayString),
                         trailing: const Icon(Icons.add),
                         onTap: () {
                           FeedCreateRoute(feedId: uri).pushReplacement(context);
@@ -72,7 +73,7 @@ class SelectFeedDialog extends HookConsumerWidget {
                     loading: () => Skeletonizer(
                       child: ListTile(
                         title: Text(BoneMock.title),
-                        subtitle: Skeleton.keep(child: Text(uri.toString())),
+                        subtitle: Skeleton.keep(child: Text(uri.displayString)),
                       ),
                     ),
                   );

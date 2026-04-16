@@ -24,6 +24,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/utils/open_in_custom_tab.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
@@ -203,7 +204,7 @@ class _AttributionLinkRow extends StatelessWidget {
               width: 96,
               child: Text(label, style: Theme.of(context).textTheme.bodySmall),
             ),
-            Expanded(child: Text(url, style: linkStyle)),
+            Expanded(child: Text(url.uriDisplayString, style: linkStyle)),
             const SizedBox(width: 8),
             Icon(
               Icons.open_in_new,

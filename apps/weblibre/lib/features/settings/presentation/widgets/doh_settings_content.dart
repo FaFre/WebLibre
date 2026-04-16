@@ -22,6 +22,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
@@ -112,7 +113,7 @@ class DohSettingsContent extends HookConsumerWidget {
                   (provider) => RadioListTile.adaptive(
                     value: provider.url,
                     title: Text(provider.name),
-                    subtitle: Text(provider.url),
+                    subtitle: Text(provider.url.uriDisplayString),
                   ),
                 )
                 .toList(),
