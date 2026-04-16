@@ -125,40 +125,58 @@ Future<PreferenceSettingGroup> _preferenceSettingGroup(
 @Riverpod()
 class _PreferenceRepository extends _$PreferenceRepository {
   final _prefManager = GeckoPrefService();
+
+  late List<String> _prefNames;
   late BehaviorSubject<Map<String, GeckoPref>> _prefSubject;
+  late Future<void> _ready;
 
   Future<void> _updatePrefs() async {
-    final groups = await ref.read(
-      _preferenceSettingGroupsProvider(partition).future,
-    );
-
-    final prefNames = groups.values
-        .map((group) => group.settings.keys)
-        .flattened
-        .toList();
-
-    final prefs = prefNames.isEmpty
+    final prefs = _prefNames.isEmpty
         ? <String, GeckoPref>{}
-        : await _prefManager.getPrefs(prefNames);
+        : await _prefManager.getPrefs(_prefNames);
+
+    if (!ref.mounted || _prefSubject.isClosed) {
+      return;
+    }
 
     _prefSubject.add(prefs);
   }
 
   Future<void> applyPrefs(Map<String, Object> prefs) async {
+    await _ready;
     await _prefManager.applyPrefs(prefs);
     await _updatePrefs();
   }
 
   Future<void> resetPrefs(List<String> prefNames) async {
+    await _ready;
     await _prefManager.resetPrefs(prefNames);
     await _updatePrefs();
   }
 
+  Future<void> _init(
+    Future<Map<String, PreferenceSettingGroup>> groupsFuture,
+  ) async {
+    final groups = await groupsFuture;
+
+    _prefNames = groups.values
+        .map((group) => group.settings.keys)
+        .flattened
+        .toList();
+
+    await _updatePrefs();
+  }
+
+  Future<void> _refreshAfterReady() async {
+    await _ready;
+    await _updatePrefs();
+  }
+
   @override
-  Raw<Stream<Map<String, GeckoPref>>> build(
-    PreferencePartition partition,
-  ) async* {
-    final prefCompleter = Completer();
+  Raw<Stream<Map<String, GeckoPref>>> build(PreferencePartition partition) {
+    final groupsFuture = ref.watch(
+      _preferenceSettingGroupsProvider(partition).future,
+    );
 
     _prefSubject = BehaviorSubject<Map<String, GeckoPref>>();
 
@@ -167,16 +185,12 @@ class _PreferenceRepository extends _$PreferenceRepository {
     });
 
     ref.onAddListener(() {
-      if (prefCompleter.isCompleted) {
-        ref.invalidateSelf();
-      }
+      unawaited(_refreshAfterReady());
     });
 
-    await _updatePrefs().whenComplete(() {
-      prefCompleter.complete();
-    });
+    _ready = _init(groupsFuture);
 
-    yield* _prefSubject.stream;
+    return _prefSubject.stream;
   }
 }
 

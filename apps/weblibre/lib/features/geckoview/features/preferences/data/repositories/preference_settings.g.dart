@@ -334,7 +334,7 @@ final class _PreferenceRepositoryProvider
 }
 
 String _$_preferenceRepositoryHash() =>
-    r'b7a0aab286dd1f8da758de5cf259ad0c14b733d9';
+    r'c416d7684f1e8f24dd9e5fc98ecb6312c07d938f';
 
 final class _PreferenceRepositoryFamily extends $Family
     with
