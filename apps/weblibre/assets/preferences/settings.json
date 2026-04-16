@@ -3,14 +3,6 @@
         "Safe Browsing": {
             "description": "Google Safe Browsing warns users about dangerous websites and downloads.",
             "preferences": {
-                "browser.safebrowsing.malware.enabled": {
-                    "value": true,
-                    "title": "Enable malware protection"
-                },
-                "browser.safebrowsing.phishing.enabled": {
-                    "value": true,
-                    "title": "Enable phishing protection"
-                },
                 "browser.safebrowsing.downloads.remote.enabled": {
                     "value": false,
                     "title": "Disable remote verification for downloads",

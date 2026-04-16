@@ -159,6 +159,10 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
 
   final bool enablePdfJs;
 
+  final bool safeBrowsingMalwareEnabled;
+
+  final bool safeBrowsingPhishingEnabled;
+
   EngineSettings({
     required super.javascriptEnabled,
     required super.trackingProtectionPolicy,
@@ -181,6 +185,8 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required this.dohExceptionsList,
     required super.fingerprintingProtectionOverrides,
     required this.enablePdfJs,
+    required this.safeBrowsingMalwareEnabled,
+    required this.safeBrowsingPhishingEnabled,
     required super.locales,
     required super.blockCookies,
     required super.customCookiePolicy,
@@ -232,6 +238,8 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     List<String>? dohExceptionsList,
     String? fingerprintingProtectionOverrides,
     bool? enablePdfJs,
+    bool? safeBrowsingMalwareEnabled,
+    bool? safeBrowsingPhishingEnabled,
     List<String>? locales,
     bool? blockCookies,
     CustomCookiePolicy? customCookiePolicy,
@@ -269,6 +277,8 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
            dohDefaultProviderUrl ?? BuiltInDohProviders.quad9.url,
        dohExceptionsList = dohExceptionsList ?? [],
        enablePdfJs = enablePdfJs ?? true,
+       safeBrowsingMalwareEnabled = safeBrowsingMalwareEnabled ?? true,
+       safeBrowsingPhishingEnabled = safeBrowsingPhishingEnabled ?? true,
        super(
          javascriptEnabled: javascriptEnabled ?? true,
          trackingProtectionPolicy:
@@ -359,6 +369,8 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     dohExceptionsList,
     fingerprintingProtectionOverrides,
     enablePdfJs,
+    safeBrowsingMalwareEnabled,
+    safeBrowsingPhishingEnabled,
     locales,
     blockCookies,
     customCookiePolicy,

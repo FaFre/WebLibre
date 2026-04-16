@@ -67,6 +67,10 @@ abstract class _$EngineSettingsCWProxy {
 
   EngineSettings enablePdfJs(bool enablePdfJs);
 
+  EngineSettings safeBrowsingMalwareEnabled(bool safeBrowsingMalwareEnabled);
+
+  EngineSettings safeBrowsingPhishingEnabled(bool safeBrowsingPhishingEnabled);
+
   EngineSettings locales(List<String>? locales);
 
   EngineSettings blockCookies(bool? blockCookies);
@@ -154,6 +158,8 @@ abstract class _$EngineSettingsCWProxy {
     List<String> dohExceptionsList,
     String? fingerprintingProtectionOverrides,
     bool enablePdfJs,
+    bool safeBrowsingMalwareEnabled,
+    bool safeBrowsingPhishingEnabled,
     List<String>? locales,
     bool? blockCookies,
     CustomCookiePolicy? customCookiePolicy,
@@ -291,6 +297,15 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
   @override
   EngineSettings enablePdfJs(bool enablePdfJs) =>
       call(enablePdfJs: enablePdfJs);
+
+  @override
+  EngineSettings safeBrowsingMalwareEnabled(bool safeBrowsingMalwareEnabled) =>
+      call(safeBrowsingMalwareEnabled: safeBrowsingMalwareEnabled);
+
+  @override
+  EngineSettings safeBrowsingPhishingEnabled(
+    bool safeBrowsingPhishingEnabled,
+  ) => call(safeBrowsingPhishingEnabled: safeBrowsingPhishingEnabled);
 
   @override
   EngineSettings locales(List<String>? locales) => call(locales: locales);
@@ -433,6 +448,8 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? dohExceptionsList = const $CopyWithPlaceholder(),
     Object? fingerprintingProtectionOverrides = const $CopyWithPlaceholder(),
     Object? enablePdfJs = const $CopyWithPlaceholder(),
+    Object? safeBrowsingMalwareEnabled = const $CopyWithPlaceholder(),
+    Object? safeBrowsingPhishingEnabled = const $CopyWithPlaceholder(),
     Object? locales = const $CopyWithPlaceholder(),
     Object? blockCookies = const $CopyWithPlaceholder(),
     Object? customCookiePolicy = const $CopyWithPlaceholder(),
@@ -571,6 +588,18 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.enablePdfJs
           // ignore: cast_nullable_to_non_nullable
           : enablePdfJs as bool,
+      safeBrowsingMalwareEnabled:
+          safeBrowsingMalwareEnabled == const $CopyWithPlaceholder() ||
+              safeBrowsingMalwareEnabled == null
+          ? _value.safeBrowsingMalwareEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : safeBrowsingMalwareEnabled as bool,
+      safeBrowsingPhishingEnabled:
+          safeBrowsingPhishingEnabled == const $CopyWithPlaceholder() ||
+              safeBrowsingPhishingEnabled == null
+          ? _value.safeBrowsingPhishingEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : safeBrowsingPhishingEnabled as bool,
       locales: locales == const $CopyWithPlaceholder()
           ? _value.locales
           // ignore: cast_nullable_to_non_nullable
@@ -760,6 +789,8 @@ EngineSettings _$EngineSettingsFromJson(
   fingerprintingProtectionOverrides:
       json['fingerprintingProtectionOverrides'] as String?,
   enablePdfJs: json['enablePdfJs'] as bool?,
+  safeBrowsingMalwareEnabled: json['safeBrowsingMalwareEnabled'] as bool?,
+  safeBrowsingPhishingEnabled: json['safeBrowsingPhishingEnabled'] as bool?,
   locales: (json['locales'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
@@ -867,6 +898,8 @@ Map<String, dynamic> _$EngineSettingsToJson(
   'dohDefaultProviderUrl': instance.dohDefaultProviderUrl,
   'dohExceptionsList': instance.dohExceptionsList,
   'enablePdfJs': instance.enablePdfJs,
+  'safeBrowsingMalwareEnabled': instance.safeBrowsingMalwareEnabled,
+  'safeBrowsingPhishingEnabled': instance.safeBrowsingPhishingEnabled,
 };
 
 const _$TrackingProtectionPolicyEnumMap = {

@@ -124,6 +124,10 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
+      'safeBrowsingMalwareEnabled': settings['safeBrowsingMalwareEnabled']
+          ?.readAs(DriftSqlType.bool, db.typeMapping),
+      'safeBrowsingPhishingEnabled': settings['safeBrowsingPhishingEnabled']
+          ?.readAs(DriftSqlType.bool, db.typeMapping),
       'locales': settings['locales']
           ?.readAs(DriftSqlType.string, db.typeMapping)
           .mapNotNull(jsonDecode),

@@ -31,6 +31,9 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 
 part 'engine_settings_replication.g.dart';
 
+const _safeBrowsingMalwarePref = 'browser.safebrowsing.malware.enabled';
+const _safeBrowsingPhishingPref = 'browser.safebrowsing.phishing.enabled';
+
 /// Checks if any Custom ETP setting changed between two EngineSettings instances.
 bool _customEtpSettingsChanged(
   GeckoEngineSettings? previous,
@@ -229,6 +232,24 @@ class EngineSettingsReplicationService
                   .read(preferenceFixatorProvider.notifier)
                   .register('pdfjs.disabled', !settings.enablePdfJs);
             }
+            if (previous.value?.safeBrowsingMalwareEnabled !=
+                settings.safeBrowsingMalwareEnabled) {
+              await ref
+                  .read(preferenceFixatorProvider.notifier)
+                  .register(
+                    _safeBrowsingMalwarePref,
+                    settings.safeBrowsingMalwareEnabled,
+                  );
+            }
+            if (previous.value?.safeBrowsingPhishingEnabled !=
+                settings.safeBrowsingPhishingEnabled) {
+              await ref
+                  .read(preferenceFixatorProvider.notifier)
+                  .register(
+                    _safeBrowsingPhishingPref,
+                    settings.safeBrowsingPhishingEnabled,
+                  );
+            }
             if (!const DeepCollectionEquality.unordered().equals(
               previous.value?.locales,
               settings.locales,
@@ -283,6 +304,18 @@ class EngineSettingsReplicationService
             await ref
                 .read(preferenceFixatorProvider.notifier)
                 .register('pdfjs.disabled', !settings.enablePdfJs);
+            await ref
+                .read(preferenceFixatorProvider.notifier)
+                .register(
+                  _safeBrowsingMalwarePref,
+                  settings.safeBrowsingMalwareEnabled,
+                );
+            await ref
+                .read(preferenceFixatorProvider.notifier)
+                .register(
+                  _safeBrowsingPhishingPref,
+                  settings.safeBrowsingPhishingEnabled,
+                );
             await ref
                 .read(preferenceFixatorProvider.notifier)
                 .register('intl.accept_languages', settings.locales.join(','));

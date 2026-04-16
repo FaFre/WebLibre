@@ -55,6 +55,7 @@ class PrivacySecuritySettingsScreen extends StatelessWidget {
                 _NetworkProtectionSection(),
                 _PrivacySignalsSection(),
                 _DataManagementSection(),
+                _SafeBrowsingSection(),
                 _AdvancedSecuritySection(),
               ],
             );
@@ -140,6 +141,21 @@ class _PrivacySignalsSection extends StatelessWidget {
         SettingSection(name: 'Privacy Signals & Modes'),
         _IncognitoModeSection(),
         _GlobalPrivacyControlTile(),
+      ],
+    );
+  }
+}
+
+class _SafeBrowsingSection extends StatelessWidget {
+  const _SafeBrowsingSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        SettingSection(name: 'Google Safe Browsing'),
+        _SafeBrowsingMalwareTile(),
+        _SafeBrowsingPhishingTile(),
       ],
     );
   }
@@ -734,6 +750,64 @@ class _FissionEnabledTile extends HookConsumerWidget {
         if (context.mounted) {
           await _showRestartDialog(context, ref);
         }
+      },
+    );
+  }
+}
+
+class _SafeBrowsingMalwareTile extends HookConsumerWidget {
+  const _SafeBrowsingMalwareTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final safeBrowsingMalwareEnabled = ref.watch(
+      engineSettingsWithDefaultsProvider.select(
+        (s) => s.safeBrowsingMalwareEnabled,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Safe Browsing Malware Protection'),
+      subtitle: const Text(
+        'Warn about dangerous websites and malicious downloads.',
+      ),
+      secondary: const Icon(Icons.bug_report_outlined),
+      value: safeBrowsingMalwareEnabled,
+      onChanged: (value) async {
+        await ref
+            .read(saveEngineSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.safeBrowsingMalwareEnabled(value),
+            );
+      },
+    );
+  }
+}
+
+class _SafeBrowsingPhishingTile extends HookConsumerWidget {
+  const _SafeBrowsingPhishingTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final safeBrowsingPhishingEnabled = ref.watch(
+      engineSettingsWithDefaultsProvider.select(
+        (s) => s.safeBrowsingPhishingEnabled,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Safe Browsing Phishing Protection'),
+      subtitle: const Text('Warn about deceptive websites and login pages.'),
+      secondary: const Icon(Icons.gpp_maybe_outlined),
+      value: safeBrowsingPhishingEnabled,
+      onChanged: (value) async {
+        await ref
+            .read(saveEngineSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.safeBrowsingPhishingEnabled(value),
+            );
       },
     );
   }
