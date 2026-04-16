@@ -211,7 +211,9 @@ class TabMenu extends HookConsumerWidget {
           Consumer(
             builder: (context, ref, child) {
               final isInstallable = ref.watch(isCurrentTabInstallableProvider);
-              final isShortcutable = ref.watch(isCurrentTabShortcutableProvider);
+              final isShortcutable = ref.watch(
+                isCurrentTabShortcutableProvider,
+              );
 
               return Visibility(
                 visible: isInstallable || isShortcutable,
@@ -575,7 +577,7 @@ class TabMenu extends HookConsumerWidget {
                 // ignore: deprecated_member_use
                 icon: const Icon(MdiIcons.languageMarkdown),
                 shareMarkdownAction: (content, fileName) async {
-                  await FilePicker.platform.saveFile(
+                  await FilePicker.saveFile(
                     fileName: fileName,
                     type: FileType.custom,
                     allowedExtensions: ['md'],

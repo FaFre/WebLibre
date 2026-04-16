@@ -998,7 +998,7 @@ class BookmarkListScreen extends HookConsumerWidget {
     String format,
   ) async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: format == 'json' ? ['json'] : ['html', 'htm'],
       );
@@ -1066,7 +1066,7 @@ class BookmarkListScreen extends HookConsumerWidget {
       final defaultFileName =
           'bookmarks_$timestamp.${format == 'json' ? 'json' : 'html'}';
 
-      final outputPath = await FilePicker.platform.saveFile(
+      final outputPath = await FilePicker.saveFile(
         dialogTitle: 'Export Bookmarks',
         fileName: defaultFileName,
         type: FileType.custom,

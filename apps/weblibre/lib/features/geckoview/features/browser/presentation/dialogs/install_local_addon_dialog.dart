@@ -45,7 +45,7 @@ class _InstallLocalAddonSheet extends HookConsumerWidget {
 
     Future<void> pickFile() async {
       try {
-        final result = await FilePicker.platform.pickFiles();
+        final result = await FilePicker.pickFiles();
 
         if (result != null && result.files.isNotEmpty) {
           final path = result.files.single.path;

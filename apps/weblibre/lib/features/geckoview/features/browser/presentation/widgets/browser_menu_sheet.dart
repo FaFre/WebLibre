@@ -1605,7 +1605,7 @@ class _ExportExpansion extends ConsumerWidget {
                 content,
                 fileName,
               ) async {
-                await FilePicker.platform.saveFile(
+                await FilePicker.saveFile(
                   fileName: fileName,
                   type: FileType.custom,
                   allowedExtensions: ['md'],
