@@ -44,6 +44,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/contro
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/keep_tab_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/providers/browser_viewport_toolbar_insets.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/addon_popup_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_fab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_view.dart';
@@ -302,6 +303,18 @@ class BrowserScreen extends HookConsumerWidget {
         await ContextMenuRoute(
           hitResult: event.hitResult.toJson(),
         ).push(context);
+      },
+    );
+
+    final addonService = ref.watch(addonServiceProvider);
+    useOnStreamChange(
+      addonService.popupStream,
+      onData: (event) async {
+        await showAddonPopupBottomSheet(
+          context,
+          extensionId: event.extensionId,
+          extensionName: event.extensionName,
+        );
       },
     );
 

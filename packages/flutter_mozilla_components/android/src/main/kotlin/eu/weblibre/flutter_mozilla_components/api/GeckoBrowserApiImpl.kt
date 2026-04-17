@@ -10,6 +10,8 @@ import android.app.Activity
 import android.content.Intent
 import android.view.View
 import androidx.fragment.app.FragmentActivity
+import eu.weblibre.flutter_mozilla_components.AddonPopupViewFactory
+import eu.weblibre.flutter_mozilla_components.AddonSettingsViewFactory
 import eu.weblibre.flutter_mozilla_components.BrowserFragment
 import eu.weblibre.flutter_mozilla_components.GeckoViewFactory
 import eu.weblibre.flutter_mozilla_components.EngineProvider
@@ -144,6 +146,14 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
                 FRAGMENT_CONTAINER_ID,
                 _flutterEvents
             )
+        )
+        _flutterPluginBinding.platformViewRegistry.registerViewFactory(
+            "eu.weblibre/addon_settings",
+            AddonSettingsViewFactory(activityProvider = { this.activity }),
+        )
+        _flutterPluginBinding.platformViewRegistry.registerViewFactory(
+            "eu.weblibre/addon_popup",
+            AddonPopupViewFactory(activityProvider = { this.activity }),
         )
         isPlatformViewRegistered = true
 

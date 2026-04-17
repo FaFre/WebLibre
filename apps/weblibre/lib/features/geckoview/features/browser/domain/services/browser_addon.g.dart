@@ -54,6 +54,50 @@ abstract class _$AllowUnsignedExtensions extends $AsyncNotifier<bool> {
   }
 }
 
+@ProviderFor(AddonAutoUpdate)
+final addonAutoUpdateProvider = AddonAutoUpdateProvider._();
+
+final class AddonAutoUpdateProvider
+    extends $AsyncNotifierProvider<AddonAutoUpdate, bool> {
+  AddonAutoUpdateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'addonAutoUpdateProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$addonAutoUpdateHash();
+
+  @$internal
+  @override
+  AddonAutoUpdate create() => AddonAutoUpdate();
+}
+
+String _$addonAutoUpdateHash() => r'89791e8b771da715b068bbdbe5c3c24a3dad4194';
+
+abstract class _$AddonAutoUpdate extends $AsyncNotifier<bool> {
+  FutureOr<bool> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<bool>, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<bool>, bool>,
+              AsyncValue<bool>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(BrowserAddonService)
 final browserAddonServiceProvider = BrowserAddonServiceProvider._();
 

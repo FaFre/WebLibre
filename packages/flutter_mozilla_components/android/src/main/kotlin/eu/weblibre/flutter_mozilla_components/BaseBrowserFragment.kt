@@ -22,7 +22,6 @@ import androidx.annotation.CallSuper
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
-import eu.weblibre.flutter_mozilla_components.addons.WebExtensionActionPopupActivity
 import eu.weblibre.flutter_mozilla_components.addons.WebExtensionPromptFeature
 import eu.weblibre.flutter_mozilla_components.databinding.FragmentBrowserBinding
 import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
@@ -555,14 +554,10 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     protected open fun onEngineSetupComplete() {}
 
     private fun openPopup(webExtensionState: WebExtensionState) {
-        val intent = Intent(
-            components.profileApplicationContext,
-            WebExtensionActionPopupActivity::class.java
-        )
-        intent.putExtra("web_extension_id", webExtensionState.id)
-        intent.putExtra("web_extension_name", webExtensionState.name)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        startActivity(intent)
+        components.addonEvents.onWebExtensionPopupRequested(
+            webExtensionState.id,
+            webExtensionState.name ?: "",
+        ) {}
     }
 
     @CallSuper

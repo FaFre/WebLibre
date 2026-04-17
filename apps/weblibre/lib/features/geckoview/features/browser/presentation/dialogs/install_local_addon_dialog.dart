@@ -76,7 +76,10 @@ class _InstallLocalAddonSheet extends HookConsumerWidget {
             .installFromFile(selectedFile.value!);
 
         if (context.mounted) {
-          showInfoMessage(context, 'Extension installed successfully');
+          showInfoMessage(
+            context,
+            'Extension installed. Automatic updates are disabled for this local version.',
+          );
           context.pop(true);
         }
       } catch (e) {
@@ -148,6 +151,11 @@ class _InstallLocalAddonSheet extends HookConsumerWidget {
                   ),
                 ],
               ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Extensions installed from a local XPI stay pinned to that version and will not update automatically.',
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             if (errorMessage.value != null) ...[
               const SizedBox(height: 8),

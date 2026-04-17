@@ -210,38 +210,6 @@
             android:exported="false" />
 
         <activity
-            android:theme="@style/AddonsActivityTheme"
-            android:name="eu.weblibre.flutter_mozilla_components.addons.AddonsActivity"
-            android:label="@string/mozac_feature_addons_addons"
-            android:exported="false"
-            android:parentActivityName=".MainActivity" />
-
-        <activity
-            android:theme="@style/AppTheme"
-            android:name="eu.weblibre.flutter_mozilla_components.addons.AddonDetailsActivity"
-            android:exported="false"
-            android:label="@string/mozac_feature_addons_addons" />
-
-        <activity
-            android:name="eu.weblibre.flutter_mozilla_components.addons.InstalledAddonDetailsActivity"
-            android:label="@string/mozac_feature_addons_addons"
-            android:parentActivityName="eu.weblibre.flutter_mozilla_components.addons.AddonsActivity"
-            android:exported="false"
-            android:theme="@style/AppTheme" />
-
-        <activity
-            android:name="eu.weblibre.flutter_mozilla_components.addons.PermissionsDetailsActivity"
-            android:label="@string/mozac_feature_addons_addons"
-            android:exported="false"
-            android:theme="@style/AppTheme" />
-
-        <activity
-            android:name="eu.weblibre.flutter_mozilla_components.addons.AddonInternalSettingsActivity"
-            android:label="@string/mozac_feature_addons_addons"
-            android:exported="false"
-            android:theme="@style/AppTheme" />
-
-        <activity
             android:name="eu.weblibre.flutter_mozilla_components.addons.WebExtensionActionPopupActivity"
             android:label="@string/mozac_feature_addons_addons"
             android:theme="@style/AppTheme"/>

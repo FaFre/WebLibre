@@ -47,8 +47,7 @@ class AllowUnsignedExtensions extends _$AllowUnsignedExtensions {
 
   @override
   FutureOr<bool> build() async {
-    final prefs =
-        await GeckoPrefService().getPrefs([_signatureRequiredPref]);
+    final prefs = await GeckoPrefService().getPrefs([_signatureRequiredPref]);
     final pref = prefs[_signatureRequiredPref];
     final allowUnsigned = pref?.value == false;
 
@@ -60,6 +59,21 @@ class AllowUnsignedExtensions extends _$AllowUnsignedExtensions {
     }
 
     return allowUnsigned;
+  }
+}
+
+@Riverpod(keepAlive: true)
+class AddonAutoUpdate extends _$AddonAutoUpdate {
+  Future<void> setEnabled({required bool enabled}) async {
+    final service = ref.read(addonServiceProvider);
+    await service.setAddonAutoUpdateEnabled(enabled: enabled);
+
+    state = AsyncData(enabled);
+  }
+
+  @override
+  FutureOr<bool> build() {
+    return ref.read(addonServiceProvider).isAddonAutoUpdateEnabled();
   }
 }
 

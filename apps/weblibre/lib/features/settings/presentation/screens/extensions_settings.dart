@@ -46,14 +46,45 @@ class ExtensionsSettingsScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               children: const [
                 SettingSection(name: 'Extensions'),
+                _ManageExtensionsTile(),
                 _InstallLocalAddonTile(),
                 _AddonCollectionTile(),
+                SettingSection(name: 'Updates'),
+                _AutoUpdateTile(),
                 SettingSection(name: 'Security'),
                 _AllowUnsignedExtensionsTile(),
               ],
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _ManageExtensionsTile extends StatelessWidget {
+  const _ManageExtensionsTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomListTile(
+      title: 'Manage Extensions',
+      subtitle:
+          'Browse installed, disabled, available, and unsupported extensions',
+      prefix: Padding(
+        padding: const EdgeInsets.only(right: 16.0),
+        child: Icon(
+          MdiIcons.puzzleEdit,
+          size: 24,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+      ),
+      suffix: FilledButton.icon(
+        onPressed: () async {
+          await const AddonManagerRoute().push<void>(context);
+        },
+        icon: const Icon(Icons.open_in_new),
+        label: const Text('Open'),
       ),
     );
   }
@@ -113,6 +144,45 @@ class _AddonCollectionTile extends StatelessWidget {
   }
 }
 
+class _AutoUpdateTile extends ConsumerWidget {
+  const _AutoUpdateTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final autoUpdate = ref.watch(addonAutoUpdateProvider);
+
+    return autoUpdate.when(
+      data: (enabled) => SwitchListTile.adaptive(
+        title: const Text('Automatic updates'),
+        subtitle: const Text(
+          'Automatically check for and install extension updates every 12 hours',
+        ),
+        secondary: const Icon(Icons.system_update_alt),
+        value: enabled,
+        onChanged: (value) async {
+          await ref
+              .read(addonAutoUpdateProvider.notifier)
+              .setEnabled(enabled: value);
+        },
+      ),
+      loading: () => const SwitchListTile.adaptive(
+        title: Text('Automatic updates'),
+        subtitle: Text(
+          'Automatically check for and install extension updates every 12 hours',
+        ),
+        secondary: Icon(Icons.system_update_alt),
+        value: true,
+        onChanged: null,
+      ),
+      error: (error, stack) => ListTile(
+        leading: const Icon(Icons.error_outline),
+        title: const Text('Automatic updates'),
+        subtitle: Text('Failed to load: $error'),
+      ),
+    );
+  }
+}
+
 class _AllowUnsignedExtensionsTile extends ConsumerWidget {
   const _AllowUnsignedExtensionsTile();
 
@@ -120,63 +190,78 @@ class _AllowUnsignedExtensionsTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final allowUnsigned = ref.watch(allowUnsignedExtensionsProvider);
 
-    return Column(
-      children: [
-        SwitchListTile.adaptive(
-          title: const Text('Allow unsigned extensions'),
-          subtitle: const Text(
-            'Unsigned extensions have not been verified by Mozilla',
-          ),
-          secondary: const Icon(Icons.extension_off),
-          value: allowUnsigned.value ?? false,
-          onChanged: allowUnsigned.isLoading
-              ? null
-              : (value) async {
-                  if (value) {
-                    final confirmed =
-                        await _showAllowUnsignedConfirmationDialog(context);
-                    if (confirmed != true) return;
-                  }
-                  await ref
-                      .read(allowUnsignedExtensionsProvider.notifier)
-                      .setAllowUnsigned(allow: value);
-                },
-        ),
-        if (allowUnsigned.value == true)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Theme.of(
+    return allowUnsigned.when(
+      data: (allowed) => Column(
+        children: [
+          SwitchListTile.adaptive(
+            title: const Text('Allow unsigned extensions'),
+            subtitle: const Text(
+              'Unsigned extensions have not been verified by Mozilla',
+            ),
+            secondary: const Icon(Icons.extension_off),
+            value: allowed,
+            onChanged: (value) async {
+              if (value) {
+                final confirmed = await _showAllowUnsignedConfirmationDialog(
                   context,
-                ).colorScheme.errorContainer.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Theme.of(context).colorScheme.error),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.warning_amber,
+                );
+                if (confirmed != true) return;
+              }
+              await ref
+                  .read(allowUnsignedExtensionsProvider.notifier)
+                  .setAllowUnsigned(allow: value);
+            },
+          ),
+          if (allowed)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.errorContainer.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
                     color: Theme.of(context).colorScheme.error,
-                    size: 20,
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Only install unsigned extensions from sources you trust. '
-                      'They may contain malicious code.',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onErrorContainer,
-                        fontSize: 12,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.warning_amber,
+                      color: Theme.of(context).colorScheme.error,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Only install unsigned extensions from sources you trust. '
+                        'They may contain malicious code.',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onErrorContainer,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
+      loading: () => const SwitchListTile.adaptive(
+        title: Text('Allow unsigned extensions'),
+        subtitle: Text('Unsigned extensions have not been verified by Mozilla'),
+        secondary: Icon(Icons.extension_off),
+        value: false,
+        onChanged: null,
+      ),
+      error: (error, stack) => ListTile(
+        leading: const Icon(Icons.error_outline),
+        title: const Text('Allow unsigned extensions'),
+        subtitle: Text('Failed to load: $error'),
+      ),
     );
   }
 }
@@ -262,4 +347,3 @@ class _AllowUnsignedConfirmationDialog extends HookWidget {
     );
   }
 }
-

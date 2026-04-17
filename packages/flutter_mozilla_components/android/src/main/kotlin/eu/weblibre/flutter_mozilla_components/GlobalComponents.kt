@@ -21,6 +21,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
 import eu.weblibre.flutter_mozilla_components.pigeons.ReaderViewController
+import eu.weblibre.flutter_mozilla_components.addons.AddonPrefs
 import eu.weblibre.flutter_mozilla_components.api.GeckoViewportApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
 import eu.weblibre.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
@@ -49,7 +50,7 @@ import java.util.concurrent.TimeUnit
 private const val HISTORY_METADATA_MAX_AGE_IN_MS = 14L * 24 * 60 * 60 * 1000 // 14 days
 private const val DEFAULT_QUERY_PARAMETER_STRIPPING_STRIP_LIST =
     "__hsfp __hssc __hstc __s _bhlid _branch_match_id _branch_referrer _gl _hsenc _kx _openstat at_recipient_id at_recipient_list bbeml bsft_clkid bsft_uid dclid et_rid fb_action_ids fb_comment_id fbclid gbraid gclid guce_referrer guce_referrer_sig hsCtaTracking igshid irclickid mc_eid mkt_tok ml_subscriber ml_subscriber_hash msclkid mtm_cid oft_c oft_ck oft_d oft_id oft_ids oft_k oft_lk oft_sk oly_anon_id oly_enc_id pk_cid rb_clickid s_cid sc_customer sc_eh sc_uid sms_click sms_source sms_uph srsltid ss_email_id syclid ttclid twclid unicorn_click_id vero_conv vero_id vgo_ee wbraid wickedid yclid ymclid ysclid"
-
+    
 object GlobalComponents {
     private var _components: Components? = null
     private var currentMode: ComponentsMode? = null
@@ -268,7 +269,23 @@ object GlobalComponents {
                     },
                     onUpdatePermissionRequest = newComponents.core.addonUpdater::onUpdatePermissionRequest,
                     onExtensionsLoaded = { extensions ->
-                        newComponents.core.addonUpdater.registerForFutureUpdates(extensions)
+                        val addonPrefs = AddonPrefs.get(applicationContext)
+                        val autoUpdateEnabled =
+                            addonPrefs.getBoolean(AddonPrefs.PREF_AUTO_UPDATE_ENABLED, true)
+                        val autoUpdateDisabledAddonIds =
+                            addonPrefs.getStringSet(AddonPrefs.PREF_AUTO_UPDATE_DISABLED_IDS, emptySet())
+                                ?: emptySet()
+                        val localFileAddonIds =
+                            addonPrefs.getStringSet(AddonPrefs.PREF_LOCAL_FILE_ADDON_IDS, emptySet())
+                                ?: emptySet()
+                        if (autoUpdateEnabled) {
+                            newComponents.core.addonUpdater.registerForFutureUpdates(
+                                extensions.filterNot { extension ->
+                                    autoUpdateDisabledAddonIds.contains(extension.id) ||
+                                        localFileAddonIds.contains(extension.id)
+                                },
+                            )
+                        }
                         newComponents.core.supportedAddonsChecker.registerForChecks()
                     },
                 )

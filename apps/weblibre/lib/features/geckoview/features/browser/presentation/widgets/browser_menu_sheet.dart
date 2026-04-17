@@ -36,6 +36,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/addons/presentation/screens/addon_internal_settings.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
@@ -1706,9 +1707,10 @@ class _ExtensionsCard extends HookConsumerWidget {
         WebExtensionActionType.browser,
       ).select((value) => value.values.toList()),
     );
+    final rootContext = Navigator.of(context, rootNavigator: true).context;
     Future<void> openExtensionSettings(String extensionId) async {
       Navigator.pop(context);
-      await addonService.startAddonSettingsActivity(extensionId);
+      await openAddonSettingsFlowById(rootContext, ref, extensionId);
     }
 
     return _buildMenuCard(
@@ -1804,7 +1806,7 @@ class _ExtensionsCard extends HookConsumerWidget {
                 icon: MdiIcons.puzzleEdit,
                 onTap: () async {
                   Navigator.pop(context);
-                  await addonService.startAddonManagerActivity();
+                  await const AddonManagerRoute().push<void>(rootContext);
                 },
               ),
               _buildSubTile(

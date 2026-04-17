@@ -27,6 +27,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
+import 'package:weblibre/features/addons/presentation/widgets/pinned_addon_bar.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
@@ -252,6 +253,7 @@ class BrowserTabBar extends HookConsumerWidget {
                 : const AppBarTitle()
           : null,
       actions: [
+        const PinnedAddonBar(),
         if (isSmallWebMode)
           ReaderButton(
             buttonBuilder: (isLoading, readerActive, icon) => ToolbarButton(

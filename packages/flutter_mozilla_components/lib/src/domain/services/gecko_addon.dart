@@ -13,6 +13,7 @@ import 'package:rxdart/rxdart.dart';
 
 typedef ExtensionDataEvent = ({String extensionId, WebExtensionData? data});
 typedef ExtensionIconEvent = ({String extensionId, Uint8List bytes});
+typedef ExtensionPopupEvent = ({String extensionId, String extensionName});
 
 final _apiInstance = GeckoAddonsApi();
 
@@ -24,6 +25,7 @@ class GeckoAddonService extends GeckoAddonEvents {
 
   final _browserIconSubject = ReplaySubject<ExtensionIconEvent>();
   final _pageIconSubject = ReplaySubject<ExtensionIconEvent>();
+  final _popupSubject = PublishSubject<ExtensionPopupEvent>();
 
   Stream<ExtensionDataEvent> get browserExtensionStream =>
       _browserExtensionSubject.stream;
@@ -33,13 +35,18 @@ class GeckoAddonService extends GeckoAddonEvents {
   Stream<ExtensionIconEvent> get browserIconStream =>
       _browserIconSubject.stream;
   Stream<ExtensionIconEvent> get pageIconStream => _pageIconSubject.stream;
+  Stream<ExtensionPopupEvent> get popupStream => _popupSubject.stream;
 
-  Future<void> startAddonManagerActivity() {
-    return _api.startAddonManagerActivity();
+  Future<List<AddonInfo>> getAddons({bool allowCache = true}) {
+    return _api.getAddons(allowCache);
   }
 
-  Future<void> startAddonSettingsActivity(String extensionId) {
-    return _api.startAddonSettingsActivity(extensionId);
+  Future<AddonInfo?> getAddonById(String addonId, {bool allowCache = true}) {
+    return _api.getAddonById(addonId, allowCache);
+  }
+
+  Future<AddonStoreInfo?> getAddonStoreInfo(String addonId) {
+    return _api.getAddonStoreInfo(addonId);
   }
 
   Future<void> invokeAddonAction(
@@ -51,6 +58,52 @@ class GeckoAddonService extends GeckoAddonEvents {
 
   Future<void> installAddon(Uri url) {
     return _api.installAddon(url.toString());
+  }
+
+  Future<AddonInfo> enableAddon(String addonId) {
+    return _api.enableAddon(addonId);
+  }
+
+  Future<AddonInfo> disableAddon(String addonId) {
+    return _api.disableAddon(addonId);
+  }
+
+  Future<AddonInfo> setAddonAllowedInPrivateBrowsing(
+    String addonId,
+    bool allowed,
+  ) {
+    return _api.setAddonAllowedInPrivateBrowsing(addonId, allowed);
+  }
+
+  Future<AddonInfo> setAddonAutoUpdateEnabledForAddon(
+    String addonId,
+    bool enabled,
+  ) {
+    return _api.setAddonAutoUpdateEnabledForAddon(addonId, enabled);
+  }
+
+  Future<void> uninstallAddon(String addonId) {
+    return _api.uninstallAddon(addonId);
+  }
+
+  Future<AddonUpdateAttemptInfo?> triggerAddonUpdate(String addonId) {
+    return _api.triggerAddonUpdate(addonId);
+  }
+
+  Future<void> triggerAllAddonUpdates() {
+    return _api.triggerAllAddonUpdates();
+  }
+
+  Future<AddonUpdateAttemptInfo?> getLastAddonUpdateAttempt(String addonId) {
+    return _api.getLastAddonUpdateAttempt(addonId);
+  }
+
+  Future<bool> isAddonAutoUpdateEnabled() {
+    return _api.isAddonAutoUpdateEnabled();
+  }
+
+  Future<void> setAddonAutoUpdateEnabled({required bool enabled}) {
+    return _api.setAddonAutoUpdateEnabled(enabled);
   }
 
   @override
@@ -115,6 +168,11 @@ class GeckoAddonService extends GeckoAddonEvents {
     }
   }
 
+  @override
+  void onWebExtensionPopupRequested(String extensionId, String extensionName) {
+    _popupSubject.add((extensionId: extensionId, extensionName: extensionName));
+  }
+
   GeckoAddonService.setUp({
     BinaryMessenger? binaryMessenger,
     GeckoAddonsApi? api,
@@ -132,5 +190,6 @@ class GeckoAddonService extends GeckoAddonEvents {
     await _pageExtensionSubject.close();
     await _browserIconSubject.close();
     await _pageIconSubject.close();
+    await _popupSubject.close();
   }
 }

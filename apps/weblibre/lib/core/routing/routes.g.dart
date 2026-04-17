@@ -13,6 +13,7 @@ List<RouteBase> get $appRoutes => [
   $bangMenuRoute,
   $bookmarksRoute,
   $browserRoute,
+  $addonManagerRoute,
   $feedListRoute,
   $historyRoute,
   $profileListRoute,
@@ -929,6 +930,125 @@ bool _$boolConverter(String value) {
 extension<T extends Enum> on Map<T, String> {
   T? _$fromName(String? value) =>
       entries.where((element) => element.value == value).firstOrNull?.key;
+}
+
+RouteBase get $addonManagerRoute => GoRouteData.$route(
+  path: '/addons',
+  name: 'AddonManagerRoute',
+  factory: $AddonManagerRoute._fromState,
+  routes: [
+    GoRouteData.$route(
+      path: 'details/:addonId',
+      name: 'AddonDetailsRoute',
+      factory: $AddonDetailsRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'permissions/:addonId',
+      name: 'AddonPermissionsRoute',
+      factory: $AddonPermissionsRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'settings/:addonId',
+      name: 'AddonInternalSettingsRoute',
+      factory: $AddonInternalSettingsRoute._fromState,
+    ),
+  ],
+);
+
+mixin $AddonManagerRoute on GoRouteData {
+  static AddonManagerRoute _fromState(GoRouterState state) =>
+      const AddonManagerRoute();
+
+  @override
+  String get location => GoRouteData.$location('/addons');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $AddonDetailsRoute on GoRouteData {
+  static AddonDetailsRoute _fromState(GoRouterState state) =>
+      AddonDetailsRoute(addonId: state.pathParameters['addonId']!);
+
+  AddonDetailsRoute get _self => this as AddonDetailsRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/addons/details/${Uri.encodeComponent(_self.addonId)}',
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $AddonPermissionsRoute on GoRouteData {
+  static AddonPermissionsRoute _fromState(GoRouterState state) =>
+      AddonPermissionsRoute(addonId: state.pathParameters['addonId']!);
+
+  AddonPermissionsRoute get _self => this as AddonPermissionsRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/addons/permissions/${Uri.encodeComponent(_self.addonId)}',
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $AddonInternalSettingsRoute on GoRouteData {
+  static AddonInternalSettingsRoute _fromState(GoRouterState state) =>
+      AddonInternalSettingsRoute(addonId: state.pathParameters['addonId']!);
+
+  AddonInternalSettingsRoute get _self => this as AddonInternalSettingsRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/addons/settings/${Uri.encodeComponent(_self.addonId)}',
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
 }
 
 RouteBase get $feedListRoute => GoRouteData.$route(

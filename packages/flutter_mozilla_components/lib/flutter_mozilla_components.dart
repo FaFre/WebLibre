@@ -38,6 +38,12 @@ export 'src/pigeons/gecko.g.dart'
     show
         AddTabParams,
         AddonCollection,
+        AddonDisabledReason,
+        AddonIncognito,
+        AddonInfo,
+        AddonStoreInfo,
+        AddonUpdateAttemptInfo,
+        AddonUpdateStatus,
         AppLinksMode,
         AudioHitResult,
         AutoplayStatus,

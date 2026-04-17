@@ -667,6 +667,112 @@ class WebExtensionData {
   );
 }
 
+enum AddonDisabledReason {
+  unsupported,
+  blocklisted,
+  userRequested,
+  notCorrectlySigned,
+  incompatible,
+  softBlocked,
+}
+
+enum AddonIncognito { spanning, split, notAllowed }
+
+enum AddonUpdateStatus {
+  notInstalled,
+  successfullyUpdated,
+  noUpdateAvailable,
+  error,
+}
+
+class AddonInfo {
+  final String id;
+  final String displayName;
+  final String? summary;
+  final String description;
+  final String downloadUrl;
+  final String version;
+  final String? installedVersion;
+  final List<String> translatedPermissions;
+  final List<String> translatedRequiredDataCollectionPermissions;
+  final String? authorName;
+  final String? authorUrl;
+  final String homepageUrl;
+  final String detailUrl;
+  final String ratingUrl;
+  final double? ratingAverage;
+  final int? ratingReviews;
+  final String createdAt;
+  final String updatedAt;
+  final Uint8List? icon;
+  final bool isInstalled;
+  final bool isEnabled;
+  final bool isSupported;
+  final bool isAllowedInPrivateBrowsing;
+  final bool isAutoUpdateEnabled;
+  final bool isLocalFileInstalled;
+  final String? optionsPageUrl;
+  final bool openOptionsPageInTab;
+  final AddonDisabledReason? disabledReason;
+  final AddonIncognito incognito;
+
+  const AddonInfo({
+    required this.id,
+    required this.displayName,
+    this.summary,
+    required this.description,
+    required this.downloadUrl,
+    required this.version,
+    this.installedVersion,
+    required this.translatedPermissions,
+    required this.translatedRequiredDataCollectionPermissions,
+    this.authorName,
+    this.authorUrl,
+    required this.homepageUrl,
+    required this.detailUrl,
+    required this.ratingUrl,
+    this.ratingAverage,
+    this.ratingReviews,
+    required this.createdAt,
+    required this.updatedAt,
+    this.icon,
+    required this.isInstalled,
+    required this.isEnabled,
+    required this.isSupported,
+    required this.isAllowedInPrivateBrowsing,
+    required this.isAutoUpdateEnabled,
+    required this.isLocalFileInstalled,
+    this.optionsPageUrl,
+    required this.openOptionsPageInTab,
+    this.disabledReason,
+    this.incognito = AddonIncognito.spanning,
+  });
+}
+
+class AddonStoreInfo {
+  final String latestVersion;
+  final String latestXpiUrl;
+
+  const AddonStoreInfo({
+    required this.latestVersion,
+    required this.latestXpiUrl,
+  });
+}
+
+class AddonUpdateAttemptInfo {
+  final String addonId;
+  final int dateMillisecondsSinceEpoch;
+  final AddonUpdateStatus? status;
+  final String? message;
+
+  const AddonUpdateAttemptInfo({
+    required this.addonId,
+    required this.dateMillisecondsSinceEpoch,
+    this.status,
+    this.message,
+  });
+}
+
 enum GeckoSuggestionType { session, clipboard, history }
 
 class GeckoSuggestion {
@@ -1738,14 +1844,49 @@ abstract class GeckoSelectionActionEvents {
 
 @HostApi()
 abstract class GeckoAddonsApi {
-  void startAddonManagerActivity();
+  @async
+  List<AddonInfo> getAddons(bool allowCache);
 
-  void startAddonSettingsActivity(String extensionId);
+  @async
+  AddonInfo? getAddonById(String addonId, bool allowCache);
+
+  @async
+  AddonStoreInfo? getAddonStoreInfo(String addonId);
 
   void invokeAddonAction(String extensionId, WebExtensionActionType actionType);
 
   @async
+  AddonInfo enableAddon(String addonId);
+
+  @async
+  AddonInfo disableAddon(String addonId);
+
+  @async
+  AddonInfo setAddonAllowedInPrivateBrowsing(String addonId, bool allowed);
+
+  @async
+  AddonInfo setAddonAutoUpdateEnabledForAddon(String addonId, bool enabled);
+
+  @async
+  void uninstallAddon(String addonId);
+
+  @async
+  AddonUpdateAttemptInfo? triggerAddonUpdate(String addonId);
+
+  @async
+  void triggerAllAddonUpdates();
+
+  @async
+  AddonUpdateAttemptInfo? getLastAddonUpdateAttempt(String addonId);
+
+  @async
   void installAddon(String url);
+
+  @async
+  bool isAddonAutoUpdateEnabled();
+
+  @async
+  void setAddonAutoUpdateEnabled(bool enabled);
 }
 
 @FlutterApi()
@@ -1769,6 +1910,8 @@ abstract class GeckoAddonEvents {
     WebExtensionActionType actionType,
     Uint8List icon,
   );
+
+  void onWebExtensionPopupRequested(String extensionId, String extensionName);
 }
 
 @HostApi()
