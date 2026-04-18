@@ -91,6 +91,17 @@ class WelcomePage extends ConsumerWidget {
                     .read(onboardingModeProvider.notifier)
                     .select(OnboardingMode.detailed),
               ),
+              const SizedBox(height: 12),
+              _ModeOption(
+                mode: OnboardingMode.restore,
+                title: 'Restore from Backup',
+                subtitle: 'Import a profile from an encrypted backup file.',
+                icon: Icons.settings_backup_restore,
+                selected: selectedMode == OnboardingMode.restore,
+                onTap: () => ref
+                    .read(onboardingModeProvider.notifier)
+                    .select(OnboardingMode.restore),
+              ),
             ],
             const SizedBox(height: 40),
             _EulaCheckbox(

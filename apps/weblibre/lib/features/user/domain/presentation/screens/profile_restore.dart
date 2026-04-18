@@ -22,6 +22,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/override_profile_dialog.dart';
 import 'package:weblibre/features/user/domain/services/user_backup.dart';
 import 'package:weblibre/utils/form_validators.dart';
@@ -31,8 +32,16 @@ enum RestoreTarget { createOrOverride, createNew }
 
 class ProfileRestoreScreen extends HookConsumerWidget {
   final Uri backupFileUri;
+  final RestoreTarget? forcedTarget;
+  final void Function(BuildContext context, Profile? restoredProfile)?
+  onRestoreSuccess;
 
-  const ProfileRestoreScreen({super.key, required this.backupFileUri});
+  const ProfileRestoreScreen({
+    super.key,
+    required this.backupFileUri,
+    this.forcedTarget,
+    this.onRestoreSuccess,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -41,10 +50,10 @@ class ProfileRestoreScreen extends HookConsumerWidget {
     final passwordTextController = useTextEditingController();
     final nameTextController = useTextEditingController();
 
-    final restoreFuture = useState<Future<bool>?>(null);
+    final restoreFuture = useState<Future<Profile?>?>(null);
     final restoreState = useFuture(restoreFuture.value);
 
-    final restoreTarget = useState(RestoreTarget.createNew);
+    final restoreTarget = useState(forcedTarget ?? RestoreTarget.createNew);
 
     useEffect(() {
       if (restoreState.hasError) {
@@ -54,7 +63,11 @@ class ProfileRestoreScreen extends HookConsumerWidget {
       } else if (restoreState.hasData) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           showInfoMessage(context, 'Backup restored successfully');
-          ProfileListRoute().go(context);
+          if (onRestoreSuccess != null) {
+            onRestoreSuccess!(context, restoreState.data);
+          } else {
+            ProfileListRoute().go(context);
+          }
         });
       }
 
@@ -93,32 +106,33 @@ class ProfileRestoreScreen extends HookConsumerWidget {
                   },
                 ),
                 const SizedBox(height: 16),
-                RadioGroup(
-                  groupValue: restoreTarget.value,
-                  onChanged: (value) {
-                    if (value != null) {
-                      restoreTarget.value = value;
-                    }
-                  },
-                  child: Column(
-                    children: [
-                      RadioListTile(
-                        enabled: !disableInteraction,
-                        value: RestoreTarget.createNew,
-                        title: const Text('Create New User'),
-                        subtitle: const Text('Restore backup as a new user'),
-                      ),
-                      RadioListTile(
-                        enabled: !disableInteraction,
-                        value: RestoreTarget.createOrOverride,
-                        title: const Text('Restore & Replace'),
-                        subtitle: const Text(
-                          'Restore backup and overwrite existing user if present',
+                if (forcedTarget == null)
+                  RadioGroup(
+                    groupValue: restoreTarget.value,
+                    onChanged: (value) {
+                      if (value != null) {
+                        restoreTarget.value = value;
+                      }
+                    },
+                    child: Column(
+                      children: [
+                        RadioListTile(
+                          enabled: !disableInteraction,
+                          value: RestoreTarget.createNew,
+                          title: const Text('Create New User'),
+                          subtitle: const Text('Restore backup as a new user'),
                         ),
-                      ),
-                    ],
+                        RadioListTile(
+                          enabled: !disableInteraction,
+                          value: RestoreTarget.createOrOverride,
+                          title: const Text('Restore & Replace'),
+                          subtitle: const Text(
+                            'Restore backup and overwrite existing user if present',
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
                 if (restoreTarget.value == RestoreTarget.createNew)
                   TextFormField(
                     controller: nameTextController,
@@ -156,7 +170,8 @@ class ProfileRestoreScreen extends HookConsumerWidget {
                                       throw Exception('Override failed');
                                     }
                                   },
-                                ),
+                                )
+                                .then<Profile?>((_) => null),
                           RestoreTarget.createNew =>
                             ref
                                 .read(userBackupServiceProvider.notifier)

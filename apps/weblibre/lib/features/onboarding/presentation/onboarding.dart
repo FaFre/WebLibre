@@ -36,7 +36,11 @@ import 'package:weblibre/features/onboarding/presentation/pages/privacy_hardenin
 import 'package:weblibre/features/onboarding/presentation/pages/toolbar_layout.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/ublock_opt_in.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/welcome.dart';
+import 'package:weblibre/features/user/domain/presentation/screens/profile_backup_list.dart';
+import 'package:weblibre/features/user/domain/presentation/screens/profile_restore.dart';
 import 'package:weblibre/features/user/domain/repositories/onboarding.dart';
+import 'package:weblibre/features/user/domain/repositories/profile.dart';
+import 'package:weblibre/utils/exit_app.dart';
 
 class OnboardingScreen extends HookConsumerWidget {
   final int currentRevision;
@@ -66,6 +70,9 @@ class OnboardingScreen extends HookConsumerWidget {
         case 1:
           return [const AiConfigurationPage()];
         default:
+          if (onboardingMode == OnboardingMode.restore && !isReturningUser) {
+            return [WelcomePage(isReturningUser: isReturningUser)];
+          }
           return [
             WelcomePage(isReturningUser: isReturningUser),
             const DefaultSearchPage(),
@@ -78,7 +85,7 @@ class OnboardingScreen extends HookConsumerWidget {
             PermissionsPage(formKey: GlobalKey<FormState>()),
           ];
       }
-    }, [currentRevision, targetRevision, onboardingMode]);
+    }, [currentRevision, targetRevision, onboardingMode, isReturningUser]);
 
     final lastPage = useRef(pageController.initialPage);
     final currentPage = useState(pageController.initialPage);
@@ -173,6 +180,63 @@ class OnboardingScreen extends HookConsumerWidget {
                         iconAlignment: IconAlignment.end,
                         icon: const Icon(Icons.chevron_right),
                         label: const Text('Next'),
+                      ),
+                    )
+                  else if (onboardingMode == OnboardingMode.restore &&
+                      !isReturningUser)
+                    Expanded(
+                      child: TextButton.icon(
+                        onPressed: eulaAccepted
+                            ? () async {
+                                await Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) => ProfileBackupListScreen(
+                                      onBackupSelected: (context, uri) {
+                                        unawaited(
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute<void>(
+                                              builder: (_) =>
+                                                  ProfileRestoreScreen(
+                                                    backupFileUri: uri,
+                                                    forcedTarget:
+                                                        RestoreTarget.createNew,
+                                                    onRestoreSuccess:
+                                                        (_, profile) async {
+                                                          await ref
+                                                              .read(
+                                                                onboardingRepositoryProvider
+                                                                    .notifier,
+                                                              )
+                                                              .pushRevision(
+                                                                targetRevision,
+                                                              );
+                                                          if (profile != null) {
+                                                            await ref
+                                                                .read(
+                                                                  profileRepositoryProvider
+                                                                      .notifier,
+                                                                )
+                                                                .switchProfile(
+                                                                  profile.id,
+                                                                );
+                                                            await exitApp(
+                                                              ref.container,
+                                                            );
+                                                          }
+                                                        },
+                                                  ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                );
+                              }
+                            : null,
+                        iconAlignment: IconAlignment.end,
+                        icon: const Icon(Icons.settings_backup_restore),
+                        label: const Text('Restore'),
                       ),
                     )
                   else

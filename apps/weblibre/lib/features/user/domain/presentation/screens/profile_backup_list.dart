@@ -33,7 +33,20 @@ final _filenamePattern = RegExp(
 );
 
 class ProfileBackupListScreen extends HookConsumerWidget {
-  const ProfileBackupListScreen({super.key});
+  final void Function(BuildContext context, Uri backupFileUri)?
+  onBackupSelected;
+
+  const ProfileBackupListScreen({super.key, this.onBackupSelected});
+
+  Future<void> _handleSelection(BuildContext context, Uri backupFileUri) async {
+    if (onBackupSelected != null) {
+      onBackupSelected!(context, backupFileUri);
+    } else {
+      await RestoreProfileRoute(
+        backupFileUri: backupFileUri.toString(),
+      ).push(context);
+    }
+  }
 
   Future<void> _pickDirectory(WidgetRef ref) async {
     final dir = await SafUtil().pickDirectory(
@@ -128,21 +141,15 @@ class ProfileBackupListScreen extends HookConsumerWidget {
                                 .read(formatProvider.notifier)
                                 .fullDateTime(dateTime),
                           ),
-                          onTap: () async {
-                            await RestoreProfileRoute(
-                              backupFileUri: file.uri,
-                            ).push(context);
-                          },
+                          onTap: () =>
+                              _handleSelection(context, Uri.parse(file.uri)),
                         );
                       } else {
                         return ListTile(
                           key: ValueKey(file.uri),
                           title: Text(file.name),
-                          onTap: () async {
-                            await RestoreProfileRoute(
-                              backupFileUri: file.uri,
-                            ).push(context);
-                          },
+                          onTap: () =>
+                              _handleSelection(context, Uri.parse(file.uri)),
                         );
                       }
                     },

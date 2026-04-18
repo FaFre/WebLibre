@@ -202,7 +202,7 @@ class UserBackupService extends _$UserBackupService {
     }
   }
 
-  Future<bool> restoreAndCreateNew(
+  Future<Profile> restoreAndCreateNew(
     Uri backupFileUri, {
     required String profileName,
     required String password,
@@ -222,17 +222,18 @@ class UserBackupService extends _$UserBackupService {
         outputDirectory: outputDirectory,
         argon2Params: Argon2Params.memoryConstrained(),
       );
-      await backup.unpack(password).then((_) async {
+      final newProfile = await backup.unpack(password).then((_) async {
         final newProfile = Profile.create(name: profileName);
         final newPath = filesystem.getProfileDir(newProfile.uuidValue);
 
         await outputDirectory.rename(newPath.path);
         await filesystem.updateProfileMetadata(newProfile);
         await filesystem.healProfile(newPath);
+        return newProfile;
       });
 
       ref.invalidate(profileRepositoryProvider);
-      return true;
+      return newProfile;
     } finally {
       try {
         if (await tempFile.exists()) {
