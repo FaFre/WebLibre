@@ -171,10 +171,6 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
     );
   }
 
-  SingleSelectable<bool> isSiteAssignedToContainer(Uri uri) {
-    return db.definitionsDrift.isSiteAssignedToContainer(uri: uri.origin);
-  }
-
   SingleSelectable<bool> areSitesAvailable(
     Iterable<Uri> origins,
     String ignoredContainerId,
@@ -183,10 +179,6 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
       ignoreContainerId: ignoredContainerId,
       uriList: jsonEncode(origins.map((value) => value.origin).toList()),
     );
-  }
-
-  Selectable<String> siteAssignedContainerId(Uri uri) {
-    return db.definitionsDrift.siteAssignedContainerId(uri: uri.origin);
   }
 
   Selectable<SiteAssignment> allAssignedSites() {

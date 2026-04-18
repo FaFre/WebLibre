@@ -165,6 +165,54 @@ describe('Store', () => {
     })
   })
 
+  describe('wildcard site assignments', function () {
+    it('matches subdomains of a wildcard entry', () => {
+      store.setSiteAssignments(new Map([['https://*.example.com', 'ctx1']]))
+
+      expect(store.isSiteOriginAssigned(new URL('https://foo.example.com/path'))).to.be.true
+      expect(store.isSiteOriginAssigned(new URL('https://a.b.example.com/'))).to.be.true
+    })
+
+    it('matches the apex of a wildcard entry', () => {
+      store.setSiteAssignments(new Map([['https://*.example.com', 'ctx1']]))
+
+      expect(store.isSiteOriginAssigned(new URL('https://example.com/path'))).to.be.true
+    })
+
+    it('does not match unrelated domains', () => {
+      store.setSiteAssignments(new Map([['https://*.example.com', 'ctx1']]))
+
+      expect(store.isSiteOriginAssigned(new URL('https://notexample.com/'))).to.be.false
+      expect(store.isSiteOriginAssigned(new URL('https://example.com.evil.test/'))).to.be.false
+    })
+
+    it('respects scheme when matching wildcards', () => {
+      store.setSiteAssignments(new Map([['https://*.example.com', 'ctx1']]))
+
+      expect(store.isSiteOriginAssigned(new URL('http://foo.example.com/'))).to.be.false
+    })
+
+    it('prefers exact match over wildcard', () => {
+      store.setSiteAssignments(new Map([
+        ['https://*.example.com', 'wild_ctx'],
+        ['https://foo.example.com', 'exact_ctx'],
+      ]))
+
+      expect(store.isSiteOriginInSameContext(new URL('https://foo.example.com/'), 'exact_ctx')).to.be.true
+      expect(store.isSiteOriginInSameContext(new URL('https://bar.example.com/'), 'wild_ctx')).to.be.true
+    })
+
+    it('prefers longer suffix when multiple wildcards match', () => {
+      store.setSiteAssignments(new Map([
+        ['https://*.example.com', 'broad_ctx'],
+        ['https://*.sub.example.com', 'narrow_ctx'],
+      ]))
+
+      expect(store.isSiteOriginInSameContext(new URL('https://x.sub.example.com/'), 'narrow_ctx')).to.be.true
+      expect(store.isSiteOriginInSameContext(new URL('https://x.other.example.com/'), 'broad_ctx')).to.be.true
+    })
+  })
+
   describe('isSiteOriginInSameContext', function () {
     it('should allow proxy-equivalent isolated context', async () => {
       store.setSiteAssignments(new Map([['https://example.com/page', 'container_ctx']]))

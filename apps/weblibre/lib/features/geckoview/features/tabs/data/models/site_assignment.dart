@@ -34,3 +34,27 @@ class SiteAssignment with FastEquatable {
   @override
   List<Object?> get hashParameters => [id, contextualIdentity, assignedSite];
 }
+
+const String _wildcardPrefix = '*.';
+
+/// A host starting with `*.` (e.g. `*.example.com`) matches the bare apex
+/// and any subdomain of it.
+bool isWildcardSite(Uri assignment) =>
+    assignment.host.startsWith(_wildcardPrefix);
+
+/// Tests whether [assignment] (a stored site-assignment entry) matches the
+/// given [request] URL. Exact entries compare origins. Wildcard entries
+/// (host starting with `*.`) match the apex and any subdomain with the
+/// same scheme, ignoring port.
+bool siteAssignmentMatches(Uri assignment, Uri request) {
+  if (assignment.scheme != request.scheme) return false;
+
+  if (isWildcardSite(assignment)) {
+    final suffix = assignment.host.substring(_wildcardPrefix.length);
+    if (suffix.isEmpty) return false;
+    final host = request.host;
+    return host == suffix || host.endsWith('.$suffix');
+  }
+
+  return assignment.origin == request.origin;
+}

@@ -24,6 +24,7 @@ import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/uuid.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/color_palette.dart';
@@ -158,12 +159,8 @@ class ContainerRepository extends _$ContainerRepository {
     return ContainerData(id: uuid.v7(), color: initialColor);
   }
 
-  Future<bool> isSiteAssignedToContainer(Uri uri) {
-    return ref
-        .read(tabDatabaseProvider)
-        .containerDao
-        .isSiteAssignedToContainer(uri)
-        .getSingle();
+  Future<bool> isSiteAssignedToContainer(Uri uri) async {
+    return (await siteAssignedContainerId(uri)) != null;
   }
 
   Future<bool> areSitesAvailable(
@@ -177,13 +174,21 @@ class ContainerRepository extends _$ContainerRepository {
         .getSingle();
   }
 
-  Future<String?> siteAssignedContainerId(Uri uri) {
-    return ref
+  Future<String?> siteAssignedContainerId(Uri uri) async {
+    final all = await ref
         .read(tabDatabaseProvider)
         .containerDao
-        .siteAssignedContainerId(uri)
-        .get()
-        .then((value) => value.firstOrNull);
+        .allAssignedSites()
+        .get();
+
+    String? wildcardMatch;
+    for (final a in all) {
+      if (siteAssignmentMatches(a.assignedSite, uri)) {
+        if (!isWildcardSite(a.assignedSite)) return a.id;
+        wildcardMatch ??= a.id;
+      }
+    }
+    return wildcardMatch;
   }
 
   Future<List<String>> getContainersToClearOnExit() async {

@@ -201,5 +201,9 @@ Stream<bool> watchIsCurrentSiteAssignedToContainer(Ref ref) {
   );
 
   final db = ref.watch(tabDatabaseProvider);
-  return db.containerDao.isSiteAssignedToContainer(currentUri).watchSingle();
+  return db.containerDao.allAssignedSites().watch().map((assignments) {
+    return assignments.any(
+      (a) => siteAssignmentMatches(a.assignedSite, currentUri),
+    );
+  });
 }

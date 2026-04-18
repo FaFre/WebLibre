@@ -75,22 +75,76 @@ function fillInDefaults(proxy: Partial<ProxyDao>): ProxyDao {
   return proxy as ProxyDao
 }
 
+interface WildcardAssignment {
+  protocol: string
+  hostSuffix: string
+  contextId: string
+}
+
 export class Store {
   private proxies: ProxyDao[] = []
   private relations: { [key: string]: string[] } = {}
 
   private siteAssignments: Map<string, string> = new Map<string, string>()
+  private wildcardAssignments: WildcardAssignment[] = []
 
   setSiteAssignments(sites: Map<string, unknown>): void {
-    this.siteAssignments = new Map(
-      Array.from(sites, ([key, value]) => {
-        return [URL.parse(key)!.origin, value as string]
-      })
-    );
+    const exact = new Map<string, string>()
+    const wildcard: WildcardAssignment[] = []
+
+    // `*` is a forbidden host code point in WHATWG URL, so wildcard entries
+    // must be detected by string match before any URL parser touches them.
+    const wildcardRe = /^(https?):\/\/\*\.([^/?#]+)$/i
+
+    for (const [key, value] of sites) {
+      const contextId = value as string
+      const wildcardMatch = wildcardRe.exec(key)
+
+      if (wildcardMatch !== null) {
+        const hostSuffix = wildcardMatch[2].toLowerCase()
+        if (hostSuffix.length === 0) continue
+        wildcard.push({
+          protocol: wildcardMatch[1].toLowerCase() + ':',
+          hostSuffix,
+          contextId,
+        })
+        continue
+      }
+
+      const parsed = URL.parse(key)
+      if (parsed === null) continue
+      exact.set(parsed.origin, contextId)
+    }
+
+    this.siteAssignments = exact
+    this.wildcardAssignments = wildcard
+  }
+
+  private matchWildcard(uri: URL): string | undefined {
+    // Longest suffix wins, so e.g. *.sub.example.com beats *.example.com.
+    let bestMatch: WildcardAssignment | undefined
+    for (const entry of this.wildcardAssignments) {
+      if (entry.protocol !== uri.protocol) continue
+      const host = uri.hostname
+      if (host !== entry.hostSuffix && !host.endsWith('.' + entry.hostSuffix)) {
+        continue
+      }
+      if (
+        bestMatch === undefined ||
+        entry.hostSuffix.length > bestMatch.hostSuffix.length
+      ) {
+        bestMatch = entry
+      }
+    }
+    return bestMatch?.contextId
+  }
+
+  private lookupAssignment(uri: URL): string | undefined {
+    return this.siteAssignments.get(uri.origin) ?? this.matchWildcard(uri)
   }
 
   isSiteOriginAssigned(uri: URL): boolean {
-    return this.siteAssignments.has(uri.origin)
+    return this.lookupAssignment(uri) !== undefined
   }
 
   /**
@@ -105,7 +159,7 @@ export class Store {
   }
 
   isSiteOriginInSameContext(uri: URL, contextId: string): boolean {
-    const assignedContextId = this.siteAssignments.get(uri.origin);
+    const assignedContextId = this.lookupAssignment(uri);
     if (assignedContextId === undefined) return false;
     if (assignedContextId === contextId) return true;
 
@@ -119,8 +173,8 @@ export class Store {
     // empty relations mean no proxy, and different non-proxied contexts
     // should not be considered equivalent.
     if (assignedRelation.length > 0 &&
-        assignedRelation.length === currentRelation.length &&
-        assignedRelation.every((id, i) => id === currentRelation[i])) {
+      assignedRelation.length === currentRelation.length &&
+      assignedRelation.every((id, i) => id === currentRelation[i])) {
       return true;
     }
 

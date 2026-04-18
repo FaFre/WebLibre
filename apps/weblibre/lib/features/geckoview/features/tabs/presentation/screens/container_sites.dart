@@ -22,10 +22,53 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/form_validators.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
+
+final _wildcardHostRegex = RegExp(
+  r'^\*\.([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,63}$',
+);
+
+/// Parses a user-entered site-assignment value. Accepts:
+/// - `example.com`, `https://example.com/path` → exact origin entry
+/// - `*.example.com`, `https://*.example.com` → wildcard entry for all
+///   subdomains (and the apex) of `example.com`
+Uri? _parseSiteAssignmentInput(String? input) {
+  if (input == null) return null;
+  final trimmed = input.trim();
+  if (trimmed.isEmpty) return null;
+
+  // Strip scheme for wildcard detection.
+  var rest = trimmed;
+  var scheme = 'https';
+  final schemeMatch = RegExp(r'^(https?):\/\/', caseSensitive: false)
+      .firstMatch(trimmed);
+  if (schemeMatch != null) {
+    scheme = schemeMatch.group(1)!.toLowerCase();
+    rest = trimmed.substring(schemeMatch.end);
+  }
+
+  // Extract host portion (up to first path/query/fragment/port separator).
+  final hostEnd = rest.indexOf(RegExp(r'[\/?#:]'));
+  final host = (hostEnd == -1 ? rest : rest.substring(0, hostEnd))
+      .toLowerCase();
+
+  if (host.startsWith('*.')) {
+    if (!_wildcardHostRegex.hasMatch(host)) return null;
+    return Uri(scheme: scheme, host: host);
+  }
+
+  final parsed = parseValidatedUrl(
+    trimmed,
+    eagerParsing: true,
+    onlyHttpProtocol: true,
+  );
+  if (parsed == null) return null;
+  return Uri.parse(parsed.origin);
+}
 
 class ContainerSitesScreen extends HookConsumerWidget {
   final Set<Uri> initialSites;
@@ -66,7 +109,9 @@ class ContainerSitesScreen extends HookConsumerWidget {
                   child: TextFormField(
                     decoration: InputDecoration(
                       label: const Text('Add Site'),
-                      hintText: 'example.com',
+                      hintText: 'example.com or *.example.com',
+                      helperText:
+                          'Use *.example.com to match all subdomains',
                       floatingLabelBehavior: FloatingLabelBehavior.always,
                       suffix: TextButton(
                         onPressed: () {
@@ -80,55 +125,42 @@ class ContainerSitesScreen extends HookConsumerWidget {
                     controller: textController,
                     keyboardType: TextInputType.url,
                     validator: (value) {
-                      final uriValid = validateUrl(
-                        value,
-                        onlyHttpProtocol: true,
-                        eagerParsing: true,
-                      );
-
-                      if (uriValid != null) {
-                        return uriValid;
+                      if (value.isEmpty) {
+                        return 'URL must be provided';
                       }
 
-                      final parsedUrl = parseValidatedUrl(
-                        value,
-                        eagerParsing: true,
-                        onlyHttpProtocol: true,
-                      );
-                      if (parsedUrl == null) {
+                      final entry = _parseSiteAssignmentInput(value);
+                      if (entry == null) {
                         return 'Invalid URL';
                       }
 
-                      final origin = Uri.parse(parsedUrl.origin);
-
-                      if (sites.value.contains(origin)) {
+                      if (sites.value.contains(entry)) {
                         return 'This site has been already assigned';
                       }
 
                       return null;
                     },
                     onSaved: (newValue) async {
-                      final parsedUrl = parseValidatedUrl(
-                        newValue,
-                        eagerParsing: true,
-                        onlyHttpProtocol: true,
-                      );
-                      if (parsedUrl == null) {
+                      final entry = _parseSiteAssignmentInput(newValue);
+                      if (entry == null) {
                         return;
                       }
 
-                      final origin = Uri.parse(parsedUrl.origin);
-
-                      final isAssigned = await ref
-                          .read(containerRepositoryProvider.notifier)
-                          .isSiteAssignedToContainer(origin);
+                      // Exact-origin duplicate detection — wildcard overlaps
+                      // with existing entries are the user's intent and are
+                      // not flagged here.
+                      final isAssigned =
+                          !isWildcardSite(entry) &&
+                          await ref
+                              .read(containerRepositoryProvider.notifier)
+                              .isSiteAssignedToContainer(entry);
 
                       if (!isAssigned) {
-                        sites.value = {...sites.value, origin};
+                        sites.value = {...sites.value, entry};
                       } else {
                         final assignedContainerId = await ref
                             .read(containerRepositoryProvider.notifier)
-                            .siteAssignedContainerId(origin);
+                            .siteAssignedContainerId(entry);
                         final assignedContainer = await assignedContainerId
                             .mapNotNull(
                               (id) => ref
@@ -140,8 +172,8 @@ class ContainerSitesScreen extends HookConsumerWidget {
                           ui_helper.showErrorMessage(
                             context,
                             (assignedContainer?.name.isNotEmpty ?? false)
-                                ? '$origin has already been assigned to container "${assignedContainer?.name}"'
-                                : '$origin has already been assigned to another container',
+                                ? '$entry has already been assigned to container "${assignedContainer?.name}"'
+                                : '$entry has already been assigned to another container',
                           );
                         }
                       }

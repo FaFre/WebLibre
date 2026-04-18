@@ -2557,14 +2557,6 @@ class DefinitionsDrift extends i9.ModularAccessor {
     ).map((i0.QueryRow row) => row.readNullable<String>('next_tab_id'));
   }
 
-  i0.Selectable<bool> isSiteAssignedToContainer({String? uri}) {
-    return customSelect(
-      'SELECT EXISTS (SELECT 1 AS _c0 FROM container CROSS JOIN json_each(container.metadata, \'\$.assignedSites\')WHERE json_each.value = ?1) AS existing',
-      variables: [i0.Variable<String>(uri)],
-      readsFrom: {container},
-    ).map((i0.QueryRow row) => row.read<bool>('existing'));
-  }
-
   i0.Selectable<bool> areSitesAvailable({
     required String uriList,
     required String ignoreContainerId,
@@ -2577,14 +2569,6 @@ class DefinitionsDrift extends i9.ModularAccessor {
       ],
       readsFrom: {container},
     ).map((i0.QueryRow row) => row.read<bool>('existing'));
-  }
-
-  i0.Selectable<String> siteAssignedContainerId({String? uri}) {
-    return customSelect(
-      'SELECT id FROM container WHERE EXISTS (SELECT 1 AS _c0 FROM json_each(container.metadata, \'\$.assignedSites\')WHERE value = ?1)',
-      variables: [i0.Variable<String>(uri)],
-      readsFrom: {container},
-    ).map((i0.QueryRow row) => row.read<String>('id'));
   }
 
   i0.Selectable<i11.SiteAssignment> allAssignedSites() {

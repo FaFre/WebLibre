@@ -1093,4 +1093,4 @@ final class WatchIsCurrentSiteAssignedToContainerProvider
 }
 
 String _$watchIsCurrentSiteAssignedToContainerHash() =>
-    r'c2a82ca9df526c7a703da52302182e497c91e824';
+    r'b4e39fecacc84f53adfd1d6368a70a84db181661';

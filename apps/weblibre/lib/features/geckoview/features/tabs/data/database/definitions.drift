@@ -297,14 +297,6 @@ nextTabByOrderKey(:tab_id AS TEXT, :container_id AS TEXT OR NULL, :skip_containe
   FROM ranked_tabs 
   WHERE id = :tab_id;
 
-isSiteAssignedToContainer:
-  SELECT EXISTS (
-      SELECT 1
-      FROM container
-      CROSS JOIN json_each(container.metadata, '$.assignedSites')
-      WHERE json_each.value = :uri
-  ) AS existing;
-
 areSitesAvailable:
   SELECT NOT EXISTS (
       SELECT 1
@@ -316,15 +308,6 @@ areSitesAvailable:
       ) AND
       container.id IS NOT :ignore_container_id
   ) AS existing;
-
-siteAssignedContainerId:
-  SELECT id
-  FROM container
-  WHERE EXISTS (
-      SELECT 1
-      FROM json_each(container.metadata, '$.assignedSites')
-      WHERE value = :uri
-  );
 
 allAssignedSites WITH SiteAssignment:
   SELECT
