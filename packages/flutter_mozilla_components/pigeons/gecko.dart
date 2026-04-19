@@ -749,13 +749,113 @@ class AddonInfo {
   });
 }
 
+enum AddonStoreApp { android, firefox }
+
+enum AddonStorePromoted { none, recommended, line }
+
+class AddonListingPreview {
+  final String imageUrl;
+  final String? thumbnailUrl;
+  final String? caption;
+
+  const AddonListingPreview({
+    required this.imageUrl,
+    this.thumbnailUrl,
+    this.caption,
+  });
+}
+
+class AddonListing {
+  final String id;
+  final String name;
+  final String? summary;
+  final String? description;
+  final String? iconUrl;
+  final String latestVersion;
+  final String downloadUrl;
+  final double? ratingAverage;
+  final int? ratingReviews;
+  final String? authorName;
+  final String? authorUrl;
+  final String? homepageUrl;
+  final String detailUrl;
+  final String? ratingUrl;
+  final int? averageDailyUsers;
+  final AddonStorePromoted promoted;
+  final List<AddonListingPreview> previews;
+  final List<String> permissions;
+  final List<String> hostPermissions;
+  final List<String> optionalPermissions;
+  final List<String> dataCollectionPermissions;
+  final int? fileSize;
+  final String? lastUpdated;
+  final String? licenseName;
+  final String? licenseUrl;
+  final String? supportUrl;
+  final String? supportEmail;
+  final List<String> categories;
+  final bool hasPrivacyPolicy;
+  final String? slug;
+
+  const AddonListing({
+    required this.id,
+    required this.name,
+    this.summary,
+    this.description,
+    this.iconUrl,
+    required this.latestVersion,
+    required this.downloadUrl,
+    this.ratingAverage,
+    this.ratingReviews,
+    this.authorName,
+    this.authorUrl,
+    this.homepageUrl,
+    required this.detailUrl,
+    this.ratingUrl,
+    this.averageDailyUsers,
+    this.promoted = AddonStorePromoted.none,
+    this.previews = const [],
+    this.permissions = const [],
+    this.hostPermissions = const [],
+    this.optionalPermissions = const [],
+    this.dataCollectionPermissions = const [],
+    this.fileSize,
+    this.lastUpdated,
+    this.licenseName,
+    this.licenseUrl,
+    this.supportUrl,
+    this.supportEmail,
+    this.categories = const [],
+    this.hasPrivacyPolicy = false,
+    this.slug,
+  });
+}
+
 class AddonStoreInfo {
   final String latestVersion;
   final String latestXpiUrl;
+  final double? ratingAverage;
+  final int? ratingReviews;
+  final String? summary;
+  final String? description;
+  final String? homepageUrl;
+  final String? detailUrl;
+  final String? ratingUrl;
+  final String? authorName;
+  final String? authorUrl;
 
   const AddonStoreInfo({
     required this.latestVersion,
     required this.latestXpiUrl,
+    this.ratingAverage,
+    this.ratingReviews,
+    this.summary,
+    this.description,
+    this.homepageUrl,
+    this.detailUrl,
+    this.ratingUrl,
+    this.authorName,
+    this.authorUrl,
   });
 }
 
@@ -1852,6 +1952,20 @@ abstract class GeckoAddonsApi {
 
   @async
   AddonStoreInfo? getAddonStoreInfo(String addonId);
+
+  @async
+  List<AddonListing> searchAddonListings(
+    String query,
+    AddonStoreApp app,
+    int page,
+    int pageSize,
+  );
+
+  @async
+  List<AddonListing> getFeaturedAddonListings(
+    AddonStoreApp app,
+    int pageSize,
+  );
 
   void invokeAddonAction(String extensionId, WebExtensionActionType actionType);
 

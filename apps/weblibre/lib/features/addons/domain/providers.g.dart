@@ -173,6 +173,360 @@ final class AddonStoreInfoFamily extends $Family
   String toString() => r'addonStoreInfoProvider';
 }
 
+@ProviderFor(featuredAddonListings)
+final featuredAddonListingsProvider = FeaturedAddonListingsFamily._();
+
+final class FeaturedAddonListingsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<AddonListing>>,
+          List<AddonListing>,
+          FutureOr<List<AddonListing>>
+        >
+    with
+        $FutureModifier<List<AddonListing>>,
+        $FutureProvider<List<AddonListing>> {
+  FeaturedAddonListingsProvider._({
+    required FeaturedAddonListingsFamily super.from,
+    required AddonStoreApp super.argument,
+  }) : super(
+         retry: null,
+         name: r'featuredAddonListingsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$featuredAddonListingsHash();
+
+  @override
+  String toString() {
+    return r'featuredAddonListingsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<AddonListing>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<AddonListing>> create(Ref ref) {
+    final argument = this.argument as AddonStoreApp;
+    return featuredAddonListings(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is FeaturedAddonListingsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$featuredAddonListingsHash() =>
+    r'94f2eb452297611d5b91ac827cb73045cc553826';
+
+final class FeaturedAddonListingsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<FutureOr<List<AddonListing>>, AddonStoreApp> {
+  FeaturedAddonListingsFamily._()
+    : super(
+        retry: null,
+        name: r'featuredAddonListingsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  FeaturedAddonListingsProvider call(AddonStoreApp app) =>
+      FeaturedAddonListingsProvider._(argument: app, from: this);
+
+  @override
+  String toString() => r'featuredAddonListingsProvider';
+}
+
+@ProviderFor(searchAddonListings)
+final searchAddonListingsProvider = SearchAddonListingsFamily._();
+
+final class SearchAddonListingsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<AddonListing>>,
+          List<AddonListing>,
+          FutureOr<List<AddonListing>>
+        >
+    with
+        $FutureModifier<List<AddonListing>>,
+        $FutureProvider<List<AddonListing>> {
+  SearchAddonListingsProvider._({
+    required SearchAddonListingsFamily super.from,
+    required (String, AddonStoreApp) super.argument,
+  }) : super(
+         retry: null,
+         name: r'searchAddonListingsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$searchAddonListingsHash();
+
+  @override
+  String toString() {
+    return r'searchAddonListingsProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<AddonListing>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<AddonListing>> create(Ref ref) {
+    final argument = this.argument as (String, AddonStoreApp);
+    return searchAddonListings(ref, argument.$1, argument.$2);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SearchAddonListingsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$searchAddonListingsHash() =>
+    r'e20c27fb597093b92f8f4d402f196cc707a3e928';
+
+final class SearchAddonListingsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<List<AddonListing>>,
+          (String, AddonStoreApp)
+        > {
+  SearchAddonListingsFamily._()
+    : super(
+        retry: null,
+        name: r'searchAddonListingsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  SearchAddonListingsProvider call(String query, AddonStoreApp app) =>
+      SearchAddonListingsProvider._(argument: (query, app), from: this);
+
+  @override
+  String toString() => r'searchAddonListingsProvider';
+}
+
+@ProviderFor(AddonStoreAppFilter)
+final addonStoreAppFilterProvider = AddonStoreAppFilterProvider._();
+
+final class AddonStoreAppFilterProvider
+    extends $NotifierProvider<AddonStoreAppFilter, AddonStoreApp> {
+  AddonStoreAppFilterProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'addonStoreAppFilterProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$addonStoreAppFilterHash();
+
+  @$internal
+  @override
+  AddonStoreAppFilter create() => AddonStoreAppFilter();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AddonStoreApp value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AddonStoreApp>(value),
+    );
+  }
+}
+
+String _$addonStoreAppFilterHash() =>
+    r'167303f223c14ce2c118aa5b76342cc3433dc8f0';
+
+abstract class _$AddonStoreAppFilter extends $Notifier<AddonStoreApp> {
+  AddonStoreApp build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AddonStoreApp, AddonStoreApp>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AddonStoreApp, AddonStoreApp>,
+              AddonStoreApp,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(addonDescriptionMarkdown)
+final addonDescriptionMarkdownProvider = AddonDescriptionMarkdownFamily._();
+
+final class AddonDescriptionMarkdownProvider
+    extends $FunctionalProvider<AsyncValue<String>, String, FutureOr<String>>
+    with $FutureModifier<String>, $FutureProvider<String> {
+  AddonDescriptionMarkdownProvider._({
+    required AddonDescriptionMarkdownFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'addonDescriptionMarkdownProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$addonDescriptionMarkdownHash();
+
+  @override
+  String toString() {
+    return r'addonDescriptionMarkdownProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<String> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<String> create(Ref ref) {
+    final argument = this.argument as String;
+    return addonDescriptionMarkdown(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is AddonDescriptionMarkdownProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$addonDescriptionMarkdownHash() =>
+    r'e60659ccef172237e44b9f77b79df4fe11997617';
+
+final class AddonDescriptionMarkdownFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<String>, String> {
+  AddonDescriptionMarkdownFamily._()
+    : super(
+        retry: null,
+        name: r'addonDescriptionMarkdownProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  AddonDescriptionMarkdownProvider call(String addonId) =>
+      AddonDescriptionMarkdownProvider._(argument: addonId, from: this);
+
+  @override
+  String toString() => r'addonDescriptionMarkdownProvider';
+}
+
+@ProviderFor(addonHtmlMarkdown)
+final addonHtmlMarkdownProvider = AddonHtmlMarkdownFamily._();
+
+final class AddonHtmlMarkdownProvider
+    extends $FunctionalProvider<AsyncValue<String>, String, FutureOr<String>>
+    with $FutureModifier<String>, $FutureProvider<String> {
+  AddonHtmlMarkdownProvider._({
+    required AddonHtmlMarkdownFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'addonHtmlMarkdownProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$addonHtmlMarkdownHash();
+
+  @override
+  String toString() {
+    return r'addonHtmlMarkdownProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<String> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<String> create(Ref ref) {
+    final argument = this.argument as String;
+    return addonHtmlMarkdown(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is AddonHtmlMarkdownProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$addonHtmlMarkdownHash() => r'51d6c7d7cf6040acc9540893dacad581606ff4a8';
+
+final class AddonHtmlMarkdownFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<String>, String> {
+  AddonHtmlMarkdownFamily._()
+    : super(
+        retry: null,
+        name: r'addonHtmlMarkdownProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  AddonHtmlMarkdownProvider call(String html) =>
+      AddonHtmlMarkdownProvider._(argument: html, from: this);
+
+  @override
+  String toString() => r'addonHtmlMarkdownProvider';
+}
+
 @ProviderFor(lastAddonUpdateAttempt)
 final lastAddonUpdateAttemptProvider = LastAddonUpdateAttemptFamily._();
 

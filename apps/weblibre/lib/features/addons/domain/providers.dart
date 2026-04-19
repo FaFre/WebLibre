@@ -23,6 +23,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/addons/utils/addon_html.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 
@@ -135,6 +136,50 @@ class AddonDetails extends _$AddonDetails {
 @Riverpod()
 Future<AddonStoreInfo?> addonStoreInfo(Ref ref, String addonId) {
   return ref.read(addonServiceProvider).getAddonStoreInfo(addonId);
+}
+
+@Riverpod()
+Future<List<AddonListing>> featuredAddonListings(Ref ref, AddonStoreApp app) {
+  return ref.read(addonServiceProvider).getFeaturedAddonListings(app: app);
+}
+
+@Riverpod()
+Future<List<AddonListing>> searchAddonListings(
+  Ref ref,
+  String query,
+  AddonStoreApp app,
+) async {
+  final trimmed = query.trim();
+  if (trimmed.isEmpty) {
+    return ref.watch(featuredAddonListingsProvider(app).future);
+  }
+  return ref.read(addonServiceProvider).searchAddonListings(
+    query: trimmed,
+    app: app,
+  );
+}
+
+@Riverpod(keepAlive: true)
+class AddonStoreAppFilter extends _$AddonStoreAppFilter {
+  void setApp(AddonStoreApp app) => state = app;
+
+  @override
+  AddonStoreApp build() => AddonStoreApp.android;
+}
+
+@Riverpod()
+Future<String> addonDescriptionMarkdown(Ref ref, String addonId) async {
+  final description = await ref.watch(
+    addonDetailsProvider(
+      addonId,
+    ).selectAsync((addon) => addon?.description ?? ''),
+  );
+  return turndownAddonHtml(description);
+}
+
+@Riverpod()
+Future<String> addonHtmlMarkdown(Ref ref, String html) {
+  return turndownAddonHtml(html);
 }
 
 @Riverpod()

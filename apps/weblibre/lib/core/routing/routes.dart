@@ -30,6 +30,7 @@ import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/features/about/presentation/screens/about.dart';
 import 'package:weblibre/features/addons/presentation/screens/addon_details.dart';
 import 'package:weblibre/features/addons/presentation/screens/addon_internal_settings.dart';
+import 'package:weblibre/features/addons/presentation/screens/addon_listing_details.dart';
 import 'package:weblibre/features/addons/presentation/screens/addon_manager.dart';
 import 'package:weblibre/features/addons/presentation/screens/addon_permissions.dart';
 import 'package:weblibre/features/bangs/data/models/bang.dart';

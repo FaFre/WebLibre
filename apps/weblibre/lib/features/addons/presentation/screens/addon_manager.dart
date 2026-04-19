@@ -17,13 +17,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/addons/domain/providers.dart';
 import 'package:weblibre/features/addons/extensions/addon_info.dart';
+import 'package:weblibre/features/addons/presentation/screens/addon_browse.dart';
 import 'package:weblibre/features/addons/presentation/widgets/addon_ui.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/install_local_addon_dialog.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 class AddonManagerScreen extends ConsumerWidget {
@@ -35,67 +38,107 @@ class AddonManagerScreen extends ConsumerWidget {
 
     Future<void> refresh() => ref.read(addonListProvider.notifier).refresh();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Extensions'),
-        actions: [
-          IconButton(
-            onPressed: addonsAsync.isLoading ? null : refresh,
-            icon: const Icon(Icons.refresh),
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Extensions'),
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: 'Installed'),
+              Tab(text: 'Browse'),
+            ],
           ),
-          _TriggerAllUpdatesButton(
-            enabled: addonsAsync.maybeWhen(
-              data: (addons) =>
-                  addons.any((a) => a.isInstalled && a.isSupported),
-              orElse: () => false,
+          actions: [
+            IconButton(
+              onPressed: addonsAsync.isLoading ? null : refresh,
+              icon: const Icon(Icons.refresh),
             ),
-          ),
-        ],
-      ),
-      body: addonsAsync.when(
-        skipLoadingOnReload: true,
-        skipError: true,
-        data: (addons) => RefreshIndicator(
-          onRefresh: refresh,
-          child: _AddonList(addons: addons),
+            _AddonManagerOverflowMenu(
+              canCheckForUpdates: addonsAsync.maybeWhen(
+                data: (addons) =>
+                    addons.any((a) => a.isInstalled && a.isSupported),
+                orElse: () => false,
+              ),
+            ),
+          ],
         ),
-        error: (error, _) => _AddonLoadError(error: error, onRetry: refresh),
-        loading: () => const Center(child: CircularProgressIndicator()),
+        body: SafeArea(
+          child: TabBarView(
+            children: [
+              addonsAsync.when(
+                skipLoadingOnReload: true,
+                skipError: true,
+                data: (addons) => RefreshIndicator(
+                  onRefresh: refresh,
+                  child: _AddonList(addons: addons),
+                ),
+                error: (error, _) =>
+                    _AddonLoadError(error: error, onRetry: refresh),
+                loading: () => const Center(child: CircularProgressIndicator()),
+              ),
+              const AddonBrowseView(),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
 
-class _TriggerAllUpdatesButton extends ConsumerWidget {
-  final bool enabled;
+enum _AddonManagerMenuAction { checkForUpdates, installFromFile }
 
-  const _TriggerAllUpdatesButton({required this.enabled});
+class _AddonManagerOverflowMenu extends ConsumerWidget {
+  final bool canCheckForUpdates;
+
+  const _AddonManagerOverflowMenu({required this.canCheckForUpdates});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final busy = ref.watch(
+    final updatesBusy = ref.watch(
       bulkAddonUpdateProvider.select((value) => value.isLoading),
     );
 
-    return IconButton(
-      onPressed: enabled && !busy
-          ? () async {
-              await ref.read(bulkAddonUpdateProvider.notifier).triggerAll();
-              if (!context.mounted) return;
-              showInfoMessage(
-                context,
-                'Background update checks started for installed extensions',
-              );
-            }
-          : null,
-      icon: busy
+    return PopupMenuButton<_AddonManagerMenuAction>(
+      icon: updatesBusy
           ? const SizedBox(
               width: 18,
               height: 18,
               child: CircularProgressIndicator(strokeWidth: 2),
             )
-          : const Icon(Icons.system_update_alt),
-      tooltip: 'Check all installed extensions for updates',
+          : const Icon(Icons.more_vert),
+      onSelected: (action) async {
+        switch (action) {
+          case _AddonManagerMenuAction.checkForUpdates:
+            await ref.read(bulkAddonUpdateProvider.notifier).triggerAll();
+            if (!context.mounted) return;
+            showInfoMessage(
+              context,
+              'Background update checks started for installed extensions',
+            );
+          case _AddonManagerMenuAction.installFromFile:
+            await showInstallLocalAddonDialog(context);
+        }
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: _AddonManagerMenuAction.checkForUpdates,
+          enabled: canCheckForUpdates && !updatesBusy,
+          child: const ListTile(
+            leading: Icon(Icons.system_update_alt),
+            title: Text('Check for updates'),
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
+        const PopupMenuItem(
+          value: _AddonManagerMenuAction.installFromFile,
+          child: ListTile(
+            leading: Icon(Icons.file_open),
+            title: Text('Install from file'),
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -113,78 +156,50 @@ class _AddonList extends StatelessWidget {
     final disabled = addons
         .where((a) => a.isInstalled && a.isSupported && !a.isEnabled)
         .toList();
-    final recommended = addons.where((a) => !a.isInstalled).toList();
     final unsupported = addons
         .where((a) => a.isInstalled && !a.isSupported)
         .toList();
+    final installed = enabled.length + disabled.length + unsupported.length;
 
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        const Card(
-          child: ListTile(
-            leading: Icon(Icons.info_outline),
-            title: Text('Addon updates run in the background'),
-            subtitle: Text(
-              'Use each extension detail screen to view its last update result or trigger a manual check.',
-            ),
-          ),
-        ),
-        if (enabled.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          const _Section(title: 'Enabled'),
-          for (final addon in enabled) _AddonCard(addon: addon),
-        ],
-        if (disabled.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          const _Section(title: 'Disabled'),
-          for (final addon in disabled) _AddonCard(addon: addon),
-        ],
-        if (recommended.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          const _Section(title: 'Available'),
-          for (final addon in recommended)
-            _AddonCard(
-              addon: addon,
-              action: _InstallAction(addon: addon),
-            ),
-        ],
-        if (unsupported.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          const _Section(title: 'Unsupported'),
-          for (final addon in unsupported)
-            _AddonCard(
-              addon: addon,
-              action: _UninstallAction(addon: addon),
-            ),
-        ],
-        if (addons.isEmpty)
-          const Padding(
-            padding: EdgeInsets.only(top: 48),
-            child: Center(child: Text('No extensions available right now.')),
-          ),
-      ],
-    );
-  }
-}
-
-class _InstallAction extends ConsumerWidget {
-  final AddonInfo addon;
-
-  const _InstallAction({required this.addon});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final busy = ref.watch(addonBusyIdsProvider).contains(addon.id);
-    return FilledButton(
-      onPressed: busy
-          ? null
-          : () async {
-              await ref.read(addonListProvider.notifier).install(addon);
-              if (!context.mounted) return;
-              showInfoMessage(context, '${addon.displayName} installed');
-            },
-      child: const Text('Install'),
+    return FadingScroll(
+      fadingSize: 25,
+      builder: (context, controller) {
+        return ListView(
+          controller: controller,
+          padding: const EdgeInsets.all(16),
+          children: [
+            if (enabled.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              const _Section(title: 'Enabled'),
+              for (final addon in enabled) _AddonCard(addon: addon),
+            ],
+            if (disabled.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              const _Section(title: 'Disabled'),
+              for (final addon in disabled) _AddonCard(addon: addon),
+            ],
+            if (unsupported.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              const _Section(title: 'Unsupported'),
+              for (final addon in unsupported)
+                _AddonCard(
+                  addon: addon,
+                  action: _UninstallAction(addon: addon),
+                ),
+            ],
+            if (installed == 0)
+              const Padding(
+                padding: EdgeInsets.only(top: 48),
+                child: Center(
+                  child: Text(
+                    'No extensions installed yet.\nBrowse the store to find some.',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }
@@ -236,6 +251,7 @@ class _AddonCard extends ConsumerWidget {
     final busy = ref.watch(addonBusyIdsProvider).contains(addon.id);
 
     return Card(
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
         onTap: busy
@@ -267,7 +283,6 @@ class _AddonCard extends ConsumerWidget {
                         const SizedBox(height: 8),
                         Wrap(
                           spacing: 8,
-                          runSpacing: 8,
                           children: [
                             if (addon.isAllowedInPrivateBrowsing)
                               const Chip(label: Text('Private Browsing')),

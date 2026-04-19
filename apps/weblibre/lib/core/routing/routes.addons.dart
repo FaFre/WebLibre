@@ -27,6 +27,10 @@ part of 'routes.dart';
       name: 'AddonDetailsRoute',
       path: 'details/:addonId',
     ),
+    TypedGoRoute<AddonListingDetailsRoute>(
+      name: 'AddonListingDetailsRoute',
+      path: 'listing/:addonId',
+    ),
     TypedGoRoute<AddonPermissionsRoute>(
       name: 'AddonPermissionsRoute',
       path: 'permissions/:addonId',
@@ -54,6 +58,19 @@ class AddonDetailsRoute extends GoRouteData with $AddonDetailsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return AddonDetailsScreen(addonId: addonId);
+  }
+}
+
+class AddonListingDetailsRoute extends GoRouteData
+    with $AddonListingDetailsRoute {
+  final String addonId;
+  final AddonListing $extra;
+
+  const AddonListingDetailsRoute({required this.addonId, required this.$extra});
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return AddonListingDetailsScreen(listing: $extra);
   }
 }
 

@@ -71,8 +71,9 @@ class AddonPermissionsScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           children: [
             if (permissions.isEmpty && dataCollection.isEmpty)
-              const Card(
-                child: ListTile(
+              Card(
+                color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                child: const ListTile(
                   leading: Icon(Icons.verified_user_outlined),
                   title: Text('No special permissions listed'),
                   subtitle: Text(
@@ -87,6 +88,7 @@ class AddonPermissionsScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Card(
+                color: Theme.of(context).colorScheme.surfaceContainerHigh,
                 child: Column(
                   children: [
                     for (final permission in permissions)
@@ -106,6 +108,7 @@ class AddonPermissionsScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Card(
+                color: Theme.of(context).colorScheme.surfaceContainerHigh,
                 child: Column(
                   children: [
                     for (final permission in dataCollection)

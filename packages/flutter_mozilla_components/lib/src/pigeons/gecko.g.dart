@@ -224,6 +224,17 @@ enum AddonUpdateStatus {
   error,
 }
 
+enum AddonStoreApp {
+  android,
+  firefox,
+}
+
+enum AddonStorePromoted {
+  none,
+  recommended,
+  line,
+}
+
 enum GeckoSuggestionType {
   session,
   clipboard,
@@ -2619,20 +2630,291 @@ class AddonInfo {
   int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
 }
 
+class AddonListingPreview {
+  AddonListingPreview({
+    required this.imageUrl,
+    this.thumbnailUrl,
+    this.caption,
+  });
+
+  String imageUrl;
+
+  String? thumbnailUrl;
+
+  String? caption;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      imageUrl,
+      thumbnailUrl,
+      caption,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static AddonListingPreview decode(Object result) {
+    result as List<Object?>;
+    return AddonListingPreview(
+      imageUrl: result[0]! as String,
+      thumbnailUrl: result[1] as String?,
+      caption: result[2] as String?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! AddonListingPreview || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(imageUrl, other.imageUrl) && _deepEquals(thumbnailUrl, other.thumbnailUrl) && _deepEquals(caption, other.caption);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+}
+
+class AddonListing {
+  AddonListing({
+    required this.id,
+    required this.name,
+    this.summary,
+    this.description,
+    this.iconUrl,
+    required this.latestVersion,
+    required this.downloadUrl,
+    this.ratingAverage,
+    this.ratingReviews,
+    this.authorName,
+    this.authorUrl,
+    this.homepageUrl,
+    required this.detailUrl,
+    this.ratingUrl,
+    this.averageDailyUsers,
+    required this.promoted,
+    required this.previews,
+    required this.permissions,
+    required this.hostPermissions,
+    required this.optionalPermissions,
+    required this.dataCollectionPermissions,
+    this.fileSize,
+    this.lastUpdated,
+    this.licenseName,
+    this.licenseUrl,
+    this.supportUrl,
+    this.supportEmail,
+    required this.categories,
+    required this.hasPrivacyPolicy,
+    this.slug,
+  });
+
+  String id;
+
+  String name;
+
+  String? summary;
+
+  String? description;
+
+  String? iconUrl;
+
+  String latestVersion;
+
+  String downloadUrl;
+
+  double? ratingAverage;
+
+  int? ratingReviews;
+
+  String? authorName;
+
+  String? authorUrl;
+
+  String? homepageUrl;
+
+  String detailUrl;
+
+  String? ratingUrl;
+
+  int? averageDailyUsers;
+
+  AddonStorePromoted promoted;
+
+  List<AddonListingPreview> previews;
+
+  List<String> permissions;
+
+  List<String> hostPermissions;
+
+  List<String> optionalPermissions;
+
+  List<String> dataCollectionPermissions;
+
+  int? fileSize;
+
+  String? lastUpdated;
+
+  String? licenseName;
+
+  String? licenseUrl;
+
+  String? supportUrl;
+
+  String? supportEmail;
+
+  List<String> categories;
+
+  bool hasPrivacyPolicy;
+
+  String? slug;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      id,
+      name,
+      summary,
+      description,
+      iconUrl,
+      latestVersion,
+      downloadUrl,
+      ratingAverage,
+      ratingReviews,
+      authorName,
+      authorUrl,
+      homepageUrl,
+      detailUrl,
+      ratingUrl,
+      averageDailyUsers,
+      promoted,
+      previews,
+      permissions,
+      hostPermissions,
+      optionalPermissions,
+      dataCollectionPermissions,
+      fileSize,
+      lastUpdated,
+      licenseName,
+      licenseUrl,
+      supportUrl,
+      supportEmail,
+      categories,
+      hasPrivacyPolicy,
+      slug,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static AddonListing decode(Object result) {
+    result as List<Object?>;
+    return AddonListing(
+      id: result[0]! as String,
+      name: result[1]! as String,
+      summary: result[2] as String?,
+      description: result[3] as String?,
+      iconUrl: result[4] as String?,
+      latestVersion: result[5]! as String,
+      downloadUrl: result[6]! as String,
+      ratingAverage: result[7] as double?,
+      ratingReviews: result[8] as int?,
+      authorName: result[9] as String?,
+      authorUrl: result[10] as String?,
+      homepageUrl: result[11] as String?,
+      detailUrl: result[12]! as String,
+      ratingUrl: result[13] as String?,
+      averageDailyUsers: result[14] as int?,
+      promoted: result[15]! as AddonStorePromoted,
+      previews: (result[16]! as List<Object?>).cast<AddonListingPreview>(),
+      permissions: (result[17]! as List<Object?>).cast<String>(),
+      hostPermissions: (result[18]! as List<Object?>).cast<String>(),
+      optionalPermissions: (result[19]! as List<Object?>).cast<String>(),
+      dataCollectionPermissions: (result[20]! as List<Object?>).cast<String>(),
+      fileSize: result[21] as int?,
+      lastUpdated: result[22] as String?,
+      licenseName: result[23] as String?,
+      licenseUrl: result[24] as String?,
+      supportUrl: result[25] as String?,
+      supportEmail: result[26] as String?,
+      categories: (result[27]! as List<Object?>).cast<String>(),
+      hasPrivacyPolicy: result[28]! as bool,
+      slug: result[29] as String?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! AddonListing || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(id, other.id) && _deepEquals(name, other.name) && _deepEquals(summary, other.summary) && _deepEquals(description, other.description) && _deepEquals(iconUrl, other.iconUrl) && _deepEquals(latestVersion, other.latestVersion) && _deepEquals(downloadUrl, other.downloadUrl) && _deepEquals(ratingAverage, other.ratingAverage) && _deepEquals(ratingReviews, other.ratingReviews) && _deepEquals(authorName, other.authorName) && _deepEquals(authorUrl, other.authorUrl) && _deepEquals(homepageUrl, other.homepageUrl) && _deepEquals(detailUrl, other.detailUrl) && _deepEquals(ratingUrl, other.ratingUrl) && _deepEquals(averageDailyUsers, other.averageDailyUsers) && _deepEquals(promoted, other.promoted) && _deepEquals(previews, other.previews) && _deepEquals(permissions, other.permissions) && _deepEquals(hostPermissions, other.hostPermissions) && _deepEquals(optionalPermissions, other.optionalPermissions) && _deepEquals(dataCollectionPermissions, other.dataCollectionPermissions) && _deepEquals(fileSize, other.fileSize) && _deepEquals(lastUpdated, other.lastUpdated) && _deepEquals(licenseName, other.licenseName) && _deepEquals(licenseUrl, other.licenseUrl) && _deepEquals(supportUrl, other.supportUrl) && _deepEquals(supportEmail, other.supportEmail) && _deepEquals(categories, other.categories) && _deepEquals(hasPrivacyPolicy, other.hasPrivacyPolicy) && _deepEquals(slug, other.slug);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+}
+
 class AddonStoreInfo {
   AddonStoreInfo({
     required this.latestVersion,
     required this.latestXpiUrl,
+    this.ratingAverage,
+    this.ratingReviews,
+    this.summary,
+    this.description,
+    this.homepageUrl,
+    this.detailUrl,
+    this.ratingUrl,
+    this.authorName,
+    this.authorUrl,
   });
 
   String latestVersion;
 
   String latestXpiUrl;
 
+  double? ratingAverage;
+
+  int? ratingReviews;
+
+  String? summary;
+
+  String? description;
+
+  String? homepageUrl;
+
+  String? detailUrl;
+
+  String? ratingUrl;
+
+  String? authorName;
+
+  String? authorUrl;
+
   List<Object?> _toList() {
     return <Object?>[
       latestVersion,
       latestXpiUrl,
+      ratingAverage,
+      ratingReviews,
+      summary,
+      description,
+      homepageUrl,
+      detailUrl,
+      ratingUrl,
+      authorName,
+      authorUrl,
     ];
   }
 
@@ -2644,6 +2926,15 @@ class AddonStoreInfo {
     return AddonStoreInfo(
       latestVersion: result[0]! as String,
       latestXpiUrl: result[1]! as String,
+      ratingAverage: result[2] as double?,
+      ratingReviews: result[3] as int?,
+      summary: result[4] as String?,
+      description: result[5] as String?,
+      homepageUrl: result[6] as String?,
+      detailUrl: result[7] as String?,
+      ratingUrl: result[8] as String?,
+      authorName: result[9] as String?,
+      authorUrl: result[10] as String?,
     );
   }
 
@@ -2656,7 +2947,7 @@ class AddonStoreInfo {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(latestVersion, other.latestVersion) && _deepEquals(latestXpiUrl, other.latestXpiUrl);
+    return _deepEquals(latestVersion, other.latestVersion) && _deepEquals(latestXpiUrl, other.latestXpiUrl) && _deepEquals(ratingAverage, other.ratingAverage) && _deepEquals(ratingReviews, other.ratingReviews) && _deepEquals(summary, other.summary) && _deepEquals(description, other.description) && _deepEquals(homepageUrl, other.homepageUrl) && _deepEquals(detailUrl, other.detailUrl) && _deepEquals(ratingUrl, other.ratingUrl) && _deepEquals(authorName, other.authorName) && _deepEquals(authorUrl, other.authorUrl);
   }
 
   @override
@@ -5326,305 +5617,317 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is AddonUpdateStatus) {
       buffer.putUint8(140);
       writeValue(buffer, value.index);
-    }    else if (value is GeckoSuggestionType) {
+    }    else if (value is AddonStoreApp) {
       buffer.putUint8(141);
       writeValue(buffer, value.index);
-    }    else if (value is TrackingProtectionPolicy) {
+    }    else if (value is AddonStorePromoted) {
       buffer.putUint8(142);
       writeValue(buffer, value.index);
-    }    else if (value is HttpsOnlyMode) {
+    }    else if (value is GeckoSuggestionType) {
       buffer.putUint8(143);
       writeValue(buffer, value.index);
-    }    else if (value is QueryParameterStripping) {
+    }    else if (value is TrackingProtectionPolicy) {
       buffer.putUint8(144);
       writeValue(buffer, value.index);
-    }    else if (value is BounceTrackingProtectionMode) {
+    }    else if (value is HttpsOnlyMode) {
       buffer.putUint8(145);
       writeValue(buffer, value.index);
-    }    else if (value is ColorScheme) {
+    }    else if (value is QueryParameterStripping) {
       buffer.putUint8(146);
       writeValue(buffer, value.index);
-    }    else if (value is CookieBannerHandlingMode) {
+    }    else if (value is BounceTrackingProtectionMode) {
       buffer.putUint8(147);
       writeValue(buffer, value.index);
-    }    else if (value is AppLinksMode) {
+    }    else if (value is ColorScheme) {
       buffer.putUint8(148);
       writeValue(buffer, value.index);
-    }    else if (value is WebContentIsolationStrategy) {
+    }    else if (value is CookieBannerHandlingMode) {
       buffer.putUint8(149);
       writeValue(buffer, value.index);
-    }    else if (value is CustomCookiePolicy) {
+    }    else if (value is AppLinksMode) {
       buffer.putUint8(150);
       writeValue(buffer, value.index);
-    }    else if (value is TrackingScope) {
+    }    else if (value is WebContentIsolationStrategy) {
       buffer.putUint8(151);
       writeValue(buffer, value.index);
-    }    else if (value is DohSettingsMode) {
+    }    else if (value is CustomCookiePolicy) {
       buffer.putUint8(152);
       writeValue(buffer, value.index);
-    }    else if (value is DownloadStatus) {
+    }    else if (value is TrackingScope) {
       buffer.putUint8(153);
       writeValue(buffer, value.index);
-    }    else if (value is LogLevel) {
+    }    else if (value is DohSettingsMode) {
       buffer.putUint8(154);
       writeValue(buffer, value.index);
-    }    else if (value is SyncEngineValue) {
+    }    else if (value is DownloadStatus) {
       buffer.putUint8(155);
       writeValue(buffer, value.index);
-    }    else if (value is MlProgressType) {
+    }    else if (value is LogLevel) {
       buffer.putUint8(156);
       writeValue(buffer, value.index);
-    }    else if (value is MlProgressStatus) {
+    }    else if (value is SyncEngineValue) {
       buffer.putUint8(157);
       writeValue(buffer, value.index);
-    }    else if (value is ClearDataType) {
+    }    else if (value is MlProgressType) {
       buffer.putUint8(158);
       writeValue(buffer, value.index);
-    }    else if (value is GeckoFetchMethod) {
+    }    else if (value is MlProgressStatus) {
       buffer.putUint8(159);
       writeValue(buffer, value.index);
-    }    else if (value is GeckoFetchRedircet) {
+    }    else if (value is ClearDataType) {
       buffer.putUint8(160);
       writeValue(buffer, value.index);
-    }    else if (value is GeckoFetchCookiePolicy) {
+    }    else if (value is GeckoFetchMethod) {
       buffer.putUint8(161);
       writeValue(buffer, value.index);
-    }    else if (value is BookmarkNodeType) {
+    }    else if (value is GeckoFetchRedircet) {
       buffer.putUint8(162);
       writeValue(buffer, value.index);
-    }    else if (value is SitePermissionStatus) {
+    }    else if (value is GeckoFetchCookiePolicy) {
       buffer.putUint8(163);
       writeValue(buffer, value.index);
-    }    else if (value is AutoplayStatus) {
+    }    else if (value is BookmarkNodeType) {
       buffer.putUint8(164);
       writeValue(buffer, value.index);
-    }    else if (value is TranslationOptions) {
+    }    else if (value is SitePermissionStatus) {
       buffer.putUint8(165);
-      writeValue(buffer, value.encode());
-    }    else if (value is TranslationLanguage) {
+      writeValue(buffer, value.index);
+    }    else if (value is AutoplayStatus) {
       buffer.putUint8(166);
-      writeValue(buffer, value.encode());
-    }    else if (value is TranslationDetectedLanguages) {
+      writeValue(buffer, value.index);
+    }    else if (value is TranslationOptions) {
       buffer.putUint8(167);
       writeValue(buffer, value.encode());
-    }    else if (value is TranslationPair) {
+    }    else if (value is TranslationLanguage) {
       buffer.putUint8(168);
       writeValue(buffer, value.encode());
-    }    else if (value is TranslationEngineStateData) {
+    }    else if (value is TranslationDetectedLanguages) {
       buffer.putUint8(169);
       writeValue(buffer, value.encode());
-    }    else if (value is TabTranslationStateData) {
+    }    else if (value is TranslationPair) {
       buffer.putUint8(170);
       writeValue(buffer, value.encode());
-    }    else if (value is ReaderState) {
+    }    else if (value is TranslationEngineStateData) {
       buffer.putUint8(171);
       writeValue(buffer, value.encode());
-    }    else if (value is AddTabParams) {
+    }    else if (value is TabTranslationStateData) {
       buffer.putUint8(172);
       writeValue(buffer, value.encode());
-    }    else if (value is LastMediaAccessState) {
+    }    else if (value is ReaderState) {
       buffer.putUint8(173);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryMetadataKey) {
+    }    else if (value is AddTabParams) {
       buffer.putUint8(174);
       writeValue(buffer, value.encode());
-    }    else if (value is PackageCategoryValue) {
+    }    else if (value is LastMediaAccessState) {
       buffer.putUint8(175);
       writeValue(buffer, value.encode());
-    }    else if (value is ExternalPackage) {
+    }    else if (value is HistoryMetadataKey) {
       buffer.putUint8(176);
       writeValue(buffer, value.encode());
-    }    else if (value is LoadUrlFlagsValue) {
+    }    else if (value is PackageCategoryValue) {
       buffer.putUint8(177);
       writeValue(buffer, value.encode());
-    }    else if (value is SourceValue) {
+    }    else if (value is ExternalPackage) {
       buffer.putUint8(178);
       writeValue(buffer, value.encode());
-    }    else if (value is TabState) {
+    }    else if (value is LoadUrlFlagsValue) {
       buffer.putUint8(179);
       writeValue(buffer, value.encode());
-    }    else if (value is RecoverableTab) {
+    }    else if (value is SourceValue) {
       buffer.putUint8(180);
       writeValue(buffer, value.encode());
-    }    else if (value is IconRequest) {
+    }    else if (value is TabState) {
       buffer.putUint8(181);
       writeValue(buffer, value.encode());
-    }    else if (value is ResourceSize) {
+    }    else if (value is RecoverableTab) {
       buffer.putUint8(182);
       writeValue(buffer, value.encode());
-    }    else if (value is Resource) {
+    }    else if (value is IconRequest) {
       buffer.putUint8(183);
       writeValue(buffer, value.encode());
-    }    else if (value is IconResult) {
+    }    else if (value is ResourceSize) {
       buffer.putUint8(184);
       writeValue(buffer, value.encode());
-    }    else if (value is CookiePartitionKey) {
+    }    else if (value is Resource) {
       buffer.putUint8(185);
       writeValue(buffer, value.encode());
-    }    else if (value is Cookie) {
+    }    else if (value is IconResult) {
       buffer.putUint8(186);
       writeValue(buffer, value.encode());
-    }    else if (value is VisitInfo) {
+    }    else if (value is CookiePartitionKey) {
       buffer.putUint8(187);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryHighlightWeights) {
+    }    else if (value is Cookie) {
       buffer.putUint8(188);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryHighlight) {
+    }    else if (value is VisitInfo) {
       buffer.putUint8(189);
       writeValue(buffer, value.encode());
-    }    else if (value is TopFrecentSiteInfo) {
+    }    else if (value is HistoryHighlightWeights) {
       buffer.putUint8(190);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryItem) {
+    }    else if (value is HistoryHighlight) {
       buffer.putUint8(191);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryState) {
+    }    else if (value is TopFrecentSiteInfo) {
       buffer.putUint8(192);
       writeValue(buffer, value.encode());
-    }    else if (value is ReaderableState) {
+    }    else if (value is HistoryItem) {
       buffer.putUint8(193);
       writeValue(buffer, value.encode());
-    }    else if (value is SecurityInfoState) {
+    }    else if (value is HistoryState) {
       buffer.putUint8(194);
       writeValue(buffer, value.encode());
-    }    else if (value is TabContentState) {
+    }    else if (value is ReaderableState) {
       buffer.putUint8(195);
       writeValue(buffer, value.encode());
-    }    else if (value is FindResultState) {
+    }    else if (value is SecurityInfoState) {
       buffer.putUint8(196);
       writeValue(buffer, value.encode());
-    }    else if (value is CustomSelectionAction) {
+    }    else if (value is TabContentState) {
       buffer.putUint8(197);
       writeValue(buffer, value.encode());
-    }    else if (value is WebExtensionData) {
+    }    else if (value is FindResultState) {
       buffer.putUint8(198);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonInfo) {
+    }    else if (value is CustomSelectionAction) {
       buffer.putUint8(199);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonStoreInfo) {
+    }    else if (value is WebExtensionData) {
       buffer.putUint8(200);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonUpdateAttemptInfo) {
+    }    else if (value is AddonInfo) {
       buffer.putUint8(201);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoSuggestion) {
+    }    else if (value is AddonListingPreview) {
       buffer.putUint8(202);
       writeValue(buffer, value.encode());
-    }    else if (value is TabContent) {
+    }    else if (value is AddonListing) {
       buffer.putUint8(203);
       writeValue(buffer, value.encode());
-    }    else if (value is ContentBlocking) {
+    }    else if (value is AddonStoreInfo) {
       buffer.putUint8(204);
       writeValue(buffer, value.encode());
-    }    else if (value is DohSettings) {
+    }    else if (value is AddonUpdateAttemptInfo) {
       buffer.putUint8(205);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoEngineSettings) {
+    }    else if (value is GeckoSuggestion) {
       buffer.putUint8(206);
       writeValue(buffer, value.encode());
-    }    else if (value is AutocompleteResult) {
+    }    else if (value is TabContent) {
       buffer.putUint8(207);
       writeValue(buffer, value.encode());
-    }    else if (value is UnknownHitResult) {
+    }    else if (value is ContentBlocking) {
       buffer.putUint8(208);
       writeValue(buffer, value.encode());
-    }    else if (value is ImageHitResult) {
+    }    else if (value is DohSettings) {
       buffer.putUint8(209);
       writeValue(buffer, value.encode());
-    }    else if (value is VideoHitResult) {
+    }    else if (value is GeckoEngineSettings) {
       buffer.putUint8(210);
       writeValue(buffer, value.encode());
-    }    else if (value is AudioHitResult) {
+    }    else if (value is AutocompleteResult) {
       buffer.putUint8(211);
       writeValue(buffer, value.encode());
-    }    else if (value is ImageSrcHitResult) {
+    }    else if (value is UnknownHitResult) {
       buffer.putUint8(212);
       writeValue(buffer, value.encode());
-    }    else if (value is PhoneHitResult) {
+    }    else if (value is ImageHitResult) {
       buffer.putUint8(213);
       writeValue(buffer, value.encode());
-    }    else if (value is EmailHitResult) {
+    }    else if (value is VideoHitResult) {
       buffer.putUint8(214);
       writeValue(buffer, value.encode());
-    }    else if (value is GeoHitResult) {
+    }    else if (value is AudioHitResult) {
       buffer.putUint8(215);
       writeValue(buffer, value.encode());
-    }    else if (value is DownloadState) {
+    }    else if (value is ImageSrcHitResult) {
       buffer.putUint8(216);
       writeValue(buffer, value.encode());
-    }    else if (value is ShareInternetResourceState) {
+    }    else if (value is PhoneHitResult) {
       buffer.putUint8(217);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonCollection) {
+    }    else if (value is EmailHitResult) {
       buffer.putUint8(218);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncEngineStatus) {
+    }    else if (value is GeoHitResult) {
       buffer.putUint8(219);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncAccountInfo) {
+    }    else if (value is DownloadState) {
       buffer.putUint8(220);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncDevice) {
+    }    else if (value is ShareInternetResourceState) {
       buffer.putUint8(221);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncIncomingTab) {
+    }    else if (value is AddonCollection) {
       buffer.putUint8(222);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncRemoteTab) {
+    }    else if (value is SyncEngineStatus) {
       buffer.putUint8(223);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncDeviceTabs) {
+    }    else if (value is SyncAccountInfo) {
       buffer.putUint8(224);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoPref) {
+    }    else if (value is SyncDevice) {
       buffer.putUint8(225);
       writeValue(buffer, value.encode());
-    }    else if (value is MlProgressData) {
+    }    else if (value is SyncIncomingTab) {
       buffer.putUint8(226);
       writeValue(buffer, value.encode());
-    }    else if (value is ContainerSiteAssignment) {
+    }    else if (value is SyncRemoteTab) {
       buffer.putUint8(227);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoHeader) {
+    }    else if (value is SyncDeviceTabs) {
       buffer.putUint8(228);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoFetchRequest) {
+    }    else if (value is GeckoPref) {
       buffer.putUint8(229);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoFetchResponse) {
+    }    else if (value is MlProgressData) {
       buffer.putUint8(230);
       writeValue(buffer, value.encode());
-    }    else if (value is BookmarkNode) {
+    }    else if (value is ContainerSiteAssignment) {
       buffer.putUint8(231);
       writeValue(buffer, value.encode());
-    }    else if (value is BookmarkInfo) {
+    }    else if (value is GeckoHeader) {
       buffer.putUint8(232);
       writeValue(buffer, value.encode());
-    }    else if (value is SitePermissions) {
+    }    else if (value is GeckoFetchRequest) {
       buffer.putUint8(233);
       writeValue(buffer, value.encode());
-    }    else if (value is TrackingProtectionException) {
+    }    else if (value is GeckoFetchResponse) {
       buffer.putUint8(234);
       writeValue(buffer, value.encode());
-    }    else if (value is PwaIcon) {
+    }    else if (value is BookmarkNode) {
       buffer.putUint8(235);
       writeValue(buffer, value.encode());
-    }    else if (value is ShareTargetFiles) {
+    }    else if (value is BookmarkInfo) {
       buffer.putUint8(236);
       writeValue(buffer, value.encode());
-    }    else if (value is ShareTargetParams) {
+    }    else if (value is SitePermissions) {
       buffer.putUint8(237);
       writeValue(buffer, value.encode());
-    }    else if (value is ShareTarget) {
+    }    else if (value is TrackingProtectionException) {
       buffer.putUint8(238);
       writeValue(buffer, value.encode());
-    }    else if (value is ExternalApplicationResource) {
+    }    else if (value is PwaIcon) {
       buffer.putUint8(239);
       writeValue(buffer, value.encode());
-    }    else if (value is PwaManifest) {
+    }    else if (value is ShareTargetFiles) {
       buffer.putUint8(240);
+      writeValue(buffer, value.encode());
+    }    else if (value is ShareTargetParams) {
+      buffer.putUint8(241);
+      writeValue(buffer, value.encode());
+    }    else if (value is ShareTarget) {
+      buffer.putUint8(242);
+      writeValue(buffer, value.encode());
+    }    else if (value is ExternalApplicationResource) {
+      buffer.putUint8(243);
+      writeValue(buffer, value.encode());
+    }    else if (value is PwaManifest) {
+      buffer.putUint8(244);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -5672,227 +5975,237 @@ class _PigeonCodec extends StandardMessageCodec {
         return value == null ? null : AddonUpdateStatus.values[value];
       case 141:
         final value = readValue(buffer) as int?;
-        return value == null ? null : GeckoSuggestionType.values[value];
+        return value == null ? null : AddonStoreApp.values[value];
       case 142:
         final value = readValue(buffer) as int?;
-        return value == null ? null : TrackingProtectionPolicy.values[value];
+        return value == null ? null : AddonStorePromoted.values[value];
       case 143:
         final value = readValue(buffer) as int?;
-        return value == null ? null : HttpsOnlyMode.values[value];
+        return value == null ? null : GeckoSuggestionType.values[value];
       case 144:
         final value = readValue(buffer) as int?;
-        return value == null ? null : QueryParameterStripping.values[value];
+        return value == null ? null : TrackingProtectionPolicy.values[value];
       case 145:
         final value = readValue(buffer) as int?;
-        return value == null ? null : BounceTrackingProtectionMode.values[value];
+        return value == null ? null : HttpsOnlyMode.values[value];
       case 146:
         final value = readValue(buffer) as int?;
-        return value == null ? null : ColorScheme.values[value];
+        return value == null ? null : QueryParameterStripping.values[value];
       case 147:
         final value = readValue(buffer) as int?;
-        return value == null ? null : CookieBannerHandlingMode.values[value];
+        return value == null ? null : BounceTrackingProtectionMode.values[value];
       case 148:
         final value = readValue(buffer) as int?;
-        return value == null ? null : AppLinksMode.values[value];
+        return value == null ? null : ColorScheme.values[value];
       case 149:
         final value = readValue(buffer) as int?;
-        return value == null ? null : WebContentIsolationStrategy.values[value];
+        return value == null ? null : CookieBannerHandlingMode.values[value];
       case 150:
         final value = readValue(buffer) as int?;
-        return value == null ? null : CustomCookiePolicy.values[value];
+        return value == null ? null : AppLinksMode.values[value];
       case 151:
         final value = readValue(buffer) as int?;
-        return value == null ? null : TrackingScope.values[value];
+        return value == null ? null : WebContentIsolationStrategy.values[value];
       case 152:
         final value = readValue(buffer) as int?;
-        return value == null ? null : DohSettingsMode.values[value];
+        return value == null ? null : CustomCookiePolicy.values[value];
       case 153:
         final value = readValue(buffer) as int?;
-        return value == null ? null : DownloadStatus.values[value];
+        return value == null ? null : TrackingScope.values[value];
       case 154:
         final value = readValue(buffer) as int?;
-        return value == null ? null : LogLevel.values[value];
+        return value == null ? null : DohSettingsMode.values[value];
       case 155:
         final value = readValue(buffer) as int?;
-        return value == null ? null : SyncEngineValue.values[value];
+        return value == null ? null : DownloadStatus.values[value];
       case 156:
         final value = readValue(buffer) as int?;
-        return value == null ? null : MlProgressType.values[value];
+        return value == null ? null : LogLevel.values[value];
       case 157:
         final value = readValue(buffer) as int?;
-        return value == null ? null : MlProgressStatus.values[value];
+        return value == null ? null : SyncEngineValue.values[value];
       case 158:
         final value = readValue(buffer) as int?;
-        return value == null ? null : ClearDataType.values[value];
+        return value == null ? null : MlProgressType.values[value];
       case 159:
         final value = readValue(buffer) as int?;
-        return value == null ? null : GeckoFetchMethod.values[value];
+        return value == null ? null : MlProgressStatus.values[value];
       case 160:
         final value = readValue(buffer) as int?;
-        return value == null ? null : GeckoFetchRedircet.values[value];
+        return value == null ? null : ClearDataType.values[value];
       case 161:
         final value = readValue(buffer) as int?;
-        return value == null ? null : GeckoFetchCookiePolicy.values[value];
+        return value == null ? null : GeckoFetchMethod.values[value];
       case 162:
         final value = readValue(buffer) as int?;
-        return value == null ? null : BookmarkNodeType.values[value];
+        return value == null ? null : GeckoFetchRedircet.values[value];
       case 163:
         final value = readValue(buffer) as int?;
-        return value == null ? null : SitePermissionStatus.values[value];
+        return value == null ? null : GeckoFetchCookiePolicy.values[value];
       case 164:
         final value = readValue(buffer) as int?;
-        return value == null ? null : AutoplayStatus.values[value];
+        return value == null ? null : BookmarkNodeType.values[value];
       case 165:
-        return TranslationOptions.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : SitePermissionStatus.values[value];
       case 166:
-        return TranslationLanguage.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : AutoplayStatus.values[value];
       case 167:
-        return TranslationDetectedLanguages.decode(readValue(buffer)!);
+        return TranslationOptions.decode(readValue(buffer)!);
       case 168:
-        return TranslationPair.decode(readValue(buffer)!);
+        return TranslationLanguage.decode(readValue(buffer)!);
       case 169:
-        return TranslationEngineStateData.decode(readValue(buffer)!);
+        return TranslationDetectedLanguages.decode(readValue(buffer)!);
       case 170:
-        return TabTranslationStateData.decode(readValue(buffer)!);
+        return TranslationPair.decode(readValue(buffer)!);
       case 171:
-        return ReaderState.decode(readValue(buffer)!);
+        return TranslationEngineStateData.decode(readValue(buffer)!);
       case 172:
-        return AddTabParams.decode(readValue(buffer)!);
+        return TabTranslationStateData.decode(readValue(buffer)!);
       case 173:
-        return LastMediaAccessState.decode(readValue(buffer)!);
+        return ReaderState.decode(readValue(buffer)!);
       case 174:
-        return HistoryMetadataKey.decode(readValue(buffer)!);
+        return AddTabParams.decode(readValue(buffer)!);
       case 175:
-        return PackageCategoryValue.decode(readValue(buffer)!);
+        return LastMediaAccessState.decode(readValue(buffer)!);
       case 176:
-        return ExternalPackage.decode(readValue(buffer)!);
+        return HistoryMetadataKey.decode(readValue(buffer)!);
       case 177:
-        return LoadUrlFlagsValue.decode(readValue(buffer)!);
+        return PackageCategoryValue.decode(readValue(buffer)!);
       case 178:
-        return SourceValue.decode(readValue(buffer)!);
+        return ExternalPackage.decode(readValue(buffer)!);
       case 179:
-        return TabState.decode(readValue(buffer)!);
+        return LoadUrlFlagsValue.decode(readValue(buffer)!);
       case 180:
-        return RecoverableTab.decode(readValue(buffer)!);
+        return SourceValue.decode(readValue(buffer)!);
       case 181:
-        return IconRequest.decode(readValue(buffer)!);
+        return TabState.decode(readValue(buffer)!);
       case 182:
-        return ResourceSize.decode(readValue(buffer)!);
+        return RecoverableTab.decode(readValue(buffer)!);
       case 183:
-        return Resource.decode(readValue(buffer)!);
+        return IconRequest.decode(readValue(buffer)!);
       case 184:
-        return IconResult.decode(readValue(buffer)!);
+        return ResourceSize.decode(readValue(buffer)!);
       case 185:
-        return CookiePartitionKey.decode(readValue(buffer)!);
+        return Resource.decode(readValue(buffer)!);
       case 186:
-        return Cookie.decode(readValue(buffer)!);
+        return IconResult.decode(readValue(buffer)!);
       case 187:
-        return VisitInfo.decode(readValue(buffer)!);
+        return CookiePartitionKey.decode(readValue(buffer)!);
       case 188:
-        return HistoryHighlightWeights.decode(readValue(buffer)!);
+        return Cookie.decode(readValue(buffer)!);
       case 189:
-        return HistoryHighlight.decode(readValue(buffer)!);
+        return VisitInfo.decode(readValue(buffer)!);
       case 190:
-        return TopFrecentSiteInfo.decode(readValue(buffer)!);
+        return HistoryHighlightWeights.decode(readValue(buffer)!);
       case 191:
-        return HistoryItem.decode(readValue(buffer)!);
+        return HistoryHighlight.decode(readValue(buffer)!);
       case 192:
-        return HistoryState.decode(readValue(buffer)!);
+        return TopFrecentSiteInfo.decode(readValue(buffer)!);
       case 193:
-        return ReaderableState.decode(readValue(buffer)!);
+        return HistoryItem.decode(readValue(buffer)!);
       case 194:
-        return SecurityInfoState.decode(readValue(buffer)!);
+        return HistoryState.decode(readValue(buffer)!);
       case 195:
-        return TabContentState.decode(readValue(buffer)!);
+        return ReaderableState.decode(readValue(buffer)!);
       case 196:
-        return FindResultState.decode(readValue(buffer)!);
+        return SecurityInfoState.decode(readValue(buffer)!);
       case 197:
-        return CustomSelectionAction.decode(readValue(buffer)!);
+        return TabContentState.decode(readValue(buffer)!);
       case 198:
-        return WebExtensionData.decode(readValue(buffer)!);
+        return FindResultState.decode(readValue(buffer)!);
       case 199:
-        return AddonInfo.decode(readValue(buffer)!);
+        return CustomSelectionAction.decode(readValue(buffer)!);
       case 200:
-        return AddonStoreInfo.decode(readValue(buffer)!);
+        return WebExtensionData.decode(readValue(buffer)!);
       case 201:
-        return AddonUpdateAttemptInfo.decode(readValue(buffer)!);
+        return AddonInfo.decode(readValue(buffer)!);
       case 202:
-        return GeckoSuggestion.decode(readValue(buffer)!);
+        return AddonListingPreview.decode(readValue(buffer)!);
       case 203:
-        return TabContent.decode(readValue(buffer)!);
+        return AddonListing.decode(readValue(buffer)!);
       case 204:
-        return ContentBlocking.decode(readValue(buffer)!);
+        return AddonStoreInfo.decode(readValue(buffer)!);
       case 205:
-        return DohSettings.decode(readValue(buffer)!);
+        return AddonUpdateAttemptInfo.decode(readValue(buffer)!);
       case 206:
-        return GeckoEngineSettings.decode(readValue(buffer)!);
+        return GeckoSuggestion.decode(readValue(buffer)!);
       case 207:
-        return AutocompleteResult.decode(readValue(buffer)!);
+        return TabContent.decode(readValue(buffer)!);
       case 208:
-        return UnknownHitResult.decode(readValue(buffer)!);
+        return ContentBlocking.decode(readValue(buffer)!);
       case 209:
-        return ImageHitResult.decode(readValue(buffer)!);
+        return DohSettings.decode(readValue(buffer)!);
       case 210:
-        return VideoHitResult.decode(readValue(buffer)!);
+        return GeckoEngineSettings.decode(readValue(buffer)!);
       case 211:
-        return AudioHitResult.decode(readValue(buffer)!);
+        return AutocompleteResult.decode(readValue(buffer)!);
       case 212:
-        return ImageSrcHitResult.decode(readValue(buffer)!);
+        return UnknownHitResult.decode(readValue(buffer)!);
       case 213:
-        return PhoneHitResult.decode(readValue(buffer)!);
+        return ImageHitResult.decode(readValue(buffer)!);
       case 214:
-        return EmailHitResult.decode(readValue(buffer)!);
+        return VideoHitResult.decode(readValue(buffer)!);
       case 215:
-        return GeoHitResult.decode(readValue(buffer)!);
+        return AudioHitResult.decode(readValue(buffer)!);
       case 216:
-        return DownloadState.decode(readValue(buffer)!);
+        return ImageSrcHitResult.decode(readValue(buffer)!);
       case 217:
-        return ShareInternetResourceState.decode(readValue(buffer)!);
+        return PhoneHitResult.decode(readValue(buffer)!);
       case 218:
-        return AddonCollection.decode(readValue(buffer)!);
+        return EmailHitResult.decode(readValue(buffer)!);
       case 219:
-        return SyncEngineStatus.decode(readValue(buffer)!);
+        return GeoHitResult.decode(readValue(buffer)!);
       case 220:
-        return SyncAccountInfo.decode(readValue(buffer)!);
+        return DownloadState.decode(readValue(buffer)!);
       case 221:
-        return SyncDevice.decode(readValue(buffer)!);
+        return ShareInternetResourceState.decode(readValue(buffer)!);
       case 222:
-        return SyncIncomingTab.decode(readValue(buffer)!);
+        return AddonCollection.decode(readValue(buffer)!);
       case 223:
-        return SyncRemoteTab.decode(readValue(buffer)!);
+        return SyncEngineStatus.decode(readValue(buffer)!);
       case 224:
-        return SyncDeviceTabs.decode(readValue(buffer)!);
+        return SyncAccountInfo.decode(readValue(buffer)!);
       case 225:
-        return GeckoPref.decode(readValue(buffer)!);
+        return SyncDevice.decode(readValue(buffer)!);
       case 226:
-        return MlProgressData.decode(readValue(buffer)!);
+        return SyncIncomingTab.decode(readValue(buffer)!);
       case 227:
-        return ContainerSiteAssignment.decode(readValue(buffer)!);
+        return SyncRemoteTab.decode(readValue(buffer)!);
       case 228:
-        return GeckoHeader.decode(readValue(buffer)!);
+        return SyncDeviceTabs.decode(readValue(buffer)!);
       case 229:
-        return GeckoFetchRequest.decode(readValue(buffer)!);
+        return GeckoPref.decode(readValue(buffer)!);
       case 230:
-        return GeckoFetchResponse.decode(readValue(buffer)!);
+        return MlProgressData.decode(readValue(buffer)!);
       case 231:
-        return BookmarkNode.decode(readValue(buffer)!);
+        return ContainerSiteAssignment.decode(readValue(buffer)!);
       case 232:
-        return BookmarkInfo.decode(readValue(buffer)!);
+        return GeckoHeader.decode(readValue(buffer)!);
       case 233:
-        return SitePermissions.decode(readValue(buffer)!);
+        return GeckoFetchRequest.decode(readValue(buffer)!);
       case 234:
-        return TrackingProtectionException.decode(readValue(buffer)!);
+        return GeckoFetchResponse.decode(readValue(buffer)!);
       case 235:
-        return PwaIcon.decode(readValue(buffer)!);
+        return BookmarkNode.decode(readValue(buffer)!);
       case 236:
-        return ShareTargetFiles.decode(readValue(buffer)!);
+        return BookmarkInfo.decode(readValue(buffer)!);
       case 237:
-        return ShareTargetParams.decode(readValue(buffer)!);
+        return SitePermissions.decode(readValue(buffer)!);
       case 238:
-        return ShareTarget.decode(readValue(buffer)!);
+        return TrackingProtectionException.decode(readValue(buffer)!);
       case 239:
-        return ExternalApplicationResource.decode(readValue(buffer)!);
+        return PwaIcon.decode(readValue(buffer)!);
       case 240:
+        return ShareTargetFiles.decode(readValue(buffer)!);
+      case 241:
+        return ShareTargetParams.decode(readValue(buffer)!);
+      case 242:
+        return ShareTarget.decode(readValue(buffer)!);
+      case 243:
+        return ExternalApplicationResource.decode(readValue(buffer)!);
+      case 244:
         return PwaManifest.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -8515,6 +8828,44 @@ class GeckoAddonsApi {
     )
     ;
     return pigeonVar_replyValue as AddonStoreInfo?;
+  }
+
+  Future<List<AddonListing>> searchAddonListings(String query, AddonStoreApp app, int page, int pageSize) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonsApi.searchAddonListings$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[query, app, page, pageSize]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return (pigeonVar_replyValue! as List<Object?>).cast<AddonListing>();
+  }
+
+  Future<List<AddonListing>> getFeaturedAddonListings(AddonStoreApp app, int pageSize) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonsApi.getFeaturedAddonListings$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[app, pageSize]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return (pigeonVar_replyValue! as List<Object?>).cast<AddonListing>();
   }
 
   Future<void> invokeAddonAction(String extensionId, WebExtensionActionType actionType) async {

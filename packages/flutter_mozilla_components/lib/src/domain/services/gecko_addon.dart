@@ -49,6 +49,22 @@ class GeckoAddonService extends GeckoAddonEvents {
     return _api.getAddonStoreInfo(addonId);
   }
 
+  Future<List<AddonListing>> searchAddonListings({
+    required String query,
+    required AddonStoreApp app,
+    int page = 1,
+    int pageSize = 25,
+  }) {
+    return _api.searchAddonListings(query, app, page, pageSize);
+  }
+
+  Future<List<AddonListing>> getFeaturedAddonListings({
+    required AddonStoreApp app,
+    int pageSize = 25,
+  }) {
+    return _api.getFeaturedAddonListings(app, pageSize);
+  }
+
   Future<void> invokeAddonAction(
     String extensionId,
     WebExtensionActionType actionType,

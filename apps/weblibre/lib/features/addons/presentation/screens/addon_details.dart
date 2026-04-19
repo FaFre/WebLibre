@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -27,6 +28,7 @@ import 'package:weblibre/features/addons/extensions/addon_info.dart';
 import 'package:weblibre/features/addons/presentation/screens/addon_internal_settings.dart';
 import 'package:weblibre/features/addons/presentation/widgets/addon_ui.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
+import 'package:weblibre/utils/number_format.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 class AddonDetailsScreen extends ConsumerWidget {
@@ -163,6 +165,7 @@ class _AddonHeader extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Card(
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -188,7 +191,6 @@ class _AddonHeader extends StatelessWidget {
                       const SizedBox(height: 12),
                       Wrap(
                         spacing: 8,
-                        runSpacing: 8,
                         children: [
                           Chip(
                             label: Text(
@@ -204,7 +206,7 @@ class _AddonHeader extends StatelessWidget {
                               avatar: const Icon(Icons.star, size: 18),
                               label: Text(
                                 '${addon.ratingAverage!.toStringAsFixed(1)}'
-                                ' (${addon.ratingReviews ?? 0})',
+                                ' (${formatCompactNumber(addon.ratingReviews ?? 0)})',
                               ),
                             ),
                         ],
@@ -272,6 +274,7 @@ class _ManagementSection extends ConsumerWidget {
         Text('Management', style: theme.textTheme.titleMedium),
         const SizedBox(height: 8),
         Card(
+          color: Theme.of(context).colorScheme.surfaceContainerHigh,
           child: Column(
             children: [
               if (addon.isSupported)
@@ -423,7 +426,7 @@ class _UpdatesSection extends ConsumerWidget {
         addon.installedVersion != availableVersion;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text('Updates', style: theme.textTheme.titleMedium),
         const SizedBox(height: 8),
@@ -566,20 +569,42 @@ void _reportUpdateResult(
   }
 }
 
-class _DescriptionCard extends StatelessWidget {
+class _DescriptionCard extends ConsumerWidget {
   final AddonInfo addon;
 
   const _DescriptionCard({required this.addon});
 
   @override
-  Widget build(BuildContext context) {
-    final description = addon.description;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final markdownAsync = ref.watch(addonDescriptionMarkdownProvider(addon.id));
 
     return Card(
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Text(
-          description.isNotEmpty ? description : 'No description provided.',
+        child: markdownAsync.when(
+          skipLoadingOnReload: true,
+          data: (markdown) => markdown.isEmpty
+              ? const Text('No description provided.')
+              : MarkdownBody(
+                  data: markdown,
+                  selectable: true,
+                  onTapLink: (text, href, title) {
+                    if (href != null && href.isNotEmpty) {
+                      launchUrl(Uri.parse(href));
+                    }
+                  },
+                ),
+          loading: () => Text(
+            addon.description.isNotEmpty
+                ? addon.description
+                : 'Loading description…',
+          ),
+          error: (_, _) => Text(
+            addon.description.isNotEmpty
+                ? addon.description
+                : 'No description provided.',
+          ),
         ),
       ),
     );
@@ -594,6 +619,7 @@ class _DetailsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
       child: Column(
         children: [
           if ((addon.authorName ?? '').isNotEmpty)

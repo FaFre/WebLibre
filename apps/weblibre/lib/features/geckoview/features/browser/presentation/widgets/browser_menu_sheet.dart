@@ -1809,27 +1809,6 @@ class _ExtensionsCard extends HookConsumerWidget {
                   await const AddonManagerRoute().push<void>(rootContext);
                 },
               ),
-              _buildSubTile(
-                'Get Extensions',
-                icon: MdiIcons.puzzlePlus,
-                onTap: () async {
-                  Navigator.pop(context);
-                  final tabMode = TabMode.fromTabType(
-                    ref
-                        .read(generalSettingsWithDefaultsProvider)
-                        .effectiveDefaultCreateTabType,
-                  );
-                  await ref
-                      .read(tabRepositoryProvider.notifier)
-                      .addTab(
-                        url: Uri.parse('https://addons.mozilla.org'),
-                        tabMode: tabMode,
-                        containerSelection:
-                            const TabContainerSelection.unassigned(),
-                        selectTab: true,
-                      );
-                },
-              ),
             ],
           ),
         ),

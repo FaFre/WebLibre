@@ -943,6 +943,11 @@ RouteBase get $addonManagerRoute => GoRouteData.$route(
       factory: $AddonDetailsRoute._fromState,
     ),
     GoRouteData.$route(
+      path: 'listing/:addonId',
+      name: 'AddonListingDetailsRoute',
+      factory: $AddonListingDetailsRoute._fromState,
+    ),
+    GoRouteData.$route(
       path: 'permissions/:addonId',
       name: 'AddonPermissionsRoute',
       factory: $AddonPermissionsRoute._fromState,
@@ -999,6 +1004,36 @@ mixin $AddonDetailsRoute on GoRouteData {
 
   @override
   void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $AddonListingDetailsRoute on GoRouteData {
+  static AddonListingDetailsRoute _fromState(GoRouterState state) =>
+      AddonListingDetailsRoute(
+        addonId: state.pathParameters['addonId']!,
+        $extra: state.extra as AddonListing,
+      );
+
+  AddonListingDetailsRoute get _self => this as AddonListingDetailsRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/addons/listing/${Uri.encodeComponent(_self.addonId)}',
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+
+  @override
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: _self.$extra);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location, extra: _self.$extra);
+
+  @override
+  void replace(BuildContext context) =>
+      context.replace(location, extra: _self.$extra);
 }
 
 mixin $AddonPermissionsRoute on GoRouteData {
