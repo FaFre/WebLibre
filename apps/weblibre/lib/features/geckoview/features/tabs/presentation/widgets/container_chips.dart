@@ -247,6 +247,7 @@ class ContainerChips extends HookConsumerWidget {
                       String
                     >(
                       enableDelete: false,
+                      maxCount: null,
                       itemId: (container) => container.id,
                       itemBackgroundColor: (container) =>
                           ContainerColors.forChip(container.color),

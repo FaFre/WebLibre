@@ -632,6 +632,7 @@ class QuickTabSwitcherView extends StatelessWidget {
             SelectableChips<QuickTabSwitcherItem, QuickTabSwitcherItem, String>(
               enableDelete: false,
               sortSelectedFirst: false,
+              maxCount: null,
               scrollController: scrollController,
               itemId: (item) => item.id,
               selectedItem: activeItem,

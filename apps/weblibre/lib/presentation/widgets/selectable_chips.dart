@@ -58,7 +58,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
   final Iterable<T> availableItems;
   final List<Widget> prefixListItems;
   final S? selectedItem;
-  final int maxCount;
+  final int? maxCount;
   final bool enableDelete;
   final bool sortSelectedFirst;
 
@@ -104,7 +104,10 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var items = availableItems.take(maxCount).toList();
+    var items = (maxCount != null)
+        ? availableItems.take(maxCount!).toList()
+        : availableItems.toList();
+
     if (sortSelectedFirst) {
       if (selectedItem case final T selectedItem) {
         final selectedIndex = items.indexWhere(
