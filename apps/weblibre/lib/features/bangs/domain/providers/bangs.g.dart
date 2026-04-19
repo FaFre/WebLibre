@@ -80,7 +80,7 @@ final class DefaultSearchBangProvider
   }
 }
 
-String _$defaultSearchBangHash() => r'39c5b18231a56763e2c620cae5f2889f7c95f6ee';
+String _$defaultSearchBangHash() => r'2da8ec4ccd0da74a7242a83ef4efe53850293116';
 
 @ProviderFor(bangData)
 final bangDataProvider = BangDataFamily._();

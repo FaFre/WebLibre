@@ -153,14 +153,14 @@ Future<List<AddonListing>> searchAddonListings(
   if (trimmed.isEmpty) {
     return ref.watch(featuredAddonListingsProvider(app).future);
   }
-  return ref.read(addonServiceProvider).searchAddonListings(
-    query: trimmed,
-    app: app,
-  );
+  return ref
+      .read(addonServiceProvider)
+      .searchAddonListings(query: trimmed, app: app);
 }
 
 @Riverpod(keepAlive: true)
 class AddonStoreAppFilter extends _$AddonStoreAppFilter {
+  // ignore: use_setters_to_change_properties
   void setApp(AddonStoreApp app) => state = app;
 
   @override

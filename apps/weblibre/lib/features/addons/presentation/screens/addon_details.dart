@@ -589,9 +589,9 @@ class _DescriptionCard extends ConsumerWidget {
               : MarkdownBody(
                   data: markdown,
                   selectable: true,
-                  onTapLink: (text, href, title) {
+                  onTapLink: (text, href, title) async {
                     if (href != null && href.isNotEmpty) {
-                      launchUrl(Uri.parse(href));
+                      await launchUrl(Uri.parse(href));
                     }
                   },
                 ),

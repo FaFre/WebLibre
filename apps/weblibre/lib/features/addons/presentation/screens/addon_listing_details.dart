@@ -249,51 +249,42 @@ class _ScreenshotsSection extends StatelessWidget {
         itemBuilder: (context, index) {
           final p = previews[index];
           return GestureDetector(
-            onTap: () => _showFullScreenImage(context, p.imageUrl),
+            onTap: () => showDialog<void>(
+              context: context,
+              barrierColor: Colors.black87,
+              builder: (context) => Dialog(
+                backgroundColor: Colors.transparent,
+                insetPadding: EdgeInsets.zero,
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: InteractiveViewer(
+                    child: Hero(
+                      tag: p.imageUrl,
+                      child: Image.network(p.imageUrl, fit: BoxFit.contain),
+                    ),
+                  ),
+                ),
+              ),
+            ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                p.thumbnailUrl ?? p.imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => Container(
-                  width: 300,
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  child: const Icon(Icons.broken_image_outlined),
+              child: Hero(
+                tag: p.imageUrl,
+                child: Image.network(
+                  p.thumbnailUrl ?? p.imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => Container(
+                    width: 300,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
+                    child: const Icon(Icons.broken_image_outlined),
+                  ),
                 ),
               ),
             ),
           );
         },
-      ),
-    );
-  }
-
-  void _showFullScreenImage(BuildContext context, String url) {
-    Navigator.of(context).push(
-      PageRouteBuilder<void>(
-        opaque: false,
-        barrierColor: Colors.black87,
-        pageBuilder: (_, _, _) => _FullScreenImage(url: url),
-      ),
-    );
-  }
-}
-
-class _FullScreenImage extends StatelessWidget {
-  final String url;
-  const _FullScreenImage({required this.url});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: GestureDetector(
-        onTap: () => Navigator.of(context).pop(),
-        child: Center(
-          child: InteractiveViewer(
-            child: Image.network(url, fit: BoxFit.contain),
-          ),
-        ),
       ),
     );
   }
@@ -311,8 +302,8 @@ class _ExpandableDescription extends HookConsumerWidget {
       skipLoadingOnReload: true,
       data: (markdown) => MarkdownBody(
         data: markdown.isEmpty ? html : markdown,
-        onTapLink: (_, href, _) {
-          if (href != null) launchUrl(Uri.parse(href));
+        onTapLink: (_, href, _) async {
+          if (href != null) await launchUrl(Uri.parse(href));
         },
       ),
       loading: () => Text(html),

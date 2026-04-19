@@ -24,7 +24,7 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/web_feed/presentation/controllers/fetch_articles.dart';
 
 @pragma('vm:entry-point')
-Future<void> backgroundFetch(HeadlessTask task) async {
+Future<void> backgroundFetch(HeadlessEvent task) async {
   final taskId = task.taskId;
 
   final isTimeout = task.timeout;
