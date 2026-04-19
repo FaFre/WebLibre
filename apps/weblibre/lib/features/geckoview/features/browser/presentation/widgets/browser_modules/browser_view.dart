@@ -276,19 +276,21 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                     generalSettingsWithDefaultsProvider,
                   );
                   await quickActions.setShortcutItems([
-                    //TODO: add icons
                     const ShortcutItem(
                       type: 'new_tab',
                       localizedTitle: 'New Tab',
+                      icon: 'mdi_icon_tab',
                     ),
                     const ShortcutItem(
                       type: 'new_private_tab',
                       localizedTitle: 'New Private Tab',
+                      icon: 'mdi_icon_domino_mask',
                     ),
                     if (settings.showIsolatedTabUi)
                       const ShortcutItem(
                         type: 'new_isolated_tab',
                         localizedTitle: 'New Isolated Tab',
+                        icon: 'mdi_icon_snowflake',
                       ),
                   ]);
                 }
