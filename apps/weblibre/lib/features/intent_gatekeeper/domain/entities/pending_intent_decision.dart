@@ -17,5 +17,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-export 'src/intent_receiver.dart';
-export 'src/pigeons/intent.g.dart' show Intent, IntentGatekeeperHostApi;
+import 'package:fast_equatable/fast_equatable.dart';
+
+class PendingIntentDecision with FastEquatable {
+  final int id;
+  final String packageName;
+  final String? url;
+
+  PendingIntentDecision({
+    required this.id,
+    required this.packageName,
+    required this.url,
+  });
+
+  @override
+  List<Object?> get hashParameters => [id, packageName, url];
+}

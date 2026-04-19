@@ -11,12 +11,15 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ShortcutManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import eu.weblibre.flutter_mozilla_components.Components
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.PwaConstants
+import eu.weblibre.flutter_mozilla_components.gatekeeper.IntentBlockNotifier
+import eu.weblibre.flutter_mozilla_components.gatekeeper.IntentGatekeeperPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -58,7 +61,53 @@ class IntentReceiverActivity : Activity() {
         intent.flags = intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK.inv()
         intent.flags = intent.flags and Intent.FLAG_ACTIVITY_CLEAR_TASK.inv()
 
+        if (shouldBlockIntent(intent)) {
+            finish()
+            return
+        }
+
         processIntent(intent)
+    }
+
+    /**
+     * Fast native block-check. Only rejects packages explicitly on the blocked
+     * list; allowed and unknown packages fall through to the Flutter-side
+     * gatekeeper which can still prompt the user.
+     *
+     * PWA launches carrying our trusted profile metadata are never blocked here —
+     * those are treated as internal launches regardless of the caller.
+     */
+    private fun shouldBlockIntent(intent: Intent): Boolean {
+        if (!IntentGatekeeperPreferences.isEnabled(applicationContext)) return false
+        if (intent.hasExtra(PwaConstants.EXTRA_PWA_PROFILE_UUID)) return false
+
+        val caller = resolveCallerPackage(intent) ?: return false
+        if (caller == packageName) return false
+        if (!IntentGatekeeperPreferences.isBlocked(applicationContext, caller)) return false
+
+        Log.i(TAG, "Blocking intent from $caller (native gatekeeper)")
+        IntentBlockNotifier.notifyBlocked(applicationContext, caller)
+        return true
+    }
+
+    private fun resolveCallerPackage(intent: Intent): String? {
+        referrer?.let { uri ->
+            if (uri.scheme == "android-app") {
+                uri.host?.let { return it }
+            }
+        }
+
+        @Suppress("DEPRECATION")
+        val referrerUri: Uri? = intent.getParcelableExtra(Intent.EXTRA_REFERRER)
+        if (referrerUri?.scheme == "android-app") {
+            referrerUri.host?.let { return it }
+        }
+
+        intent.getStringExtra(Intent.EXTRA_REFERRER_NAME)?.let { name ->
+            Uri.parse(name).takeIf { it.scheme == "android-app" }?.host?.let { return it }
+        }
+
+        return callingPackage
     }
 
     override fun onDestroy() {
@@ -439,6 +488,12 @@ class IntentReceiverActivity : Activity() {
         val mainActivityIntent = Intent(intent).apply {
             setClassName(this@IntentReceiverActivity, "eu.weblibre.gecko.MainActivity")
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            // Preserve the original caller so the gatekeeper on the Flutter side
+            // can identify which app triggered this intent (getReferrer() in the
+            // forwarded activity would otherwise resolve to ourselves).
+            if (!hasExtra(Intent.EXTRA_REFERRER) && !hasExtra(Intent.EXTRA_REFERRER_NAME)) {
+                referrer?.let { putExtra(Intent.EXTRA_REFERRER, it) }
+            }
         }
         startActivity(mainActivityIntent)
         finish()

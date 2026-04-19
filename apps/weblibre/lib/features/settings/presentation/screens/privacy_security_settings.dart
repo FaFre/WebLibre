@@ -25,6 +25,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/delete_data.dart';
+import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
+import 'package:weblibre/features/intent_gatekeeper/domain/services/package_label_resolver.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
@@ -54,6 +56,7 @@ class PrivacySecuritySettingsScreen extends StatelessWidget {
                 _ConnectionSecuritySection(),
                 _NetworkProtectionSection(),
                 _PrivacySignalsSection(),
+                _AppOpeningProtectionSection(),
                 _DataManagementSection(),
                 _SafeBrowsingSection(),
                 _AdvancedSecuritySection(),
@@ -852,6 +855,149 @@ Future<void> _showRestartDialog(BuildContext context, WidgetRef ref) async {
     await exitApp(ProviderScope.containerOf(context));
   }
 }
+
+class _AppOpeningProtectionSection extends HookConsumerWidget {
+  const _AppOpeningProtectionSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final enabled = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.blockExternalAppsEnabled,
+      ),
+    );
+    final policies = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.externalAppIntentPolicies,
+      ),
+    );
+
+    return Column(
+      children: [
+        const SettingSection(name: 'App-Opening Protection'),
+        SwitchListTile.adaptive(
+          title: const Text('Block apps from opening your browser'),
+          subtitle: const Text(
+            'Ask before opening links that other apps send to WebLibre.',
+          ),
+          secondary: const Icon(MdiIcons.appsBox),
+          value: enabled,
+          onChanged: (value) async {
+            await ref
+                .read(saveGeneralSettingsControllerProvider.notifier)
+                .save(
+                  (current) => current.copyWith.blockExternalAppsEnabled(value),
+                );
+          },
+        ),
+        if (enabled && policies.isNotEmpty)
+          _ManagedAppPolicyList(policies: policies),
+      ],
+    );
+  }
+}
+
+class _ManagedAppPolicyList extends HookConsumerWidget {
+  final Map<String, IntentSourcePolicy> policies;
+
+  const _ManagedAppPolicyList({required this.policies});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final entries = policies.entries.toList(growable: false);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Managed apps', style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 4),
+          for (final entry in entries)
+            _ManagedAppPolicyTile(
+              packageName: entry.key,
+              policy: entry.value,
+              onAction: (action) async {
+                final notifier = ref.read(
+                  saveGeneralSettingsControllerProvider.notifier,
+                );
+                switch (action) {
+                  case _PolicyAction.allow:
+                    await notifier.save(
+                      (current) => current.copyWith.externalAppIntentPolicies({
+                        ...current.externalAppIntentPolicies,
+                        entry.key: IntentSourcePolicy.allow,
+                      }),
+                    );
+                  case _PolicyAction.block:
+                    await notifier.save(
+                      (current) => current.copyWith.externalAppIntentPolicies({
+                        ...current.externalAppIntentPolicies,
+                        entry.key: IntentSourcePolicy.block,
+                      }),
+                    );
+                  case _PolicyAction.remove:
+                    await notifier.save(
+                      (current) => current.copyWith.externalAppIntentPolicies(
+                        {...current.externalAppIntentPolicies}
+                          ..remove(entry.key),
+                      ),
+                    );
+                }
+              },
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ManagedAppPolicyTile extends HookConsumerWidget {
+  final String packageName;
+  final IntentSourcePolicy policy;
+  final Future<void> Function(_PolicyAction action) onAction;
+
+  const _ManagedAppPolicyTile({
+    required this.packageName,
+    required this.policy,
+    required this.onAction,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final label = ref.watch(
+      packageLabelProvider(packageName).select((value) => value.value),
+    );
+    final hasLabel = label != null && label.isNotEmpty;
+
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(
+        policy == IntentSourcePolicy.allow
+            ? MdiIcons.checkCircleOutline
+            : MdiIcons.cancel,
+      ),
+      title: Text(hasLabel ? label : packageName),
+      subtitle: Text(
+        hasLabel
+            ? '${policy == IntentSourcePolicy.allow ? 'Always allowed' : 'Always blocked'} · $packageName'
+            : (policy == IntentSourcePolicy.allow
+                  ? 'Always allowed'
+                  : 'Always blocked'),
+      ),
+      trailing: PopupMenuButton<_PolicyAction>(
+        onSelected: onAction,
+        itemBuilder: (context) => const [
+          PopupMenuItem(value: _PolicyAction.allow, child: Text('Allow')),
+          PopupMenuItem(value: _PolicyAction.block, child: Text('Block')),
+          PopupMenuItem(value: _PolicyAction.remove, child: Text('Remove')),
+        ],
+      ),
+    );
+  }
+}
+
+enum _PolicyAction { allow, block, remove }
 
 class _NetworkProtectionSection extends StatelessWidget {
   const _NetworkProtectionSection();

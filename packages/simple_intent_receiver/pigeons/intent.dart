@@ -53,3 +53,15 @@ class Intent {
 abstract class IntentEvents {
   void onIntentReceived(int sequence, Intent intent);
 }
+
+@HostApi()
+abstract class IntentGatekeeperHostApi {
+  /// Replicates the blocked-packages policy to the native side so the
+  /// [IntentReceiverActivity] can reject intents without launching Flutter.
+  void setConfig(bool enabled, List<String> blockedPackages);
+
+  /// Resolves a package name to its user-visible application label via
+  /// [PackageManager]. Returns `null` if the package is not installed or the
+  /// label cannot be resolved.
+  String? resolvePackageLabel(String packageName);
+}

@@ -24,6 +24,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
+import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 
 part 'general_settings.g.dart';
@@ -119,6 +120,8 @@ class GeneralSettings with FastEquatable {
   final bool unshortenerEnabled;
   final String unshortenerToken;
   final bool allowNonManifestPwaInstall;
+  final bool blockExternalAppsEnabled;
+  final Map<String, IntentSourcePolicy> externalAppIntentPolicies;
 
   GeneralSettings({
     required this.themeMode,
@@ -170,6 +173,8 @@ class GeneralSettings with FastEquatable {
     required this.unshortenerEnabled,
     required this.unshortenerToken,
     required this.allowNonManifestPwaInstall,
+    required this.blockExternalAppsEnabled,
+    required this.externalAppIntentPolicies,
   });
 
   GeneralSettings.withDefaults({
@@ -222,6 +227,8 @@ class GeneralSettings with FastEquatable {
     bool? unshortenerEnabled,
     String? unshortenerToken,
     bool? allowNonManifestPwaInstall,
+    bool? blockExternalAppsEnabled,
+    Map<String, IntentSourcePolicy>? externalAppIntentPolicies,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        uiScaleFactor = uiScaleFactor ?? defaultUiScaleFactor,
        disableAnimations = disableAnimations ?? false,
@@ -280,7 +287,9 @@ class GeneralSettings with FastEquatable {
        tabBarLongPressUrlCopy = tabBarLongPressUrlCopy ?? true,
        unshortenerEnabled = unshortenerEnabled ?? false,
        unshortenerToken = unshortenerToken ?? '',
-       allowNonManifestPwaInstall = allowNonManifestPwaInstall ?? false;
+       allowNonManifestPwaInstall = allowNonManifestPwaInstall ?? false,
+       blockExternalAppsEnabled = blockExternalAppsEnabled ?? false,
+       externalAppIntentPolicies = externalAppIntentPolicies ?? const {};
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) =>
       _$GeneralSettingsFromJson(json);
@@ -353,5 +362,7 @@ class GeneralSettings with FastEquatable {
     unshortenerEnabled,
     unshortenerToken,
     allowNonManifestPwaInstall,
+    blockExternalAppsEnabled,
+    externalAppIntentPolicies,
   ];
 }

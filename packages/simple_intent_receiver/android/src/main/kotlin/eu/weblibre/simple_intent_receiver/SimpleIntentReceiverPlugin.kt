@@ -22,7 +22,10 @@ package eu.weblibre.simple_intent_receiver
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import io.flutter.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -30,20 +33,29 @@ import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.PluginRegistry
 import eu.weblibre.simple_intent_receiver.pigeons.Intent as PigeonIntent
+import eu.weblibre.simple_intent_receiver.pigeons.IntentGatekeeperHostApi
 
 class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.NewIntentListener {
   private lateinit var context: Context
   private var intentReceiver: IntentReceiver? = null
   private var lastHandledIntent: String? = null
   private var activity: Activity? = null
+  private var binaryMessenger: io.flutter.plugin.common.BinaryMessenger? = null
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     context = flutterPluginBinding.applicationContext
     intentReceiver = IntentReceiver(flutterPluginBinding.binaryMessenger)
+    binaryMessenger = flutterPluginBinding.binaryMessenger
+    IntentGatekeeperHostApi.setUp(
+      flutterPluginBinding.binaryMessenger,
+      IntentGatekeeperHostApiImpl(flutterPluginBinding.applicationContext),
+    )
   }
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
     intentReceiver = null
+    binaryMessenger?.let { IntentGatekeeperHostApi.setUp(it, null) }
+    binaryMessenger = null
   }
 
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {
@@ -118,10 +130,59 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
     return true
   }
 
+  private fun resolveCallerPackage(intent: Intent): String? {
+    val raw = resolveRawCallerPackage(intent) ?: return null
+    // Treat system packages (launcher, shell, SystemUI, etc.) as internal — the
+    // gatekeeper shouldn't prompt the user when the OS itself forwards an intent.
+    if (isSystemPackage(raw)) return null
+    return raw
+  }
+
+  private fun resolveRawCallerPackage(intent: Intent): String? {
+    // 1. Try Activity.getReferrer() — handles EXTRA_REFERRER/_NAME and real caller.
+    activity?.referrer?.let { uri ->
+      if (uri.scheme == "android-app") {
+        uri.host?.let { return it }
+      }
+    }
+
+    // 2. Fallback to explicit referrer extras on the intent itself.
+    @Suppress("DEPRECATION")
+    val referrerUri: Uri? = intent.getParcelableExtra(Intent.EXTRA_REFERRER)
+    if (referrerUri?.scheme == "android-app") {
+      referrerUri.host?.let { return it }
+    }
+
+    intent.getStringExtra(Intent.EXTRA_REFERRER_NAME)?.let { name ->
+      Uri.parse(name).takeIf { it.scheme == "android-app" }?.host?.let { return it }
+    }
+
+    // 3. Caller for startActivityForResult flows.
+    return activity?.callingPackage
+  }
+
+  private fun isSystemPackage(packageName: String): Boolean {
+    return try {
+      val pm = context.packageManager
+      val info = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        pm.getApplicationInfo(packageName, PackageManager.ApplicationInfoFlags.of(0))
+      } else {
+        @Suppress("DEPRECATION")
+        pm.getApplicationInfo(packageName, 0)
+      }
+      val systemFlags = ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP
+      (info.flags and systemFlags) != 0
+    } catch (_: PackageManager.NameNotFoundException) {
+      false
+    } catch (_: Exception) {
+      false
+    }
+  }
+
   private fun convertToPigeonIntent(intent: Intent): PigeonIntent {
     val action = intent.action
     val data = intent.dataString
-    val fromPackageName = intent.getPackage()
+    val fromPackageName = resolveCallerPackage(intent)
 
     val categories = ArrayList<String>()
     intent.categories?.let {

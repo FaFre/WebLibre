@@ -53,6 +53,11 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
+import 'package:weblibre/features/intent_gatekeeper/domain/entities/pending_intent_decision.dart';
+import 'package:weblibre/features/intent_gatekeeper/domain/services/intent_gatekeeper.dart';
+import 'package:weblibre/features/intent_gatekeeper/domain/services/native_gatekeeper_replicator.dart';
+import 'package:weblibre/features/intent_gatekeeper/presentation/widgets/intent_gatekeeper_dialog.dart';
 import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
@@ -347,6 +352,37 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       }
     });
 
+    ref.listenManual<AsyncValue<PendingIntentDecision>>(
+      intentGatekeeperProvider,
+      (previous, next) async {
+        final request = next.value;
+        if (request == null) {
+          return;
+        }
+
+        final gatekeeper = ref.read(intentGatekeeperProvider.notifier);
+        if (!context.mounted) {
+          await gatekeeper.resolve(
+            id: request.id,
+            decision: IntentSourcePolicy.block,
+          );
+          return;
+        }
+
+        final outcome = await showDialog<DialogOutcome>(
+          context: context,
+          builder: (context) => IntentGatekeeperDialog(request: request),
+        );
+
+        await gatekeeper.resolve(
+          id: request.id,
+          decision: outcome?.decision ?? IntentSourcePolicy.block,
+          persist: outcome?.persist ?? false,
+          packageName: request.packageName,
+        );
+      },
+    );
+
     ref.listenManual(
       engineBoundIntentStreamProvider,
       (previous, next) {
@@ -437,6 +473,19 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       onError: (error, stackTrace) {
         logger.e(
           'Error listening to tabRepositoryProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+
+    ref.listenManual(
+      fireImmediately: true,
+      nativeIntentGatekeeperReplicatorProvider,
+      (previous, next) {},
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to nativeIntentGatekeeperReplicatorProvider',
           error: error,
           stackTrace: stackTrace,
         );

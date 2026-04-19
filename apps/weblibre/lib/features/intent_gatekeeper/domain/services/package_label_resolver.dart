@@ -17,5 +17,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-export 'src/intent_receiver.dart';
-export 'src/pigeons/intent.g.dart' show Intent, IntentGatekeeperHostApi;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:simple_intent_receiver/simple_intent_receiver.dart';
+
+part 'package_label_resolver.g.dart';
+
+@Riverpod(keepAlive: true)
+Future<String?> packageLabel(Ref ref, String packageName) {
+  final api = IntentGatekeeperHostApi();
+  return api.resolvePackageLabel(packageName);
+}

@@ -27,12 +27,33 @@ import 'package:simple_intent_receiver/simple_intent_receiver.dart';
 import 'package:uri_to_file/uri_to_file.dart' as uri_to_file;
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/data/models/received_intent_parameter.dart';
+import 'package:weblibre/features/intent_gatekeeper/domain/services/intent_gatekeeper.dart';
 
 part 'sharing_intent.g.dart';
 
-final _sharingIntentTransformer =
+StreamTransformer<Intent, ReceivedIntentParameter>
+_buildSharingIntentTransformer(IntentGatekeeper gatekeeper) =>
     StreamTransformer<Intent, ReceivedIntentParameter>.fromHandlers(
       handleData: (intent, sink) async {
+        // PWA shortcut intents carry our own signed context id — always allow.
+        final pwaContextId =
+            intent.action == 'android.intent.action.VIEW'
+                ? intent.extra['pwa_context_id'] as String?
+                : null;
+
+        if (pwaContextId == null) {
+          final allowed = await gatekeeper.shouldAllow(
+            fromPackageName: intent.fromPackageName,
+            url: intent.data,
+          );
+          if (!allowed) {
+            logger.i(
+              'Blocked intent from ${intent.fromPackageName ?? 'unknown app'}',
+            );
+            return;
+          }
+        }
+
         final data = switch (intent.action) {
           'android.intent.action.PROCESS_TEXT' =>
             intent.extra['android.intent.extra.PROCESS_TEXT'] as String?,
@@ -46,10 +67,7 @@ final _sharingIntentTransformer =
         };
 
         // Extract container context from shortcut intents
-        final contextId =
-            intent.action == 'android.intent.action.VIEW'
-                ? intent.extra['pwa_context_id'] as String?
-                : null;
+        final contextId = pwaContextId;
 
         if (data != null) {
           if (uri_to_file.isUriSupported(data)) {
@@ -101,6 +119,7 @@ final _sharingIntentTransformer =
 @Riverpod(keepAlive: true)
 Raw<Stream<ReceivedIntentParameter>> sharingIntentStream(Ref ref) {
   final receiver = IntentReceiver.setUp();
+  final gatekeeper = ref.watch(intentGatekeeperProvider.notifier);
 
-  return receiver.events.transform(_sharingIntentTransformer);
+  return receiver.events.transform(_buildSharingIntentTransformer(gatekeeper));
 }

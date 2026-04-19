@@ -231,6 +231,13 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
       ),
       'allowNonManifestPwaInstall': settings['allowNonManifestPwaInstall']
           ?.readAs(DriftSqlType.bool, db.typeMapping),
+      'blockExternalAppsEnabled': settings['blockExternalAppsEnabled']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'externalAppIntentPolicies': settings['externalAppIntentPolicies']
+          ?.readAs(DriftSqlType.string, db.typeMapping)
+          .mapNotNull(jsonDecode),
     });
   }
 

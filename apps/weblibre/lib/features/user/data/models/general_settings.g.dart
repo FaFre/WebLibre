@@ -123,6 +123,12 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings allowNonManifestPwaInstall(bool allowNonManifestPwaInstall);
 
+  GeneralSettings blockExternalAppsEnabled(bool blockExternalAppsEnabled);
+
+  GeneralSettings externalAppIntentPolicies(
+    Map<String, IntentSourcePolicy> externalAppIntentPolicies,
+  );
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -180,6 +186,8 @@ abstract class _$GeneralSettingsCWProxy {
     bool unshortenerEnabled,
     String unshortenerToken,
     bool allowNonManifestPwaInstall,
+    bool blockExternalAppsEnabled,
+    Map<String, IntentSourcePolicy> externalAppIntentPolicies,
   });
 }
 
@@ -399,6 +407,15 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(allowNonManifestPwaInstall: allowNonManifestPwaInstall);
 
   @override
+  GeneralSettings blockExternalAppsEnabled(bool blockExternalAppsEnabled) =>
+      call(blockExternalAppsEnabled: blockExternalAppsEnabled);
+
+  @override
+  GeneralSettings externalAppIntentPolicies(
+    Map<String, IntentSourcePolicy> externalAppIntentPolicies,
+  ) => call(externalAppIntentPolicies: externalAppIntentPolicies);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -457,6 +474,8 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? unshortenerEnabled = const $CopyWithPlaceholder(),
     Object? unshortenerToken = const $CopyWithPlaceholder(),
     Object? allowNonManifestPwaInstall = const $CopyWithPlaceholder(),
+    Object? blockExternalAppsEnabled = const $CopyWithPlaceholder(),
+    Object? externalAppIntentPolicies = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -747,6 +766,18 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.allowNonManifestPwaInstall
           // ignore: cast_nullable_to_non_nullable
           : allowNonManifestPwaInstall as bool,
+      blockExternalAppsEnabled:
+          blockExternalAppsEnabled == const $CopyWithPlaceholder() ||
+              blockExternalAppsEnabled == null
+          ? _value.blockExternalAppsEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : blockExternalAppsEnabled as bool,
+      externalAppIntentPolicies:
+          externalAppIntentPolicies == const $CopyWithPlaceholder() ||
+              externalAppIntentPolicies == null
+          ? _value.externalAppIntentPolicies
+          // ignore: cast_nullable_to_non_nullable
+          : externalAppIntentPolicies as Map<String, IntentSourcePolicy>,
     );
   }
 }
@@ -858,6 +889,11 @@ GeneralSettings _$GeneralSettingsFromJson(
   unshortenerEnabled: json['unshortenerEnabled'] as bool?,
   unshortenerToken: json['unshortenerToken'] as String?,
   allowNonManifestPwaInstall: json['allowNonManifestPwaInstall'] as bool?,
+  blockExternalAppsEnabled: json['blockExternalAppsEnabled'] as bool?,
+  externalAppIntentPolicies:
+      (json['externalAppIntentPolicies'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, $enumDecode(_$IntentSourcePolicyEnumMap, e)),
+      ),
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -923,6 +959,10 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'unshortenerEnabled': instance.unshortenerEnabled,
   'unshortenerToken': instance.unshortenerToken,
   'allowNonManifestPwaInstall': instance.allowNonManifestPwaInstall,
+  'blockExternalAppsEnabled': instance.blockExternalAppsEnabled,
+  'externalAppIntentPolicies': instance.externalAppIntentPolicies.map(
+    (k, e) => MapEntry(k, _$IntentSourcePolicyEnumMap[e]!),
+  ),
 };
 
 const _$ThemeModeEnumMap = {
@@ -984,4 +1024,9 @@ const _$TabBarLayoutEnumMap = {
 const _$QuickTabSwitcherModeEnumMap = {
   QuickTabSwitcherMode.lastUsedTabs: 'lastUsedTabs',
   QuickTabSwitcherMode.containerTabs: 'containerTabs',
+};
+
+const _$IntentSourcePolicyEnumMap = {
+  IntentSourcePolicy.allow: 'allow',
+  IntentSourcePolicy.block: 'block',
 };

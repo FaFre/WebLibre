@@ -30,7 +30,9 @@ class SettingDao extends DatabaseAccessor<UserDatabase> with $SettingDaoMixin {
   SettingDao(super.attachedDatabase);
 
   Future<int> updateSetting(String key, String? partitionKey, Object? value) {
-    final normalizedValue = (value is Iterable) ? jsonEncode(value) : value;
+    final normalizedValue = (value is Iterable || value is Map)
+        ? jsonEncode(value)
+        : value;
 
     final driftvalue = normalizedValue.mapNotNull(
       (normalizedValue) => DriftAny(normalizedValue),

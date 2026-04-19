@@ -17,6 +17,26 @@ private object IntentPigeonUtils {
 
   fun createConnectionError(channelName: String): FlutterError {
     return FlutterError("channel-error",  "Unable to establish connection on channel: '$channelName'.", "")  }
+
+  fun wrapResult(result: Any?): List<Any?> {
+    return listOf(result)
+  }
+
+  fun wrapError(exception: Throwable): List<Any?> {
+    return if (exception is FlutterError) {
+      listOf(
+        exception.code,
+        exception.message,
+        exception.details
+      )
+    } else {
+      listOf(
+        exception.javaClass.simpleName,
+        exception.toString(),
+        "Cause: " + exception.cause + ", Stacktrace: " + Log.getStackTraceString(exception)
+      )
+    }
+  }
   fun doubleEquals(a: Double, b: Double): Boolean {
     // Normalize -0.0 to 0.0 and handle NaN equality.
     return (if (a == 0.0) 0.0 else a) == (if (b == 0.0) 0.0 else b) || (a.isNaN() && b.isNaN())
@@ -273,6 +293,68 @@ class IntentEvents(private val binaryMessenger: BinaryMessenger, private val mes
       } else {
         callback(Result.failure(IntentPigeonUtils.createConnectionError(channelName)))
       } 
+    }
+  }
+}
+/** Generated interface from Pigeon that represents a handler of messages from Flutter. */
+interface IntentGatekeeperHostApi {
+  /**
+   * Replicates the blocked-packages policy to the native side so the
+   * [IntentReceiverActivity] can reject intents without launching Flutter.
+   */
+  fun setConfig(enabled: Boolean, blockedPackages: List<String>)
+  /**
+   * Resolves a package name to its user-visible application label via
+   * [PackageManager]. Returns `null` if the package is not installed or the
+   * label cannot be resolved.
+   */
+  fun resolvePackageLabel(packageName: String): String?
+
+  companion object {
+    /** The codec used by IntentGatekeeperHostApi. */
+    val codec: MessageCodec<Any?> by lazy {
+      IntentPigeonCodec()
+    }
+    /** Sets up an instance of `IntentGatekeeperHostApi` to handle messages through the `binaryMessenger`. */
+    @JvmOverloads
+    fun setUp(binaryMessenger: BinaryMessenger, api: IntentGatekeeperHostApi?, messageChannelSuffix: String = "") {
+      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.simple_intent_receiver.IntentGatekeeperHostApi.setConfig$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val enabledArg = args[0] as Boolean
+            val blockedPackagesArg = args[1] as List<String>
+            val wrapped: List<Any?> = try {
+              api.setConfig(enabledArg, blockedPackagesArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              IntentPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.simple_intent_receiver.IntentGatekeeperHostApi.resolvePackageLabel$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val packageNameArg = args[0] as String
+            val wrapped: List<Any?> = try {
+              listOf(api.resolvePackageLabel(packageNameArg))
+            } catch (exception: Throwable) {
+              IntentPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
     }
   }
 }
