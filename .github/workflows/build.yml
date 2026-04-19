@@ -85,33 +85,38 @@ jobs:
       - name: Build components
         run: melos run build-components --no-select
 
-      - name: Build APK
+      - name: Build APK (Alpha)
+        if: steps.build-type.outputs.is_prerelease == 'true'
+        run: melos run build-browser-alpha --no-select
+
+      - name: Build APK (Stable)
+        if: steps.build-type.outputs.is_prerelease == 'false'
         run: melos run build-browser --no-select
 
       - name: Build App Bundle
         if: steps.build-type.outputs.is_prerelease == 'false'
         working-directory: apps/weblibre
-        run: flutter build appbundle --target-platform android-arm,android-arm64 --no-tree-shake-icons
+        run: flutter build appbundle --flavor stable --target-platform android-arm,android-arm64 --no-tree-shake-icons
 
       - name: Create github artifact release (Prerelease)
         if: steps.build-type.outputs.is_prerelease == 'true'
         uses: ncipollo/release-action@v1.17.0
         with:
-          artifacts: "apps/weblibre/build/app/outputs/apk/release/*.apk"
+          artifacts: "apps/weblibre/build/app/outputs/apk/alpha/release/*.apk"
           prerelease: true
 
       - name: Create github artifact release (Full)
         if: steps.build-type.outputs.is_prerelease == 'false'
         uses: ncipollo/release-action@v1.17.0
         with:
-          artifacts: "apps/weblibre/build/app/outputs/apk/release/*.apk,apps/weblibre/build/app/outputs/bundle/release/app-release.aab"
+          artifacts: "apps/weblibre/build/app/outputs/apk/stable/release/*.apk,apps/weblibre/build/app/outputs/bundle/stableRelease/app-stable-release.aab"
 
       - name: Upload app bundle artifact
         if: steps.build-type.outputs.is_prerelease == 'false'
         uses: actions/upload-artifact@v4
         with:
           name: appbundle
-          path: apps/weblibre/build/app/outputs/bundle/release/app-release.aab
+          path: apps/weblibre/build/app/outputs/bundle/stableRelease/app-stable-release.aab
 
       - name: Release to Google Play (internal)
         if: steps.build-type.outputs.is_prerelease == 'false'
@@ -121,7 +126,7 @@ jobs:
           SUPPLY_JSON_KEY_DATA: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
         run: |
           bundle exec fastlane supply \
-          --aab build/app/outputs/bundle/release/app-release.aab \
+          --aab build/app/outputs/bundle/stableRelease/app-stable-release.aab \
           --track internal
 
       - name: Cleanup

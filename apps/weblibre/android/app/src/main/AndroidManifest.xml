@@ -48,7 +48,7 @@
 
     
     <application
-        android:label="WebLibre"
+        android:label="${appName}"
         android:name=".MyApplication"
         android:icon="@mipmap/launcher_icon"
         android:usesCleartextTraffic="true"
@@ -78,10 +78,10 @@
         
         <activity
             android:name=".MainActivity"
-            android:label="WebLibre"
+            android:label="${appName}"
             android:exported="true"
             android:launchMode="singleTask"
-            android:taskAffinity="eu.weblibre.gecko.task"
+            android:taskAffinity="${applicationId}.task"
             android:theme="@style/LaunchTheme"
             android:supportsPictureInPicture="true"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"

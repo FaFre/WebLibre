@@ -48,6 +48,20 @@ android {
         versionName = flutterVersionName
     }
 
+    flavorDimensions "track"
+    productFlavors {
+        stable {
+            dimension "track"
+            manifestPlaceholders = [appName: "WebLibre"]
+        }
+        alpha {
+            dimension "track"
+            applicationIdSuffix ".alpha"
+            versionNameSuffix "-alpha"
+            manifestPlaceholders = [appName: "WebLibre Alpha"]
+        }
+    }
+
     dependencies {
         // implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
         implementation 'androidx.glance:glance-appwidget:1.1.1'

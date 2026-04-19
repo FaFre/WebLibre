@@ -5,55 +5,41 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "app",
-            "cwd": "app",
+            "name": "WebLibre",
+            "cwd": "apps/weblibre",
             "request": "launch",
             "type": "dart",
             "args": [
                 "--device-user",
-                "0"
+                "0",
+                "--flavor",
+                "alpha"
             ]
         },
         {
-            "name": "app (profile mode)",
-            "cwd": "app",
+            "name": "WebLibre (profile mode)",
+            "cwd": "apps/weblibre",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile",
             "args": [
                 "--device-user",
-                "0"
+                "0",
+                "--flavor",
+                "alpha"
             ]
         },
         {
-            "name": "app (release mode)",
-            "cwd": "app",
+            "name": "WebLibre (release mode)",
+            "cwd": "apps/weblibre",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release",
             "args": [
                 "--device-user",
-                "0"
-            ]
-        },
-        {
-            "name": "flutter_mozilla_components",
-            "cwd": "packages/flutter_mozilla_components/example",
-            "request": "launch",
-            "type": "dart",
-            "args": [
-                "--device-user",
-                "0"
-            ]
-        },
-        {
-            "name": "simple_intent_receiver",
-            "cwd": "packages/simple_intent_receiver/example",
-            "request": "launch",
-            "type": "dart",
-            "args": [
-                "--device-user",
-                "0"
+                "0",
+                "--flavor",
+                "alpha"
             ]
         },
     ]

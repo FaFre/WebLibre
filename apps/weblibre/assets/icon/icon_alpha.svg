@@ -1,0 +1,45 @@
+<svg width="147" height="147" viewBox="0 -20.5 147 147" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- 1. Blueprint Background (full-bleed square, matches icon.png canvas) -->
+    <rect x="0" y="-20.5" width="147" height="147" fill="#0A1128"/>
+
+    <!-- 2. Schematic Grid -->
+    <defs>
+        <pattern id="blueprintGrid" width="12" height="12" patternUnits="userSpaceOnUse">
+            <path d="M 12 0 L 0 0 0 12" fill="none" stroke="#162545" stroke-width="1"/>
+        </pattern>
+    </defs>
+    <rect x="0" y="-20.5" width="147" height="147" fill="url(#blueprintGrid)"/>
+
+    <!-- 3. Right Pillar (Grey - Back) -->
+    <path d="M146.187 4.16996C146.608 2.00885 144.953 0 142.751 0H116.196C114.521 0 113.081 1.18632 112.761 2.83005L93.5631 101.268C93.1417 103.429 94.7966 105.438 96.9984 105.438H123.554C125.229 105.438 126.669 104.251 126.989 102.608L146.187 4.16996Z"
+          fill="#A7A7A7" fill-opacity="0.1" stroke="#A7A7A7" stroke-width="1.5"/>
+    <circle cx="142.75" cy="0" r="1.5" fill="#0A1128" stroke="#A7A7A7" stroke-width="1"/>
+    <circle cx="116.19" cy="0" r="1.5" fill="#0A1128" stroke="#A7A7A7" stroke-width="1"/>
+    <circle cx="93.56" cy="101.26" r="1.5" fill="#0A1128" stroke="#A7A7A7" stroke-width="1"/>
+    <circle cx="123.55" cy="105.43" r="1.5" fill="#0A1128" stroke="#A7A7A7" stroke-width="1"/>
+
+    <!-- 4. Left Pillar (Purple - Back) -->
+    <path d="M0.813229 4.16996C0.391767 2.00885 2.04669 0 4.24852 0H30.8042C32.4789 0 33.9189 1.18632 34.2395 2.83005L53.4369 101.268C53.8583 103.429 52.2034 105.438 50.0016 105.438H23.4459C21.7712 105.438 20.3312 104.251 20.0106 102.608L0.813229 4.16996Z"
+          fill="#9C83F8" fill-opacity="0.1" stroke="#9C83F8" stroke-width="1.5"/>
+    <circle cx="4.24" cy="0" r="1.5" fill="#0A1128" stroke="#9C83F8" stroke-width="1"/>
+    <circle cx="30.80" cy="0" r="1.5" fill="#0A1128" stroke="#9C83F8" stroke-width="1"/>
+    <circle cx="53.43" cy="101.26" r="1.5" fill="#0A1128" stroke="#9C83F8" stroke-width="1"/>
+    <circle cx="23.44" cy="105.43" r="1.5" fill="#0A1128" stroke="#9C83F8" stroke-width="1"/>
+
+    <!-- 5. Center Arch (Yellow - Front) -->
+    <!-- Faint volume -->
+    <path d="M106.53 105.441C106.53 71.9717 98.6042 38.5029 74.1832 38.5029C49.7622 38.5029 41.124 71.3155 41.124 105.441"
+          stroke="#FBDC6B" stroke-opacity="0.15" stroke-width="33.6875" stroke-linecap="butt"/>
+    <!-- Dashed structural wireframe line -->
+    <path d="M106.53 105.441C106.53 71.9717 98.6042 38.5029 74.1832 38.5029C49.7622 38.5029 41.124 71.3155 41.124 105.441"
+          stroke="#FBDC6B" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>
+    <circle cx="106.53" cy="105.441" r="2" fill="#0A1128" stroke="#FBDC6B" stroke-width="1.5"/>
+    <circle cx="74.18" cy="38.5" r="2" fill="#0A1128" stroke="#FBDC6B" stroke-width="1.5"/>
+    <circle cx="41.12" cy="105.441" r="2" fill="#0A1128" stroke="#FBDC6B" stroke-width="1.5"/>
+
+    <!-- 6. Alpha Terminal Tag (Topmost Layer) -->
+    <g transform="translate(46, 82)">
+        <rect width="55" height="16" rx="4" fill="#0A1128" stroke="#FF6B00" stroke-width="1.5"/>
+        <text x="27.5" y="11.5" font-family="monospace, sans-serif" font-weight="bold" font-size="9" fill="#FF6B00" text-anchor="middle" letter-spacing="1">ALPHA</text>
+    </g>
+</svg>

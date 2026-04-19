@@ -78,8 +78,14 @@ melos:
         sh scripts/build-readability.sh
         python3 scripts/build_quotes_db.py
     build-browser:
-      description: Build release APK split per ABI
+      description: Build stable release APK split per ABI
       run: |
         set -e
         cd apps/weblibre
-        flutter build apk --release --target-platform android-arm,android-arm64 --split-per-abi --no-tree-shake-icons
+        flutter build apk --release --flavor stable --target-platform android-arm,android-arm64 --split-per-abi --no-tree-shake-icons
+    build-browser-alpha:
+      description: Build alpha release APK split per ABI (side-by-side installable with stable)
+      run: |
+        set -e
+        cd apps/weblibre
+        flutter build apk --release --flavor alpha --target-platform android-arm,android-arm64 --split-per-abi --no-tree-shake-icons
