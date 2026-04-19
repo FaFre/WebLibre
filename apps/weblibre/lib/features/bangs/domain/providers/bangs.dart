@@ -41,6 +41,21 @@ Stream<BangData?> defaultSearchBangData(Ref ref) {
   return repository.watchBang(key);
 }
 
+@Riverpod(keepAlive: true)
+Future<BangData?> defaultSearchBang(Ref ref) {
+  final key = ref.watch(
+    generalSettingsWithDefaultsProvider.select(
+      (value) => value.defaultSearchProvider,
+    ),
+  );
+
+  if (key == null) {
+    return Future.value();
+  }
+
+  return ref.read(bangDataRepositoryProvider.notifier).getBang(key);
+}
+
 @Riverpod()
 Stream<BangData?> bangData(Ref ref, BangKey key) {
   final repository = ref.watch(bangDataRepositoryProvider.notifier);

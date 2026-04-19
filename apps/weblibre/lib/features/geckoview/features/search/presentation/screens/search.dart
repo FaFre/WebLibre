@@ -580,9 +580,7 @@ class SearchScreen extends HookConsumerWidget {
                           final bang =
                               siteBang ??
                               globalBang ??
-                              await ref.read(
-                                defaultSearchBangDataProvider.future,
-                              );
+                              await ref.read(defaultSearchBangProvider.future);
 
                           if (bang != null) {
                             newUrl = bang.getTemplateUrl(searchQuery);

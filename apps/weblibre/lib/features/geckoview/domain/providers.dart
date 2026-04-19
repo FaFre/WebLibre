@@ -64,36 +64,54 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
         }
       }),
       DefaultSearchAction((text) async {
-        if (ref.mounted) {
-          final defaultSearchBang = await ref.read(
-            defaultSearchBangDataProvider.future,
-          );
+        if (!ref.mounted) return;
 
-          if (ref.mounted && defaultSearchBang != null) {
-            final currentTab = ref.read(
-              tabStatesProvider,
-            )[ref.read(selectedTabProvider)];
+        final searchBang = await ref.read(defaultSearchBangProvider.future);
 
-            final tabMode =
-                currentTab?.tabMode ??
-                TabMode.fromTabType(
-                  ref
-                      .read(generalSettingsWithDefaultsProvider)
-                      .effectiveDefaultCreateTabType,
-                );
+        if (!ref.mounted) return;
 
-            await ref
-                .read(tabRepositoryProvider.notifier)
-                .addTab(
-                  url: defaultSearchBang.getTemplateUrl(text),
-                  parentId: currentTab?.id,
-                  tabMode: tabMode,
-                  selectTab: true,
-                );
-          } else {
-            logger.e('No default search bang found');
-          }
+        if (searchBang != null) {
+          final currentTab = ref.read(
+            tabStatesProvider,
+          )[ref.read(selectedTabProvider)];
+
+          final tabMode =
+              currentTab?.tabMode ??
+              TabMode.fromTabType(
+                ref
+                    .read(generalSettingsWithDefaultsProvider)
+                    .effectiveDefaultCreateTabType,
+              );
+
+          await ref
+              .read(tabRepositoryProvider.notifier)
+              .addTab(
+                url: searchBang.getTemplateUrl(text),
+                parentId: currentTab?.id,
+                tabMode: tabMode,
+                selectTab: true,
+              );
+          return;
         }
+
+        logger.w('No search bang found, falling back to search screen');
+
+        final router = await ref.read(routerProvider.future);
+        if (!ref.mounted) return;
+
+        final settings = ref.read(generalSettingsWithDefaultsProvider);
+        final selectedTabState = ref.read(
+          tabStatesProvider,
+        )[ref.read(selectedTabProvider)];
+
+        await router.push(
+          SearchRoute(
+            tabType:
+                selectedTabState?.tabMode.toTabType() ??
+                settings.effectiveDefaultCreateTabType,
+            searchText: text,
+          ).location,
+        );
       }),
       FindInPageAction((text) async {
         if (ref.mounted) {

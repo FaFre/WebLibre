@@ -421,7 +421,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                 case SharedText():
                   final bang =
                       ref.read(selectedBangDataProvider()) ??
-                      await ref.read(defaultSearchBangDataProvider.future);
+                      await ref.read(defaultSearchBangProvider.future);
 
                   await ref
                       .read(tabRepositoryProvider.notifier)

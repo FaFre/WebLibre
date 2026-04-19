@@ -44,6 +44,44 @@ final class DefaultSearchBangDataProvider
 String _$defaultSearchBangDataHash() =>
     r'5f43b8989219cf3cb2f5ca65df351b6cb100427f';
 
+@ProviderFor(defaultSearchBang)
+final defaultSearchBangProvider = DefaultSearchBangProvider._();
+
+final class DefaultSearchBangProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<BangData?>,
+          BangData?,
+          FutureOr<BangData?>
+        >
+    with $FutureModifier<BangData?>, $FutureProvider<BangData?> {
+  DefaultSearchBangProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'defaultSearchBangProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$defaultSearchBangHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<BangData?> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<BangData?> create(Ref ref) {
+    return defaultSearchBang(ref);
+  }
+}
+
+String _$defaultSearchBangHash() => r'39c5b18231a56763e2c620cae5f2889f7c95f6ee';
+
 @ProviderFor(bangData)
 final bangDataProvider = BangDataFamily._();
 
