@@ -29,6 +29,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/container_
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/controllers/container_topic.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/delete_container_dialog.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/discard_changes_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_sites.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/color_picker_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
@@ -82,207 +83,242 @@ class ContainerEditScreen extends HookConsumerWidget {
     final textController = useTextEditingController(
       text: initialContainer.name,
     );
+    useListenable(textController);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(switch (_mode) {
-          _DialogMode.create => 'New Container',
-          _DialogMode.edit => 'Edit Container',
-        }),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              final name = textController.text.trim();
-              final container = initialContainer.copyWith(
-                name: name.isNotEmpty ? name : null,
-                color: selectedColor.value,
-                metadata: initialContainer.metadata.copyWith(
-                  contextualIdentity: contextualIdentity.value,
-                  useProxy: useProxy.value && contextualIdentity.value != null,
-                  clearDataOnExit:
-                      clearDataOnExit.value && contextualIdentity.value != null,
-                  assignedSites: assignedSites.value,
-                ),
-              );
+    ContainerData buildContainer() {
+      final name = textController.text.trim();
+      return initialContainer.copyWith(
+        name: name.isNotEmpty ? name : null,
+        color: selectedColor.value,
+        metadata: initialContainer.metadata.copyWith(
+          contextualIdentity: contextualIdentity.value,
+          useProxy: useProxy.value && contextualIdentity.value != null,
+          clearDataOnExit:
+              clearDataOnExit.value && contextualIdentity.value != null,
+          assignedSites: assignedSites.value,
+        ),
+      );
+    }
 
-              switch (_mode) {
-                case _DialogMode.create:
-                  await ref
-                      .read(containerRepositoryProvider.notifier)
-                      .addContainer(container);
-                case _DialogMode.edit:
-                  await ref
-                      .read(containerRepositoryProvider.notifier)
-                      .replaceContainer(container);
-              }
+    Future<ContainerData> saveContainer() async {
+      final container = buildContainer();
+      switch (_mode) {
+        case _DialogMode.create:
+          await ref
+              .read(containerRepositoryProvider.notifier)
+              .addContainer(container);
+        case _DialogMode.edit:
+          await ref
+              .read(containerRepositoryProvider.notifier)
+              .replaceContainer(container);
+      }
+      return container;
+    }
 
-              if (context.mounted) {
-                context.pop(container);
-              }
-            },
-            icon: const Icon(Icons.check),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView(
-                  children: [
-                    TextField(
-                      decoration: InputDecoration(
-                        prefixIcon: Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: AnimatedContainer(
-                            duration: disableAnimations
-                                ? Duration.zero
-                                : const Duration(milliseconds: 300),
-                            height: 24,
-                            width: 24,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: ContainerColors.preview(
-                                selectedColor.value,
+    final container = buildContainer();
+    //Empty copy to create comparable container with same type
+    final comparison = initialContainer.copyWith();
+
+    return PopScope(
+      canPop: container == comparison,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+
+        final choice = await showDiscardChangesDialog(context);
+        if (choice == null) return;
+
+        switch (choice) {
+          case DiscardChangesChoice.discard:
+            if (context.mounted) {
+              context.pop();
+            }
+          case DiscardChangesChoice.save:
+            final container = await saveContainer();
+            if (context.mounted) {
+              context.pop(container);
+            }
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(switch (_mode) {
+            _DialogMode.create => 'New Container',
+            _DialogMode.edit => 'Edit Container',
+          }),
+          actions: [
+            IconButton(
+              onPressed: () async {
+                final container = await saveContainer();
+                if (context.mounted) {
+                  context.pop(container);
+                }
+              },
+              icon: const Icon(Icons.check),
+            ),
+          ],
+        ),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView(
+                    children: [
+                      TextField(
+                        decoration: InputDecoration(
+                          prefixIcon: Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: AnimatedContainer(
+                              duration: disableAnimations
+                                  ? Duration.zero
+                                  : const Duration(milliseconds: 300),
+                              height: 24,
+                              width: 24,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: ContainerColors.preview(
+                                  selectedColor.value,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        label: const Text('Name'),
-                        suffixIcon: _buildMagicWandButton(
-                          context,
-                          ref,
-                          textController,
-                        ),
-                      ),
-                      controller: textController,
-                    ),
-                    TextButton.icon(
-                      label: const Text('Select Color'),
-                      icon: const Icon(Icons.colorize),
-                      onPressed: () async {
-                        final color = await showDialog<Color?>(
-                          context: context,
-                          builder: (context) =>
-                              ColorPickerDialog(selectedColor.value),
-                        );
-
-                        if (color != null) {
-                          selectedColor.value = color;
-                        }
-                      },
-                    ),
-                    SwitchListTile.adaptive(
-                      value: contextualIdentity.value != null,
-                      title: const Text('Cookie Isolation'),
-                      secondary: const Icon(MdiIcons.cookieLock),
-                      contentPadding: EdgeInsets.zero,
-                      onChanged: (_mode == _DialogMode.create)
-                          ? (value) {
-                              contextualIdentity.value = value
-                                  ? initialContainer
-                                            .metadata
-                                            .contextualIdentity ??
-                                        uuid.v4()
-                                  : null;
-
-                              if (!value && useProxy.value) {
-                                useProxy.value = false;
-                              }
-                            }
-                          : null,
-                    ),
-                    SwitchListTile.adaptive(
-                      value: useProxy.value,
-                      title: const Text('Use Tor™ Proxy'),
-                      secondary: const Icon(TorIcons.onionAlt),
-                      contentPadding: EdgeInsets.zero,
-                      onChanged: switch (_mode) {
-                        _DialogMode.create => (value) {
-                          if (value && contextualIdentity.value == null) {
-                            contextualIdentity.value =
-                                initialContainer.metadata.contextualIdentity ??
-                                uuid.v4();
-                          }
-
-                          useProxy.value = value;
-                        },
-                        _DialogMode.edit =>
-                          (contextualIdentity.value != null)
-                              ? (value) {
-                                  useProxy.value = value;
-                                }
-                              : null,
-                      },
-                    ),
-                    SwitchListTile.adaptive(
-                      value: clearDataOnExit.value,
-                      title: const Text('Clear Data on Exit'),
-                      subtitle: const Text(
-                        'Clear cookies and site data when app closes',
-                      ),
-                      secondary: const Icon(MdiIcons.databaseRemove),
-                      contentPadding: EdgeInsets.zero,
-                      onChanged: (contextualIdentity.value != null)
-                          ? (value) {
-                              clearDataOnExit.value = value;
-                            }
-                          : null,
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.web),
-                      title: const Text('Assigned Sites'),
-                      trailing: const Icon(Icons.chevron_right),
-                      contentPadding: EdgeInsets.zero,
-                      onTap: () async {
-                        final result = await showDialog<Set<Uri>>(
-                          context: context,
-                          builder: (context) => ContainerSitesScreen(
-                            initialSites: assignedSites.value?.toSet() ?? {},
+                          label: const Text('Name'),
+                          suffixIcon: _buildMagicWandButton(
+                            context,
+                            ref,
+                            textController,
                           ),
-                        );
-
-                        if (result.isEmpty) {
-                          assignedSites.value = null;
-                        } else {
-                          assignedSites.value = result!.toList();
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              if (_mode == _DialogMode.edit)
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(
-                        color: Theme.of(context).colorScheme.error,
+                        ),
+                        controller: textController,
                       ),
-                      foregroundColor: Theme.of(context).colorScheme.error,
-                      iconColor: Theme.of(context).colorScheme.error,
-                    ),
-                    label: const Text('Delete'),
-                    icon: const Icon(Icons.delete),
-                    onPressed: () async {
-                      final result = await showDeleteContainerDialog(context);
+                      TextButton.icon(
+                        label: const Text('Select Color'),
+                        icon: const Icon(Icons.colorize),
+                        onPressed: () async {
+                          final color = await showDialog<Color?>(
+                            context: context,
+                            builder: (context) =>
+                                ColorPickerDialog(selectedColor.value),
+                          );
 
-                      if (result == true) {
-                        await ref
-                            .read(containerRepositoryProvider.notifier)
-                            .deleteContainer(initialContainer.id);
+                          if (color != null) {
+                            selectedColor.value = color;
+                          }
+                        },
+                      ),
+                      SwitchListTile.adaptive(
+                        value: contextualIdentity.value != null,
+                        title: const Text('Cookie Isolation'),
+                        secondary: const Icon(MdiIcons.cookieLock),
+                        contentPadding: EdgeInsets.zero,
+                        onChanged: (_mode == _DialogMode.create)
+                            ? (value) {
+                                contextualIdentity.value = value
+                                    ? initialContainer
+                                              .metadata
+                                              .contextualIdentity ??
+                                          uuid.v4()
+                                    : null;
 
-                        if (context.mounted) {
-                          context.pop();
-                        }
-                      }
-                    },
+                                if (!value && useProxy.value) {
+                                  useProxy.value = false;
+                                }
+                              }
+                            : null,
+                      ),
+                      SwitchListTile.adaptive(
+                        value: useProxy.value,
+                        title: const Text('Use Tor™ Proxy'),
+                        secondary: const Icon(TorIcons.onionAlt),
+                        contentPadding: EdgeInsets.zero,
+                        onChanged: switch (_mode) {
+                          _DialogMode.create => (value) {
+                            if (value && contextualIdentity.value == null) {
+                              contextualIdentity.value =
+                                  initialContainer
+                                      .metadata
+                                      .contextualIdentity ??
+                                  uuid.v4();
+                            }
+
+                            useProxy.value = value;
+                          },
+                          _DialogMode.edit =>
+                            (contextualIdentity.value != null)
+                                ? (value) {
+                                    useProxy.value = value;
+                                  }
+                                : null,
+                        },
+                      ),
+                      SwitchListTile.adaptive(
+                        value: clearDataOnExit.value,
+                        title: const Text('Clear Data on Exit'),
+                        subtitle: const Text(
+                          'Clear cookies and site data when app closes',
+                        ),
+                        secondary: const Icon(MdiIcons.databaseRemove),
+                        contentPadding: EdgeInsets.zero,
+                        onChanged: (contextualIdentity.value != null)
+                            ? (value) {
+                                clearDataOnExit.value = value;
+                              }
+                            : null,
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.web),
+                        title: const Text('Assigned Sites'),
+                        trailing: const Icon(Icons.chevron_right),
+                        contentPadding: EdgeInsets.zero,
+                        onTap: () async {
+                          final result = await showDialog<Set<Uri>>(
+                            context: context,
+                            builder: (context) => ContainerSitesScreen(
+                              initialSites: assignedSites.value?.toSet() ?? {},
+                            ),
+                          );
+
+                          if (result.isEmpty) {
+                            assignedSites.value = null;
+                          } else {
+                            assignedSites.value = result!.toList();
+                          }
+                        },
+                      ),
+                    ],
                   ),
                 ),
-            ],
+                if (_mode == _DialogMode.edit)
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                        foregroundColor: Theme.of(context).colorScheme.error,
+                        iconColor: Theme.of(context).colorScheme.error,
+                      ),
+                      label: const Text('Delete'),
+                      icon: const Icon(Icons.delete),
+                      onPressed: () async {
+                        final result = await showDeleteContainerDialog(context);
+
+                        if (result == true) {
+                          await ref
+                              .read(containerRepositoryProvider.notifier)
+                              .deleteContainer(initialContainer.id);
+
+                          if (context.mounted) {
+                            context.pop();
+                          }
+                        }
+                      },
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
