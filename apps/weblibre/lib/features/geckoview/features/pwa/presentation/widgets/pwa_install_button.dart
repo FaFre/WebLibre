@@ -32,44 +32,52 @@ import 'package:weblibre/utils/ui_helper.dart';
 Future<void> showPwaInstallDialog(BuildContext context, WidgetRef ref) async {
   final selectedTabId = ref.read(selectedTabProvider);
   final manifest = ref.read(currentTabManifestProvider);
-  final name = manifest?.name ?? manifest?.shortName ?? 'this web app';
+  final defaultName =
+      manifest?.shortName ?? manifest?.name ?? 'this web app';
   final tabState = selectedTabId != null
       ? ref.read(tabStateProvider(selectedTabId))
       : null;
   final url = tabState?.url ?? Uri.parse('about:blank');
 
-  final confirmed = await showPwaInstallBottomSheet(
+  final config = await showPwaInstallBottomSheet(
     context,
-    name: name,
+    defaultName: defaultName,
     url: url,
   );
 
-  if (confirmed == true) {
-    try {
-      final success = await ref.read(installCurrentWebAppProvider.future);
+  if (config == null) return;
 
-      if (context.mounted) {
-        if (success) {
-          showInfoMessage(context, '$name added to home screen');
-        } else {
-          showErrorMessage(
-            context,
-            'Failed to add $name. The site may not support installation.',
-          );
-        }
+  final name = config.name;
+
+  try {
+    final success = await ref.read(
+      installCurrentWebAppProvider(
+        overrideName: name == defaultName ? null : name,
+        contextId: config.contextId,
+      ).future,
+    );
+
+    if (context.mounted) {
+      if (success) {
+        showInfoMessage(context, '$name added to home screen');
+      } else {
+        showErrorMessage(
+          context,
+          'Failed to add $name. The site may not support installation.',
+        );
       }
-    } catch (e, stackTrace) {
-      logger.e('Failed to install PWA', error: e, stackTrace: stackTrace);
+    }
+  } catch (e, stackTrace) {
+    logger.e('Failed to install PWA', error: e, stackTrace: stackTrace);
 
-      if (context.mounted) {
-        var errorMessage = 'Failed to add $name to home screen';
+    if (context.mounted) {
+      var errorMessage = 'Failed to add $name to home screen';
 
-        if (e is StateError) {
-          errorMessage = 'No tab selected. Please try again.';
-        }
-
-        showErrorMessage(context, errorMessage);
+      if (e is StateError) {
+        errorMessage = 'No tab selected. Please try again.';
       }
+
+      showErrorMessage(context, errorMessage);
     }
   }
 }
@@ -84,28 +92,43 @@ Future<void> showShortcutInstallDialog(
   if (selectedTabId == null) return;
 
   final tabState = ref.read(tabStateProvider(selectedTabId));
-  final name = tabState?.title ?? 'this site';
+  final defaultName = tabState?.title.trim().isNotEmpty == true
+      ? tabState!.title
+      : 'this site';
   final url = tabState?.url ?? Uri.parse('about:blank');
 
   final settings = ref.read(generalSettingsWithDefaultsProvider);
   final showAppOption = settings.allowNonManifestPwaInstall;
 
-  final choice = await showShortcutChoiceBottomSheet(
+  final config = await showShortcutChoiceBottomSheet(
     context,
-    name: name,
+    defaultName: defaultName,
     url: url,
     showAppOption: showAppOption,
   );
 
-  if (choice == null) return;
+  if (config == null) return;
+
+  final name = config.name;
+  final overrideName = name == defaultName ? null : name;
 
   try {
     final bool success;
-    switch (choice) {
+    switch (config.type) {
       case ShortcutInstallType.shortcut:
-        success = await ref.read(installBasicShortcutProvider().future);
+        success = await ref.read(
+          installBasicShortcutProvider(
+            overrideName: overrideName,
+            contextId: config.contextId,
+          ).future,
+        );
       case ShortcutInstallType.app:
-        success = await ref.read(installCurrentWebAppProvider.future);
+        success = await ref.read(
+          installCurrentWebAppProvider(
+            overrideName: overrideName,
+            contextId: config.contextId,
+          ).future,
+        );
     }
 
     if (context.mounted) {

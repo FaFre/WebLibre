@@ -29,8 +29,6 @@ import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/pwa_installability.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 
 part 'providers.g.dart';
 
@@ -95,7 +93,11 @@ bool isCurrentTabInstallable(Ref ref) {
 /// Installs the current tab as a PWA, embedding profile and container context
 /// in the shortcut intent so the PWA reopens with the same isolation.
 @Riverpod()
-Future<bool> installCurrentWebApp(Ref ref) async {
+Future<bool> installCurrentWebApp(
+  Ref ref, {
+  String? overrideName,
+  String? contextId,
+}) async {
   final selectedTabId = ref.read(selectedTabProvider);
 
   if (selectedTabId == null) {
@@ -104,18 +106,12 @@ Future<bool> installCurrentWebApp(Ref ref) async {
 
   final profileUuid = filesystem.selectedProfile.uuid;
 
-  final selectedContainerId = ref.read(selectedContainerProvider);
-  String? contextId;
-
-  if (selectedContainerId != null) {
-    final containerRepository = ref.read(containerRepositoryProvider.notifier);
-    final containerData = await containerRepository.getContainerData(
-      selectedContainerId,
-    );
-    contextId = containerData?.metadata.contextualIdentity;
-  }
-
-  return GeckoPwaApi().installWebApp(selectedTabId, profileUuid, contextId);
+  return GeckoPwaApi().installWebApp(
+    selectedTabId,
+    profileUuid,
+    contextId,
+    overrideName,
+  );
 }
 
 /// Returns all installed PWAs.
@@ -139,7 +135,11 @@ bool isCurrentTabShortcutable(Ref ref) {
 
 /// Creates a basic bookmark shortcut on the home screen for the current tab.
 @Riverpod()
-Future<bool> installBasicShortcut(Ref ref, {String? overrideName}) async {
+Future<bool> installBasicShortcut(
+  Ref ref, {
+  String? overrideName,
+  String? contextId,
+}) async {
   final selectedTabId = ref.read(selectedTabProvider);
 
   if (selectedTabId == null) {
@@ -147,17 +147,6 @@ Future<bool> installBasicShortcut(Ref ref, {String? overrideName}) async {
   }
 
   final profileUuid = filesystem.selectedProfile.uuid;
-
-  final selectedContainerId = ref.read(selectedContainerProvider);
-
-  String? contextId;
-  if (selectedContainerId != null) {
-    final containerRepository = ref.read(containerRepositoryProvider.notifier);
-    final containerData = await containerRepository.getContainerData(
-      selectedContainerId,
-    );
-    contextId = containerData?.metadata.contextualIdentity;
-  }
 
   return GeckoPwaApi().installBasicShortcut(
     selectedTabId,

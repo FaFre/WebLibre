@@ -27,6 +27,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
@@ -35,22 +36,34 @@ import 'package:weblibre/features/geckoview/features/open_link_tools/presentatio
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/hooks/url_cleaner_controller.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/widgets/attribution_link.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/widgets/url_cleaner_tile.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/animated_tab_type_switcher.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/compact_container_selector.dart';
+import 'package:weblibre/features/share_intent/domain/entities/intent_container_mode.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/hooks/debouncer.dart';
-import 'package:weblibre/presentation/icons/weblibre_icons.dart';
 import 'package:weblibre/utils/form_validators.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 class OpenSharedContent extends HookConsumerWidget {
   final Uri sharedUrl;
+  final String? contextId;
+  final IntentContainerMode containerMode;
 
   static final _appLinksService = GeckoAppLinksService();
 
-  const OpenSharedContent({super.key, required this.sharedUrl});
+  const OpenSharedContent({
+    super.key,
+    required this.sharedUrl,
+    this.contextId,
+    this.containerMode = IntentContainerMode.useSelected,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -58,7 +71,81 @@ class OpenSharedContent extends HookConsumerWidget {
     final textController = useTextEditingController(text: sharedUrl.toString());
     final appColors = AppColors.of(context);
 
-    final selectedContainer = useState<ContainerData?>(null);
+    final globalSelectedContainer = ref.watch(
+      selectedContainerDataProvider.select((value) => value.value),
+    );
+    final selectedContainer = useState<ContainerData?>(
+      containerMode == IntentContainerMode.useSelected
+          ? globalSelectedContainer
+          : null,
+    );
+    final containerSelectionTouched = useRef(false);
+    final defaultTabType = ref.read(
+      generalSettingsWithDefaultsProvider.select(
+        (value) => value.effectiveDefaultCreateTabType,
+      ),
+    );
+
+    // If the intent carried an isolated context, preselect the isolated tab
+    // type and preserve the existing context id so opening doesn't mint a
+    // fresh one.
+    final carriedIsolatedContextId = useMemoized(
+      () => isIsolatedContextId(contextId) ? contextId : null,
+      [contextId],
+    );
+
+    final selectedTabType = useState(
+      carriedIsolatedContextId != null ? TabType.isolated : defaultTabType,
+    );
+
+    useEffect(() {
+      if (!containerSelectionTouched.value &&
+          containerMode == IntentContainerMode.useSelected) {
+        selectedContainer.value = globalSelectedContainer;
+      }
+      return null;
+    }, [globalSelectedContainer, containerMode]);
+
+    useEffect(() {
+      if (containerMode != IntentContainerMode.specific ||
+          contextId == null ||
+          isIsolatedContextId(contextId)) {
+        if (!containerSelectionTouched.value &&
+            containerMode == IntentContainerMode.unassigned) {
+          selectedContainer.value = null;
+        }
+        return null;
+      }
+
+      var cancelled = false;
+
+      unawaited(
+        Future(() async {
+          final container = await ref
+              .read(containerRepositoryProvider.notifier)
+              .getContainerByContextualIdentity(contextId!);
+          if (cancelled ||
+              !context.mounted ||
+              containerSelectionTouched.value) {
+            return;
+          }
+
+          selectedContainer.value = container;
+        }),
+      );
+
+      return () {
+        cancelled = true;
+      };
+    }, [containerMode, contextId]);
+
+    TabMode resolveTabMode() {
+      if (selectedTabType.value == TabType.isolated &&
+          carriedIsolatedContextId != null) {
+        return TabMode.isolated(carriedIsolatedContextId);
+      }
+      return TabMode.fromTabType(selectedTabType.value);
+    }
 
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final catalogAsync = ref.watch(urlCleanerCatalogServiceProvider);
@@ -151,7 +238,7 @@ class OpenSharedContent extends HookConsumerWidget {
       }
     }
 
-    Future<void> openCustomTab(bool isPrivate) async {
+    Future<void> openCustomTab(TabMode tabMode) async {
       if (formKey.currentState?.validate() == true) {
         final parsedUrl = parseValidatedUrl(
           textController.text,
@@ -161,10 +248,14 @@ class OpenSharedContent extends HookConsumerWidget {
           return;
         }
 
+        final contextId = tabMode is IsolatedTabMode
+            ? tabMode.isolationContextId
+            : selectedContainer.value?.metadata.contextualIdentity;
+
         await GeckoBrowserService().openInCustomTab(
           url: parsedUrl,
-          private: isPrivate,
-          contextId: selectedContainer.value?.id,
+          private: tabMode is PrivateTabMode,
+          contextId: contextId,
         );
 
         if (context.mounted) {
@@ -203,18 +294,7 @@ class OpenSharedContent extends HookConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text('Open link', style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 16),
-              if (settings.showContainerUi)
-                ContainerChips(
-                  displayMenu: false,
-                  selectedContainer: selectedContainer.value,
-                  onSelected: (container) {
-                    selectedContainer.value = container;
-                  },
-                  onDeleted: (container) {
-                    selectedContainer.value = null;
-                  },
-                ),
+              const SizedBox(height: 8),
               TextFormField(
                 controller: textController,
                 keyboardType: TextInputType.url,
@@ -337,64 +417,78 @@ class OpenSharedContent extends HookConsumerWidget {
                   icon: Icons.open_in_new,
                   onTap: openInApp,
                 ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Builder(
+                  builder: (context) {
+                    final tabTypeSwitcher = AnimatedTabTypeSwitcher(
+                      selected: selectedTabType.value,
+                      onChanged: (value) => selectedTabType.value = value,
+                      showIsolatedOption:
+                          settings.showIsolatedTabUi ||
+                          carriedIsolatedContextId != null,
+                      selectedBackgroundColor: switch (selectedTabType.value) {
+                        TabType.regular => null,
+                        TabType.private => appColors.privateSelectionOverlay,
+                        TabType.isolated => appColors.isolatedSelectionOverlay,
+                        TabType.child => null,
+                      },
+                    );
+
+                    if (!settings.showContainerUi) {
+                      return Center(child: tabTypeSwitcher);
+                    }
+
+                    return Row(
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: tabTypeSwitcher,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          flex: 2,
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: CompactContainerSelector(
+                              selectedContainer: selectedContainer.value,
+                              onSelectionChanged: (selection) async {
+                                containerSelectionTouched.value = true;
+                                switch (selection) {
+                                  case ContainerSelectionSelected(
+                                    :final containerId,
+                                  ):
+                                    selectedContainer.value = await ref
+                                        .read(
+                                          containerRepositoryProvider.notifier,
+                                        )
+                                        .getContainerData(containerId);
+                                  case ContainerSelectionUnassigned():
+                                    selectedContainer.value = null;
+                                }
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
               _OpenActionTile(
                 title: 'Open in new tab',
                 subtitle: 'Add to your browser tabs',
                 icon: MdiIcons.tab,
-                trailing: PopupMenuButton<TabMode>(
-                  icon: const Icon(WebLibreIcons.tabType, size: 24),
-                  tooltip: settings.showIsolatedTabUi
-                      ? 'Private / Isolated'
-                      : 'Private',
-                  onSelected: openTab,
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: TabMode.private,
-                      child: Row(
-                        children: [
-                          Icon(
-                            MdiIcons.dominoMask,
-                            color: appColors.privateTabPurple,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 12),
-                          const Text('Private'),
-                        ],
-                      ),
-                    ),
-                    if (settings.showIsolatedTabUi)
-                      PopupMenuItem(
-                        value: TabMode.newIsolated(),
-                        child: Row(
-                          children: [
-                            Icon(
-                              MdiIcons.snowflake,
-                              color: appColors.isolatedTabTeal,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 12),
-                            const Text('Isolated'),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-                onTap: () => openTab(TabMode.regular),
+                onTap: () => openTab(resolveTabMode()),
               ),
               _OpenActionTile(
                 title: 'Open in custom tab',
                 subtitle: 'Open in a separate window',
                 icon: MdiIcons.applicationOutline,
-                trailing: IconButton(
-                  icon: Icon(
-                    MdiIcons.dominoMask,
-                    color: appColors.privateTabPurple,
-                    size: 24,
-                  ),
-                  tooltip: 'Private',
-                  onPressed: () => openCustomTab(true),
-                ),
-                onTap: () => openCustomTab(false),
+                onTap: () => openCustomTab(resolveTabMode()),
               ),
             ],
           ),
@@ -491,7 +585,7 @@ class _OpenActionTile extends StatelessWidget {
   final IconData icon;
   final Widget? trailing;
   final bool showTrailingDivider;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const _OpenActionTile({
     required this.title,
@@ -499,7 +593,7 @@ class _OpenActionTile extends StatelessWidget {
     required this.icon,
     this.trailing,
     this.showTrailingDivider = true,
-    required this.onTap,
+    this.onTap,
   });
 
   @override

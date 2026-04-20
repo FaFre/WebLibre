@@ -5474,6 +5474,8 @@ class PwaManifest {
     required this.preferRelatedApplications,
     this.shareTarget,
     required this.currentUrl,
+    this.contextId,
+    this.installLabel,
   });
 
   String startUrl;
@@ -5510,6 +5512,19 @@ class PwaManifest {
   /// Used for HTTPS/installability checks.
   String currentUrl;
 
+  /// Storage context (container contextualIdentity or isolated `iso1_…` id)
+  /// that this install was pinned with. Only populated by
+  /// `getInstalledWebApps` — read from the pinned shortcut's intent extras,
+  /// not from the manifest itself, because the same URL can have multiple
+  /// installs that differ only in contextId.
+  String? contextId;
+
+  /// User-chosen launcher label for this specific install (from the pinned
+  /// shortcut's shortLabel). May differ from `name`/`shortName` because the
+  /// underlying manifest is shared across install variants of the same URL.
+  /// Only populated by `getInstalledWebApps`.
+  String? installLabel;
+
   List<Object?> _toList() {
     return <Object?>[
       startUrl,
@@ -5528,6 +5543,8 @@ class PwaManifest {
       preferRelatedApplications,
       shareTarget,
       currentUrl,
+      contextId,
+      installLabel,
     ];
   }
 
@@ -5553,6 +5570,8 @@ class PwaManifest {
       preferRelatedApplications: result[13]! as bool,
       shareTarget: result[14] as ShareTarget?,
       currentUrl: result[15]! as String,
+      contextId: result[16] as String?,
+      installLabel: result[17] as String?,
     );
   }
 
@@ -5565,7 +5584,7 @@ class PwaManifest {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(startUrl, other.startUrl) && _deepEquals(name, other.name) && _deepEquals(shortName, other.shortName) && _deepEquals(display, other.display) && _deepEquals(themeColor, other.themeColor) && _deepEquals(backgroundColor, other.backgroundColor) && _deepEquals(scope, other.scope) && _deepEquals(description, other.description) && _deepEquals(icons, other.icons) && _deepEquals(dir, other.dir) && _deepEquals(lang, other.lang) && _deepEquals(orientation, other.orientation) && _deepEquals(relatedApplications, other.relatedApplications) && _deepEquals(preferRelatedApplications, other.preferRelatedApplications) && _deepEquals(shareTarget, other.shareTarget) && _deepEquals(currentUrl, other.currentUrl);
+    return _deepEquals(startUrl, other.startUrl) && _deepEquals(name, other.name) && _deepEquals(shortName, other.shortName) && _deepEquals(display, other.display) && _deepEquals(themeColor, other.themeColor) && _deepEquals(backgroundColor, other.backgroundColor) && _deepEquals(scope, other.scope) && _deepEquals(description, other.description) && _deepEquals(icons, other.icons) && _deepEquals(dir, other.dir) && _deepEquals(lang, other.lang) && _deepEquals(orientation, other.orientation) && _deepEquals(relatedApplications, other.relatedApplications) && _deepEquals(preferRelatedApplications, other.preferRelatedApplications) && _deepEquals(shareTarget, other.shareTarget) && _deepEquals(currentUrl, other.currentUrl) && _deepEquals(contextId, other.contextId) && _deepEquals(installLabel, other.installLabel);
   }
 
   @override
@@ -10499,15 +10518,16 @@ class GeckoPwaApi {
   /// The [tabId] identifies which tab to install from. If null, uses the selected tab.
   /// The [profileUuid] is the UUID of the current user profile.
   /// The [contextId] is the container's contextual identity (optional, null for default container).
+  /// The [overrideAppName] customizes the installed app's displayed name and persists in the saved manifest.
   /// Returns true if installation was successful.
-  Future<bool> installWebApp(String? tabId, String profileUuid, String? contextId) async {
+  Future<bool> installWebApp(String? tabId, String profileUuid, String? contextId, String? overrideAppName) async {
     final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoPwaApi.installWebApp$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, profileUuid, contextId]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, profileUuid, contextId, overrideAppName]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(

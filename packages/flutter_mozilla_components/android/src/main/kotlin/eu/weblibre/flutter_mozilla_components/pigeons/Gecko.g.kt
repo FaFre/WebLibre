@@ -5124,7 +5124,22 @@ data class PwaManifest (
    * The URL of the page when the manifest was detected.
    * Used for HTTPS/installability checks.
    */
-  val currentUrl: String
+  val currentUrl: String,
+  /**
+   * Storage context (container contextualIdentity or isolated `iso1_…` id)
+   * that this install was pinned with. Only populated by
+   * `getInstalledWebApps` — read from the pinned shortcut's intent extras,
+   * not from the manifest itself, because the same URL can have multiple
+   * installs that differ only in contextId.
+   */
+  val contextId: String? = null,
+  /**
+   * User-chosen launcher label for this specific install (from the pinned
+   * shortcut's shortLabel). May differ from `name`/`shortName` because the
+   * underlying manifest is shared across install variants of the same URL.
+   * Only populated by `getInstalledWebApps`.
+   */
+  val installLabel: String? = null
 )
  {
   companion object {
@@ -5145,7 +5160,9 @@ data class PwaManifest (
       val preferRelatedApplications = pigeonVar_list[13] as Boolean
       val shareTarget = pigeonVar_list[14] as ShareTarget?
       val currentUrl = pigeonVar_list[15] as String
-      return PwaManifest(startUrl, name, shortName, display, themeColor, backgroundColor, scope, description, icons, dir, lang, orientation, relatedApplications, preferRelatedApplications, shareTarget, currentUrl)
+      val contextId = pigeonVar_list[16] as String?
+      val installLabel = pigeonVar_list[17] as String?
+      return PwaManifest(startUrl, name, shortName, display, themeColor, backgroundColor, scope, description, icons, dir, lang, orientation, relatedApplications, preferRelatedApplications, shareTarget, currentUrl, contextId, installLabel)
     }
   }
   fun toList(): List<Any?> {
@@ -5166,6 +5183,8 @@ data class PwaManifest (
       preferRelatedApplications,
       shareTarget,
       currentUrl,
+      contextId,
+      installLabel,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -5176,7 +5195,7 @@ data class PwaManifest (
       return true
     }
     val other = other as PwaManifest
-    return GeckoPigeonUtils.deepEquals(this.startUrl, other.startUrl) && GeckoPigeonUtils.deepEquals(this.name, other.name) && GeckoPigeonUtils.deepEquals(this.shortName, other.shortName) && GeckoPigeonUtils.deepEquals(this.display, other.display) && GeckoPigeonUtils.deepEquals(this.themeColor, other.themeColor) && GeckoPigeonUtils.deepEquals(this.backgroundColor, other.backgroundColor) && GeckoPigeonUtils.deepEquals(this.scope, other.scope) && GeckoPigeonUtils.deepEquals(this.description, other.description) && GeckoPigeonUtils.deepEquals(this.icons, other.icons) && GeckoPigeonUtils.deepEquals(this.dir, other.dir) && GeckoPigeonUtils.deepEquals(this.lang, other.lang) && GeckoPigeonUtils.deepEquals(this.orientation, other.orientation) && GeckoPigeonUtils.deepEquals(this.relatedApplications, other.relatedApplications) && GeckoPigeonUtils.deepEquals(this.preferRelatedApplications, other.preferRelatedApplications) && GeckoPigeonUtils.deepEquals(this.shareTarget, other.shareTarget) && GeckoPigeonUtils.deepEquals(this.currentUrl, other.currentUrl)
+    return GeckoPigeonUtils.deepEquals(this.startUrl, other.startUrl) && GeckoPigeonUtils.deepEquals(this.name, other.name) && GeckoPigeonUtils.deepEquals(this.shortName, other.shortName) && GeckoPigeonUtils.deepEquals(this.display, other.display) && GeckoPigeonUtils.deepEquals(this.themeColor, other.themeColor) && GeckoPigeonUtils.deepEquals(this.backgroundColor, other.backgroundColor) && GeckoPigeonUtils.deepEquals(this.scope, other.scope) && GeckoPigeonUtils.deepEquals(this.description, other.description) && GeckoPigeonUtils.deepEquals(this.icons, other.icons) && GeckoPigeonUtils.deepEquals(this.dir, other.dir) && GeckoPigeonUtils.deepEquals(this.lang, other.lang) && GeckoPigeonUtils.deepEquals(this.orientation, other.orientation) && GeckoPigeonUtils.deepEquals(this.relatedApplications, other.relatedApplications) && GeckoPigeonUtils.deepEquals(this.preferRelatedApplications, other.preferRelatedApplications) && GeckoPigeonUtils.deepEquals(this.shareTarget, other.shareTarget) && GeckoPigeonUtils.deepEquals(this.currentUrl, other.currentUrl) && GeckoPigeonUtils.deepEquals(this.contextId, other.contextId) && GeckoPigeonUtils.deepEquals(this.installLabel, other.installLabel)
   }
 
   override fun hashCode(): Int {
@@ -5197,6 +5216,8 @@ data class PwaManifest (
     result = 31 * result + GeckoPigeonUtils.deepHash(this.preferRelatedApplications)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.shareTarget)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.currentUrl)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.contextId)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.installLabel)
     return result
   }
 }
@@ -10635,9 +10656,10 @@ interface GeckoPwaApi {
    * The [tabId] identifies which tab to install from. If null, uses the selected tab.
    * The [profileUuid] is the UUID of the current user profile.
    * The [contextId] is the container's contextual identity (optional, null for default container).
+   * The [overrideAppName] customizes the installed app's displayed name and persists in the saved manifest.
    * Returns true if installation was successful.
    */
-  fun installWebApp(tabId: String?, profileUuid: String, contextId: String?, callback: (Result<Boolean>) -> Unit)
+  fun installWebApp(tabId: String?, profileUuid: String, contextId: String?, overrideAppName: String?, callback: (Result<Boolean>) -> Unit)
   /** Returns a list of all installed PWA manifests. */
   fun getInstalledWebApps(callback: (Result<List<PwaManifest>>) -> Unit)
   /**
@@ -10672,7 +10694,8 @@ interface GeckoPwaApi {
             val tabIdArg = args[0] as String?
             val profileUuidArg = args[1] as String
             val contextIdArg = args[2] as String?
-            api.installWebApp(tabIdArg, profileUuidArg, contextIdArg) { result: Result<Boolean> ->
+            val overrideAppNameArg = args[3] as String?
+            api.installWebApp(tabIdArg, profileUuidArg, contextIdArg, overrideAppNameArg) { result: Result<Boolean> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(GeckoPigeonUtils.wrapError(error))

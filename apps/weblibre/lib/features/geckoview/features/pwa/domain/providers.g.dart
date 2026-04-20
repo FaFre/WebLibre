@@ -213,7 +213,7 @@ String _$isCurrentTabInstallableHash() =>
 /// in the shortcut intent so the PWA reopens with the same isolation.
 
 @ProviderFor(installCurrentWebApp)
-final installCurrentWebAppProvider = InstallCurrentWebAppProvider._();
+final installCurrentWebAppProvider = InstallCurrentWebAppFamily._();
 
 /// Installs the current tab as a PWA, embedding profile and container context
 /// in the shortcut intent so the PWA reopens with the same isolation.
@@ -223,19 +223,26 @@ final class InstallCurrentWebAppProvider
     with $FutureModifier<bool>, $FutureProvider<bool> {
   /// Installs the current tab as a PWA, embedding profile and container context
   /// in the shortcut intent so the PWA reopens with the same isolation.
-  InstallCurrentWebAppProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'installCurrentWebAppProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  InstallCurrentWebAppProvider._({
+    required InstallCurrentWebAppFamily super.from,
+    required ({String? overrideName, String? contextId}) super.argument,
+  }) : super(
+         retry: null,
+         name: r'installCurrentWebAppProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
   @override
   String debugGetCreateSourceHash() => _$installCurrentWebAppHash();
+
+  @override
+  String toString() {
+    return r'installCurrentWebAppProvider'
+        ''
+        '$argument';
+  }
 
   @$internal
   @override
@@ -244,12 +251,61 @@ final class InstallCurrentWebAppProvider
 
   @override
   FutureOr<bool> create(Ref ref) {
-    return installCurrentWebApp(ref);
+    final argument =
+        this.argument as ({String? overrideName, String? contextId});
+    return installCurrentWebApp(
+      ref,
+      overrideName: argument.overrideName,
+      contextId: argument.contextId,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is InstallCurrentWebAppProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
   }
 }
 
 String _$installCurrentWebAppHash() =>
-    r'da536e2aca886831e0bbbc5b70eae03ac4a4ea9f';
+    r'0e0013fac7b70441983f7af1e6db3c6470c23900';
+
+/// Installs the current tab as a PWA, embedding profile and container context
+/// in the shortcut intent so the PWA reopens with the same isolation.
+
+final class InstallCurrentWebAppFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<bool>,
+          ({String? overrideName, String? contextId})
+        > {
+  InstallCurrentWebAppFamily._()
+    : super(
+        retry: null,
+        name: r'installCurrentWebAppProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Installs the current tab as a PWA, embedding profile and container context
+  /// in the shortcut intent so the PWA reopens with the same isolation.
+
+  InstallCurrentWebAppProvider call({
+    String? overrideName,
+    String? contextId,
+  }) => InstallCurrentWebAppProvider._(
+    argument: (overrideName: overrideName, contextId: contextId),
+    from: this,
+  );
+
+  @override
+  String toString() => r'installCurrentWebAppProvider';
+}
 
 /// Returns all installed PWAs.
 
@@ -357,7 +413,7 @@ final class InstallBasicShortcutProvider
   /// Creates a basic bookmark shortcut on the home screen for the current tab.
   InstallBasicShortcutProvider._({
     required InstallBasicShortcutFamily super.from,
-    required String? super.argument,
+    required ({String? overrideName, String? contextId}) super.argument,
   }) : super(
          retry: null,
          name: r'installBasicShortcutProvider',
@@ -373,7 +429,7 @@ final class InstallBasicShortcutProvider
   String toString() {
     return r'installBasicShortcutProvider'
         ''
-        '($argument)';
+        '$argument';
   }
 
   @$internal
@@ -383,8 +439,13 @@ final class InstallBasicShortcutProvider
 
   @override
   FutureOr<bool> create(Ref ref) {
-    final argument = this.argument as String?;
-    return installBasicShortcut(ref, overrideName: argument);
+    final argument =
+        this.argument as ({String? overrideName, String? contextId});
+    return installBasicShortcut(
+      ref,
+      overrideName: argument.overrideName,
+      contextId: argument.contextId,
+    );
   }
 
   @override
@@ -399,12 +460,16 @@ final class InstallBasicShortcutProvider
 }
 
 String _$installBasicShortcutHash() =>
-    r'aa8a96e94eac19e3e0b2a087bc6dde12d28f48f2';
+    r'fcb5bec79f375b32a7a0953ad22859a0db222167';
 
 /// Creates a basic bookmark shortcut on the home screen for the current tab.
 
 final class InstallBasicShortcutFamily extends $Family
-    with $FunctionalFamilyOverride<FutureOr<bool>, String?> {
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<bool>,
+          ({String? overrideName, String? contextId})
+        > {
   InstallBasicShortcutFamily._()
     : super(
         retry: null,
@@ -416,8 +481,13 @@ final class InstallBasicShortcutFamily extends $Family
 
   /// Creates a basic bookmark shortcut on the home screen for the current tab.
 
-  InstallBasicShortcutProvider call({String? overrideName}) =>
-      InstallBasicShortcutProvider._(argument: overrideName, from: this);
+  InstallBasicShortcutProvider call({
+    String? overrideName,
+    String? contextId,
+  }) => InstallBasicShortcutProvider._(
+    argument: (overrideName: overrideName, contextId: contextId),
+    from: this,
+  );
 
   @override
   String toString() => r'installBasicShortcutProvider';

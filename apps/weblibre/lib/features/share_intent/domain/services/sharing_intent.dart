@@ -28,93 +28,109 @@ import 'package:uri_to_file/uri_to_file.dart' as uri_to_file;
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/data/models/received_intent_parameter.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/services/intent_gatekeeper.dart';
+import 'package:weblibre/features/share_intent/domain/entities/intent_container_mode.dart';
 
 part 'sharing_intent.g.dart';
 
 StreamTransformer<Intent, ReceivedIntentParameter>
-_buildSharingIntentTransformer(IntentGatekeeper gatekeeper) =>
-    StreamTransformer<Intent, ReceivedIntentParameter>.fromHandlers(
-      handleData: (intent, sink) async {
-        // PWA shortcut intents carry our own signed context id — always allow.
-        final pwaContextId =
-            intent.action == 'android.intent.action.VIEW'
-                ? intent.extra['pwa_context_id'] as String?
-                : null;
+_buildSharingIntentTransformer(
+  IntentGatekeeper gatekeeper,
+) => StreamTransformer<Intent, ReceivedIntentParameter>.fromHandlers(
+  handleData: (intent, sink) async {
+    final shortcutContextId = intent.action == 'android.intent.action.VIEW'
+        ? intent.extra['pwa_context_id'] as String?
+        : null;
+    final containerMode = intent.action == 'android.intent.action.VIEW'
+        ? IntentContainerMode.fromWireValue(
+            intent.extra['shortcut_container_mode'] as String?,
+            contextId: shortcutContextId,
+          )
+        : IntentContainerMode.useSelected;
 
-        if (pwaContextId == null) {
-          final allowed = await gatekeeper.shouldAllow(
-            fromPackageName: intent.fromPackageName,
-            url: intent.data,
-          );
-          if (!allowed) {
-            logger.i(
-              'Blocked intent from ${intent.fromPackageName ?? 'unknown app'}',
-            );
-            return;
-          }
-        }
+    final allowed = await gatekeeper.shouldAllow(
+      fromPackageName: intent.fromPackageName,
+      url: intent.data,
+    );
+    if (!allowed) {
+      logger.i(
+        'Blocked intent from ${intent.fromPackageName ?? 'unknown app'}',
+      );
+      return;
+    }
 
-        final data = switch (intent.action) {
-          'android.intent.action.PROCESS_TEXT' =>
-            intent.extra['android.intent.extra.PROCESS_TEXT'] as String?,
-          'android.intent.action.WEB_SEARCH' =>
-            intent.extra['query'] as String?,
-          'android.intent.action.VIEW' => intent.data,
-          'android.intent.action.SEND' =>
-            intent.extra['android.intent.extra.STREAM'] as String? ??
-                intent.extra['android.intent.extra.TEXT'] as String?,
-          _ => null,
-        };
+    final data = switch (intent.action) {
+      'android.intent.action.PROCESS_TEXT' =>
+        intent.extra['android.intent.extra.PROCESS_TEXT'] as String?,
+      'android.intent.action.WEB_SEARCH' => intent.extra['query'] as String?,
+      'android.intent.action.VIEW' => intent.data,
+      'android.intent.action.SEND' =>
+        intent.extra['android.intent.extra.STREAM'] as String? ??
+            intent.extra['android.intent.extra.TEXT'] as String?,
+      _ => null,
+    };
 
-        // Extract container context from shortcut intents
-        final contextId = pwaContextId;
+    // Extract container context from shortcut intents.
+    final contextId = shortcutContextId;
 
-        if (data != null) {
-          if (uri_to_file.isUriSupported(data)) {
-            var path = data;
-            if (p.extension(data).whenNotEmpty == null) {
-              if (intent.mimeType.whenNotEmpty != null) {
-                final ext = mime.extensionFromMime(intent.mimeType!);
-                if (ext != null) {
-                  path = p.setExtension(path, '.$ext');
-                } else {
-                  logger.w(
-                    'Could not determine file extension for: ${intent.mimeType}',
-                  );
-                }
-              } else {
-                logger.w(
-                  'Received intent without extension and mime type $path',
-                );
-              }
-            }
-
-            try {
-              final file = await uri_to_file.toFile(path);
-              final mimeType = mime.lookupMimeType(file.path);
-              switch (mimeType) {
-                case 'application/pdf':
-                  sink.add(
-                    ReceivedIntentParameter(path, null, contextId: contextId),
-                  );
-                default:
-                  logger.w('Unhandled mime type: $mimeType');
-              }
-            } catch (e) {
-              logger.e('Failed to convert URI to file: $e');
-              // Fallback: pass the original URI
-              sink.add(
-                ReceivedIntentParameter(data, null, contextId: contextId),
+    if (data != null) {
+      if (uri_to_file.isUriSupported(data)) {
+        var path = data;
+        if (p.extension(data).whenNotEmpty == null) {
+          if (intent.mimeType.whenNotEmpty != null) {
+            final ext = mime.extensionFromMime(intent.mimeType!);
+            if (ext != null) {
+              path = p.setExtension(path, '.$ext');
+            } else {
+              logger.w(
+                'Could not determine file extension for: ${intent.mimeType}',
               );
             }
           } else {
-            sink.add(
-              ReceivedIntentParameter(data, null, contextId: contextId),
-            );
+            logger.w('Received intent without extension and mime type $path');
           }
         }
-      },
-    );
+
+        try {
+          final file = await uri_to_file.toFile(path);
+          final mimeType = mime.lookupMimeType(file.path);
+          switch (mimeType) {
+            case 'application/pdf':
+              sink.add(
+                ReceivedIntentParameter(
+                  path,
+                  null,
+                  contextId: contextId,
+                  containerMode: containerMode,
+                ),
+              );
+            default:
+              logger.w('Unhandled mime type: $mimeType');
+          }
+        } catch (e) {
+          logger.e('Failed to convert URI to file: $e');
+          // Fallback: pass the original URI
+          sink.add(
+            ReceivedIntentParameter(
+              data,
+              null,
+              contextId: contextId,
+              containerMode: containerMode,
+            ),
+          );
+        }
+      } else {
+        sink.add(
+          ReceivedIntentParameter(
+            data,
+            null,
+            contextId: contextId,
+            containerMode: containerMode,
+          ),
+        );
+      }
+    }
+  },
+);
 
 @Riverpod(keepAlive: true)
 Raw<Stream<ReceivedIntentParameter>> sharingIntentStream(Ref ref) {

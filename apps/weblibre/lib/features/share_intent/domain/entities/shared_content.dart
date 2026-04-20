@@ -18,29 +18,42 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:weblibre/features/share_intent/domain/entities/intent_container_mode.dart';
 import 'package:weblibre/utils/input_classification.dart';
 
 sealed class SharedContent with FastEquatable {
   final String? contextId;
+  final IntentContainerMode containerMode;
 
-  SharedContent({this.contextId});
+  SharedContent({
+    this.contextId,
+    this.containerMode = IntentContainerMode.useSelected,
+  });
 
-  factory SharedContent.parse(String content, {String? contextId}) {
+  factory SharedContent.parse(
+    String content, {
+    String? contextId,
+    IntentContainerMode containerMode = IntentContainerMode.useSelected,
+  }) {
     if (parseSharedIntentUrl(content) case final Uri uri) {
-      return SharedUrl(uri, contextId: contextId);
+      return SharedUrl(uri, contextId: contextId, containerMode: containerMode);
     } else {
-      return SharedText(content, contextId: contextId);
+      return SharedText(
+        content,
+        contextId: contextId,
+        containerMode: containerMode,
+      );
     }
   }
 
   @override
-  List<Object?> get hashParameters => [contextId];
+  List<Object?> get hashParameters => [contextId, containerMode];
 }
 
 final class SharedUrl extends SharedContent {
   final Uri url;
 
-  SharedUrl(this.url, {super.contextId});
+  SharedUrl(this.url, {super.contextId, super.containerMode});
 
   @override
   String toString() => url.toString();
@@ -52,7 +65,7 @@ final class SharedUrl extends SharedContent {
 final class SharedText extends SharedContent {
   final String text;
 
-  SharedText(this.text, {super.contextId});
+  SharedText(this.text, {super.contextId, super.containerMode});
 
   @override
   String toString() => text;

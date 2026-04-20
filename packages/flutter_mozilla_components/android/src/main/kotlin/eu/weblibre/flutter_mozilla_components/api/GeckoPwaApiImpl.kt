@@ -52,6 +52,14 @@ class GeckoPwaApiImpl(
         private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     }
 
+    private enum class ShortcutKind(
+        val shortcutType: String,
+        val idPrefix: String,
+    ) {
+        PWA(PwaConstants.SHORTCUT_TYPE_PWA, "pwa"),
+        BASIC(PwaConstants.SHORTCUT_TYPE_BASIC, "shortcut"),
+    }
+
     private val logger = Logger("GeckoPwaApiImpl")
     private val appPrefs by lazy {
         context.applicationContext.getSharedPreferences(
@@ -68,6 +76,7 @@ class GeckoPwaApiImpl(
         tabId: String?,
         profileUuid: String,
         contextId: String?,
+        overrideAppName: String?,
         callback: (Result<Boolean>) -> Unit
     ) {
         logger.debug("installWebApp called for tabId: $tabId, profileUuid: $profileUuid, contextId: $contextId")
@@ -86,7 +95,7 @@ class GeckoPwaApiImpl(
                     return@launch
                 }
 
-                val manifest = tab.content.webAppManifest ?: run {
+                val baseManifest = tab.content.webAppManifest ?: run {
                     // Generate a synthetic manifest for sites without one
                     val url = tab.content.url
                     val title = tab.content.title.ifBlank { url }
@@ -99,17 +108,26 @@ class GeckoPwaApiImpl(
                     )
                 }
 
+                val manifest = overrideAppName?.takeIf { it.isNotBlank() }?.let { name ->
+                    baseManifest.copy(name = name, shortName = name)
+                } ?: baseManifest
+
                 logger.debug("Installing web app for tab ${tab.id}: ${manifest.startUrl}")
 
                 val success = createPwaShortcut(
                     manifest = manifest,
                     profileUuid = profileUuid,
                     contextId = contextId,
+                    tabFavicon = tab.content.icon,
                 )
 
                 if (success) {
-                    components.core.webAppManifestStorage.saveManifest(manifest)
-                    storeProfileMapping(manifest.startUrl, profileUuid)
+                    // Persist the unmodified manifest so a second install
+                    // of the same URL with a different overrideAppName or
+                    // contextId does not clobber the first install's
+                    // standalone-window metadata. The user-chosen label
+                    // lives on the shortcut itself.
+                    components.core.webAppManifestStorage.saveManifest(baseManifest)
                     logger.debug("Web app installation completed for tab ${tab.id}")
                 } else {
                     logger.warn("Failed to create PWA shortcut for tab ${tab.id}")
@@ -130,6 +148,7 @@ class GeckoPwaApiImpl(
         manifest: WebAppManifest,
         profileUuid: String,
         contextId: String?,
+        tabFavicon: Bitmap?,
     ): Boolean = withContext(Dispatchers.Main) {
         try {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -148,17 +167,29 @@ class GeckoPwaApiImpl(
                 return@withContext false
             }
 
-            val (iconBitmap, isMaskable) = loadPwaIcon(manifest)
+            // Prefer a manifest icon when available; for synthetic manifests
+            // (no icons declared) fall back to the tab favicon so we always
+            // ship a shortcut icon — some launchers crash when pinning a
+            // shortcut without one.
+            val iconBitmap = loadPwaIcon(manifest)
+                ?: loadTabFaviconBitmap(manifest.startUrl, tabFavicon)
 
-            val shortcutId = generateShortcutId(manifest.startUrl, profileUuid)
+            val appName = manifest.shortName ?: manifest.name ?: "Web App"
+
+            val shortcutId = resolveShortcutId(
+                shortcutManager = shortcutManager,
+                url = manifest.startUrl,
+                profileUuid = profileUuid,
+                contextId = contextId,
+                shortcutKind = ShortcutKind.PWA,
+            )
             val launchToken = resolveLaunchToken(
                 shortcutManager = shortcutManager,
                 shortcutId = shortcutId,
                 startUrl = manifest.startUrl,
                 profileUuid = profileUuid,
+                contextId = contextId,
             )
-
-            val appName = manifest.shortName ?: manifest.name ?: "Web App"
 
             val shortcutIntent = Intent(context, IntentReceiverActivity::class.java).apply {
                 action = Intent.ACTION_VIEW
@@ -167,7 +198,11 @@ class GeckoPwaApiImpl(
                 putExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID, contextId)
                 putExtra(PwaConstants.EXTRA_PWA_TOKEN, launchToken)
                 putExtra(PwaConstants.EXTRA_PWA_INSTALL_START_URL, manifest.startUrl)
-                putExtra(PwaConstants.EXTRA_SHORTCUT_TYPE, PwaConstants.SHORTCUT_TYPE_PWA)
+                putExtra(PwaConstants.EXTRA_SHORTCUT_TYPE, ShortcutKind.PWA.shortcutType)
+                putExtra(
+                    PwaConstants.EXTRA_SHORTCUT_CONTAINER_MODE,
+                    resolveShortcutContainerMode(contextId),
+                )
             }
 
             val shortcut = ShortcutInfo.Builder(context, shortcutId).apply {
@@ -176,19 +211,17 @@ class GeckoPwaApiImpl(
                 setIntent(shortcutIntent)
 
                 if (iconBitmap != null) {
-                    // Only use adaptive bitmap for maskable icons (designed for adaptive shapes)
-                    // Regular icons should use createWithBitmap to display as-is
-                    if (isMaskable && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        setIcon(Icon.createWithAdaptiveBitmap(iconBitmap))
-                    } else {
-                        setIcon(Icon.createWithBitmap(iconBitmap))
-                    }
+                    // Always use createWithBitmap (never createWithAdaptiveBitmap):
+                    // Launcher3's pin-preview routes adaptive icons through
+                    // AdaptiveIconDrawable + BitmapShader and promotes intermediates
+                    // to HARDWARE, crashing the software preview canvas.
+                    setIcon(Icon.createWithBitmap(iconBitmap))
                 }
             }.build()
 
-            // Update existing shortcut intent if one exists with the same ID
-            // (e.g. upgrading a basic shortcut to PWA). requestPinShortcut alone
-            // may reuse the cached intent on some launchers.
+            // Update an existing install of the same kind in place. Some
+            // launchers reuse cached shortcut metadata unless we explicitly
+            // refresh the pinned record first.
             updateExistingShortcut(shortcutManager, shortcut)
 
             val success = shortcutManager.requestPinShortcut(shortcut, null)
@@ -218,53 +251,129 @@ class GeckoPwaApiImpl(
     }
 
     /**
-     * Generates a collision-resistant shortcut ID from URL + profile using SHA-256.
+     * Resolves the shortcut ID for the current install kind.
+     *
+     * New installs use a kind-specific ID so a standalone PWA and a regular
+     * shortcut for the same site do not overwrite each other. For minimal
+     * migration handling, we still reuse the legacy shared ID if a pinned
+     * shortcut with that ID already exists for the same kind.
      */
-    private fun generateShortcutId(url: String, profileUuid: String): String {
+    private fun resolveShortcutId(
+        shortcutManager: ShortcutManager,
+        url: String,
+        profileUuid: String,
+        contextId: String? = null,
+        shortcutKind: ShortcutKind,
+    ): String {
+        val typedShortcutId = generateShortcutId(
+            url = url,
+            profileUuid = profileUuid,
+            contextId = contextId,
+            shortcutKind = shortcutKind,
+        )
+        if (shortcutManager.pinnedShortcuts.any { it.id == typedShortcutId }) {
+            return typedShortcutId
+        }
+
+        val legacyShortcutId = generateLegacyShortcutId(
+            url = url,
+            profileUuid = profileUuid,
+            contextId = contextId,
+        )
+        val matchingLegacyShortcut = shortcutManager.pinnedShortcuts.firstOrNull { shortcut ->
+            if (shortcut.id != legacyShortcutId) {
+                return@firstOrNull false
+            }
+
+            val shortcutIntent = shortcut.intent ?: return@firstOrNull false
+            shortcutIntent.getStringExtra(PwaConstants.EXTRA_PWA_PROFILE_UUID) == profileUuid &&
+                shortcutIntent.getStringExtra(PwaConstants.EXTRA_SHORTCUT_TYPE) == shortcutKind.shortcutType
+        }
+        return matchingLegacyShortcut?.id ?: typedShortcutId
+    }
+
+    /**
+     * Generates a collision-resistant shortcut ID from (type, url, profile,
+     * contextId) using SHA-256. The display label is deliberately excluded
+     * because it is presentation, not install identity.
+     */
+    private fun generateShortcutId(
+        url: String,
+        profileUuid: String,
+        contextId: String? = null,
+        shortcutKind: ShortcutKind,
+    ): String {
         val digest = MessageDigest.getInstance("SHA-256")
-        val hash = digest.digest("$url::$profileUuid".toByteArray())
+        val key = if (contextId.isNullOrEmpty()) {
+            "${shortcutKind.shortcutType}::$url::$profileUuid"
+        } else {
+            "${shortcutKind.shortcutType}::$url::$profileUuid::$contextId"
+        }
+        val hash = digest.digest(key.toByteArray())
+        val hex = hash.take(16).joinToString("") { "%02x".format(it) }
+        return "${shortcutKind.idPrefix}_$hex"
+    }
+
+    /**
+     * Historical shared shortcut ID used before install kind became part of
+     * the identity. Both PWAs and basic shortcuts previously reused this ID.
+     */
+    private fun generateLegacyShortcutId(
+        url: String,
+        profileUuid: String,
+        contextId: String? = null,
+    ): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        val key = if (contextId.isNullOrEmpty()) {
+            "$url::$profileUuid"
+        } else {
+            "$url::$profileUuid::$contextId"
+        }
+        val hash = digest.digest(key.toByteArray())
         val hex = hash.take(16).joinToString("") { "%02x".format(it) }
         return "pwa_$hex"
     }
 
+    private fun resolveShortcutContainerMode(contextId: String?): String {
+        return if (contextId.isNullOrEmpty()) {
+            PwaConstants.SHORTCUT_CONTAINER_MODE_UNASSIGNED
+        } else {
+            PwaConstants.SHORTCUT_CONTAINER_MODE_SPECIFIC
+        }
+    }
+
     /**
-     * Loads the PWA icon from the manifest using BrowserIcons.
-     * Returns a pair of (bitmap, isMaskable) to determine proper icon format.
+     * Loads the PWA icon from the manifest using BrowserIcons. Requested at
+     * plain LAUNCHER size since the shortcut is set as a non-adaptive bitmap.
      */
-    private suspend fun loadPwaIcon(manifest: WebAppManifest): Pair<Bitmap?, Boolean> = withContext(Dispatchers.IO) {
+    private suspend fun loadPwaIcon(manifest: WebAppManifest): Bitmap? = withContext(Dispatchers.IO) {
         try {
             val iconResource = manifest.icons
                 .filter { it.purpose.contains(WebAppManifest.Icon.Purpose.MASKABLE) ||
                          it.purpose.contains(WebAppManifest.Icon.Purpose.ANY) }
                 .maxByOrNull { (it.sizes?.maxOf { size -> size.width * size.height } ?: 0) }
                 ?: manifest.icons.firstOrNull()
+                ?: return@withContext null
 
-            if (iconResource != null) {
-                val isMaskable = iconResource.purpose.contains(WebAppManifest.Icon.Purpose.MASKABLE)
-                val iconRequest = IconRequest(
-                    url = manifest.startUrl,
-                    size = IconRequest.Size.LAUNCHER_ADAPTIVE,
-                    resources = listOf(
-                        IconRequest.Resource(
-                            url = iconResource.src,
-                            type = IconRequest.Resource.Type.MANIFEST_ICON,
-                            sizes = iconResource.sizes?.map { size ->
-                                mozilla.components.concept.engine.manifest.Size(size.width, size.height)
-                            } ?: emptyList(),
-                            mimeType = iconResource.type,
-                            maskable = isMaskable
-                        )
+            val iconRequest = IconRequest(
+                url = manifest.startUrl,
+                size = IconRequest.Size.LAUNCHER,
+                resources = listOf(
+                    IconRequest.Resource(
+                        url = iconResource.src,
+                        type = IconRequest.Resource.Type.MANIFEST_ICON,
+                        sizes = iconResource.sizes?.map { size ->
+                            mozilla.components.concept.engine.manifest.Size(size.width, size.height)
+                        } ?: emptyList(),
+                        mimeType = iconResource.type,
                     )
                 )
+            )
 
-                val iconResult = components.core.icons.loadIcon(iconRequest).await()
-                Pair(iconResult?.bitmap, isMaskable)
-            } else {
-                Pair(null, false)
-            }
+            components.core.icons.loadIcon(iconRequest).await()?.bitmap
         } catch (e: Exception) {
             logger.error("Failed to load PWA icon", e)
-            Pair(null, false)
+            null
         }
     }
 
@@ -335,15 +444,22 @@ class GeckoPwaApiImpl(
                 return@withContext false
             }
 
-            val shortcutId = generateShortcutId(url, profileUuid)
+            val shortLabel = title.ifBlank { url }
+
+            val shortcutId = resolveShortcutId(
+                shortcutManager = shortcutManager,
+                url = url,
+                profileUuid = profileUuid,
+                contextId = contextId,
+                shortcutKind = ShortcutKind.BASIC,
+            )
             val launchToken = resolveLaunchToken(
                 shortcutManager = shortcutManager,
                 shortcutId = shortcutId,
                 startUrl = url,
                 profileUuid = profileUuid,
+                contextId = contextId,
             )
-
-            val shortLabel = title.ifBlank { url }
 
             val shortcutIntent = Intent(context, IntentReceiverActivity::class.java).apply {
                 action = Intent.ACTION_VIEW
@@ -352,7 +468,11 @@ class GeckoPwaApiImpl(
                 putExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID, contextId)
                 putExtra(PwaConstants.EXTRA_PWA_TOKEN, launchToken)
                 putExtra(PwaConstants.EXTRA_PWA_INSTALL_START_URL, url)
-                putExtra(PwaConstants.EXTRA_SHORTCUT_TYPE, PwaConstants.SHORTCUT_TYPE_BASIC)
+                putExtra(PwaConstants.EXTRA_SHORTCUT_TYPE, ShortcutKind.BASIC.shortcutType)
+                putExtra(
+                    PwaConstants.EXTRA_SHORTCUT_CONTAINER_MODE,
+                    resolveShortcutContainerMode(contextId),
+                )
             }
 
             val icon = loadTabIcon(url, tabIcon)
@@ -364,7 +484,7 @@ class GeckoPwaApiImpl(
                 icon?.let { setIcon(it) }
             }.build()
 
-            // Update existing shortcut intent if one exists with the same ID
+            // Update an existing install of the same kind in place.
             updateExistingShortcut(shortcutManager, shortcut)
 
             val success = shortcutManager.requestPinShortcut(shortcut, null)
@@ -377,29 +497,35 @@ class GeckoPwaApiImpl(
     }
 
     /**
-     * Loads an icon for the shortcut from the tab's favicon or BrowserIcons.
+     * Loads a favicon-style bitmap for [url], preferring the in-memory tab icon
+     * and falling back to BrowserIcons at LAUNCHER size. Returns a live bitmap
+     * (caller is responsible for converting to software before use).
      */
-    private suspend fun loadTabIcon(url: String, tabIcon: Bitmap?): Icon? = withContext(Dispatchers.IO) {
+    private suspend fun loadTabFaviconBitmap(
+        url: String,
+        tabIcon: Bitmap?,
+    ): Bitmap? = withContext(Dispatchers.IO) {
         try {
-            // Try using the tab's existing favicon first
-            val bitmap = tabIcon?.takeUnless { it.isRecycled }
+            tabIcon?.takeUnless { it.isRecycled }
                 ?: run {
-                    // Fall back to loading via BrowserIcons
                     val iconRequest = IconRequest(
                         url = url,
                         size = IconRequest.Size.LAUNCHER,
                     )
                     components.core.icons.loadIcon(iconRequest).await()?.bitmap
                 }
-
-            bitmap?.takeUnless { it.isRecycled }?.let {
-                val bitmapCopy = it.copy(it.config ?: Bitmap.Config.ARGB_8888, false)
-                Icon.createWithBitmap(bitmapCopy)
-            }
         } catch (e: Exception) {
-            logger.error("Failed to load tab icon", e)
+            logger.error("Failed to load tab favicon bitmap", e)
             null
         }
+    }
+
+    /**
+     * Loads an icon for the shortcut from the tab's favicon or BrowserIcons.
+     */
+    private suspend fun loadTabIcon(url: String, tabIcon: Bitmap?): Icon? {
+        val bitmap = loadTabFaviconBitmap(url, tabIcon)
+        return bitmap?.takeUnless { it.isRecycled }?.let(Icon::createWithBitmap)
     }
 
     /**
@@ -425,14 +551,51 @@ class GeckoPwaApiImpl(
         coroutineScope.launch {
             try {
                 val storage = components.core.webAppManifestStorage
-                val manifests = storage.loadShareableManifests(System.currentTimeMillis())
                 val currentProfileUuid = getCurrentProfileUuid()
-                val pwaManifests = manifests.filter { manifest ->
-                    val mappedProfile = getProfileMapping(manifest.startUrl)
-                    currentProfileUuid == null || mappedProfile == null || mappedProfile == currentProfileUuid
-                }.map { manifest ->
-                    manifest.toPwaManifest()
+
+                // Pinned shortcuts are the source of truth for installs: each
+                // pinned shortcut carries its own label, profile, and
+                // contextId in its intent extras. Two installs of the same
+                // URL with different contextIds or labels are two distinct
+                // shortcuts here, even though Mozilla's manifest storage
+                // keys the underlying manifest by URL only. We join the
+                // shared manifest with per-install fields from each shortcut.
+                val pwaShortcuts = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.getSystemService<ShortcutManager>()?.pinnedShortcuts
+                        ?.filter { shortcut ->
+                            val intent = shortcut.intent ?: return@filter false
+                            intent.getStringExtra(PwaConstants.EXTRA_SHORTCUT_TYPE) ==
+                                PwaConstants.SHORTCUT_TYPE_PWA
+                        }
+                        ?: emptyList()
+                } else {
+                    emptyList()
                 }
+
+                val pwaManifests = pwaShortcuts.mapNotNull { shortcut ->
+                    val intent = shortcut.intent ?: return@mapNotNull null
+                    val shortcutProfile =
+                        intent.getStringExtra(PwaConstants.EXTRA_PWA_PROFILE_UUID)
+                    if (currentProfileUuid != null &&
+                        shortcutProfile != null &&
+                        shortcutProfile != currentProfileUuid
+                    ) {
+                        return@mapNotNull null
+                    }
+
+                    val installStartUrl =
+                        intent.getStringExtra(PwaConstants.EXTRA_PWA_INSTALL_START_URL)
+                            ?: intent.dataString
+                            ?: return@mapNotNull null
+                    val manifest = storage.loadManifest(installStartUrl)
+                        ?: return@mapNotNull null
+
+                    manifest.toPwaManifest(
+                        contextId = intent.getStringExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID),
+                        installLabel = shortcut.shortLabel?.toString(),
+                    )
+                }
+
                 logger.debug("Found ${pwaManifests.size} installed web apps")
                 callback(Result.success(pwaManifests))
             } catch (e: Exception) {
@@ -442,19 +605,14 @@ class GeckoPwaApiImpl(
         }
     }
 
-    private fun storeProfileMapping(startUrl: String, profileUuid: String) {
-        appPrefs.edit()
-            .putString(startUrl, profileUuid)
-            .apply()
-    }
-
     private fun resolveLaunchToken(
         shortcutManager: ShortcutManager,
         shortcutId: String,
         startUrl: String,
         profileUuid: String,
+        contextId: String?,
     ): String {
-        val storedToken = getStoredLaunchToken(startUrl, profileUuid)
+        val storedToken = getStoredLaunchToken(startUrl, profileUuid, contextId)
         val existingShortcutToken = shortcutManager.pinnedShortcuts
             .firstOrNull { shortcut -> shortcut.id == shortcutId }
             ?.intent
@@ -464,7 +622,7 @@ class GeckoPwaApiImpl(
             ?.getStringExtra(PwaConstants.EXTRA_PWA_TOKEN)
 
         if (!existingShortcutToken.isNullOrEmpty()) {
-            val committed = storeLaunchToken(startUrl, profileUuid, existingShortcutToken)
+            val committed = storeLaunchToken(startUrl, profileUuid, contextId, existingShortcutToken)
             if (!committed) {
                 logger.warn("Failed to persist pinned shortcut PWA token for $startUrl")
             }
@@ -472,7 +630,7 @@ class GeckoPwaApiImpl(
         }
 
         if (!storedToken.isNullOrEmpty()) {
-            val committed = storeLaunchToken(startUrl, profileUuid, storedToken)
+            val committed = storeLaunchToken(startUrl, profileUuid, contextId, storedToken)
             if (!committed) {
                 logger.warn("Failed to refresh stored PWA launch token index for $startUrl")
             }
@@ -480,27 +638,40 @@ class GeckoPwaApiImpl(
         }
 
         val generatedToken = UUID.randomUUID().toString()
-        val committed = storeLaunchToken(startUrl, profileUuid, generatedToken)
+        val committed = storeLaunchToken(startUrl, profileUuid, contextId, generatedToken)
         if (!committed) {
             logger.warn("Failed to persist PWA launch token for $startUrl")
         }
         return generatedToken
     }
 
-    private fun getStoredLaunchToken(startUrl: String, profileUuid: String): String? {
-        val tokenKey = "${PwaConstants.PROFILE_MAPPING_TOKEN_PREFIX}${startUrl}::${profileUuid}"
-        return appPrefs.getString(tokenKey, null)
+    private fun tokenKey(startUrl: String, profileUuid: String, contextId: String?): String {
+        // Keyed by (startUrl, profileUuid, contextId) so multiple installs of
+        // the same URL with different storage contexts each keep their own
+        // token and don't share or overwrite each other.
+        return "${PwaConstants.PROFILE_MAPPING_TOKEN_PREFIX}${startUrl}::${profileUuid}::${contextId.orEmpty()}"
     }
 
-    private fun storeLaunchToken(startUrl: String, profileUuid: String, token: String): Boolean {
-        val tokenKey = "${PwaConstants.PROFILE_MAPPING_TOKEN_PREFIX}${startUrl}::${profileUuid}"
-        return appPrefs.edit()
-            .putString(tokenKey, token)
-            .commit()
+    private fun legacyTokenKey(startUrl: String, profileUuid: String): String {
+        return "${PwaConstants.PROFILE_MAPPING_TOKEN_PREFIX}${startUrl}::${profileUuid}"
     }
 
-    private fun getProfileMapping(startUrl: String): String? {
-        return appPrefs.getString(startUrl, null)
+    private fun getStoredLaunchToken(startUrl: String, profileUuid: String, contextId: String?): String? {
+        return appPrefs.getString(tokenKey(startUrl, profileUuid, contextId), null)
+            ?: if (contextId.isNullOrEmpty()) {
+                appPrefs.getString(legacyTokenKey(startUrl, profileUuid), null)
+            } else {
+                null
+            }
+    }
+
+    private fun storeLaunchToken(startUrl: String, profileUuid: String, contextId: String?, token: String): Boolean {
+        return appPrefs.edit().apply {
+            putString(tokenKey(startUrl, profileUuid, contextId), token)
+            if (contextId.isNullOrEmpty()) {
+                putString(legacyTokenKey(startUrl, profileUuid), token)
+            }
+        }.commit()
     }
 
     private fun getCurrentProfileUuid(): String? {
@@ -517,10 +688,16 @@ class GeckoPwaApiImpl(
         }
     }
 
-    private fun WebAppManifest.toPwaManifest(currentUrl: String = startUrl): PwaManifest {
+    private fun WebAppManifest.toPwaManifest(
+        currentUrl: String = startUrl,
+        contextId: String? = null,
+        installLabel: String? = null,
+    ): PwaManifest {
         return PwaManifest(
             startUrl = startUrl,
             currentUrl = currentUrl,
+            contextId = contextId,
+            installLabel = installLabel,
             name = name,
             shortName = shortName,
             display = display?.name?.lowercase()?.replace("_", "-"),

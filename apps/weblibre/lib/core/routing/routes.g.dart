@@ -860,6 +860,8 @@ mixin $OpenSharedContentRoute on GoRouteData {
   static OpenSharedContentRoute _fromState(GoRouterState state) =>
       OpenSharedContentRoute(
         sharedUrl: state.uri.queryParameters['shared-url'] ?? 'about:blank',
+        contextId: state.uri.queryParameters['context-id'],
+        containerMode: state.uri.queryParameters['container-mode'],
       );
 
   OpenSharedContentRoute get _self => this as OpenSharedContentRoute;
@@ -869,6 +871,8 @@ mixin $OpenSharedContentRoute on GoRouteData {
     '/browser/open_content',
     queryParams: {
       if (_self.sharedUrl != 'about:blank') 'shared-url': _self.sharedUrl,
+      if (_self.contextId != null) 'context-id': _self.contextId,
+      if (_self.containerMode != null) 'container-mode': _self.containerMode,
     },
   );
 

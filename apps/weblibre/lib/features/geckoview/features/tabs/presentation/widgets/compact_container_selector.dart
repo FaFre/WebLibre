@@ -36,8 +36,14 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 /// Long pressing opens the edit screen for the selected container.
 class CompactContainerSelector extends ConsumerWidget {
   final ContainerData? selectedContainer;
+  final Future<void> Function(ContainerSelectionResult selection)?
+  onSelectionChanged;
 
-  const CompactContainerSelector({super.key, this.selectedContainer});
+  const CompactContainerSelector({
+    super.key,
+    this.selectedContainer,
+    this.onSelectionChanged,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -73,6 +79,14 @@ class CompactContainerSelector extends ConsumerWidget {
         onPressed: () async {
           final selection = await const ContainerSelectionRoute()
               .push<ContainerSelectionResult?>(context);
+          if (selection == null) {
+            return;
+          }
+
+          if (onSelectionChanged != null) {
+            await onSelectionChanged!(selection);
+            return;
+          }
 
           switch (selection) {
             case ContainerSelectionSelected(:final containerId):
@@ -81,8 +95,6 @@ class CompactContainerSelector extends ConsumerWidget {
                   .setContainerId(containerId);
             case ContainerSelectionUnassigned():
               ref.read(selectedContainerProvider.notifier).clearContainer();
-            case null:
-              break;
           }
         },
       ),

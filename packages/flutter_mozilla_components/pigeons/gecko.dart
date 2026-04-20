@@ -2673,6 +2673,19 @@ class PwaManifest {
   /// Used for HTTPS/installability checks.
   final String currentUrl;
 
+  /// Storage context (container contextualIdentity or isolated `iso1_…` id)
+  /// that this install was pinned with. Only populated by
+  /// `getInstalledWebApps` — read from the pinned shortcut's intent extras,
+  /// not from the manifest itself, because the same URL can have multiple
+  /// installs that differ only in contextId.
+  final String? contextId;
+
+  /// User-chosen launcher label for this specific install (from the pinned
+  /// shortcut's shortLabel). May differ from `name`/`shortName` because the
+  /// underlying manifest is shared across install variants of the same URL.
+  /// Only populated by `getInstalledWebApps`.
+  final String? installLabel;
+
   const PwaManifest({
     required this.startUrl,
     required this.currentUrl,
@@ -2690,6 +2703,8 @@ class PwaManifest {
     this.relatedApplications = const [],
     this.preferRelatedApplications = false,
     this.shareTarget,
+    this.contextId,
+    this.installLabel,
   });
 }
 
@@ -2708,9 +2723,15 @@ abstract class GeckoPwaApi {
   /// The [tabId] identifies which tab to install from. If null, uses the selected tab.
   /// The [profileUuid] is the UUID of the current user profile.
   /// The [contextId] is the container's contextual identity (optional, null for default container).
+  /// The [overrideAppName] customizes the installed app's displayed name and persists in the saved manifest.
   /// Returns true if installation was successful.
   @async
-  bool installWebApp(String? tabId, String profileUuid, String? contextId);
+  bool installWebApp(
+    String? tabId,
+    String profileUuid,
+    String? contextId,
+    String? overrideAppName,
+  );
 
   /// Returns a list of all installed PWA manifests.
   @async

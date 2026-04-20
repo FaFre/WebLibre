@@ -51,21 +51,26 @@ class SelectedContainer extends _$SelectedContainer {
     return null;
   }
 
-  Future<SetContainerResult> setContainerId(String id) async {
+  Future<SetContainerResult> setContainerId(
+    String id, {
+    bool Function()? shouldApply,
+  }) async {
     final container = await ref
         .read(containerRepositoryProvider.notifier)
         .getContainerData(id);
 
-    if (ref.mounted && container != null) {
+    bool canApply() => shouldApply?.call() ?? true;
+
+    if (ref.mounted && container != null && canApply()) {
       if (container.metadata.useProxy) {
         final proxyPluginHealthy = await GeckoContainerProxyService()
             .healthcheck();
 
-        if (proxyPluginHealthy) {
+        if (ref.mounted && proxyPluginHealthy && canApply()) {
           state = id;
           return SetContainerResult.successHasProxy;
         }
-      } else {
+      } else if (canApply()) {
         state = id;
         return SetContainerResult.success;
       }

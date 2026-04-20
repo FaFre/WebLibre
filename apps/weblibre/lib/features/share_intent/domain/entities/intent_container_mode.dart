@@ -17,22 +17,33 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:fast_equatable/fast_equatable.dart';
-import 'package:weblibre/features/share_intent/domain/entities/intent_container_mode.dart';
 
-class ReceivedIntentParameter with FastEquatable {
-  final String? content;
-  final String? tool;
-  final String? contextId;
-  final IntentContainerMode containerMode;
+enum IntentContainerMode {
+  useSelected('use-selected'),
+  unassigned('unassigned'),
+  specific('specific');
 
-  ReceivedIntentParameter(
-    this.content,
-    this.tool, {
-    this.contextId,
-    this.containerMode = IntentContainerMode.useSelected,
-  });
+  const IntentContainerMode(this.wireValue);
 
-  @override
-  List<Object?> get hashParameters => [content, tool, contextId, containerMode];
+  final String wireValue;
+
+  String? get queryValueOrNull =>
+      this == IntentContainerMode.useSelected ? null : wireValue;
+
+  static IntentContainerMode fromWireValue(
+    String? wireValue, {
+    String? contextId,
+  }) {
+    for (final mode in values) {
+      if (mode.wireValue == wireValue) {
+        return mode;
+      }
+    }
+
+    if (contextId != null) {
+      return IntentContainerMode.specific;
+    }
+
+    return IntentContainerMode.useSelected;
+  }
 }

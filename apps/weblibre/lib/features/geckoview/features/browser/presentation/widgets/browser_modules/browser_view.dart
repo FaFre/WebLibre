@@ -58,6 +58,7 @@ import 'package:weblibre/features/intent_gatekeeper/domain/entities/pending_inte
 import 'package:weblibre/features/intent_gatekeeper/domain/services/intent_gatekeeper.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/services/native_gatekeeper_replicator.dart';
 import 'package:weblibre/features/intent_gatekeeper/presentation/widgets/intent_gatekeeper_dialog.dart';
+import 'package:weblibre/features/share_intent/domain/entities/intent_container_mode.dart';
 import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
@@ -403,6 +404,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                   final containerSelection = await _resolveContainerSelection(
                     ref,
                     sharedContent.contextId,
+                    sharedContent.containerMode,
                   );
 
                   await ref
@@ -443,6 +445,8 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                 case SharedUrl():
                   final route = OpenSharedContentRoute(
                     sharedUrl: sharedContent.url.toString(),
+                    contextId: sharedContent.contextId,
+                    containerMode: sharedContent.containerMode.queryValueOrNull,
                   );
                   await router.push(route.location);
                 case SharedText():
@@ -704,13 +708,19 @@ class _BrowserViewState extends ConsumerState<BrowserView>
   }
 }
 
-/// Resolves a [TabContainerSelection] from a shortcut intent's context ID.
-/// Returns [TabContainerSelection.useSelected] if no contextId or container not found.
+/// Resolves a [TabContainerSelection] from incoming launch container metadata.
 Future<TabContainerSelection> _resolveContainerSelection(
   WidgetRef ref,
   String? contextId,
+  IntentContainerMode containerMode,
 ) async {
-  if (contextId == null) return const TabContainerSelection.useSelected();
+  if (contextId == null) {
+    return switch (containerMode) {
+      IntentContainerMode.unassigned =>
+        const TabContainerSelection.unassigned(),
+      _ => const TabContainerSelection.useSelected(),
+    };
+  }
 
   final container = await ref
       .read(containerRepositoryProvider.notifier)
@@ -720,5 +730,9 @@ Future<TabContainerSelection> _resolveContainerSelection(
     return TabContainerSelection.specific(container);
   }
 
-  return const TabContainerSelection.useSelected();
+  return switch (containerMode) {
+    IntentContainerMode.useSelected =>
+      const TabContainerSelection.useSelected(),
+    _ => const TabContainerSelection.unassigned(),
+  };
 }

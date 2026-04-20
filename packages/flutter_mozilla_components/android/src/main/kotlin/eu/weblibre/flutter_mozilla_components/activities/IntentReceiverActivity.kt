@@ -222,14 +222,22 @@ class IntentReceiverActivity : Activity() {
             PwaConstants.PROFILE_MAPPING_PREFS,
             Context.MODE_PRIVATE,
         )
-        val tokenKey = "${PwaConstants.PROFILE_MAPPING_TOKEN_PREFIX}${intentUrl}::${profileUuid}"
-        if (prefs.getString(tokenKey, null) == token) {
+        // Tokens are keyed by (url, profile, contextId) since each install
+        // variant gets its own token. Fall back to the legacy (url, profile)
+        // key for shortcuts pinned before context-scoping was introduced.
+        val contextId = intent.getStringExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID).orEmpty()
+        val tokenKey = "${PwaConstants.PROFILE_MAPPING_TOKEN_PREFIX}${intentUrl}::${profileUuid}::${contextId}"
+        val legacyTokenKey = "${PwaConstants.PROFILE_MAPPING_TOKEN_PREFIX}${intentUrl}::${profileUuid}"
+        if (prefs.getString(tokenKey, null) == token ||
+            prefs.getString(legacyTokenKey, null) == token) {
             return true
         }
 
         if (!installStartUrl.isNullOrEmpty() && installStartUrl != intentUrl) {
-            val installTokenKey = "${PwaConstants.PROFILE_MAPPING_TOKEN_PREFIX}${installStartUrl}::${profileUuid}"
-            if (prefs.getString(installTokenKey, null) == token) {
+            val installTokenKey = "${PwaConstants.PROFILE_MAPPING_TOKEN_PREFIX}${installStartUrl}::${profileUuid}::${contextId}"
+            val legacyInstallTokenKey = "${PwaConstants.PROFILE_MAPPING_TOKEN_PREFIX}${installStartUrl}::${profileUuid}"
+            if (prefs.getString(installTokenKey, null) == token ||
+                prefs.getString(legacyInstallTokenKey, null) == token) {
                 return true
             }
         }
