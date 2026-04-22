@@ -44,7 +44,7 @@
     "ts-mocha": "^11.1.0",
     "ts-standard": "^12.0.2",
     "tsconfig-paths-webpack-plugin": "^4.2.0",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.2",
     "web-ext": "^9.4.0",
     "webpack": "^5.105.4",
     "webpack-cli": "^6.0.1"
