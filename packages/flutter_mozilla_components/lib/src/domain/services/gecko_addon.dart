@@ -26,6 +26,7 @@ class GeckoAddonService extends GeckoAddonEvents {
   final _browserIconSubject = ReplaySubject<ExtensionIconEvent>();
   final _pageIconSubject = ReplaySubject<ExtensionIconEvent>();
   final _popupSubject = PublishSubject<ExtensionPopupEvent>();
+  final _openAddonSettingsSubject = PublishSubject<String>();
 
   Stream<ExtensionDataEvent> get browserExtensionStream =>
       _browserExtensionSubject.stream;
@@ -36,6 +37,8 @@ class GeckoAddonService extends GeckoAddonEvents {
       _browserIconSubject.stream;
   Stream<ExtensionIconEvent> get pageIconStream => _pageIconSubject.stream;
   Stream<ExtensionPopupEvent> get popupStream => _popupSubject.stream;
+  Stream<String> get openAddonSettingsStream =>
+      _openAddonSettingsSubject.stream;
 
   Future<List<AddonInfo>> getAddons({bool allowCache = true}) {
     return _api.getAddons(allowCache);
@@ -189,6 +192,11 @@ class GeckoAddonService extends GeckoAddonEvents {
     _popupSubject.add((extensionId: extensionId, extensionName: extensionName));
   }
 
+  @override
+  void onOpenAddonSettingsRequested(String addonId) {
+    _openAddonSettingsSubject.add(addonId);
+  }
+
   GeckoAddonService.setUp({
     BinaryMessenger? binaryMessenger,
     GeckoAddonsApi? api,
@@ -207,5 +215,6 @@ class GeckoAddonService extends GeckoAddonEvents {
     await _browserIconSubject.close();
     await _pageIconSubject.close();
     await _popupSubject.close();
+    await _openAddonSettingsSubject.close();
   }
 }

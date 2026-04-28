@@ -413,6 +413,8 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     store = components.core.store,
                     context = profileContext,
                     fragmentManager = parentFragmentManager,
+                    addonManager = components.core.addonManager,
+                    addonEvents = components.addonEvents,
                 ),
                 owner = this,
                 view = view

@@ -1962,10 +1962,7 @@ abstract class GeckoAddonsApi {
   );
 
   @async
-  List<AddonListing> getFeaturedAddonListings(
-    AddonStoreApp app,
-    int pageSize,
-  );
+  List<AddonListing> getFeaturedAddonListings(AddonStoreApp app, int pageSize);
 
   void invokeAddonAction(String extensionId, WebExtensionActionType actionType);
 
@@ -2026,6 +2023,8 @@ abstract class GeckoAddonEvents {
   );
 
   void onWebExtensionPopupRequested(String extensionId, String extensionName);
+
+  void onOpenAddonSettingsRequested(String addonId);
 }
 
 @HostApi()

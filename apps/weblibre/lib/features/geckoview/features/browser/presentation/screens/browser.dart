@@ -317,6 +317,12 @@ class BrowserScreen extends HookConsumerWidget {
         );
       },
     );
+    useOnStreamChange(
+      addonService.openAddonSettingsStream,
+      onData: (addonId) async {
+        await AddonInternalSettingsRoute(addonId: addonId).push<void>(context);
+      },
+    );
 
     useOnAppLifecycleStateChange((previous, current) {
       switch (current) {
