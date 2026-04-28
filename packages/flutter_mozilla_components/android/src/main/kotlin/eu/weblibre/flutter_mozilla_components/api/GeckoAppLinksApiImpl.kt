@@ -54,9 +54,11 @@ class GeckoAppLinksApiImpl(
                     return@launch
                 }
 
-                // Set FLAG_ACTIVITY_NEW_TASK to launch in new task
-                // This prevents issues with app task stacks
-                redirect.appIntent?.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                // Use NEW_DOCUMENT + MULTIPLE_TASK so the target app opens in its own
+                // task and doesn't get absorbed into WebLibre's recents entry.
+                // This matches Fenix's ShareController behaviour.
+                redirect.appIntent?.flags =
+                    Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
 
                 components.useCases.appLinksUseCases.openAppLink.invoke(redirect.appIntent)
                 callback(Result.success(true))

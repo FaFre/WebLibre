@@ -344,7 +344,8 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                             val appLinksUseCases = components.useCases.appLinksUseCases
                             val getRedirect = appLinksUseCases.appLinkRedirect
                             val redirect = getRedirect.invoke(fallbackUrl)
-                            redirect.appIntent?.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            redirect.appIntent?.flags =
+                                Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
                             appLinksUseCases.openAppLink.invoke(redirect.appIntent)
                         }
                     },

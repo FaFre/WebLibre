@@ -295,6 +295,9 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
                 type = "text/plain"
                 putExtra(Intent.EXTRA_TEXT, tab.content.url)
                 putExtra(Intent.EXTRA_SUBJECT, tab.content.title)
+                // Use NEW_DOCUMENT + MULTIPLE_TASK so the receiving app opens
+                // in its own task rather than inside WebLibre's recents entry.
+                flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
             }
             startActivity(Intent.createChooser(shareIntent, null))
         }

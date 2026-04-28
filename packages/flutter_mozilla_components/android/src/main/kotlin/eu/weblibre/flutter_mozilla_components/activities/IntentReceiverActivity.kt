@@ -33,11 +33,12 @@ import mozilla.components.browser.state.state.ExternalAppType
 import java.io.File
 
 /**
- * Lightweight transparent activity that receives all ACTION_VIEW intents and routes them
+ * Lightweight transparent activity that receives all external intents and routes them
  * to the appropriate activity:
  * - Custom Tab intents → [ExternalAppBrowserActivity]
  * - PWA launch intents → [ExternalAppBrowserActivity] (with profile/context tracking)
- * - Regular VIEW intents → MainActivity (Flutter)
+ * - SHARE intents with a URL → [ExternalAppBrowserActivity] (separate recents entry)
+ * - Regular VIEW / SEND / PROCESS_TEXT / WEB_SEARCH intents → MainActivity (Flutter)
  *
  * For PWA intents created by our custom installer, checks profile match and shows dialog
  * if the current profile differs from the installation profile.
@@ -134,6 +135,23 @@ class IntentReceiverActivity : Activity() {
     private fun routeIntent(intent: Intent) {
         val privateBrowsingMode = intent.getBooleanExtra(PRIVATE_BROWSING_MODE, false)
         intent.putExtra(PRIVATE_BROWSING_MODE, privateBrowsingMode)
+
+        // SHARE intents with a URL are routed to ExternalAppBrowserActivity so they
+        // appear as a separate recents entry ("share as new task"), matching the
+        // behaviour users expect when sharing content into the browser. SEND intents
+        // without a URL (plain text, files) fall through to MainActivity for the
+        // Flutter-side to handle (search, PDF display, etc.).
+        if (intent.action == Intent.ACTION_SEND) {
+            val shareUrl = extractShareUrl(intent)
+            if (shareUrl != null) {
+                Log.d(TAG, "SHARE intent with URL, routing to custom tab: $shareUrl")
+                handleShareUrlAsCustomTab(intent, shareUrl, privateBrowsingMode)
+                return
+            }
+            Log.d(TAG, "SHARE intent without URL, routing to MainActivity")
+            handleRegularIntent(intent)
+            return
+        }
 
         // Check if this is our custom PWA intent with profile metadata
         val profileUuid = intent.getStringExtra(PwaConstants.EXTRA_PWA_PROFILE_UUID)
@@ -491,6 +509,80 @@ class IntentReceiverActivity : Activity() {
         components.useCases.sessionUseCases.loadUrl(url, tab.id, loadUrlFlags)
 
         return tab.id
+    }
+
+    /**
+     * Extracts a URL from a SEND intent.
+     * First checks EXTRA_TEXT for a URL, then EXTRA_STREAM.
+     * Returns null if no valid URL is found.
+     */
+    private fun extractShareUrl(intent: Intent): String? {
+        fun String?.toHttpUrl(): String? {
+            val candidate = this?.trim().orEmpty()
+            return candidate.takeIf {
+                it.startsWith("http://") || it.startsWith("https://")
+            }
+        }
+
+        intent.getStringExtra(Intent.EXTRA_TEXT)?.toHttpUrl()?.let { return it }
+
+        @Suppress("DEPRECATION")
+        val streamUri: Uri? = intent.getParcelableExtra(Intent.EXTRA_STREAM)
+        streamUri?.toString().toHttpUrl()?.let { return it }
+
+        intent.dataString.toHttpUrl()?.let { return it }
+
+        return null
+    }
+
+    /**
+     * Creates a custom tab session for the shared URL and launches
+     * [ExternalAppBrowserActivity], which appears as a separate recents entry
+     * because it uses taskAffinity="" and documentLaunchMode="always".
+     */
+    private fun handleShareUrlAsCustomTab(
+        sourceIntent: Intent,
+        url: String,
+        privateBrowsingMode: Boolean,
+    ) {
+        var components = GlobalComponents.components
+        if (components == null) {
+            if (!GlobalComponents.ensureExternalComponents(applicationContext)) {
+                Log.w(TAG, "Components not initialized, falling back to MainActivity for SHARE")
+                handleRegularIntent(sourceIntent)
+                return
+            }
+            components = GlobalComponents.components
+        }
+
+        if (components == null) {
+            Log.e(TAG, "Components still null after init, falling back to MainActivity for SHARE")
+            handleRegularIntent(sourceIntent)
+            return
+        }
+
+        val customTabConfig = mozilla.components.browser.state.state.CustomTabConfig()
+
+        val tab = mozilla.components.browser.state.state.createCustomTab(
+            url = url,
+            config = customTabConfig,
+            source = mozilla.components.browser.state.state.SessionState.Source.Internal.CustomTab,
+            private = privateBrowsingMode,
+        )
+
+        components.core.store.dispatch(
+            mozilla.components.browser.state.action.CustomTabListAction.AddCustomTabAction(tab)
+        )
+
+        val loadUrlFlags = mozilla.components.concept.engine.EngineSession.LoadUrlFlags.external()
+        components.useCases.sessionUseCases.loadUrl(url, tab.id, loadUrlFlags)
+
+        val externalIntent = ExternalAppBrowserActivity.createIntent(
+            context = this,
+            customTabSessionId = tab.id,
+        )
+        startActivity(externalIntent)
+        finish()
     }
 
     private fun handleRegularIntent(intent: Intent) {
