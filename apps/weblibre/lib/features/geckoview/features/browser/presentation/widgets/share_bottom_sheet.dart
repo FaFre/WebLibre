@@ -29,7 +29,6 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
@@ -41,6 +40,8 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
+import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
+import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 Future<void> showShareBottomSheet(
@@ -117,7 +118,7 @@ class ShareBottomSheet extends HookConsumerWidget {
           children: [
             // Header with URL and tracking status
             _ShareHeader(
-              url: effectiveUrl?.toString() ?? '',
+              url: effectiveUrl,
               urlWasCleaned: urlWasCleaned,
               hasTracking: showCleanerTile && !cleaner.applied,
               cleanerResult: showCleanerTile ? cleaner.result : null,
@@ -219,7 +220,7 @@ class ShareBottomSheet extends HookConsumerWidget {
 }
 
 class _ShareHeader extends StatelessWidget {
-  final String url;
+  final Uri? url;
   final bool urlWasCleaned;
   final bool hasTracking;
   final UrlCleanerResult? cleanerResult;
@@ -250,7 +251,7 @@ class _ShareHeader extends StatelessWidget {
                 showDialog(
                   context: context,
                   builder: (context) => TrackingDetailsDialog(
-                    currentUrl: url,
+                    currentUrl: url.toString(),
                     result: cleanerResult!,
                     allowReferralMarketing: allowReferralMarketing,
                     onApplySelectedRemovals: onApplySelectedRemovals,
@@ -271,16 +272,18 @@ class _ShareHeader extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    url.uriDisplayString,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: urlWasCleaned
-                          ? colorScheme.primary
-                          : colorScheme.onSurfaceVariant,
-                    ),
-                  ),
+                  if (url != null)
+                    UriBreadcrumb(
+                      uri: url!,
+                      icon: UrlIcon([url!], iconSize: 20),
+                      style: TextStyle(
+                        color: urlWasCleaned
+                            ? colorScheme.primary
+                            : colorScheme.onSurfaceVariant,
+                      ),
+                    )
+                  else
+                    const SizedBox.shrink(),
                   const SizedBox(height: 4),
                   if (hasTracking)
                     Row(
