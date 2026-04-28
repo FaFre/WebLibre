@@ -634,6 +634,17 @@ class BrowserScreen extends HookConsumerWidget {
                       ? topAppBarTotalHeight
                       : 0.0;
 
+                  // Only fall back to the system bottom inset when the bottom
+                  // toolbar was explicitly dismissed. The normal auto-hide
+                  // hidden state is still handled by GeckoView's dynamic
+                  // toolbar/clipping logic.
+                  final applyBottomSafeArea =
+                      !tabInFullScreen &&
+                      !isSmallWebActive &&
+                      !sheetDisplayed &&
+                      bottomOffset == 0 &&
+                      toolbarState == ToolbarVisibility.dismissed;
+
                   return Positioned(
                     left: 0,
                     right: 0,
@@ -647,6 +658,7 @@ class BrowserScreen extends HookConsumerWidget {
                           : null,
                       sheetDisplayed: sheetDisplayed,
                       hasTopBarOffset: topOffset > 0,
+                      applyBottomSafeArea: applyBottomSafeArea,
                     ),
                   );
                 },
@@ -933,6 +945,7 @@ class _Browser extends HookConsumerWidget {
   final bool tabInFullScreen;
   final bool sheetDisplayed;
   final bool hasTopBarOffset;
+  final bool applyBottomSafeArea;
 
   const _Browser({
     required this.overlayController,
@@ -940,6 +953,7 @@ class _Browser extends HookConsumerWidget {
     required this.pointerMoveEventSink,
     required this.sheetDisplayed,
     required this.hasTopBarOffset,
+    required this.applyBottomSafeArea,
   });
 
   @override
@@ -1159,6 +1173,7 @@ class _Browser extends HookConsumerWidget {
                 isFullscreen: tabInFullScreen,
                 pointerMoveEventSink: pointerMoveEventSink,
                 hasTopBarOffset: hasTopBarOffset,
+                applyBottomSafeArea: applyBottomSafeArea,
               ),
             ),
           ),
@@ -1172,10 +1187,12 @@ class _BrowserView extends StatelessWidget {
   final bool isFullscreen;
   final StreamSink<Offset>? pointerMoveEventSink;
   final bool hasTopBarOffset;
+  final bool applyBottomSafeArea;
 
   const _BrowserView({
     required this.isFullscreen,
     required this.hasTopBarOffset,
+    required this.applyBottomSafeArea,
     this.pointerMoveEventSink,
   });
 
@@ -1185,8 +1202,10 @@ class _BrowserView extends StatelessWidget {
       // Disable top SafeArea when top bar handles it (has offset applied)
       top: !isFullscreen && !hasTopBarOffset,
       right: !isFullscreen,
-      // Bottom SafeArea is handled by the overlay toolbar (BottomAppBar)
-      bottom: false,
+      // Apply bottom SafeArea only when no toolbar/overlay is rendered at the
+      // bottom (and not in fullscreen). Otherwise the toolbar handles its own
+      // safe-area inset and the platform view extends behind it.
+      bottom: applyBottomSafeArea,
       left: !isFullscreen,
       child: Stack(
         children: [BrowserView(pointerMoveEventSink: pointerMoveEventSink)],
