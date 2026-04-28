@@ -404,6 +404,8 @@ class BrowserScreen extends HookConsumerWidget {
 
     // Get pixel ratio for converting logical pixels to physical pixels
     final pixelRatio = MediaQuery.of(context).devicePixelRatio;
+    final bottomSystemInsetPx =
+        (MediaQuery.viewPaddingOf(context).bottom * pixelRatio).round();
 
     // Watch find-in-page visibility for the selected tab
     final findInPageVisible =
@@ -450,9 +452,11 @@ class BrowserScreen extends HookConsumerWidget {
       viewportService.keyboardEvents,
       onData: (event) {
         if (!event.isAnimating) {
-          final nextKeyboardHeight = event.isVisible ? event.heightPx : null;
-          if (keyboardHeightPx.value != nextKeyboardHeight) {
-            keyboardHeightPx.value = nextKeyboardHeight;
+          final nextKeyboardHeightPx = event.isVisible
+              ? event.heightPx + bottomSystemInsetPx
+              : null;
+          if (keyboardHeightPx.value != nextKeyboardHeightPx) {
+            keyboardHeightPx.value = nextKeyboardHeightPx;
           }
         }
       },
