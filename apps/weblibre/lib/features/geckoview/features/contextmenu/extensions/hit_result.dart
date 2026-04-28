@@ -21,6 +21,7 @@ import 'dart:convert';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/domain/converters/hit_result_converter.dart';
 
 extension HitResultJson on HitResult {
@@ -82,14 +83,15 @@ extension HitResultX on HitResult {
     const maxTitleLength = 2500;
 
     return switch (this) {
-      UnknownHitResult(src: final src) => src,
-      ImageSrcHitResult(uri: final uri) => uri,
-      ImageHitResult(src: final src, title: final title) =>
-        title.isEmpty ? (src.length > maxTitleLength ? 'image' : src) : title!,
+      UnknownHitResult(src: final src) => src.uriDisplayString,
+      ImageSrcHitResult(uri: final uri) => uri.uriDisplayString,
+      ImageHitResult(src: final src, title: final title) => title.isEmpty
+          ? (src.length > maxTitleLength ? 'image' : src.uriDisplayString)
+          : title!,
       VideoHitResult(src: final src, title: final title) =>
-        (title.isEmpty) ? src : title!,
+        (title.isEmpty) ? src.uriDisplayString : title!,
       AudioHitResult(src: final src, title: final title) =>
-        (title.isEmpty) ? src : title!,
+        (title.isEmpty) ? src.uriDisplayString : title!,
       _ => 'about:blank',
     };
   }

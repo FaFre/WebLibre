@@ -47,18 +47,11 @@ extension UriX on Uri {
       return '';
     }
 
-    final segments = pathSegments.join('/');
-    final buffer = StringBuffer();
-
-    if (path.startsWith('/')) {
-      buffer.write('/');
+    try {
+      return Uri.decodeComponent(path);
+    } on FormatException {
+      return path;
     }
-    buffer.write(segments);
-    if (path.length > 1 && path.endsWith('/')) {
-      buffer.write('/');
-    }
-
-    return buffer.toString();
   }
 
   String get displayString {
@@ -94,6 +87,10 @@ extension UriStringX on String {
     if (uri == null || uri.toString() != this) {
       return this;
     }
-    return uri.displayString;
+    try {
+      return uri.displayString;
+    } on FormatException {
+      return this;
+    }
   }
 }

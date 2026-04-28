@@ -65,5 +65,34 @@ void main() {
         'https://example.com/%ZZ?query=%',
       );
     });
+
+    test('preserves trailing slash exactly once', () {
+      final uri = Uri.parse('http://x.com/a/b/');
+
+      expect(uri.displayString, 'http://x.com/a/b/');
+    });
+
+    test('decodes Cyrillic Reddit URL with trailing slash', () {
+      final uri = Uri.parse(
+        'https://www.reddit.com/r/KafkaFPS/comments/1sn0j5w/'
+        '%D0%BF%D0%B5%D1%80%D0%B5%D1%81%D1%82%D0%B0%D0%BD%D1%8C%D1%82%D0%B5'
+        '_%D1%81%D0%BE%D0%BF%D1%80%D0%BE%D1%82%D0%B8%D0%B2%D0%BB%D1%8F'
+        '%D1%82%D1%8C%D1%81%D1%8F_%D0%BC%D0%B8%D1%81%D1%82%D0%B5%D1%80'
+        '_%D0%B0%D0%BD%D0%B4%D0%B5%D1%80%D1%81%D0%BE%D0%BD/',
+      );
+
+      expect(
+        uri.displayString,
+        'https://www.reddit.com/r/KafkaFPS/comments/1sn0j5w/'
+        'перестаньте_сопротивляться_мистер_андерсон/',
+      );
+    });
+
+    test('keeps IDN punycode host as-is', () {
+      expect(
+        'https://xn--j1ail.xn--p1ai/'.uriDisplayString,
+        'https://xn--j1ail.xn--p1ai/',
+      );
+    });
   });
 }
