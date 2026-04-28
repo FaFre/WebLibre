@@ -55,6 +55,7 @@ class UriBreadcrumb extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ?icon,
+                  if (icon != null) const SizedBox(width: 6),
                   Text(
                     uri.authority,
                     maxLines: 1,
