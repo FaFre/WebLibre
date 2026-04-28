@@ -7,7 +7,7 @@
 package eu.weblibre.flutter_mozilla_components.activities
 
 import android.app.Activity
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ShortcutManager
@@ -15,6 +15,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import eu.weblibre.flutter_mozilla_components.Components
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.PwaConstants
@@ -26,6 +27,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import mozilla.components.browser.state.selector.findCustomTab
 import mozilla.components.feature.customtabs.CustomTabIntentProcessor
 import mozilla.components.feature.intent.ext.getSessionId
 import mozilla.components.feature.pwa.intent.WebAppIntentProcessor
@@ -168,7 +170,7 @@ class IntentReceiverActivity : Activity() {
                 }
 
                 Log.d(TAG, "Trusted PWA intent with profile metadata: profileUuid=$profileUuid, contextId=$contextId")
-                handlePwaIntent(intent, profileUuid, contextId)
+                handlePwaIntent(intent, profileUuid, contextId, token)
                 return
             }
 
@@ -345,6 +347,7 @@ class IntentReceiverActivity : Activity() {
         intent: Intent,
         profileUuid: String,
         contextId: String?,
+        token: String?,
     ) {
         val url = intent.dataString
         if (url == null) {
@@ -353,18 +356,36 @@ class IntentReceiverActivity : Activity() {
             return
         }
 
+        val installStartUrl = intent.getStringExtra(PwaConstants.EXTRA_PWA_INSTALL_START_URL)
+
         val currentProfileUuid = getCurrentProfileUuid()
 
         if (currentProfileUuid != null && currentProfileUuid != profileUuid) {
             Log.d(TAG, "Profile mismatch: current=$currentProfileUuid, expected=$profileUuid")
             showProfileMismatchDialog(
                 intent = intent,
-                onProceed = { launchPwaWithContext(url, contextId) },
+                onProceed = {
+                    launchPwaWithContext(
+                        url = url,
+                        contextId = contextId,
+                        profileUuid = profileUuid,
+                        token = token,
+                        installStartUrl = installStartUrl,
+                        allowTaskReuse = false,
+                    )
+                },
                 isPwa = true,
             )
         } else {
             Log.d(TAG, "Profile match or indeterminate, launching PWA with contextId=$contextId")
-            launchPwaWithContext(url, contextId)
+            launchPwaWithContext(
+                url = url,
+                contextId = contextId,
+                profileUuid = profileUuid,
+                token = token,
+                installStartUrl = installStartUrl,
+                allowTaskReuse = true,
+            )
         }
     }
 
@@ -441,7 +462,19 @@ class IntentReceiverActivity : Activity() {
     /**
      * Launches the PWA with the specified context ID for storage isolation.
      */
-    private fun launchPwaWithContext(url: String, contextId: String?) {
+    private fun launchPwaWithContext(
+        url: String,
+        contextId: String?,
+        profileUuid: String,
+        token: String?,
+        installStartUrl: String?,
+        allowTaskReuse: Boolean,
+    ) {
+        if (allowTaskReuse && bringPwaTaskToFront(url, profileUuid, contextId, token, installStartUrl)) {
+            finish()
+            return
+        }
+
         val components = GlobalComponents.components
             ?: run {
                 Log.e(TAG, "Components not available for PWA launch")
@@ -467,6 +500,10 @@ class IntentReceiverActivity : Activity() {
                     context = this@IntentReceiverActivity,
                     customTabSessionId = sessionId,
                     webAppManifestUrl = url,
+                    pwaProfileUuid = profileUuid,
+                    pwaContextId = contextId,
+                    pwaToken = token,
+                    pwaInstallStartUrl = installStartUrl ?: url,
                 )
                 startActivity(externalIntent)
                 finish()
@@ -475,6 +512,89 @@ class IntentReceiverActivity : Activity() {
                 handleRegularIntent(intent)
             }
         }
+    }
+
+    private fun bringPwaTaskToFront(
+        url: String,
+        profileUuid: String,
+        contextId: String?,
+        token: String?,
+        installStartUrl: String?,
+    ): Boolean {
+        if (token.isNullOrEmpty()) {
+            return false
+        }
+
+        val activityManager = getSystemService(ActivityManager::class.java) ?: return false
+        val components = GlobalComponents.components
+
+        for (appTask in activityManager.appTasks) {
+            val baseIntent = runCatching { appTask.taskInfo.baseIntent }
+                .getOrElse { error ->
+                    Log.w(TAG, "Failed to inspect app task", error)
+                    return@getOrElse null
+                } ?: continue
+
+            if (baseIntent.component?.className != ExternalAppBrowserActivity::class.java.name) {
+                continue
+            }
+
+            if (!matchesPwaTaskIntent(baseIntent, url, profileUuid, contextId, token, installStartUrl, components)) {
+                continue
+            }
+
+            return try {
+                appTask.moveToFront()
+                Log.d(TAG, "Resumed existing PWA task for $url")
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to move existing PWA task to front", e)
+                false
+            }
+        }
+
+        return false
+    }
+
+    private fun matchesPwaTaskIntent(
+        baseIntent: Intent,
+        url: String,
+        profileUuid: String,
+        contextId: String?,
+        token: String,
+        installStartUrl: String?,
+        components: Components?,
+    ): Boolean {
+        val requestedContextId = contextId.orEmpty()
+        val requestedInstallStartUrl = installStartUrl ?: url
+
+        val taskToken = baseIntent.getStringExtra(PwaConstants.EXTRA_PWA_TOKEN)
+        if (!taskToken.isNullOrEmpty()) {
+            return taskToken == token &&
+                baseIntent.getStringExtra(PwaConstants.EXTRA_PWA_PROFILE_UUID) == profileUuid &&
+                baseIntent.getStringExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID).orEmpty() == requestedContextId &&
+                baseIntent.getStringExtra(PwaConstants.EXTRA_PWA_INSTALL_START_URL) == requestedInstallStartUrl
+        }
+
+        val taskManifestUrl = baseIntent.getStringExtra(ExternalAppBrowserActivity.EXTRA_WEB_APP_MANIFEST_URL)
+        if (taskManifestUrl != requestedInstallStartUrl && taskManifestUrl != url) {
+            return false
+        }
+
+        val sessionId = baseIntent.getStringExtra(ExternalAppBrowserActivity.EXTRA_CUSTOM_TAB_SESSION_ID)
+            ?: return false
+        val customTab = components?.core?.store?.state?.findCustomTab(sessionId) ?: return false
+        val appType = customTab.config.externalAppType
+        val isPwa = appType == ExternalAppType.PROGRESSIVE_WEB_APP ||
+            appType == ExternalAppType.TRUSTED_WEB_ACTIVITY
+        if (!isPwa) {
+            return false
+        }
+
+        val manifestStartUrl = customTab.content.webAppManifest?.startUrl
+        val launchUrl = manifestStartUrl ?: taskManifestUrl ?: customTab.content.url
+        return customTab.contextId.orEmpty() == requestedContextId &&
+            (launchUrl == requestedInstallStartUrl || launchUrl == url)
     }
 
     /**

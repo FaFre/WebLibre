@@ -45,11 +45,21 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
             context: Context,
             customTabSessionId: String,
             webAppManifestUrl: String? = null,
+            pwaProfileUuid: String? = null,
+            pwaContextId: String? = null,
+            pwaToken: String? = null,
+            pwaInstallStartUrl: String? = null,
         ): Intent {
             return Intent(context, ExternalAppBrowserActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
                 putExtra(EXTRA_CUSTOM_TAB_SESSION_ID, customTabSessionId)
                 webAppManifestUrl?.let { putExtra(EXTRA_WEB_APP_MANIFEST_URL, it) }
+                pwaProfileUuid?.let { putExtra(PwaConstants.EXTRA_PWA_PROFILE_UUID, it) }
+                pwaContextId?.let { putExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID, it) }
+                pwaToken?.let { putExtra(PwaConstants.EXTRA_PWA_TOKEN, it) }
+                pwaInstallStartUrl?.let {
+                    putExtra(PwaConstants.EXTRA_PWA_INSTALL_START_URL, it)
+                }
             }
         }
     }
