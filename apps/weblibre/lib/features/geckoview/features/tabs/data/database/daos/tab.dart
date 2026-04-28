@@ -525,12 +525,13 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     );
   }
 
-  Future<List<String>> getUnassignedTabsOlderThan(DateTime threshold) {
+  Future<List<String>> getUnassignedRegularTabsOlderThan(DateTime threshold) {
     final query = selectOnly(db.tab)
       ..addColumns([db.tab.id])
       ..where(
         db.tab.containerId.isNull() &
-            db.tab.timestamp.isSmallerThanValue(threshold),
+            db.tab.timestamp.isSmallerThanValue(threshold) &
+            db.tab.tabMode.equalsValue(TabModeDbValue.regular),
       );
 
     return query.map((row) => row.read(db.tab.id)!).get();

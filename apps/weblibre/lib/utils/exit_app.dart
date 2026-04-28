@@ -30,11 +30,12 @@ import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 Future<void> exitApp(ProviderContainer container) async {
   logger.i('Preparing exit');
 
-  // 1. Close private/isolated tabs (clears browsing data for those contexts)
+  // 1. Close private tabs (clears browsing data for private contexts).
+  //    Isolated tabs are persistent and should survive app exit.
   try {
     await container
         .read(tabDataRepositoryProvider.notifier)
-        .closeAllTabs(includeRegular: false);
+        .closeAllTabs(includeRegular: false, includeIsolated: false);
     logger.i('Private tabs closed');
   } catch (e, st) {
     logger.e('Failed to close tabs', error: e, stackTrace: st);

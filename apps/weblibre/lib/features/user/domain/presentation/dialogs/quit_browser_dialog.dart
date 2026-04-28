@@ -30,7 +30,7 @@ Future<bool?> showQuitBrowserDialog(BuildContext context) {
         icon: const Icon(Icons.warning),
         title: const Text('Quit Browser'),
         content: const Text(
-          'This will properly shutdown the browser and clear private tabs',
+          'This will properly shutdown the browser and clear private tab data',
         ),
         actions: <Widget>[
           TextButton(

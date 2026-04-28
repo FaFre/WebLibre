@@ -277,7 +277,7 @@ class TabDataRepository extends _$TabDataRepository {
     final tabIds = await ref
         .read(tabDatabaseProvider)
         .tabDao
-        .getUnassignedTabsOlderThan(threshold);
+        .getUnassignedRegularTabsOlderThan(threshold);
 
     if (tabIds.isNotEmpty) {
       await ref.read(tabRepositoryProvider.notifier).closeTabs(tabIds);

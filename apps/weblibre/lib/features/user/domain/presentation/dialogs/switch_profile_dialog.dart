@@ -33,7 +33,7 @@ Future<bool?> showSwitchProfileDialog(
       icon: const Icon(Icons.warning),
       title: const Text('Switch User'),
       content: Text(
-        "Switching to User '$profileName' will require a restart of the Browser.",
+        "Switching to User '$profileName' will require a restart of the Browser.\n\nPrivate tab data will be cleared on restart.",
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       actions: [
