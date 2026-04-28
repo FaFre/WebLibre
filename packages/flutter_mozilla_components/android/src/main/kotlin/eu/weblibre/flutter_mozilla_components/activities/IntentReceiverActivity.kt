@@ -7,7 +7,7 @@
 package eu.weblibre.flutter_mozilla_components.activities
 
 import android.app.Activity
-import android.app.AlertDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ShortcutManager
@@ -421,7 +421,7 @@ class IntentReceiverActivity : Activity() {
             "The original profile's app state and saved data will not be used.\n\n" +
             "Do you want to proceed anyway?"
 
-        AlertDialog.Builder(this)
+        MaterialAlertDialogBuilder(this)
             .setTitle("Profile Mismatch")
             .setMessage(message)
             .setPositiveButton("Open in Current Profile") { _, _ ->
