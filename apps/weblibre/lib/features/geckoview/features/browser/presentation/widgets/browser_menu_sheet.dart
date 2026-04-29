@@ -2043,6 +2043,10 @@ class _ProfileCard extends HookConsumerWidget {
               await exitApp(ref.container);
             }
           },
+          onLongPress: () async {
+            Navigator.pop(context);
+            await exitApp(ref.container);
+          },
         ),
       ],
     );
