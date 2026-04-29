@@ -527,6 +527,9 @@ class _PageActionsCard extends HookConsumerWidget {
 
         // Add to Home Screen (conditional)
         _AddToHomeScreenTile(selectedTabId: selectedTabId),
+
+        // Open in App (conditional)
+        _OpenInAppTile(selectedTabId: selectedTabId),
       ],
     );
   }
@@ -1339,9 +1342,6 @@ class _ShareExpansion extends HookConsumerWidget {
             },
           ),
 
-          // Open in App (conditional)
-          _OpenInAppSubTile(selectedTabId: selectedTabId),
-
           // Share Screenshot
           _buildSubTile(
             'Share Screenshot',
@@ -1415,12 +1415,12 @@ class _ShareExpansion extends HookConsumerWidget {
   }
 }
 
-class _OpenInAppSubTile extends HookConsumerWidget {
+class _OpenInAppTile extends HookConsumerWidget {
   final String selectedTabId;
 
   static final _service = GeckoAppLinksService();
 
-  const _OpenInAppSubTile({required this.selectedTabId});
+  const _OpenInAppTile({required this.selectedTabId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1433,14 +1433,19 @@ class _OpenInAppSubTile extends HookConsumerWidget {
 
     if (hasExternalApp.data != true) return const SizedBox.shrink();
 
-    return _buildSubTile(
-      'Open in App',
-      icon: Icons.open_in_new,
-      onTap: () async {
-        if (url == null) return;
-        final success = await _service.openAppLink(url);
-        if (success && context.mounted) Navigator.pop(context);
-      },
+    return Column(
+      children: [
+        _buildDivider(),
+        ListTile(
+          leading: const Icon(Icons.open_in_new),
+          title: const Text('Open in App'),
+          onTap: () async {
+            if (url == null) return;
+            final success = await _service.openAppLink(url);
+            if (success && context.mounted) Navigator.pop(context);
+          },
+        ),
+      ],
     );
   }
 }
