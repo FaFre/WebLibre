@@ -186,7 +186,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
         : TabsCountButton(
             selectedTabId: scope.selectedTabId,
             displayedSheet: scope.displayedSheet,
-            showLongPressMenu: false,
+            showLongPressMenu: true,
           ),
   ),
   ToolbarButtonDefinition(
