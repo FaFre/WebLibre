@@ -26,6 +26,7 @@ import mozilla.components.feature.downloads.manager.FetchDownloadManager
 import mozilla.components.feature.prompts.PromptFeature
 import mozilla.components.support.base.feature.UserInteractionHandler
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
+import mozilla.components.support.utils.DefaultDownloadFileUtils
 
 /**
  * Provides shared functionality to fragments for add-on popups and settings.
@@ -71,6 +72,12 @@ abstract class AddonPopupBaseFragment : Fragment(), EngineSession.Observer, User
                     useCases = components.useCases.downloadsUseCases,
                     fragmentManager = childFragmentManager,
                     tabId = it.id,
+                    downloadFileUtils = DefaultDownloadFileUtils(
+                        context = components.profileApplicationContext,
+                        downloadLocation = {
+                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+                        },
+                    ),
                     downloadManager = FetchDownloadManager(
                         requireContext().applicationContext,
                         components.core.store,

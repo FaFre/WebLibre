@@ -12,6 +12,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -64,6 +65,7 @@ import mozilla.components.support.base.log.logger.Logger
 import mozilla.components.support.ktx.android.view.enterImmersiveMode
 import mozilla.components.support.ktx.android.view.exitImmersiveMode
 import mozilla.components.support.locale.ActivityContextWrapper
+import mozilla.components.support.utils.DefaultDownloadFileUtils
 import mozilla.components.support.webextensions.WebExtensionPopupObserver
 
 /**
@@ -299,6 +301,12 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     onDownloadStopped = { download, id, status ->
                         Logger.debug("Download done. ID#$id $download with status $status")
                     },
+                    downloadFileUtils = DefaultDownloadFileUtils(
+                        context = components.profileApplicationContext,
+                        downloadLocation = {
+                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+                        },
+                    ),
                     downloadManager = FetchDownloadManager(
                         components.profileApplicationContext,
                         components.core.store,

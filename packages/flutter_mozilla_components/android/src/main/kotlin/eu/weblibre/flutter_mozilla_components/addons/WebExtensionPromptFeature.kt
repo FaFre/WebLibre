@@ -322,7 +322,7 @@ class WebExtensionPromptFeature(
             }
 
             is WebExtensionInstallException.SoftBlocked -> {
-                context.getString(MozComp.string.mozac_feature_addons_soft_blocked_1, addonName)
+                context.getString(MozComp.string.mozac_feature_addons_soft_blocked_2, addonName)
             }
 
             is WebExtensionInstallException.UserCancelled -> {

@@ -8,6 +8,7 @@ package eu.weblibre.flutter_mozilla_components
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Environment
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.PopupWindow
 import androidx.annotation.CallSuper
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.materialswitch.MaterialSwitch
@@ -88,10 +90,16 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
             ContextMenuCandidate.createSaveImageCandidate(
                 requireContext(),
                 components.useCases.contextMenuUseCases,
+                downloadsLocation = {
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+                },
             ),
             ContextMenuCandidate.createSaveVideoAudioCandidate(
                 requireContext(),
                 components.useCases.contextMenuUseCases,
+                downloadsLocation = {
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+                },
             ),
             ContextMenuCandidate.createCopyImageLocationCandidate(requireContext(), view),
         )
@@ -330,6 +338,7 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
                     customTabsStore = components.core.customTabsStore,
                     tabId = sessionId,
                     manifest = manifest,
+                    scope = viewLifecycleOwner.lifecycleScope,
                 ) { toolbarVisible ->
                     Logger.debug("Custom tab toolbar visibility: $toolbarVisible")
                 },

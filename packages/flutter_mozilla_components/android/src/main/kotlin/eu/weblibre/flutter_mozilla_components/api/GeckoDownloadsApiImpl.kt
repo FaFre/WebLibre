@@ -58,7 +58,6 @@ class GeckoDownloadsApiImpl : GeckoDownloadsApi {
             currentBytesCopied = currentBytesCopied ?: 0L,
             status = status?.toMozillaStatus() ?: mozilla.components.browser.state.state.content.DownloadState.Status.INITIATED,
             userAgent = userAgent,
-            destinationDirectory = destinationDirectory ?: Environment.DIRECTORY_DOWNLOADS,
             directoryPath = directoryPath ?: Environment.getExternalStoragePublicDirectory(
                 destinationDirectory ?: Environment.DIRECTORY_DOWNLOADS
             ).path,

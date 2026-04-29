@@ -14,6 +14,8 @@ import mozilla.components.feature.downloads.DefaultPackageNameProvider
 import mozilla.components.feature.downloads.DownloadEstimator
 import mozilla.components.feature.downloads.FileSizeFormatter
 import mozilla.components.feature.downloads.PackageNameProvider
+import mozilla.components.feature.downloads.filewriter.DefaultDownloadFileWriter
+import mozilla.components.feature.downloads.filewriter.DownloadFileWriter
 import mozilla.components.support.base.android.NotificationsDelegate
 import mozilla.components.support.utils.DefaultDownloadFileUtils
 import mozilla.components.support.utils.DownloadFileUtils
@@ -39,6 +41,12 @@ class DownloadService : AbstractFetchDownloadService() {
             downloadLocation = {
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
             },
+        )
+    }
+    override val downloadFileWriter: DownloadFileWriter by lazy {
+        DefaultDownloadFileWriter(
+            context = applicationContext,
+            downloadFileUtils = downloadFileUtils,
         )
     }
 }

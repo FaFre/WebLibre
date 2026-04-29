@@ -5,6 +5,7 @@
 package eu.weblibre.flutter_mozilla_components.components
 
 import android.content.Context
+import android.os.Environment
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.Engine
 import mozilla.components.feature.app.links.AppLinksUseCases
@@ -17,6 +18,7 @@ import mozilla.components.feature.pwa.WebAppShortcutManager
 import mozilla.components.feature.pwa.WebAppUseCases
 import mozilla.components.feature.tabs.CustomTabsUseCases
 import mozilla.components.feature.tabs.TabsUseCases
+import mozilla.components.support.utils.DefaultDownloadFileUtils
 
 /**
  * Component group for all use cases. Use cases are provided by feature
@@ -46,7 +48,17 @@ class UseCases(
     /**
      * Use cases related to the downloads feature.
      */
-    val downloadsUseCases: DownloadsUseCases by lazy { DownloadsUseCases(store, context) }
+    val downloadsUseCases: DownloadsUseCases by lazy {
+        DownloadsUseCases(
+            store = store,
+            downloadFileUtils = DefaultDownloadFileUtils(
+                context = context,
+                downloadLocation = {
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+                },
+            ),
+        )
+    }
 
     /**
      * Use cases related to the context menu feature.

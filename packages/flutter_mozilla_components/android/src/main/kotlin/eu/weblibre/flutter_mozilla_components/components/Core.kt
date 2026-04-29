@@ -8,6 +8,7 @@ package eu.weblibre.flutter_mozilla_components.components
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Environment
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import eu.weblibre.flutter_mozilla_components.Components
@@ -72,6 +73,7 @@ import mozilla.components.support.base.worker.Frequency
 import org.mozilla.geckoview.GeckoRuntime
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.Job
+import mozilla.components.support.utils.DefaultDownloadFileUtils
 import java.util.concurrent.TimeUnit
 
 private const val AMO_COLLECTION_MAX_CACHE_AGE = 24 * 60L
@@ -205,7 +207,17 @@ class Core(
             middleware = listOf(
                 HistoryMetadataMiddleware(historyMetadataService),
                 FlutterEventMiddleware(flutterEvents),
-                DownloadMiddleware(context, DownloadService::class.java, { false }),
+                DownloadMiddleware(
+                    applicationContext = context,
+                    downloadServiceClass = DownloadService::class.java,
+                    deleteFileFromStorage = { false },
+                    downloadFileUtils = DefaultDownloadFileUtils(
+                        context = context,
+                        downloadLocation = {
+                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+                        },
+                    ),
+                ),
                 ThumbnailsMiddleware(thumbnailStorage),
                 ReaderViewMiddleware(),
                 UndoMiddleware(),
