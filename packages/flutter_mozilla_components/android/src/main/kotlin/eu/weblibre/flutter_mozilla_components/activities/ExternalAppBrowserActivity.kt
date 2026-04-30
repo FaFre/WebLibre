@@ -16,6 +16,7 @@ import androidx.core.view.WindowCompat
 import eu.weblibre.flutter_mozilla_components.ExternalAppBrowserFragment
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.PwaConstants
+import eu.weblibre.flutter_mozilla_components.PwaSessionCreator
 import eu.weblibre.flutter_mozilla_components.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -66,6 +67,7 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
 
     private val logger = Logger("ExternalAppBrowserActivity")
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var isRecoveringPwaSession = false
 
     private val customTabSessionId: String?
         get() = intent?.getStringExtra(EXTRA_CUSTOM_TAB_SESSION_ID)
@@ -85,16 +87,18 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
             finishAndRemoveTask()
         }
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        setContentView(R.layout.activity_external_app_browser)
+
         val sessionId = customTabSessionId
         if (sessionId == null) {
             Log.e(TAG, "No custom tab session ID provided")
             logger.error("No custom tab session ID provided, finishing.")
-            fallbackToMainActivity()
+            if (!recoverPwaSession(null, "missing session ID")) {
+                fallbackToMainActivity()
+            }
             return
         }
-
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        setContentView(R.layout.activity_external_app_browser)
 
         val components = GlobalComponents.components
         if (components == null) {
@@ -145,7 +149,9 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
         if (components.core.store.state.findCustomTab(sessionId) == null) {
             Log.e(TAG, "Custom tab session $sessionId not found in store")
             logger.error("Custom tab session $sessionId not found in store, finishing.")
-            fallbackToMainActivity()
+            if (!recoverPwaSession(sessionId, "session not found in store")) {
+                fallbackToMainActivity()
+            }
             return
         }
 
@@ -168,8 +174,59 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
         if (components.core.store.state.findCustomTab(sessionId) == null) {
             Log.w(TAG, "Custom tab session $sessionId gone on resume")
             logger.debug("Custom tab session $sessionId gone, finishing activity.")
-            fallbackToMainActivity()
+            if (!recoverPwaSession(sessionId, "session gone on resume")) {
+                fallbackToMainActivity()
+            }
         }
+    }
+
+    private fun recoverPwaSession(missingSessionId: String?, reason: String): Boolean {
+        if (isRecoveringPwaSession) {
+            return true
+        }
+
+        val launchUrl = webAppManifestUrl
+            ?: intent?.getStringExtra(PwaConstants.EXTRA_PWA_INSTALL_START_URL)
+            ?: return false
+
+        val isPwaTask = webAppManifestUrl != null ||
+            intent?.hasExtra(PwaConstants.EXTRA_PWA_PROFILE_UUID) == true
+        if (!isPwaTask) {
+            return false
+        }
+
+        val contextId = intent?.getStringExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID)
+        isRecoveringPwaSession = true
+        Log.w(TAG, "Recovering PWA session for $launchUrl: $reason")
+
+        coroutineScope.launch {
+            try {
+                val sessionId = PwaSessionCreator.create(launchUrl, contextId)
+                Log.d(
+                    TAG,
+                    "Recovered PWA session: old=$missingSessionId, new=$sessionId, url=$launchUrl",
+                )
+
+                intent.putExtra(EXTRA_CUSTOM_TAB_SESSION_ID, sessionId)
+                if (webAppManifestUrl == null) {
+                    intent.putExtra(EXTRA_WEB_APP_MANIFEST_URL, launchUrl)
+                }
+
+                if (!isFinishing && !isDestroyed) {
+                    showFragment(sessionId)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to recover PWA session", e)
+                logger.error("Failed to recover PWA session, removing stale task.", e)
+                if (!isFinishing && !isDestroyed) {
+                    finishAndRemoveTask()
+                }
+            } finally {
+                isRecoveringPwaSession = false
+            }
+        }
+
+        return true
     }
 
     private fun fallbackToMainActivity() {

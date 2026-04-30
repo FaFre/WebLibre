@@ -19,6 +19,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import eu.weblibre.flutter_mozilla_components.Components
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.PwaConstants
+import eu.weblibre.flutter_mozilla_components.PwaSessionCreator
 import eu.weblibre.flutter_mozilla_components.gatekeeper.IntentBlockNotifier
 import eu.weblibre.flutter_mozilla_components.gatekeeper.IntentGatekeeperPreferences
 import kotlinx.coroutines.CoroutineScope
@@ -26,7 +27,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import mozilla.components.browser.state.selector.findCustomTab
 import mozilla.components.feature.customtabs.CustomTabIntentProcessor
 import mozilla.components.feature.intent.ext.getSessionId
@@ -475,23 +475,17 @@ class IntentReceiverActivity : Activity() {
             return
         }
 
-        val components = GlobalComponents.components
-            ?: run {
-                Log.e(TAG, "Components not available for PWA launch")
-                handleRegularIntent(intent)
-                return
-            }
+        if (GlobalComponents.components == null) {
+            Log.e(TAG, "Components not available for PWA launch")
+            handleRegularIntent(intent)
+            return
+        }
 
         coroutineScope.launch {
             try {
-                val manifest = withContext(Dispatchers.IO) {
-                    components.core.webAppManifestStorage.loadManifest(url)
-                }
-
-                val sessionId = createPwaSession(
+                val sessionId = PwaSessionCreator.create(
                     url = url,
                     contextId = contextId,
-                    manifest = manifest
                 )
 
                 Log.d(TAG, "Created PWA session: contextId=$contextId, sessionId=$sessionId")
@@ -595,40 +589,6 @@ class IntentReceiverActivity : Activity() {
         val launchUrl = manifestStartUrl ?: taskManifestUrl ?: customTab.content.url
         return customTab.contextId.orEmpty() == requestedContextId &&
             (launchUrl == requestedInstallStartUrl || launchUrl == url)
-    }
-
-    /**
-     * Creates a custom tab session for a PWA with the specified context ID.
-     */
-    private fun createPwaSession(
-        url: String,
-        contextId: String?,
-        manifest: mozilla.components.concept.engine.manifest.WebAppManifest?
-    ): String {
-        val components = GlobalComponents.components
-            ?: throw IllegalStateException("Components not initialized")
-
-        val customTabConfig = mozilla.components.browser.state.state.CustomTabConfig(
-            externalAppType = mozilla.components.browser.state.state.ExternalAppType.PROGRESSIVE_WEB_APP
-        )
-
-        val tab = mozilla.components.browser.state.state.createCustomTab(
-            url = url,
-            contextId = contextId,
-            config = customTabConfig,
-            webAppManifest = manifest,
-            source = mozilla.components.browser.state.state.SessionState.Source.Internal.CustomTab,
-            private = false
-        )
-
-        components.core.store.dispatch(
-            mozilla.components.browser.state.action.CustomTabListAction.AddCustomTabAction(tab)
-        )
-
-        val loadUrlFlags = mozilla.components.concept.engine.EngineSession.LoadUrlFlags.external()
-        components.useCases.sessionUseCases.loadUrl(url, tab.id, loadUrlFlags)
-
-        return tab.id
     }
 
     /**

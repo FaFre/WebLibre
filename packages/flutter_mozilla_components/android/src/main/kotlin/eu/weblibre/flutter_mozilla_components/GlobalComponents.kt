@@ -163,7 +163,9 @@ object GlobalComponents {
 
         val previousComponents = _components
         val previousMode = currentMode
-        val previousCustomTabs = if (previousMode == ComponentsMode.EXTERNAL) {
+        val isSameProfile = previousComponents?.profileApplicationContext?.relativePath ==
+            applicationContext.relativePath
+        val previousCustomTabs = if (isSameProfile) {
             previousComponents?.core?.store?.state?.customTabs.orEmpty()
         } else {
             emptyList()
