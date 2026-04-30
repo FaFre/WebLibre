@@ -25,6 +25,8 @@ class GeckoBrowserService {
     String? fxaServerOverride,
     String? syncTokenServerOverride, [
     GeckoEngineSettings? startupSettings,
+    String? startupUBlockFilterListsPref,
+    bool clearStartupUBlockFilterListsPref = false,
   ]) {
     return _api.initialize(
       profileFolder,
@@ -34,6 +36,8 @@ class GeckoBrowserService {
       fxaServerOverride,
       syncTokenServerOverride,
       startupSettings,
+      startupUBlockFilterListsPref,
+      clearStartupUBlockFilterListsPref,
     );
   }
 

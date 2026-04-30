@@ -25,6 +25,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/features/user/data/models/ublock_filter_list_settings.dart';
 import 'package:weblibre/features/user/domain/entities/fingerprint_overrides.dart';
 
 part 'engine_settings.g.dart';
@@ -133,6 +134,12 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   @JsonKey(fromJson: _addonCollectionFromJson, toJson: _addonCollectionToJson)
   final AddonCollection? addonCollection;
 
+  @JsonKey(
+    fromJson: _ublockFilterListSettingsFromJson,
+    toJson: _ublockFilterListSettingsToJson,
+  )
+  final UBlockFilterListSettings ublockFilterListSettings;
+
   final DohSettingsMode dohSettingsMode;
   final String dohProviderUrl;
   final String dohDefaultProviderUrl;
@@ -179,6 +186,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required this.queryParameterStripping,
     required this.bounceTrackingProtectionMode,
     required this.addonCollection,
+    required this.ublockFilterListSettings,
     required this.dohSettingsMode,
     required this.dohProviderUrl,
     required this.dohDefaultProviderUrl,
@@ -232,6 +240,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     super.userAgent,
     bool? enterpriseRootsEnabled,
     this.addonCollection,
+    UBlockFilterListSettings? ublockFilterListSettings,
     DohSettingsMode? dohSettingsMode,
     String? dohProviderUrl,
     String? dohDefaultProviderUrl,
@@ -267,7 +276,9 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     super.lnaBlocking,
     bool? lnaBlockTrackers,
     bool? lnaEnabled,
-  }) : queryParameterStripping =
+  }) : ublockFilterListSettings =
+           ublockFilterListSettings ?? UBlockFilterListSettings(),
+       queryParameterStripping =
            queryParameterStripping ?? QueryParameterStripping.enabled,
        bounceTrackingProtectionMode =
            bounceTrackingProtectionMode ?? BounceTrackingProtectionMode.enabled,
@@ -341,6 +352,20 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   static String? _addonCollectionToJson(AddonCollection? collection) =>
       collection.mapNotNull((collection) => jsonEncode(collection.encode()));
 
+  static UBlockFilterListSettings _ublockFilterListSettingsFromJson(
+    String? json,
+  ) =>
+      json.mapNotNull(
+            (encoded) => UBlockFilterListSettings.fromJson(
+              jsonDecode(encoded) as Map<String, dynamic>,
+            ),
+          ) ??
+      UBlockFilterListSettings();
+
+  static String _ublockFilterListSettingsToJson(
+    UBlockFilterListSettings settings,
+  ) => jsonEncode(settings.toJson());
+
   factory EngineSettings.fromJson(Map<String, dynamic> json) =>
       _$EngineSettingsFromJson(json);
 
@@ -363,6 +388,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     queryParameterStripping,
     bounceTrackingProtectionMode,
     addonCollection,
+    ublockFilterListSettings,
     dohSettingsMode,
     dohProviderUrl,
     dohDefaultProviderUrl,

@@ -35,6 +35,7 @@ assets/bangs/
 assets/preferences/builtin-bridges.json
 assets/preferences/url-shortener-list.json
 assets/preferences/url_cleaner_data.minify.json
+/assets/ublock/
 
 # Android related
 **/android/**/gradle-wrapper.jar

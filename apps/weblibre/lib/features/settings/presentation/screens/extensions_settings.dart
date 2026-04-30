@@ -65,25 +65,18 @@ class _ManageExtensionsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomListTile(
-      title: 'Manage Extensions',
+    return ListTile(
+      leading: Icon(
+        MdiIcons.puzzleEdit,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+      title: const Text('Manage Extensions'),
       subtitle:
-          'Browse installed, disabled, available, and unsupported extensions',
-      prefix: Padding(
-        padding: const EdgeInsets.only(right: 16.0),
-        child: Icon(
-          MdiIcons.puzzleEdit,
-          size: 24,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
-      ),
-      suffix: FilledButton.icon(
-        onPressed: () async {
-          await const AddonManagerRoute().push<void>(context);
-        },
-        icon: const Icon(Icons.open_in_new),
-        label: const Text('Open'),
-      ),
+          const Text('Browse installed, disabled, available, and unsupported extensions'),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () async {
+        await const AddonManagerRoute().push<void>(context);
+      },
     );
   }
 }
@@ -93,24 +86,17 @@ class _AddonCollectionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomListTile(
-      title: 'Custom Collection',
-      subtitle: 'Use a custom Mozilla addon collection',
-      prefix: Padding(
-        padding: const EdgeInsets.only(right: 16.0),
-        child: Icon(
-          MdiIcons.folderMultiple,
-          size: 24,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
+    return ListTile(
+      leading: Icon(
+        MdiIcons.folderMultiple,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
-      suffix: FilledButton.icon(
-        onPressed: () async {
-          await AddonCollectionRoute().push(context);
-        },
-        icon: const Icon(Icons.settings),
-        label: const Text('Configure'),
-      ),
+      title: const Text('Custom Collection'),
+      subtitle: const Text('Use a custom Mozilla addon collection'),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () async {
+        await AddonCollectionRoute().push(context);
+      },
     );
   }
 }

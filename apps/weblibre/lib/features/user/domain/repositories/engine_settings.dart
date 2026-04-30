@@ -100,6 +100,10 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
         DriftSqlType.string,
         db.typeMapping,
       ),
+      'ublockFilterListSettings': settings['ublockFilterListSettings']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
       'dohSettingsMode': settings['dohSettingsMode']?.readAs(
         DriftSqlType.string,
         db.typeMapping,

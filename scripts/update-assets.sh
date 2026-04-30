@@ -93,9 +93,20 @@ update_url_shorteners() {
         "$dir/url-shortener-list.json"
 }
 
+update_ublock() {
+  local dir="$REPO_ROOT/apps/weblibre/assets/ublock"
+  log "Updating uBlock Origin assets..."
+
+  fetch "https://raw.githubusercontent.com/gorhill/uBlock/master/assets/assets.json" \
+        "$dir/assets.json"
+
+  date -u --iso-8601=seconds > "$dir/last_sync.txt"
+  log "uBlock assets sync completed at $(cat "$dir/last_sync.txt")"
+}
+
 # ── main ─────────────────────────────────────────────────────────────────────
 
-ALL_GROUPS=(bangs bridges url-cleaner url-shorteners)
+ALL_GROUPS=(bangs bridges url-cleaner url-shorteners ublock)
 SELECTED_GROUPS=()
 
 while [[ $# -gt 0 ]]; do
@@ -117,6 +128,7 @@ for group in "${SELECTED_GROUPS[@]}"; do
     bridges)        update_bridges        || ((FAILURES++)) ;;
     url-cleaner)    update_url_cleaner    || ((FAILURES++)) ;;
     url-shorteners) update_url_shorteners || ((FAILURES++)) ;;
+    ublock)         update_ublock         || ((FAILURES++)) ;;
     *) err "Unknown group: $group"; ((FAILURES++)) ;;
   esac
 done

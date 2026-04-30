@@ -1616,6 +1616,11 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       factory: $AddonCollectionRoute._fromState,
     ),
     GoRouteData.$route(
+      path: 'ublock_filter_lists',
+      name: 'UBlockFilterListsRoute',
+      factory: $UBlockFilterListsRoute._fromState,
+    ),
+    GoRouteData.$route(
       path: 'tracking_protection_exceptions',
       name: 'TrackingProtectionExceptionsRoute',
       factory: $TrackingProtectionExceptionsRoute._fromState,
@@ -1998,6 +2003,27 @@ mixin $AddonCollectionRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/addon_collection');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $UBlockFilterListsRoute on GoRouteData {
+  static UBlockFilterListsRoute _fromState(GoRouterState state) =>
+      UBlockFilterListsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/ublock_filter_lists');
 
   @override
   void go(BuildContext context) => context.go(location);

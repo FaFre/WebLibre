@@ -338,6 +338,16 @@ class _ManagementSection extends ConsumerWidget {
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => openAddonSettingsFlow(context, ref, addon),
                 ),
+              if (addon.id == 'uBlock0@raymondhill.net')
+                ListTile(
+                  leading: const Icon(Icons.filter_list),
+                  title: const Text('Filter Lists & Hardenings'),
+                  subtitle: const Text(
+                    'Manage filter lists and apply WebLibre hardenings',
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => UBlockFilterListsRoute().push<void>(context),
+                ),
               ListTile(
                 leading: const Icon(Icons.privacy_tip_outlined),
                 title: const Text('Permissions'),

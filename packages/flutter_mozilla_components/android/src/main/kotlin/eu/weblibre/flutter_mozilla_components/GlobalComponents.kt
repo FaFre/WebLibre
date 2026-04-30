@@ -36,7 +36,9 @@ import mozilla.components.browser.state.action.RestoreCompleteAction
 import mozilla.components.browser.state.action.TabListAction
 import mozilla.components.browser.state.action.CustomTabListAction
 import mozilla.components.browser.state.selector.findCustomTab
+import mozilla.components.ExperimentalAndroidComponentsApi
 import mozilla.components.concept.engine.selection.SelectionActionDelegate
+import mozilla.components.concept.engine.preferences.Branch
 import mozilla.components.feature.addons.update.GlobalAddonDependencyProvider
 import mozilla.components.support.base.facts.Facts
 import mozilla.components.support.base.facts.processor.LogFactProcessor
@@ -50,6 +52,7 @@ import java.util.concurrent.TimeUnit
 private const val HISTORY_METADATA_MAX_AGE_IN_MS = 14L * 24 * 60 * 60 * 1000 // 14 days
 private const val DEFAULT_QUERY_PARAMETER_STRIPPING_STRIP_LIST =
     "__hsfp __hssc __hstc __s _bhlid _branch_match_id _branch_referrer _gl _hsenc _kx _openstat at_recipient_id at_recipient_list bbeml bsft_clkid bsft_uid dclid et_rid fb_action_ids fb_comment_id fbclid gbraid gclid guce_referrer guce_referrer_sig hsCtaTracking igshid irclickid mc_eid mkt_tok ml_subscriber ml_subscriber_hash msclkid mtm_cid oft_c oft_ck oft_d oft_id oft_ids oft_k oft_lk oft_sk oly_anon_id oly_enc_id pk_cid rb_clickid s_cid sc_customer sc_eh sc_uid sms_click sms_source sms_uph srsltid ss_email_id syclid ttclid twclid unicorn_click_id vero_conv vero_id vgo_ee wbraid wickedid yclid ymclid ysclid"
+private const val UBLOCK_FILTER_LISTS_PREF = "browser.weblibre.uBO.filterLists"
     
 object GlobalComponents {
     private var _components: Components? = null
@@ -86,6 +89,10 @@ object GlobalComponents {
 
     // Startup settings for builder-only GeckoRuntimeSettings (fission, process isolation, etc.)
     var startupSettings: GeckoEngineSettings? = null
+
+    // Startup pref written before web extensions initialize.
+    var startupUBlockFilterListsPref: String? = null
+    var clearStartupUBlockFilterListsPref: Boolean = false
 
     fun shouldOpenLinksInApp(isExternalSession: Boolean = false): Boolean {
         return when (engineSettingsApi!!.getAppLinksMode()) {
@@ -140,6 +147,40 @@ object GlobalComponents {
     @DelicateCoroutinesApi
     private fun restoreDownloads(newComponents: Components) = GlobalScope.launch(Dispatchers.Main) {
         newComponents.useCases.downloadsUseCases.restoreDownloads()
+    }
+
+    // Submits the uBO managed-storage pref before web extensions register.
+    // Called from setUp() on the main thread; we do not block awaiting the
+    // ack callback because the engine dispatches it back to the main thread
+    // (which is held by setUp), and waiting would deadlock. The underlying
+    // GeckoView pref store accepts the new value before the callback fires,
+    // so by the time WebExtensionSupport.initialize installs uBO and the
+    // extension reads storage.managed, the pref is already present.
+    @OptIn(ExperimentalAndroidComponentsApi::class)
+    private fun applyStartupUBlockFilterListsPref(newComponents: Components) {
+        if (!clearStartupUBlockFilterListsPref && startupUBlockFilterListsPref == null) {
+            return
+        }
+
+        val onError: (Throwable) -> Unit = {
+            Logger.warn("Failed applying startup uBlock filter list pref", it)
+        }
+
+        if (clearStartupUBlockFilterListsPref) {
+            newComponents.core.engine.clearBrowserUserPref(
+                pref = UBLOCK_FILTER_LISTS_PREF,
+                onSuccess = {},
+                onError = onError,
+            )
+        } else {
+            newComponents.core.engine.setBrowserPref(
+                UBLOCK_FILTER_LISTS_PREF,
+                requireNotNull(startupUBlockFilterListsPref),
+                Branch.USER,
+                onSuccess = {},
+                onError = onError,
+            )
+        }
     }
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -206,6 +247,7 @@ object GlobalComponents {
 
         if (mode == ComponentsMode.FULL) {
             newComponents.core.engine.warmUp()
+            applyStartupUBlockFilterListsPref(newComponents)
         }
 
         fun restorePreviousCustomTabs() {

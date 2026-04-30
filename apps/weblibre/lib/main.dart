@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:background_fetch/background_fetch.dart';
@@ -42,7 +43,9 @@ import 'package:weblibre/core/providers/app_state.dart';
 import 'package:weblibre/core/providers/defaults.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/domain/services/app_initialization.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/services/engine_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
+import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_feed/presentation/controllers/fetch_articles.dart';
@@ -179,6 +182,14 @@ class _MainWidget extends HookConsumerWidget {
       final generalSettings = await ref
           .read(generalSettingsRepositoryProvider.notifier)
           .fetchSettings();
+      final startupUBlockFilterListsPref =
+          engineSettings.ublockFilterListSettings.enabled
+          ? jsonEncode(
+              engineSettings.ublockFilterListSettings.resolveFinalList(),
+            )
+          : null;
+      final clearStartupUBlockFilterListsPref =
+          !engineSettings.ublockFilterListSettings.enabled;
 
       try {
         await GeckoBrowserService().initialize(
@@ -189,6 +200,8 @@ class _MainWidget extends HookConsumerWidget {
           generalSettings.syncServerOverride,
           generalSettings.syncTokenServerOverride,
           engineSettings,
+          startupUBlockFilterListsPref,
+          clearStartupUBlockFilterListsPref,
         );
       } on PlatformException catch (e, s) {
         logger.e(
@@ -204,6 +217,21 @@ class _MainWidget extends HookConsumerWidget {
           stackTrace: s,
         );
         rethrow;
+      }
+
+      // Mirror the startup uBO pref into the fixator so later pref changes are
+      // still observed and enforced after native startup initialization.
+      try {
+        await syncUBlockFilterLists(
+          ref.read(preferenceFixatorProvider.notifier),
+          engineSettings,
+        );
+      } catch (e, s) {
+        logger.w(
+          'Failed to sync uBlock filter list pref at startup',
+          error: e,
+          stackTrace: s,
+        );
       }
 
       await ref.read(appInitializationServiceProvider.notifier).initialize();

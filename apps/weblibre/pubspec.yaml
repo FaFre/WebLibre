@@ -120,6 +120,7 @@ flutter:
     - assets/legal/
     - assets/quotes/
     - assets/small_web/
+    - assets/ublock/
   fonts:
     - family: TorIcons
       fonts:

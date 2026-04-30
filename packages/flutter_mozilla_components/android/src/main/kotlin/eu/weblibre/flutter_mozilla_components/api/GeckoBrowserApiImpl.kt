@@ -180,6 +180,8 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         fxaServerOverride: String?,
         syncTokenServerOverride: String?,
         startupSettings: GeckoEngineSettings?,
+        startupUBlockFilterListsPref: String?,
+        clearStartupUBlockFilterListsPref: Boolean,
     ) {
         synchronized(this) {
             if (!isGeckoInitialized) {
@@ -196,6 +198,9 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
 
                 // Store startup settings before runtime creation
                 GlobalComponents.startupSettings = startupSettings
+                GlobalComponents.startupUBlockFilterListsPref = startupUBlockFilterListsPref
+                GlobalComponents.clearStartupUBlockFilterListsPref =
+                    clearStartupUBlockFilterListsPref
 
                 setupGeckoEngine(
                     profileFolder,

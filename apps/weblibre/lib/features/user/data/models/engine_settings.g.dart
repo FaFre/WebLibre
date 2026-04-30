@@ -53,6 +53,10 @@ abstract class _$EngineSettingsCWProxy {
 
   EngineSettings addonCollection(AddonCollection? addonCollection);
 
+  EngineSettings ublockFilterListSettings(
+    UBlockFilterListSettings ublockFilterListSettings,
+  );
+
   EngineSettings dohSettingsMode(DohSettingsMode dohSettingsMode);
 
   EngineSettings dohProviderUrl(String dohProviderUrl);
@@ -152,6 +156,7 @@ abstract class _$EngineSettingsCWProxy {
     QueryParameterStripping queryParameterStripping,
     BounceTrackingProtectionMode bounceTrackingProtectionMode,
     AddonCollection? addonCollection,
+    UBlockFilterListSettings ublockFilterListSettings,
     DohSettingsMode dohSettingsMode,
     String dohProviderUrl,
     String dohDefaultProviderUrl,
@@ -270,6 +275,11 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
   @override
   EngineSettings addonCollection(AddonCollection? addonCollection) =>
       call(addonCollection: addonCollection);
+
+  @override
+  EngineSettings ublockFilterListSettings(
+    UBlockFilterListSettings ublockFilterListSettings,
+  ) => call(ublockFilterListSettings: ublockFilterListSettings);
 
   @override
   EngineSettings dohSettingsMode(DohSettingsMode dohSettingsMode) =>
@@ -442,6 +452,7 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? queryParameterStripping = const $CopyWithPlaceholder(),
     Object? bounceTrackingProtectionMode = const $CopyWithPlaceholder(),
     Object? addonCollection = const $CopyWithPlaceholder(),
+    Object? ublockFilterListSettings = const $CopyWithPlaceholder(),
     Object? dohSettingsMode = const $CopyWithPlaceholder(),
     Object? dohProviderUrl = const $CopyWithPlaceholder(),
     Object? dohDefaultProviderUrl = const $CopyWithPlaceholder(),
@@ -554,6 +565,12 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.addonCollection
           // ignore: cast_nullable_to_non_nullable
           : addonCollection as AddonCollection?,
+      ublockFilterListSettings:
+          ublockFilterListSettings == const $CopyWithPlaceholder() ||
+              ublockFilterListSettings == null
+          ? _value.ublockFilterListSettings
+          // ignore: cast_nullable_to_non_nullable
+          : ublockFilterListSettings as UBlockFilterListSettings,
       dohSettingsMode:
           dohSettingsMode == const $CopyWithPlaceholder() ||
               dohSettingsMode == null
@@ -777,6 +794,9 @@ EngineSettings _$EngineSettingsFromJson(
   addonCollection: EngineSettings._addonCollectionFromJson(
     json['addonCollection'] as String?,
   ),
+  ublockFilterListSettings: EngineSettings._ublockFilterListSettingsFromJson(
+    json['ublockFilterListSettings'] as String?,
+  ),
   dohSettingsMode: $enumDecodeNullable(
     _$DohSettingsModeEnumMap,
     json['dohSettingsMode'],
@@ -892,6 +912,9 @@ Map<String, dynamic> _$EngineSettingsToJson(
           .bounceTrackingProtectionMode]!,
   'addonCollection': EngineSettings._addonCollectionToJson(
     instance.addonCollection,
+  ),
+  'ublockFilterListSettings': EngineSettings._ublockFilterListSettingsToJson(
+    instance.ublockFilterListSettings,
   ),
   'dohSettingsMode': _$DohSettingsModeEnumMap[instance.dohSettingsMode]!,
   'dohProviderUrl': instance.dohProviderUrl,

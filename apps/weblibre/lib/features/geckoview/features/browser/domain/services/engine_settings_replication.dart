@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:convert';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
@@ -26,6 +28,7 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_settings.dart';
+import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
@@ -33,6 +36,7 @@ part 'engine_settings_replication.g.dart';
 
 const _safeBrowsingMalwarePref = 'browser.safebrowsing.malware.enabled';
 const _safeBrowsingPhishingPref = 'browser.safebrowsing.phishing.enabled';
+const ublockFilterListsPref = 'browser.weblibre.uBO.filterLists';
 
 /// Checks if any Custom ETP setting changed between two EngineSettings instances.
 bool _customEtpSettingsChanged(
@@ -53,6 +57,22 @@ bool _customEtpSettingsChanged(
           current.suspectedFingerprintersScope ||
       previous.allowListBaseline != current.allowListBaseline ||
       previous.allowListConvenience != current.allowListConvenience;
+}
+
+Future<void> syncUBlockFilterLists(
+  PreferenceFixator fixator,
+  EngineSettings settings,
+) async {
+  if (!settings.ublockFilterListSettings.enabled) {
+    await fixator.unregister(ublockFilterListsPref);
+    await GeckoPrefService().resetPrefs([ublockFilterListsPref]);
+    return;
+  }
+
+  await fixator.register(
+    ublockFilterListsPref,
+    jsonEncode(settings.ublockFilterListSettings.resolveFinalList()),
+  );
 }
 
 @Riverpod(keepAlive: true)
@@ -296,6 +316,13 @@ class EngineSettingsReplicationService
             if (previous.value?.lnaEnabled != settings.lnaEnabled) {
               await _service.lnaEnabled(settings.lnaEnabled);
             }
+            if (previous.value?.ublockFilterListSettings !=
+                settings.ublockFilterListSettings) {
+              await syncUBlockFilterLists(
+                ref.read(preferenceFixatorProvider.notifier),
+                settings,
+              );
+            }
           } else {
             await _service.setDefaultSettings(settings);
             await ref
@@ -319,6 +346,10 @@ class EngineSettingsReplicationService
             await ref
                 .read(preferenceFixatorProvider.notifier)
                 .register('intl.accept_languages', settings.locales.join(','));
+            await syncUBlockFilterLists(
+              ref.read(preferenceFixatorProvider.notifier),
+              settings,
+            );
 
             // Initialize unsigned extensions fixator from Gecko pref
             await ref.read(allowUnsignedExtensionsProvider.future);

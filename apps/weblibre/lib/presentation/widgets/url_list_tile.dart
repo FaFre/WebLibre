@@ -27,6 +27,7 @@ class UrlListTile extends StatelessWidget {
   final Widget? leading;
   final Widget? trailing;
   final Color? borderColor;
+  final bool showHttpScheme;
   final VoidCallback? onTap;
 
   const UrlListTile({
@@ -36,6 +37,7 @@ class UrlListTile extends StatelessWidget {
     this.leading,
     this.trailing,
     this.borderColor,
+    this.showHttpScheme = true,
     this.onTap,
   });
 
@@ -90,6 +92,7 @@ class UrlListTile extends StatelessWidget {
                       const SizedBox(height: 3.0),
                       UriBreadcrumb(
                         uri: uri,
+                        showHttpScheme: showHttpScheme,
                         style: textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),

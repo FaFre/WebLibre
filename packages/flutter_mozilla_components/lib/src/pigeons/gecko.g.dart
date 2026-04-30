@@ -6394,6 +6394,8 @@ class GeckoBrowserApi {
     String? fxaServerOverride,
     String? syncTokenServerOverride,
     GeckoEngineSettings? startupSettings,
+    String? startupUBlockFilterListsPref,
+    bool clearStartupUBlockFilterListsPref,
   ) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.flutter_mozilla_components.GeckoBrowserApi.initialize$pigeonVar_messageChannelSuffix';
@@ -6411,6 +6413,8 @@ class GeckoBrowserApi {
           fxaServerOverride,
           syncTokenServerOverride,
           startupSettings,
+          startupUBlockFilterListsPref,
+          clearStartupUBlockFilterListsPref,
         ]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 

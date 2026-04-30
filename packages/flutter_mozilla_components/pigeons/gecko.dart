@@ -1328,6 +1328,13 @@ class AddonCollection {
 @HostApi()
 abstract class GeckoBrowserApi {
   String getGeckoVersion();
+  // [startupUBlockFilterListsPref] is the JSON-encoded value to write to the
+  // managed-storage pref read by uBlock Origin at extension startup. The pref
+  // must be written before the extension registers, so it is plumbed through
+  // initialize rather than set later.
+  // If [clearStartupUBlockFilterListsPref] is true, the pref is cleared and
+  // [startupUBlockFilterListsPref] is ignored. If both are unset/false, the
+  // pref is left untouched.
   void initialize(
     String profileFolder,
     LogLevel logLevel,
@@ -1336,6 +1343,8 @@ abstract class GeckoBrowserApi {
     String? fxaServerOverride,
     String? syncTokenServerOverride,
     GeckoEngineSettings? startupSettings,
+    String? startupUBlockFilterListsPref,
+    bool clearStartupUBlockFilterListsPref,
   );
   bool showNativeFragment();
   void onTrimMemory(int level);

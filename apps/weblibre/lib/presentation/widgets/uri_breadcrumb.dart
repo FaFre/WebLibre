@@ -26,6 +26,7 @@ class UriBreadcrumb extends StatelessWidget {
   final Uri uri;
   final Widget? icon;
   final TextStyle? style;
+  final bool showHttpScheme;
   final void Function()? onTooltipTriggered;
 
   const UriBreadcrumb({
@@ -33,6 +34,7 @@ class UriBreadcrumb extends StatelessWidget {
     required this.uri,
     this.icon,
     this.style,
+    this.showHttpScheme = true,
     this.onTooltipTriggered,
   });
 
@@ -56,6 +58,22 @@ class UriBreadcrumb extends StatelessWidget {
                 children: [
                   ?icon,
                   if (icon != null) const SizedBox(width: 6),
+                  if (!uri.isHttpOrHttps || showHttpScheme) ...[
+                    Text(
+                      uri.scheme,
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.visible,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const Text(
+                      ' › ',
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.visible,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
                   Text(
                     uri.authority,
                     maxLines: 1,

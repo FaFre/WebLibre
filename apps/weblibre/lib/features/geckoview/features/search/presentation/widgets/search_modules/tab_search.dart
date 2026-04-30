@@ -244,7 +244,7 @@ class TabSearch extends HookConsumerWidget {
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
                           )
-                        : UriBreadcrumb(uri: result.url),
+                        : UriBreadcrumb(uri: result.url, showHttpScheme: false),
                     onTap: () async {
                       await ref
                           .read(tabRepositoryProvider.notifier)

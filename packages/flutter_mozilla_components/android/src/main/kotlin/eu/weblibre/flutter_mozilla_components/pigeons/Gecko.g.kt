@@ -6282,7 +6282,7 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoBrowserApi {
   fun getGeckoVersion(): String
-  fun initialize(profileFolder: String, logLevel: LogLevel, contentBlocking: ContentBlocking, addonCollection: AddonCollection?, fxaServerOverride: String?, syncTokenServerOverride: String?, startupSettings: GeckoEngineSettings?)
+  fun initialize(profileFolder: String, logLevel: LogLevel, contentBlocking: ContentBlocking, addonCollection: AddonCollection?, fxaServerOverride: String?, syncTokenServerOverride: String?, startupSettings: GeckoEngineSettings?, startupUBlockFilterListsPref: String?, clearStartupUBlockFilterListsPref: Boolean)
   fun showNativeFragment(): Boolean
   fun onTrimMemory(level: Long)
   fun openInCustomTab(url: String, private: Boolean, contextId: String?)
@@ -6327,8 +6327,10 @@ interface GeckoBrowserApi {
             val fxaServerOverrideArg = args[4] as String?
             val syncTokenServerOverrideArg = args[5] as String?
             val startupSettingsArg = args[6] as GeckoEngineSettings?
+            val startupUBlockFilterListsPrefArg = args[7] as String?
+            val clearStartupUBlockFilterListsPrefArg = args[8] as Boolean
             val wrapped: List<Any?> = try {
-              api.initialize(profileFolderArg, logLevelArg, contentBlockingArg, addonCollectionArg, fxaServerOverrideArg, syncTokenServerOverrideArg, startupSettingsArg)
+              api.initialize(profileFolderArg, logLevelArg, contentBlockingArg, addonCollectionArg, fxaServerOverrideArg, syncTokenServerOverrideArg, startupSettingsArg, startupUBlockFilterListsPrefArg, clearStartupUBlockFilterListsPrefArg)
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)

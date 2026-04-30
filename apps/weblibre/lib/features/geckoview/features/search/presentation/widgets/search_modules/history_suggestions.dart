@@ -112,7 +112,10 @@ class HistorySuggestions extends HookConsumerWidget {
                             ),
                             subtitle:
                                 uri.mapNotNull(
-                                  (uri) => UriBreadcrumb(uri: uri),
+                                  (uri) => UriBreadcrumb(
+                                    uri: uri,
+                                    showHttpScheme: false,
+                                  ),
                                 ) ??
                                 suggestion.description.mapNotNull(
                                   (description) => Text(

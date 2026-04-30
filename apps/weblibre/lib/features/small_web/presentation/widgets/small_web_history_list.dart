@@ -279,6 +279,7 @@ class _HistoryListItem extends ConsumerWidget {
                       const SizedBox(height: 3),
                       UriBreadcrumb(
                         uri: visit.url,
+                        showHttpScheme: false,
                         style: textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),

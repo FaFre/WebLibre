@@ -77,7 +77,10 @@ class BookmarkSearch extends HookConsumerWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    subtitle: UriBreadcrumb(uri: bookmark.url),
+                    subtitle: UriBreadcrumb(
+                      uri: bookmark.url,
+                      showHttpScheme: false,
+                    ),
                     onTap: () => onUriSelected(bookmark.url),
                   );
                 },

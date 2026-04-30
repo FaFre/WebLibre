@@ -546,6 +546,7 @@ class ListTabPreview extends HookConsumerWidget {
                           Expanded(
                             child: UriBreadcrumb(
                               uri: tabState.url,
+                              showHttpScheme: false,
                               style: textTheme.bodySmall?.copyWith(
                                 color: subtitleColor,
                               ),
@@ -636,7 +637,7 @@ class SyncedListTabPreview extends StatelessWidget {
               ),
             ],
           ),
-          UriBreadcrumb(uri: url),
+          UriBreadcrumb(uri: url, showHttpScheme: false),
         ],
       ),
       trailing: const Icon(Icons.open_in_new),

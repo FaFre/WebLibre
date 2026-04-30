@@ -292,24 +292,17 @@ class _ErrorLogsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomListTile(
-      title: 'Error Logs',
-      subtitle: 'View and copy logs for issue reporting',
-      prefix: Padding(
-        padding: const EdgeInsets.only(right: 16.0),
-        child: Icon(
-          Icons.bug_report,
-          size: 24,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
+    return ListTile(
+      leading: Icon(
+        Icons.bug_report,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
-      suffix: FilledButton.icon(
-        onPressed: () async {
-          await ErrorLogsRoute().push(context);
-        },
-        icon: const Icon(Icons.open_in_new),
-        label: const Text('View'),
-      ),
+      title: const Text('Error Logs'),
+      subtitle: const Text('View and copy logs for issue reporting'),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () async {
+        await ErrorLogsRoute().push(context);
+      },
     );
   }
 }

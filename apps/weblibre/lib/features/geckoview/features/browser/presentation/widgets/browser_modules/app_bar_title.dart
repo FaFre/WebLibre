@@ -169,6 +169,7 @@ class CompactAppBarTitleView extends StatelessWidget {
                   Flexible(
                     child: UriBreadcrumb(
                       uri: tabState.url,
+                      showHttpScheme: false,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurface,
                       ),

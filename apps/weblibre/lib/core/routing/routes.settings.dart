@@ -83,6 +83,10 @@ part of 'routes.dart';
       name: 'AddonCollectionRoute',
       path: 'addon_collection',
     ),
+    TypedGoRoute<UBlockFilterListsRoute>(
+      name: 'UBlockFilterListsRoute',
+      path: 'ublock_filter_lists',
+    ),
     TypedGoRoute<TrackingProtectionExceptionsRoute>(
       name: 'TrackingProtectionExceptionsRoute',
       path: 'tracking_protection_exceptions',
@@ -215,6 +219,13 @@ class AddonCollectionRoute extends GoRouteData with $AddonCollectionRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const AddonCollectionScreen();
+  }
+}
+
+class UBlockFilterListsRoute extends GoRouteData with $UBlockFilterListsRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const UBlockFilterListsScreen();
   }
 }
 

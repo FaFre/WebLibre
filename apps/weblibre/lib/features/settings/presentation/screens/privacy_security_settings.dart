@@ -97,6 +97,7 @@ class _TrackingProtectionSection extends StatelessWidget {
         _BounceTrackingProtectionTile(),
         _QueryParameterStrippingSection(),
         _TrackingProtectionExceptionsTile(),
+        _UBlockFilterListsTile(),
       ],
     );
   }
@@ -722,6 +723,27 @@ class _WebEngineHardeningTile extends StatelessWidget {
       trailing: const Icon(Icons.chevron_right),
       onTap: () async {
         await WebEngineHardeningRoute().push(context);
+      },
+    );
+  }
+}
+
+class _UBlockFilterListsTile extends StatelessWidget {
+  const _UBlockFilterListsTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: const Text('uBlock Filter Lists & Hardenings'),
+      subtitle: const Text('Manage filter lists and apply WebLibre hardenings'),
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 8.0,
+        horizontal: 16.0,
+      ),
+      leading: const Icon(Icons.filter_list),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () async {
+        await UBlockFilterListsRoute().push<void>(context);
       },
     );
   }
