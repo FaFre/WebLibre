@@ -85,7 +85,9 @@ class UBlockFilterListSettings with FastEquatable {
     this.externalFilterLists = const [],
   });
 
-  factory UBlockFilterListSettings.managedDefaults(UBlockAssetsRegistry registry) {
+  factory UBlockFilterListSettings.managedDefaults(
+    UBlockAssetsRegistry registry,
+  ) {
     return UBlockFilterListSettings(
       enabled: true,
       enabledStockListTokens: registry.defaultEnabledTokens,

@@ -113,16 +113,16 @@ class IntentGatekeeperDialog extends HookConsumerWidget {
             ),
             const SizedBox(height: 8),
             FilledButton.tonal(
-              onPressed: () => Navigator.of(context).pop(
-                const DialogOutcome(decision: IntentSourcePolicy.allow),
-              ),
+              onPressed: () => Navigator.of(
+                context,
+              ).pop(const DialogOutcome(decision: IntentSourcePolicy.allow)),
               child: const Text('Allow once'),
             ),
             const SizedBox(height: 8),
             OutlinedButton(
-              onPressed: () => Navigator.of(context).pop(
-                const DialogOutcome(decision: IntentSourcePolicy.block),
-              ),
+              onPressed: () => Navigator.of(
+                context,
+              ).pop(const DialogOutcome(decision: IntentSourcePolicy.block)),
               child: const Text('Block once'),
             ),
             const SizedBox(height: 8),

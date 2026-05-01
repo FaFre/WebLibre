@@ -686,8 +686,9 @@ class _AllowNonManifestPwaInstallTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final allowNonManifestPwaInstall = ref.watch(
-      generalSettingsWithDefaultsProvider
-          .select((s) => s.allowNonManifestPwaInstall),
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.allowNonManifestPwaInstall,
+      ),
     );
 
     return SwitchListTile.adaptive(

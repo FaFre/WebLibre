@@ -475,8 +475,8 @@ class _ScreenshotProtectionTile extends HookConsumerWidget {
         await ref
             .read(saveGeneralSettingsControllerProvider.notifier)
             .save(
-              (currentSettings) => currentSettings.copyWith
-                  .screenshotProtectionEnabled(value),
+              (currentSettings) =>
+                  currentSettings.copyWith.screenshotProtectionEnabled(value),
             );
       },
     );

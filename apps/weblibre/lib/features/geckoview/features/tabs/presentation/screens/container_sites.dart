@@ -28,9 +28,7 @@ import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/form_validators.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
-final _wildcardHostRegex = RegExp(
-  r'^\*\.([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,63}$',
-);
+final _wildcardHostRegex = RegExp(r'^\*\.([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,63}$');
 
 /// Parses a user-entered site-assignment value. Accepts:
 /// - `example.com`, `https://example.com/path` → exact origin entry
@@ -44,8 +42,10 @@ Uri? _parseSiteAssignmentInput(String? input) {
   // Strip scheme for wildcard detection.
   var rest = trimmed;
   var scheme = 'https';
-  final schemeMatch = RegExp(r'^(https?):\/\/', caseSensitive: false)
-      .firstMatch(trimmed);
+  final schemeMatch = RegExp(
+    r'^(https?):\/\/',
+    caseSensitive: false,
+  ).firstMatch(trimmed);
   if (schemeMatch != null) {
     scheme = schemeMatch.group(1)!.toLowerCase();
     rest = trimmed.substring(schemeMatch.end);
@@ -110,8 +110,7 @@ class ContainerSitesScreen extends HookConsumerWidget {
                     decoration: InputDecoration(
                       label: const Text('Add Site'),
                       hintText: 'example.com or *.example.com',
-                      helperText:
-                          'Use *.example.com to match all subdomains',
+                      helperText: 'Use *.example.com to match all subdomains',
                       floatingLabelBehavior: FloatingLabelBehavior.always,
                       suffix: TextButton(
                         onPressed: () {

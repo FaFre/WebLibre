@@ -85,9 +85,10 @@ extension HitResultX on HitResult {
     return switch (this) {
       UnknownHitResult(src: final src) => src.uriDisplayString,
       ImageSrcHitResult(uri: final uri) => uri.uriDisplayString,
-      ImageHitResult(src: final src, title: final title) => title.isEmpty
-          ? (src.length > maxTitleLength ? 'image' : src.uriDisplayString)
-          : title!,
+      ImageHitResult(src: final src, title: final title) =>
+        title.isEmpty
+            ? (src.length > maxTitleLength ? 'image' : src.uriDisplayString)
+            : title!,
       VideoHitResult(src: final src, title: final title) =>
         (title.isEmpty) ? src.uriDisplayString : title!,
       AudioHitResult(src: final src, title: final title) =>

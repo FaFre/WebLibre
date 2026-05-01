@@ -32,8 +32,7 @@ import 'package:weblibre/utils/ui_helper.dart';
 Future<void> showPwaInstallDialog(BuildContext context, WidgetRef ref) async {
   final selectedTabId = ref.read(selectedTabProvider);
   final manifest = ref.read(currentTabManifestProvider);
-  final defaultName =
-      manifest?.shortName ?? manifest?.name ?? 'this web app';
+  final defaultName = manifest?.shortName ?? manifest?.name ?? 'this web app';
   final tabState = selectedTabId != null
       ? ref.read(tabStateProvider(selectedTabId))
       : null;

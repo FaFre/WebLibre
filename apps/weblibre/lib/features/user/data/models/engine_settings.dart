@@ -356,10 +356,10 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     String? json,
   ) =>
       json.mapNotNull(
-            (encoded) => UBlockFilterListSettings.fromJson(
-              jsonDecode(encoded) as Map<String, dynamic>,
-            ),
-          ) ??
+        (encoded) => UBlockFilterListSettings.fromJson(
+          jsonDecode(encoded) as Map<String, dynamic>,
+        ),
+      ) ??
       UBlockFilterListSettings();
 
   static String _ublockFilterListSettingsToJson(

@@ -195,7 +195,11 @@ class _InstallConfigSheet extends HookConsumerWidget {
         list.add(_StorageNewIsolated());
         return list;
       },
-      [tabContextId, containerData?.id, containerData?.metadata.contextualIdentity],
+      [
+        tabContextId,
+        containerData?.id,
+        containerData?.metadata.contextualIdentity,
+      ],
     );
 
     // Pick sensible default selection based on current context.
@@ -319,9 +323,7 @@ class _InstallConfigSheet extends HookConsumerWidget {
               ListTile(
                 leading: const Icon(Icons.shortcut),
                 title: const Text('Add Shortcut'),
-                subtitle: const Text(
-                  'Opens as a standard tab in the browser.',
-                ),
+                subtitle: const Text('Opens as a standard tab in the browser.'),
                 onTap: () => submit(ShortcutInstallType.shortcut),
               ),
             const SizedBox(height: 8),

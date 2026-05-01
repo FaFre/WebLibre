@@ -71,8 +71,9 @@ class _ManageExtensionsTile extends StatelessWidget {
         color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
       title: const Text('Manage Extensions'),
-      subtitle:
-          const Text('Browse installed, disabled, available, and unsupported extensions'),
+      subtitle: const Text(
+        'Browse installed, disabled, available, and unsupported extensions',
+      ),
       trailing: const Icon(Icons.chevron_right),
       onTap: () async {
         await const AddonManagerRoute().push<void>(context);

@@ -280,31 +280,28 @@ void main() {
       },
     );
 
-    test(
-      'toggling off a token in both sets removes it from both',
-      () {
-        final settings = UBlockFilterListSettings(
-          enabled: true,
-          enabledStockListTokens: ['DEU-0', 'easylist'],
-          autoEnabledStockListTokens: ['DEU-0', 'NLD-0'],
-        );
+    test('toggling off a token in both sets removes it from both', () {
+      final settings = UBlockFilterListSettings(
+        enabled: true,
+        enabledStockListTokens: ['DEU-0', 'easylist'],
+        autoEnabledStockListTokens: ['DEU-0', 'NLD-0'],
+      );
 
-        expect(settings.isTokenEnabled('DEU-0'), true);
+      expect(settings.isTokenEnabled('DEU-0'), true);
 
-        final updated = settings.copyWith(
-          enabledStockListTokens: [...settings.enabledStockListTokens]
-            ..remove('DEU-0'),
-          autoEnabledStockListTokens: [...settings.autoEnabledStockListTokens]
-            ..remove('DEU-0'),
-        );
+      final updated = settings.copyWith(
+        enabledStockListTokens: [...settings.enabledStockListTokens]
+          ..remove('DEU-0'),
+        autoEnabledStockListTokens: [...settings.autoEnabledStockListTokens]
+          ..remove('DEU-0'),
+      );
 
-        expect(updated.enabledStockListTokens, isNot(contains('DEU-0')));
-        expect(updated.autoEnabledStockListTokens, isNot(contains('DEU-0')));
-        expect(updated.isTokenEnabled('DEU-0'), false);
-        expect(updated.isTokenEnabled('NLD-0'), true);
-        expect(updated.isTokenEnabled('easylist'), true);
-      },
-    );
+      expect(updated.enabledStockListTokens, isNot(contains('DEU-0')));
+      expect(updated.autoEnabledStockListTokens, isNot(contains('DEU-0')));
+      expect(updated.isTokenEnabled('DEU-0'), false);
+      expect(updated.isTokenEnabled('NLD-0'), true);
+      expect(updated.isTokenEnabled('easylist'), true);
+    });
 
     test('toggling on a disabled token adds to enabledStockListTokens', () {
       final settings = UBlockFilterListSettings(
