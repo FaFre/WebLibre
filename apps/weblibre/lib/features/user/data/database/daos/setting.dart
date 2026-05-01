@@ -29,6 +29,11 @@ import 'package:weblibre/features/user/data/database/definitions.drift.dart';
 class SettingDao extends DatabaseAccessor<UserDatabase> with $SettingDaoMixin {
   SettingDao(super.attachedDatabase);
 
+  Future<DriftAny?> getSettingValue(String key) async {
+    final query = db.setting.select()..where((r) => r.key.equals(key));
+    return (await query.getSingleOrNull())?.value;
+  }
+
   Future<int> updateSetting(String key, String? partitionKey, Object? value) {
     final normalizedValue = (value is Iterable || value is Map)
         ? jsonEncode(value)

@@ -21,20 +21,83 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
+import 'package:drift/drift.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_migrations.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/models/preference_setting.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/setting_groups_serializer.dart';
+import 'package:weblibre/features/user/data/providers.dart';
 
 part 'preference_settings.g.dart';
+
+const _preferenceMigrationVersionKey = 'preferenceMigrationVersion';
+const _preferenceMigrationPartitionKey = 'preferenceMigration';
+const _preferenceMigrationSchemaVersion = 1;
+const _mainProcessDisableJitPref =
+    'javascript.options.main_process_disable_jit';
 
 @Riverpod(keepAlive: true)
 class StartupPreferenceEnforcementService
     extends _$StartupPreferenceEnforcementService {
+  final _prefManager = GeckoPrefService();
+
+  PreferenceMigrationRunner get _migrationRunner => PreferenceMigrationRunner(
+    schemaVersion: _preferenceMigrationSchemaVersion,
+    steps: {
+      0: () => _prefManager.resetPrefs([_mainProcessDisableJitPref]),
+    },
+  );
+
+  Future<int> _readPreferenceMigrationVersion() async {
+    final db = ref.read(userDatabaseProvider);
+    final value = await db.settingDao.getSettingValue(
+      _preferenceMigrationVersionKey,
+    );
+
+    return value?.readAs(DriftSqlType.int, db.typeMapping) ?? 0;
+  }
+
+  Future<void> _writePreferenceMigrationVersion(int version) async {
+    await ref
+        .read(userDatabaseProvider)
+        .settingDao
+        .updateSetting(
+          _preferenceMigrationVersionKey,
+          _preferenceMigrationPartitionKey,
+          version,
+        );
+  }
+
+  Future<void> _runMigrations() async {
+    final previousVersion = await _readPreferenceMigrationVersion();
+    final currentVersion = await _migrationRunner.run(
+      readVersion: _readPreferenceMigrationVersion,
+      writeVersion: _writePreferenceMigrationVersion,
+    );
+
+    if (currentVersion > previousVersion) {
+      logger.i(
+        'Applied preference migrations '
+        '$previousVersion -> $currentVersion',
+      );
+    }
+  }
+
   Future<void> apply() async {
+    try {
+      await _runMigrations();
+    } catch (e, s) {
+      logger.w(
+        'Failed to run preference migrations, will retry on next launch',
+        error: e,
+        stackTrace: s,
+      );
+    }
+
     final content = await ref.read(_preferenceSettingContentProvider.future);
     final groups = deserializePreferenceSettingGroups(
       PreferencePartition.user,
@@ -58,7 +121,7 @@ class StartupPreferenceEnforcementService
       return;
     }
 
-    final currentPrefs = await GeckoPrefService().getPrefs(
+    final currentPrefs = await _prefManager.getPrefs(
       startupPrefs.keys.toList(),
     );
 
@@ -77,7 +140,7 @@ class StartupPreferenceEnforcementService
 
     if (prefsToEnforce.isNotEmpty) {
       try {
-        await GeckoPrefService().applyPrefs(prefsToEnforce);
+        await _prefManager.applyPrefs(prefsToEnforce);
       } catch (e) {
         logger.w(
           'Failed to enforce startup preferences, will retry on next launch',
