@@ -566,12 +566,6 @@
                     "shouldBeDefault": true,
                     "enforceOnStartup": true
                 },
-                "network.predictor.enable-prefetch": {
-                    "value": false,
-                    "title": "Disable prefetching predictions",
-                    "shouldBeDefault": true,
-                    "enforceOnStartup": true
-                },
                 "network.http.speculative-parallel-limit": {
                     "value": 0,
                     "title": "Disable speculative connections on link hover",
@@ -858,6 +852,11 @@
                     "value": false,
                     "title": "Disable window-open-based storage access heuristic",
                     "requireUserOptIn": true
+                },
+                "dom.security.framebusting_intervention.enabled": {
+                    "value": true,
+                    "title": "Block third-party redirects",
+                    "shouldBeDefault": true
                 }
             }
         },
@@ -1077,12 +1076,6 @@
                     "value": false,
                     "title": "Disable JIT hints optimization",
                     "description": "Disables eager baseline hints to reduce JIT attack surface"
-                },
-                "javascript.options.main_process_disable_jit": {
-                    "value": true,
-                    "title": "Disable all JITs for parent process",
-                    "description": "Disables JIT compilation for the critical parent/main process",
-                    "shouldBeDefault": true
                 }
             }
         },
