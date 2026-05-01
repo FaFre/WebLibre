@@ -116,7 +116,7 @@ class BookmarkEntry extends BookmarkItem with FastEquatable {
   ];
 }
 
-@CopyWith()
+@CopyWith(constructor: '_')
 @JsonSerializable()
 class BookmarkFolder extends BookmarkItem with FastEquatable {
   @override
@@ -140,6 +140,15 @@ class BookmarkFolder extends BookmarkItem with FastEquatable {
     required this.dateAdded,
     required this.children,
   }) : title = bookmarkRootDisplayNames[guid] ?? title;
+
+  BookmarkFolder._({
+    required this.guid,
+    required this.parentGuid,
+    required this.title,
+    required this.position,
+    required this.dateAdded,
+    required this.children,
+  });
 
   factory BookmarkFolder.fromJson(Map<String, dynamic> json) =>
       _$BookmarkFolderFromJson(json);

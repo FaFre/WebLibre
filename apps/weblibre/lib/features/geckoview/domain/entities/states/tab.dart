@@ -32,7 +32,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 
 part 'tab.g.dart';
 
-@CopyWith()
+@CopyWith(constructor: '_')
 class TabState extends WebPageInfo {
   static final defaultUrl = Uri.parse('about:blank');
 
@@ -97,6 +97,26 @@ class TabState extends WebPageInfo {
     required this.findResultState,
     required this.translationState,
   }) : super(title: title.trim());
+
+  TabState._({
+    required this.id,
+    required this.parentId,
+    required this.contextId,
+    required super.url,
+    required super.title,
+    required this.icon,
+    required this.thumbnail,
+    required this.progress,
+    required this.tabMode,
+    required this.isFullScreen,
+    required this.isLoading,
+    required this.showToolbarAsExpanded,
+    required this.securityInfoState,
+    required this.historyState,
+    required this.readerableState,
+    required this.findResultState,
+    required this.translationState,
+  });
 
   factory TabState.$default(String tabId) => TabState(
     id: tabId,

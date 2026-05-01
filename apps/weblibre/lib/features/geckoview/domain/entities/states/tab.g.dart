@@ -13,7 +13,7 @@ abstract class _$TabStateCWProxy {
 
   TabState url(Uri url);
 
-  TabState title(String title);
+  TabState title(String? title);
 
   TabState icon(EquatableImage? icon);
 
@@ -50,7 +50,7 @@ abstract class _$TabStateCWProxy {
     String? parentId,
     String? contextId,
     Uri url,
-    String title,
+    String? title,
     EquatableImage? icon,
     EquatableImage? thumbnail,
     int progress,
@@ -83,7 +83,7 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
   TabState url(Uri url) => call(url: url);
 
   @override
-  TabState title(String title) => call(title: title);
+  TabState title(String? title) => call(title: title);
 
   @override
   TabState icon(EquatableImage? icon) => call(icon: icon);
@@ -153,7 +153,7 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
     Object? findResultState = const $CopyWithPlaceholder(),
     Object? translationState = const $CopyWithPlaceholder(),
   }) {
-    return TabState(
+    return TabState._(
       id: _value.id,
       parentId: parentId == const $CopyWithPlaceholder()
           ? _value.parentId
@@ -167,10 +167,10 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
           ? _value.url
           // ignore: cast_nullable_to_non_nullable
           : url as Uri,
-      title: title == const $CopyWithPlaceholder() || title == null
+      title: title == const $CopyWithPlaceholder()
           ? _value.title
           // ignore: cast_nullable_to_non_nullable
-          : title as String,
+          : title as String?,
       icon: icon == const $CopyWithPlaceholder()
           ? _value.icon
           // ignore: cast_nullable_to_non_nullable

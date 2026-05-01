@@ -5,7 +5,7 @@ ext {
 }
 
 buildscript {
-    ext.kotlin_version = '2.3.10'
+    ext.kotlin_version = '2.3.21'
 }
 
 allprojects {

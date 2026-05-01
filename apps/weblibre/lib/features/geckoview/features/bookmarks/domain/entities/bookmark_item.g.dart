@@ -199,7 +199,7 @@ class _$BookmarkFolderCWProxyImpl implements _$BookmarkFolderCWProxy {
     Object? dateAdded = const $CopyWithPlaceholder(),
     Object? children = const $CopyWithPlaceholder(),
   }) {
-    return BookmarkFolder(
+    return BookmarkFolder._(
       guid: guid == const $CopyWithPlaceholder() || guid == null
           ? _value.guid
           // ignore: cast_nullable_to_non_nullable
