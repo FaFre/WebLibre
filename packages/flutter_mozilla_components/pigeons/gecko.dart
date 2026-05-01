@@ -1494,6 +1494,7 @@ abstract class GeckoSyncApi {
 abstract class GeckoEngineSettingsApi {
   void setDefaultSettings(GeckoEngineSettings settings);
   void updateRuntimeSettings(GeckoEngineSettings settings);
+  void setScreenshotProtectionEnabled(bool enabled);
   void setPullToRefreshEnabled(bool enabled);
 
   /// Sets the app links mode preference (stored in SharedPreferences).

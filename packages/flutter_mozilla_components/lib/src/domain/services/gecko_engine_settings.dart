@@ -189,6 +189,10 @@ class GeckoEngineSettingsService {
     return _api.updateRuntimeSettings(GeckoEngineSettings(lnaEnabled: state));
   }
 
+  Future<void> setScreenshotProtectionEnabled(bool enabled) {
+    return _api.setScreenshotProtectionEnabled(enabled);
+  }
+
   Future<void> setPullToRefreshEnabled(bool enabled) {
     return _api.setPullToRefreshEnabled(enabled);
   }

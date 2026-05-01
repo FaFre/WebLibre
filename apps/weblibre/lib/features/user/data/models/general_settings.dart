@@ -76,6 +76,7 @@ class GeneralSettings with FastEquatable {
   final bool enableReadability;
   final bool enforceReadability;
   final Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit;
+  final bool screenshotProtectionEnabled;
   @BangKeyConverter()
   final BangKey? defaultSearchProvider;
   final SearchSuggestionProviders defaultSearchSuggestionsProvider;
@@ -131,6 +132,7 @@ class GeneralSettings with FastEquatable {
     required this.enableReadability,
     required this.enforceReadability,
     required this.deleteBrowsingDataOnQuit,
+    required this.screenshotProtectionEnabled,
     required this.defaultSearchProvider,
     required this.defaultSearchSuggestionsProvider,
     required this.createChildTabsOption,
@@ -185,6 +187,7 @@ class GeneralSettings with FastEquatable {
     bool? enableReadability,
     bool? enforceReadability,
     this.deleteBrowsingDataOnQuit,
+    bool? screenshotProtectionEnabled,
     BangKey? defaultSearchProvider,
     SearchSuggestionProviders? defaultSearchSuggestionsProvider,
     bool? createChildTabsOption,
@@ -233,9 +236,10 @@ class GeneralSettings with FastEquatable {
        uiScaleFactor = uiScaleFactor ?? defaultUiScaleFactor,
        disableAnimations = disableAnimations ?? false,
        showModalBarrier = showModalBarrier ?? true,
-       enableReadability = enableReadability ?? true,
-       enforceReadability = enforceReadability ?? false,
-       defaultSearchProvider = defaultSearchProvider ?? _fallbackSearchProvider,
+        enableReadability = enableReadability ?? true,
+        enforceReadability = enforceReadability ?? false,
+        screenshotProtectionEnabled = screenshotProtectionEnabled ?? false,
+        defaultSearchProvider = defaultSearchProvider ?? _fallbackSearchProvider,
        defaultSearchSuggestionsProvider =
            defaultSearchSuggestionsProvider ?? _fallbackAutocompleteProvider,
        createChildTabsOption = createChildTabsOption ?? false,
@@ -320,6 +324,7 @@ class GeneralSettings with FastEquatable {
     enableReadability,
     enforceReadability,
     deleteBrowsingDataOnQuit,
+    screenshotProtectionEnabled,
     defaultSearchProvider,
     defaultSearchSuggestionsProvider,
     createChildTabsOption,

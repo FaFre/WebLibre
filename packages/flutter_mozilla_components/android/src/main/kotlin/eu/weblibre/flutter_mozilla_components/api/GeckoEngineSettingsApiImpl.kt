@@ -419,6 +419,10 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
         GlobalComponents.pullToRefreshEnabled = enabled
     }
 
+    override fun setScreenshotProtectionEnabled(enabled: Boolean) {
+        GlobalComponents.screenshotProtectionEnabled = enabled
+    }
+
     override fun setAppLinksMode(mode: AppLinksMode) {
         val context = components.profileApplicationContext
         val prefKey = context.getString(R.string.pref_key_open_links_in_apps)

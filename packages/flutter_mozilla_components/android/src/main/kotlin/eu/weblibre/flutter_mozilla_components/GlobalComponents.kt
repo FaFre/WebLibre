@@ -75,6 +75,14 @@ object GlobalComponents {
 
     var onPullToRefreshEnabledChanged: ((Boolean) -> Unit)? = null
 
+    var screenshotProtectionEnabled: Boolean = false
+        set(value) {
+            field = value
+            onScreenshotProtectionEnabledChanged?.invoke(value)
+        }
+
+    var onScreenshotProtectionEnabledChanged: ((Boolean) -> Unit)? = null
+
     // Viewport events for keyboard visibility notifications
     var viewportEvents: GeckoViewportEvents? = null
 

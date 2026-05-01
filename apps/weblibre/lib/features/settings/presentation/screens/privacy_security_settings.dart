@@ -144,6 +144,7 @@ class _PrivacySignalsSection extends StatelessWidget {
       children: [
         SettingSection(name: 'Privacy Signals & Modes'),
         _IncognitoModeSection(),
+        _ScreenshotProtectionTile(),
         _GlobalPrivacyControlTile(),
       ],
     );
@@ -446,6 +447,36 @@ class _GlobalPrivacyControlTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.globalPrivacyControlEnabled(value),
+            );
+      },
+    );
+  }
+}
+
+class _ScreenshotProtectionTile extends HookConsumerWidget {
+  const _ScreenshotProtectionTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final enabled = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.screenshotProtectionEnabled,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Screenshot protection'),
+      subtitle: const Text(
+        'Blocks screenshots and screen recordings for this app on Android.',
+      ),
+      secondary: const Icon(MdiIcons.cameraOff),
+      value: enabled,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) => currentSettings.copyWith
+                  .screenshotProtectionEnabled(value),
             );
       },
     );

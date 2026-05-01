@@ -16,6 +16,7 @@ import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager.LayoutParams.FLAG_SECURE
 import android.widget.FrameLayout
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -34,6 +35,7 @@ import eu.weblibre.flutter_mozilla_components.integration.ReaderViewIntegration
 import eu.weblibre.flutter_mozilla_components.activities.ExternalAppBrowserActivity
 import eu.weblibre.flutter_mozilla_components.services.DownloadService
 import io.flutter.Log
+import mozilla.components.browser.state.selector.findCustomTabOrSelectedTab
 import mozilla.components.browser.state.state.WebExtensionState
 import mozilla.components.browser.thumbnails.BrowserThumbnails
 import mozilla.components.concept.engine.EngineView
@@ -149,6 +151,18 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     private lateinit var requestDownloadPermissionsLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var requestSitePermissionsLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var requestPromptsPermissionsLauncher: ActivityResultLauncher<Array<String>>
+
+    private fun updateSecureWindowState() {
+        val tab = components.core.store.state.findCustomTabOrSelectedTab(sessionId)
+        val shouldSecure =
+            GlobalComponents.screenshotProtectionEnabled || tab?.content?.private == true
+
+        if (shouldSecure) {
+            requireActivity().window.addFlags(FLAG_SECURE)
+        } else {
+            requireActivity().window.clearFlags(FLAG_SECURE)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -268,6 +282,10 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
             GlobalComponents.onPullToRefreshEnabledChanged = { enabled ->
                 _binding?.swipeToRefresh?.isEnabled = enabled
             }
+            GlobalComponents.onScreenshotProtectionEnabledChanged = {
+                updateSecureWindowState()
+            }
+            updateSecureWindowState()
 
             shareResourceFeature.set(
                 ShareResourceFeature(
@@ -461,6 +479,11 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     window = requireActivity().window,
                     store = components.core.store,
                     customTabId = sessionId,
+                    isSecure = { session ->
+                        session.content.private ||
+                            GlobalComponents.screenshotProtectionEnabled
+                    },
+                    clearFlagOnStop = false,
                 ),
                 owner = this,
                 view = binding.root,
@@ -663,6 +686,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         browserHandlingScrollFeature = null
 
         GlobalComponents.onPullToRefreshEnabledChanged = null
+        GlobalComponents.onScreenshotProtectionEnabledChanged = null
         val engineView = fragmentEngineView
         engineView?.setActivityContext(null)
         if (components.activeEngineView == engineView) {

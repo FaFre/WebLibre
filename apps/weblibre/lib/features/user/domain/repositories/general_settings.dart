@@ -71,6 +71,8 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
       'deleteBrowsingDataOnQuit': settings['deleteBrowsingDataOnQuit']
           ?.readAs(DriftSqlType.string, db.typeMapping)
           .mapNotNull(jsonDecode),
+      'screenshotProtectionEnabled': settings['screenshotProtectionEnabled']
+          ?.readAs(DriftSqlType.bool, db.typeMapping),
       'defaultSearchProvider': settings['defaultSearchProvider']?.readAs(
         DriftSqlType.string,
         db.typeMapping,

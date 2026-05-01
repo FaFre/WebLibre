@@ -110,6 +110,23 @@ class EngineSettingsReplicationService
     ref.listen(
       fireImmediately: true,
       generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.screenshotProtectionEnabled,
+      ),
+      (previous, next) async {
+        await _service.setScreenshotProtectionEnabled(next);
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to screenshotProtectionEnabled',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+
+    ref.listen(
+      fireImmediately: true,
+      generalSettingsWithDefaultsProvider.select(
         (settings) => settings.pullToRefreshEnabled,
       ),
       (previous, next) async {

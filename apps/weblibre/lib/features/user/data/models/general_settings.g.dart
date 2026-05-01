@@ -23,6 +23,8 @@ abstract class _$GeneralSettingsCWProxy {
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
   );
 
+  GeneralSettings screenshotProtectionEnabled(bool screenshotProtectionEnabled);
+
   GeneralSettings defaultSearchProvider(BangKey? defaultSearchProvider);
 
   GeneralSettings defaultSearchSuggestionsProvider(
@@ -144,6 +146,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool enableReadability,
     bool enforceReadability,
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
+    bool screenshotProtectionEnabled,
     BangKey? defaultSearchProvider,
     SearchSuggestionProviders defaultSearchSuggestionsProvider,
     bool createChildTabsOption,
@@ -225,6 +228,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings deleteBrowsingDataOnQuit(
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
   ) => call(deleteBrowsingDataOnQuit: deleteBrowsingDataOnQuit);
+
+  @override
+  GeneralSettings screenshotProtectionEnabled(
+    bool screenshotProtectionEnabled,
+  ) => call(screenshotProtectionEnabled: screenshotProtectionEnabled);
 
   @override
   GeneralSettings defaultSearchProvider(BangKey? defaultSearchProvider) =>
@@ -431,6 +439,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? enableReadability = const $CopyWithPlaceholder(),
     Object? enforceReadability = const $CopyWithPlaceholder(),
     Object? deleteBrowsingDataOnQuit = const $CopyWithPlaceholder(),
+    Object? screenshotProtectionEnabled = const $CopyWithPlaceholder(),
     Object? defaultSearchProvider = const $CopyWithPlaceholder(),
     Object? defaultSearchSuggestionsProvider = const $CopyWithPlaceholder(),
     Object? createChildTabsOption = const $CopyWithPlaceholder(),
@@ -516,6 +525,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.deleteBrowsingDataOnQuit
           // ignore: cast_nullable_to_non_nullable
           : deleteBrowsingDataOnQuit as Set<DeleteBrowsingDataType>?,
+      screenshotProtectionEnabled:
+          screenshotProtectionEnabled == const $CopyWithPlaceholder() ||
+              screenshotProtectionEnabled == null
+          ? _value.screenshotProtectionEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : screenshotProtectionEnabled as bool,
       defaultSearchProvider:
           defaultSearchProvider == const $CopyWithPlaceholder()
           ? _value.defaultSearchProvider
@@ -805,6 +820,7 @@ GeneralSettings _$GeneralSettingsFromJson(
   deleteBrowsingDataOnQuit: (json['deleteBrowsingDataOnQuit'] as List<dynamic>?)
       ?.map((e) => $enumDecode(_$DeleteBrowsingDataTypeEnumMap, e))
       .toSet(),
+  screenshotProtectionEnabled: json['screenshotProtectionEnabled'] as bool?,
   defaultSearchProvider: const BangKeyConverter().fromJson(
     json['defaultSearchProvider'] as String?,
   ),
@@ -908,6 +924,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'deleteBrowsingDataOnQuit': instance.deleteBrowsingDataOnQuit
       ?.map((e) => _$DeleteBrowsingDataTypeEnumMap[e]!)
       .toList(),
+  'screenshotProtectionEnabled': instance.screenshotProtectionEnabled,
   'defaultSearchProvider': const BangKeyConverter().toJson(
     instance.defaultSearchProvider,
   ),
