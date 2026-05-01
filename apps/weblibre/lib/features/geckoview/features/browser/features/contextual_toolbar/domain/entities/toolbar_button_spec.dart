@@ -46,6 +46,11 @@ const forwardToolbarButtonSpec = ToolbarButtonSpec(
   defaultFallback: ToolbarButtonId.share,
 );
 
+const historyToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.history,
+  defaultVisible: false,
+);
+
 const bookmarksToolbarButtonSpec = ToolbarButtonSpec(
   id: ToolbarButtonId.bookmarks,
   defaultVisible: false,
@@ -167,6 +172,7 @@ const quitToolbarButtonSpec = ToolbarButtonSpec(
 const toolbarButtonSpecs = [
   backToolbarButtonSpec,
   forwardToolbarButtonSpec,
+  historyToolbarButtonSpec,
   bookmarksToolbarButtonSpec,
   bookmarkToggleToolbarButtonSpec,
   shareToolbarButtonSpec,

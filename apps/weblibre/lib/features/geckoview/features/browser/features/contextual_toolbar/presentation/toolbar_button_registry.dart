@@ -122,6 +122,21 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     },
   ),
   ToolbarButtonDefinition(
+    spec: historyToolbarButtonSpec,
+    label: 'History',
+    icon: Icons.history,
+    builder: (scope, context, ref) {
+      return IconButton(
+        onPressed: scope.isPreview
+            ? () {}
+            : () async {
+                await const HistoryRoute().push(context);
+              },
+        icon: const Icon(Icons.history),
+      );
+    },
+  ),
+  ToolbarButtonDefinition(
     spec: bookmarksToolbarButtonSpec,
     label: 'Bookmarks',
     icon: MdiIcons.bookmarkMultiple,
