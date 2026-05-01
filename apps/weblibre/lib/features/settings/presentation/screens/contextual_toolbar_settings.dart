@@ -20,6 +20,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/contextual_toolbar_config_repository.dart';
@@ -37,6 +38,15 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final configs = ref.watch(effectiveToolbarButtonConfigsProvider);
     final repository = ref.watch(contextualToolbarConfigRepositoryProvider);
+
+    final visibleConfigs = useMemoized(
+      () => configs.value.where((c) => c.isVisible).toList(growable: false),
+      [configs],
+    );
+    final hiddenConfigs = useMemoized(
+      () => configs.value.where((c) => !c.isVisible).toList(growable: false),
+      [configs],
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -73,25 +83,80 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
             SliverToBoxAdapter(
               child: ListTile(
                 title: Text(
-                  'Button Order',
+                  'Enabled',
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
               ),
             ),
-            SliverReorderableList(
-              itemCount: configs.value.length,
-              onReorder: (oldIndex, newIndex) =>
-                  _onReorder(configs.value, oldIndex, newIndex, repository),
-              itemBuilder: (context, index) {
-                final config = configs.value[index];
-                return _ToolbarButtonConfigTile(
-                  key: ValueKey(config.buttonId),
-                  index: index,
-                  config: config,
-                  repository: repository,
-                );
-              },
+            if (visibleConfigs.isEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Text(
+                    'No enabled buttons. Toggle a button below to enable it.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              )
+            else
+              SliverReorderableList(
+                itemCount: visibleConfigs.length,
+                onReorder: (oldIndex, newIndex) =>
+                    _onReorder(visibleConfigs, oldIndex, newIndex, repository),
+                itemBuilder: (context, index) {
+                  final config = visibleConfigs[index];
+                  return _ToolbarButtonConfigTile(
+                    key: ValueKey(config.buttonId),
+                    index: index,
+                    config: config,
+                    repository: repository,
+                  );
+                },
+              ),
+            const SliverToBoxAdapter(child: Divider(height: 1)),
+            SliverToBoxAdapter(
+              child: ListTile(
+                title: Text(
+                  'Disabled',
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+              ),
             ),
+            if (hiddenConfigs.isEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Text(
+                    'All buttons are enabled.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              )
+            else
+              SliverReorderableList(
+                itemCount: hiddenConfigs.length,
+                onReorder: (oldIndex, newIndex) =>
+                    _onReorder(hiddenConfigs, oldIndex, newIndex, repository),
+                itemBuilder: (context, index) {
+                  final config = hiddenConfigs[index];
+                  return _ToolbarButtonConfigTile(
+                    key: ValueKey(config.buttonId),
+                    index: index,
+                    config: config,
+                    repository: repository,
+                  );
+                },
+              ),
           ],
         ),
       ),
