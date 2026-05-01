@@ -27,6 +27,7 @@ import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
 import 'package:weblibre/features/onboarding/domain/entities/onboarding_mode.dart';
 import 'package:weblibre/features/onboarding/domain/providers.dart';
+import 'package:weblibre/features/onboarding/presentation/onboarding_defaults.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/abstract/i_form_page.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/ai_configuration.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/default_search.dart';
@@ -61,9 +62,19 @@ class OnboardingScreen extends HookConsumerWidget {
     final eulaAccepted = ref.watch(eulaAcceptedProvider);
     final onboardingMode = ref.watch(onboardingModeProvider);
 
+    final isFreshOnboarding = currentRevision < 0;
     final isReturningUser = currentRevision == 2;
     final showDetailedPages =
         isReturningUser || onboardingMode == OnboardingMode.detailed;
+
+    useEffect(() {
+      if (!isFreshOnboarding || onboardingMode == OnboardingMode.restore) {
+        return null;
+      }
+
+      unawaited(applyOnboardingPrivacyDefaults(ref));
+      return null;
+    }, [isFreshOnboarding, onboardingMode]);
 
     final pages = useMemoized<List<Widget>>(() {
       switch (currentRevision) {
@@ -195,36 +206,34 @@ class OnboardingScreen extends HookConsumerWidget {
                                         unawaited(
                                           Navigator.of(context).push(
                                             MaterialPageRoute<void>(
-                                              builder: (_) =>
-                                                  ProfileRestoreScreen(
-                                                    backupFileUri: uri,
-                                                    forcedTarget:
-                                                        RestoreTarget.createNew,
-                                                    onRestoreSuccess:
-                                                        (_, profile) async {
-                                                          await ref
-                                                              .read(
-                                                                onboardingRepositoryProvider
-                                                                    .notifier,
-                                                              )
-                                                              .pushRevision(
-                                                                targetRevision,
-                                                              );
-                                                          if (profile != null) {
-                                                            await ref
-                                                                .read(
-                                                                  profileRepositoryProvider
-                                                                      .notifier,
-                                                                )
-                                                                .switchProfile(
-                                                                  profile.id,
-                                                                );
-                                                            await exitApp(
-                                                              ref.container,
-                                                            );
-                                                          }
-                                                        },
-                                                  ),
+                                              builder: (_) => ProfileRestoreScreen(
+                                                backupFileUri: uri,
+                                                forcedTarget:
+                                                    RestoreTarget.createNew,
+                                                onRestoreSuccess: (_, profile) async {
+                                                  await ref
+                                                      .read(
+                                                        onboardingRepositoryProvider
+                                                            .notifier,
+                                                      )
+                                                      .pushRevision(
+                                                        targetRevision,
+                                                      );
+                                                  if (profile != null) {
+                                                    await ref
+                                                        .read(
+                                                          profileRepositoryProvider
+                                                              .notifier,
+                                                        )
+                                                        .switchProfile(
+                                                          profile.id,
+                                                        );
+                                                    await exitApp(
+                                                      ref.container,
+                                                    );
+                                                  }
+                                                },
+                                              ),
                                             ),
                                           ),
                                         );
@@ -254,6 +263,8 @@ class OnboardingScreen extends HookConsumerWidget {
                                   .read(browserAddonServiceProvider.notifier)
                                   .install('uBlock0@raymondhill.net'),
                             );
+
+                            await applyOnboardingOptimizedUBlockDefaults(ref);
                           }
 
                           await ref

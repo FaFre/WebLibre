@@ -24,13 +24,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
+import 'package:weblibre/features/onboarding/presentation/onboarding_defaults.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/abstract/i_form_page.dart';
-import 'package:weblibre/features/user/data/models/engine_settings.dart';
-import 'package:weblibre/features/user/data/models/ublock_filter_list_settings.dart';
-import 'package:weblibre/features/user/data/providers/ublock_assets.dart';
-import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
 
 class UBlockOptInPage extends HookConsumerWidget implements IFormPage {
@@ -97,29 +93,7 @@ There are many other lists available to block even more.
                 onSaved: (newValue) {
                   if (newValue != true || !installUBlock.value) return;
 
-                  Future<void> applyOptimizedDefaults() async {
-                    try {
-                      final registry = await ref.read(
-                        ublockAssetsRegistryProvider.future,
-                      );
-                      final optimized =
-                          UBlockFilterListSettings.optimizedDefaults(registry);
-                      await ref
-                          .read(engineSettingsRepositoryProvider.notifier)
-                          .updateSettings(
-                            (current) => current.copyWith
-                                .ublockFilterListSettings(optimized),
-                          );
-                    } catch (e, s) {
-                      logger.w(
-                        'Failed applying optimized uBlock defaults during onboarding',
-                        error: e,
-                        stackTrace: s,
-                      );
-                    }
-                  }
-
-                  unawaited(applyOptimizedDefaults());
+                  unawaited(applyOnboardingOptimizedUBlockDefaults(ref));
                 },
                 builder: (field) => SwitchListTile(
                   contentPadding: EdgeInsets.zero,
