@@ -24,6 +24,7 @@ class IntentGatekeeperHostApiImpl(private val context: Context) : IntentGatekeep
         private const val PREFS_NAME = "weblibre_intent_gatekeeper"
         private const val KEY_ENABLED = "enabled"
         private const val KEY_BLOCKED_PACKAGES = "blocked_packages"
+        private const val KEY_PENDING_ALWAYS_ALLOW = "pending_always_allow"
     }
 
     override fun setConfig(enabled: Boolean, blockedPackages: List<String>) {
@@ -48,6 +49,26 @@ class IntentGatekeeperHostApiImpl(private val context: Context) : IntentGatekeep
             null
         } catch (_: Exception) {
             null
+        }
+    }
+
+    override fun getPendingAlwaysAllows(): List<String> {
+        val prefs = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return (prefs.getStringSet(KEY_PENDING_ALWAYS_ALLOW, emptySet()) ?: emptySet()).toList()
+    }
+
+    override fun ackPendingAlwaysAllows(packageNames: List<String>) {
+        if (packageNames.isEmpty()) return
+
+        val prefs = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val pending = prefs.getStringSet(KEY_PENDING_ALWAYS_ALLOW, emptySet())?.toMutableSet()
+            ?: mutableSetOf()
+        if (pending.removeAll(packageNames.toSet())) {
+            if (pending.isEmpty()) {
+                prefs.edit().remove(KEY_PENDING_ALWAYS_ALLOW).apply()
+            } else {
+                prefs.edit().putStringSet(KEY_PENDING_ALWAYS_ALLOW, pending).apply()
+            }
         }
     }
 }

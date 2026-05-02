@@ -27,16 +27,34 @@ import 'package:simple_intent_receiver/simple_intent_receiver.dart';
 import 'package:uri_to_file/uri_to_file.dart' as uri_to_file;
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/data/models/received_intent_parameter.dart';
+import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/services/intent_gatekeeper.dart';
 import 'package:weblibre/features/share_intent/domain/entities/intent_container_mode.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'sharing_intent.g.dart';
+
+const _alwaysAllowPackageExtra = 'eu.weblibre.gatekeeper.always_allow_package';
 
 StreamTransformer<Intent, ReceivedIntentParameter>
 _buildSharingIntentTransformer(
   IntentGatekeeper gatekeeper,
 ) => StreamTransformer<Intent, ReceivedIntentParameter>.fromHandlers(
   handleData: (intent, sink) async {
+    final alwaysAllowPackage =
+        intent.extra[_alwaysAllowPackageExtra] as String?;
+    if (alwaysAllowPackage != null) {
+      await gatekeeper.ref
+          .read(generalSettingsRepositoryProvider.notifier)
+          .updateSettings(
+            (current) => current.copyWith.externalAppIntentPolicies({
+              ...current.externalAppIntentPolicies,
+              alwaysAllowPackage: IntentSourcePolicy.allow,
+            }),
+          );
+    }
+
     final shortcutContextId = intent.action == 'android.intent.action.VIEW'
         ? intent.extra['pwa_context_id'] as String?
         : null;

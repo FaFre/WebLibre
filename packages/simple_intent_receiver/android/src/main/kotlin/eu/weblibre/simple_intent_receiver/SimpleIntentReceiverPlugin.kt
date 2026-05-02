@@ -36,6 +36,17 @@ import eu.weblibre.simple_intent_receiver.pigeons.Intent as PigeonIntent
 import eu.weblibre.simple_intent_receiver.pigeons.IntentGatekeeperHostApi
 
 class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.NewIntentListener {
+  companion object {
+    // Stable names that must match the notification replay path and shared-prefs schema.
+    private const val PREFS_NAME = "weblibre_intent_gatekeeper"
+    private const val KEY_NOTIFICATION_APPROVAL_TOKENS = "notification_approval_tokens"
+    private const val KEY_NOTIFICATION_APPROVAL_PACKAGE_PREFIX = "notification_approval_package_"
+    private const val EXTRA_NOTIFICATION_APPROVAL_TOKEN = "eu.weblibre.gatekeeper.notification_approval_token"
+    private const val EXTRA_ALWAYS_ALLOW_PACKAGE = "eu.weblibre.gatekeeper.always_allow_package"
+  }
+
+  private data class NotificationApproval(val alwaysAllowPackage: String?)
+
   private lateinit var context: Context
   private var intentReceiver: IntentReceiver? = null
   private var lastHandledIntent: String? = null
@@ -125,12 +136,17 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
       intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
     }
 
-    val pigeonIntent = convertToPigeonIntent(intent)
+    val notificationApproval = consumeNotificationApproval(intent)
+    val pigeonIntent = convertToPigeonIntent(intent, notificationApproval)
     intentReceiver?.sendIntent(pigeonIntent)
     return true
   }
 
-  private fun resolveCallerPackage(intent: Intent): String? {
+  private fun resolveCallerPackage(intent: Intent, notificationApproval: NotificationApproval?): String? {
+    if (notificationApproval != null) {
+      return null
+    }
+
     val raw = resolveRawCallerPackage(intent) ?: return null
     // Treat system packages (launcher, shell, SystemUI, etc.) as internal — the
     // gatekeeper shouldn't prompt the user when the OS itself forwards an intent.
@@ -179,10 +195,28 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
     }
   }
 
-  private fun convertToPigeonIntent(intent: Intent): PigeonIntent {
+  private fun consumeNotificationApproval(intent: Intent): NotificationApproval? {
+    val token = intent.getStringExtra(EXTRA_NOTIFICATION_APPROVAL_TOKEN) ?: return null
+    val prefs = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    val tokens = prefs.getStringSet(KEY_NOTIFICATION_APPROVAL_TOKENS, emptySet())?.toMutableSet()
+      ?: return null
+    if (!tokens.remove(token)) {
+      return null
+    }
+
+    val alwaysAllowPackage = prefs.getString("$KEY_NOTIFICATION_APPROVAL_PACKAGE_PREFIX$token", null)
+    prefs.edit()
+      .putStringSet(KEY_NOTIFICATION_APPROVAL_TOKENS, tokens)
+      .remove("$KEY_NOTIFICATION_APPROVAL_PACKAGE_PREFIX$token")
+      .apply()
+
+    return NotificationApproval(alwaysAllowPackage)
+  }
+
+  private fun convertToPigeonIntent(intent: Intent, notificationApproval: NotificationApproval?): PigeonIntent {
     val action = intent.action
     val data = intent.dataString
-    val fromPackageName = resolveCallerPackage(intent)
+    val fromPackageName = resolveCallerPackage(intent, notificationApproval)
 
     val categories = ArrayList<String>()
     intent.categories?.let {
@@ -193,6 +227,13 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
     intent.extras?.let { bundle ->
       for (key in bundle.keySet()) {
         try {
+          if (key == EXTRA_NOTIFICATION_APPROVAL_TOKEN) {
+            continue
+          }
+          if (key == EXTRA_ALWAYS_ALLOW_PACKAGE) {
+            continue
+          }
+
           when (val value = bundle.get(key)) {
             is Bundle -> {
               val bundleMap = HashMap<String, Any?>()
@@ -222,6 +263,10 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
           extras["${key}_error"] = e.message ?: "Unknown error"
         }
       }
+    }
+
+    notificationApproval?.alwaysAllowPackage?.let {
+      extras[EXTRA_ALWAYS_ALLOW_PACKAGE] = it
     }
 
     return PigeonIntent(

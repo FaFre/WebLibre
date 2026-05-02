@@ -20,15 +20,15 @@
 import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/about/domain/providers.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/pending_intent_decision.dart';
+import 'package:weblibre/features/intent_gatekeeper/domain/services/native_gatekeeper_replicator.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'intent_gatekeeper.g.dart';
-
-const _ownPackageName = 'eu.weblibre.gecko';
 
 @Riverpod(keepAlive: true)
 class IntentGatekeeper extends _$IntentGatekeeper {
@@ -62,14 +62,24 @@ class IntentGatekeeper extends _$IntentGatekeeper {
     required String? fromPackageName,
     required String? url,
   }) async {
-    final settings = ref.read(generalSettingsWithDefaultsProvider);
+    await ref
+        .read(nativeIntentGatekeeperReplicatorProvider.notifier)
+        .syncPendingAllows();
+
+    final settings = await ref
+        .read(generalSettingsRepositoryProvider.notifier)
+        .fetchSettings();
 
     if (!settings.blockExternalAppsEnabled) {
       return true;
     }
 
+    final ownPackageName = (await ref.read(
+      packageInfoProvider.future,
+    )).packageName;
+
     // Internal / unknown callers: no package to gate on — let through.
-    if (fromPackageName == null || fromPackageName == _ownPackageName) {
+    if (fromPackageName == null || fromPackageName == ownPackageName) {
       return true;
     }
 

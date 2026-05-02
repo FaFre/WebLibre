@@ -64,4 +64,15 @@ abstract class IntentGatekeeperHostApi {
   /// [PackageManager]. Returns `null` if the package is not installed or the
   /// label cannot be resolved.
   String? resolvePackageLabel(String packageName);
+
+  /// Returns the list of packages for which the user tapped "Always allow"
+  /// via a blocked-intent notification while WebLibre was not running.
+  /// Callers must acknowledge persisted packages via
+  /// [ackPendingAlwaysAllows] after Flutter settings were updated
+  /// successfully.
+  List<String> getPendingAlwaysAllows();
+
+  /// Removes the given packages from the pending "Always allow" set after
+  /// Flutter has successfully persisted them into its own policy store.
+  void ackPendingAlwaysAllows(List<String> packageNames);
 }

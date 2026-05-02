@@ -26,6 +26,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:simple_intent_receiver/simple_intent_receiver.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'native_gatekeeper_replicator.g.dart';
@@ -34,10 +35,14 @@ part 'native_gatekeeper_replicator.g.dart';
 /// `IntentReceiverActivity` can reject intents without launching Flutter.
 /// Only blocked packages are replicated — allow/unknown still fall through to
 /// the Flutter gatekeeper dialog.
+///
+/// Also consumes any "always allow" decisions made via notification actions
+/// and merges them into Flutter's policy before the next gatekeeper check.
 @Riverpod(keepAlive: true)
 class NativeIntentGatekeeperReplicator
     extends _$NativeIntentGatekeeperReplicator {
   final _api = IntentGatekeeperHostApi();
+  Future<void>? _pendingAllowSync;
 
   Future<void> _push(
     ({bool enabled, Map<String, IntentSourcePolicy> policies}) config,
@@ -58,8 +63,53 @@ class NativeIntentGatekeeperReplicator
     }
   }
 
+  /// Reads any packages the user approved via notification and persists them
+  /// as `allow` policies in the Flutter settings.
+  Future<void> _syncPendingAllowsInternal() async {
+    try {
+      final pending = await _api.getPendingAlwaysAllows();
+      if (pending.isEmpty) return;
+
+      await ref
+          .read(generalSettingsRepositoryProvider.notifier)
+          .updateSettings(
+            (current) => current.copyWith.externalAppIntentPolicies({
+              ...current.externalAppIntentPolicies,
+              for (final pkg in pending) pkg: IntentSourcePolicy.allow,
+            }),
+          );
+      await _api.ackPendingAlwaysAllows(pending);
+    } catch (error, stackTrace) {
+      logger.e(
+        'Failed to consume pending always-allows from native',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  /// Deduplicates native pending-allow synchronization across concurrent
+  /// callers so startup intent handling and config replication observe the same
+  /// persisted policy state.
+  Future<void> syncPendingAllows() {
+    final inFlight = _pendingAllowSync;
+    if (inFlight != null) {
+      return inFlight;
+    }
+
+    final future = _syncPendingAllowsInternal();
+    _pendingAllowSync = future.whenComplete(() {
+      if (identical(_pendingAllowSync, future)) {
+        _pendingAllowSync = null;
+      }
+    });
+    return _pendingAllowSync!;
+  }
+
   @override
   void build() {
+    unawaited(syncPendingAllows());
+
     ref.listen(
       generalSettingsWithDefaultsProvider.select(
         (settings) => EquatableValue((
@@ -80,7 +130,16 @@ class NativeIntentGatekeeperReplicator
             )) {
           return;
         }
-        unawaited(_push(next));
+        unawaited(() async {
+          await syncPendingAllows();
+          final settings = await ref
+              .read(generalSettingsRepositoryProvider.notifier)
+              .fetchSettings();
+          await _push((
+            enabled: settings.blockExternalAppsEnabled,
+            policies: settings.externalAppIntentPolicies,
+          ));
+        }());
       },
     );
   }

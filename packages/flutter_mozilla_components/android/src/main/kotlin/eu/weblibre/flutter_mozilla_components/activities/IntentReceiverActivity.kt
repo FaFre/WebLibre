@@ -22,6 +22,7 @@ import eu.weblibre.flutter_mozilla_components.PwaConstants
 import eu.weblibre.flutter_mozilla_components.PwaSessionCreator
 import eu.weblibre.flutter_mozilla_components.gatekeeper.IntentBlockNotifier
 import eu.weblibre.flutter_mozilla_components.gatekeeper.IntentGatekeeperPreferences
+import eu.weblibre.flutter_mozilla_components.gatekeeper.GatekeeperNotificationActionReceiver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -84,13 +85,20 @@ class IntentReceiverActivity : Activity() {
     private fun shouldBlockIntent(intent: Intent): Boolean {
         if (!IntentGatekeeperPreferences.isEnabled(applicationContext)) return false
         if (intent.hasExtra(PwaConstants.EXTRA_PWA_PROFILE_UUID)) return false
+        intent.getStringExtra(
+            GatekeeperNotificationActionReceiver.EXTRA_NOTIFICATION_APPROVAL_TOKEN,
+        )?.let { token ->
+            if (IntentGatekeeperPreferences.hasNotificationApproval(applicationContext, token)) {
+                return false
+            }
+        }
 
         val caller = resolveCallerPackage(intent) ?: return false
         if (caller == packageName) return false
         if (!IntentGatekeeperPreferences.isBlocked(applicationContext, caller)) return false
 
         Log.i(TAG, "Blocking intent from $caller (native gatekeeper)")
-        IntentBlockNotifier.notifyBlocked(applicationContext, caller)
+        IntentBlockNotifier.notifyBlocked(applicationContext, caller, intent)
         return true
     }
 

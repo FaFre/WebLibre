@@ -309,6 +309,19 @@ interface IntentGatekeeperHostApi {
    * label cannot be resolved.
    */
   fun resolvePackageLabel(packageName: String): String?
+  /**
+   * Returns the list of packages for which the user tapped "Always allow"
+   * via a blocked-intent notification while WebLibre was not running.
+   * Callers must acknowledge persisted packages via
+   * [ackPendingAlwaysAllows] after Flutter settings were updated
+   * successfully.
+   */
+  fun getPendingAlwaysAllows(): List<String>
+  /**
+   * Removes the given packages from the pending "Always allow" set after
+   * Flutter has successfully persisted them into its own policy store.
+   */
+  fun ackPendingAlwaysAllows(packageNames: List<String>)
 
   companion object {
     /** The codec used by IntentGatekeeperHostApi. */
@@ -346,6 +359,39 @@ interface IntentGatekeeperHostApi {
             val packageNameArg = args[0] as String
             val wrapped: List<Any?> = try {
               listOf(api.resolvePackageLabel(packageNameArg))
+            } catch (exception: Throwable) {
+              IntentPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.simple_intent_receiver.IntentGatekeeperHostApi.getPendingAlwaysAllows$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.getPendingAlwaysAllows())
+            } catch (exception: Throwable) {
+              IntentPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.simple_intent_receiver.IntentGatekeeperHostApi.ackPendingAlwaysAllows$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val packageNamesArg = args[0] as List<String>
+            val wrapped: List<Any?> = try {
+              api.ackPendingAlwaysAllows(packageNamesArg)
+              listOf(null)
             } catch (exception: Throwable) {
               IntentPigeonUtils.wrapError(exception)
             }

@@ -312,4 +312,50 @@ class IntentGatekeeperHostApi {
     );
     return pigeonVar_replyValue as String?;
   }
+
+  /// Returns the list of packages for which the user tapped "Always allow"
+  /// via a blocked-intent notification while WebLibre was not running.
+  /// Callers must acknowledge persisted packages via
+  /// [ackPendingAlwaysAllows] after Flutter settings were updated
+  /// successfully.
+  Future<List<String>> getPendingAlwaysAllows() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.simple_intent_receiver.IntentGatekeeperHostApi.getPendingAlwaysAllows$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return (pigeonVar_replyValue! as List<Object?>).cast<String>();
+  }
+
+  /// Removes the given packages from the pending "Always allow" set after
+  /// Flutter has successfully persisted them into its own policy store.
+  Future<void> ackPendingAlwaysAllows(List<String> packageNames) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.simple_intent_receiver.IntentGatekeeperHostApi.ackPendingAlwaysAllows$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[packageNames],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
 }
