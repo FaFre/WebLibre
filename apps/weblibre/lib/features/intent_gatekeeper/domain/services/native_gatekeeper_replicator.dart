@@ -97,13 +97,14 @@ class NativeIntentGatekeeperReplicator
       return inFlight;
     }
 
-    final future = _syncPendingAllowsInternal();
-    _pendingAllowSync = future.whenComplete(() {
-      if (identical(_pendingAllowSync, future)) {
+    late final Future<void> wrapped;
+    wrapped = _syncPendingAllowsInternal().whenComplete(() {
+      if (identical(_pendingAllowSync, wrapped)) {
         _pendingAllowSync = null;
       }
     });
-    return _pendingAllowSync!;
+    _pendingAllowSync = wrapped;
+    return wrapped;
   }
 
   @override
