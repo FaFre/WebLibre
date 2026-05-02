@@ -383,7 +383,7 @@ class _LinkedConsoleList extends ConsumerWidget {
         }
         return ListView.builder(
           controller: scrollController,
-          padding: const EdgeInsets.symmetric(vertical: 4),
+          padding: const EdgeInsets.only(top: 4, bottom: 56),
           itemCount: filtered.length,
           itemBuilder: (context, index) {
             final console = filtered[index];
@@ -432,7 +432,7 @@ class _AllConsoleList extends ConsumerWidget {
         }
         return ListView.builder(
           controller: scrollController,
-          padding: const EdgeInsets.symmetric(vertical: 4),
+          padding: const EdgeInsets.only(top: 4, bottom: 56),
           itemCount: consoles.length,
           itemBuilder: (context, index) {
             final console = consoles[index];

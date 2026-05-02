@@ -383,7 +383,7 @@ class _TabListView extends HookConsumerWidget {
         builder: (context, controller) {
           return !reorderEnabled
               ? ListView.builder(
-                  padding: EdgeInsets.zero,
+                  padding: const EdgeInsets.only(bottom: 56),
                   controller: scrollController,
                   itemCount: displayItemCount,
                   itemExtent: _itemHeight,
@@ -437,6 +437,7 @@ class _TabListView extends HookConsumerWidget {
                 )
               : ReorderableListView.builder(
                   scrollController: controller,
+                  padding: const EdgeInsets.only(bottom: 56),
                   itemCount: displayItemCount,
                   itemExtent: _itemHeight,
                   onReorderStart: (index) {

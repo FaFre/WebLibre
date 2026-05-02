@@ -470,7 +470,7 @@ class _TabGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return GridView.builder(
       controller: scrollController,
-      padding: EdgeInsets.zero,
+      padding: const EdgeInsets.only(bottom: 56),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         //Sync values for itemHeight calculation _calculateItemHeight
         childAspectRatio: 0.75,
