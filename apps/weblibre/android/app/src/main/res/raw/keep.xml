@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/mdi_icon_tab,@drawable/mdi_icon_domino_mask,@drawable/mdi_icon_snowflake,@drawable/mdi_icon_brain,@drawable/mdi_icon_text,@drawable/mdi_icon_search_web,@drawable/button" />
