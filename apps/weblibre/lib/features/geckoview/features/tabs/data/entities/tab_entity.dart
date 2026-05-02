@@ -66,6 +66,94 @@ class SearchResultTabEntity extends TabEntity {
   ];
 }
 
+/// Sealed type for items rendered in the grouped flat list/grid views.
+///
+/// Distinct from [TabEntity] which serves the original flat-only path. The
+/// grouped variant carries enough information to render parent-with-children
+/// blocks while keeping a single ordered top-level list.
+sealed class TabListItemEntity with FastEquatable {
+  String get tabId;
+  String get orderKey;
+  String? get containerId;
+}
+
+class TabListStandaloneItem extends TabListItemEntity {
+  @override
+  final String tabId;
+  @override
+  final String orderKey;
+  @override
+  final String? containerId;
+
+  TabListStandaloneItem({
+    required this.tabId,
+    required this.orderKey,
+    required this.containerId,
+  });
+
+  @override
+  List<Object?> get hashParameters => [tabId, orderKey, containerId];
+}
+
+class TabListParentGroup extends TabListItemEntity {
+  @override
+  final String tabId;
+  @override
+  final String orderKey;
+  @override
+  final String? containerId;
+  final int childCount;
+
+  TabListParentGroup({
+    required this.tabId,
+    required this.orderKey,
+    required this.containerId,
+    required this.childCount,
+  });
+
+  @override
+  List<Object?> get hashParameters => [
+    tabId,
+    orderKey,
+    containerId,
+    childCount,
+  ];
+}
+
+class TabListChildItem extends TabListItemEntity {
+  @override
+  final String tabId;
+  @override
+  final String orderKey;
+  @override
+  final String? containerId;
+  final String parentId;
+  final String rootId;
+  final int depth;
+  final int childCount;
+
+  TabListChildItem({
+    required this.tabId,
+    required this.orderKey,
+    required this.containerId,
+    required this.parentId,
+    required this.rootId,
+    required this.depth,
+    this.childCount = 0,
+  });
+
+  @override
+  List<Object?> get hashParameters => [
+    tabId,
+    orderKey,
+    containerId,
+    parentId,
+    rootId,
+    depth,
+    childCount,
+  ];
+}
+
 class TabTreeEntity extends TabEntity {
   @override
   final String tabId;

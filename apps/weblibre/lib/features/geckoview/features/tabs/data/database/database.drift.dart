@@ -32,6 +32,7 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
   List<i0.DatabaseSchemaEntity> get allSchemaEntities => [
     container,
     tab,
+    i1.idxTabParentContainer,
     tabFts,
     i1.tabMaintainParentChainOnDelete,
     i1.tabAfterInsert,

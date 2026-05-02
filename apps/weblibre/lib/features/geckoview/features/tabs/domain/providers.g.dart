@@ -370,6 +370,89 @@ final class WatchTabTreesProvider
 
 String _$watchTabTreesHash() => r'a2be591acb6818ea8675a12d90e6c4684a0448a8';
 
+@ProviderFor(watchTabsWithRootAndDepth)
+final watchTabsWithRootAndDepthProvider = WatchTabsWithRootAndDepthFamily._();
+
+final class WatchTabsWithRootAndDepthProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<TabsWithRootAndDepthResult>>,
+          List<TabsWithRootAndDepthResult>,
+          Stream<List<TabsWithRootAndDepthResult>>
+        >
+    with
+        $FutureModifier<List<TabsWithRootAndDepthResult>>,
+        $StreamProvider<List<TabsWithRootAndDepthResult>> {
+  WatchTabsWithRootAndDepthProvider._({
+    required WatchTabsWithRootAndDepthFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'watchTabsWithRootAndDepthProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchTabsWithRootAndDepthHash();
+
+  @override
+  String toString() {
+    return r'watchTabsWithRootAndDepthProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<List<TabsWithRootAndDepthResult>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<TabsWithRootAndDepthResult>> create(Ref ref) {
+    final argument = this.argument as String?;
+    return watchTabsWithRootAndDepth(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WatchTabsWithRootAndDepthProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$watchTabsWithRootAndDepthHash() =>
+    r'dd485f4f60924e90f1f338237401dc95ca7e123f';
+
+final class WatchTabsWithRootAndDepthFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          Stream<List<TabsWithRootAndDepthResult>>,
+          String?
+        > {
+  WatchTabsWithRootAndDepthFamily._()
+    : super(
+        retry: null,
+        name: r'watchTabsWithRootAndDepthProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  WatchTabsWithRootAndDepthProvider call(String? containerId) =>
+      WatchTabsWithRootAndDepthProvider._(argument: containerId, from: this);
+
+  @override
+  String toString() => r'watchTabsWithRootAndDepthProvider';
+}
+
 @ProviderFor(watchTabDescendants)
 final watchTabDescendantsProvider = WatchTabDescendantsFamily._();
 

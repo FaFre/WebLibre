@@ -151,6 +151,16 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
     );
   }
 
+  SingleOrNullSelectable<String> getLastChildTabId(
+    String? containerId,
+    String parentId,
+  ) {
+    return db.definitionsDrift.lastChildTabId(
+      containerId: containerId,
+      parentId: parentId,
+    );
+  }
+
   SingleOrNullSelectable<String> generateOrderKeyAfterTabId(
     String? containerId,
     String tabId,

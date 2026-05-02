@@ -43,7 +43,9 @@ abstract class _$GeneralSettingsCWProxy {
     TabType storedDefaultCreateTabType,
   );
 
-  GeneralSettings newTabPosition(NewTabPosition newTabPosition);
+  GeneralSettings tabListDirection(TabListDirection tabListDirection);
+
+  GeneralSettings tabBarDirection(TabBarDirection tabBarDirection);
 
   GeneralSettings tabIntentOpenSetting(
     TabIntentOpenSetting tabIntentOpenSetting,
@@ -154,7 +156,8 @@ abstract class _$GeneralSettingsCWProxy {
     bool showContainerUi,
     bool showIsolatedTabUi,
     TabType storedDefaultCreateTabType,
-    NewTabPosition newTabPosition,
+    TabListDirection tabListDirection,
+    TabBarDirection tabBarDirection,
     TabIntentOpenSetting tabIntentOpenSetting,
     bool autoHideTabBar,
     TabBarSwipeAction tabBarSwipeAction,
@@ -265,8 +268,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   ) => call(storedDefaultCreateTabType: storedDefaultCreateTabType);
 
   @override
-  GeneralSettings newTabPosition(NewTabPosition newTabPosition) =>
-      call(newTabPosition: newTabPosition);
+  GeneralSettings tabListDirection(TabListDirection tabListDirection) =>
+      call(tabListDirection: tabListDirection);
+
+  @override
+  GeneralSettings tabBarDirection(TabBarDirection tabBarDirection) =>
+      call(tabBarDirection: tabBarDirection);
 
   @override
   GeneralSettings tabIntentOpenSetting(
@@ -447,7 +454,8 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? showContainerUi = const $CopyWithPlaceholder(),
     Object? showIsolatedTabUi = const $CopyWithPlaceholder(),
     Object? storedDefaultCreateTabType = const $CopyWithPlaceholder(),
-    Object? newTabPosition = const $CopyWithPlaceholder(),
+    Object? tabListDirection = const $CopyWithPlaceholder(),
+    Object? tabBarDirection = const $CopyWithPlaceholder(),
     Object? tabIntentOpenSetting = const $CopyWithPlaceholder(),
     Object? autoHideTabBar = const $CopyWithPlaceholder(),
     Object? tabBarSwipeAction = const $CopyWithPlaceholder(),
@@ -572,12 +580,18 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.storedDefaultCreateTabType
           // ignore: cast_nullable_to_non_nullable
           : storedDefaultCreateTabType as TabType,
-      newTabPosition:
-          newTabPosition == const $CopyWithPlaceholder() ||
-              newTabPosition == null
-          ? _value.newTabPosition
+      tabListDirection:
+          tabListDirection == const $CopyWithPlaceholder() ||
+              tabListDirection == null
+          ? _value.tabListDirection
           // ignore: cast_nullable_to_non_nullable
-          : newTabPosition as NewTabPosition,
+          : tabListDirection as TabListDirection,
+      tabBarDirection:
+          tabBarDirection == const $CopyWithPlaceholder() ||
+              tabBarDirection == null
+          ? _value.tabBarDirection
+          // ignore: cast_nullable_to_non_nullable
+          : tabBarDirection as TabBarDirection,
       tabIntentOpenSetting:
           tabIntentOpenSetting == const $CopyWithPlaceholder() ||
               tabIntentOpenSetting == null
@@ -836,9 +850,13 @@ GeneralSettings _$GeneralSettingsFromJson(
     _$TabTypeEnumMap,
     json['defaultCreateTabType'],
   ),
-  newTabPosition: $enumDecodeNullable(
-    _$NewTabPositionEnumMap,
-    json['newTabPosition'],
+  tabListDirection: $enumDecodeNullable(
+    _$TabListDirectionEnumMap,
+    json['tabListDirection'],
+  ),
+  tabBarDirection: $enumDecodeNullable(
+    _$TabBarDirectionEnumMap,
+    json['tabBarDirection'],
   ),
   tabIntentOpenSetting: $enumDecodeNullable(
     _$TabIntentOpenSettingEnumMap,
@@ -937,7 +955,8 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'showIsolatedTabUi': instance.showIsolatedTabUi,
   'defaultCreateTabType':
       _$TabTypeEnumMap[instance.storedDefaultCreateTabType]!,
-  'newTabPosition': _$NewTabPositionEnumMap[instance.newTabPosition]!,
+  'tabListDirection': _$TabListDirectionEnumMap[instance.tabListDirection]!,
+  'tabBarDirection': _$TabBarDirectionEnumMap[instance.tabBarDirection]!,
   'tabIntentOpenSetting':
       _$TabIntentOpenSettingEnumMap[instance.tabIntentOpenSetting]!,
   'autoHideTabBar': instance.autoHideTabBar,
@@ -1012,9 +1031,14 @@ const _$TabTypeEnumMap = {
   TabType.isolated: 'isolated',
 };
 
-const _$NewTabPositionEnumMap = {
-  NewTabPosition.first: 'first',
-  NewTabPosition.end: 'end',
+const _$TabListDirectionEnumMap = {
+  TabListDirection.newestFirst: 'newestFirst',
+  TabListDirection.oldestFirst: 'oldestFirst',
+};
+
+const _$TabBarDirectionEnumMap = {
+  TabBarDirection.newestFirst: 'newestFirst',
+  TabBarDirection.oldestFirst: 'oldestFirst',
 };
 
 const _$TabIntentOpenSettingEnumMap = {

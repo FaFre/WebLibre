@@ -28,6 +28,7 @@ import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
@@ -127,10 +128,21 @@ class GridTabPreview extends HookConsumerWidget {
   final VoidCallback? onDoubleTap;
   final VoidCallback? onDelete;
   final void Function(String host)? onDeleteAll;
+  final VoidCallback? onCloseSubtree;
 
   final bool showPinBadge;
 
   final Widget? trailingChild;
+
+  /// Hierarchy widget rendered in the top-left corner alongside any
+  /// pin badge / [trailingChild]. Used by the tabs grid to inline the
+  /// expand/collapse toggle without overlay layers.
+  final Widget? groupToggle;
+
+  /// Tree depth (>= 1 for any child). Renders a stack of overlapping
+  /// subdirectory glyphs in the bottom-left of the thumbnail to signal
+  /// nesting level at a glance.
+  final int depth;
 
   const GridTabPreview({
     required this.tabId,
@@ -139,8 +151,11 @@ class GridTabPreview extends HookConsumerWidget {
     this.onDoubleTap,
     this.onDelete,
     this.onDeleteAll,
+    this.onCloseSubtree,
     this.showPinBadge = false,
     this.trailingChild,
+    this.groupToggle,
+    this.depth = 0,
     super.key,
   });
 
@@ -220,7 +235,9 @@ class GridTabPreview extends HookConsumerWidget {
                   else
                     Center(child: TabIcon(tabState: tabState, iconSize: 48)),
                   // Close button overlay
-                  if (onDelete != null || onDeleteAll != null)
+                  if (onDelete != null ||
+                      onDeleteAll != null ||
+                      onCloseSubtree != null)
                     Positioned(
                       top: 6.0,
                       right: 6.0,
@@ -237,6 +254,12 @@ class GridTabPreview extends HookConsumerWidget {
                             leadingIcon: const Icon(Icons.language),
                             child: const Text('Close from Same Host'),
                           ),
+                          if (onCloseSubtree != null)
+                            MenuItemButton(
+                              onPressed: onCloseSubtree,
+                              leadingIcon: const Icon(Icons.account_tree),
+                              child: const Text('Close Tab and Descendants'),
+                            ),
                         ],
                         child: SizedBox(
                           width: 28,
@@ -252,7 +275,8 @@ class GridTabPreview extends HookConsumerWidget {
                                 Radius.circular(8.0),
                               ),
                               onTap: onDelete,
-                              onLongPress: onDeleteAll != null
+                              onLongPress:
+                                  onDeleteAll != null || onCloseSubtree != null
                                   ? () {
                                       if (extendedDeleteMenuController.isOpen) {
                                         extendedDeleteMenuController.close();
@@ -271,13 +295,24 @@ class GridTabPreview extends HookConsumerWidget {
                         ),
                       ),
                     ),
-                  if (trailingChild != null || isPinned)
+                  if (depth > 0)
+                    Positioned(
+                      bottom: 6.0,
+                      left: 6.0,
+                      child: _GridDepthIndicator(depth: depth),
+                    ),
+                  if (trailingChild != null || isPinned || groupToggle != null)
                     Positioned(
                       top: 6.0,
                       left: 6.0,
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          if (groupToggle != null) ...[
+                            groupToggle!,
+                            if (trailingChild != null || isPinned)
+                              const SizedBox(width: 4),
+                          ],
                           if (trailingChild != null) trailingChild!,
                           if (isPinned)
                             Padding(
@@ -400,10 +435,19 @@ class ListTabPreview extends HookConsumerWidget {
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
   final void Function(String host)? onDeleteAll;
+  final VoidCallback? onCloseSubtree;
 
   final bool showPinBadge;
 
   final Widget? trailingChild;
+
+  /// Hierarchy widget rendered inside the trailing row, just before the
+  /// close button. Used to inline the group expand/collapse toggle.
+  final Widget? groupToggle;
+
+  /// Tree depth of this row. Used to render an integrated indent guide
+  /// (vertical bar + L-stub) on the leading edge of the tile.
+  final int depth;
 
   const ListTabPreview({
     required this.tabId,
@@ -411,8 +455,11 @@ class ListTabPreview extends HookConsumerWidget {
     this.onTap,
     this.onDelete,
     this.onDeleteAll,
+    this.onCloseSubtree,
     this.showPinBadge = false,
     this.trailingChild,
+    this.groupToggle,
+    this.depth = 0,
     super.key,
   });
 
@@ -488,7 +535,7 @@ class ListTabPreview extends HookConsumerWidget {
 
     const borderRadius = BorderRadius.all(Radius.circular(12.0));
 
-    return Container(
+    final card = Container(
       margin: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 4.0),
       decoration: BoxDecoration(
         color: listBgColor,
@@ -557,7 +604,10 @@ class ListTabPreview extends HookConsumerWidget {
                     ],
                   ),
                 ),
-                if (onDelete != null || onDeleteAll != null)
+                if (groupToggle != null) groupToggle!,
+                if (onDelete != null ||
+                    onDeleteAll != null ||
+                    onCloseSubtree != null)
                   MenuAnchor(
                     controller: extendedDeleteMenuController,
                     builder: (context, controller, child) {
@@ -571,10 +621,16 @@ class ListTabPreview extends HookConsumerWidget {
                         leadingIcon: const Icon(Icons.language),
                         child: const Text('Close from Same Host'),
                       ),
+                      if (onCloseSubtree != null)
+                        MenuItemButton(
+                          onPressed: onCloseSubtree,
+                          leadingIcon: const Icon(Icons.account_tree),
+                          child: const Text('Close Tab and Descendants'),
+                        ),
                     ],
                     child: IconButton(
                       onPressed: onDelete,
-                      onLongPress: onDeleteAll != null
+                      onLongPress: onDeleteAll != null || onCloseSubtree != null
                           ? () {
                               if (extendedDeleteMenuController.isOpen) {
                                 extendedDeleteMenuController.close();
@@ -597,7 +653,100 @@ class ListTabPreview extends HookConsumerWidget {
         ),
       ),
     );
+
+    if (depth <= 0) {
+      return card;
+    }
+
+    final levels = math.min(depth, _listMaxIndentLevels);
+    final indentWidth = levels * _listIndentStep;
+    final guideColor = colorScheme.outlineVariant.withAlpha(150);
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(
+          width: indentWidth,
+          child: CustomPaint(
+            painter: _IndentGuidePainter(
+              color: guideColor,
+              stubInsetFromRight: 8.0,
+            ),
+          ),
+        ),
+        Expanded(child: card),
+      ],
+    );
   }
+}
+
+const double _listIndentStep = 16.0;
+const int _listMaxIndentLevels = 3;
+
+// Cap glyph count so the badge stays readable on deep trees.
+const int _gridMaxDepthGlyphs = 4;
+
+class _GridDepthIndicator extends StatelessWidget {
+  final int depth;
+  const _GridDepthIndicator({required this.depth});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final glyphCount = math.min(depth, _gridMaxDepthGlyphs);
+
+    // Same shell as the top-left toggle / top-right close button:
+    // 28px tall, surfaceContainerHighest with 200 alpha, 8px radius,
+    // onSurfaceVariant icons at 16px.
+    return SizedBox(
+      height: 28,
+      child: Material(
+        color: scheme.surfaceContainerHighest.withAlpha(200),
+        borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < glyphCount; i++)
+                Icon(
+                  MdiIcons.subdirectoryArrowRight,
+                  size: 16,
+                  color: scheme.onSurfaceVariant,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _IndentGuidePainter extends CustomPainter {
+  final Color color;
+  final double stubInsetFromRight;
+
+  _IndentGuidePainter({required this.color, required this.stubInsetFromRight});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 2.0
+      ..strokeCap = StrokeCap.round;
+
+    final guideX = size.width - stubInsetFromRight;
+    // L-stub is centred vertically in the row so it tracks the tile's
+    // mid-line regardless of itemExtent changes.
+    final stubY = size.height / 2;
+
+    canvas.drawLine(Offset(guideX, 0), Offset(guideX, size.height), paint);
+    canvas.drawLine(Offset(guideX, stubY), Offset(size.width, stubY), paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _IndentGuidePainter old) =>
+      old.color != color || old.stubInsetFromRight != stubInsetFromRight;
 }
 
 class SyncedListTabPreview extends StatelessWidget {
@@ -654,6 +803,9 @@ class SingleGridTabPreview extends HookConsumerWidget {
   final void Function() onClose;
   final void Function()? onBeforeDelete;
 
+  final Widget? groupToggle;
+  final int depth;
+
   const SingleGridTabPreview({
     required this.tabId,
     required this.activeTabId,
@@ -661,6 +813,8 @@ class SingleGridTabPreview extends HookConsumerWidget {
     required this.sourceSearchQuery,
     this.deleteThreshold = 100,
     this.onBeforeDelete,
+    this.groupToggle,
+    this.depth = 0,
     super.key,
   });
 
@@ -707,6 +861,8 @@ class SingleGridTabPreview extends HookConsumerWidget {
           tabId: tabId,
           isActive: tabId == activeTabId,
           showPinBadge: true,
+          groupToggle: groupToggle,
+          depth: depth,
           onTap: () async {
             if (tabId != activeTabId) {
               //Close first to avoid rebuilds
@@ -737,6 +893,27 @@ class SingleGridTabPreview extends HookConsumerWidget {
                 context,
                 ref.read(tabRepositoryProvider.notifier).undoClose,
                 count: count,
+              );
+            }
+          },
+          onCloseSubtree: () async {
+            final subtreeIds = await ref
+                .read(tabDataRepositoryProvider.notifier)
+                .getTabDescendants(tabId)
+                .then((descendants) => descendants.keys.toList());
+            if (!context.mounted) return;
+
+            final didClose = await closeTabsWithConfirmation(
+              context,
+              ref,
+              subtreeIds,
+            );
+
+            if (context.mounted && didClose) {
+              ui_helper.showTabUndoClose(
+                context,
+                ref.read(tabRepositoryProvider.notifier).undoClose,
+                count: subtreeIds.length,
               );
             }
           },
@@ -771,6 +948,9 @@ class SingleListTabPreview extends HookConsumerWidget {
   final void Function() onClose;
   final void Function()? onBeforeDelete;
 
+  final Widget? groupToggle;
+  final int depth;
+
   const SingleListTabPreview({
     required this.tabId,
     required this.activeTabId,
@@ -778,6 +958,8 @@ class SingleListTabPreview extends HookConsumerWidget {
     required this.sourceSearchQuery,
     this.deleteThreshold = 100,
     this.onBeforeDelete,
+    this.groupToggle,
+    this.depth = 0,
     super.key,
   });
 
@@ -824,6 +1006,8 @@ class SingleListTabPreview extends HookConsumerWidget {
           tabId: tabId,
           isActive: tabId == activeTabId,
           showPinBadge: true,
+          groupToggle: groupToggle,
+          depth: depth,
           onTap: () async {
             if (tabId != activeTabId) {
               //Close first to avoid rebuilds
@@ -854,6 +1038,27 @@ class SingleListTabPreview extends HookConsumerWidget {
                 context,
                 ref.read(tabRepositoryProvider.notifier).undoClose,
                 count: count,
+              );
+            }
+          },
+          onCloseSubtree: () async {
+            final subtreeIds = await ref
+                .read(tabDataRepositoryProvider.notifier)
+                .getTabDescendants(tabId)
+                .then((descendants) => descendants.keys.toList());
+            if (!context.mounted) return;
+
+            final didClose = await closeTabsWithConfirmation(
+              context,
+              ref,
+              subtreeIds,
+            );
+
+            if (context.mounted && didClose) {
+              ui_helper.showTabUndoClose(
+                context,
+                ref.read(tabRepositoryProvider.notifier).undoClose,
+                count: subtreeIds.length,
               );
             }
           },

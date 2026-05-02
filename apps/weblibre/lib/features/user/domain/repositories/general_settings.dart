@@ -106,6 +106,14 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.string,
         db.typeMapping,
       ),
+      'tabListDirection': settings['tabListDirection']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
+      'tabBarDirection': settings['tabBarDirection']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
       'tabIntentOpenSetting': settings['tabIntentOpenSetting']?.readAs(
         DriftSqlType.string,
         db.typeMapping,

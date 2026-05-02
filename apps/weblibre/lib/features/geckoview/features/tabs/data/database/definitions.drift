@@ -37,7 +37,14 @@ CREATE TABLE tab(
   )
 );
 
-CREATE VIRTUAL TABLE tab_fts 
+-- Composite index used by `tabsWithRootAndDepth` (the seed checks
+-- `parent_id IS NULL OR NOT EXISTS(... WHERE p.id = parent_id AND
+-- p.container_id IS :container_id)`) and by `lastChildTabId`
+-- (`WHERE parent_id = ? AND container_id IS ?`). Without it, both queries
+-- degrade to per-row scans on large containers.
+CREATE INDEX idx_tab_parent_container ON tab(parent_id, container_id);
+
+CREATE VIRTUAL TABLE tab_fts
   USING fts5(
     title,
     url,
@@ -122,6 +129,11 @@ trailingOrderKey(REQUIRED :container_id AS TEXT OR NULL, :bucket AS INTEGER):
       LIMIT 1
     )
   );
+
+lastChildTabId(:parent_id AS TEXT, REQUIRED :container_id AS TEXT OR NULL):
+  SELECT id FROM tab
+  WHERE parent_id = :parent_id AND container_id IS :container_id
+  ORDER BY order_key DESC LIMIT 1;
 
 orderKeyAfterTab(:tab_id AS TEXT, REQUIRED :container_id AS TEXT OR NULL):
   WITH ordered_table AS (
@@ -248,6 +260,61 @@ ON
   d.root_id = rs.root_id AND 
   d.timestamp = rs.max_timestamp
 ORDER BY d.timestamp DESC;
+
+-- Returns each tab in a container together with its (recursive) root id and
+-- depth from that root. Drives the grouped-list rendering path. The provider
+-- handles ordering, filter, and direction.
+tabsWithRootAndDepth(REQUIRED :container_id AS TEXT OR NULL):
+  -- Seed the recursion from every tab in the target container whose parent is
+  -- not also in this container (parent NULL, parent missing, or parent moved
+  -- away). This treats a child whose ancestor lives elsewhere as a *local
+  -- root* rather than dropping it from the grouped view entirely.
+  WITH RECURSIVE walk(id, parent_id, order_key, root_id, depth) AS (
+    SELECT t.id, t.parent_id, t.order_key, t.id AS root_id, 0 AS depth
+    FROM tab t
+    WHERE t.container_id IS :container_id
+      AND (
+        t.parent_id IS NULL
+        OR NOT EXISTS (
+          SELECT 1 FROM tab p
+          WHERE p.id = t.parent_id AND p.container_id IS :container_id
+        )
+      )
+
+    UNION ALL
+
+    SELECT t.id, t.parent_id, t.order_key, w.root_id, w.depth + 1
+    FROM tab t
+    INNER JOIN walk w ON t.parent_id = w.id
+    WHERE t.container_id IS :container_id
+  )
+  SELECT id, parent_id, order_key, root_id, depth FROM walk;
+
+-- Returns the id of the tab whose `order_key` is the largest within the
+-- (inclusive) subtree rooted at :tab_id. Used to anchor a sibling insert
+-- *after* the entire subtree of an existing tab.
+--
+-- Contiguity assumption: this query is only correct when subtrees occupy a
+-- contiguous range in `order_key` space. The reorder algorithm preserves
+-- this by moving subtrees as atomic blocks, but legacy rows or a flat
+-- (non-hierarchical) reorder could interleave order_keys across scopes.
+-- In that pathological case the returned anchor is still the largest-keyed
+-- descendant, but it may sit *between* unrelated tabs rather than after the
+-- entire subtree.
+lastSubtreeTabIdByOrderKey(
+  :tab_id AS TEXT,
+  REQUIRED :container_id AS TEXT OR NULL
+):
+  WITH RECURSIVE subtree AS (
+    SELECT id, order_key FROM tab
+    WHERE id = :tab_id AND container_id IS :container_id
+    UNION ALL
+    SELECT t.id, t.order_key
+    FROM tab t
+    INNER JOIN subtree s ON t.parent_id = s.id
+    WHERE t.container_id IS :container_id
+  )
+  SELECT id FROM subtree ORDER BY order_key DESC LIMIT 1;
 
 unorderedTabDescendants:
   WITH RECURSIVE descendants AS (

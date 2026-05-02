@@ -19,6 +19,7 @@
  */
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 import 'package:lexo_rank/lexo_rank.dart';
 import 'package:nullability/nullability.dart';
@@ -30,7 +31,6 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
 
 class SyncTabsResult {
   final Set<String> deletedIsolationContextIds;
@@ -154,35 +154,54 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   Future<String> _generateOrderKey({
     required Value<String?> parentId,
     required Value<String?> containerId,
-    required NewTabPosition newTabPosition,
+    Value<String?> afterTabId = const Value.absent(),
   }) async {
-    if (parentId.value.isNotEmpty) {
-      return await db.containerDao
-              .generateOrderKeyAfterTabId(containerId.value, parentId.value!)
-              .getSingleOrNull() ??
-          await db.containerDao
-              .generateLeadingOrderKey(containerId.value)
-              .getSingle();
-    } else {
-      return switch (newTabPosition) {
-        NewTabPosition.first =>
-          db.containerDao
-              .generateLeadingOrderKey(containerId.value)
-              .getSingle(),
-        NewTabPosition.end =>
-          db.containerDao
-              .generateTrailingOrderKey(containerId.value)
-              .getSingle(),
-      };
+    // Explicit "place after this tab" wins regardless of parent.
+    if (afterTabId.present && afterTabId.value != null) {
+      final key = await db.containerDao
+          .generateOrderKeyAfterTabId(containerId.value, afterTabId.value!)
+          .getSingleOrNull();
+      if (key != null) {
+        return key;
+      }
     }
+
+    if (parentId.value.isNotEmpty) {
+      // Place new child after the last existing sibling, falling back to
+      // immediately after the parent if there are none yet.
+      final lastChildId = await db.containerDao
+          .getLastChildTabId(containerId.value, parentId.value!)
+          .getSingleOrNull();
+
+      final anchorTabId = lastChildId ?? parentId.value!;
+
+      final key = await db.containerDao
+          .generateOrderKeyAfterTabId(containerId.value, anchorTabId)
+          .getSingleOrNull();
+      if (key != null) {
+        return key;
+      }
+      // Defensive fallback: covers both "parent row not present" *and* the
+      // cross-container case where the parent lives in a different container
+      // than `containerId.value` (then `getLastChildTabId` and
+      // `generateOrderKeyAfterTabId` both yield null because they filter on
+      // the new container). In either case append to the end.
+    }
+
+    // Root tabs (or unresolved parent) always append to the end of the list.
+    // Display direction is applied at render time via TabListDirection /
+    // TabBarDirection settings, so we never need to insert at the front.
+    return db.containerDao
+        .generateTrailingOrderKey(containerId.value)
+        .getSingle();
   }
 
   Future<String> upsertTabTransactional(
     Future<String> Function() createTab, {
     required Value<String?> parentId,
-    NewTabPosition newTabPosition = NewTabPosition.first,
     Value<String?> containerId = const Value.absent(),
     Value<String?> orderKey = const Value.absent(),
+    Value<String?> afterTabId = const Value.absent(),
     Value<Uri?> url = const Value.absent(),
     Value<String?> title = const Value.absent(),
     Value<TabMode> tabMode = const Value.absent(),
@@ -194,7 +213,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
           await _generateOrderKey(
             parentId: parentId,
             containerId: containerId,
-            newTabPosition: newTabPosition,
+            afterTabId: afterTabId,
           );
       final Value<TabModeDbValue> persistedTabMode = tabMode.present
           ? Value(tabMode.value.toDbValue())
@@ -239,9 +258,9 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     String tabId, {
     required TabSource source,
     required Value<String?> parentId,
-    NewTabPosition newTabPosition = NewTabPosition.first,
     Value<String?> containerId = const Value.absent(),
     Value<String?> orderKey = const Value.absent(),
+    Value<String?> afterTabId = const Value.absent(),
     Value<Uri?> url = const Value.absent(),
     Value<String?> title = const Value.absent(),
     Value<TabMode> tabMode = const Value.absent(),
@@ -252,7 +271,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
           await _generateOrderKey(
             parentId: parentId,
             containerId: containerId,
-            newTabPosition: newTabPosition,
+            afterTabId: afterTabId,
           );
       final Value<TabModeDbValue> persistedTabMode = tabMode.present
           ? Value(tabMode.value.toDbValue())
@@ -298,9 +317,265 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     return statement.write(TabCompanion(containerId: Value(containerId)));
   }
 
-  Future<void> assignOrderKey(String id, {required String orderKey}) {
-    final statement = _updateByIdStatement(id);
-    return statement.write(TabCompanion(orderKey: Value(orderKey)));
+  Future<void> reorderTabs({
+    required List<String> movingTabIds,
+    required String? previousTabId,
+    required String? nextTabId,
+  }) {
+    if (movingTabIds.isEmpty) {
+      return Future.value();
+    }
+
+    return db.transaction(() async {
+      final anchorIds = [
+        if (previousTabId != null) previousTabId,
+        if (nextTabId != null) nextTabId,
+      ];
+
+      final anchors = anchorIds.isEmpty
+          ? const <String, TabData>{}
+          : {
+              for (final tab in await (select(
+                db.tab,
+              )..where((t) => t.id.isIn(anchorIds))).get())
+                tab.id: tab,
+            };
+
+      final previousTab = previousTabId == null ? null : anchors[previousTabId];
+      final nextTab = nextTabId == null ? null : anchors[nextTabId];
+      final previousRank = previousTab == null
+          ? null
+          : LexoRank.parse(previousTab.orderKey);
+      final nextRank = nextTab == null
+          ? null
+          : LexoRank.parse(nextTab.orderKey);
+
+      final orderKeys = _generateOrderKeysBetween(
+        count: movingTabIds.length,
+        previousRank: previousRank,
+        nextRank: nextRank,
+      );
+
+      await batch((batch) {
+        for (var i = 0; i < movingTabIds.length; i++) {
+          batch.update(
+            db.tab,
+            TabCompanion(orderKey: Value(orderKeys[i])),
+            where: (t) => t.id.equals(movingTabIds[i]),
+          );
+        }
+      });
+    });
+  }
+
+  List<String> _generateOrderKeysBetween({
+    required int count,
+    required LexoRank? previousRank,
+    required LexoRank? nextRank,
+  }) {
+    if (count <= 0) {
+      return const [];
+    }
+
+    if (previousRank == null && nextRank == null) {
+      var rank = LexoRank.middle();
+      return [
+        for (var i = 0; i < count; i++)
+          () {
+            final value = rank.value;
+            rank = rank.genNext();
+            return value;
+          }(),
+      ];
+    }
+
+    if (nextRank == null) {
+      var rank = previousRank!.genNext();
+      return [
+        for (var i = 0; i < count; i++)
+          () {
+            final value = rank.value;
+            rank = rank.genNext();
+            return value;
+          }(),
+      ];
+    }
+
+    if (previousRank == null) {
+      var rank = nextRank;
+      final reversed = <String>[];
+      for (var i = 0; i < count; i++) {
+        rank = rank.genPrev();
+        reversed.add(rank.value);
+      }
+      return reversed.reversed.toList();
+    }
+
+    var upperBound = nextRank;
+    final reversed = <String>[];
+    for (var i = 0; i < count; i++) {
+      upperBound = previousRank.genBetween(upperBound);
+      reversed.add(upperBound.value);
+    }
+    return reversed.reversed.toList();
+  }
+
+  /// Reassigns `order_key` for grandchildren whose parent is being closed so
+  /// they slot into the closing scope at the position previously occupied by
+  /// their (closing) parent. Run *before* the close itself.
+  ///
+  /// Edge cases worth knowing about:
+  ///
+  /// - When the first batch of pending grandchildren has no surviving sibling
+  ///   strictly before them, [previousRank] is `null` (rather than a tab in
+  ///   the parent of the scope's parent). The assigned keys are correct
+  ///   relative to siblings in this scope, but in a flat-by-order_key view
+  ///   (e.g. the tab bar) the promoted children may now sort before unrelated
+  ///   tabs from other scopes that originally sat before the closing tab in
+  ///   storage. Hierarchical views mask this via `tabsWithRootAndDepth`.
+  ///
+  /// - Within a scope, grandchildren are emitted in DFS order through the
+  ///   closing chain (`childrenByParent[closingId]` recursively), not by raw
+  ///   storage order. If a user manually reordered a grandchild to sit after
+  ///   one of its uncles in storage and the uncle is also closing, the DFS
+  ///   walk will re-emit them in tree order — silently overriding the manual
+  ///   key. This is treated as "rebuild the scope on close".
+  ///
+  /// - Only `order_key` is rewritten. `parent_id` is left untouched and is
+  ///   normalised lazily by the `tab_maintain_parent_chain_on_delete` trigger
+  ///   when the close itself runs.
+  Future<void> preservePromotedChildOrderOnClose(Iterable<String> tabIds) {
+    final closingIds = tabIds.toSet();
+    if (closingIds.isEmpty) {
+      return Future.value();
+    }
+
+    return db.transaction(() async {
+      final closingTabs = await (select(
+        db.tab,
+      )..where((t) => t.id.isIn(closingIds))).get();
+
+      if (closingTabs.isEmpty) {
+        return;
+      }
+
+      final directChildren =
+          await (select(db.tab)
+                ..where((t) => t.parentId.isIn(closingIds))
+                ..orderBy([(t) => OrderingTerm.asc(t.orderKey)]))
+              .get();
+
+      final closingTabById = {for (final tab in closingTabs) tab.id: tab};
+      final childrenByParent = <String, List<TabData>>{};
+      for (final child in directChildren) {
+        final parentId = child.parentId;
+        if (parentId == null) continue;
+        childrenByParent.putIfAbsent(parentId, () => []).add(child);
+      }
+
+      final promotedBoundaryCache = <String, List<TabData>>{};
+      List<TabData> promotedBoundaryChildren(String closingTabId) {
+        return promotedBoundaryCache.putIfAbsent(closingTabId, () {
+          final result = <TabData>[];
+          for (final child
+              in childrenByParent[closingTabId] ?? const <TabData>[]) {
+            if (closingIds.contains(child.id)) {
+              result.addAll(promotedBoundaryChildren(child.id));
+            } else {
+              result.add(child);
+            }
+          }
+          return result;
+        });
+      }
+
+      final representativeClosingTabs = closingTabs.where(
+        (tab) => !closingTabById.containsKey(tab.parentId),
+      );
+
+      final closingTabsByScope = groupBy(
+        representativeClosingTabs,
+        (TabData tab) => (containerId: tab.containerId, parentId: tab.parentId),
+      );
+
+      for (final entry in closingTabsByScope.entries) {
+        final scope = entry.key;
+        final scopedClosingTabs = entry.value.sorted(
+          (a, b) => a.orderKey.compareTo(b.orderKey),
+        );
+
+        final sameScopeTabs =
+            await (select(db.tab)
+                  ..where((t) {
+                    final sameContainer = scope.containerId != null
+                        ? t.containerId.equals(scope.containerId!)
+                        : t.containerId.isNull();
+                    final sameParent = scope.parentId != null
+                        ? t.parentId.equals(scope.parentId!)
+                        : t.parentId.isNull();
+
+                    return sameContainer &
+                        sameParent &
+                        t.id.isNotIn(closingIds);
+                  })
+                  ..orderBy([(t) => OrderingTerm.asc(t.orderKey)]))
+                .get();
+
+        var closingIndex = 0;
+        var survivorIndex = 0;
+        LexoRank? previousRank;
+        final pendingChildren = <TabData>[];
+
+        Future<void> assignPendingChildren(LexoRank? nextRank) async {
+          if (pendingChildren.isEmpty) {
+            return;
+          }
+
+          final orderKeys = _generateOrderKeysBetween(
+            count: pendingChildren.length,
+            previousRank: previousRank,
+            nextRank: nextRank,
+          );
+
+          for (var i = 0; i < pendingChildren.length; i++) {
+            await _updateByIdStatement(
+              pendingChildren[i].id,
+            ).write(TabCompanion(orderKey: Value(orderKeys[i])));
+          }
+
+          pendingChildren.clear();
+        }
+
+        while (closingIndex < scopedClosingTabs.length ||
+            survivorIndex < sameScopeTabs.length) {
+          final nextClosing = closingIndex < scopedClosingTabs.length
+              ? scopedClosingTabs[closingIndex]
+              : null;
+          final nextSurvivor = survivorIndex < sameScopeTabs.length
+              ? sameScopeTabs[survivorIndex]
+              : null;
+
+          final takeClosing =
+              nextClosing != null &&
+              (nextSurvivor == null ||
+                  nextClosing.orderKey.compareTo(nextSurvivor.orderKey) < 0);
+
+          if (takeClosing) {
+            pendingChildren.addAll(promotedBoundaryChildren(nextClosing.id));
+            closingIndex++;
+            continue;
+          }
+
+          final survivor = nextSurvivor!;
+          final survivorRank = LexoRank.parse(survivor.orderKey);
+          await assignPendingChildren(survivorRank);
+          previousRank = survivorRank;
+          survivorIndex++;
+        }
+
+        await assignPendingChildren(null);
+      }
+    });
   }
 
   Future<void> touchTab(String id, {required DateTime timestamp}) {
@@ -522,6 +797,16 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
 
     return query.map(
       (row) => MapEntry(row.read(db.tab.id)!, row.read(db.tab.timestamp)!),
+    );
+  }
+
+  SingleOrNullSelectable<String> lastSubtreeTabIdByOrderKey(
+    String tabId, {
+    required String? containerId,
+  }) {
+    return db.definitionsDrift.lastSubtreeTabIdByOrderKey(
+      tabId: tabId,
+      containerId: containerId,
     );
   }
 

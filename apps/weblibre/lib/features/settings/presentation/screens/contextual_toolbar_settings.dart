@@ -106,8 +106,13 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
             else
               SliverReorderableList(
                 itemCount: visibleConfigs.length,
-                onReorder: (oldIndex, newIndex) =>
-                    _onReorder(visibleConfigs, oldIndex, newIndex, repository),
+                onReorder: (oldIndex, newIndex) => _onReorder(
+                  visibleConfigs,
+                  oldIndex,
+                  newIndex,
+                  repository,
+                  isVisible: true,
+                ),
                 itemBuilder: (context, index) {
                   final config = visibleConfigs[index];
                   return _ToolbarButtonConfigTile(
@@ -145,8 +150,13 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
             else
               SliverReorderableList(
                 itemCount: hiddenConfigs.length,
-                onReorder: (oldIndex, newIndex) =>
-                    _onReorder(hiddenConfigs, oldIndex, newIndex, repository),
+                onReorder: (oldIndex, newIndex) => _onReorder(
+                  hiddenConfigs,
+                  oldIndex,
+                  newIndex,
+                  repository,
+                  isVisible: false,
+                ),
                 itemBuilder: (context, index) {
                   final config = hiddenConfigs[index];
                   return _ToolbarButtonConfigTile(
@@ -180,8 +190,9 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
     List<ToolbarButtonConfig> configs,
     int oldIndex,
     int newIndex,
-    ContextualToolbarConfigRepository repository,
-  ) {
+    ContextualToolbarConfigRepository repository, {
+    required bool isVisible,
+  }) {
     if (oldIndex == newIndex) return;
     final reorder = _resolveToolbarReorder(configs, oldIndex, newIndex);
     if (reorder.targetIndex == oldIndex) return;
@@ -192,6 +203,7 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
         oldIndex,
         reorder.targetIndex,
         reorder.movedId,
+        isVisible: isVisible,
       ),
     );
   }
@@ -201,22 +213,33 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
     List<ToolbarButtonConfig> configs,
     int oldIndex,
     int targetIndex,
-    String movedId,
-  ) async {
+    String movedId, {
+    required bool isVisible,
+  }) async {
+    // [configs] still contains the moved item. [targetIndex] is the
+    // post-removal destination index, clamped to [0, configs.length - 1].
+    // Because of the clamp, `>= configs.length - 1` only fires when the user
+    // dropped past the very last surviving item; `configs[targetIndex + 1]`
+    // is otherwise always a valid neighbour in the original list (since the
+    // moved item sits at oldIndex < targetIndex + 1 in the else branch).
     final String orderKey;
     if (targetIndex <= 0) {
-      orderKey = await repository.generateLeadingOrderKey();
+      orderKey = await repository.generateLeadingOrderKey(isVisible: isVisible);
     } else if (targetIndex >= configs.length - 1) {
-      orderKey = await repository.generateTrailingOrderKey();
+      orderKey = await repository.generateTrailingOrderKey(
+        isVisible: isVisible,
+      );
     } else if (targetIndex < oldIndex) {
       orderKey =
           await repository.generateOrderKeyAfterButtonId(
             configs[targetIndex - 1].buttonId,
+            isVisible: isVisible,
           ) ??
-          await repository.generateLeadingOrderKey();
+          await repository.generateLeadingOrderKey(isVisible: isVisible);
     } else {
       orderKey = await repository.generateOrderKeyBeforeButtonId(
         configs[targetIndex + 1].buttonId,
+        isVisible: isVisible,
       );
     }
     await repository.assignOrderKey(movedId, orderKey: orderKey);

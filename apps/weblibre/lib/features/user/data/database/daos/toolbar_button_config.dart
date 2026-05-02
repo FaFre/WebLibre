@@ -44,9 +44,24 @@ class ToolbarButtonConfigDao extends DatabaseAccessor<UserDatabase>
           .write(ToolbarButtonConfigsCompanion(orderKey: Value(orderKey)));
 
   Future<void> assignVisibility(String buttonId, {required bool visible}) =>
-      (update(db.toolbarButtonConfigs)
-            ..where((t) => t.buttonId.equals(buttonId)))
-          .write(ToolbarButtonConfigsCompanion(isVisible: Value(visible)));
+      transaction(() async {
+        // Land the toggled button at the trailing edge of its *new* section
+        // so its order_key always stays inside the visibility partition.
+        // Without this, a button keeps the key it was assigned in the other
+        // section and lands at an arbitrary position after the toggle.
+        final orderKey = await generateTrailingOrderKey(
+          isVisible: visible,
+        ).getSingle();
+
+        await (update(
+          db.toolbarButtonConfigs,
+        )..where((t) => t.buttonId.equals(buttonId))).write(
+          ToolbarButtonConfigsCompanion(
+            isVisible: Value(visible),
+            orderKey: Value(orderKey),
+          ),
+        );
+      });
 
   Future<void> assignFallback(String buttonId, String? fallbackId) =>
       (update(db.toolbarButtonConfigs)
@@ -74,7 +89,9 @@ class ToolbarButtonConfigDao extends DatabaseAccessor<UserDatabase>
     await transaction(() async {
       final inserted = <ToolbarButtonConfig>[];
       for (final def in missing) {
-        final orderKey = await generateTrailingOrderKey().getSingle();
+        final orderKey = await generateTrailingOrderKey(
+          isVisible: def.defaultVisible,
+        ).getSingle();
         inserted.add(
           ToolbarButtonConfig(
             buttonId: def.buttonId,
@@ -96,18 +113,37 @@ class ToolbarButtonConfigDao extends DatabaseAccessor<UserDatabase>
     });
   }
 
-  SingleSelectable<String> generateLeadingOrderKey({int bucket = 0}) =>
-      db.definitionsDrift.toolbarLeadingOrderKey(bucket: bucket);
+  SingleSelectable<String> generateLeadingOrderKey({
+    int bucket = 0,
+    required bool isVisible,
+  }) => db.definitionsDrift.toolbarLeadingOrderKey(
+    bucket: bucket,
+    isVisible: isVisible,
+  );
 
-  SingleSelectable<String> generateTrailingOrderKey({int bucket = 0}) =>
-      db.definitionsDrift.toolbarTrailingOrderKey(bucket: bucket);
+  SingleSelectable<String> generateTrailingOrderKey({
+    int bucket = 0,
+    required bool isVisible,
+  }) => db.definitionsDrift.toolbarTrailingOrderKey(
+    bucket: bucket,
+    isVisible: isVisible,
+  );
 
   SingleOrNullSelectable<String> generateOrderKeyAfterButtonId(
-    String buttonId,
-  ) => db.definitionsDrift.toolbarOrderKeyAfterButton(buttonId: buttonId);
+    String buttonId, {
+    required bool isVisible,
+  }) => db.definitionsDrift.toolbarOrderKeyAfterButton(
+    buttonId: buttonId,
+    isVisible: isVisible,
+  );
 
-  SingleSelectable<String> generateOrderKeyBeforeButtonId(String buttonId) =>
-      db.definitionsDrift.toolbarOrderKeyBeforeButton(buttonId: buttonId);
+  SingleSelectable<String> generateOrderKeyBeforeButtonId(
+    String buttonId, {
+    required bool isVisible,
+  }) => db.definitionsDrift.toolbarOrderKeyBeforeButton(
+    buttonId: buttonId,
+    isVisible: isVisible,
+  );
 
   Future<void> _insertWithDeferredFallbacks(
     List<ToolbarButtonConfig> configs,

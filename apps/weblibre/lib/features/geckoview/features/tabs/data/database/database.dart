@@ -31,7 +31,7 @@ import 'package:weblibre/features/search/domain/fts_tokenizer.dart';
 @DriftDatabase(include: {'definitions.drift'}, daos: [ContainerDao, TabDao])
 class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
   @override
-  final int schemaVersion = 7;
+  final int schemaVersion = 8;
 
   @override
   final int ftsTokenLimit = 10;
@@ -117,6 +117,25 @@ class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
     },
     from6To7: (m, schema) async {
       await m.addColumn(schema.tab, schema.tab.isPinned);
+    },
+    from7To8: (m, schema) async {
+      // Composite index supporting `tabsWithRootAndDepth` (parent existence
+      // checks scoped per container) and `lastChildTabId` (last child of a
+      // parent within a container). On large containers SQLite was falling
+      // back to per-row scans on the recursive seed.
+      //
+      // Also drop any rows whose `parent_id` references a tab that no
+      // longer exists (e.g. left over from a close that ran without the
+      // delete trigger). `tab_maintain_parent_chain_on_delete` keeps this
+      // clean going forward; the one-shot UPDATE here removes legacy
+      // dangling pointers so the new index is built on consistent data.
+      await m.database.customStatement(
+        'UPDATE tab SET parent_id = NULL '
+        'WHERE parent_id IS NOT NULL '
+        'AND NOT EXISTS (SELECT 1 FROM tab p WHERE p.id = tab.parent_id)',
+      );
+
+      await m.createIndex(schema.idxTabParentContainer);
     },
   );
 }

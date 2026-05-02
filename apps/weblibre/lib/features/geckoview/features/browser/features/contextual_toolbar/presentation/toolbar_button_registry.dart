@@ -46,6 +46,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
@@ -673,6 +674,23 @@ class _CloseTabToolbarButton extends HookConsumerWidget {
             },
             child: const Text('Close from Same Host'),
           ),
+        MenuItemButton(
+          leadingIcon: const Icon(Icons.account_tree),
+          onPressed: () async {
+            final tabId = scope.selectedTabId;
+            if (tabId == null) return;
+            final descendants = await ref
+                .read(tabDataRepositoryProvider.notifier)
+                .getTabDescendants(tabId);
+            if (!context.mounted) return;
+
+            final subtreeIds = descendants.keys.toList();
+            if (subtreeIds.isNotEmpty) {
+              await closeTabsWithConfirmation(context, ref, subtreeIds);
+            }
+          },
+          child: const Text('Close Tab and Descendants'),
+        ),
       ],
       child: IconButton(
         onPressed: scope.isPreview

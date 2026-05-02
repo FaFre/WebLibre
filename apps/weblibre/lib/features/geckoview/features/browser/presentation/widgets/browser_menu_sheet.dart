@@ -347,6 +347,24 @@ class _NavigationRow extends HookConsumerWidget {
                 },
                 child: const Text('Close from Same Host'),
               ),
+            MenuItemButton(
+              leadingIcon: const Icon(Icons.account_tree),
+              onPressed: () async {
+                final descendants = await ref
+                    .read(tabDataRepositoryProvider.notifier)
+                    .getTabDescendants(selectedTabId);
+                if (!context.mounted) return;
+
+                final subtreeIds = descendants.keys.toList();
+                if (subtreeIds.isNotEmpty) {
+                  await closeTabsWithConfirmation(context, ref, subtreeIds);
+                }
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('Close Tab and Descendants'),
+            ),
           ],
           child: _buildNavIcon(
             icon: MdiIcons.tabMinus,

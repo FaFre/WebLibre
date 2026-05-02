@@ -36,29 +36,66 @@ import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_view_reorder.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_context_menu_draggable.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_drop_target.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_group_expand_toggle.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
 import 'package:weblibre/features/geckoview/features/browser/utils/grid_calculations.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart'
+    show TabsWithRootAndDepthResult;
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
+/// Top-left expand/collapse toggle for grid cells. Returns null for any
+/// row that is not a parent — leaf children rely on the bottom-left depth
+/// indicator instead.
+Widget? _gridGroupToggleFor(TabViewItem row) {
+  final parentGroup = row.parentGroup;
+  if (parentGroup != null) {
+    return TabGroupExpandToggle(
+      parentId: parentGroup.tabId,
+      childCount: parentGroup.childCount,
+      style: TabGroupToggleStyle.grid,
+    );
+  }
+  final child = row.childItem;
+  if (child != null && child.childCount > 0) {
+    return TabGroupExpandToggle(
+      parentId: child.tabId,
+      childCount: child.childCount,
+      style: TabGroupToggleStyle.grid,
+    );
+  }
+  return null;
+}
+
+int _gridDepthFor(TabViewItem row) => row.childItem?.depth ?? 0;
+
 class _TabDraggable extends HookConsumerWidget {
-  final TabEntity entity;
+  final String tabId;
+  final String? sourceSearchQuery;
   final String? suggestedContainerId;
   final VoidCallback onClose;
+  final Widget? groupToggle;
+  final int depth;
 
   const _TabDraggable({
-    required this.entity,
+    required this.tabId,
     required this.onClose,
+    this.sourceSearchQuery,
     this.suggestedContainerId,
+    this.groupToggle,
+    this.depth = 0,
   });
 
   @override
@@ -73,7 +110,7 @@ class _TabDraggable extends HookConsumerWidget {
           null => null,
         };
 
-        return (dragTabId == entity.tabId) ? value : null;
+        return (dragTabId == tabId) ? value : null;
       }),
     );
 
@@ -81,8 +118,8 @@ class _TabDraggable extends HookConsumerWidget {
     final tab = useMemoized(() {
       return (suggestedContainerId != null)
           ? SuggestedSingleGridTabPreview(
-              key: ValueKey(entity.tabId),
-              tabId: entity.tabId,
+              key: ValueKey(tabId),
+              tabId: tabId,
               activeTabId: activeTab,
               onTap: () async {
                 final containerData = await ref
@@ -92,24 +129,20 @@ class _TabDraggable extends HookConsumerWidget {
                 if (containerData != null) {
                   await ref
                       .read(tabDataRepositoryProvider.notifier)
-                      .assignContainer(entity.tabId, containerData);
+                      .assignContainer(tabId, containerData);
                 }
               },
             )
           : SingleGridTabPreview(
-              key: ValueKey(entity.tabId),
-              tabId: entity.tabId,
+              key: ValueKey(tabId),
+              tabId: tabId,
               activeTabId: activeTab,
               onClose: onClose,
-              sourceSearchQuery: switch (entity) {
-                DefaultTabEntity _ => null,
-                final SearchResultTabEntity entity => entity.searchQuery,
-                TabTreeEntity _ => throw UnimplementedError(
-                  'TabTreeEntity not implemented in tab grid view',
-                ),
-              },
+              sourceSearchQuery: sourceSearchQuery,
+              groupToggle: groupToggle,
+              depth: depth,
             );
-    }, [entity.tabId, activeTab, suggestedContainerId]);
+    }, [tabId, activeTab, suggestedContainerId, groupToggle, depth]);
 
     return switch (dragData) {
       ContainerDropData() => Opacity(
@@ -144,19 +177,71 @@ class _TabGridView extends HookConsumerWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final disableAnimations = MediaQuery.disableAnimationsOf(context);
     final canManualReorder = ref.watch(canManualTabReorderProvider);
-    final reorderEnabled = tabsReorderable && canManualReorder;
-
     final containerId = ref.watch(selectedContainerProvider);
-
-    final filteredTabEntities = ref.watch(
-      seamlessFilteredTabEntitiesProvider(
-        searchPartition: TabSearchPartition.preview,
-        // ignore: document_ignores using fast equatable
-        // ignore: provider_parameters
-        containerFilter: ContainerFilterById(containerId: containerId),
-        groupTrees: false,
-      ),
+    final reorderEnabled = tabsReorderable && canManualReorder;
+    final filterOptions = ref.watch(tabViewFilterControllerProvider);
+    final showHierarchicalTabs = filterOptions.showHierarchicalTabs;
+    final tabListDirection = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.tabListDirection),
     );
+    final collapsedGroups = ref.watch(collapsedGroupsProvider);
+    final List<TabsWithRootAndDepthResult> treeRows = showHierarchicalTabs
+        ? ref.watch(
+            watchTabsWithRootAndDepthProvider(
+              containerId,
+            ).select((value) => value.value ?? const []),
+          )
+        : const <TabsWithRootAndDepthResult>[];
+
+    final hasActiveSearch = ref.watch(
+      tabSearchRepositoryProvider(
+        TabSearchPartition.preview,
+      ).select((value) => (value.value?.query ?? '').isNotEmpty),
+    );
+
+    final List<TabViewItem> primaryRows;
+    if (hasActiveSearch || !showHierarchicalTabs) {
+      final flat = ref.watch(
+        seamlessFilteredTabEntitiesProvider(
+          searchPartition: TabSearchPartition.preview,
+          // ignore: document_ignores using fast equatable
+          // ignore: provider_parameters
+          containerFilter: ContainerFilterById(containerId: containerId),
+          groupTrees: false,
+        ),
+      );
+      primaryRows = [
+        for (final entity in flat.value)
+          TabViewItem.search(
+            tabId: entity.tabId,
+            sourceSearchQuery: switch (entity) {
+              DefaultTabEntity _ => null,
+              final SearchResultTabEntity e => e.searchQuery,
+              TabTreeEntity _ => null,
+            },
+          ),
+      ];
+    } else {
+      final grouped = ref.watch(
+        groupedTabListItemsProvider(containerId: containerId),
+      );
+      primaryRows = [
+        for (final item in grouped.value)
+          switch (item) {
+            TabListStandaloneItem(:final tabId) => TabViewItem.standalone(
+              tabId: tabId,
+            ),
+            final TabListParentGroup g => TabViewItem.parent(
+              tabId: g.tabId,
+              parentGroup: g,
+            ),
+            final TabListChildItem c => TabViewItem.child(
+              tabId: c.tabId,
+              childItem: c,
+            ),
+          },
+      ];
+    }
 
     final tabSuggestionsEnabled = ref.watch(
       persistedBoolProvider(PersistedBoolKey.tabSuggestions),
@@ -167,12 +252,10 @@ class _TabGridView extends HookConsumerWidget {
         : EquatableValue(<TabEntity>[]);
 
     final itemCount =
-        filteredTabEntities.value.length +
+        primaryRows.length +
         //Limit to 3 sugegstions for now
         math.min<int>(suggestedTabEntities.value.length, 3);
-    final displayItemCount = reorderEnabled
-        ? filteredTabEntities.value.length
-        : itemCount;
+    final displayItemCount = reorderEnabled ? primaryRows.length : itemCount;
 
     final activeTab = ref.watch(selectedTabProvider);
 
@@ -205,9 +288,7 @@ class _TabGridView extends HookConsumerWidget {
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (scrollController.hasClients && activeTab != null) {
-          final index = filteredTabEntities.value.indexWhere(
-            (entity) => entity.tabId == activeTab,
-          );
+          final index = primaryRows.indexWhere((row) => row.tabId == activeTab);
 
           if (index > -1) {
             final row = index ~/ crossAxisCount;
@@ -273,7 +354,7 @@ class _TabGridView extends HookConsumerWidget {
                     return widget;
                   },
                   suggestedContainerId: containerId,
-                  filteredTabEntities: filteredTabEntities,
+                  primaryRows: primaryRows,
                   suggestedTabEntities: suggestedTabEntities,
                   onClose: onClose,
                 )
@@ -294,57 +375,30 @@ class _TabGridView extends HookConsumerWidget {
                     final oldIndex = positions.first.oldIndex;
                     final newIndex = positions.first.newIndex;
 
-                    final containerRepository = ref.read(
-                      containerRepositoryProvider.notifier,
-                    );
-
                     //Suggestions are at the end and not reorderable, so skip
-                    if (oldIndex >= filteredTabEntities.value.length) {
+                    if (oldIndex >= primaryRows.length) {
                       return;
                     }
 
-                    final tabId = filteredTabEntities.value[oldIndex].tabId;
-                    final containerId = await ref
-                        .read(tabDataRepositoryProvider.notifier)
-                        .getTabContainerId(tabId);
-
-                    var targetIndex = newIndex;
-                    if (targetIndex > oldIndex) {
-                      targetIndex -= 1;
-                    }
-
-                    targetIndex = targetIndex.clamp(
-                      0,
-                      filteredTabEntities.value.length - 1,
+                    final result = buildTabViewReorderResult(
+                      visibleItems: primaryRows,
+                      treeRows: treeRows,
+                      collapsedGroups: collapsedGroups,
+                      oldIndex: oldIndex,
+                      newIndex: newIndex,
+                      tabListDirection: tabListDirection,
+                      hierarchical: showHierarchicalTabs && !hasActiveSearch,
                     );
 
-                    final String key;
-                    if (targetIndex <= 0) {
-                      key = await containerRepository.getLeadingOrderKey(
-                        containerId,
-                      );
-                    } else if (targetIndex >=
-                        filteredTabEntities.value.length - 1) {
-                      key = await containerRepository.getTrailingOrderKey(
-                        containerId,
-                      );
-                    } else {
-                      if (targetIndex < oldIndex) {
-                        key = (await containerRepository.getOrderKeyAfterTab(
-                          filteredTabEntities.value[targetIndex - 1].tabId,
-                          containerId,
-                        ))!;
-                      } else {
-                        key = await containerRepository.getOrderKeyBeforeTab(
-                          filteredTabEntities.value[targetIndex + 1].tabId,
-                          containerId,
-                        );
-                      }
-                    }
+                    if (result == null) return;
 
                     await ref
                         .read(tabDataRepositoryProvider.notifier)
-                        .assignOrderKey(tabId, key);
+                        .reorderTabs(
+                          movingTabIds: result.movingTabIds,
+                          previousTabId: result.previousTabId,
+                          nextTabId: result.nextTabId,
+                        );
                   },
                   childBuilder: (reorderableItemBuilder) {
                     return _TabGrid(
@@ -371,7 +425,7 @@ class _TabGridView extends HookConsumerWidget {
                         return reorderableItemBuilder(wrapped, index);
                       },
                       suggestedContainerId: containerId,
-                      filteredTabEntities: filteredTabEntities,
+                      primaryRows: primaryRows,
                       suggestedTabEntities: suggestedTabEntities,
                       onClose: onClose,
                     );
@@ -391,7 +445,7 @@ class _TabGrid extends StatelessWidget {
     required this.itemCount,
     required this.itemBuilder,
     required this.suggestedContainerId,
-    required this.filteredTabEntities,
+    required this.primaryRows,
     required this.suggestedTabEntities,
     required this.onClose,
   });
@@ -400,7 +454,7 @@ class _TabGrid extends StatelessWidget {
   final int itemCount;
   final ScrollController? scrollController;
   final String? suggestedContainerId;
-  final EquatableValue<List<TabEntity>> filteredTabEntities;
+  final List<TabViewItem> primaryRows;
   final EquatableValue<List<TabEntity>> suggestedTabEntities;
   final Widget Function(Widget, int)? itemBuilder;
   final VoidCallback onClose;
@@ -419,34 +473,37 @@ class _TabGrid extends StatelessWidget {
       ),
       itemCount: itemCount,
       itemBuilder: (context, index) {
-        final TabEntity entity;
-        final String? suggestedId;
+        if (index < primaryRows.length) {
+          final row = primaryRows[index];
+          final tab = CustomDraggable(
+            key: Key(row.tabId),
+            data: TabDragData(row.tabId),
+            child: _TabDraggable(
+              tabId: row.tabId,
+              sourceSearchQuery: row.sourceSearchQuery,
+              onClose: onClose,
+              groupToggle: _gridGroupToggleFor(row),
+              depth: _gridDepthFor(row),
+            ),
+          );
 
-        if (index < filteredTabEntities.value.length) {
-          entity = filteredTabEntities.value[index];
-          suggestedId = null;
-        } else {
-          final suggestedIndex = index - filteredTabEntities.value.length;
-          entity = suggestedTabEntities.value[suggestedIndex];
-          suggestedId = suggestedContainerId;
+          if (itemBuilder == null) {
+            return TabDropTarget(targetTabId: row.tabId, child: tab);
+          }
+          return itemBuilder!(tab, index);
         }
+
+        final suggestedIndex = index - primaryRows.length;
+        final entity = suggestedTabEntities.value[suggestedIndex];
 
         final tab = CustomDraggable(
-          key: Key(
-            suggestedId != null ? 'suggested_${entity.tabId}' : entity.tabId,
-          ),
-          data: suggestedId != null ? null : TabDragData(entity.tabId),
+          key: Key('suggested_${entity.tabId}'),
           child: _TabDraggable(
-            entity: entity,
+            tabId: entity.tabId,
             onClose: onClose,
-            suggestedContainerId: suggestedId,
+            suggestedContainerId: suggestedContainerId,
           ),
         );
-
-        // Only add DragTarget for non-suggested tabs in non-reorder mode
-        if (suggestedId == null && itemBuilder == null) {
-          return TabDropTarget(targetTabId: entity.tabId, child: tab);
-        }
 
         return (itemBuilder != null) ? itemBuilder!(tab, index) : tab;
       },

@@ -2024,36 +2024,46 @@ i0.Index get idxToolbarOrderKey => i0.Index(
 
 class DefinitionsDrift extends i3.ModularAccessor {
   DefinitionsDrift(i0.GeneratedDatabase db) : super(db);
-  i0.Selectable<String> toolbarLeadingOrderKey({required int bucket}) {
+  i0.Selectable<String> toolbarLeadingOrderKey({
+    required int bucket,
+    required bool isVisible,
+  }) {
     return customSelect(
-      'SELECT lexo_rank_previous(?1, (SELECT order_key FROM toolbar_button_configs ORDER BY order_key LIMIT 1)) AS _c0',
-      variables: [i0.Variable<int>(bucket)],
+      'SELECT lexo_rank_previous(?1, (SELECT order_key FROM toolbar_button_configs WHERE is_visible = ?2 ORDER BY order_key LIMIT 1)) AS _c0',
+      variables: [i0.Variable<int>(bucket), i0.Variable<bool>(isVisible)],
       readsFrom: {toolbarButtonConfigs},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
-  i0.Selectable<String> toolbarTrailingOrderKey({required int bucket}) {
+  i0.Selectable<String> toolbarTrailingOrderKey({
+    required int bucket,
+    required bool isVisible,
+  }) {
     return customSelect(
-      'SELECT lexo_rank_next(?1, (SELECT order_key FROM toolbar_button_configs ORDER BY order_key DESC LIMIT 1)) AS _c0',
-      variables: [i0.Variable<int>(bucket)],
+      'SELECT lexo_rank_next(?1, (SELECT order_key FROM toolbar_button_configs WHERE is_visible = ?2 ORDER BY order_key DESC LIMIT 1)) AS _c0',
+      variables: [i0.Variable<int>(bucket), i0.Variable<bool>(isVisible)],
       readsFrom: {toolbarButtonConfigs},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
-  i0.Selectable<String> toolbarOrderKeyAfterButton({required String buttonId}) {
+  i0.Selectable<String> toolbarOrderKeyAfterButton({
+    required bool isVisible,
+    required String buttonId,
+  }) {
     return customSelect(
-      'WITH ordered_table AS (SELECT button_id, order_key, LEAD(order_key)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS next_order_key FROM toolbar_button_configs) SELECT lexo_rank_reorder_after(order_key, next_order_key) AS _c0 FROM ordered_table WHERE button_id = ?1',
-      variables: [i0.Variable<String>(buttonId)],
+      'WITH ordered_table AS (SELECT button_id, order_key, LEAD(order_key)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS next_order_key FROM toolbar_button_configs WHERE is_visible = ?1) SELECT lexo_rank_reorder_after(order_key, next_order_key) AS _c0 FROM ordered_table WHERE button_id = ?2',
+      variables: [i0.Variable<bool>(isVisible), i0.Variable<String>(buttonId)],
       readsFrom: {toolbarButtonConfigs},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
   i0.Selectable<String> toolbarOrderKeyBeforeButton({
+    required bool isVisible,
     required String buttonId,
   }) {
     return customSelect(
-      'WITH ordered_table AS (SELECT button_id, order_key, LAG(order_key)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS prev_order_key FROM toolbar_button_configs) SELECT lexo_rank_reorder_before(order_key, prev_order_key) AS _c0 FROM ordered_table WHERE button_id = ?1',
-      variables: [i0.Variable<String>(buttonId)],
+      'WITH ordered_table AS (SELECT button_id, order_key, LAG(order_key)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS prev_order_key FROM toolbar_button_configs WHERE is_visible = ?1) SELECT lexo_rank_reorder_before(order_key, prev_order_key) AS _c0 FROM ordered_table WHERE button_id = ?2',
+      variables: [i0.Variable<bool>(isVisible), i0.Variable<String>(buttonId)],
       readsFrom: {toolbarButtonConfigs},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }

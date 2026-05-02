@@ -49,7 +49,7 @@ final class CanManualTabReorderProvider
 }
 
 String _$canManualTabReorderHash() =>
-    r'ba5d961933464b6e005d7945802908a9a4ae034b';
+    r'598bc67a750f45893ba555b9b7866499b1808896';
 
 @ProviderFor(SelectedBangTrigger)
 final selectedBangTriggerProvider = SelectedBangTriggerFamily._();
@@ -529,7 +529,7 @@ final class SelectedContainerTabStatesWithContainerProvider
 }
 
 String _$selectedContainerTabStatesWithContainerHash() =>
-    r'187e408857ddc5fe08f8e5344beb510c3c39abe1';
+    r'6b630cdfc589af6961d4c96c90d09bd107560f15';
 
 @ProviderFor(quickTabSwitcherTabStates)
 final quickTabSwitcherTabStatesProvider = QuickTabSwitcherTabStatesFamily._();
@@ -601,7 +601,7 @@ final class QuickTabSwitcherTabStatesProvider
 }
 
 String _$quickTabSwitcherTabStatesHash() =>
-    r'd83ea34d366238681baaad0b36699ee0742edc3d';
+    r'32e928b4596ef2388f8c0e4cfdcf8f3563a1e24a';
 
 final class QuickTabSwitcherTabStatesFamily extends $Family
     with
@@ -962,7 +962,7 @@ final class SeamlessFilteredTabEntitiesProvider
 }
 
 String _$seamlessFilteredTabEntitiesHash() =>
-    r'bc6833f975e9af3b2117268d7644dc56131c85a3';
+    r'79abca3ad2753af4482c0e3bcfa317a6f336ca17';
 
 final class SeamlessFilteredTabEntitiesFamily extends $Family
     with
@@ -1093,6 +1093,139 @@ final class FilteredTabPreviewsFamily extends $Family
 
   @override
   String toString() => r'filteredTabPreviewsProvider';
+}
+
+/// Grouped flat-list rendering for the list and grid views.
+///
+/// Parent rows always render before their descendants. [TabListDirection]
+/// applies both to root group ordering and to sibling ordering below each
+/// parent, so parent-child pairs stay together while child order still follows
+/// the configured direction.
+///
+/// Returns `null` when the input data is not yet available (loading).
+
+@ProviderFor(groupedTabListItems)
+final groupedTabListItemsProvider = GroupedTabListItemsFamily._();
+
+/// Grouped flat-list rendering for the list and grid views.
+///
+/// Parent rows always render before their descendants. [TabListDirection]
+/// applies both to root group ordering and to sibling ordering below each
+/// parent, so parent-child pairs stay together while child order still follows
+/// the configured direction.
+///
+/// Returns `null` when the input data is not yet available (loading).
+
+final class GroupedTabListItemsProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<List<TabListItemEntity>>,
+          EquatableValue<List<TabListItemEntity>>,
+          EquatableValue<List<TabListItemEntity>>
+        >
+    with $Provider<EquatableValue<List<TabListItemEntity>>> {
+  /// Grouped flat-list rendering for the list and grid views.
+  ///
+  /// Parent rows always render before their descendants. [TabListDirection]
+  /// applies both to root group ordering and to sibling ordering below each
+  /// parent, so parent-child pairs stay together while child order still follows
+  /// the configured direction.
+  ///
+  /// Returns `null` when the input data is not yet available (loading).
+  GroupedTabListItemsProvider._({
+    required GroupedTabListItemsFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'groupedTabListItemsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$groupedTabListItemsHash();
+
+  @override
+  String toString() {
+    return r'groupedTabListItemsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<List<TabListItemEntity>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<List<TabListItemEntity>> create(Ref ref) {
+    final argument = this.argument as String?;
+    return groupedTabListItems(ref, containerId: argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EquatableValue<List<TabListItemEntity>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<EquatableValue<List<TabListItemEntity>>>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is GroupedTabListItemsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$groupedTabListItemsHash() =>
+    r'48c7c971d95934afb48aa19b7400e208ee2f10e4';
+
+/// Grouped flat-list rendering for the list and grid views.
+///
+/// Parent rows always render before their descendants. [TabListDirection]
+/// applies both to root group ordering and to sibling ordering below each
+/// parent, so parent-child pairs stay together while child order still follows
+/// the configured direction.
+///
+/// Returns `null` when the input data is not yet available (loading).
+
+final class GroupedTabListItemsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          EquatableValue<List<TabListItemEntity>>,
+          String?
+        > {
+  GroupedTabListItemsFamily._()
+    : super(
+        retry: null,
+        name: r'groupedTabListItemsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Grouped flat-list rendering for the list and grid views.
+  ///
+  /// Parent rows always render before their descendants. [TabListDirection]
+  /// applies both to root group ordering and to sibling ordering below each
+  /// parent, so parent-child pairs stay together while child order still follows
+  /// the configured direction.
+  ///
+  /// Returns `null` when the input data is not yet available (loading).
+
+  GroupedTabListItemsProvider call({required String? containerId}) =>
+      GroupedTabListItemsProvider._(argument: containerId, from: this);
+
+  @override
+  String toString() => r'groupedTabListItemsProvider';
 }
 
 @ProviderFor(AppLinksModeNotifier)

@@ -46,7 +46,9 @@ enum QuickTabSwitcherMode { lastUsedTabs, containerTabs }
 
 enum TabIntentOpenSetting { regular, private, ask }
 
-enum NewTabPosition { first, end }
+enum TabListDirection { newestFirst, oldestFirst }
+
+enum TabBarDirection { newestFirst, oldestFirst }
 
 enum TabBarPosition { top, bottom }
 
@@ -86,7 +88,8 @@ class GeneralSettings with FastEquatable {
   final bool showIsolatedTabUi;
   @JsonKey(name: 'defaultCreateTabType')
   final TabType storedDefaultCreateTabType;
-  final NewTabPosition newTabPosition;
+  final TabListDirection tabListDirection;
+  final TabBarDirection tabBarDirection;
   final TabIntentOpenSetting tabIntentOpenSetting;
   final bool autoHideTabBar;
   final TabBarSwipeAction tabBarSwipeAction;
@@ -140,7 +143,8 @@ class GeneralSettings with FastEquatable {
     required this.showContainerUi,
     required this.showIsolatedTabUi,
     required this.storedDefaultCreateTabType,
-    required this.newTabPosition,
+    required this.tabListDirection,
+    required this.tabBarDirection,
     required this.tabIntentOpenSetting,
     required this.autoHideTabBar,
     required this.tabBarSwipeAction,
@@ -195,7 +199,8 @@ class GeneralSettings with FastEquatable {
     bool? showContainerUi,
     bool? showIsolatedTabUi,
     TabType? storedDefaultCreateTabType,
-    NewTabPosition? newTabPosition,
+    TabListDirection? tabListDirection,
+    TabBarDirection? tabBarDirection,
     TabIntentOpenSetting? tabIntentOpenSetting,
     bool? autoHideTabBar,
     TabBarSwipeAction? tabBarSwipeAction,
@@ -248,7 +253,8 @@ class GeneralSettings with FastEquatable {
        showIsolatedTabUi = showIsolatedTabUi ?? true,
        storedDefaultCreateTabType =
            storedDefaultCreateTabType ?? TabType.regular,
-       newTabPosition = newTabPosition ?? NewTabPosition.first,
+       tabListDirection = tabListDirection ?? TabListDirection.newestFirst,
+       tabBarDirection = tabBarDirection ?? TabBarDirection.newestFirst,
        tabIntentOpenSetting = tabIntentOpenSetting ?? TabIntentOpenSetting.ask,
        autoHideTabBar = autoHideTabBar ?? true,
        tabBarSwipeAction =
@@ -295,8 +301,23 @@ class GeneralSettings with FastEquatable {
        blockExternalAppsEnabled = blockExternalAppsEnabled ?? false,
        externalAppIntentPolicies = externalAppIntentPolicies ?? const {};
 
-  factory GeneralSettings.fromJson(Map<String, dynamic> json) =>
-      _$GeneralSettingsFromJson(json);
+  factory GeneralSettings.fromJson(Map<String, dynamic> json) {
+    // Migrate legacy `newTabPosition` setting to direction settings.
+    // Old `first` (new tabs at top) → newestFirst; `end` → oldestFirst.
+    // TODO: Drop this fallback (and the `newTabPosition` row in the user
+    // settings DB) once enough releases have shipped that rolling back to a
+    // version without `tabListDirection`/`tabBarDirection` is no longer a
+    // concern.
+    final legacyNewTabPosition = json['newTabPosition'];
+    if (legacyNewTabPosition != null) {
+      final mapped = legacyNewTabPosition == 'end'
+          ? 'oldestFirst'
+          : 'newestFirst';
+      json.putIfAbsent('tabListDirection', () => mapped);
+      json.putIfAbsent('tabBarDirection', () => mapped);
+    }
+    return _$GeneralSettingsFromJson(json);
+  }
 
   Map<String, dynamic> toJson() => _$GeneralSettingsToJson(this);
 
@@ -332,7 +353,8 @@ class GeneralSettings with FastEquatable {
     showContainerUi,
     showIsolatedTabUi,
     storedDefaultCreateTabType,
-    newTabPosition,
+    tabListDirection,
+    tabBarDirection,
     tabIntentOpenSetting,
     autoHideTabBar,
     tabBarSwipeAction,

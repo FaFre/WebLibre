@@ -97,7 +97,7 @@ final class TabViewFilterControllerProvider
 }
 
 String _$tabViewFilterControllerHash() =>
-    r'95e8a03d60ebe05e0c5df38f810f951a4fe2ed78';
+    r'6f5d42761765c0135bf40953c574c17d141ffab2';
 
 @JsonPersist()
 abstract class _$TabViewFilterControllerBase
@@ -112,6 +112,80 @@ abstract class _$TabViewFilterControllerBase
             as $ClassProviderElement<
               AnyNotifier<TabViewFilterOptions, TabViewFilterOptions>,
               TabViewFilterOptions,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
+/// Tracks which parent groups are *collapsed* in the grouped list/grid views.
+///
+/// Stored as the collapsed set so groups default to expanded for fresh
+/// sessions. In-memory only — group expansion is treated as ephemeral UI
+/// state, not a persisted setting.
+
+@ProviderFor(CollapsedGroups)
+final collapsedGroupsProvider = CollapsedGroupsProvider._();
+
+/// Tracks which parent groups are *collapsed* in the grouped list/grid views.
+///
+/// Stored as the collapsed set so groups default to expanded for fresh
+/// sessions. In-memory only — group expansion is treated as ephemeral UI
+/// state, not a persisted setting.
+final class CollapsedGroupsProvider
+    extends $NotifierProvider<CollapsedGroups, Set<String>> {
+  /// Tracks which parent groups are *collapsed* in the grouped list/grid views.
+  ///
+  /// Stored as the collapsed set so groups default to expanded for fresh
+  /// sessions. In-memory only — group expansion is treated as ephemeral UI
+  /// state, not a persisted setting.
+  CollapsedGroupsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'collapsedGroupsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$collapsedGroupsHash();
+
+  @$internal
+  @override
+  CollapsedGroups create() => CollapsedGroups();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Set<String> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Set<String>>(value),
+    );
+  }
+}
+
+String _$collapsedGroupsHash() => r'f2434cc008720240513a41bd11eea6656aeb0c13';
+
+/// Tracks which parent groups are *collapsed* in the grouped list/grid views.
+///
+/// Stored as the collapsed set so groups default to expanded for fresh
+/// sessions. In-memory only — group expansion is treated as ephemeral UI
+/// state, not a persisted setting.
+
+abstract class _$CollapsedGroups extends $Notifier<Set<String>> {
+  Set<String> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<Set<String>, Set<String>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<Set<String>, Set<String>>,
+              Set<String>,
               Object?,
               Object?
             >;

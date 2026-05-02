@@ -2060,6 +2060,11 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
   }
 }
 
+i0.Index get idxTabParentContainer => i0.Index(
+  'idx_tab_parent_container',
+  'CREATE INDEX idx_tab_parent_container ON tab (parent_id, container_id)',
+);
+
 class TabFts extends i0.Table
     with i0.TableInfo<TabFts, i3.TabFt>, i0.VirtualTableInfo<TabFts, i3.TabFt> {
   @override
@@ -2406,6 +2411,20 @@ class DefinitionsDrift extends i9.ModularAccessor {
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
+  i0.Selectable<String> lastChildTabId({
+    required String parentId,
+    required String? containerId,
+  }) {
+    return customSelect(
+      'SELECT id FROM tab WHERE parent_id = ?1 AND container_id IS ?2 ORDER BY order_key DESC LIMIT 1',
+      variables: [
+        i0.Variable<String>(parentId),
+        i0.Variable<String>(containerId),
+      ],
+      readsFrom: {tab},
+    ).map((i0.QueryRow row) => row.read<String>('id'));
+  }
+
   i0.Selectable<String> orderKeyAfterTab({
     required String? containerId,
     required String tabId,
@@ -2500,6 +2519,35 @@ class DefinitionsDrift extends i9.ModularAccessor {
         totalTabs: row.read<int>('total_tabs'),
       ),
     );
+  }
+
+  i0.Selectable<TabsWithRootAndDepthResult> tabsWithRootAndDepth({
+    required String? containerId,
+  }) {
+    return customSelect(
+      'WITH RECURSIVE walk (id, parent_id, order_key, root_id, depth) AS (SELECT t.id, t.parent_id, t.order_key, t.id AS root_id, 0 AS depth FROM tab AS t WHERE t.container_id IS ?1 AND(t.parent_id IS NULL OR NOT EXISTS (SELECT 1 FROM tab AS p WHERE p.id = t.parent_id AND p.container_id IS ?1))UNION ALL SELECT t.id, t.parent_id, t.order_key, w.root_id, w.depth + 1 FROM tab AS t INNER JOIN walk AS w ON t.parent_id = w.id WHERE t.container_id IS ?1) SELECT id, parent_id, order_key, root_id, depth FROM walk',
+      variables: [i0.Variable<String>(containerId)],
+      readsFrom: {tab},
+    ).map(
+      (i0.QueryRow row) => TabsWithRootAndDepthResult(
+        id: row.read<String>('id'),
+        parentId: row.readNullable<String>('parent_id'),
+        orderKey: row.read<String>('order_key'),
+        rootId: row.read<String>('root_id'),
+        depth: row.read<int>('depth'),
+      ),
+    );
+  }
+
+  i0.Selectable<String> lastSubtreeTabIdByOrderKey({
+    required String tabId,
+    required String? containerId,
+  }) {
+    return customSelect(
+      'WITH RECURSIVE subtree AS (SELECT id, order_key FROM tab WHERE id = ?1 AND container_id IS ?2 UNION ALL SELECT t.id, t.order_key FROM tab AS t INNER JOIN subtree AS s ON t.parent_id = s.id WHERE t.container_id IS ?2) SELECT id FROM subtree ORDER BY order_key DESC LIMIT 1',
+      variables: [i0.Variable<String>(tabId), i0.Variable<String>(containerId)],
+      readsFrom: {tab},
+    ).map((i0.QueryRow row) => row.read<String>('id'));
   }
 
   i0.Selectable<UnorderedTabDescendantsResult> unorderedTabDescendants({
@@ -2655,6 +2703,21 @@ class TabTreesResult {
     required this.latestTabId,
     required this.latestTimestamp,
     required this.totalTabs,
+  });
+}
+
+class TabsWithRootAndDepthResult {
+  final String id;
+  final String? parentId;
+  final String orderKey;
+  final String rootId;
+  final int depth;
+  TabsWithRootAndDepthResult({
+    required this.id,
+    this.parentId,
+    required this.orderKey,
+    required this.rootId,
+    required this.depth,
   });
 }
 

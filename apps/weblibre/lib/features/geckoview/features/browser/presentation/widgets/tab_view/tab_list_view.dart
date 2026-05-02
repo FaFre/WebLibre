@@ -35,13 +35,19 @@ import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_view_reorder.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_context_menu_draggable.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_drop_target.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_group_expand_toggle.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart'
+    show TabsWithRootAndDepthResult;
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -49,17 +55,47 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/ta
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
+/// Build the hierarchy toggle injected into [ListTabPreview.groupToggle].
+///
+/// Returns a [TabGroupExpandToggle] for any node with descendants
+/// (root parents AND intermediate children), and null otherwise.
+Widget? _listGroupToggleFor(TabViewItem row) {
+  final parentGroup = row.parentGroup;
+  if (parentGroup != null) {
+    return TabGroupExpandToggle(
+      parentId: parentGroup.tabId,
+      childCount: parentGroup.childCount,
+    );
+  }
+  final child = row.childItem;
+  if (child != null && child.childCount > 0) {
+    return TabGroupExpandToggle(
+      parentId: child.tabId,
+      childCount: child.childCount,
+    );
+  }
+  return null;
+}
+
+int _depthFor(TabViewItem row) => row.childItem?.depth ?? 0;
+
 class _TabDraggable extends HookConsumerWidget {
-  final TabEntity entity;
+  final String tabId;
+  final String? sourceSearchQuery;
   final String? suggestedContainerId;
   final VoidCallback onClose;
   final double height;
+  final Widget? groupToggle;
+  final int depth;
 
   const _TabDraggable({
-    required this.entity,
+    required this.tabId,
     required this.onClose,
     required this.height,
+    this.sourceSearchQuery,
     this.suggestedContainerId,
+    this.groupToggle,
+    this.depth = 0,
   });
 
   @override
@@ -75,7 +111,7 @@ class _TabDraggable extends HookConsumerWidget {
           null => null,
         };
 
-        return (dragTabId == entity.tabId) ? value : null;
+        return (dragTabId == tabId) ? value : null;
       }),
     );
 
@@ -83,8 +119,8 @@ class _TabDraggable extends HookConsumerWidget {
     final tab = useMemoized(() {
       return (suggestedContainerId != null)
           ? SuggestedSingleListTabPreview(
-              key: ValueKey(entity.tabId),
-              tabId: entity.tabId,
+              key: ValueKey(tabId),
+              tabId: tabId,
               activeTabId: activeTab,
               onTap: () async {
                 final containerData = await ref
@@ -94,24 +130,20 @@ class _TabDraggable extends HookConsumerWidget {
                 if (containerData != null) {
                   await ref
                       .read(tabDataRepositoryProvider.notifier)
-                      .assignContainer(entity.tabId, containerData);
+                      .assignContainer(tabId, containerData);
                 }
               },
             )
           : SingleListTabPreview(
-              key: ValueKey(entity.tabId),
-              tabId: entity.tabId,
+              key: ValueKey(tabId),
+              tabId: tabId,
               activeTabId: activeTab,
               onClose: onClose,
-              sourceSearchQuery: switch (entity) {
-                DefaultTabEntity _ => null,
-                final SearchResultTabEntity entity => entity.searchQuery,
-                TabTreeEntity _ => throw UnimplementedError(
-                  'TabTreeEntity not implemented in tab list view',
-                ),
-              },
+              sourceSearchQuery: sourceSearchQuery,
+              groupToggle: groupToggle,
+              depth: depth,
             );
-    }, [entity.tabId, activeTab, suggestedContainerId]);
+    }, [tabId, activeTab, suggestedContainerId, groupToggle, depth]);
 
     return switch (dragData) {
       ContainerDropData() => Opacity(
@@ -208,16 +240,69 @@ class _TabListView extends HookConsumerWidget {
     final containerId = ref.watch(selectedContainerProvider);
     final canManualReorder = ref.watch(canManualTabReorderProvider);
     final reorderEnabled = tabsReorderable && canManualReorder;
-
-    final filteredTabEntities = ref.watch(
-      seamlessFilteredTabEntitiesProvider(
-        searchPartition: TabSearchPartition.preview,
-        // ignore: document_ignores using fast equatable
-        // ignore: provider_parameters
-        containerFilter: ContainerFilterById(containerId: containerId),
-        groupTrees: false,
-      ),
+    final filterOptions = ref.watch(tabViewFilterControllerProvider);
+    final showHierarchicalTabs = filterOptions.showHierarchicalTabs;
+    final tabListDirection = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.tabListDirection),
     );
+    final collapsedGroups = ref.watch(collapsedGroupsProvider);
+    final List<TabsWithRootAndDepthResult> treeRows = showHierarchicalTabs
+        ? ref.watch(
+            watchTabsWithRootAndDepthProvider(
+              containerId,
+            ).select((value) => value.value ?? const []),
+          )
+        : const <TabsWithRootAndDepthResult>[];
+
+    final hasActiveSearch = ref.watch(
+      tabSearchRepositoryProvider(
+        TabSearchPartition.preview,
+      ).select((value) => (value.value?.query ?? '').isNotEmpty),
+    );
+
+    final List<TabViewItem> primaryRows;
+    if (hasActiveSearch || !showHierarchicalTabs) {
+      final flat = ref.watch(
+        seamlessFilteredTabEntitiesProvider(
+          searchPartition: TabSearchPartition.preview,
+          // ignore: document_ignores using fast equatable
+          // ignore: provider_parameters
+          containerFilter: ContainerFilterById(containerId: containerId),
+          groupTrees: false,
+        ),
+      );
+      primaryRows = [
+        for (final entity in flat.value)
+          TabViewItem.search(
+            tabId: entity.tabId,
+            sourceSearchQuery: switch (entity) {
+              DefaultTabEntity _ => null,
+              final SearchResultTabEntity e => e.searchQuery,
+              TabTreeEntity _ => null,
+            },
+          ),
+      ];
+    } else {
+      final grouped = ref.watch(
+        groupedTabListItemsProvider(containerId: containerId),
+      );
+      primaryRows = [
+        for (final item in grouped.value)
+          switch (item) {
+            TabListStandaloneItem(:final tabId) => TabViewItem.standalone(
+              tabId: tabId,
+            ),
+            final TabListParentGroup g => TabViewItem.parent(
+              tabId: g.tabId,
+              parentGroup: g,
+            ),
+            final TabListChildItem c => TabViewItem.child(
+              tabId: c.tabId,
+              childItem: c,
+            ),
+          },
+      ];
+    }
 
     final tabSuggestionsEnabled = ref.watch(
       persistedBoolProvider(PersistedBoolKey.tabSuggestions),
@@ -228,12 +313,10 @@ class _TabListView extends HookConsumerWidget {
         : EquatableValue(<TabEntity>[]);
 
     final itemCount =
-        filteredTabEntities.value.length +
+        primaryRows.length +
         //Limit to 3 sugegstions for now
         math.min<int>(suggestedTabEntities.value.length, 3);
-    final displayItemCount = reorderEnabled
-        ? filteredTabEntities.value.length
-        : itemCount;
+    final displayItemCount = reorderEnabled ? primaryRows.length : itemCount;
 
     final activeTab = ref.watch(selectedTabProvider);
 
@@ -244,9 +327,7 @@ class _TabListView extends HookConsumerWidget {
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (scrollController.hasClients && activeTab != null) {
-          final index = filteredTabEntities.value.indexWhere(
-            (entity) => entity.tabId == activeTab,
-          );
+          final index = primaryRows.indexWhere((row) => row.tabId == activeTab);
 
           if (index > -1) {
             final viewportStart = scrollController.offset;
@@ -302,50 +383,50 @@ class _TabListView extends HookConsumerWidget {
                   itemCount: displayItemCount,
                   itemExtent: _itemHeight,
                   itemBuilder: (context, index) {
-                    final TabEntity entity;
-                    final String? suggestedId;
+                    if (index < primaryRows.length) {
+                      final row = primaryRows[index];
+                      final tab = CustomDraggable(
+                        key: Key(row.tabId),
+                        data: TabDragData(row.tabId),
+                        child: _TabDraggable(
+                          tabId: row.tabId,
+                          onClose: onClose,
+                          sourceSearchQuery: row.sourceSearchQuery,
+                          height: _itemHeight,
+                          groupToggle: _listGroupToggleFor(row),
+                          depth: _depthFor(row),
+                        ),
+                      );
 
-                    if (index < filteredTabEntities.value.length) {
-                      entity = filteredTabEntities.value[index];
-                      suggestedId = null;
-                    } else {
-                      final suggestedIndex =
-                          index - filteredTabEntities.value.length;
-                      entity = suggestedTabEntities.value[suggestedIndex];
-                      suggestedId = containerId;
+                      return TabDropTarget(
+                        targetTabId: row.tabId,
+                        child: TabContextMenuDraggable(
+                          tabId: row.tabId,
+                          data: tab.data! as TabDragData,
+                          feedbackSize: Size(
+                            MediaQuery.of(context).size.width,
+                            _itemHeight,
+                          ),
+                          child: tab.child,
+                        ),
+                      );
                     }
 
+                    final suggestedIndex = index - primaryRows.length;
+                    final entity = suggestedTabEntities.value[suggestedIndex];
                     final tab = CustomDraggable(
-                      key: Key(
-                        suggestedId != null
-                            ? 'suggested_${entity.tabId}'
-                            : entity.tabId,
-                      ),
-                      data: suggestedId != null
-                          ? null
-                          : TabDragData(entity.tabId),
+                      key: Key('suggested_${entity.tabId}'),
                       child: _TabDraggable(
-                        entity: entity,
+                        tabId: entity.tabId,
                         onClose: onClose,
-                        suggestedContainerId: suggestedId,
+                        suggestedContainerId: containerId,
                         height: _itemHeight,
                       ),
                     );
-
                     return TabDropTarget(
                       targetTabId: entity.tabId,
-                      enabled: suggestedId == null,
-                      child: tab.data is TabDragData
-                          ? TabContextMenuDraggable(
-                              tabId: (tab.data! as TabDragData).tabId,
-                              data: tab.data! as TabDragData,
-                              feedbackSize: Size(
-                                MediaQuery.of(context).size.width,
-                                _itemHeight,
-                              ),
-                              child: tab.child,
-                            )
-                          : tab.child,
+                      enabled: false,
+                      child: tab.child,
                     );
                   },
                 )
@@ -357,84 +438,59 @@ class _TabListView extends HookConsumerWidget {
                     ref.read(willAcceptDropProvider.notifier).clear();
                   },
                   onReorder: (oldIndex, newIndex) async {
-                    final containerRepository = ref.read(
-                      containerRepositoryProvider.notifier,
-                    );
-
                     //Suggestions are at the end and not reorderable, so skip
-                    if (oldIndex >= filteredTabEntities.value.length) {
+                    if (oldIndex >= primaryRows.length) {
                       return;
                     }
 
-                    final tabId = filteredTabEntities.value[oldIndex].tabId;
-                    final containerId = await ref
-                        .read(tabDataRepositoryProvider.notifier)
-                        .getTabContainerId(tabId);
-
-                    var targetIndex = newIndex;
-                    if (targetIndex > oldIndex) {
-                      targetIndex -= 1;
-                    }
-
-                    targetIndex = targetIndex.clamp(
-                      0,
-                      filteredTabEntities.value.length - 1,
+                    final result = buildTabViewReorderResult(
+                      visibleItems: primaryRows,
+                      treeRows: treeRows,
+                      collapsedGroups: collapsedGroups,
+                      oldIndex: oldIndex,
+                      newIndex: newIndex,
+                      tabListDirection: tabListDirection,
+                      hierarchical: showHierarchicalTabs && !hasActiveSearch,
                     );
 
-                    final String key;
-                    if (targetIndex <= 0) {
-                      key = await containerRepository.getLeadingOrderKey(
-                        containerId,
-                      );
-                    } else if (targetIndex >=
-                        filteredTabEntities.value.length - 1) {
-                      key = await containerRepository.getTrailingOrderKey(
-                        containerId,
-                      );
-                    } else {
-                      if (targetIndex < oldIndex) {
-                        key = (await containerRepository.getOrderKeyAfterTab(
-                          filteredTabEntities.value[targetIndex - 1].tabId,
-                          containerId,
-                        ))!;
-                      } else {
-                        key = await containerRepository.getOrderKeyBeforeTab(
-                          filteredTabEntities.value[targetIndex + 1].tabId,
-                          containerId,
-                        );
-                      }
-                    }
+                    if (result == null) return;
 
                     await ref
                         .read(tabDataRepositoryProvider.notifier)
-                        .assignOrderKey(tabId, key);
+                        .reorderTabs(
+                          movingTabIds: result.movingTabIds,
+                          previousTabId: result.previousTabId,
+                          nextTabId: result.nextTabId,
+                        );
                   },
                   itemBuilder: (context, index) {
-                    if (index < filteredTabEntities.value.length) {
-                      final entity = filteredTabEntities.value[index];
+                    if (index < primaryRows.length) {
+                      final row = primaryRows[index];
                       return CustomDraggable(
-                        key: Key(entity.tabId),
-                        data: TabDragData(entity.tabId),
+                        key: Key(row.tabId),
+                        data: TabDragData(row.tabId),
                         child: TabContextMenuDraggable(
-                          tabId: entity.tabId,
+                          tabId: row.tabId,
                           feedbackSize: Size.zero,
                           externalDrag: true,
                           child: _TabDraggable(
-                            entity: entity,
+                            tabId: row.tabId,
                             onClose: onClose,
+                            sourceSearchQuery: row.sourceSearchQuery,
                             height: _itemHeight,
+                            groupToggle: _listGroupToggleFor(row),
+                            depth: _depthFor(row),
                           ),
                         ),
                       );
                     } else {
-                      final suggestedIndex =
-                          index - filteredTabEntities.value.length;
+                      final suggestedIndex = index - primaryRows.length;
                       final entity = suggestedTabEntities.value[suggestedIndex];
 
                       return CustomDraggable(
                         key: Key('suggested_${entity.tabId}'),
                         child: _TabDraggable(
-                          entity: entity,
+                          tabId: entity.tabId,
                           onClose: onClose,
                           suggestedContainerId: containerId,
                           height: _itemHeight,

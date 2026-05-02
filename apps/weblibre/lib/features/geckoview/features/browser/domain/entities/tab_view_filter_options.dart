@@ -86,6 +86,8 @@ class TabViewFilterOptions with FastEquatable {
   final TabTypeFilter tabTypeFilter;
   final TabSortType sortType;
   final bool sortPinnedFirst;
+  @JsonKey(defaultValue: true)
+  final bool showHierarchicalTabs;
   @DateTimeRangeConverter()
   final DateTimeRange<DateTime>? dateRange;
   final TabQuickInterval? quickInterval;
@@ -94,6 +96,7 @@ class TabViewFilterOptions with FastEquatable {
     required this.tabTypeFilter,
     required this.sortType,
     required this.sortPinnedFirst,
+    required this.showHierarchicalTabs,
     required this.dateRange,
     required this.quickInterval,
   });
@@ -103,6 +106,7 @@ class TabViewFilterOptions with FastEquatable {
         tabTypeFilter: TabTypeFilter.all,
         sortType: TabSortType.manual,
         sortPinnedFirst: true,
+        showHierarchicalTabs: true,
         dateRange: null,
         quickInterval: null,
       );
@@ -132,6 +136,7 @@ class TabViewFilterOptions with FastEquatable {
     tabTypeFilter,
     sortType,
     sortPinnedFirst,
+    showHierarchicalTabs,
     dateRange,
     quickInterval,
   ];

@@ -98,6 +98,17 @@ Stream<List<TabTreesResult>> watchTabTrees(Ref ref) {
 }
 
 @Riverpod()
+Stream<List<TabsWithRootAndDepthResult>> watchTabsWithRootAndDepth(
+  Ref ref,
+  String? containerId,
+) {
+  final db = ref.watch(tabDatabaseProvider);
+  return db.definitionsDrift
+      .tabsWithRootAndDepth(containerId: containerId)
+      .watch();
+}
+
+@Riverpod()
 Stream<Map<String, String?>> watchTabDescendants(Ref ref, String tabId) {
   final db = ref.watch(tabDatabaseProvider);
   return db.definitionsDrift.unorderedTabDescendants(tabId: tabId).watch().map((

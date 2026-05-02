@@ -122,11 +122,19 @@ class TabDataRepository extends _$TabDataRepository {
         .setPinned(tabId, pinned: pinned);
   }
 
-  Future<void> assignOrderKey(String tabId, String orderKey) {
+  Future<void> reorderTabs({
+    required List<String> movingTabIds,
+    required String? previousTabId,
+    required String? nextTabId,
+  }) {
     return ref
         .read(tabDatabaseProvider)
         .tabDao
-        .assignOrderKey(tabId, orderKey: orderKey);
+        .reorderTabs(
+          movingTabIds: movingTabIds,
+          previousTabId: previousTabId,
+          nextTabId: nextTabId,
+        );
   }
 
   Future<int> closeAllTabs({

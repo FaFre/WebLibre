@@ -50,20 +50,30 @@ class ContextualToolbarConfigRepository {
     return _dao.assignFallback(buttonId, fallbackId);
   }
 
-  Future<String> generateLeadingOrderKey() {
-    return _dao.generateLeadingOrderKey().getSingle();
+  Future<String> generateLeadingOrderKey({required bool isVisible}) {
+    return _dao.generateLeadingOrderKey(isVisible: isVisible).getSingle();
   }
 
-  Future<String> generateTrailingOrderKey() {
-    return _dao.generateTrailingOrderKey().getSingle();
+  Future<String> generateTrailingOrderKey({required bool isVisible}) {
+    return _dao.generateTrailingOrderKey(isVisible: isVisible).getSingle();
   }
 
-  Future<String?> generateOrderKeyAfterButtonId(String buttonId) {
-    return _dao.generateOrderKeyAfterButtonId(buttonId).getSingleOrNull();
+  Future<String?> generateOrderKeyAfterButtonId(
+    String buttonId, {
+    required bool isVisible,
+  }) {
+    return _dao
+        .generateOrderKeyAfterButtonId(buttonId, isVisible: isVisible)
+        .getSingleOrNull();
   }
 
-  Future<String> generateOrderKeyBeforeButtonId(String buttonId) {
-    return _dao.generateOrderKeyBeforeButtonId(buttonId).getSingle();
+  Future<String> generateOrderKeyBeforeButtonId(
+    String buttonId, {
+    required bool isVisible,
+  }) {
+    return _dao
+        .generateOrderKeyBeforeButtonId(buttonId, isVisible: isVisible)
+        .getSingle();
   }
 
   Future<void> seedMissingDefaults() {

@@ -80,6 +80,10 @@ class TabViewFilterController extends _$TabViewFilterController {
     state = state.copyWith(sortPinnedFirst: value);
   }
 
+  void setShowHierarchicalTabs(bool value) {
+    state = state.copyWith(showHierarchicalTabs: value);
+  }
+
   void setDateRange(DateTimeRange<DateTime>? range) {
     // ignore: avoid_redundant_argument_values
     state = state.copyWith(dateRange: range, quickInterval: null);
@@ -103,6 +107,25 @@ class TabViewFilterController extends _$TabViewFilterController {
 
     return stateOrNull ?? TabViewFilterOptions.withDefaults();
   }
+}
+
+/// Tracks which parent groups are *collapsed* in the grouped list/grid views.
+///
+/// Stored as the collapsed set so groups default to expanded for fresh
+/// sessions. In-memory only — group expansion is treated as ephemeral UI
+/// state, not a persisted setting.
+@Riverpod(keepAlive: true)
+class CollapsedGroups extends _$CollapsedGroups {
+  @override
+  Set<String> build() => const {};
+
+  void toggle(String parentId) {
+    state = state.contains(parentId)
+        ? (state.toSet()..remove(parentId))
+        : (state.toSet()..add(parentId));
+  }
+
+  void expandAll() => state = const {};
 }
 
 @Riverpod()

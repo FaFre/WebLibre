@@ -35,6 +35,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/entities/tab_preview.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
@@ -59,7 +60,13 @@ bool canManualTabReorder(Ref ref) {
     ).select((value) => (value.value?.query ?? '').isNotEmpty),
   );
 
-  return !filterOptions.hasActiveFilter && !hasActiveSearch;
+  // sortPinnedFirst partitions the rendered list into pinned/unpinned
+  // sections that don't reflect storage order_key ordering. A drag would
+  // compute anchors across the partition boundary and silently snap the
+  // moved tab into the wrong section once the stream re-renders.
+  return !filterOptions.hasActiveFilter &&
+      !hasActiveSearch &&
+      !filterOptions.sortPinnedFirst;
 }
 
 @Riverpod(keepAlive: true)
@@ -239,6 +246,10 @@ selectedContainerTabStatesWithContainer(Ref ref) {
         ),
   ];
 
+  final tabBarDirection = ref.watch(
+    generalSettingsWithDefaultsProvider.select((s) => s.tabBarDirection),
+  );
+
   items.sort((a, b) {
     final aPinned = pinnedTabIds?.contains(a.$1.id) ?? false;
     final bPinned = pinnedTabIds?.contains(b.$1.id) ?? false;
@@ -249,7 +260,10 @@ selectedContainerTabStatesWithContainer(Ref ref) {
 
     final aOrderKey = orderKeys[a.$1.id] ?? '';
     final bOrderKey = orderKeys[b.$1.id] ?? '';
-    return aOrderKey.compareTo(bOrderKey);
+    // Root tabs always append (trailing key), so ascending = oldest first.
+    return tabBarDirection == TabBarDirection.newestFirst
+        ? bOrderKey.compareTo(aOrderKey)
+        : aOrderKey.compareTo(bOrderKey);
   });
 
   return EquatableValue(items);
@@ -273,9 +287,23 @@ EquatableValue<List<TabStateWithContainer>> quickTabSwitcherTabStates(
       ref.watch(selectedContainerTabStatesWithContainerProvider).value,
   };
 
+  // `containerTabs` already had `tabBarDirection` applied during its sort.
+  // For `lastUsedTabs` the upstream `fifoTabStates` is MRU-first (timestamp
+  // desc); honour the same direction setting here so the user's choice
+  // takes effect in the default switcher mode too.
+  final tabBarDirection = ref.watch(
+    generalSettingsWithDefaultsProvider.select((s) => s.tabBarDirection),
+  );
+
   return EquatableValue(switch (effectiveMode) {
-    QuickTabSwitcherMode.lastUsedTabs =>
-      tabStates.where((state) => state.$1.id != selectedTabId).toList(),
+    QuickTabSwitcherMode.lastUsedTabs => () {
+      final filtered = tabStates
+          .where((state) => state.$1.id != selectedTabId)
+          .toList();
+      return tabBarDirection == TabBarDirection.oldestFirst
+          ? filtered.reversed.toList()
+          : filtered;
+    }(),
     QuickTabSwitcherMode.containerTabs => tabStates,
   });
 }
@@ -587,11 +615,24 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
       ? ref.watch(watchTabTimestampsProvider.select((value) => value.value))
       : null;
 
+  final tabListDirection = ref.watch(
+    generalSettingsWithDefaultsProvider.select((s) => s.tabListDirection),
+  );
+
+  // Root tabs are always inserted with a trailing LexoRank key, so the
+  // database order (ascending order_key) is oldest-first. Flip to
+  // newest-first when the user selects that direction.
+  List<TabEntity> applyDirection(List<TabEntity> entities) {
+    return tabListDirection == TabListDirection.newestFirst
+        ? entities.reversed.toList()
+        : entities;
+  }
+
   if (tabSearchResults == null) {
     if (filterOptions.hasActiveFilter || pinnedTabIds.isNotEmpty) {
       return EquatableValue(
         _applyTabFiltersAndSort(
-          availableTabs.value,
+          applyDirection(availableTabs.value),
           filterOptions,
           tabStates,
           pinnedTabIds,
@@ -600,7 +641,7 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
       );
     }
 
-    return availableTabs;
+    return EquatableValue(applyDirection(availableTabs.value));
   }
 
   final searchFiltered = tabSearchResults
@@ -624,6 +665,7 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
   }
 
   return EquatableValue(searchFiltered);
+  // Search results retain the search-relevance ordering — no direction flip.
 }
 
 @Riverpod()
@@ -669,6 +711,345 @@ EquatableValue<List<TabPreview>> filteredTabPreviews(
         .whereType<TabPreview>()
         .toList(),
   );
+}
+
+/// Grouped flat-list rendering for the list and grid views.
+///
+/// Parent rows always render before their descendants. [TabListDirection]
+/// applies both to root group ordering and to sibling ordering below each
+/// parent, so parent-child pairs stay together while child order still follows
+/// the configured direction.
+///
+/// Returns `null` when the input data is not yet available (loading).
+@Riverpod()
+EquatableValue<List<TabListItemEntity>> groupedTabListItems(
+  Ref ref, {
+  required String? containerId,
+}) {
+  final tabsWithRoot = ref.watch(
+    watchTabsWithRootAndDepthProvider(
+      containerId,
+    ).select((value) => value.value),
+  );
+  if (tabsWithRoot == null) {
+    return EquatableValue(const []);
+  }
+
+  final tabList = ref.watch(tabListProvider);
+  final tabStates = ref.watch(tabStatesProvider);
+  final filterOptions = ref.watch(tabViewFilterControllerProvider);
+  final pinnedTabIds = ref.watch(
+    watchPinnedTabIdsProvider.select(
+      (value) => value.value ?? const <String>{},
+    ),
+  );
+  final tabListDirection = ref.watch(
+    generalSettingsWithDefaultsProvider.select((s) => s.tabListDirection),
+  );
+  final collapsedGroups = ref.watch(collapsedGroupsProvider);
+
+  final needsTimestamps =
+      filterOptions.effectiveDateRange != null ||
+      filterOptions.sortType.sortField == SortField.dateAsc ||
+      filterOptions.sortType.sortField == SortField.dateDesc;
+  final tabTimestamps = needsTimestamps
+      ? ref.watch(watchTabTimestampsProvider.select((value) => value.value))
+      : null;
+
+  // Index every row from the CTE — we need the full graph to walk ancestor
+  // chains even when intermediate ancestors fail the filter.
+  final byId = {for (final row in tabsWithRoot) row.id: row};
+
+  // Filter to tabs that exist in the engine session list and pass the
+  // tab-type / date-range filter. Filtering is applied to *individual* tabs.
+  final available = tabsWithRoot
+      .where((row) => tabList.value.contains(row.id))
+      .where(
+        (row) => filterOptions.matchesTab(
+          tabStates[row.id]?.tabMode,
+          tabTimestamps?[row.id],
+        ),
+      )
+      .toList();
+
+  if (available.isEmpty) {
+    return EquatableValue(const []);
+  }
+
+  final visibleIds = {for (final row in available) row.id};
+
+  // Map every visible row to the closest visible ancestor (its effective
+  // root). When the original root is filtered out we walk up the chain via
+  // parent_id until we either find a visible ancestor or fall off the top —
+  // in the latter case the row becomes its own root. This keeps subtrees
+  // grouped under whichever ancestor remains visible.
+  String effectiveRootFor(TabsWithRootAndDepthResult row) {
+    var effectiveRoot = row;
+    var current = row;
+    while (true) {
+      final parentId = current.parentId;
+      if (parentId == null) return effectiveRoot.id;
+      final parent = byId[parentId];
+      if (parent == null) return effectiveRoot.id;
+      if (visibleIds.contains(parent.id)) {
+        // Climb to the topmost visible ancestor so siblings collapse into a
+        // single group rather than fragmenting.
+        effectiveRoot = parent;
+        current = parent;
+        continue;
+      }
+      // Skip filtered-out ancestor and keep climbing.
+      current = parent;
+    }
+  }
+
+  // Recompute depth relative to the effective root (so indentation stays
+  // sensible after filtered-out ancestors collapse out).
+  int depthFromRoot(TabsWithRootAndDepthResult row, String rootId) {
+    var depth = 0;
+    var current = row;
+    while (current.id != rootId) {
+      final parentId = current.parentId;
+      if (parentId == null) return depth;
+      final parent = byId[parentId];
+      if (parent == null) return depth;
+      if (visibleIds.contains(parent.id)) {
+        depth++;
+      }
+      current = parent;
+    }
+    return depth;
+  }
+
+  final byRoot = <String, List<_GroupedRow>>{};
+  for (final row in available) {
+    final rootId = effectiveRootFor(row);
+    byRoot
+        .putIfAbsent(rootId, () => [])
+        .add(_GroupedRow(row: row, depth: depthFromRoot(row, rootId)));
+  }
+
+  // Build a list of group records to sort across.
+  final sortField = filterOptions.sortType.sortField;
+  final groupRecords = <_TabGroupRecord>[];
+  for (final entry in byRoot.entries) {
+    final rootMember = entry.value.firstWhere((r) => r.row.id == entry.key);
+    final root = rootMember.row;
+    final state = tabStates[root.id];
+    final timestamp = tabTimestamps?[root.id];
+    groupRecords.add(
+      _TabGroupRecord(
+        rootId: root.id,
+        rootOrderKey: root.orderKey,
+        root: rootMember,
+        members: entry.value,
+        isPinned: pinnedTabIds.contains(root.id),
+        titleKey:
+            sortField == SortField.titleAsc || sortField == SortField.titleDesc
+            ? (state?.titleOrAuthority ?? '').toLowerCase()
+            : null,
+        urlKey: sortField == SortField.urlAsc || sortField == SortField.urlDesc
+            ? (state?.url.toString() ?? '')
+            : null,
+        dateKey:
+            sortField == SortField.dateAsc || sortField == SortField.dateDesc
+            ? (timestamp ?? DateTime(0))
+            : null,
+      ),
+    );
+  }
+
+  groupRecords.sort((a, b) {
+    if (filterOptions.sortPinnedFirst && a.isPinned != b.isPinned) {
+      return a.isPinned ? -1 : 1;
+    }
+
+    if (sortField != null) {
+      final cmp = switch (sortField) {
+        SortField.titleAsc => a.titleKey!.compareTo(b.titleKey!),
+        SortField.titleDesc => b.titleKey!.compareTo(a.titleKey!),
+        SortField.urlAsc => a.urlKey!.compareTo(b.urlKey!),
+        SortField.urlDesc => b.urlKey!.compareTo(a.urlKey!),
+        SortField.dateAsc => a.dateKey!.compareTo(b.dateKey!),
+        SortField.dateDesc => b.dateKey!.compareTo(a.dateKey!),
+      };
+      if (cmp != 0) return cmp;
+    }
+
+    return a.rootOrderKey.compareTo(b.rootOrderKey);
+  });
+
+  // Direction applies to the order of root groups here. Sibling order below
+  // each parent is handled during recursive flattening.
+  // When no explicit sortField is active, oldest-first is the natural
+  // order_key ASC; newest-first reverses the group list. Pinned and
+  // unpinned partitions are reversed independently so pinned-first stays
+  // intact while still flipping the relative order within each partition.
+  if (sortField == null && tabListDirection == TabListDirection.newestFirst) {
+    if (filterOptions.sortPinnedFirst) {
+      final pinned = groupRecords.where((g) => g.isPinned).toList()
+        ..sort((a, b) => b.rootOrderKey.compareTo(a.rootOrderKey));
+      final unpinned = groupRecords.where((g) => !g.isPinned).toList()
+        ..sort((a, b) => b.rootOrderKey.compareTo(a.rootOrderKey));
+      groupRecords
+        ..clear()
+        ..addAll(pinned)
+        ..addAll(unpinned);
+    } else {
+      final reversed = groupRecords.reversed.toList();
+      groupRecords
+        ..clear()
+        ..addAll(reversed);
+    }
+  }
+
+  // Flatten according to expansion state.
+  final result = <TabListItemEntity>[];
+  for (final group in groupRecords) {
+    if (group.members.length == 1) {
+      final only = group.root.row;
+      result.add(
+        TabListStandaloneItem(
+          tabId: only.id,
+          orderKey: only.orderKey,
+          containerId: containerId,
+        ),
+      );
+      continue;
+    }
+
+    final root = group.root.row;
+    result.add(
+      TabListParentGroup(
+        tabId: root.id,
+        orderKey: root.orderKey,
+        containerId: containerId,
+        childCount: group.members.length - 1,
+      ),
+    );
+
+    if (collapsedGroups.contains(root.id)) {
+      continue;
+    }
+
+    final childrenByVisibleParent = <String, List<_GroupedRow>>{};
+    for (final member in group.members) {
+      if (member.row.id == root.id) {
+        continue;
+      }
+
+      final visibleParentId = _nearestVisibleParentId(
+        member.row,
+        root.id,
+        byId,
+        visibleIds,
+      );
+      childrenByVisibleParent
+          .putIfAbsent(visibleParentId, () => [])
+          .add(member);
+    }
+
+    // Children are always sorted by storage `order_key` (optionally reversed
+    // for newest-first) — even when an explicit `sortField` (title/url/date)
+    // is active. The explicit sort applies only to root groups; descendants
+    // remain in insertion order so a parent's children stay grouped in the
+    // order they were opened rather than alphabetically interleaving across
+    // siblings.
+    for (final children in childrenByVisibleParent.values) {
+      children.sort((a, b) {
+        final cmp = a.row.orderKey.compareTo(b.row.orderKey);
+        return tabListDirection == TabListDirection.newestFirst ? -cmp : cmp;
+      });
+    }
+
+    void addChildren(String parentId) {
+      for (final member
+          in childrenByVisibleParent[parentId] ?? const <_GroupedRow>[]) {
+        final child = member.row;
+        final grandchildren =
+            childrenByVisibleParent[child.id] ?? const <_GroupedRow>[];
+        result.add(
+          TabListChildItem(
+            tabId: child.id,
+            orderKey: child.orderKey,
+            containerId: containerId,
+            parentId: parentId,
+            rootId: root.id,
+            depth: member.depth,
+            childCount: grandchildren.length,
+          ),
+        );
+        // Respect per-node collapse: collapsing an intermediate child hides
+        // its descendants while keeping siblings of the parent visible.
+        if (!collapsedGroups.contains(child.id)) {
+          addChildren(child.id);
+        }
+      }
+    }
+
+    addChildren(root.id);
+  }
+
+  return EquatableValue(result);
+}
+
+String _nearestVisibleParentId(
+  TabsWithRootAndDepthResult row,
+  String rootId,
+  Map<String, TabsWithRootAndDepthResult> byId,
+  Set<String> visibleIds,
+) {
+  var current = row;
+  final seen = <String>{row.id};
+
+  while (true) {
+    final parentId = current.parentId;
+    if (parentId == null) {
+      return rootId;
+    }
+    if (parentId == rootId) {
+      return rootId;
+    }
+
+    final parent = byId[parentId];
+    if (parent == null || !seen.add(parent.id)) {
+      return rootId;
+    }
+    if (visibleIds.contains(parent.id)) {
+      return parent.id;
+    }
+
+    current = parent;
+  }
+}
+
+class _GroupedRow {
+  final TabsWithRootAndDepthResult row;
+  final int depth;
+
+  _GroupedRow({required this.row, required this.depth});
+}
+
+class _TabGroupRecord {
+  final String rootId;
+  final String rootOrderKey;
+  final _GroupedRow root;
+  final List<_GroupedRow> members;
+  final bool isPinned;
+  final String? titleKey;
+  final String? urlKey;
+  final DateTime? dateKey;
+
+  _TabGroupRecord({
+    required this.rootId,
+    required this.rootOrderKey,
+    required this.root,
+    required this.members,
+    required this.isPinned,
+    required this.titleKey,
+    required this.urlKey,
+    required this.dateKey,
+  });
 }
 
 @Riverpod()

@@ -33,6 +33,7 @@ import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
@@ -66,14 +67,6 @@ class TabRepository extends _$TabRepository {
 
   void clearLaunchedFromIntent(String tabId) {
     _tabFromIntent.remove(tabId);
-  }
-
-  NewTabPosition _newTabPositionForParent(String? parentId) {
-    if (parentId != null) {
-      return NewTabPosition.first;
-    }
-
-    return ref.read(generalSettingsWithDefaultsProvider).newTabPosition;
   }
 
   Future<String?> _resolveParentIdForContext({
@@ -132,7 +125,6 @@ class TabRepository extends _$TabRepository {
     final effectiveContextId = tabMode is IsolatedTabMode
         ? effectiveIsolationContextId
         : assignedContainer?.metadata.contextualIdentity;
-    final newTabPosition = _newTabPositionForParent(validatedParentId);
 
     final newTabId = await tabDao.upsertTabTransactional(
       () {
@@ -150,7 +142,6 @@ class TabRepository extends _$TabRepository {
         );
       },
       parentId: Value(validatedParentId),
-      newTabPosition: newTabPosition,
       containerId: Value(assignedContainer?.id),
       url: Value(url),
       tabMode: Value(tabMode),
@@ -215,7 +206,6 @@ class TabRepository extends _$TabRepository {
           tabId,
           parentId: Value(validatedParentId),
           source: TabSource.manual,
-          newTabPosition: _newTabPositionForParent(validatedParentId),
           containerId: Value(assignedContainer?.id),
           url: Value(Uri.tryParse(tab.url)),
           tabMode: Value(
@@ -257,6 +247,22 @@ class TabRepository extends _$TabRepository {
         ? duplicateIsolationContextId
         : containerData?.metadata.contextualIdentity;
 
+    // Place the duplicate as a sibling of the source — same parent — and
+    // insert it right after the source's full subtree, so existing
+    // children of the source are not split from their parent.
+    final sourceData = await tabDao
+        .getTabDataById(selectTabId)
+        .getSingleOrNull();
+    final sourceParentId = sourceData?.parentId;
+    final anchorTabId =
+        await tabDao
+            .lastSubtreeTabIdByOrderKey(
+              selectTabId,
+              containerId: containerData?.id,
+            )
+            .getSingleOrNull() ??
+        selectTabId;
+
     return await tabDao.upsertTabTransactional(
       () {
         return _tabsService.duplicateTab(
@@ -265,8 +271,8 @@ class TabRepository extends _$TabRepository {
           selectNewTab: selectTab,
         );
       },
-      parentId: const Value.absent(),
-      newTabPosition: _newTabPositionForParent(null),
+      parentId: Value(sourceParentId),
+      afterTabId: Value(anchorTabId),
       containerId: Value(containerData?.id),
       tabMode: Value(duplicateTabMode),
     );
@@ -319,15 +325,12 @@ class TabRepository extends _$TabRepository {
     String? containerId,
     bool skipContainerCheck = true,
   }) async {
-    final previousTabId = await ref
-        .read(tabDatabaseProvider)
-        .definitionsDrift
-        .previousTabByOrderKey(
-          tabId: tabId,
-          containerId: containerId,
-          skipContainerCheck: skipContainerCheck,
-        )
-        .getSingleOrNull();
+    final previousTabId = await _adjacentVisibleTabByOrder(
+      tabId,
+      containerId: containerId,
+      skipContainerCheck: skipContainerCheck,
+      selectPrevious: true,
+    );
 
     if (ref.mounted && previousTabId != null) {
       return selectTab(previousTabId);
@@ -341,15 +344,12 @@ class TabRepository extends _$TabRepository {
     String? containerId,
     bool skipContainerCheck = true,
   }) async {
-    final previousTabId = await ref
-        .read(tabDatabaseProvider)
-        .definitionsDrift
-        .nextTabByOrderKey(
-          tabId: tabId,
-          containerId: containerId,
-          skipContainerCheck: skipContainerCheck,
-        )
-        .getSingleOrNull();
+    final previousTabId = await _adjacentVisibleTabByOrder(
+      tabId,
+      containerId: containerId,
+      skipContainerCheck: skipContainerCheck,
+      selectPrevious: false,
+    );
 
     if (ref.mounted && previousTabId != null) {
       return selectTab(previousTabId);
@@ -383,7 +383,80 @@ class TabRepository extends _$TabRepository {
     return true;
   }
 
-  Future<void> _selectNextTab(String tabId) async {
+  Future<String?> _adjacentVisibleTabByOrder(
+    String tabId, {
+    required String? containerId,
+    required bool skipContainerCheck,
+    required bool selectPrevious,
+  }) {
+    // "Previous/next" here is interpreted relative to the *tab bar*
+    // direction, even when the user triggered the navigation from the tab
+    // tray (which has its own `tabListDirection`). If the two settings
+    // disagree, "next tab" while looking at the tray flows by tab-bar
+    // direction. Treat as intentional — keyboard / gesture navigation is
+    // anchored to the bar's mental model.
+    final newestFirst =
+        ref.read(generalSettingsWithDefaultsProvider).tabBarDirection ==
+        TabBarDirection.newestFirst;
+    final TabDatabase tabDatabase = ref.read(tabDatabaseProvider);
+    final definitions = tabDatabase.definitionsDrift;
+
+    if (newestFirst == selectPrevious) {
+      return definitions
+          .nextTabByOrderKey(
+            tabId: tabId,
+            containerId: containerId,
+            skipContainerCheck: skipContainerCheck,
+          )
+          .getSingleOrNull();
+    }
+
+    return definitions
+        .previousTabByOrderKey(
+          tabId: tabId,
+          containerId: containerId,
+          skipContainerCheck: skipContainerCheck,
+        )
+        .getSingleOrNull();
+  }
+
+  Future<String?> _nearestAvailableVisibleTabByOrder(
+    String tabId, {
+    required String? containerId,
+    required Set<String> excludedTabIds,
+  }) async {
+    Future<String?> walkDirection({required bool selectPrevious}) async {
+      var candidate = await _adjacentVisibleTabByOrder(
+        tabId,
+        containerId: containerId,
+        skipContainerCheck: false,
+        selectPrevious: selectPrevious,
+      );
+
+      while (candidate != null) {
+        if (!excludedTabIds.contains(candidate)) {
+          return candidate;
+        }
+
+        candidate = await _adjacentVisibleTabByOrder(
+          candidate,
+          containerId: containerId,
+          skipContainerCheck: false,
+          selectPrevious: selectPrevious,
+        );
+      }
+
+      return null;
+    }
+
+    return await walkDirection(selectPrevious: true) ??
+        await walkDirection(selectPrevious: false);
+  }
+
+  Future<void> _selectNextTab(
+    String tabId, {
+    Set<String> excludedTabIds = const {},
+  }) async {
     final tabState = ref.read(tabStatesProvider)[tabId];
 
     final currentContainerId = await ref
@@ -395,13 +468,20 @@ class TabRepository extends _$TabRepository {
     final sameContainerTabs = await ref
         .read(containerRepositoryProvider.notifier)
         .getContainerTabIds(currentContainerId)
-        .then((tabs) => tabs.where((tab) => tab != tabId).toList());
+        .then(
+          (tabs) => tabs
+              .where((tab) => tab != tabId && !excludedTabIds.contains(tab))
+              .toList(),
+        );
 
     if (!ref.mounted) return;
 
     // Priority 1: Check for parent tab first
     if (tabState?.parentId != null) {
-      return _tabsService.selectTab(tabId: tabState!.parentId!);
+      final parentId = tabState!.parentId!;
+      if (!excludedTabIds.contains(parentId)) {
+        return _tabsService.selectTab(tabId: parentId);
+      }
     }
 
     // Priority 2: Check for previous tab by timestamp
@@ -419,34 +499,14 @@ class TabRepository extends _$TabRepository {
 
     if (!ref.mounted) return;
 
-    final previousOrderedTabId = await ref
-        .read(tabDatabaseProvider)
-        .definitionsDrift
-        .previousTabByOrderKey(
-          tabId: tabId,
-          containerId: currentContainerId,
-          skipContainerCheck: false,
-        )
-        .getSingleOrNull();
+    final orderedNeighborTabId = await _nearestAvailableVisibleTabByOrder(
+      tabId,
+      containerId: currentContainerId,
+      excludedTabIds: excludedTabIds,
+    );
 
-    if (previousOrderedTabId != null) {
-      return _tabsService.selectTab(tabId: previousOrderedTabId);
-    }
-
-    if (!ref.mounted) return;
-
-    final nextOrderedTabId = await ref
-        .read(tabDatabaseProvider)
-        .definitionsDrift
-        .nextTabByOrderKey(
-          tabId: tabId,
-          containerId: currentContainerId,
-          skipContainerCheck: false,
-        )
-        .getSingleOrNull();
-
-    if (nextOrderedTabId != null) {
-      return _tabsService.selectTab(tabId: nextOrderedTabId);
+    if (orderedNeighborTabId != null) {
+      return _tabsService.selectTab(tabId: orderedNeighborTabId);
     }
 
     if (!ref.mounted) return;
@@ -454,7 +514,11 @@ class TabRepository extends _$TabRepository {
     final unassignedTabs = await ref
         .read(containerRepositoryProvider.notifier)
         .getContainerTabIds(null)
-        .then((tabs) => tabs.where((tab) => tab != tabId).toList());
+        .then(
+          (tabs) => tabs
+              .where((tab) => tab != tabId && !excludedTabIds.contains(tab))
+              .toList(),
+        );
 
     if (unassignedTabs.isNotEmpty) {
       return _tabsService.selectTab(tabId: unassignedTabs.first);
@@ -474,7 +538,11 @@ class TabRepository extends _$TabRepository {
       (container) => ref
           .read(containerRepositoryProvider.notifier)
           .getContainerTabIds(container.id)
-          .then((tabs) => tabs.where((tab) => tab != tabId).toList()),
+          .then(
+            (tabs) => tabs
+                .where((tab) => tab != tabId && !excludedTabIds.contains(tab))
+                .toList(),
+          ),
     );
 
     if (nextContainerTabs.isNotEmpty) {
@@ -492,6 +560,8 @@ class TabRepository extends _$TabRepository {
       if (ref.read(selectedTabProvider) == tabId) {
         await _selectNextTab(tabId);
       }
+
+      await _preservePromotedChildOrderOnClose([tabId]);
 
       await _tabsService.removeTab(tabId: tabId);
 
@@ -517,11 +587,20 @@ class TabRepository extends _$TabRepository {
 
       final selectedTab = ref.read(selectedTabProvider);
       if (selectedTab.mapNotNull(tabIds.contains) ?? false) {
-        await _selectNextTab(selectedTab!);
+        await _selectNextTab(selectedTab!, excludedTabIds: tabIds.toSet());
       }
+
+      await _preservePromotedChildOrderOnClose(tabIds);
 
       await _tabsService.removeTabs(ids: tabIds);
     });
+  }
+
+  Future<void> _preservePromotedChildOrderOnClose(List<String> tabIds) {
+    return ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .preservePromotedChildOrderOnClose(tabIds);
   }
 
   /// Clears Gecko browsing data and removes proxy alias for an isolation
@@ -638,7 +717,6 @@ class TabRepository extends _$TabRepository {
           tabId,
           parentId: const Value.absent(),
           source: TabSource.addedEvent,
-          newTabPosition: _newTabPositionForParent(null),
           containerId: Value(containerId),
         );
       },

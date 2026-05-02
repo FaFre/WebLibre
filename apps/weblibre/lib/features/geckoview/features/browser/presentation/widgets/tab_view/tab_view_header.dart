@@ -427,6 +427,24 @@ class TabViewHeader extends HookConsumerWidget {
                                 ],
                                 child: const Text('Sort'),
                               ),
+                              MenuItemButton(
+                                leadingIcon: Icon(
+                                  filterOptions.showHierarchicalTabs
+                                      ? Icons.check_box
+                                      : Icons.check_box_outline_blank,
+                                ),
+                                onPressed: () {
+                                  ref
+                                      .read(
+                                        tabViewFilterControllerProvider
+                                            .notifier,
+                                      )
+                                      .setShowHierarchicalTabs(
+                                        !filterOptions.showHierarchicalTabs,
+                                      );
+                                },
+                                child: const Text('Hierarchical View'),
+                              ),
                               const Divider(),
                               // Date range picker
                               MenuItemButton(
