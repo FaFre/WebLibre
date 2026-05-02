@@ -42,7 +42,7 @@ final class SmallWebModeControllerProvider
 }
 
 String _$smallWebModeControllerHash() =>
-    r'26fb84c9ce60562738f7d9523f74aebfb19ad84b';
+    r'a012c3735309e0ace448369e2bf41e2671b7d9b9';
 
 abstract class _$SmallWebModeController extends $Notifier<String?> {
   String? build();

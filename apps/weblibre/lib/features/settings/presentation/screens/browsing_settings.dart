@@ -198,7 +198,7 @@ class _SmallWebTabDefaultSection extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appColors = AppColors.of(context);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final smallWebTabType = settings.smallWebTabType;
+    final smallWebTabType = settings.effectiveSmallWebTabType;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -276,9 +276,8 @@ class _ExternalLinkHandlingSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appColors = AppColors.of(context);
-    final tabIntentOpenSetting = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.tabIntentOpenSetting),
-    );
+    final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final tabIntentOpenSetting = settings.tabIntentOpenSetting;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -316,6 +315,18 @@ class _ExternalLinkHandlingSection extends HookConsumerWidget {
                         : appColors.privateTabPurple,
                   ),
                 ),
+                if (settings.showIsolatedTabUi)
+                  ButtonSegment(
+                    value: TabIntentOpenSetting.isolated,
+                    label: const Text('Isolated'),
+                    icon: Icon(
+                      MdiIcons.snowflake,
+                      color:
+                          tabIntentOpenSetting == TabIntentOpenSetting.isolated
+                          ? null
+                          : appColors.isolatedTabTeal,
+                    ),
+                  ),
               ],
               selected: {tabIntentOpenSetting},
               onSelectionChanged: (value) async {
@@ -330,6 +341,9 @@ class _ExternalLinkHandlingSection extends HookConsumerWidget {
                 TabIntentOpenSetting.regular => null,
                 TabIntentOpenSetting.private => SegmentedButton.styleFrom(
                   selectedBackgroundColor: appColors.privateSelectionOverlay,
+                ),
+                TabIntentOpenSetting.isolated => SegmentedButton.styleFrom(
+                  selectedBackgroundColor: appColors.isolatedSelectionOverlay,
                 ),
                 TabIntentOpenSetting.ask => null,
               },
@@ -545,6 +559,15 @@ class _ShowIsolatedTabUiTile extends HookConsumerWidget {
             updated = updated.copyWith.storedDefaultCreateTabType(
               TabType.regular,
             );
+          }
+          if (!value &&
+              updated.tabIntentOpenSetting == TabIntentOpenSetting.isolated) {
+            updated = updated.copyWith.tabIntentOpenSetting(
+              TabIntentOpenSetting.ask,
+            );
+          }
+          if (!value && updated.smallWebTabType == TabType.isolated) {
+            updated = updated.copyWith.smallWebTabType(TabType.private);
           }
           return updated;
         });

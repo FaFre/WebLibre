@@ -88,9 +88,7 @@ TabViewReorderResult? buildTabViewReorderResult({
       ? withoutMovingItem[insertIndex].tabId
       : null;
   if (targetBeforeId != null && moveBlockIds.contains(targetBeforeId)) {
-    logger.t(
-      'reorder refused: drop target is inside the moving subtree',
-    );
+    logger.t('reorder refused: drop target is inside the moving subtree');
     return null;
   }
 

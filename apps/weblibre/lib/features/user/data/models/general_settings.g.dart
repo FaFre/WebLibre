@@ -1044,6 +1044,7 @@ const _$TabBarDirectionEnumMap = {
 const _$TabIntentOpenSettingEnumMap = {
   TabIntentOpenSetting.regular: 'regular',
   TabIntentOpenSetting.private: 'private',
+  TabIntentOpenSetting.isolated: 'isolated',
   TabIntentOpenSetting.ask: 'ask',
 };
 

@@ -44,7 +44,7 @@ enum TabBarSwipeAction { switchLastOpened, navigateOrderedTabs }
 
 enum QuickTabSwitcherMode { lastUsedTabs, containerTabs }
 
-enum TabIntentOpenSetting { regular, private, ask }
+enum TabIntentOpenSetting { regular, private, isolated, ask }
 
 enum TabListDirection { newestFirst, oldestFirst }
 
@@ -326,6 +326,21 @@ class GeneralSettings with FastEquatable {
       return TabType.regular;
     }
     return storedDefaultCreateTabType;
+  }
+
+  TabType get effectiveSmallWebTabType {
+    if (!showIsolatedTabUi && smallWebTabType == TabType.isolated) {
+      return TabType.private;
+    }
+    return smallWebTabType;
+  }
+
+  TabIntentOpenSetting get effectiveTabIntentOpenSetting {
+    if (!showIsolatedTabUi &&
+        tabIntentOpenSetting == TabIntentOpenSetting.isolated) {
+      return TabIntentOpenSetting.ask;
+    }
+    return tabIntentOpenSetting;
   }
 
   QuickTabSwitcherMode effectiveUiQuickTabSwitcherMode() {

@@ -65,7 +65,7 @@ class SmallWebModeController extends _$SmallWebModeController {
     }
 
     final settings = ref.read(generalSettingsWithDefaultsProvider);
-    final tabMode = TabMode.fromTabType(settings.smallWebTabType);
+    final tabMode = TabMode.fromTabType(settings.effectiveSmallWebTabType);
 
     final newTabId = await ref
         .read(tabRepositoryProvider.notifier)

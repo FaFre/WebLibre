@@ -392,30 +392,37 @@ class _BrowserViewState extends ConsumerState<BrowserView>
         next.whenData((sharedContent) async {
           final settings = ref.read(generalSettingsWithDefaultsProvider);
 
-          switch (settings.tabIntentOpenSetting) {
+          switch (settings.effectiveTabIntentOpenSetting) {
             case TabIntentOpenSetting.regular:
             case TabIntentOpenSetting.private:
+            case TabIntentOpenSetting.isolated:
               await ref
                   .read(engineReadyStateProvider.notifier)
                   .waitUntilReady();
 
+              final tabMode = switch (settings.effectiveTabIntentOpenSetting) {
+                TabIntentOpenSetting.private => TabMode.private,
+                TabIntentOpenSetting.isolated => TabMode.newIsolated(),
+                _ => TabMode.regular,
+              };
+
               switch (sharedContent) {
                 case SharedUrl():
-                  final containerSelection = await _resolveContainerSelection(
-                    ref,
-                    sharedContent.contextId,
-                    sharedContent.containerMode,
-                  );
+                  final containerSelection =
+                      settings.effectiveTabIntentOpenSetting ==
+                          TabIntentOpenSetting.isolated
+                      ? const TabContainerSelection.unassigned()
+                      : await _resolveContainerSelection(
+                          ref,
+                          sharedContent.contextId,
+                          sharedContent.containerMode,
+                        );
 
                   await ref
                       .read(tabRepositoryProvider.notifier)
                       .addTab(
                         url: sharedContent.url,
-                        tabMode:
-                            settings.tabIntentOpenSetting ==
-                                TabIntentOpenSetting.private
-                            ? TabMode.private
-                            : TabMode.regular,
+                        tabMode: tabMode,
                         launchedFromIntent: true,
                         selectTab: true,
                         containerSelection: containerSelection,
@@ -429,11 +436,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                       .read(tabRepositoryProvider.notifier)
                       .addTab(
                         url: bang?.getTemplateUrl(sharedContent.text),
-                        tabMode:
-                            settings.tabIntentOpenSetting ==
-                                TabIntentOpenSetting.private
-                            ? TabMode.private
-                            : TabMode.regular,
+                        tabMode: tabMode,
                         launchedFromIntent: true,
                         selectTab: true,
                       );
