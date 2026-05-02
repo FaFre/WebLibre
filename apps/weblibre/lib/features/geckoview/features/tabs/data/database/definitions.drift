@@ -37,6 +37,11 @@ CREATE TABLE tab(
   )
 );
 
+CREATE TABLE closed_tab_tombstone(
+  tab_id TEXT PRIMARY KEY NOT NULL,
+  closed_at DATETIME NOT NULL
+);
+
 -- Composite index used by `tabsWithRootAndDepth` (the seed checks
 -- `parent_id IS NULL OR NOT EXISTS(... WHERE p.id = parent_id AND
 -- p.container_id IS :container_id)`) and by `lastChildTabId`
@@ -389,6 +394,13 @@ containerByContextualIdentity:
   SELECT * FROM container
   WHERE container.metadata ->> '$.contextualIdentity' = :contextId
   LIMIT 1;
+
+containerIdsByContextualIdentities:
+  SELECT
+    id,
+    CAST(container.metadata ->> '$.contextualIdentity' AS TEXT) AS contextual_identity
+  FROM container
+  WHERE CAST(container.metadata ->> '$.contextualIdentity' AS TEXT) IN :contextIds;
 
 containersToClearOnExit:
   SELECT container.metadata ->> '$.contextualIdentity' AS contextual_identity

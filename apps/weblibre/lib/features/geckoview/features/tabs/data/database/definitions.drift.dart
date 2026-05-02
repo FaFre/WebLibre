@@ -882,6 +882,159 @@ typedef $TabProcessedTableManager =
       i3.TabData,
       i0.PrefetchHooks Function({bool containerId})
     >;
+typedef $ClosedTabTombstoneCreateCompanionBuilder =
+    i3.ClosedTabTombstoneCompanion Function({
+      required String tabId,
+      required DateTime closedAt,
+      i0.Value<int> rowid,
+    });
+typedef $ClosedTabTombstoneUpdateCompanionBuilder =
+    i3.ClosedTabTombstoneCompanion Function({
+      i0.Value<String> tabId,
+      i0.Value<DateTime> closedAt,
+      i0.Value<int> rowid,
+    });
+
+class $ClosedTabTombstoneFilterComposer
+    extends i0.Composer<i0.GeneratedDatabase, i3.ClosedTabTombstone> {
+  $ClosedTabTombstoneFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnFilters<String> get tabId => $composableBuilder(
+    column: $table.tabId,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<DateTime> get closedAt => $composableBuilder(
+    column: $table.closedAt,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+}
+
+class $ClosedTabTombstoneOrderingComposer
+    extends i0.Composer<i0.GeneratedDatabase, i3.ClosedTabTombstone> {
+  $ClosedTabTombstoneOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnOrderings<String> get tabId => $composableBuilder(
+    column: $table.tabId,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<DateTime> get closedAt => $composableBuilder(
+    column: $table.closedAt,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+}
+
+class $ClosedTabTombstoneAnnotationComposer
+    extends i0.Composer<i0.GeneratedDatabase, i3.ClosedTabTombstone> {
+  $ClosedTabTombstoneAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.GeneratedColumn<String> get tabId =>
+      $composableBuilder(column: $table.tabId, builder: (column) => column);
+
+  i0.GeneratedColumn<DateTime> get closedAt =>
+      $composableBuilder(column: $table.closedAt, builder: (column) => column);
+}
+
+class $ClosedTabTombstoneTableManager
+    extends
+        i0.RootTableManager<
+          i0.GeneratedDatabase,
+          i3.ClosedTabTombstone,
+          i3.ClosedTabTombstoneData,
+          i3.$ClosedTabTombstoneFilterComposer,
+          i3.$ClosedTabTombstoneOrderingComposer,
+          i3.$ClosedTabTombstoneAnnotationComposer,
+          $ClosedTabTombstoneCreateCompanionBuilder,
+          $ClosedTabTombstoneUpdateCompanionBuilder,
+          (
+            i3.ClosedTabTombstoneData,
+            i0.BaseReferences<
+              i0.GeneratedDatabase,
+              i3.ClosedTabTombstone,
+              i3.ClosedTabTombstoneData
+            >,
+          ),
+          i3.ClosedTabTombstoneData,
+          i0.PrefetchHooks Function()
+        > {
+  $ClosedTabTombstoneTableManager(
+    i0.GeneratedDatabase db,
+    i3.ClosedTabTombstone table,
+  ) : super(
+        i0.TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              i3.$ClosedTabTombstoneFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              i3.$ClosedTabTombstoneOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              i3.$ClosedTabTombstoneAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                i0.Value<String> tabId = const i0.Value.absent(),
+                i0.Value<DateTime> closedAt = const i0.Value.absent(),
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i3.ClosedTabTombstoneCompanion(
+                tabId: tabId,
+                closedAt: closedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String tabId,
+                required DateTime closedAt,
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i3.ClosedTabTombstoneCompanion.insert(
+                tabId: tabId,
+                closedAt: closedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $ClosedTabTombstoneProcessedTableManager =
+    i0.ProcessedTableManager<
+      i0.GeneratedDatabase,
+      i3.ClosedTabTombstone,
+      i3.ClosedTabTombstoneData,
+      i3.$ClosedTabTombstoneFilterComposer,
+      i3.$ClosedTabTombstoneOrderingComposer,
+      i3.$ClosedTabTombstoneAnnotationComposer,
+      $ClosedTabTombstoneCreateCompanionBuilder,
+      $ClosedTabTombstoneUpdateCompanionBuilder,
+      (
+        i3.ClosedTabTombstoneData,
+        i0.BaseReferences<
+          i0.GeneratedDatabase,
+          i3.ClosedTabTombstone,
+          i3.ClosedTabTombstoneData
+        >,
+      ),
+      i3.ClosedTabTombstoneData,
+      i0.PrefetchHooks Function()
+    >;
 typedef $TabFtsCreateCompanionBuilder =
     i3.TabFtsCompanion Function({
       required String title,
@@ -2060,6 +2213,196 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
   }
 }
 
+class ClosedTabTombstone extends i0.Table
+    with i0.TableInfo<ClosedTabTombstone, i3.ClosedTabTombstoneData> {
+  @override
+  final i0.GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  ClosedTabTombstone(this.attachedDatabase, [this._alias]);
+  late final i0.GeneratedColumn<String> tabId = i0.GeneratedColumn<String>(
+    'tab_id',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'PRIMARY KEY NOT NULL',
+  );
+  late final i0.GeneratedColumn<DateTime> closedAt =
+      i0.GeneratedColumn<DateTime>(
+        'closed_at',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.dateTime,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      );
+  @override
+  List<i0.GeneratedColumn> get $columns => [tabId, closedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'closed_tab_tombstone';
+  @override
+  Set<i0.GeneratedColumn> get $primaryKey => {tabId};
+  @override
+  i3.ClosedTabTombstoneData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return i3.ClosedTabTombstoneData(
+      tabId: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}tab_id'],
+      )!,
+      closedAt: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.dateTime,
+        data['${effectivePrefix}closed_at'],
+      )!,
+    );
+  }
+
+  @override
+  ClosedTabTombstone createAlias(String alias) {
+    return ClosedTabTombstone(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class ClosedTabTombstoneData extends i0.DataClass
+    implements i0.Insertable<i3.ClosedTabTombstoneData> {
+  final String tabId;
+  final DateTime closedAt;
+  const ClosedTabTombstoneData({required this.tabId, required this.closedAt});
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    map['tab_id'] = i0.Variable<String>(tabId);
+    map['closed_at'] = i0.Variable<DateTime>(closedAt);
+    return map;
+  }
+
+  factory ClosedTabTombstoneData.fromJson(
+    Map<String, dynamic> json, {
+    i0.ValueSerializer? serializer,
+  }) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return ClosedTabTombstoneData(
+      tabId: serializer.fromJson<String>(json['tab_id']),
+      closedAt: serializer.fromJson<DateTime>(json['closed_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({i0.ValueSerializer? serializer}) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'tab_id': serializer.toJson<String>(tabId),
+      'closed_at': serializer.toJson<DateTime>(closedAt),
+    };
+  }
+
+  i3.ClosedTabTombstoneData copyWith({String? tabId, DateTime? closedAt}) =>
+      i3.ClosedTabTombstoneData(
+        tabId: tabId ?? this.tabId,
+        closedAt: closedAt ?? this.closedAt,
+      );
+  ClosedTabTombstoneData copyWithCompanion(
+    i3.ClosedTabTombstoneCompanion data,
+  ) {
+    return ClosedTabTombstoneData(
+      tabId: data.tabId.present ? data.tabId.value : this.tabId,
+      closedAt: data.closedAt.present ? data.closedAt.value : this.closedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ClosedTabTombstoneData(')
+          ..write('tabId: $tabId, ')
+          ..write('closedAt: $closedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(tabId, closedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is i3.ClosedTabTombstoneData &&
+          other.tabId == this.tabId &&
+          other.closedAt == this.closedAt);
+}
+
+class ClosedTabTombstoneCompanion
+    extends i0.UpdateCompanion<i3.ClosedTabTombstoneData> {
+  final i0.Value<String> tabId;
+  final i0.Value<DateTime> closedAt;
+  final i0.Value<int> rowid;
+  const ClosedTabTombstoneCompanion({
+    this.tabId = const i0.Value.absent(),
+    this.closedAt = const i0.Value.absent(),
+    this.rowid = const i0.Value.absent(),
+  });
+  ClosedTabTombstoneCompanion.insert({
+    required String tabId,
+    required DateTime closedAt,
+    this.rowid = const i0.Value.absent(),
+  }) : tabId = i0.Value(tabId),
+       closedAt = i0.Value(closedAt);
+  static i0.Insertable<i3.ClosedTabTombstoneData> custom({
+    i0.Expression<String>? tabId,
+    i0.Expression<DateTime>? closedAt,
+    i0.Expression<int>? rowid,
+  }) {
+    return i0.RawValuesInsertable({
+      if (tabId != null) 'tab_id': tabId,
+      if (closedAt != null) 'closed_at': closedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  i3.ClosedTabTombstoneCompanion copyWith({
+    i0.Value<String>? tabId,
+    i0.Value<DateTime>? closedAt,
+    i0.Value<int>? rowid,
+  }) {
+    return i3.ClosedTabTombstoneCompanion(
+      tabId: tabId ?? this.tabId,
+      closedAt: closedAt ?? this.closedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    if (tabId.present) {
+      map['tab_id'] = i0.Variable<String>(tabId.value);
+    }
+    if (closedAt.present) {
+      map['closed_at'] = i0.Variable<DateTime>(closedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = i0.Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ClosedTabTombstoneCompanion(')
+          ..write('tabId: $tabId, ')
+          ..write('closedAt: $closedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 i0.Index get idxTabParentContainer => i0.Index(
   'idx_tab_parent_container',
   'CREATE INDEX idx_tab_parent_container ON tab (parent_id, container_id)',
@@ -2643,6 +2986,23 @@ class DefinitionsDrift extends i9.ModularAccessor {
     ).asyncMap(container.mapFromRow);
   }
 
+  i0.Selectable<ContainerIdsByContextualIdentitiesResult>
+  containerIdsByContextualIdentities({required List<String> contextIds}) {
+    var $arrayStartIndex = 1;
+    final expandedcontextIds = $expandVar($arrayStartIndex, contextIds.length);
+    $arrayStartIndex += contextIds.length;
+    return customSelect(
+      'SELECT id, CAST(container.metadata ->> \'\$.contextualIdentity\' AS TEXT) AS contextual_identity FROM container WHERE CAST(container.metadata ->> \'\$.contextualIdentity\' AS TEXT) IN ($expandedcontextIds)',
+      variables: [for (var $ in contextIds) i0.Variable<String>($)],
+      readsFrom: {container},
+    ).map(
+      (i0.QueryRow row) => ContainerIdsByContextualIdentitiesResult(
+        id: row.read<String>('id'),
+        contextualIdentity: row.read<String>('contextual_identity'),
+      ),
+    );
+  }
+
   i0.Selectable<String?> containersToClearOnExit() {
     return customSelect(
       'SELECT container.metadata ->> \'\$.contextualIdentity\' AS contextual_identity FROM container WHERE json_extract(container.metadata, \'\$.clearDataOnExit\') = 1 AND container.metadata ->> \'\$.contextualIdentity\' IS NOT NULL',
@@ -2725,6 +3085,15 @@ class UnorderedTabDescendantsResult {
   final String id;
   final String? parentId;
   UnorderedTabDescendantsResult({required this.id, this.parentId});
+}
+
+class ContainerIdsByContextualIdentitiesResult {
+  final String id;
+  final String contextualIdentity;
+  ContainerIdsByContextualIdentitiesResult({
+    required this.id,
+    required this.contextualIdentity,
+  });
 }
 
 class IsolatedContextContainerPairsResult {

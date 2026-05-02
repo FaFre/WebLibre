@@ -31,7 +31,7 @@ import 'package:weblibre/features/search/domain/fts_tokenizer.dart';
 @DriftDatabase(include: {'definitions.drift'}, daos: [ContainerDao, TabDao])
 class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
   @override
-  final int schemaVersion = 8;
+  final int schemaVersion = 9;
 
   @override
   final int ftsTokenLimit = 10;
@@ -136,6 +136,9 @@ class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
       );
 
       await m.createIndex(schema.idxTabParentContainer);
+    },
+    from8To9: (m, schema) async {
+      await m.create(schema.closedTabTombstone);
     },
   );
 }

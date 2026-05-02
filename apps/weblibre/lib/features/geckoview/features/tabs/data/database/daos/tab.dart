@@ -47,6 +47,8 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   final _undoHistory = <String, TabData>{};
   Timer? _clearHistoryTimer;
 
+  static const closedTabTombstoneTtl = Duration(hours: 24);
+
   TabDao(super.db);
 
   UpdateStatement<Tab, TabData> _updateByIdStatement(String id) =>
@@ -315,6 +317,103 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   Future<void> assignContainer(String id, {required String? containerId}) {
     final statement = _updateByIdStatement(id);
     return statement.write(TabCompanion(containerId: Value(containerId)));
+  }
+
+  Future<void> addClosedTabTombstones(
+    Iterable<String> tabIds, {
+    DateTime? closedAt,
+  }) async {
+    final uniqueIds = tabIds.toSet();
+    if (uniqueIds.isEmpty) {
+      return;
+    }
+
+    final effectiveClosedAt = closedAt ?? DateTime.now();
+
+    await batch((batch) {
+      for (final tabId in uniqueIds) {
+        batch.insert(
+          db.closedTabTombstone,
+          ClosedTabTombstoneCompanion.insert(
+            tabId: tabId,
+            closedAt: effectiveClosedAt,
+          ),
+          onConflict: DoUpdate(
+            (_) =>
+                ClosedTabTombstoneCompanion(closedAt: Value(effectiveClosedAt)),
+          ),
+        );
+      }
+    });
+  }
+
+  Future<void> deleteClosedTabTombstones(Iterable<String> tabIds) {
+    final uniqueIds = tabIds.toSet();
+    if (uniqueIds.isEmpty) {
+      return Future.value();
+    }
+
+    return (db.closedTabTombstone.delete()
+          ..where((t) => t.tabId.isIn(uniqueIds)))
+        .go();
+  }
+
+  Future<void> pruneExpiredClosedTabTombstones({
+    Duration ttl = closedTabTombstoneTtl,
+    DateTime? now,
+  }) {
+    final cutoff = (now ?? DateTime.now()).subtract(ttl);
+
+    return (db.closedTabTombstone.delete()
+          ..where((t) => t.closedAt.isSmallerOrEqualValue(cutoff)))
+        .go();
+  }
+
+  Future<Set<String>> getStartupRestoredClosedTabIds(
+    Iterable<String> tabIds, {
+    required DateTime sessionStartedAt,
+    Duration ttl = closedTabTombstoneTtl,
+    DateTime? now,
+  }) async {
+    final uniqueIds = tabIds.toSet();
+    if (uniqueIds.isEmpty) {
+      return const <String>{};
+    }
+
+    final freshnessCutoff = (now ?? DateTime.now()).subtract(ttl);
+    final query = selectOnly(db.closedTabTombstone)
+      ..addColumns([db.closedTabTombstone.tabId])
+      ..where(
+        db.closedTabTombstone.tabId.isIn(uniqueIds) &
+            db.closedTabTombstone.closedAt.isSmallerThanValue(
+              sessionStartedAt,
+            ) &
+            db.closedTabTombstone.closedAt.isBiggerOrEqualValue(
+              freshnessCutoff,
+            ),
+      );
+
+    return query
+        .map((row) => row.read(db.closedTabTombstone.tabId)!)
+        .get()
+        .then((rows) => rows.toSet());
+  }
+
+  Future<Map<String, String>> _containerIdsByContextualIdentity(
+    Iterable<String> contextIds,
+  ) async {
+    final uniqueContextIds = contextIds.toSet();
+    if (uniqueContextIds.isEmpty) {
+      return const <String, String>{};
+    }
+
+    final rows = await db.definitionsDrift
+        .containerIdsByContextualIdentities(
+          contextIds: uniqueContextIds.toList(growable: false),
+        )
+        .get();
+
+    return {for (final row in rows) row.contextualIdentity: row.id};
   }
 
   Future<void> reorderTabs({
@@ -633,6 +732,32 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         parentIdsToValidate,
       ).get().then((ids) => ids.toSet());
 
+      final containerRepairCandidates = {
+        for (final state in next.values)
+          if (state.contextId != null &&
+              (previous?[state.id]?.contextId != state.contextId ||
+                  previous?[state.id] == null))
+            state.id: state.contextId!,
+      };
+      final currentContainerIds = containerRepairCandidates.isEmpty
+          ? const <String, String?>{}
+          : await getTabsContainerId(
+              containerRepairCandidates.keys,
+            ).get().then(Map.fromEntries);
+      final repairableContexts = containerRepairCandidates.entries
+          .where((entry) => currentContainerIds[entry.key] == null)
+          .map((entry) => entry.value)
+          .toSet();
+      final containerIdsByContext = await _containerIdsByContextualIdentity(
+        repairableContexts,
+      );
+      final repairedContainerIds = <String, String>{
+        for (final entry in containerRepairCandidates.entries)
+          if (currentContainerIds[entry.key] == null)
+            if (containerIdsByContext[entry.value] case final containerId?)
+              entry.key: containerId,
+      };
+
       // Complete validation map
       for (final state in next.values) {
         final previousState = previous?[state.id];
@@ -658,13 +783,17 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
               previousState.url != state.url ||
               previousState.title != state.title ||
               previousState.parentId != state.parentId ||
-              previousState.tabMode != state.tabMode) {
+              previousState.tabMode != state.tabMode ||
+              repairedContainerIds.containsKey(state.id)) {
             batch.update(
               db.tab,
               TabCompanion(
                 parentId: validatedParentIds.containsKey(state.id)
                     ? Value(validatedParentIds[state.id])
                     : const Value.absent(),
+                containerId:
+                    repairedContainerIds[state.id].mapNotNull(Value.new) ??
+                    const Value.absent(),
                 url: (previousState?.url != state.url)
                     ? Value(state.url)
                     : const Value.absent(),

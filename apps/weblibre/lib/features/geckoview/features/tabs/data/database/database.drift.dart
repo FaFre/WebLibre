@@ -17,6 +17,9 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
   $TabDatabaseManager get managers => $TabDatabaseManager(this);
   late final i1.Container container = i1.Container(this);
   late final i1.Tab tab = i1.Tab(this);
+  late final i1.ClosedTabTombstone closedTabTombstone = i1.ClosedTabTombstone(
+    this,
+  );
   late final i1.TabFts tabFts = i1.TabFts(this);
   late final i2.ContainerDao containerDao = i2.ContainerDao(
     this as i3.TabDatabase,
@@ -32,6 +35,7 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
   List<i0.DatabaseSchemaEntity> get allSchemaEntities => [
     container,
     tab,
+    closedTabTombstone,
     i1.idxTabParentContainer,
     tabFts,
     i1.tabMaintainParentChainOnDelete,
@@ -86,6 +90,8 @@ class $TabDatabaseManager {
   i1.$ContainerTableManager get container =>
       i1.$ContainerTableManager(_db, _db.container);
   i1.$TabTableManager get tab => i1.$TabTableManager(_db, _db.tab);
+  i1.$ClosedTabTombstoneTableManager get closedTabTombstone =>
+      i1.$ClosedTabTombstoneTableManager(_db, _db.closedTabTombstone);
   i1.$TabFtsTableManager get tabFts => i1.$TabFtsTableManager(_db, _db.tabFts);
 }
 

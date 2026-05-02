@@ -52,6 +52,10 @@ part 'tab.g.dart';
 @Riverpod(keepAlive: true)
 class TabRepository extends _$TabRepository {
   final _tabsService = GeckoTabService();
+  final _sessionStartedAt = DateTime.now();
+  bool _didPruneTombstones = false;
+  bool _reclosing = false;
+  bool _suppressNextReclose = false;
 
   final _tabFromIntent = <String>{};
   final _closeLock = Lock();
@@ -550,38 +554,28 @@ class TabRepository extends _$TabRepository {
     }
   }
 
-  Future<void> closeTab(String tabId) {
+  Future<void> _closeTabsInternal(
+    List<String> tabIds, {
+    required bool recordTombstones,
+  }) {
     return _closeLock.synchronized(() async {
-      // Collect isolation context before close
-      final isolationContextId = ref
-          .read(tabStatesProvider)[tabId]
-          ?.isolationContextId;
-
-      if (ref.read(selectedTabProvider) == tabId) {
-        await _selectNextTab(tabId);
+      if (tabIds.isEmpty) {
+        return;
       }
 
-      await _preservePromotedChildOrderOnClose([tabId]);
-
-      await _tabsService.removeTab(tabId: tabId);
-
-      // Queue isolation cleanup — actual cleanup runs after syncTabs
-      // deletes the DB row, so the count check is accurate.
-      if (isolationContextId != null) {
-        _pendingIsolationCleanup.add(isolationContextId);
+      if (recordTombstones) {
+        await ref
+            .read(tabDatabaseProvider)
+            .tabDao
+            .addClosedTabTombstones(tabIds);
       }
-    });
-  }
 
-  Future<void> closeTabs(List<String> tabIds) {
-    return _closeLock.synchronized(() async {
-      // Collect isolation contexts from tabs being closed
       for (final tabId in tabIds) {
-        final contextId = ref
+        final isolationContextId = ref
             .read(tabStatesProvider)[tabId]
             ?.isolationContextId;
-        if (contextId != null) {
-          _pendingIsolationCleanup.add(contextId);
+        if (isolationContextId != null) {
+          _pendingIsolationCleanup.add(isolationContextId);
         }
       }
 
@@ -592,8 +586,27 @@ class TabRepository extends _$TabRepository {
 
       await _preservePromotedChildOrderOnClose(tabIds);
 
-      await _tabsService.removeTabs(ids: tabIds);
+      if (tabIds.length == 1) {
+        await _tabsService.removeTab(tabId: tabIds.single);
+      } else {
+        await _tabsService.removeTabs(ids: tabIds);
+      }
     });
+  }
+
+  Future<void> closeTab(String tabId) {
+    return _closeTabsInternal([tabId], recordTombstones: true);
+  }
+
+  Future<void> closeTabs(List<String> tabIds) {
+    return _closeTabsInternal(tabIds, recordTombstones: true);
+  }
+
+  Future<void> _clearTombstonesForCurrentTabs(List<String> tabIds) {
+    return ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .deleteClosedTabTombstones(tabIds);
   }
 
   Future<void> _preservePromotedChildOrderOnClose(List<String> tabIds) {
@@ -662,7 +675,47 @@ class TabRepository extends _$TabRepository {
   }
 
   Future<void> undoClose() {
+    // Suppress the next reclose pass: undo can resurrect a tab whose
+    // tombstone is still on disk (from a previous session); without this
+    // flag the listener would immediately re-close it.
+    _suppressNextReclose = true;
     return _tabsService.undo();
+  }
+
+  Future<bool> _recloseRestoredClosedTabs(List<String> tabIds) async {
+    if (_reclosing) {
+      return false;
+    }
+    _reclosing = true;
+    try {
+      final tabDao = ref.read(tabDatabaseProvider).tabDao;
+
+      if (!_didPruneTombstones) {
+        await tabDao.pruneExpiredClosedTabTombstones();
+        _didPruneTombstones = true;
+      }
+
+      final restoredClosedTabIds = await tabDao.getStartupRestoredClosedTabIds(
+        tabIds,
+        sessionStartedAt: _sessionStartedAt,
+      );
+
+      if (restoredClosedTabIds.isEmpty) {
+        return false;
+      }
+
+      // recordTombstones: false — the tombstone already exists from the
+      // original close; rewriting it would bump closed_at into this session
+      // and disable the resurrection check on the next emission.
+      await _closeTabsInternal(
+        restoredClosedTabIds.toList(growable: false),
+        recordTombstones: false,
+      );
+
+      return true;
+    } finally {
+      _reclosing = false;
+    }
   }
 
   /// Cleans up isolation contexts from previous crashed sessions.
@@ -845,6 +898,15 @@ class TabRepository extends _$TabRepository {
     ref.listen(
       tabListProvider,
       (previous, next) async {
+        if (_suppressNextReclose) {
+          _suppressNextReclose = false;
+          // Drop tombstones for the tabs that just came back via undo so
+          // future emissions don't treat them as resurrections.
+          await _clearTombstonesForCurrentTabs(next.value);
+        } else if (await _recloseRestoredClosedTabs(next.value)) {
+          return;
+        }
+
         //Only sync tabs if there has been a previous value or is not empty
         final shouldSyncTabs =
             next.value.isNotEmpty || (previous?.value.isNotEmpty ?? false);
