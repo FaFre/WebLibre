@@ -241,6 +241,11 @@ class _TabListView extends HookConsumerWidget {
     final canManualReorder = ref.watch(canManualTabReorderProvider);
     final reorderEnabled = tabsReorderable && canManualReorder;
     final filterOptions = ref.watch(tabViewFilterControllerProvider);
+    final pinnedTabIds = ref.watch(
+      watchPinnedTabIdsProvider.select(
+        (value) => value.value ?? const <String>{},
+      ),
+    );
     final showHierarchicalTabs = filterOptions.showHierarchicalTabs;
     final tabListDirection = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.tabListDirection),
@@ -447,10 +452,12 @@ class _TabListView extends HookConsumerWidget {
                       visibleItems: primaryRows,
                       treeRows: treeRows,
                       collapsedGroups: collapsedGroups,
+                      pinnedTabIds: pinnedTabIds,
                       oldIndex: oldIndex,
                       newIndex: newIndex,
                       tabListDirection: tabListDirection,
                       hierarchical: showHierarchicalTabs && !hasActiveSearch,
+                      sortPinnedFirst: filterOptions.sortPinnedFirst,
                     );
 
                     if (result == null) return;

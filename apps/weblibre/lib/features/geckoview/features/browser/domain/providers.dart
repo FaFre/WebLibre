@@ -60,13 +60,7 @@ bool canManualTabReorder(Ref ref) {
     ).select((value) => (value.value?.query ?? '').isNotEmpty),
   );
 
-  // sortPinnedFirst partitions the rendered list into pinned/unpinned
-  // sections that don't reflect storage order_key ordering. A drag would
-  // compute anchors across the partition boundary and silently snap the
-  // moved tab into the wrong section once the stream re-renders.
-  return !filterOptions.hasActiveFilter &&
-      !hasActiveSearch &&
-      !filterOptions.sortPinnedFirst;
+  return !filterOptions.hasActiveFilter && !hasActiveSearch;
 }
 
 @Riverpod(keepAlive: true)

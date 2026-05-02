@@ -184,6 +184,11 @@ class _TabGridView extends HookConsumerWidget {
     final tabListDirection = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.tabListDirection),
     );
+    final pinnedTabIds = ref.watch(
+      watchPinnedTabIdsProvider.select(
+        (value) => value.value ?? const <String>{},
+      ),
+    );
     final collapsedGroups = ref.watch(collapsedGroupsProvider);
     final List<TabsWithRootAndDepthResult> treeRows = showHierarchicalTabs
         ? ref.watch(
@@ -384,10 +389,12 @@ class _TabGridView extends HookConsumerWidget {
                       visibleItems: primaryRows,
                       treeRows: treeRows,
                       collapsedGroups: collapsedGroups,
+                      pinnedTabIds: pinnedTabIds,
                       oldIndex: oldIndex,
                       newIndex: newIndex,
                       tabListDirection: tabListDirection,
                       hierarchical: showHierarchicalTabs && !hasActiveSearch,
+                      sortPinnedFirst: filterOptions.sortPinnedFirst,
                     );
 
                     if (result == null) return;

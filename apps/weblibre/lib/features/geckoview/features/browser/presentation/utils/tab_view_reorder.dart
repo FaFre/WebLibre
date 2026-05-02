@@ -38,10 +38,12 @@ TabViewReorderResult? buildTabViewReorderResult({
   required List<TabViewItem> visibleItems,
   required List<TabsWithRootAndDepthResult> treeRows,
   required Set<String> collapsedGroups,
+  required Set<String> pinnedTabIds,
   required int oldIndex,
   required int newIndex,
   required TabListDirection tabListDirection,
   required bool hierarchical,
+  required bool sortPinnedFirst,
 }) {
   if (oldIndex < 0 || oldIndex >= visibleItems.length) {
     logger.t(
@@ -65,11 +67,14 @@ TabViewReorderResult? buildTabViewReorderResult({
     final ordered = reordered.map((item) => item.tabId).toList();
     return _resultFromOrderedIds(
       movingTabIds: [movingItem.tabId],
-      orderedTabIds: tabListDirection == TabListDirection.newestFirst
-          // Rendering flips root group order for newest-first; convert the
-          // display order back to storage order before choosing anchors.
-          ? ordered.reversed.toList()
-          : ordered,
+      orderedTabIds: _orderedIdsForStorageAnchors(
+        ordered,
+        tabListDirection: tabListDirection,
+        pinnedTabIds: pinnedTabIds,
+        parentById: const {},
+        movingPartitionRootId: movingItem.tabId,
+        sortPinnedFirst: sortPinnedFirst,
+      ),
     );
   }
 
@@ -195,8 +200,42 @@ TabViewReorderResult? buildTabViewReorderResult({
 
   return _resultFromOrderedIds(
     movingTabIds: moveBlock,
-    orderedTabIds: orderedTabIds,
+    orderedTabIds: _orderedIdsForStorageAnchors(
+      orderedTabIds,
+      tabListDirection: tabListDirection,
+      pinnedTabIds: pinnedTabIds,
+      parentById: parentById,
+      movingPartitionRootId: _rootIdFor(movingItem.tabId, parentById),
+      sortPinnedFirst: sortPinnedFirst,
+    ),
   );
+}
+
+List<String> _orderedIdsForStorageAnchors(
+  List<String> orderedTabIds, {
+  required TabListDirection tabListDirection,
+  required Set<String> pinnedTabIds,
+  required Map<String, String?> parentById,
+  required String movingPartitionRootId,
+  required bool sortPinnedFirst,
+}) {
+  var storageOrderedIds = tabListDirection == TabListDirection.newestFirst
+      // Rendering flips root group order for newest-first; convert the
+      // display order back to storage order before choosing anchors.
+      ? orderedTabIds.reversed.toList()
+      : orderedTabIds;
+
+  if (!sortPinnedFirst || pinnedTabIds.isEmpty) {
+    return storageOrderedIds;
+  }
+
+  // Pinned-first is a render-only partition, so choose DB anchors only from
+  // the moving tab's own partition to avoid snapping across the boundary.
+  final movingPinned = pinnedTabIds.contains(movingPartitionRootId);
+  return storageOrderedIds.where((tabId) {
+    final rootId = _rootIdFor(tabId, parentById);
+    return pinnedTabIds.contains(rootId) == movingPinned;
+  }).toList();
 }
 
 TabViewReorderResult? _resultFromOrderedIds({
