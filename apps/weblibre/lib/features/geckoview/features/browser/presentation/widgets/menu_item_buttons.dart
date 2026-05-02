@@ -19,6 +19,7 @@
  */
 import 'dart:ui' as ui;
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -244,6 +245,56 @@ class ShareScreenshotMenuItemButton extends HookConsumerWidget {
                     files: [file],
                     subject: tabState.titleOrAuthority,
                   ),
+                );
+              }
+            } finally {
+              result.dispose();
+            }
+          });
+        }
+
+        if (context.mounted) {
+          MenuController.maybeOf(context)?.close();
+        }
+      },
+    );
+  }
+}
+
+class ExportScreenshotMenuItemButton extends HookConsumerWidget {
+  const ExportScreenshotMenuItemButton({
+    super.key,
+    required this.selectedTabId,
+  });
+
+  final String? selectedTabId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return MenuItemButton(
+      leadingIcon: const Icon(MdiIcons.fileImage),
+      closeOnActivate: false,
+      child: const Text('Export as PNG'),
+      onPressed: () async {
+        final screenshot = await ref
+            .read(selectedTabSessionProvider)
+            .requestScreenshot();
+
+        final tabState = ref.read(tabStateProvider(selectedTabId))!;
+
+        if (screenshot != null) {
+          ui.decodeImageFromList(screenshot, (result) async {
+            try {
+              final png = await result.toByteData(
+                format: ui.ImageByteFormat.png,
+              );
+
+              if (png != null) {
+                await FilePicker.saveFile(
+                  fileName: '${tabState.titleOrAuthority}.png',
+                  type: FileType.custom,
+                  allowedExtensions: ['png'],
+                  bytes: png.buffer.asUint8List(),
                 );
               }
             } finally {

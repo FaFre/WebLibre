@@ -1650,6 +1650,42 @@ class _ExportExpansion extends ConsumerWidget {
             },
           ),
 
+          // Export as PNG
+          _buildSubTile(
+            'Export as PNG',
+            icon: MdiIcons.fileImage,
+            onTap: () async {
+              final screenshot = await ref
+                  .read(selectedTabSessionProvider)
+                  .requestScreenshot();
+
+              final ts = ref.read(tabStateProvider(selectedTabId))!;
+
+              if (screenshot != null) {
+                ui.decodeImageFromList(screenshot, (result) async {
+                  try {
+                    final png = await result.toByteData(
+                      format: ui.ImageByteFormat.png,
+                    );
+
+                    if (png != null) {
+                      await FilePicker.saveFile(
+                        fileName: '${ts.titleOrAuthority}.png',
+                        type: FileType.custom,
+                        allowedExtensions: ['png'],
+                        bytes: png.buffer.asUint8List(),
+                      );
+                    }
+                  } finally {
+                    result.dispose();
+                  }
+                });
+              }
+
+              if (context.mounted) Navigator.pop(context);
+            },
+          ),
+
           // Print
           _buildSubTile(
             'Print',

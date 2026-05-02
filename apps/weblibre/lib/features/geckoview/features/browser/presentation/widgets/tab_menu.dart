@@ -586,6 +586,7 @@ class TabMenu extends HookConsumerWidget {
                 },
               ),
               SaveToPdfMenuItemButton(selectedTabId: selectedTabId),
+              ExportScreenshotMenuItemButton(selectedTabId: selectedTabId),
               PrintMenuItemButton(selectedTabId: selectedTabId),
             ],
             leadingIcon: const Icon(MdiIcons.fileExport),
