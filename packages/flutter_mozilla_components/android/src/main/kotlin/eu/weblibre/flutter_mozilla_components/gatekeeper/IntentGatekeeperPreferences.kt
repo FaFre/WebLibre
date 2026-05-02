@@ -26,10 +26,6 @@ object IntentGatekeeperPreferences {
     private const val KEY_NOTIFICATION_APPROVAL_TOKENS = "notification_approval_tokens"
     private const val KEY_NOTIFICATION_APPROVAL_PACKAGE_PREFIX = "notification_approval_package_"
 
-    data class NotificationApproval(
-        val alwaysAllowPackage: String?,
-    )
-
     fun get(context: Context): SharedPreferences =
         context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
@@ -94,24 +90,4 @@ object IntentGatekeeperPreferences {
         return token in tokens
     }
 
-    fun consumeNotificationApproval(context: Context, token: String): NotificationApproval? {
-        val prefs = get(context)
-        val tokens =
-            prefs.getStringSet(KEY_NOTIFICATION_APPROVAL_TOKENS, emptySet())
-                ?.toMutableSet()
-                ?: return null
-        if (!tokens.remove(token)) return null
-
-        val alwaysAllowPackage = prefs.getString(
-            "$KEY_NOTIFICATION_APPROVAL_PACKAGE_PREFIX$token",
-            null,
-        )
-
-        prefs.edit()
-            .putStringSet(KEY_NOTIFICATION_APPROVAL_TOKENS, tokens)
-            .remove("$KEY_NOTIFICATION_APPROVAL_PACKAGE_PREFIX$token")
-            .apply()
-
-        return NotificationApproval(alwaysAllowPackage = alwaysAllowPackage)
-    }
 }
