@@ -22,6 +22,7 @@ import 'dart:async';
 
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -542,54 +543,127 @@ class QuickTabSwitcher extends HookConsumerWidget {
     );
 
     final chipScrollController = useScrollController();
+    final activeItemKey = useRef(GlobalKey());
+    final isUserScrolling = useRef(false);
+    final userScrollTimer = useRef<Timer?>(null);
 
-    return QuickTabSwitcherView(
-      availableItems: availableItems,
-      activeItem: activeItem.isActive ? activeItem : null,
-      scrollController: chipScrollController,
-      showTitles: showTitles,
-      showIsolatedTabUi: showIsolatedTabUi,
-      onSelected: (item) async {
-        if (!item.isHistory && item.isActive) {
-          return;
-        }
-        if (item.isHistory) {
-          await ref
-              .read(tabRepositoryProvider.notifier)
-              .addTab(url: item.url, tabMode: TabMode.regular, selectTab: true);
-        } else {
-          await ref.read(tabRepositoryProvider.notifier).selectTab(item.id);
-        }
-      },
-      itemWrapBuilder: (child, item) {
-        if (item.isHistory) {
-          return child;
-        }
+    useEffect(() {
+      return userScrollTimer.value?.cancel;
+    }, []);
 
-        return TabMenu(
-          selectedTabId: item.id,
-          enableFindInPage: false,
-          enableFetchFeeds: false,
-          enableDesktopMode: false,
-          enableReaderMode: false,
-          enableReloadButton: false,
-          enableNavigationButtons: false,
-          enableAddToHomeScreen: false,
-          enablePinTab: effectiveMode == QuickTabSwitcherMode.containerTabs,
-          builder: (context, controller, _) {
-            return InkWell(
-              onLongPress: () {
-                if (controller.isOpen) {
-                  controller.close();
-                } else {
-                  controller.open();
-                }
-              },
-              child: child,
+    useEffect(() {
+      if (isUserScrolling.value) return null;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final context = activeItemKey.value.currentContext;
+        if (context != null) {
+          Scrollable.ensureVisible(
+            context,
+            alignment: 0.5,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+          );
+        } else if (chipScrollController.hasClients) {
+          final activeIndex = availableItems.indexWhere(
+            (item) => item.id == selectedTabId,
+          );
+          if (activeIndex < 0) return;
+
+          final totalItems = availableItems.length;
+          final maxExtent = chipScrollController.position.maxScrollExtent;
+          if (totalItems > 0 && maxExtent > 0) {
+            chipScrollController.jumpTo(
+              (activeIndex / totalItems * maxExtent).clamp(0.0, maxExtent),
             );
-          },
-        );
+
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              final retryContext = activeItemKey.value.currentContext;
+              if (retryContext != null) {
+                Scrollable.ensureVisible(
+                  retryContext,
+                  alignment: 0.5,
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
+                );
+              }
+            });
+          }
+        }
+      });
+
+      return null;
+    }, [selectedTabId]);
+
+    return NotificationListener<UserScrollNotification>(
+      onNotification: (notification) {
+        if (notification.direction != ScrollDirection.idle) {
+          isUserScrolling.value = true;
+          userScrollTimer.value?.cancel();
+          userScrollTimer.value = Timer(const Duration(milliseconds: 1500), () {
+            isUserScrolling.value = false;
+          });
+        } else {
+          userScrollTimer.value?.cancel();
+          userScrollTimer.value = Timer(const Duration(milliseconds: 1500), () {
+            isUserScrolling.value = false;
+          });
+        }
+
+        return false;
       },
+      child: QuickTabSwitcherView(
+        availableItems: availableItems,
+        activeItem: activeItem.isActive ? activeItem : null,
+        scrollController: chipScrollController,
+        activeItemKey: activeItemKey.value,
+        showTitles: showTitles,
+        showIsolatedTabUi: showIsolatedTabUi,
+        onSelected: (item) async {
+          if (!item.isHistory && item.isActive) {
+            return;
+          }
+          if (item.isHistory) {
+            await ref
+                .read(tabRepositoryProvider.notifier)
+                .addTab(
+                  url: item.url,
+                  tabMode: TabMode.regular,
+                  selectTab: true,
+                );
+          } else {
+            await ref.read(tabRepositoryProvider.notifier).selectTab(item.id);
+          }
+        },
+        itemWrapBuilder: (child, item) {
+          if (item.isHistory) {
+            return child;
+          }
+
+          return TabMenu(
+            selectedTabId: item.id,
+            enableFindInPage: false,
+            enableFetchFeeds: false,
+            enableDesktopMode: false,
+            enableReaderMode: false,
+            enableReloadButton: false,
+            enableNavigationButtons: false,
+            enableAddToHomeScreen: false,
+            enablePinTab: effectiveMode == QuickTabSwitcherMode.containerTabs,
+            builder: (context, controller, _) {
+              return InkWell(
+                onLongPress: () {
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
+                  }
+                },
+                child: child,
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
@@ -600,6 +674,7 @@ class QuickTabSwitcherView extends StatelessWidget {
     required this.availableItems,
     required this.activeItem,
     required this.scrollController,
+    this.activeItemKey,
     required this.showTitles,
     required this.showIsolatedTabUi,
     required this.onSelected,
@@ -609,6 +684,7 @@ class QuickTabSwitcherView extends StatelessWidget {
   final List<QuickTabSwitcherItem> availableItems;
   final QuickTabSwitcherItem? activeItem;
   final ScrollController scrollController;
+  final GlobalKey? activeItemKey;
   final bool showTitles;
   final bool showIsolatedTabUi;
   final Future<void> Function(QuickTabSwitcherItem item) onSelected;
@@ -634,6 +710,8 @@ class QuickTabSwitcherView extends StatelessWidget {
               sortSelectedFirst: false,
               maxCount: null,
               scrollController: scrollController,
+              activeItemKey: activeItemKey,
+              cacheExtent: 500,
               itemId: (item) => item.id,
               selectedItem: activeItem,
               selectedBorderColor: Theme.of(context).colorScheme.primary,

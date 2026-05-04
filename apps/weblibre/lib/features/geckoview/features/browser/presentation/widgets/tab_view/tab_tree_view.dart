@@ -243,27 +243,45 @@ class ViewTabTreesWidget extends HookConsumerWidget {
                   );
 
                   useEffect(() {
-                    final index = filteredTabEntities.value.indexWhere(
-                      (entity) => entity.tabId == activeTab,
-                    );
-
-                    if (index > -1) {
-                      final offset = (index ~/ 2) * itemSize.height;
-
-                      if (offset != scrollController.offset) {
-                        if (disableAnimations) {
-                          scrollController.jumpTo(offset);
-                        } else {
-                          unawaited(
-                            scrollController.animateTo(
-                              offset,
-                              duration: const Duration(milliseconds: 200),
-                              curve: Curves.easeInOut,
-                            ),
-                          );
-                        }
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (!scrollController.hasClients || activeTab == null) {
+                        return;
                       }
-                    }
+
+                      final index = filteredTabEntities.value.indexWhere(
+                        (entity) => entity.tabId == activeTab,
+                      );
+
+                      if (index < 0) return;
+
+                      final row = index ~/ 2;
+                      final tabStart = row * itemSize.height;
+                      final viewportDimension =
+                          scrollController.position.viewportDimension;
+
+                      final targetOffset =
+                          (tabStart -
+                                  viewportDimension / 2 +
+                                  itemSize.height / 2)
+                              .clamp(
+                                0.0,
+                                scrollController.position.maxScrollExtent,
+                              );
+
+                      if (targetOffset == scrollController.offset) return;
+
+                      if (disableAnimations) {
+                        scrollController.jumpTo(targetOffset);
+                      } else {
+                        unawaited(
+                          scrollController.animateTo(
+                            targetOffset,
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.easeInOut,
+                          ),
+                        );
+                      }
+                    });
 
                     return null;
                   }, [filteredTabEntities, activeTab]);

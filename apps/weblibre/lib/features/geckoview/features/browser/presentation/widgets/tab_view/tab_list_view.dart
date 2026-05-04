@@ -325,55 +325,39 @@ class _TabListView extends HookConsumerWidget {
 
     final activeTab = ref.watch(selectedTabProvider);
 
-    final didInitialScroll = useRef(false);
-
     useEffect(() {
-      if (didInitialScroll.value) return null;
-
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (scrollController.hasClients && activeTab != null) {
           final index = primaryRows.indexWhere((row) => row.tabId == activeTab);
 
           if (index > -1) {
-            final viewportStart = scrollController.offset;
-            final viewportEnd =
-                viewportStart + scrollController.position.viewportDimension;
+            final viewportDimension =
+                scrollController.position.viewportDimension;
             final tabStart = index * _itemHeight;
-            final tabEnd = tabStart + _itemHeight;
 
-            final isVisible =
-                tabStart >= viewportStart && tabEnd <= viewportEnd;
-
-            if (!isVisible) {
-              final targetOffset = (tabStart - _itemHeight).clamp(
-                0.0,
-                scrollController.position.maxScrollExtent,
-              );
-
-              if (disableAnimations) {
-                scrollController.jumpTo(targetOffset);
-              } else {
-                unawaited(
-                  scrollController.animateTo(
-                    targetOffset,
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeInOut,
-                  ),
+            final targetOffset =
+                (tabStart - viewportDimension / 2 + _itemHeight / 2).clamp(
+                  0.0,
+                  scrollController.position.maxScrollExtent,
                 );
-              }
 
-              didInitialScroll.value = true;
+            if (disableAnimations) {
+              scrollController.jumpTo(targetOffset);
             } else {
-              didInitialScroll.value = true;
+              unawaited(
+                scrollController.animateTo(
+                  targetOffset,
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
+                ),
+              );
             }
-          } else {
-            didInitialScroll.value = true;
           }
         }
       });
 
       return null;
-    }, [activeTab]);
+    }, [activeTab, primaryRows.length]);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),

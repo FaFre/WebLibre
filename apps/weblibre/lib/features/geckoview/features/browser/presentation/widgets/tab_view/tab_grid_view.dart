@@ -286,51 +286,40 @@ class _TabGridView extends HookConsumerWidget {
       [screenWidth, crossAxisCount],
     );
 
-    final didInitialScroll = useRef(false);
-
     useEffect(() {
-      if (didInitialScroll.value) return null;
-
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (scrollController.hasClients && activeTab != null) {
           final index = primaryRows.indexWhere((row) => row.tabId == activeTab);
 
           if (index > -1) {
             final row = index ~/ crossAxisCount;
-            final viewportStart = scrollController.offset;
-            final viewportEnd =
-                viewportStart + scrollController.position.viewportDimension;
             final tabStart = row * itemSize.height;
-            final tabEnd = tabStart + itemSize.height;
+            final viewportDimension =
+                scrollController.position.viewportDimension;
 
-            final isVisible =
-                tabStart >= viewportStart && tabEnd <= viewportEnd;
-
-            if (!isVisible) {
-              if (disableAnimations) {
-                scrollController.jumpTo(tabStart);
-              } else {
-                unawaited(
-                  scrollController.animateTo(
-                    tabStart,
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeInOut,
-                  ),
+            final targetOffset =
+                (tabStart - viewportDimension / 2 + itemSize.height / 2).clamp(
+                  0.0,
+                  scrollController.position.maxScrollExtent,
                 );
-              }
 
-              didInitialScroll.value = true;
+            if (disableAnimations) {
+              scrollController.jumpTo(targetOffset);
             } else {
-              didInitialScroll.value = true;
+              unawaited(
+                scrollController.animateTo(
+                  targetOffset,
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
+                ),
+              );
             }
-          } else {
-            didInitialScroll.value = true;
           }
         }
       });
 
       return null;
-    }, [activeTab]);
+    }, [activeTab, primaryRows.length]);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),

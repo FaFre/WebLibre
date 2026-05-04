@@ -63,6 +63,8 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
   final bool sortSelectedFirst;
 
   final ScrollController? scrollController;
+  final GlobalKey? activeItemKey;
+  final double? cacheExtent;
 
   final K Function(S item) itemId;
   final Widget Function(T item) itemLabel;
@@ -98,6 +100,8 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
     this.onLongPress,
     this.sortSelectedFirst = true,
     this.scrollController,
+    this.activeItemKey,
+    this.cacheExtent = 0,
     this.labelPadding,
     super.key,
   });
@@ -127,8 +131,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
       builder: (context, controller) {
         return ListView.builder(
           controller: controller,
-          //Improve list performance by not rendering outside screen at all
-          cacheExtent: 0,
+          cacheExtent: cacheExtent,
           scrollDirection: Axis.horizontal,
           itemCount: prefixListItems.length + items.length,
           itemBuilder: (context, index) {
@@ -180,7 +183,13 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
               ),
             );
 
-            return (itemWrap != null) ? itemWrap!(child, item) : child;
+            final wrappedChild = (itemWrap != null)
+                ? itemWrap!(child, item)
+                : child;
+
+            return isSelected && activeItemKey != null
+                ? KeyedSubtree(key: activeItemKey, child: wrappedChild)
+                : wrappedChild;
           },
         );
       },
