@@ -209,6 +209,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: navigationMenuToolbarButtonSpec,
     label: 'Menu',
     icon: Icons.more_vert,
+    longPressActions: ['Open Settings'],
     builder: (scope, context, ref) => scope.isPreview
         ? NavigationMenuButtonView(onTap: () {})
         : NavigationMenuButton(selectedTabId: scope.selectedTabId),

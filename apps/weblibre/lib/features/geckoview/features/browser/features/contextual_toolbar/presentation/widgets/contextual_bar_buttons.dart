@@ -81,18 +81,26 @@ class NavigationMenuButton extends StatelessWidget {
       onTap: () async {
         await showBrowserMenuSheet(context);
       },
+      onLongPress: () async {
+        await SettingsRoute().push(context);
+      },
     );
   }
 }
 
 class NavigationMenuButtonView extends StatelessWidget {
-  const NavigationMenuButtonView({super.key, this.onTap});
+  const NavigationMenuButtonView({super.key, this.onTap, this.onLongPress});
 
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
-    return ToolbarButton(onTap: onTap, child: const Icon(Icons.more_vert));
+    return ToolbarButton(
+      onTap: onTap,
+      onLongPress: onLongPress,
+      child: const Icon(Icons.more_vert),
+    );
   }
 }
 
