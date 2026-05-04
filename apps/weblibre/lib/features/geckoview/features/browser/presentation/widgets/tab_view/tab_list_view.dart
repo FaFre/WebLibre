@@ -43,8 +43,6 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart'
-    show TabsWithRootAndDepthResult;
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
@@ -251,13 +249,11 @@ class _TabListView extends HookConsumerWidget {
       generalSettingsWithDefaultsProvider.select((s) => s.tabListDirection),
     );
     final collapsedGroups = ref.watch(collapsedGroupsProvider);
-    final List<TabsWithRootAndDepthResult> treeRows = showHierarchicalTabs
-        ? ref.watch(
-            watchTabsWithRootAndDepthProvider(
-              containerId,
-            ).select((value) => value.value ?? const []),
-          )
-        : const <TabsWithRootAndDepthResult>[];
+    final treeRows = ref.watch(
+      watchTabsWithRootAndDepthProvider(
+        containerId,
+      ).select((value) => value.value ?? const []),
+    );
 
     final hasActiveSearch = ref.watch(
       tabSearchRepositoryProvider(
@@ -266,7 +262,7 @@ class _TabListView extends HookConsumerWidget {
     );
 
     final List<TabViewItem> primaryRows;
-    if (hasActiveSearch || !showHierarchicalTabs) {
+    if (hasActiveSearch) {
       final flat = ref.watch(
         seamlessFilteredTabEntitiesProvider(
           searchPartition: TabSearchPartition.preview,
@@ -297,14 +293,14 @@ class _TabListView extends HookConsumerWidget {
             TabListStandaloneItem(:final tabId) => TabViewItem.standalone(
               tabId: tabId,
             ),
-            final TabListParentGroup g => TabViewItem.parent(
-              tabId: g.tabId,
-              parentGroup: g,
-            ),
-            final TabListChildItem c => TabViewItem.child(
-              tabId: c.tabId,
-              childItem: c,
-            ),
+            final TabListParentGroup g =>
+              showHierarchicalTabs
+                  ? TabViewItem.parent(tabId: g.tabId, parentGroup: g)
+                  : TabViewItem.standalone(tabId: g.tabId),
+            final TabListChildItem c =>
+              showHierarchicalTabs
+                  ? TabViewItem.child(tabId: c.tabId, childItem: c)
+                  : TabViewItem.standalone(tabId: c.tabId),
           },
       ];
     }

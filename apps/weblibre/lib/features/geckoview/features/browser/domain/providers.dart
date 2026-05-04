@@ -223,11 +223,13 @@ selectedContainerTabStatesWithContainer(Ref ref) {
 
   final tabStates = ref.watch(tabStatesProvider);
 
-  final pinnedTabIds = ref.watch(
-    watchPinnedTabIdsProvider.select((value) => value.value),
-  );
+  final groupedItems = ref
+      .watch(groupedTabListItemsProvider(containerId: filter.containerId))
+      .value;
 
-  final orderKeys = {for (final tab in sortedTabs) tab.tabId: tab.orderKey};
+  final groupedOrder = {
+    for (var i = 0; i < groupedItems.length; i++) groupedItems[i].tabId: i,
+  };
 
   final items = [
     for (final tabEntity in sortedTabs)
@@ -240,24 +242,10 @@ selectedContainerTabStatesWithContainer(Ref ref) {
         ),
   ];
 
-  final tabBarDirection = ref.watch(
-    generalSettingsWithDefaultsProvider.select((s) => s.tabBarDirection),
-  );
-
   items.sort((a, b) {
-    final aPinned = pinnedTabIds?.contains(a.$1.id) ?? false;
-    final bPinned = pinnedTabIds?.contains(b.$1.id) ?? false;
-
-    if (aPinned != bPinned) {
-      return aPinned ? -1 : 1;
-    }
-
-    final aOrderKey = orderKeys[a.$1.id] ?? '';
-    final bOrderKey = orderKeys[b.$1.id] ?? '';
-    // Root tabs always append (trailing key), so ascending = oldest first.
-    return tabBarDirection == TabBarDirection.newestFirst
-        ? bOrderKey.compareTo(aOrderKey)
-        : aOrderKey.compareTo(bOrderKey);
+    final aIndex = groupedOrder[a.$1.id] ?? groupedItems.length;
+    final bIndex = groupedOrder[b.$1.id] ?? groupedItems.length;
+    return aIndex.compareTo(bIndex);
   });
 
   return EquatableValue(items);
