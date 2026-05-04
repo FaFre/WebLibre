@@ -52,19 +52,6 @@ object IntentBlockNotifier {
 
         builder.addAction(
             0,
-            "Allow once",
-            buildActionIntent(
-                context = appCtx,
-                action = GatekeeperNotificationActionReceiver.ACTION_ALLOW_ONCE,
-                packageName = packageName,
-                blockedIntent = blockedIntent,
-                notificationId = notificationId,
-                requestCode = notificationId + 1,
-            ),
-        )
-
-        builder.addAction(
-            0,
             "Always allow",
             buildActionIntent(
                 context = appCtx,
@@ -73,6 +60,19 @@ object IntentBlockNotifier {
                 blockedIntent = blockedIntent,
                 notificationId = notificationId,
                 requestCode = notificationId + 2,
+            ),
+        )
+
+        builder.addAction(
+            0,
+            "Allow once",
+            buildActionIntent(
+                context = appCtx,
+                action = GatekeeperNotificationActionReceiver.ACTION_ALLOW_ONCE,
+                packageName = packageName,
+                blockedIntent = blockedIntent,
+                notificationId = notificationId,
+                requestCode = notificationId + 1,
             ),
         )
 
