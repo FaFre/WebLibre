@@ -129,6 +129,9 @@ class SearchField extends HookConsumerWidget {
             : null,
         minLines: minLines,
         autofocus: autofocus,
+        onSuggestionDismiss: () {
+          suggestion.value = null;
+        },
         decoration: InputDecoration(
           border: InputBorder.none,
           contentPadding: const EdgeInsetsDirectional.fromSTEB(12, 12, 0, 12),

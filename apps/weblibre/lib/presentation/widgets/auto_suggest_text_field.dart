@@ -50,6 +50,7 @@ class AutoSuggestTextField extends HookWidget {
   final bool? enableIMEPersonalizedLearning;
   final TapRegionCallback? onTapOutside;
   final VoidCallback? onTap;
+  final VoidCallback? onSuggestionDismiss;
   final bool autocorrect;
   final GlobalKey? textFieldKey;
 
@@ -80,6 +81,7 @@ class AutoSuggestTextField extends HookWidget {
     this.enableIMEPersonalizedLearning = true,
     this.onTapOutside,
     this.onTap,
+    this.onSuggestionDismiss,
     this.autocorrect = false,
     this.textFieldKey,
   });
@@ -95,6 +97,20 @@ class AutoSuggestTextField extends HookWidget {
         this.textFieldKey ?? useMemoized<GlobalKey>(() => GlobalKey());
 
     final effectiveStyle = style ?? Theme.of(context).textTheme.bodyLarge!;
+
+    final hasSuggestionNotifier = useValueNotifier(false);
+
+    useEffect(() {
+      hasSuggestionNotifier.value = _suggestionHasMatch();
+      return null;
+    }, [suggestion, controller.text]);
+
+    final dismissFormatter = useMemoized(
+      () => _SuggestionDismissFormatter(
+        hasSuggestionNotifier: hasSuggestionNotifier,
+        onSuggestionDismiss: onSuggestionDismiss,
+      ),
+    );
 
     final showSuggestion = useListenableSelector(controller, () {
       if (maxLines != 1) {
@@ -139,30 +155,6 @@ class AutoSuggestTextField extends HookWidget {
                       controller,
                       () => controller.text,
                     );
-
-                    useEffect(() {
-                      TextSelection? lastSelection;
-
-                      void handleSelectionChange() {
-                        if (lastSelection != controller.selection) {
-                          lastSelection = controller.selection;
-                          if (lastSelection!.start != lastSelection!.end) {
-                            if (_suggestionHasMatch()) {
-                              controller.value = controller.value.copyWith(
-                                text: suggestion,
-                                selection: lastSelection!.expandTo(
-                                  TextPosition(offset: suggestion!.length),
-                                ),
-                              );
-                            }
-                          }
-                        }
-                      }
-
-                      controller.addListener(handleSelectionChange);
-                      return () =>
-                          controller.removeListener(handleSelectionChange);
-                    });
 
                     if (!_suggestionHasMatch()) {
                       return const SizedBox.shrink();
@@ -230,7 +222,7 @@ class AutoSuggestTextField extends HookWidget {
               }
             },
           ),
-          inputFormatters: inputFormatters,
+          inputFormatters: [dismissFormatter, ...?inputFormatters],
           enabled: enabled,
           cursorColor: cursorColor,
           enableIMEPersonalizedLearning: enableIMEPersonalizedLearning ?? true,
@@ -239,5 +231,30 @@ class AutoSuggestTextField extends HookWidget {
         ),
       ],
     );
+  }
+}
+
+class _SuggestionDismissFormatter extends TextInputFormatter {
+  final ValueNotifier<bool> hasSuggestionNotifier;
+  final VoidCallback? onSuggestionDismiss;
+
+  _SuggestionDismissFormatter({
+    required this.hasSuggestionNotifier,
+    this.onSuggestionDismiss,
+  });
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (hasSuggestionNotifier.value &&
+        newValue.text.length < oldValue.text.length &&
+        oldValue.selection.isCollapsed &&
+        oldValue.selection.baseOffset == oldValue.text.length) {
+      onSuggestionDismiss?.call();
+      return oldValue;
+    }
+    return newValue;
   }
 }
