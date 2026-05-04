@@ -342,14 +342,6 @@ EquatableValue<List<TabStateWithContainer>> quickTabSwitcherTabStates(
       ref.watch(selectedContainerTabStatesWithContainerProvider).value,
   };
 
-  // `containerTabs` already had `tabBarDirection` applied during its sort.
-  // For `lastUsedTabs` the upstream `fifoTabStates` is MRU-first (timestamp
-  // desc); honour the same direction setting here so the user's choice
-  // takes effect in the default switcher mode too.
-  final tabBarDirection = ref.watch(
-    generalSettingsWithDefaultsProvider.select((s) => s.tabBarDirection),
-  );
-
   final pinnedTabIds = ref.watch(
     watchPinnedTabIdsProvider.select(
       (value) => value.value ?? const <String>{},
@@ -364,6 +356,7 @@ EquatableValue<List<TabStateWithContainer>> quickTabSwitcherTabStates(
       final filtered = tabStates
           .where((state) => state.$1.id != selectedTabId)
           .toList();
+      // Always show MRU-first regardless of tabBarDirection.
       if (sortPinnedFirst && pinnedTabIds.isNotEmpty) {
         final pinned = filtered
             .where((s) => pinnedTabIds.contains(s.$1.id))
@@ -371,16 +364,9 @@ EquatableValue<List<TabStateWithContainer>> quickTabSwitcherTabStates(
         final unpinned = filtered
             .where((s) => !pinnedTabIds.contains(s.$1.id))
             .toList();
-        // Each partition is MRU-first from fifoTabStates. For oldestFirst,
-        // reverse each partition independently so pinned stays on top.
-        if (tabBarDirection == TabDirection.oldestFirst) {
-          return [...pinned.reversed, ...unpinned.reversed];
-        }
         return [...pinned, ...unpinned];
       }
-      return tabBarDirection == TabDirection.oldestFirst
-          ? filtered.reversed.toList()
-          : filtered;
+      return filtered;
     }(),
     QuickTabSwitcherMode.containerTabs => tabStates,
   });
