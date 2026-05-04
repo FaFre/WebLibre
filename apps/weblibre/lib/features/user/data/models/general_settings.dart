@@ -46,9 +46,7 @@ enum QuickTabSwitcherMode { lastUsedTabs, containerTabs }
 
 enum TabIntentOpenSetting { regular, private, isolated, ask }
 
-enum TabListDirection { newestFirst, oldestFirst }
-
-enum TabBarDirection { newestFirst, oldestFirst }
+enum TabDirection { newestFirst, oldestFirst }
 
 enum TabBarPosition { top, bottom }
 
@@ -88,8 +86,8 @@ class GeneralSettings with FastEquatable {
   final bool showIsolatedTabUi;
   @JsonKey(name: 'defaultCreateTabType')
   final TabType storedDefaultCreateTabType;
-  final TabListDirection tabListDirection;
-  final TabBarDirection tabBarDirection;
+  final TabDirection tabListDirection;
+  final TabDirection tabBarDirection;
   final TabIntentOpenSetting tabIntentOpenSetting;
   final bool autoHideTabBar;
   final TabBarSwipeAction tabBarSwipeAction;
@@ -199,8 +197,8 @@ class GeneralSettings with FastEquatable {
     bool? showContainerUi,
     bool? showIsolatedTabUi,
     TabType? storedDefaultCreateTabType,
-    TabListDirection? tabListDirection,
-    TabBarDirection? tabBarDirection,
+    TabDirection? tabListDirection,
+    TabDirection? tabBarDirection,
     TabIntentOpenSetting? tabIntentOpenSetting,
     bool? autoHideTabBar,
     TabBarSwipeAction? tabBarSwipeAction,
@@ -253,8 +251,8 @@ class GeneralSettings with FastEquatable {
        showIsolatedTabUi = showIsolatedTabUi ?? true,
        storedDefaultCreateTabType =
            storedDefaultCreateTabType ?? TabType.regular,
-       tabListDirection = tabListDirection ?? TabListDirection.newestFirst,
-       tabBarDirection = tabBarDirection ?? TabBarDirection.newestFirst,
+       tabListDirection = tabListDirection ?? TabDirection.newestFirst,
+       tabBarDirection = tabBarDirection ?? TabDirection.newestFirst,
        tabIntentOpenSetting = tabIntentOpenSetting ?? TabIntentOpenSetting.ask,
        autoHideTabBar = autoHideTabBar ?? true,
        tabBarSwipeAction =

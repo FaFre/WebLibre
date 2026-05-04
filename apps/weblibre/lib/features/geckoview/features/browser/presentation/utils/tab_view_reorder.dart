@@ -41,7 +41,7 @@ TabViewReorderResult? buildTabViewReorderResult({
   required Set<String> pinnedTabIds,
   required int oldIndex,
   required int newIndex,
-  required TabListDirection tabListDirection,
+  required TabDirection tabListDirection,
   required bool hierarchical,
   required bool sortPinnedFirst,
 }) {
@@ -178,7 +178,7 @@ TabViewReorderResult? buildTabViewReorderResult({
   // order before picking anchors so genBetween receives prev.orderKey <
   // next.orderKey. Block contents (e.g. the moving subtree from _subtreeIds)
   // are already storage-ordered internally, so we reverse blocks as units.
-  if (tabListDirection == TabListDirection.newestFirst) {
+  if (tabListDirection == TabDirection.newestFirst) {
     for (final blocks in blocksByRoot.values) {
       if (blocks.length > 1) {
         final reversedTail = blocks.sublist(1).reversed.toList();
@@ -189,7 +189,7 @@ TabViewReorderResult? buildTabViewReorderResult({
     }
   }
 
-  final orderedRootIds = tabListDirection == TabListDirection.newestFirst
+  final orderedRootIds = tabListDirection == TabDirection.newestFirst
       ? rootOrder.reversed
       : rootOrder;
 
@@ -213,13 +213,13 @@ TabViewReorderResult? buildTabViewReorderResult({
 
 List<String> _orderedIdsForStorageAnchors(
   List<String> orderedTabIds, {
-  required TabListDirection tabListDirection,
+  required TabDirection tabListDirection,
   required Set<String> pinnedTabIds,
   required Map<String, String?> parentById,
   required String movingPartitionRootId,
   required bool sortPinnedFirst,
 }) {
-  var storageOrderedIds = tabListDirection == TabListDirection.newestFirst
+  var storageOrderedIds = tabListDirection == TabDirection.newestFirst
       // Rendering flips root group order for newest-first; convert the
       // display order back to storage order before choosing anchors.
       ? orderedTabIds.reversed.toList()

@@ -49,7 +49,7 @@ final class CanManualTabReorderProvider
 }
 
 String _$canManualTabReorderHash() =>
-    r'598bc67a750f45893ba555b9b7866499b1808896';
+    r'ba5d961933464b6e005d7945802908a9a4ae034b';
 
 @ProviderFor(SelectedBangTrigger)
 final selectedBangTriggerProvider = SelectedBangTriggerFamily._();
@@ -529,7 +529,7 @@ final class SelectedContainerTabStatesWithContainerProvider
 }
 
 String _$selectedContainerTabStatesWithContainerHash() =>
-    r'6b630cdfc589af6961d4c96c90d09bd107560f15';
+    r'e6fd0e1e0ca4cfb0a0a46e8ff4e63d41032bfad9';
 
 @ProviderFor(quickTabSwitcherTabStates)
 final quickTabSwitcherTabStatesProvider = QuickTabSwitcherTabStatesFamily._();
@@ -601,7 +601,7 @@ final class QuickTabSwitcherTabStatesProvider
 }
 
 String _$quickTabSwitcherTabStatesHash() =>
-    r'32e928b4596ef2388f8c0e4cfdcf8f3563a1e24a';
+    r'3a1a195f6b2fc4cc54e689fab7bacaf4e6422196';
 
 final class QuickTabSwitcherTabStatesFamily extends $Family
     with
@@ -962,7 +962,7 @@ final class SeamlessFilteredTabEntitiesProvider
 }
 
 String _$seamlessFilteredTabEntitiesHash() =>
-    r'79abca3ad2753af4482c0e3bcfa317a6f336ca17';
+    r'83113c04be7932c60c7c97b70595fde0145f8040';
 
 final class SeamlessFilteredTabEntitiesFamily extends $Family
     with
@@ -1097,7 +1097,7 @@ final class FilteredTabPreviewsFamily extends $Family
 
 /// Grouped flat-list rendering for the list and grid views.
 ///
-/// Parent rows always render before their descendants. [TabListDirection]
+/// Parent rows always render before their descendants. [TabDirection]
 /// applies both to root group ordering and to sibling ordering below each
 /// parent, so parent-child pairs stay together while child order still follows
 /// the configured direction.
@@ -1109,7 +1109,7 @@ final groupedTabListItemsProvider = GroupedTabListItemsFamily._();
 
 /// Grouped flat-list rendering for the list and grid views.
 ///
-/// Parent rows always render before their descendants. [TabListDirection]
+/// Parent rows always render before their descendants. [TabDirection]
 /// applies both to root group ordering and to sibling ordering below each
 /// parent, so parent-child pairs stay together while child order still follows
 /// the configured direction.
@@ -1126,7 +1126,7 @@ final class GroupedTabListItemsProvider
     with $Provider<EquatableValue<List<TabListItemEntity>>> {
   /// Grouped flat-list rendering for the list and grid views.
   ///
-  /// Parent rows always render before their descendants. [TabListDirection]
+  /// Parent rows always render before their descendants. [TabDirection]
   /// applies both to root group ordering and to sibling ordering below each
   /// parent, so parent-child pairs stay together while child order still follows
   /// the configured direction.
@@ -1186,11 +1186,11 @@ final class GroupedTabListItemsProvider
 }
 
 String _$groupedTabListItemsHash() =>
-    r'48c7c971d95934afb48aa19b7400e208ee2f10e4';
+    r'15106bfa42146270245c7178928a834237042c1c';
 
 /// Grouped flat-list rendering for the list and grid views.
 ///
-/// Parent rows always render before their descendants. [TabListDirection]
+/// Parent rows always render before their descendants. [TabDirection]
 /// applies both to root group ordering and to sibling ordering below each
 /// parent, so parent-child pairs stay together while child order still follows
 /// the configured direction.
@@ -1214,7 +1214,7 @@ final class GroupedTabListItemsFamily extends $Family
 
   /// Grouped flat-list rendering for the list and grid views.
   ///
-  /// Parent rows always render before their descendants. [TabListDirection]
+  /// Parent rows always render before their descendants. [TabDirection]
   /// applies both to root group ordering and to sibling ordering below each
   /// parent, so parent-child pairs stay together while child order still follows
   /// the configured direction.

@@ -227,11 +227,74 @@ selectedContainerTabStatesWithContainer(Ref ref) {
       .watch(groupedTabListItemsProvider(containerId: filter.containerId))
       .value;
 
+  final tabListDirection = ref.watch(
+    generalSettingsWithDefaultsProvider.select((s) => s.tabListDirection),
+  );
+  final tabBarDirection = ref.watch(
+    generalSettingsWithDefaultsProvider.select((s) => s.tabBarDirection),
+  );
+  final pinnedTabIds = ref.watch(
+    watchPinnedTabIdsProvider.select(
+      (value) => value.value ?? const <String>{},
+    ),
+  );
+  final sortPinnedFirst = ref.watch(
+    tabViewFilterControllerProvider.select((v) => v.sortPinnedFirst),
+  );
+
+  // Build an order map from groupedItems. When the tab bar direction differs
+  // from the tab list direction, reverse root group order within each
+  // pinned/unpinned partition so the bar respects the user's direction
+  // preference while keeping parent–child groups intact.
+  List<TabListItemEntity> orderedItems = groupedItems;
+  if (tabBarDirection != tabListDirection) {
+    // Split groupedItems into root groups (each: root + its children).
+    final rootGroups = <(bool isPinned, List<TabListItemEntity>)>[];
+    var currentGroup = <TabListItemEntity>[];
+    for (final item in groupedItems) {
+      final isRoot =
+          item is TabListStandaloneItem || item is TabListParentGroup;
+      if (isRoot && currentGroup.isNotEmpty) {
+        final isPinned =
+            sortPinnedFirst && pinnedTabIds.contains(currentGroup.first.tabId);
+        rootGroups.add((isPinned, currentGroup));
+        currentGroup = [];
+      }
+      currentGroup.add(item);
+    }
+    if (currentGroup.isNotEmpty) {
+      final isPinned =
+          sortPinnedFirst && pinnedTabIds.contains(currentGroup.first.tabId);
+      rootGroups.add((isPinned, currentGroup));
+    }
+
+    // Reverse root groups within each partition (pinned / unpinned).
+    final result = <TabListItemEntity>[];
+    if (sortPinnedFirst) {
+      final pinned = rootGroups
+          .where((g) => g.$1)
+          .toList()
+          .reversed
+          .expand((g) => g.$2);
+      final unpinned = rootGroups
+          .where((g) => !g.$1)
+          .toList()
+          .reversed
+          .expand((g) => g.$2);
+      result
+        ..addAll(pinned)
+        ..addAll(unpinned);
+    } else {
+      result.addAll(rootGroups.reversed.expand((g) => g.$2));
+    }
+    orderedItems = result;
+  }
+
   final groupedOrder = {
-    for (var i = 0; i < groupedItems.length; i++) groupedItems[i].tabId: i,
+    for (var i = 0; i < orderedItems.length; i++) orderedItems[i].tabId: i,
   };
 
-  final items = [
+  var items = [
     for (final tabEntity in sortedTabs)
       if (tabStates.containsKey(tabEntity.tabId))
         (
@@ -243,10 +306,20 @@ selectedContainerTabStatesWithContainer(Ref ref) {
   ];
 
   items.sort((a, b) {
-    final aIndex = groupedOrder[a.$1.id] ?? groupedItems.length;
-    final bIndex = groupedOrder[b.$1.id] ?? groupedItems.length;
+    final aIndex = groupedOrder[a.$1.id] ?? orderedItems.length;
+    final bIndex = groupedOrder[b.$1.id] ?? orderedItems.length;
     return aIndex.compareTo(bIndex);
   });
+
+  // Flat pinned-first: move all pinned tabs before unpinned regardless of
+  // hierarchy, preserving relative order within each partition.
+  if (sortPinnedFirst && pinnedTabIds.isNotEmpty) {
+    final pinned = items.where((i) => pinnedTabIds.contains(i.$1.id)).toList();
+    final unpinned = items
+        .where((i) => !pinnedTabIds.contains(i.$1.id))
+        .toList();
+    items = [...pinned, ...unpinned];
+  }
 
   return EquatableValue(items);
 }
@@ -277,12 +350,35 @@ EquatableValue<List<TabStateWithContainer>> quickTabSwitcherTabStates(
     generalSettingsWithDefaultsProvider.select((s) => s.tabBarDirection),
   );
 
+  final pinnedTabIds = ref.watch(
+    watchPinnedTabIdsProvider.select(
+      (value) => value.value ?? const <String>{},
+    ),
+  );
+  final sortPinnedFirst = ref.watch(
+    tabViewFilterControllerProvider.select((v) => v.sortPinnedFirst),
+  );
+
   return EquatableValue(switch (effectiveMode) {
     QuickTabSwitcherMode.lastUsedTabs => () {
       final filtered = tabStates
           .where((state) => state.$1.id != selectedTabId)
           .toList();
-      return tabBarDirection == TabBarDirection.oldestFirst
+      if (sortPinnedFirst && pinnedTabIds.isNotEmpty) {
+        final pinned = filtered
+            .where((s) => pinnedTabIds.contains(s.$1.id))
+            .toList();
+        final unpinned = filtered
+            .where((s) => !pinnedTabIds.contains(s.$1.id))
+            .toList();
+        // Each partition is MRU-first from fifoTabStates. For oldestFirst,
+        // reverse each partition independently so pinned stays on top.
+        if (tabBarDirection == TabDirection.oldestFirst) {
+          return [...pinned.reversed, ...unpinned.reversed];
+        }
+        return [...pinned, ...unpinned];
+      }
+      return tabBarDirection == TabDirection.oldestFirst
           ? filtered.reversed.toList()
           : filtered;
     }(),
@@ -605,7 +701,7 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
   // database order (ascending order_key) is oldest-first. Flip to
   // newest-first when the user selects that direction.
   List<TabEntity> applyDirection(List<TabEntity> entities) {
-    return tabListDirection == TabListDirection.newestFirst
+    return tabListDirection == TabDirection.newestFirst
         ? entities.reversed.toList()
         : entities;
   }
@@ -697,7 +793,7 @@ EquatableValue<List<TabPreview>> filteredTabPreviews(
 
 /// Grouped flat-list rendering for the list and grid views.
 ///
-/// Parent rows always render before their descendants. [TabListDirection]
+/// Parent rows always render before their descendants. [TabDirection]
 /// applies both to root group ordering and to sibling ordering below each
 /// parent, so parent-child pairs stay together while child order still follows
 /// the configured direction.
@@ -867,7 +963,7 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
   // order_key ASC; newest-first reverses the group list. Pinned and
   // unpinned partitions are reversed independently so pinned-first stays
   // intact while still flipping the relative order within each partition.
-  if (sortField == null && tabListDirection == TabListDirection.newestFirst) {
+  if (sortField == null && tabListDirection == TabDirection.newestFirst) {
     if (filterOptions.sortPinnedFirst) {
       final pinned = groupRecords.where((g) => g.isPinned).toList()
         ..sort((a, b) => b.rootOrderKey.compareTo(a.rootOrderKey));
@@ -931,17 +1027,36 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
           .add(member);
     }
 
-    // Children are always sorted by storage `order_key` (optionally reversed
-    // for newest-first) — even when an explicit `sortField` (title/url/date)
-    // is active. The explicit sort applies only to root groups; descendants
-    // remain in insertion order so a parent's children stay grouped in the
-    // order they were opened rather than alphabetically interleaving across
-    // siblings.
+    // Children are sorted by storage `order_key` (optionally reversed for
+    // newest-first) — even when an explicit `sortField` is active. The
+    // explicit sort applies only to root groups; descendants remain in
+    // insertion order. When `sortPinnedFirst` is true, pinned children are
+    // sorted before unpinned siblings within each parent group.
     for (final children in childrenByVisibleParent.values) {
-      children.sort((a, b) {
-        final cmp = a.row.orderKey.compareTo(b.row.orderKey);
-        return tabListDirection == TabListDirection.newestFirst ? -cmp : cmp;
-      });
+      if (filterOptions.sortPinnedFirst) {
+        final pinned = children
+            .where((c) => pinnedTabIds.contains(c.row.id))
+            .toList();
+        final unpinned = children
+            .where((c) => !pinnedTabIds.contains(c.row.id))
+            .toList();
+        final cmp = (_GroupedRow a, _GroupedRow b) =>
+            a.row.orderKey.compareTo(b.row.orderKey);
+        final directionCmp = tabListDirection == TabDirection.newestFirst
+            ? (_GroupedRow a, _GroupedRow b) => -cmp(a, b)
+            : cmp;
+        pinned.sort(directionCmp);
+        unpinned.sort(directionCmp);
+        children
+          ..clear()
+          ..addAll(pinned)
+          ..addAll(unpinned);
+      } else {
+        children.sort((a, b) {
+          final cmp = a.row.orderKey.compareTo(b.row.orderKey);
+          return tabListDirection == TabDirection.newestFirst ? -cmp : cmp;
+        });
+      }
     }
 
     void addChildren(String parentId) {

@@ -383,12 +383,12 @@ class _TabListDirectionSection extends HookConsumerWidget {
               showSelectedIcon: false,
               segments: const [
                 ButtonSegment(
-                  value: TabListDirection.newestFirst,
+                  value: TabDirection.newestFirst,
                   label: Text('Newest first'),
                   icon: Icon(MdiIcons.arrowCollapseUp),
                 ),
                 ButtonSegment(
-                  value: TabListDirection.oldestFirst,
+                  value: TabDirection.oldestFirst,
                   label: Text('Oldest first'),
                   icon: Icon(MdiIcons.arrowCollapseDown),
                 ),
@@ -438,12 +438,12 @@ class _TabBarDirectionSection extends HookConsumerWidget {
               showSelectedIcon: false,
               segments: const [
                 ButtonSegment(
-                  value: TabBarDirection.newestFirst,
+                  value: TabDirection.newestFirst,
                   label: Text('Newest first'),
                   icon: Icon(MdiIcons.arrowCollapseLeft),
                 ),
                 ButtonSegment(
-                  value: TabBarDirection.oldestFirst,
+                  value: TabDirection.oldestFirst,
                   label: Text('Oldest first'),
                   icon: Icon(MdiIcons.arrowCollapseRight),
                 ),

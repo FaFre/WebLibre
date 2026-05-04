@@ -261,7 +261,7 @@ class _TabListView extends HookConsumerWidget {
       ).select((value) => (value.value?.query ?? '').isNotEmpty),
     );
 
-    final List<TabViewItem> primaryRows;
+    List<TabViewItem> primaryRows;
     if (hasActiveSearch) {
       final flat = ref.watch(
         seamlessFilteredTabEntitiesProvider(
@@ -303,6 +303,15 @@ class _TabListView extends HookConsumerWidget {
                   : TabViewItem.standalone(tabId: c.tabId),
           },
       ];
+      if (!showHierarchicalTabs && filterOptions.sortPinnedFirst) {
+        final pinned = primaryRows
+            .where((r) => pinnedTabIds.contains(r.tabId))
+            .toList();
+        final unpinned = primaryRows
+            .where((r) => !pinnedTabIds.contains(r.tabId))
+            .toList();
+        primaryRows = [...pinned, ...unpinned];
+      }
     }
 
     final tabSuggestionsEnabled = ref.watch(

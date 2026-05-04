@@ -401,7 +401,7 @@ class TabRepository extends _$TabRepository {
     // anchored to the bar's mental model.
     final newestFirst =
         ref.read(generalSettingsWithDefaultsProvider).tabBarDirection ==
-        TabBarDirection.newestFirst;
+        TabDirection.newestFirst;
     final TabDatabase tabDatabase = ref.read(tabDatabaseProvider);
     final definitions = tabDatabase.definitionsDrift;
 

@@ -13,8 +13,8 @@ part of 'native_gatekeeper_replicator.dart';
 /// Only blocked packages are replicated — allow/unknown still fall through to
 /// the Flutter gatekeeper dialog.
 ///
-/// On startup, also consumes any "always allow" decisions made via notification
-/// actions while Flutter was not running, and merges them into Flutter's policy.
+/// Also consumes any "always allow" decisions made via notification actions
+/// and merges them into Flutter's policy before the next gatekeeper check.
 
 @ProviderFor(NativeIntentGatekeeperReplicator)
 final nativeIntentGatekeeperReplicatorProvider =
@@ -25,8 +25,8 @@ final nativeIntentGatekeeperReplicatorProvider =
 /// Only blocked packages are replicated — allow/unknown still fall through to
 /// the Flutter gatekeeper dialog.
 ///
-/// On startup, also consumes any "always allow" decisions made via notification
-/// actions while Flutter was not running, and merges them into Flutter's policy.
+/// Also consumes any "always allow" decisions made via notification actions
+/// and merges them into Flutter's policy before the next gatekeeper check.
 final class NativeIntentGatekeeperReplicatorProvider
     extends $NotifierProvider<NativeIntentGatekeeperReplicator, void> {
   /// Mirrors the Flutter-side block list to the native side so the
@@ -34,8 +34,8 @@ final class NativeIntentGatekeeperReplicatorProvider
   /// Only blocked packages are replicated — allow/unknown still fall through to
   /// the Flutter gatekeeper dialog.
   ///
-  /// On startup, also consumes any "always allow" decisions made via notification
-  /// actions while Flutter was not running, and merges them into Flutter's policy.
+  /// Also consumes any "always allow" decisions made via notification actions
+  /// and merges them into Flutter's policy before the next gatekeeper check.
   NativeIntentGatekeeperReplicatorProvider._()
     : super(
         from: null,
@@ -65,15 +65,15 @@ final class NativeIntentGatekeeperReplicatorProvider
 }
 
 String _$nativeIntentGatekeeperReplicatorHash() =>
-    r'ed1ba2a318467317d6fb412495171acb8819e483';
+    r'bb2e2a252143879e558d513f9c48f3e66513baa9';
 
 /// Mirrors the Flutter-side block list to the native side so the
 /// `IntentReceiverActivity` can reject intents without launching Flutter.
 /// Only blocked packages are replicated — allow/unknown still fall through to
 /// the Flutter gatekeeper dialog.
 ///
-/// On startup, also consumes any "always allow" decisions made via notification
-/// actions while Flutter was not running, and merges them into Flutter's policy.
+/// Also consumes any "always allow" decisions made via notification actions
+/// and merges them into Flutter's policy before the next gatekeeper check.
 
 abstract class _$NativeIntentGatekeeperReplicator extends $Notifier<void> {
   void build();
