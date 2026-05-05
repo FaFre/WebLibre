@@ -234,11 +234,11 @@ class BrowserTabBar extends HookConsumerWidget {
 
     final showTabTitle = displayedSheet is! ViewTabsSheet;
 
-    final backgroundColor =
+    final effectiveContainerColor =
         (settings.showContainerUi &&
             containerColor != null &&
             displayedSheet is! ViewTabsSheet)
-        ? ContainerColors.forAppBar(containerColor)
+        ? containerColor
         : null;
 
     return BrowserTabBarView(
@@ -247,11 +247,11 @@ class BrowserTabBar extends HookConsumerWidget {
       showQuickTabSwitcherBar: showQuickTabSwitcherBar,
       displayAppBar: displayAppBar,
       displayQuickTabSwitcher: displayQuickTabSwitcher,
-      backgroundColor: backgroundColor,
+      backgroundColor: null,
       title: showTabTitle
           ? settings.tabBarLayout == TabBarLayout.compact
-                ? const CompactAppBarTitle()
-                : const AppBarTitle()
+                ? CompactAppBarTitle(containerColor: effectiveContainerColor)
+                : AppBarTitle(containerColor: effectiveContainerColor)
           : null,
       actions: [
         const PinnedAddonBar(),

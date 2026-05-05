@@ -38,7 +38,9 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 
 class CompactAppBarTitle extends ConsumerWidget {
-  const CompactAppBarTitle({super.key});
+  const CompactAppBarTitle({super.key, this.containerColor});
+
+  final Color? containerColor;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -68,6 +70,7 @@ class CompactAppBarTitle extends ConsumerWidget {
           isTabTuneledAsync.hasValue && isTabTuneledAsync.value == true,
       siteSettingsBadgeState: siteSettingsBadgeState,
       longPressUrlCopy: settings.tabBarLongPressUrlCopy,
+      containerColor: containerColor,
       onSiteSettingsTap: () {
         ref
             .read(bottomSheetControllerProvider.notifier)
@@ -94,6 +97,7 @@ class CompactAppBarTitleView extends StatelessWidget {
     required this.onTitleTap,
     this.tabIcon,
     this.longPressUrlCopy = true,
+    this.containerColor,
   });
 
   final TabState tabState;
@@ -103,11 +107,13 @@ class CompactAppBarTitleView extends StatelessWidget {
   final VoidCallback onTitleTap;
   final Widget? tabIcon;
   final bool longPressUrlCopy;
+  final Color? containerColor;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = AppColors.of(context);
+    final containerColor = this.containerColor;
 
     return Row(
       children: [
@@ -142,11 +148,24 @@ class CompactAppBarTitleView extends StatelessWidget {
         Expanded(
           child: GestureDetector(
             onTap: onTitleTap,
-            child: Container(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOut,
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
+                color: containerColor != null
+                    ? Color.alphaBlend(
+                        containerColor.withValues(alpha: 0.08),
+                        theme.colorScheme.surfaceContainerHighest,
+                      )
+                    : theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(24),
+                border: containerColor != null
+                    ? Border.all(
+                        color: containerColor.withValues(alpha: 0.5),
+                        width: 2,
+                      )
+                    : null,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -171,7 +190,11 @@ class CompactAppBarTitleView extends StatelessWidget {
                     const Icon(MdiIcons.tunnelOutline, size: 16),
                     const SizedBox(width: 4),
                   ],
-                  _SecurityStatusIcon(tabState: tabState, size: 16),
+                  _SecurityStatusIcon(
+                    tabState: tabState,
+                    size: 16,
+                    containerColor: containerColor,
+                  ),
                   const SizedBox(width: 6),
                   Flexible(
                     child: UriBreadcrumb(
@@ -201,7 +224,9 @@ class CompactAppBarTitleView extends StatelessWidget {
 }
 
 class AppBarTitle extends ConsumerWidget {
-  const AppBarTitle({super.key});
+  const AppBarTitle({super.key, this.containerColor});
+
+  final Color? containerColor;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -231,6 +256,7 @@ class AppBarTitle extends ConsumerWidget {
           isTabTuneledAsync.hasValue && isTabTuneledAsync.value == true,
       siteSettingsBadgeState: siteSettingsBadgeState,
       longPressUrlCopy: settings.tabBarLongPressUrlCopy,
+      containerColor: containerColor,
       onSiteSettingsTap: () {
         ref
             .read(bottomSheetControllerProvider.notifier)
@@ -257,6 +283,7 @@ class AppBarTitleView extends StatelessWidget {
     required this.onTitleTap,
     required this.longPressUrlCopy,
     this.tabIcon,
+    this.containerColor,
   });
 
   final TabState tabState;
@@ -266,11 +293,13 @@ class AppBarTitleView extends StatelessWidget {
   final VoidCallback onTitleTap;
   final Widget? tabIcon;
   final bool longPressUrlCopy;
+  final Color? containerColor;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = AppColors.of(context);
+    final containerColor = this.containerColor;
 
     return Row(
       children: [
@@ -333,45 +362,73 @@ class AppBarTitleView extends StatelessWidget {
                     ),
                   ),
                 ),
-                Row(
-                  children: [
-                    if (tabState.tabMode is PrivateTabMode) ...[
-                      Icon(
-                        MdiIcons.dominoMask,
-                        color: appColors.privateTabPurple,
-                        size: 14,
-                      ),
-                      const SizedBox(width: 4),
-                    ] else if (tabState.tabMode is IsolatedTabMode) ...[
-                      Icon(
-                        MdiIcons.snowflake,
-                        color: appColors.isolatedTabTeal,
-                        size: 14,
-                      ),
-                      const SizedBox(width: 4),
-                    ],
-                    if (isTabTunneled) ...[
-                      const Icon(MdiIcons.tunnelOutline, size: 14),
-                      const SizedBox(width: 4),
-                    ],
-                    _SecurityStatusIcon(tabState: tabState, size: 14),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: UriBreadcrumb(
-                        uri: tabState.url,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurface,
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
+                  padding: containerColor != null
+                      ? const EdgeInsets.symmetric(vertical: 2, horizontal: 8)
+                      : EdgeInsets.zero,
+                  decoration: BoxDecoration(
+                    color: containerColor != null
+                        ? Color.alphaBlend(
+                            containerColor.withValues(alpha: 0.08),
+                            theme.colorScheme.surfaceContainerHighest,
+                          )
+                        : null,
+                    borderRadius: BorderRadius.circular(12),
+                    border: containerColor != null
+                        ? Border.all(
+                            color: containerColor.withValues(alpha: 0.5),
+                            width: 2,
+                          )
+                        : null,
+                  ),
+                  child: Row(
+                    children: [
+                      if (tabState.tabMode is PrivateTabMode) ...[
+                        Icon(
+                          MdiIcons.dominoMask,
+                          color: appColors.privateTabPurple,
+                          size: 14,
                         ),
-                        onTooltipTriggered: longPressUrlCopy
-                            ? () async {
-                                await Clipboard.setData(
-                                  ClipboardData(text: tabState.url.toString()),
-                                );
-                              }
-                            : null,
+                        const SizedBox(width: 4),
+                      ] else if (tabState.tabMode is IsolatedTabMode) ...[
+                        Icon(
+                          MdiIcons.snowflake,
+                          color: appColors.isolatedTabTeal,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 4),
+                      ],
+                      if (isTabTunneled) ...[
+                        const Icon(MdiIcons.tunnelOutline, size: 14),
+                        const SizedBox(width: 4),
+                      ],
+                      _SecurityStatusIcon(
+                        tabState: tabState,
+                        size: 14,
+                        containerColor: containerColor,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: UriBreadcrumb(
+                          uri: tabState.url,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurface,
+                          ),
+                          onTooltipTriggered: longPressUrlCopy
+                              ? () async {
+                                  await Clipboard.setData(
+                                    ClipboardData(
+                                      text: tabState.url.toString(),
+                                    ),
+                                  );
+                                }
+                              : null,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -384,10 +441,15 @@ class AppBarTitleView extends StatelessWidget {
 }
 
 class _SecurityStatusIcon extends StatelessWidget {
-  const _SecurityStatusIcon({required this.tabState, required this.size});
+  const _SecurityStatusIcon({
+    required this.tabState,
+    required this.size,
+    this.containerColor,
+  });
 
   final TabState tabState;
   final double size;
+  final Color? containerColor;
 
   @override
   Widget build(BuildContext context) {
@@ -398,7 +460,7 @@ class _SecurityStatusIcon extends StatelessWidget {
         size: size,
       );
     } else if (tabState.readerableState.active) {
-      return Icon(MdiIcons.lockMinus, size: size);
+      return Icon(MdiIcons.lockMinus, color: containerColor, size: size);
     } else if (!tabState.securityInfoState.secure) {
       return Icon(
         MdiIcons.lockAlert,
@@ -406,10 +468,10 @@ class _SecurityStatusIcon extends StatelessWidget {
         size: size,
       );
     } else if (!tabState.isLoading) {
-      return Icon(MdiIcons.lock, size: size);
+      return Icon(MdiIcons.lock, color: containerColor, size: size);
     }
 
-    return Icon(MdiIcons.timerSand, size: size);
+    return Icon(MdiIcons.timerSand, color: containerColor, size: size);
   }
 }
 
