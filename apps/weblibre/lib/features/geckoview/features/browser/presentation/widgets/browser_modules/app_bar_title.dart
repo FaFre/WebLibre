@@ -46,8 +46,10 @@ class CompactAppBarTitle extends ConsumerWidget {
     final selectedTabType = ref.watch(selectedTabTypeProvider);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final isTabTuneledAsync = ref.watch(isTabTunneledProvider(tabState?.id));
-    final showSiteSettingsBadge = ref.watch(
-      showSiteSettingsBadgeProvider.select((value) => value.value == true),
+    final siteSettingsBadgeState = ref.watch(
+      showSiteSettingsBadgeProvider.select(
+        (value) => value.value ?? SiteSettingsBadgeState.hidden,
+      ),
     );
 
     if (tabState == null) {
@@ -64,7 +66,7 @@ class CompactAppBarTitle extends ConsumerWidget {
       tabState: tabState,
       isTabTunneled:
           isTabTuneledAsync.hasValue && isTabTuneledAsync.value == true,
-      showSiteSettingsBadge: showSiteSettingsBadge,
+      siteSettingsBadgeState: siteSettingsBadgeState,
       longPressUrlCopy: settings.tabBarLongPressUrlCopy,
       onSiteSettingsTap: () {
         ref
@@ -87,7 +89,7 @@ class CompactAppBarTitleView extends StatelessWidget {
     super.key,
     required this.tabState,
     required this.isTabTunneled,
-    required this.showSiteSettingsBadge,
+    required this.siteSettingsBadgeState,
     required this.onSiteSettingsTap,
     required this.onTitleTap,
     this.tabIcon,
@@ -96,7 +98,7 @@ class CompactAppBarTitleView extends StatelessWidget {
 
   final TabState tabState;
   final bool isTabTunneled;
-  final bool showSiteSettingsBadge;
+  final SiteSettingsBadgeState siteSettingsBadgeState;
   final VoidCallback onSiteSettingsTap;
   final VoidCallback onTitleTap;
   final Widget? tabIcon;
@@ -117,17 +119,22 @@ class CompactAppBarTitleView extends StatelessWidget {
               clipBehavior: Clip.none,
               children: [
                 tabIcon ?? TabIcon(tabState: tabState, iconSize: 24),
-                Positioned(
-                  top: -4,
-                  right: -4,
-                  child: Icon(
-                    MdiIcons.shieldHalfFull,
-                    size: 10,
-                    color: showSiteSettingsBadge
-                        ? appColors.warningAmber
-                        : Colors.green,
+                if (siteSettingsBadgeState != SiteSettingsBadgeState.hidden)
+                  Positioned(
+                    top: -4,
+                    right: -4,
+                    child: Icon(
+                      siteSettingsBadgeState == SiteSettingsBadgeState.improved
+                          ? MdiIcons.shield
+                          : MdiIcons.shieldAlert,
+                      size: 10,
+                      color:
+                          siteSettingsBadgeState ==
+                              SiteSettingsBadgeState.improved
+                          ? Colors.green
+                          : appColors.warningAmber,
+                    ),
                   ),
-                ),
               ],
             ),
           ),
@@ -202,8 +209,10 @@ class AppBarTitle extends ConsumerWidget {
     final selectedTabType = ref.watch(selectedTabTypeProvider);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final isTabTuneledAsync = ref.watch(isTabTunneledProvider(tabState?.id));
-    final showSiteSettingsBadge = ref.watch(
-      showSiteSettingsBadgeProvider.select((value) => value.value == true),
+    final siteSettingsBadgeState = ref.watch(
+      showSiteSettingsBadgeProvider.select(
+        (value) => value.value ?? SiteSettingsBadgeState.hidden,
+      ),
     );
 
     if (tabState == null) {
@@ -220,7 +229,7 @@ class AppBarTitle extends ConsumerWidget {
       tabState: tabState,
       isTabTunneled:
           isTabTuneledAsync.hasValue && isTabTuneledAsync.value == true,
-      showSiteSettingsBadge: showSiteSettingsBadge,
+      siteSettingsBadgeState: siteSettingsBadgeState,
       longPressUrlCopy: settings.tabBarLongPressUrlCopy,
       onSiteSettingsTap: () {
         ref
@@ -243,7 +252,7 @@ class AppBarTitleView extends StatelessWidget {
     super.key,
     required this.tabState,
     required this.isTabTunneled,
-    required this.showSiteSettingsBadge,
+    required this.siteSettingsBadgeState,
     required this.onSiteSettingsTap,
     required this.onTitleTap,
     required this.longPressUrlCopy,
@@ -252,7 +261,7 @@ class AppBarTitleView extends StatelessWidget {
 
   final TabState tabState;
   final bool isTabTunneled;
-  final bool showSiteSettingsBadge;
+  final SiteSettingsBadgeState siteSettingsBadgeState;
   final VoidCallback onSiteSettingsTap;
   final VoidCallback onTitleTap;
   final Widget? tabIcon;
@@ -273,17 +282,22 @@ class AppBarTitleView extends StatelessWidget {
               clipBehavior: Clip.none,
               children: [
                 tabIcon ?? TabIcon(tabState: tabState, iconSize: 24),
-                Positioned(
-                  top: -4,
-                  right: -4,
-                  child: Icon(
-                    MdiIcons.shieldHalfFull,
-                    size: 10,
-                    color: showSiteSettingsBadge
-                        ? appColors.warningAmber
-                        : Colors.green,
+                if (siteSettingsBadgeState != SiteSettingsBadgeState.hidden)
+                  Positioned(
+                    top: -4,
+                    right: -4,
+                    child: Icon(
+                      siteSettingsBadgeState == SiteSettingsBadgeState.improved
+                          ? MdiIcons.shield
+                          : MdiIcons.shieldAlert,
+                      size: 10,
+                      color:
+                          siteSettingsBadgeState ==
+                              SiteSettingsBadgeState.improved
+                          ? Colors.green
+                          : appColors.warningAmber,
+                    ),
                   ),
-                ),
               ],
             ),
           ),

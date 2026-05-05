@@ -24,6 +24,7 @@ import 'package:weblibre/features/geckoview/domain/entities/states/security.dart
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_bar_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/providers/site_settings_badge_provider.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
@@ -351,7 +352,7 @@ class _RegularPreviewTitle extends StatelessWidget {
     return AppBarTitleView(
       tabState: tabState,
       isTabTunneled: false,
-      showSiteSettingsBadge: false,
+      siteSettingsBadgeState: SiteSettingsBadgeState.hidden,
       onSiteSettingsTap: _noop,
       onTitleTap: _noop,
       tabIcon: const Icon(MdiIcons.web, size: 24),
@@ -370,7 +371,7 @@ class _CompactPreviewTitle extends StatelessWidget {
     return CompactAppBarTitleView(
       tabState: tabState,
       isTabTunneled: false,
-      showSiteSettingsBadge: false,
+      siteSettingsBadgeState: SiteSettingsBadgeState.hidden,
       onSiteSettingsTap: _noop,
       onTitleTap: _noop,
       tabIcon: const Icon(MdiIcons.web, size: 24),

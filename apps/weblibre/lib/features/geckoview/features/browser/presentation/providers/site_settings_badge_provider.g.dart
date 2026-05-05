@@ -8,20 +8,24 @@ part of 'site_settings_badge_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Provider that determines whether to show the site settings badge on the tab icon.
-/// Returns true if any site-specific setting has been altered from defaults.
+/// Provider that determines the site settings badge state on the tab icon.
 
 @ProviderFor(showSiteSettingsBadge)
 final showSiteSettingsBadgeProvider = ShowSiteSettingsBadgeProvider._();
 
-/// Provider that determines whether to show the site settings badge on the tab icon.
-/// Returns true if any site-specific setting has been altered from defaults.
+/// Provider that determines the site settings badge state on the tab icon.
 
 final class ShowSiteSettingsBadgeProvider
-    extends $FunctionalProvider<AsyncValue<bool>, bool, FutureOr<bool>>
-    with $FutureModifier<bool>, $FutureProvider<bool> {
-  /// Provider that determines whether to show the site settings badge on the tab icon.
-  /// Returns true if any site-specific setting has been altered from defaults.
+    extends
+        $FunctionalProvider<
+          AsyncValue<SiteSettingsBadgeState>,
+          SiteSettingsBadgeState,
+          FutureOr<SiteSettingsBadgeState>
+        >
+    with
+        $FutureModifier<SiteSettingsBadgeState>,
+        $FutureProvider<SiteSettingsBadgeState> {
+  /// Provider that determines the site settings badge state on the tab icon.
   ShowSiteSettingsBadgeProvider._()
     : super(
         from: null,
@@ -38,14 +42,15 @@ final class ShowSiteSettingsBadgeProvider
 
   @$internal
   @override
-  $FutureProviderElement<bool> $createElement($ProviderPointer pointer) =>
-      $FutureProviderElement(pointer);
+  $FutureProviderElement<SiteSettingsBadgeState> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<bool> create(Ref ref) {
+  FutureOr<SiteSettingsBadgeState> create(Ref ref) {
     return showSiteSettingsBadge(ref);
   }
 }
 
 String _$showSiteSettingsBadgeHash() =>
-    r'c68e3b37b6f25e02779123b3f642a58dc98ba3a7';
+    r'fbfe409cdd6656d5cd26e377a68acde6ff4294fa';

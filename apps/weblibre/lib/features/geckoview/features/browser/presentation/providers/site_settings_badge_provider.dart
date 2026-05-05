@@ -27,13 +27,26 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 
 part 'site_settings_badge_provider.g.dart';
 
-/// Provider that determines whether to show the site settings badge on the tab icon.
-/// Returns true if any site-specific setting has been altered from defaults.
+/// Indicates whether the site settings badge should be shown on the tab icon
+/// and, if so, which direction settings have been changed.
+enum SiteSettingsBadgeState {
+  /// No per-site settings differ from defaults.
+  hidden,
+
+  /// At least one per-site setting is stricter than the default.
+  improved,
+
+  /// At least one per-site setting is looser than the default.
+  /// Tracking-protection exceptions also count as weakened.
+  weakened,
+}
+
+/// Provider that determines the site settings badge state on the tab icon.
 @Riverpod()
-Future<bool> showSiteSettingsBadge(Ref ref) async {
+Future<SiteSettingsBadgeState> showSiteSettingsBadge(Ref ref) async {
   final tabState = ref.watch(selectedTabStateProvider);
   if (tabState == null) {
-    return false;
+    return SiteSettingsBadgeState.hidden;
   }
 
   // Check tracking protection exception
@@ -42,7 +55,7 @@ Future<bool> showSiteSettingsBadge(Ref ref) async {
   );
 
   if (!tabState.url.hasScheme || !tabState.url.isHttpOrHttps) {
-    return false;
+    return SiteSettingsBadgeState.hidden;
   }
 
   // Watch site permissions
@@ -54,27 +67,24 @@ Future<bool> showSiteSettingsBadge(Ref ref) async {
   );
 
   if (hasTrackingException) {
-    return true;
-  }
-  // Check for altered permissions
-  if (_hasAlteredPermissions(permissions)) {
-    return true;
-  }
-  // Check for altered autoplay settings
-  if (_hasAlteredAutoplay(permissions)) {
-    return true;
+    return SiteSettingsBadgeState.weakened;
   }
 
-  return false;
+  final badgeState = _evaluateBadgeState(permissions);
+  return badgeState;
 }
 
-/// Checks if any permission has been explicitly set to allowed or blocked
-bool _hasAlteredPermissions(SitePermissions? permissions) {
+/// Evaluates whether site permissions are default, improved, or weakened.
+/// Weakened takes precedence over improved.
+SiteSettingsBadgeState _evaluateBadgeState(SitePermissions? permissions) {
   if (permissions == null) {
-    return false;
+    return SiteSettingsBadgeState.hidden;
   }
 
-  // Check all permission fields
+  var hasImproved = false;
+  var hasWeakened = false;
+
+  // Evaluate permission-type fields
   final permissionStatuses = [
     permissions.camera,
     permissions.microphone,
@@ -87,30 +97,40 @@ bool _hasAlteredPermissions(SitePermissions? permissions) {
     permissions.localNetworkAccess,
   ];
 
-  return permissionStatuses.any(
-    (status) =>
-        status != null &&
-        (status == SitePermissionStatus.allowed ||
-            status == SitePermissionStatus.blocked),
-  );
-}
-
-/// Checks if autoplay settings differ from defaults
-/// Default: autoplayAudible = blocked (null), autoplayInaudible = allowed (null)
-bool _hasAlteredAutoplay(SitePermissions? permissions) {
-  if (permissions == null) {
-    return false;
+  for (final status in permissionStatuses) {
+    if (status == null) {
+      continue;
+    }
+    if (status == SitePermissionStatus.blocked) {
+      hasImproved = true;
+    } else if (status == SitePermissionStatus.allowed) {
+      hasWeakened = true;
+    }
+    // noDecision is the default -> no effect
   }
 
+  // Evaluate autoplay audible
   final audible = permissions.autoplayAudible;
+  if (audible != null && audible != AutoplayStatus.blocked) {
+    hasWeakened = true;
+  }
+
+  // Evaluate autoplay inaudible
   final inaudible = permissions.autoplayInaudible;
+  if (inaudible != null) {
+    if (inaudible == AutoplayStatus.blocked) {
+      hasImproved = true;
+    } else if (inaudible != AutoplayStatus.allowed) {
+      hasWeakened = true;
+    }
+  }
 
-  // Check if audible differs from default (null or blocked)
-  final audibleAltered = audible != null && audible != AutoplayStatus.blocked;
+  if (hasWeakened) {
+    return SiteSettingsBadgeState.weakened;
+  }
+  if (hasImproved) {
+    return SiteSettingsBadgeState.improved;
+  }
 
-  // Check if inaudible differs from default (null or allowed)
-  final inaudibleAltered =
-      inaudible != null && inaudible != AutoplayStatus.allowed;
-
-  return audibleAltered || inaudibleAltered;
+  return SiteSettingsBadgeState.hidden;
 }
