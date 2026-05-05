@@ -21,7 +21,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/clear_site_data_dialog.dart';
 import 'package:weblibre/utils/ui_helper.dart';
@@ -52,6 +54,13 @@ class ClearSiteDataSection extends HookConsumerWidget {
         newTypes.remove(type);
       } else {
         newTypes.add(type);
+
+        if (type == ClearDataType.allSiteData) {
+          newTypes.removeAll([
+            ClearDataType.onlyCaches,
+            ClearDataType.onlyCookies,
+          ]);
+        }
       }
       selectedTypes.value = newTypes;
     }
@@ -79,18 +88,13 @@ class ClearSiteDataSection extends HookConsumerWidget {
         ),
         if (isExpanded.value) ...[
           _DataTypeCheckbox(
-            label: 'Cookies',
-            subtitle: 'Login tokens, preferences, tracking data',
-            type: ClearDataType.cookies,
-            isSelected: selectedTypes.value.contains(ClearDataType.cookies),
-            onChanged: (selected) => toggleType(ClearDataType.cookies),
-          ),
-          _DataTypeCheckbox(
-            label: 'Cached Files',
-            subtitle: 'Images, scripts, stylesheets',
-            type: ClearDataType.allCaches,
-            isSelected: selectedTypes.value.contains(ClearDataType.allCaches),
-            onChanged: (selected) => toggleType(ClearDataType.allCaches),
+            label: 'Auth Sessions',
+            subtitle: 'Saved logins, active sessions',
+            type: ClearDataType.authSessions,
+            isSelected: selectedTypes.value.contains(
+              ClearDataType.authSessions,
+            ),
+            onChanged: (selected) => toggleType(ClearDataType.authSessions),
           ),
           _DataTypeCheckbox(
             label: 'Site Data',
@@ -99,14 +103,33 @@ class ClearSiteDataSection extends HookConsumerWidget {
             isSelected: selectedTypes.value.contains(ClearDataType.allSiteData),
             onChanged: (selected) => toggleType(ClearDataType.allSiteData),
           ),
-          _DataTypeCheckbox(
-            label: 'Auth Sessions',
-            subtitle: 'Saved logins, active sessions',
-            type: ClearDataType.authSessions,
-            isSelected: selectedTypes.value.contains(
-              ClearDataType.authSessions,
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0),
+            child: _DataTypeCheckbox(
+              label: 'Cookies',
+              subtitle: 'Login tokens, preferences, tracking data',
+              type: ClearDataType.onlyCookies,
+              isSelected:
+                  selectedTypes.value.contains(ClearDataType.allSiteData) ||
+                  selectedTypes.value.contains(ClearDataType.onlyCookies),
+              onChanged: selectedTypes.value.contains(ClearDataType.allSiteData)
+                  ? null
+                  : (selected) => toggleType(ClearDataType.onlyCookies),
             ),
-            onChanged: (selected) => toggleType(ClearDataType.authSessions),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0),
+            child: _DataTypeCheckbox(
+              label: 'Cached Files',
+              subtitle: 'Images, scripts, stylesheets',
+              type: ClearDataType.onlyCaches,
+              isSelected:
+                  selectedTypes.value.contains(ClearDataType.allSiteData) ||
+                  selectedTypes.value.contains(ClearDataType.onlyCaches),
+              onChanged: selectedTypes.value.contains(ClearDataType.allSiteData)
+                  ? null
+                  : (selected) => toggleType(ClearDataType.onlyCaches),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(
@@ -163,6 +186,7 @@ class ClearSiteDataSection extends HookConsumerWidget {
         await _clearData(ref, selectedTypes);
         if (context.mounted) {
           showInfoMessage(context, 'Site data cleared');
+          ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
         }
       } catch (e, s) {
         logger.e('Failed to clear site data', error: e, stackTrace: s);
@@ -178,9 +202,9 @@ class ClearSiteDataSection extends HookConsumerWidget {
   String _formatTypes(Set<ClearDataType> types) {
     final labels = types.map((t) {
       switch (t) {
-        case ClearDataType.cookies:
+        case ClearDataType.onlyCookies:
           return 'cookies';
-        case ClearDataType.allCaches:
+        case ClearDataType.onlyCaches:
           return 'cached files';
         case ClearDataType.allSiteData:
           return 'site data';
@@ -218,7 +242,7 @@ class _DataTypeCheckbox extends StatelessWidget {
   final String subtitle;
   final ClearDataType type;
   final bool isSelected;
-  final ValueChanged<bool> onChanged;
+  final ValueChanged<bool>? onChanged;
 
   const _DataTypeCheckbox({
     required this.label,
@@ -234,7 +258,10 @@ class _DataTypeCheckbox extends StatelessWidget {
       title: Text(label),
       subtitle: Text(subtitle),
       value: isSelected,
-      onChanged: (value) => onChanged(value ?? false),
+      onChanged: onChanged.mapNotNull(
+        (onChanged) =>
+            (value) => onChanged(value ?? false),
+      ),
       controlAffinity: ListTileControlAffinity.trailing,
     );
   }

@@ -681,12 +681,15 @@ enum class MlProgressStatus(val raw: Int) {
 enum class ClearDataType(val raw: Int) {
   /** Authentication sessions */
   AUTH_SESSIONS(0),
-  /** All site data (cookies, storage, etc.) */
+  /**
+   * All site data (cookies, storage, etc.)
+   * WARNING: If this is set it already includes cookies and allCaches. Passing the additionally will lead to issues
+   */
   ALL_SITE_DATA(1),
   /** Cookies only */
-  COOKIES(2),
+  ONLY_COOKIES(2),
   /** Cache only */
-  ALL_CACHES(3);
+  ONLY_CACHES(3);
 
   companion object {
     fun ofRaw(raw: Int): ClearDataType? {

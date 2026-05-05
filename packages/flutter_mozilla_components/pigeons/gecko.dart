@@ -2087,13 +2087,14 @@ enum ClearDataType {
   authSessions,
 
   /// All site data (cookies, storage, etc.)
+  /// WARNING: If this is set it already includes cookies and allCaches. Passing the additionally will lead to issues
   allSiteData,
 
   /// Cookies only
-  cookies,
+  onlyCookies,
 
   /// Cache only
-  allCaches,
+  onlyCaches,
 }
 
 @HostApi()
