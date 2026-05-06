@@ -419,6 +419,10 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
         GlobalComponents.pullToRefreshEnabled = enabled
     }
 
+    override fun setBrowserHandlingScrollEnabled(enabled: Boolean) {
+        GlobalComponents.browserHandlingScrollEnabled = enabled
+    }
+
     override fun setScreenshotProtectionEnabled(enabled: Boolean) {
         GlobalComponents.screenshotProtectionEnabled = enabled
     }

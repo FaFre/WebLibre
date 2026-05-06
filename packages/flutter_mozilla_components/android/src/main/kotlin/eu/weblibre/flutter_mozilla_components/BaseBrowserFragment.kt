@@ -569,7 +569,19 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 }
 
                 browserHandlingScrollFeature = BrowserHandlingScrollFeature(viewportEvents).also {
-                    it.start()
+                    if (GlobalComponents.browserHandlingScrollEnabled) {
+                        it.start()
+                    }
+                }
+
+                GlobalComponents.onBrowserHandlingScrollEnabledChanged = { enabled ->
+                    browserHandlingScrollFeature?.let {
+                        if (enabled) {
+                            it.start()
+                        } else {
+                            it.stop()
+                        }
+                    }
                 }
             }
 
@@ -686,6 +698,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         browserHandlingScrollFeature = null
 
         GlobalComponents.onPullToRefreshEnabledChanged = null
+        GlobalComponents.onBrowserHandlingScrollEnabledChanged = null
         GlobalComponents.onScreenshotProtectionEnabledChanged = null
         val engineView = fragmentEngineView
         engineView?.setActivityContext(null)

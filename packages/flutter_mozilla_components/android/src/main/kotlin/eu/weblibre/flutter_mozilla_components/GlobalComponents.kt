@@ -75,6 +75,14 @@ object GlobalComponents {
 
     var onPullToRefreshEnabledChanged: ((Boolean) -> Unit)? = null
 
+    var browserHandlingScrollEnabled: Boolean = true
+        set(value) {
+            field = value
+            onBrowserHandlingScrollEnabledChanged?.invoke(value)
+        }
+
+    var onBrowserHandlingScrollEnabledChanged: ((Boolean) -> Unit)? = null
+
     var screenshotProtectionEnabled: Boolean = false
         set(value) {
             field = value

@@ -197,6 +197,10 @@ class GeckoEngineSettingsService {
     return _api.setPullToRefreshEnabled(enabled);
   }
 
+  Future<void> setBrowserHandlingScrollEnabled(bool enabled) {
+    return _api.setBrowserHandlingScrollEnabled(enabled);
+  }
+
   /// Sets the app links mode preference.
   /// Controls how external app links are handled in browser.
   Future<void> setAppLinksMode(AppLinksMode mode) {

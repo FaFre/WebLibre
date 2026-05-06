@@ -144,6 +144,23 @@ class EngineSettingsReplicationService
     ref.listen(
       fireImmediately: true,
       generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.browserHandlingScrollEnabled,
+      ),
+      (previous, next) async {
+        await _service.setBrowserHandlingScrollEnabled(next);
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to browserHandlingScrollEnabled',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+
+    ref.listen(
+      fireImmediately: true,
+      generalSettingsWithDefaultsProvider.select(
         (settings) => settings.useExternalDownloadManager,
       ),
       (previous, next) async {

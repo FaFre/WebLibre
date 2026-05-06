@@ -99,6 +99,7 @@ class GeneralSettings with FastEquatable {
   final TabBarLayout tabBarLayout;
   final QuickTabSwitcherMode quickTabSwitcherMode;
   final bool pullToRefreshEnabled;
+  final bool browserHandlingScrollEnabled;
   final bool useExternalDownloadManager;
   final bool doubleBackCloseTab;
   final Duration unassignedTabsAutoCleanInterval;
@@ -154,6 +155,7 @@ class GeneralSettings with FastEquatable {
     required this.tabBarLayout,
     required this.quickTabSwitcherMode,
     required this.pullToRefreshEnabled,
+    required this.browserHandlingScrollEnabled,
     required this.useExternalDownloadManager,
     required this.doubleBackCloseTab,
     required this.unassignedTabsAutoCleanInterval,
@@ -210,6 +212,7 @@ class GeneralSettings with FastEquatable {
     TabBarLayout? tabBarLayout,
     QuickTabSwitcherMode? quickTabSwitcherMode,
     bool? pullToRefreshEnabled,
+    bool? browserHandlingScrollEnabled,
     bool? useExternalDownloadManager,
     bool? doubleBackCloseTab,
     Duration? unassignedTabsAutoCleanInterval,
@@ -267,6 +270,7 @@ class GeneralSettings with FastEquatable {
        quickTabSwitcherMode =
            quickTabSwitcherMode ?? QuickTabSwitcherMode.lastUsedTabs,
        pullToRefreshEnabled = pullToRefreshEnabled ?? true,
+       browserHandlingScrollEnabled = browserHandlingScrollEnabled ?? true,
        useExternalDownloadManager = useExternalDownloadManager ?? false,
        doubleBackCloseTab = doubleBackCloseTab ?? true,
        unassignedTabsAutoCleanInterval =
@@ -379,6 +383,7 @@ class GeneralSettings with FastEquatable {
     tabBarLayout,
     quickTabSwitcherMode,
     pullToRefreshEnabled,
+    browserHandlingScrollEnabled,
     useExternalDownloadManager,
     doubleBackCloseTab,
     unassignedTabsAutoCleanInterval,
