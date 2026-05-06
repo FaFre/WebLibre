@@ -34,7 +34,7 @@ final class AllowUnsignedExtensionsProvider
 }
 
 String _$allowUnsignedExtensionsHash() =>
-    r'3b67f51cabf8e2f37d992320c5b93bb61c6dbe1f';
+    r'ba282219edc9149da886371d873d2a5ee0dfb6dd';
 
 abstract class _$AllowUnsignedExtensions extends $AsyncNotifier<bool> {
   FutureOr<bool> build();
@@ -78,7 +78,7 @@ final class AddonAutoUpdateProvider
   AddonAutoUpdate create() => AddonAutoUpdate();
 }
 
-String _$addonAutoUpdateHash() => r'89791e8b771da715b068bbdbe5c3c24a3dad4194';
+String _$addonAutoUpdateHash() => r'0a2661316d1d1345e81df2552925eda3c2bf6ec1';
 
 abstract class _$AddonAutoUpdate extends $AsyncNotifier<bool> {
   FutureOr<bool> build();

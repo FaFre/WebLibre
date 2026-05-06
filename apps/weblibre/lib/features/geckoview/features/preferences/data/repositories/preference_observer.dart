@@ -31,11 +31,16 @@ class PreferenceChangeListener extends _$PreferenceChangeListener {
   Stream<GeckoPref> build() async* {
     final events = ref.watch(eventServiceProvider);
 
+    ref.onDispose(() {
+      unawaited(GeckoPrefService().stopObserveChanges());
+    });
+
     await GeckoPrefService().startObserveChanges();
 
-    ref.onDispose(() async {
+    if (!ref.mounted) {
       await GeckoPrefService().stopObserveChanges();
-    });
+      return;
+    }
 
     yield* events.prefUpdateEvent;
   }

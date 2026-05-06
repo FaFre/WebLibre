@@ -80,7 +80,14 @@ class AddonDetails extends _$AddonDetails {
 
   Future<void> _run(Future<AddonInfo?> Function() action) async {
     state = const AsyncLoading<AddonInfo?>();
-    state = await AsyncValue.guard(action);
+
+    final result = await AsyncValue.guard(action);
+
+    if (!ref.mounted) {
+      return;
+    }
+
+    state = result;
 
     ref.invalidate(addonListProvider);
   }
@@ -239,6 +246,10 @@ class AddonUpdateCheck extends _$AddonUpdateCheck {
           : AddonUpdateRunDone(attempt?.message);
     });
 
+    if (!ref.mounted) {
+      return result.value ?? const AddonUpdateRunFailed();
+    }
+
     state = result;
     ref.invalidate(addonDetailsProvider(addonId));
     ref.invalidate(lastAddonUpdateAttemptProvider(addonId));
@@ -261,26 +272,40 @@ class AddonList extends _$AddonList {
   }
 
   Future<void> install(AddonInfo addon) async {
-    ref.read(addonBusyIdsProvider.notifier).add(addon.id);
+    final busyIds = ref.read(addonBusyIdsProvider.notifier);
+    busyIds.add(addon.id);
+
     try {
       await _service.installAddon(Uri.parse(addon.downloadUrl));
+
+      if (!ref.mounted) {
+        return;
+      }
+
       ref.invalidate(addonDetailsProvider(addon.id));
       ref.invalidateSelf();
       await future;
     } finally {
-      ref.read(addonBusyIdsProvider.notifier).remove(addon.id);
+      busyIds.remove(addon.id);
     }
   }
 
   Future<void> uninstall(AddonInfo addon) async {
-    ref.read(addonBusyIdsProvider.notifier).add(addon.id);
+    final busyIds = ref.read(addonBusyIdsProvider.notifier);
+    busyIds.add(addon.id);
+
     try {
       await _service.uninstallAddon(addon.id);
+
+      if (!ref.mounted) {
+        return;
+      }
+
       ref.invalidate(addonDetailsProvider(addon.id));
       ref.invalidateSelf();
       await future;
     } finally {
-      ref.read(addonBusyIdsProvider.notifier).remove(addon.id);
+      busyIds.remove(addon.id);
     }
   }
 
@@ -292,8 +317,15 @@ class AddonList extends _$AddonList {
 
 @Riverpod()
 class AddonBusyIds extends _$AddonBusyIds {
-  void add(String id) => state = {...state, id};
-  void remove(String id) => state = {...state}..remove(id);
+  void add(String id) {
+    if (!ref.mounted) return;
+    state = {...state, id};
+  }
+
+  void remove(String id) {
+    if (!ref.mounted) return;
+    state = {...state}..remove(id);
+  }
 
   @override
   Set<String> build() => const {};
@@ -329,9 +361,16 @@ class PinnedAddonIds extends _$PinnedAddonIds {
 class BulkAddonUpdate extends _$BulkAddonUpdate {
   Future<void> triggerAll() async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
+
+    final result = await AsyncValue.guard(() async {
       await ref.read(addonServiceProvider).triggerAllAddonUpdates();
     });
+
+    if (!ref.mounted) {
+      return;
+    }
+
+    state = result;
   }
 
   @override

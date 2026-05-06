@@ -39,6 +39,10 @@ class WebExtensionsState extends _$WebExtensionsState {
     : _imageCache = LRUCache(50, onEvict: (image) => image.dispose());
 
   void _onExtensionUpdate(ExtensionDataEvent event) {
+    if (!ref.mounted) {
+      return;
+    }
+
     final ExtensionDataEvent(:extensionId, :data) = event;
 
     if (data != null) {
@@ -80,6 +84,11 @@ class WebExtensionsState extends _$WebExtensionsState {
     final ExtensionIconEvent(:extensionId, :bytes) = event;
 
     final image = await tryDecodeImage(bytes);
+
+    if (!ref.mounted) {
+      image?.dispose();
+      return;
+    }
 
     if (image != null) {
       // set() will evict the old entry via onEvict callback, which handles disposal
@@ -185,13 +194,13 @@ class WebExtensionsState extends _$WebExtensionsState {
       },
     );
 
-    ref.onDispose(() async {
+    ref.onDispose(() {
       // Dispose all cached images
       _imageCache.clear();
 
       // Cancel all stream subscriptions
       for (final sub in subscriptions) {
-        await sub.cancel();
+        unawaited(sub.cancel());
       }
     });
 

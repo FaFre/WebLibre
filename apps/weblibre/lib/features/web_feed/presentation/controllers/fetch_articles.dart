@@ -28,7 +28,8 @@ part 'fetch_articles.g.dart';
 class FetchArticlesController extends _$FetchArticlesController {
   Future<void> fetchAllArticles() async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
+
+    final result = await AsyncValue.guard(() async {
       final feedRepository = ref.read(feedRepositoryProvider.notifier);
 
       final feeds = await feedRepository.getAllFeeds();
@@ -52,11 +53,18 @@ class FetchArticlesController extends _$FetchArticlesController {
         }).toList(),
       );
     });
+
+    if (!ref.mounted) {
+      return;
+    }
+
+    state = result;
   }
 
   Future<void> fetchFeedArticles(Uri uri) async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
+
+    final result = await AsyncValue.guard(() async {
       final feedRepository = ref.read(feedRepositoryProvider.notifier);
 
       final result = await ref.read(feedReaderProvider.notifier).parseFeed(uri);
@@ -64,6 +72,12 @@ class FetchArticlesController extends _$FetchArticlesController {
       await feedRepository.upsertArticles(result.articleData);
       await feedRepository.touchFeedFetched(uri);
     });
+
+    if (!ref.mounted) {
+      return;
+    }
+
+    state = result;
   }
 
   @override

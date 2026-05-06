@@ -784,8 +784,9 @@ class TabRepository extends _$TabRepository {
 
     final containerSiteAssignementSub = eventSerivce.siteAssignementEvent.listen(
       (event) async {
-        if (event.tabId != null) {
-          final tabState = ref.read(tabStatesProvider)[event.tabId];
+        final tabId = event.tabId;
+        if (tabId != null) {
+          final tabState = ref.read(tabStatesProvider)[tabId];
           if (tabState != null) {
             final uri = Uri.parse(event.url);
             final originUri = event.originUrl.mapNotNull(Uri.parse);
@@ -793,52 +794,81 @@ class TabRepository extends _$TabRepository {
             final targetContainerId = await ref
                 .read(containerRepositoryProvider.notifier)
                 .siteAssignedContainerId(Uri.parse(uri.origin));
+
+            if (!ref.mounted) {
+              return;
+            }
+
             final containerData = await targetContainerId.mapNotNull(
               (id) => ref
                   .read(containerRepositoryProvider.notifier)
                   .getContainerData(id),
             );
 
+            if (!ref.mounted) {
+              return;
+            }
+
             if (containerData != null) {
+              final currentTabState = ref.read(tabStatesProvider)[tabId];
+              if (currentTabState == null) {
+                logger.w('Could not get tab for assignement ${event.url}');
+                return;
+              }
+
               final tabIsEmpty =
-                  tabState.url == TabState.defaultUrl &&
-                  tabState.historyState.items.isEmpty;
+                  currentTabState.url == TabState.defaultUrl &&
+                  currentTabState.historyState.items.isEmpty;
 
               if (event.blocked || tabIsEmpty) {
                 await addTab(
                   url: uri,
-                  tabMode: tabState.tabMode,
+                  tabMode: currentTabState.tabMode,
                   containerSelection: TabContainerSelection.specific(
                     containerData,
                   ),
-                  parentId: tabState.id,
+                  parentId: currentTabState.id,
                   selectTab: true,
                 );
 
-                if (tabState.historyState.items.isEmpty) {
-                  await closeTab(tabState.id);
+                if (!ref.mounted) {
+                  return;
+                }
+
+                if (currentTabState.historyState.items.isEmpty) {
+                  await closeTab(currentTabState.id);
                 }
               } else {
                 final tabContainerId = await ref
                     .read(tabDataRepositoryProvider.notifier)
-                    .getTabContainerId(tabState.id);
+                    .getTabContainerId(currentTabState.id);
+
+                if (!ref.mounted) {
+                  return;
+                }
+
+                final latestTabState = ref.read(tabStatesProvider)[tabId];
+                if (latestTabState == null) {
+                  logger.w('Could not get tab for assignement ${event.url}');
+                  return;
+                }
 
                 if (targetContainerId != tabContainerId) {
                   if (originUri == null) {
                     await ref
                         .read(tabDataRepositoryProvider.notifier)
-                        .assignContainer(tabState.id, containerData);
-                  } else if (tabState.url == originUri) {
+                        .assignContainer(latestTabState.id, containerData);
+                  } else if (latestTabState.url == originUri) {
                     await ref
                         .read(tabDataRepositoryProvider.notifier)
                         .assignContainer(
-                          tabState.id,
+                          latestTabState.id,
                           containerData,
                           closeOldTab: false,
                         );
                   } else {
                     logger.w(
-                      'Could not match origin url for assignment ${tabState.url} to request ${event.originUrl}',
+                      'Could not match origin url for assignment ${latestTabState.url} to request ${event.originUrl}',
                     );
                   }
                 }

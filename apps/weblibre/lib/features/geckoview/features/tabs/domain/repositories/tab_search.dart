@@ -38,7 +38,7 @@ class TabSearchRepository extends _$TabSearchRepository {
     String ellipsis = '…',
   }) async {
     if (input.isNotEmpty) {
-      state = await AsyncValue.guard(() async {
+      final result = await AsyncValue.guard(() async {
         return (
           query: input,
           results: await ref
@@ -55,6 +55,12 @@ class TabSearchRepository extends _$TabSearchRepository {
               .get(),
         );
       });
+
+      if (!ref.mounted) {
+        return;
+      }
+
+      state = result;
     } else {
       state = const AsyncValue.data(null);
     }

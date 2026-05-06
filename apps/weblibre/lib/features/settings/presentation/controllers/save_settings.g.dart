@@ -35,7 +35,7 @@ final class SaveGeneralSettingsControllerProvider
 }
 
 String _$saveGeneralSettingsControllerHash() =>
-    r'b75c9c52452a9cb687f69dad1523f1ed5205847e';
+    r'9a6d663234c1a1750bf90bf29b4664e4d86861c0';
 
 abstract class _$SaveGeneralSettingsController extends $AsyncNotifier<void> {
   FutureOr<void> build();
@@ -81,7 +81,7 @@ final class SaveEngineSettingsControllerProvider
 }
 
 String _$saveEngineSettingsControllerHash() =>
-    r'd3d74a6aadc89532b1d81c424d92efbfa43002d5';
+    r'fbe89c8f9772e50fc8ada3d41a233ba5650a7982';
 
 abstract class _$SaveEngineSettingsController extends $AsyncNotifier<void> {
   FutureOr<void> build();
@@ -126,7 +126,7 @@ final class SaveTorSettingsControllerProvider
 }
 
 String _$saveTorSettingsControllerHash() =>
-    r'd8aa04d7ae60c97bdad6c072f894189509dd35d3';
+    r'bc8bac2f2d777025fa3e2c85badcbc095a9e3ad1';
 
 abstract class _$SaveTorSettingsController extends $AsyncNotifier<void> {
   FutureOr<void> build();

@@ -31,11 +31,9 @@ part 'providers.g.dart';
 
 @Riverpod(keepAlive: true)
 Future<KagiSourceService> kagiSourceService(Ref ref) async {
+  final db = ref.watch(smallWebDatabaseProvider);
   final categories = await ref.watch(kagiCategoriesProvider.future);
-  return KagiSourceService(
-    ref.watch(smallWebDatabaseProvider),
-    categories.remap,
-  );
+  return KagiSourceService(db, categories.remap);
 }
 
 @Riverpod(keepAlive: true)
@@ -45,13 +43,11 @@ WanderSourceService wanderSourceService(Ref ref) {
 
 @Riverpod(keepAlive: true)
 Future<SmallWebDiscoverService> smallWebDiscoverService(Ref ref) async {
+  final db = ref.watch(smallWebDatabaseProvider);
+  final wanderService = ref.watch(wanderSourceServiceProvider);
   final kagiService = await ref.watch(kagiSourceServiceProvider.future);
 
-  return SmallWebDiscoverService(
-    ref.watch(smallWebDatabaseProvider),
-    kagiService,
-    ref.watch(wanderSourceServiceProvider),
-  );
+  return SmallWebDiscoverService(db, kagiService, wanderService);
 }
 
 @Riverpod()

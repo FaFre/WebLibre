@@ -44,6 +44,7 @@ Future<void> showPwaInstallDialog(BuildContext context, WidgetRef ref) async {
     url: url,
   );
 
+  if (!context.mounted) return;
   if (config == null) return;
 
   final name = config.name;
@@ -106,6 +107,7 @@ Future<void> showShortcutInstallDialog(
     showAppOption: showAppOption,
   );
 
+  if (!context.mounted) return;
   if (config == null) return;
 
   final name = config.name;

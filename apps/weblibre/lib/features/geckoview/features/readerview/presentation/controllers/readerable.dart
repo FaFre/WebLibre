@@ -34,7 +34,15 @@ class ReaderableScreenController extends _$ReaderableScreenController {
     final eventChange = ref.read(eventServiceProvider).readerableEvents.first;
     final toggle = _service.toggleReaderView(enable);
 
-    state = await AsyncValue.guard(() => Future.wait([toggle, eventChange]));
+    final result = await AsyncValue.guard(
+      () => Future.wait([toggle, eventChange]),
+    );
+
+    if (!ref.mounted) {
+      return;
+    }
+
+    state = result;
   }
 
   @override

@@ -33,11 +33,18 @@ class SaveGeneralSettingsController extends _$SaveGeneralSettingsController {
 
   Future<void> save(UpdateGeneralSettingsFunc updateSettings) async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(
+
+    final result = await AsyncValue.guard(
       () => ref
           .read(generalSettingsRepositoryProvider.notifier)
           .updateSettings(updateSettings),
     );
+
+    if (!ref.mounted) {
+      return;
+    }
+
+    state = result;
   }
 }
 
@@ -50,11 +57,18 @@ class SaveEngineSettingsController extends _$SaveEngineSettingsController {
 
   Future<void> save(UpdateEngineSettingsFunc updateSettings) async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(
+
+    final result = await AsyncValue.guard(
       () => ref
           .read(engineSettingsRepositoryProvider.notifier)
           .updateSettings(updateSettings),
     );
+
+    if (!ref.mounted) {
+      return;
+    }
+
+    state = result;
   }
 }
 
@@ -67,10 +81,17 @@ class SaveTorSettingsController extends _$SaveTorSettingsController {
 
   Future<void> save(UpdateTorSettingsFunc updateSettings) async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(
+
+    final result = await AsyncValue.guard(
       () => ref
           .read(torSettingsRepositoryProvider.notifier)
           .updateSettings(updateSettings),
     );
+
+    if (!ref.mounted) {
+      return;
+    }
+
+    state = result;
   }
 }

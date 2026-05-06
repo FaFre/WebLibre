@@ -50,7 +50,7 @@ final class AddonDetailsProvider
   }
 }
 
-String _$addonDetailsHash() => r'26b4a33e9d17aced1d3fb5c6ff28921f611ca5b0';
+String _$addonDetailsHash() => r'b8b7b0620d618488227fb6b8ba889279b933b707';
 
 final class AddonDetailsFamily extends $Family
     with
@@ -658,7 +658,7 @@ final class AddonUpdateCheckProvider
   }
 }
 
-String _$addonUpdateCheckHash() => r'4ef375b5cd9b0eb89fbbdaff3f93a35482191af5';
+String _$addonUpdateCheckHash() => r'496cf9756101c9c36fa4b90f1fd92627aee92177';
 
 final class AddonUpdateCheckFamily extends $Family
     with
@@ -739,7 +739,7 @@ final class AddonListProvider
   AddonList create() => AddonList();
 }
 
-String _$addonListHash() => r'7625b69a433d073e186571453e39b557d8b48a5d';
+String _$addonListHash() => r'1e60b0b04702e6ed6143ccf19d9e4140d1a1deec';
 
 abstract class _$AddonList extends $AsyncNotifier<List<AddonInfo>> {
   FutureOr<List<AddonInfo>> build();
@@ -791,7 +791,7 @@ final class AddonBusyIdsProvider
   }
 }
 
-String _$addonBusyIdsHash() => r'6f9761320d42b2b5132936797617fdb13b718dd3';
+String _$addonBusyIdsHash() => r'aac8fd8784ba296129ffdb17c2d1355c1546140f';
 
 abstract class _$AddonBusyIds extends $Notifier<Set<String>> {
   Set<String> build();
@@ -895,7 +895,7 @@ final class BulkAddonUpdateProvider
   }
 }
 
-String _$bulkAddonUpdateHash() => r'2605711734f9eb6af70e721a4337556a7ea85512';
+String _$bulkAddonUpdateHash() => r'ec3cdc136c0ad4a6687516bf14912fd5b96b11b4';
 
 abstract class _$BulkAddonUpdate extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();

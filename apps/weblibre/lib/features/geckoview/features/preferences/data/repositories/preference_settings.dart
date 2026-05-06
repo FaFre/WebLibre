@@ -243,8 +243,8 @@ class _PreferenceRepository extends _$PreferenceRepository {
 
     _prefSubject = BehaviorSubject<Map<String, GeckoPref>>();
 
-    ref.onDispose(() async {
-      await _prefSubject.close();
+    ref.onDispose(() {
+      unawaited(_prefSubject.close());
     });
 
     ref.onAddListener(() {
@@ -260,19 +260,21 @@ class _PreferenceRepository extends _$PreferenceRepository {
 @Riverpod()
 class UnifiedPreferenceSettingsRepository
     extends _$UnifiedPreferenceSettingsRepository {
-  Map<String, PreferenceSettingGroup>? _statelessGroups;
-
   Future<void> apply() async {
     final preferenceRepository = ref.read(
       _preferenceRepositoryProvider(partition).notifier,
     );
 
-    _statelessGroups = await ref.read(
+    final groups = await ref.read(
       _preferenceSettingGroupsProvider(partition).future,
     );
 
+    if (!ref.mounted) {
+      return;
+    }
+
     final prefs = {
-      for (final group in _statelessGroups!.values)
+      for (final group in groups.values)
         ...Map.fromEntries(
           group.settings.entries
               .where((e) => !e.value.requireUserOptIn)
@@ -288,11 +290,15 @@ class UnifiedPreferenceSettingsRepository
       _preferenceRepositoryProvider(partition).notifier,
     );
 
-    _statelessGroups = await ref.read(
+    final groups = await ref.read(
       _preferenceSettingGroupsProvider(partition).future,
     );
 
-    final prefs = _statelessGroups!.values
+    if (!ref.mounted) {
+      return;
+    }
+
+    final prefs = groups.values
         .map((group) => group.settings.keys)
         .flattened
         .toList();
@@ -304,14 +310,13 @@ class UnifiedPreferenceSettingsRepository
   Stream<Map<String, PreferenceSettingGroup>> build(
     PreferencePartition partition,
   ) async* {
-    _statelessGroups = await ref.watch(
+    final prefStream = ref.watch(_preferenceRepositoryProvider(partition));
+    final groups = await ref.watch(
       _preferenceSettingGroupsProvider(partition).future,
     );
 
-    final prefStream = ref.watch(_preferenceRepositoryProvider(partition));
-
     yield* prefStream.map(
-      (prefs) => _statelessGroups!.map(
+      (prefs) => groups.map(
         (groupName, group) => MapEntry(
           groupName,
           group.copyWith.settings(
@@ -329,26 +334,28 @@ class UnifiedPreferenceSettingsRepository
 @Riverpod()
 class PreferenceSettingsGroupRepository
     extends _$PreferenceSettingsGroupRepository {
-  PreferenceSettingGroup? _statelessSettingGroup;
-
   Future<void> apply({List<String>? filter}) async {
     final preferenceRepository = ref.read(
       _preferenceRepositoryProvider(partition).notifier,
     );
 
-    _statelessSettingGroup ??= await ref.read(
+    final settingGroup = await ref.read(
       _preferenceSettingGroupProvider(partition, groupName).future,
     );
+
+    if (!ref.mounted) {
+      return;
+    }
 
     final prefs = Map.fromEntries(
       filter?.map(
             (e) => MapEntry(
               e,
-              _statelessSettingGroup!.settings[e]?.value ??
+              settingGroup.settings[e]?.value ??
                   (throw Exception('Preference not part of group')),
             ),
           ) ??
-          _statelessSettingGroup!.settings.entries
+          settingGroup.settings.entries
               .where((e) => !e.value.requireUserOptIn)
               .map((e) => MapEntry(e.key, e.value.value)),
     );
@@ -361,19 +368,21 @@ class PreferenceSettingsGroupRepository
       _preferenceRepositoryProvider(partition).notifier,
     );
 
-    _statelessSettingGroup ??= await ref.read(
+    final settingGroup = await ref.read(
       _preferenceSettingGroupProvider(partition, groupName).future,
     );
 
+    if (!ref.mounted) {
+      return;
+    }
+
     if (filter != null &&
-        filter.any(
-          (value) => !_statelessSettingGroup!.settings.containsKey(value),
-        )) {
+        filter.any((value) => !settingGroup.settings.containsKey(value))) {
       throw Exception('Preference not part of group');
     }
 
     await preferenceRepository.resetPrefs(
-      filter ?? _statelessSettingGroup!.settings.keys.toList(),
+      filter ?? settingGroup.settings.keys.toList(),
     );
   }
 
@@ -382,15 +391,14 @@ class PreferenceSettingsGroupRepository
     PreferencePartition partition,
     String groupName,
   ) async* {
-    _statelessSettingGroup = await ref.watch(
+    final prefStream = ref.watch(_preferenceRepositoryProvider(partition));
+    final settingGroup = await ref.watch(
       _preferenceSettingGroupProvider(partition, groupName).future,
     );
 
-    final prefStream = ref.watch(_preferenceRepositoryProvider(partition));
-
     yield* prefStream.map(
-      (prefs) => _statelessSettingGroup!.copyWith.settings(
-        _statelessSettingGroup!.settings.map(
+      (prefs) => settingGroup.copyWith.settings(
+        settingGroup.settings.map(
           (key, value) => MapEntry(key, value.copyWith.current(prefs[key])),
         ),
       ),

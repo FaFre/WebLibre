@@ -60,7 +60,7 @@ class AppInitializationService extends _$AppInitializationService {
   }
 
   Future<void> initialize() async {
-    state = await Result.fromAsync(() async {
+    final result = await Result.fromAsync(() async {
       final errors = <ErrorMessage>[];
 
       await ref.read(formatProvider.future);
@@ -80,6 +80,12 @@ class AppInitializationService extends _$AppInitializationService {
 
       return (initialized: true, stage: null, errors: errors);
     });
+
+    if (!ref.mounted) {
+      return;
+    }
+
+    state = result;
   }
 
   @override

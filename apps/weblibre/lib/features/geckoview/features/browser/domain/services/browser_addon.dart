@@ -42,20 +42,24 @@ class AllowUnsignedExtensions extends _$AllowUnsignedExtensions {
       await fixator.unregister(_signatureRequiredPref);
       await GeckoPrefService().applyPrefs({_signatureRequiredPref: true});
     }
+
+    if (!ref.mounted) {
+      return;
+    }
+
     state = AsyncData(allow);
   }
 
   @override
   FutureOr<bool> build() async {
+    final fixator = ref.read(preferenceFixatorProvider.notifier);
     final prefs = await GeckoPrefService().getPrefs([_signatureRequiredPref]);
     final pref = prefs[_signatureRequiredPref];
     final allowUnsigned = pref?.value == false;
 
     // Re-register with fixator to prevent Gecko from resetting
     if (allowUnsigned) {
-      await ref
-          .read(preferenceFixatorProvider.notifier)
-          .register(_signatureRequiredPref, false);
+      await fixator.register(_signatureRequiredPref, false);
     }
 
     return allowUnsigned;
@@ -67,6 +71,10 @@ class AddonAutoUpdate extends _$AddonAutoUpdate {
   Future<void> setEnabled({required bool enabled}) async {
     final service = ref.read(addonServiceProvider);
     await service.setAddonAutoUpdateEnabled(enabled: enabled);
+
+    if (!ref.mounted) {
+      return;
+    }
 
     state = AsyncData(enabled);
   }

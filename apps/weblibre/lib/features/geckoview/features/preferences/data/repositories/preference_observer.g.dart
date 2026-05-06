@@ -34,7 +34,7 @@ final class PreferenceChangeListenerProvider
 }
 
 String _$preferenceChangeListenerHash() =>
-    r'de9759b32a6a6b9bab5656137a365da78633f866';
+    r'baf2abe1948998a043a8473547a225582dbc8c7b';
 
 abstract class _$PreferenceChangeListener extends $StreamNotifier<GeckoPref> {
   Stream<GeckoPref> build();

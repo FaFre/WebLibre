@@ -54,7 +54,7 @@ final class AppInitializationServiceProvider
 }
 
 String _$appInitializationServiceHash() =>
-    r'c26f968d53b4ea18f7be890c9610c9bf9d300322';
+    r'bf4c472d5b0b758d703b8ca40763cf2a59712a4c';
 
 abstract class _$AppInitializationService
     extends
