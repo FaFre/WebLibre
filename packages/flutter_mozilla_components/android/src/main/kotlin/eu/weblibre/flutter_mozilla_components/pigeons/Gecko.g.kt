@@ -6757,7 +6757,6 @@ interface GeckoEngineSettingsApi {
   fun updateRuntimeSettings(settings: GeckoEngineSettings)
   fun setScreenshotProtectionEnabled(enabled: Boolean)
   fun setPullToRefreshEnabled(enabled: Boolean)
-  fun setBrowserHandlingScrollEnabled(enabled: Boolean)
   /**
    * Sets the app links mode preference (stored in SharedPreferences).
    * Controls how external app links are handled in the browser.
@@ -6842,24 +6841,6 @@ interface GeckoEngineSettingsApi {
             val enabledArg = args[0] as Boolean
             val wrapped: List<Any?> = try {
               api.setPullToRefreshEnabled(enabledArg)
-              listOf(null)
-            } catch (exception: Throwable) {
-              GeckoPigeonUtils.wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setBrowserHandlingScrollEnabled$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val enabledArg = args[0] as Boolean
-            val wrapped: List<Any?> = try {
-              api.setBrowserHandlingScrollEnabled(enabledArg)
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)

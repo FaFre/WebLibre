@@ -156,8 +156,6 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
-      'browserHandlingScrollEnabled': settings['browserHandlingScrollEnabled']
-          ?.readAs(DriftSqlType.bool, db.typeMapping),
       'useExternalDownloadManager': settings['useExternalDownloadManager']
           ?.readAs(DriftSqlType.bool, db.typeMapping),
       'doubleBackCloseTab': settings['doubleBackCloseTab']?.readAs(

@@ -1496,7 +1496,6 @@ abstract class GeckoEngineSettingsApi {
   void updateRuntimeSettings(GeckoEngineSettings settings);
   void setScreenshotProtectionEnabled(bool enabled);
   void setPullToRefreshEnabled(bool enabled);
-  void setBrowserHandlingScrollEnabled(bool enabled);
 
   /// Sets the app links mode preference (stored in SharedPreferences).
   /// Controls how external app links are handled in the browser.

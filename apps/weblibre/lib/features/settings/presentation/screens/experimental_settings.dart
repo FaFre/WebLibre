@@ -25,9 +25,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/utils/exit_app.dart';
 
@@ -46,9 +44,6 @@ class ExperimentalSettingsScreen extends StatelessWidget {
               controller: controller,
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               children: const [
-                SettingSection(name: 'Browser Touch Diagnostics'),
-                _TouchDiagnosticsInfoTile(),
-                _BrowserHandlingScrollEnabledTile(),
                 SettingSection(name: 'Web Push'),
                 _UnifiedPushDistributorTile(),
                 SettingSection(name: 'Runtime & Startup'),
@@ -59,51 +54,6 @@ class ExperimentalSettingsScreen extends StatelessWidget {
           },
         ),
       ),
-    );
-  }
-}
-
-class _TouchDiagnosticsInfoTile extends StatelessWidget {
-  const _TouchDiagnosticsInfoTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return const ListTile(
-      leading: Icon(MdiIcons.bugOutline),
-      title: Text('Samsung tap-scroll checks'),
-      subtitle: Text(
-        'For issue #284, test in this order: disable Pull to Refresh, disable Auto-hide Tab Bar, then disable the native scroll detector below.',
-      ),
-    );
-  }
-}
-
-class _BrowserHandlingScrollEnabledTile extends HookConsumerWidget {
-  const _BrowserHandlingScrollEnabledTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final browserHandlingScrollEnabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.browserHandlingScrollEnabled,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Native Gecko Scroll Detector'),
-      subtitle: const Text(
-        'Lets native Gecko touch handling decide when the browser toolbar may react to page scrolling. Turn this off to test Samsung tap-scroll issues.',
-      ),
-      secondary: const Icon(Icons.touch_app),
-      value: browserHandlingScrollEnabled,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.browserHandlingScrollEnabled(value),
-            );
-      },
     );
   }
 }
