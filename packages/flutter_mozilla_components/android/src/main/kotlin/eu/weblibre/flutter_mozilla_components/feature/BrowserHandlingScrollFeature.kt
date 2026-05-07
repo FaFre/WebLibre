@@ -17,13 +17,12 @@ import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
 /**
  * Feature that filters browser touch input and reports whether GeckoView is handling scroll input.
  *
- * Checks InputResultDetail while scroll detection is enabled and only emits on state changes.
+ * Checks InputResultDetail while active and only emits on state changes.
  */
 class BrowserHandlingScrollFeature(
     private val flutterEvents: GeckoViewportEvents,
 ) {
     private var running = false
-    private var scrollDetectionEnabled = false
     private var touchSessionActive = false
     private var lastValue: Boolean? = null
     private var touchListener: View.OnTouchListener? = null
@@ -32,34 +31,19 @@ class BrowserHandlingScrollFeature(
     private var suppressUntilAllPointersUp = false
     private var syntheticCancelDispatched = false
 
-    fun start(scrollDetectionEnabled: Boolean) {
-        if (running) {
-            setScrollDetectionEnabled(scrollDetectionEnabled)
-            return
-        }
+    fun start() {
+        if (running) return
 
         running = true
-        this.scrollDetectionEnabled = scrollDetectionEnabled
         touchSessionActive = false
         lastValue = null
         resetPinchGuard()
         attachTouchListenerIfPossible()
     }
 
-    fun setScrollDetectionEnabled(enabled: Boolean) {
-        if (scrollDetectionEnabled == enabled) return
-
-        scrollDetectionEnabled = enabled
-        if (!enabled) {
-            touchSessionActive = false
-            emitIfChanged(false)
-        }
-    }
-
     fun stop() {
         if (!running) return
         running = false
-        scrollDetectionEnabled = false
         touchSessionActive = false
         resetPinchGuard()
         emitIfChanged(false)
@@ -89,8 +73,6 @@ class BrowserHandlingScrollFeature(
     }
 
     private fun updateScrollDetection(event: MotionEvent) {
-        if (!scrollDetectionEnabled) return
-
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 touchSessionActive = true
