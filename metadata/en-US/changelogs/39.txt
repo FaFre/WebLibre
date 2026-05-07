@@ -1,0 +1,80 @@
+GeckoView 150.0.1
+
+**Extension Management**
+
+- **Redesigned Extensions System** — The entire add-on system has been rebuilt, replacing the legacy native Android screens with a smoother in-app experience. Browse, search, install, and manage extensions all within the app.
+- **Add-on Store** — Discover recommended extensions directly in the app with segmented categories and a streamlined install flow.
+- **Add-on Detail Screens** — View permissions, internal settings, and popups for each extension without leaving the app.
+- **Pinned Add-on Bar** — Quick-access bar in the browser toolbar for your favorite extensions, with bottom-sheet popups.
+- **Update All Extensions** — One-tap button to check for and install updates for all your installed extensions at once.
+- **uBlock Origin Filter List Management** — Browse, enable, and disable individual uBlock Origin filter lists. Add custom external filter lists and apply recommended hardening filters for extra privacy.
+
+**Privacy & Security**
+
+- **Intent Gatekeeper** — When another app tries to open a link, WebLibre can now ask whether to allow or block it. Manage per-app permissions and respond from notifications without opening the browser.
+- **Screenshot Protection** — New privacy setting to block screenshots and screen recordings of the browser. Find it under Settings > Privacy & Security.
+- **Permission Shield Indicators** — The shield icon on your tab now uses colors to show your privacy status: green means enhanced protection, yellow means you've loosened settings for this site, and it's hidden when everything is at default.
+- **Third-Party Redirect Blocking** — Enabled by default to protect you from malicious redirects.
+- **Smarter Onboarding Defaults** — New users automatically get recommended privacy defaults, including uBlock Origin with optimized filter lists and engine-level privacy hardening.
+- **Fixed Site Data Clearing** — Clearing cookies or site data now properly closes affected tabs first, preventing old data from reappearing immediately.
+
+**Tab Management**
+
+- **Tree View Everywhere** — View your tabs in a hierarchical tree structure in List and Grid views too, so you can always see which tabs opened from which.
+- **Reorder Tabs in Groups** — Manually reorder tabs within groups for full control over your browsing layout.
+- **Auto-Scroll to Active Tab** — The active tab now smoothly scrolls into view when you open any tab view (list, grid, tree, or quick switcher).
+- **Pinned Tabs Respected Everywhere** — Pinned tabs now stay at the top in the quick tab switcher and grid view too, not just the list.
+- **Quick Tab Switcher Always MRU** — The quick-switcher bar always shows your most recently used tabs first for consistent muscle memory.
+- **Container Tab Colors on Title Bar** — When browsing in a container, the address bar now shows a subtle colored border matching your container's theme.
+- **New Sorting Options** — Choose whether new tabs appear at the top or bottom (or left/right) of your tab lists.
+- **Stronger Session Restore** — A new internal system reduces the chance of duplicate tabs appearing after restart.
+- **Isolated Tabs Persist** — Isolated tabs now properly survive quitting the app (only private tabs are cleared on exit).
+
+**PWAs & Home Screen Shortcuts**
+
+- **Custom Names for Shortcuts** — Give your home screen shortcuts any name you want instead of being stuck with the website's default title.
+- **Storage Context for Shortcuts** — Choose how each shortcut handles logins and data: normal storage, share with an existing container, inherit your current isolated session, or create a fresh isolated context — perfect for using multiple accounts on the same site.
+- **Multiple Shortcuts Per Site** — Pin the same website multiple times with different names and storage contexts (e.g., personal account and work account).
+- **Better Shortcut Icons** — Shortcuts now always get an icon, even for sites that don't provide one.
+- **Smarter PWA Launches** — Opening a PWA that's already open now brings it to the front instead of starting a duplicate.
+- **PWA Session Recovery** — PWAs that lose their session (e.g., after the browser is killed) now automatically recover instead of crashing.
+
+**Export & Sharing**
+
+- **Export Page as Image** — Save any webpage as a PNG image to your device.
+- **Copy Images from Image Menu** — Long-press any image to copy it directly to your clipboard.
+- **Smarter Text Sharing** — When sharing text or URLs into WebLibre from other apps, they now properly route through containers and custom tabs.
+
+**Search & Navigation**
+
+- **History Toolbar Button** — Optional quick-access button for your browsing history, available from the toolbar customization screen.
+- **Better Search Without a Default Engine** — Highlighting text and choosing to search now opens the search screen with your text pre-filled, even if no default engine is set.
+- **Fixed Address Bar Ghost Text** — Backspace and delete no longer cause suggestion text to glitch or get corrupted.
+
+**Onboarding & Setup**
+
+- **Restore Backup During Onboarding** — Import an encrypted profile backup right from the welcome screen, before creating any profile.
+- **Alpha & Stable Side by Side** — You can now keep both the stable and alpha versions installed at the same time as separate apps, so they don't interfere.
+- **Optimized Defaults** — When installing uBlock Origin during setup, you can opt in to recommended privacy filter lists automatically.
+- **Automatic Preference Migration** — A new system keeps your settings up to date automatically when new features are added.
+
+**UI & Polish**
+
+- **Redesigned Toolbar Customization** — Toolbar settings now separate buttons into "Enabled" and "Disabled" sections for a clearer overview.
+- **Long-Press Menu for Settings** — Long-press the menu button (...) in the toolbar to jump directly to Settings.
+- **Quick Quit on Long Press** — Long-press the "Quit" button in the profile menu to exit immediately, skipping the confirmation dialog.
+- **Clearer Site Data Options** — The site data cleanup screen now shows Cookies and Cached Files as sub-options under Site Data, making it easier to understand what you're clearing.
+- **Unsaved Changes Warning** — Editing a container and pressing back without saving now asks whether to save, discard, or keep editing.
+- **Better Keyboard Handling** — The bottom sheet now adjusts to the keyboard height so content is never hidden.
+- **Improved URL Display** — URLs are formatted more cleanly with better special character handling.
+- **Addon Store Screenshot Viewer** — Tap a screenshot in the addon details page to view it in a zoomable overlay.
+- **Proper Quick Action Icons** — The Android launcher long-press shortcuts now show proper icons instead of blank tiles.
+
+**Bug Fixes**
+
+- Fixed ghost text and clipping artifacts in the address bar
+- Fixed PWA launch duplication when the app was already open
+- Fixed overlapping UI elements when the floating action button is visible
+- Fixed tab bar long-press interactions
+- Fixed small web mode handling of isolated tab types
+- Fixed toolbar preview layout overlapping with the action button
