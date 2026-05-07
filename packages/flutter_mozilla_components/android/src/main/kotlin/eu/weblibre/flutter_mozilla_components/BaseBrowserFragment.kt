@@ -569,19 +569,11 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 }
 
                 browserHandlingScrollFeature = BrowserHandlingScrollFeature(viewportEvents).also {
-                    if (GlobalComponents.browserHandlingScrollEnabled) {
-                        it.start()
-                    }
+                    it.start(GlobalComponents.browserHandlingScrollEnabled)
                 }
 
                 GlobalComponents.onBrowserHandlingScrollEnabledChanged = { enabled ->
-                    browserHandlingScrollFeature?.let {
-                        if (enabled) {
-                            it.start()
-                        } else {
-                            it.stop()
-                        }
-                    }
+                    browserHandlingScrollFeature?.setScrollDetectionEnabled(enabled)
                 }
             }
 

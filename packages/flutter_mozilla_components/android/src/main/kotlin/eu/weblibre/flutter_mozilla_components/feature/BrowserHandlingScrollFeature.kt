@@ -15,31 +15,54 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportEvents
 import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
 
 /**
- * Feature that reports whether GeckoView is currently handling scroll input.
+ * Feature that filters browser touch input and reports whether GeckoView is handling scroll input.
  *
- * Checks InputResultDetail while active and only emits on state changes.
+ * Checks InputResultDetail while scroll detection is enabled and only emits on state changes.
  */
 class BrowserHandlingScrollFeature(
     private val flutterEvents: GeckoViewportEvents,
 ) {
     private var running = false
+    private var scrollDetectionEnabled = false
     private var touchSessionActive = false
     private var lastValue: Boolean? = null
     private var touchListener: View.OnTouchListener? = null
     private var touchTargetView: View? = null
+    private var multiTouchSequenceActive = false
+    private var suppressUntilAllPointersUp = false
+    private var syntheticCancelDispatched = false
 
-    fun start() {
-        if (running) return
+    fun start(scrollDetectionEnabled: Boolean) {
+        if (running) {
+            setScrollDetectionEnabled(scrollDetectionEnabled)
+            return
+        }
+
         running = true
+        this.scrollDetectionEnabled = scrollDetectionEnabled
         touchSessionActive = false
         lastValue = null
+        resetPinchGuard()
         attachTouchListenerIfPossible()
+    }
+
+    fun setScrollDetectionEnabled(enabled: Boolean) {
+        if (scrollDetectionEnabled == enabled) return
+
+        scrollDetectionEnabled = enabled
+        if (!enabled) {
+            touchSessionActive = false
+            emitIfChanged(false)
+        }
     }
 
     fun stop() {
         if (!running) return
         running = false
+        scrollDetectionEnabled = false
         touchSessionActive = false
+        resetPinchGuard()
+        emitIfChanged(false)
         detachTouchListenerIfPossible()
         lastValue = null
     }
@@ -55,30 +78,115 @@ class BrowserHandlingScrollFeature(
         touchListener = View.OnTouchListener { _, event ->
             if (!running) return@OnTouchListener false
 
-            when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    touchSessionActive = true
-                    emitIfChanged()
-                }
+            val consumeEvent = handlePinchGesture(targetView, event)
+            updateScrollDetection(event)
 
-                MotionEvent.ACTION_MOVE -> {
-                    if (touchSessionActive) {
-                        emitIfChanged()
-                    }
-                }
-
-                MotionEvent.ACTION_UP,
-                MotionEvent.ACTION_CANCEL -> {
-                    touchSessionActive = false
-                }
-            }
-
-            // Never consume touch; GeckoView must keep handling it.
-            false
+            consumeEvent
         }
 
         targetView.setOnTouchListener(touchListener)
         touchTargetView = targetView
+    }
+
+    private fun updateScrollDetection(event: MotionEvent) {
+        if (!scrollDetectionEnabled) return
+
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                touchSessionActive = true
+                emitCurrentStateIfChanged()
+            }
+
+            MotionEvent.ACTION_POINTER_DOWN -> {
+                touchSessionActive = false
+                emitIfChanged(false)
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                if (touchSessionActive) {
+                    emitCurrentStateIfChanged()
+                }
+            }
+
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL -> {
+                touchSessionActive = false
+                emitIfChanged(false)
+            }
+        }
+    }
+
+    private fun handlePinchGesture(targetView: View, event: MotionEvent): Boolean {
+        if (suppressUntilAllPointersUp) {
+            when (event.actionMasked) {
+                MotionEvent.ACTION_MOVE -> {
+                    dispatchSyntheticCancelIfNeeded(targetView, event)
+                    return true
+                }
+
+                MotionEvent.ACTION_UP,
+                MotionEvent.ACTION_CANCEL -> {
+                    val consumeEvent = syntheticCancelDispatched
+                    if (!syntheticCancelDispatched && event.actionMasked == MotionEvent.ACTION_UP) {
+                        dispatchSyntheticCancelIfNeeded(targetView, event)
+                        resetPinchGuard()
+                        return true
+                    }
+
+                    resetPinchGuard()
+                    return consumeEvent
+                }
+            }
+        }
+
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> resetPinchGuard()
+            MotionEvent.ACTION_POINTER_DOWN -> multiTouchSequenceActive = true
+            MotionEvent.ACTION_POINTER_UP -> {
+                if (multiTouchSequenceActive) {
+                    suppressUntilAllPointersUp = true
+                    // Prevent APZ from treating the remaining finger as a pan/fling after pinch end.
+                    postSyntheticCancelIfNeeded(targetView, event)
+                }
+            }
+
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL -> resetPinchGuard()
+        }
+
+        // Do not consume normal touch; GeckoView must keep handling it.
+        return false
+    }
+
+    private fun postSyntheticCancelIfNeeded(targetView: View, event: MotionEvent) {
+        val cancelEvent = MotionEvent.obtain(event)
+        targetView.post {
+            if (running && suppressUntilAllPointersUp && !syntheticCancelDispatched) {
+                dispatchSyntheticCancel(targetView, cancelEvent)
+            } else {
+                cancelEvent.recycle()
+            }
+        }
+    }
+
+    private fun dispatchSyntheticCancelIfNeeded(targetView: View, event: MotionEvent) {
+        if (syntheticCancelDispatched) return
+
+        val cancelEvent = MotionEvent.obtain(event)
+        dispatchSyntheticCancel(targetView, cancelEvent)
+    }
+
+    private fun dispatchSyntheticCancel(targetView: View, cancelEvent: MotionEvent) {
+        cancelEvent.action = MotionEvent.ACTION_CANCEL
+        targetView.onTouchEvent(cancelEvent)
+        cancelEvent.recycle()
+        syntheticCancelDispatched = true
+    }
+
+    private fun resetPinchGuard() {
+        multiTouchSequenceActive = false
+        suppressUntilAllPointersUp = false
+        syntheticCancelDispatched = false
     }
 
     private fun detachTouchListenerIfPossible() {
@@ -100,7 +208,7 @@ class BrowserHandlingScrollFeature(
         return root
     }
 
-    private fun emitIfChanged() {
+    private fun emitCurrentStateIfChanged() {
         val isHandling = try {
             val engineView = GlobalComponents.components?.mainBrowserEngineView
             if (engineView == null) {
@@ -113,6 +221,10 @@ class BrowserHandlingScrollFeature(
             false
         }
 
+        emitIfChanged(isHandling)
+    }
+
+    private fun emitIfChanged(isHandling: Boolean) {
         if (lastValue == isHandling) return
         lastValue = isHandling
 
