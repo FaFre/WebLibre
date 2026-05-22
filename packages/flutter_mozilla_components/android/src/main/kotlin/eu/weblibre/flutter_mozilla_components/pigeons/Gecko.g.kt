@@ -4574,6 +4574,72 @@ data class MlProgressData (
 }
 
 /** Generated class from Pigeon that represents data sent in messages. */
+data class GeckoProxySettings (
+  val id: String,
+  val title: String,
+  val type: String,
+  val host: String,
+  val port: Long,
+  val username: String? = null,
+  val password: String? = null,
+  val proxyDNS: Boolean,
+  val doNotProxyLocal: Boolean
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): GeckoProxySettings {
+      val id = pigeonVar_list[0] as String
+      val title = pigeonVar_list[1] as String
+      val type = pigeonVar_list[2] as String
+      val host = pigeonVar_list[3] as String
+      val port = pigeonVar_list[4] as Long
+      val username = pigeonVar_list[5] as String?
+      val password = pigeonVar_list[6] as String?
+      val proxyDNS = pigeonVar_list[7] as Boolean
+      val doNotProxyLocal = pigeonVar_list[8] as Boolean
+      return GeckoProxySettings(id, title, type, host, port, username, password, proxyDNS, doNotProxyLocal)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      id,
+      title,
+      type,
+      host,
+      port,
+      username,
+      password,
+      proxyDNS,
+      doNotProxyLocal,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as GeckoProxySettings
+    return GeckoPigeonUtils.deepEquals(this.id, other.id) && GeckoPigeonUtils.deepEquals(this.title, other.title) && GeckoPigeonUtils.deepEquals(this.type, other.type) && GeckoPigeonUtils.deepEquals(this.host, other.host) && GeckoPigeonUtils.deepEquals(this.port, other.port) && GeckoPigeonUtils.deepEquals(this.username, other.username) && GeckoPigeonUtils.deepEquals(this.password, other.password) && GeckoPigeonUtils.deepEquals(this.proxyDNS, other.proxyDNS) && GeckoPigeonUtils.deepEquals(this.doNotProxyLocal, other.doNotProxyLocal)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.id)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.title)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.type)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.host)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.port)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.username)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.password)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.proxyDNS)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.doNotProxyLocal)
+    return result
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
 data class ContainerSiteAssignment (
   val requestId: String,
   val tabId: String? = null,
@@ -4619,6 +4685,52 @@ data class ContainerSiteAssignment (
     result = 31 * result + GeckoPigeonUtils.deepHash(this.originUrl)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.url)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.blocked)
+    return result
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class ProxyLoadError (
+  val tabId: String? = null,
+  val contextId: String? = null,
+  val url: String? = null,
+  val errorType: String
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ProxyLoadError {
+      val tabId = pigeonVar_list[0] as String?
+      val contextId = pigeonVar_list[1] as String?
+      val url = pigeonVar_list[2] as String?
+      val errorType = pigeonVar_list[3] as String
+      return ProxyLoadError(tabId, contextId, url, errorType)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      tabId,
+      contextId,
+      url,
+      errorType,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as ProxyLoadError
+    return GeckoPigeonUtils.deepEquals(this.tabId, other.tabId) && GeckoPigeonUtils.deepEquals(this.contextId, other.contextId) && GeckoPigeonUtils.deepEquals(this.url, other.url) && GeckoPigeonUtils.deepEquals(this.errorType, other.errorType)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.tabId)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.contextId)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.url)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.errorType)
     return result
   }
 }
@@ -5995,75 +6107,85 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
       }
       235.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ContainerSiteAssignment.fromList(it)
+          GeckoProxySettings.fromList(it)
         }
       }
       236.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoHeader.fromList(it)
+          ContainerSiteAssignment.fromList(it)
         }
       }
       237.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoFetchRequest.fromList(it)
+          ProxyLoadError.fromList(it)
         }
       }
       238.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoFetchResponse.fromList(it)
+          GeckoHeader.fromList(it)
         }
       }
       239.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          BookmarkNode.fromList(it)
+          GeckoFetchRequest.fromList(it)
         }
       }
       240.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          BookmarkInfo.fromList(it)
+          GeckoFetchResponse.fromList(it)
         }
       }
       241.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SitePermissions.fromList(it)
+          BookmarkNode.fromList(it)
         }
       }
       242.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TrackingProtectionException.fromList(it)
+          BookmarkInfo.fromList(it)
         }
       }
       243.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          PwaIcon.fromList(it)
+          SitePermissions.fromList(it)
         }
       }
       244.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ShareTargetFiles.fromList(it)
+          TrackingProtectionException.fromList(it)
         }
       }
       245.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ShareTargetParams.fromList(it)
+          PwaIcon.fromList(it)
         }
       }
       246.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ShareTarget.fromList(it)
+          ShareTargetFiles.fromList(it)
         }
       }
       247.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ExternalApplicationResource.fromList(it)
+          ShareTargetParams.fromList(it)
         }
       }
       248.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          PwaManifest.fromList(it)
+          ShareTarget.fromList(it)
         }
       }
       249.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ExternalApplicationResource.fromList(it)
+        }
+      }
+      250.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          PwaManifest.fromList(it)
+        }
+      }
+      251.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           SandboxCaptureEntry.fromList(it)
         }
@@ -6497,64 +6619,72 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
         stream.write(234)
         writeValue(stream, value.toList())
       }
-      is ContainerSiteAssignment -> {
+      is GeckoProxySettings -> {
         stream.write(235)
         writeValue(stream, value.toList())
       }
-      is GeckoHeader -> {
+      is ContainerSiteAssignment -> {
         stream.write(236)
         writeValue(stream, value.toList())
       }
-      is GeckoFetchRequest -> {
+      is ProxyLoadError -> {
         stream.write(237)
         writeValue(stream, value.toList())
       }
-      is GeckoFetchResponse -> {
+      is GeckoHeader -> {
         stream.write(238)
         writeValue(stream, value.toList())
       }
-      is BookmarkNode -> {
+      is GeckoFetchRequest -> {
         stream.write(239)
         writeValue(stream, value.toList())
       }
-      is BookmarkInfo -> {
+      is GeckoFetchResponse -> {
         stream.write(240)
         writeValue(stream, value.toList())
       }
-      is SitePermissions -> {
+      is BookmarkNode -> {
         stream.write(241)
         writeValue(stream, value.toList())
       }
-      is TrackingProtectionException -> {
+      is BookmarkInfo -> {
         stream.write(242)
         writeValue(stream, value.toList())
       }
-      is PwaIcon -> {
+      is SitePermissions -> {
         stream.write(243)
         writeValue(stream, value.toList())
       }
-      is ShareTargetFiles -> {
+      is TrackingProtectionException -> {
         stream.write(244)
         writeValue(stream, value.toList())
       }
-      is ShareTargetParams -> {
+      is PwaIcon -> {
         stream.write(245)
         writeValue(stream, value.toList())
       }
-      is ShareTarget -> {
+      is ShareTargetFiles -> {
         stream.write(246)
         writeValue(stream, value.toList())
       }
-      is ExternalApplicationResource -> {
+      is ShareTargetParams -> {
         stream.write(247)
         writeValue(stream, value.toList())
       }
-      is PwaManifest -> {
+      is ShareTarget -> {
         stream.write(248)
         writeValue(stream, value.toList())
       }
-      is SandboxCaptureEntry -> {
+      is ExternalApplicationResource -> {
         stream.write(249)
+        writeValue(stream, value.toList())
+      }
+      is PwaManifest -> {
+        stream.write(250)
+        writeValue(stream, value.toList())
+      }
+      is SandboxCaptureEntry -> {
+        stream.write(251)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -8279,6 +8409,11 @@ interface GeckoContainerProxyApi {
   fun setProxyPort(port: Long)
   fun addContainerProxy(contextId: String)
   fun removeContainerProxy(contextId: String)
+  fun upsertProxy(proxy: GeckoProxySettings)
+  fun removeProxy(proxyId: String)
+  fun setContainerProxy(contextId: String, proxyId: String)
+  fun clearContainerProxy(contextId: String)
+  fun removeContainerProxyRelation(contextId: String, proxyId: String)
   fun setSiteAssignments(assignments: Map<String, String>)
   fun healthcheck(callback: (Result<Boolean>) -> Unit)
 
@@ -8335,6 +8470,98 @@ interface GeckoContainerProxyApi {
             val contextIdArg = args[0] as String
             val wrapped: List<Any?> = try {
               api.removeContainerProxy(contextIdArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.upsertProxy$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val proxyArg = args[0] as GeckoProxySettings
+            val wrapped: List<Any?> = try {
+              api.upsertProxy(proxyArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.removeProxy$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val proxyIdArg = args[0] as String
+            val wrapped: List<Any?> = try {
+              api.removeProxy(proxyIdArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.setContainerProxy$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val contextIdArg = args[0] as String
+            val proxyIdArg = args[1] as String
+            val wrapped: List<Any?> = try {
+              api.setContainerProxy(contextIdArg, proxyIdArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.clearContainerProxy$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val contextIdArg = args[0] as String
+            val wrapped: List<Any?> = try {
+              api.clearContainerProxy(contextIdArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.removeContainerProxyRelation$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val contextIdArg = args[0] as String
+            val proxyIdArg = args[1] as String
+            val wrapped: List<Any?> = try {
+              api.removeContainerProxyRelation(contextIdArg, proxyIdArg)
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
@@ -8772,6 +8999,23 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onContainerSiteAssignment$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg, detailsArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  fun onProxyLoadError(sequenceArg: Long, detailsArg: ProxyLoadError, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onProxyLoadError$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
     channel.send(listOf(sequenceArg, detailsArg)) {
       if (it is List<*>) {

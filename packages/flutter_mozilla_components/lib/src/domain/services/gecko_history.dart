@@ -91,7 +91,10 @@ class GeckoHistoryService {
     return _api.getVisited(urls);
   }
 
-  Future<List<HistorySuggestion>> getSuggestions(String query, {int limit = 10}) {
+  Future<List<HistorySuggestion>> getSuggestions(
+    String query, {
+    int limit = 10,
+  }) {
     return _api.getSuggestions(query, limit);
   }
 
@@ -140,6 +143,8 @@ class GeckoHistoryService {
   }
 
   Future<void> deleteHistoryMetadataOlderThan(DateTime olderThan) {
-    return _api.deleteHistoryMetadataOlderThan(olderThan.millisecondsSinceEpoch);
+    return _api.deleteHistoryMetadataOlderThan(
+      olderThan.millisecondsSinceEpoch,
+    );
   }
 }

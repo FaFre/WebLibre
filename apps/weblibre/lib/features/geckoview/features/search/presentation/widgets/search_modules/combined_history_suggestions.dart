@@ -75,9 +75,7 @@ class CombinedHistorySuggestions extends HookConsumerWidget {
         // which is the same constant the row builder scans for below.
         // Don't override the defaults here unless those scan constants
         // are kept in sync.
-        await ref
-            .read(historySearchRepositoryProvider.notifier)
-            .addQuery(text);
+        await ref.read(historySearchRepositoryProvider.notifier).addQuery(text);
       },
     );
 

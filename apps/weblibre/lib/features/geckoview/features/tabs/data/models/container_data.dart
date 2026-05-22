@@ -23,6 +23,7 @@ import 'package:flutter/widgets.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:weblibre/data/database/converters/color.dart';
 import 'package:weblibre/data/database/converters/icon_data.dart';
+import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 
 part 'container_data.g.dart';
 
@@ -31,10 +32,14 @@ part 'container_data.g.dart';
 class ContainerMetadata with FastEquatable {
   @IconDataJsonConverter()
   final IconData? iconData;
+
   final String? contextualIdentity;
 
-  @JsonKey(defaultValue: false)
-  final bool useProxy;
+  @JsonKey(
+    fromJson: _proxyConnectionIdFromJson,
+    toJson: _proxyConnectionIdToJson,
+  )
+  final ProxyConnectionId? proxyConnectionId;
 
   @JsonKey(defaultValue: false)
   final bool clearDataOnExit;
@@ -44,7 +49,7 @@ class ContainerMetadata with FastEquatable {
   ContainerMetadata({
     required this.iconData,
     required this.contextualIdentity,
-    required this.useProxy,
+    required this.proxyConnectionId,
     required this.clearDataOnExit,
     required this.assignedSites,
   });
@@ -52,16 +57,18 @@ class ContainerMetadata with FastEquatable {
   ContainerMetadata.withDefaults({
     IconData? iconData,
     String? contextualIdentity,
-    bool? useProxy,
+    ProxyConnectionId? proxyConnectionId,
     bool? clearDataOnExit,
     List<Uri>? assignedSites,
   }) : this(
          iconData: iconData,
          contextualIdentity: contextualIdentity,
-         useProxy: useProxy ?? false,
+         proxyConnectionId: proxyConnectionId,
          clearDataOnExit: clearDataOnExit ?? false,
          assignedSites: assignedSites,
        );
+
+  bool get usesTorProxy => proxyConnectionId is TorProxyConnectionId;
 
   factory ContainerMetadata.fromJson(Map<String, dynamic> json) =>
       _$ContainerMetadataFromJson(json);
@@ -72,7 +79,7 @@ class ContainerMetadata with FastEquatable {
   List<Object?> get hashParameters => [
     iconData,
     contextualIdentity,
-    useProxy,
+    proxyConnectionId,
     clearDataOnExit,
     assignedSites,
   ];
@@ -141,3 +148,8 @@ class ContainerDataWithCount extends ContainerData {
   @override
   List<Object?> get hashParameters => [...super.hashParameters, tabCount];
 }
+
+ProxyConnectionId? _proxyConnectionIdFromJson(String? json) =>
+    ProxyConnectionId.decode(json);
+
+String? _proxyConnectionIdToJson(ProxyConnectionId? object) => object?.encode();

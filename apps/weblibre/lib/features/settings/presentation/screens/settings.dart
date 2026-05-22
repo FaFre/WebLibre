@@ -27,6 +27,7 @@ import 'package:weblibre/features/settings/presentation/screens/browsing_setting
 import 'package:weblibre/features/settings/presentation/screens/extensions_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/general_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/privacy_security_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/proxy_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/search_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/web_content_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
@@ -42,7 +43,10 @@ class SettingsScreen extends HookWidget {
     final categories = _buildCategories();
     final sections = search.normalizedQuery.isEmpty
         ? _buildCategorySections(categories)
-        : _buildSearchSections(categories, search.normalizedQuery);
+        : _buildSearchSections([
+            ...categories.browser,
+            ...categories.services,
+          ], search.normalizedQuery);
 
     return Scaffold(
       body: SafeArea(
@@ -83,8 +87,13 @@ class SettingsScreen extends HookWidget {
   }
 }
 
-List<_SettingsCategoryDefinition> _buildCategories() {
-  return [
+typedef _CategoryGroups = ({
+  List<_SettingsCategoryDefinition> browser,
+  List<_SettingsCategoryDefinition> services,
+});
+
+_CategoryGroups _buildCategories() {
+  final browser = [
     _SettingsCategoryDefinition(
       title: 'General',
       subtitle: 'Appearance, language, downloads',
@@ -140,6 +149,26 @@ List<_SettingsCategoryDefinition> _buildCategories() {
       onTap: (context) => PrivacySecuritySettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
+      title: 'Proxy',
+      subtitle: 'Connections and routing',
+      icon: MdiIcons.lanConnect,
+      keywords: const [
+        'proxy',
+        'sing-box',
+        'socks',
+        'vpn',
+        'wireguard',
+        'routing',
+        'tor',
+        'container',
+      ],
+      sections: proxySettingsSections,
+      onTap: (context) => const ProxySettingsRoute().push(context),
+    ),
+  ];
+
+  final services = [
+    _SettingsCategoryDefinition(
       title: 'Extensions',
       subtitle: 'Install and manage extension sources',
       icon: MdiIcons.puzzleOutline,
@@ -170,23 +199,25 @@ List<_SettingsCategoryDefinition> _buildCategories() {
       onTap: (context) => AdvancedSettingsRoute().push(context),
     ),
   ];
+
+  return (browser: browser, services: services);
 }
 
 List<SettingsSectionDefinition> _buildCategorySections(
-  List<_SettingsCategoryDefinition> categories,
+  _CategoryGroups categories,
 ) {
   return [
     SettingsSectionDefinition(
       title: 'Browser',
       entries: [
-        for (final category in categories.take(7))
+        for (final category in categories.browser)
           _buildCategoryEntry(category),
       ],
     ),
     SettingsSectionDefinition(
       title: 'Services & Advanced',
       entries: [
-        for (final category in categories.skip(7))
+        for (final category in categories.services)
           _buildCategoryEntry(category),
       ],
     ),

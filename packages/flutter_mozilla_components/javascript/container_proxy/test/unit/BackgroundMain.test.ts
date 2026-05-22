@@ -1,4 +1,4 @@
-import BackgroundMain, { doNotProxy } from '../../src/background/BackgroundMain'
+import BackgroundMain, { doNotProxy, emergencyBreak } from '../../src/background/BackgroundMain'
 import { Store } from '../../src/store/Store'
 
 import { expect } from 'chai'
@@ -39,6 +39,16 @@ describe('BackgroundMain', function () {
 
       expect(result).to.be.an('array')
       expect(result).to.be.not.empty
+    })
+
+    it('should block if an assigned proxy no longer exists', async () => {
+      const isolatedStore = new Store()
+      const isolatedBackgroundMain = new BackgroundMain({ store: isolatedStore })
+      isolatedStore.setContainerProxyRelation('general', 'missing-proxy')
+
+      const result = await isolatedBackgroundMain.onRequest({ cookieStoreId: 'firefox-default', url: 'https://google.com', tabId: 0 })
+
+      expect(result).to.be.deep.equal([emergencyBreak])
     })
 
     it('should remove doNotProxyLocal flag from proxy settings if proxy is set up', async () => {

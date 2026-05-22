@@ -19,11 +19,12 @@
  */
 package eu.weblibre.flutter_tor
 
-import IPtProxy.IPtProxy
 import eu.weblibre.flutter_tor.generated.IPtProxyController
 import eu.weblibre.flutter_tor.generated.TransportType
+import io.nekohasekai.IPtProxy.Controller
+import io.nekohasekai.IPtProxy.IPtProxy
 
-class ProxyImpl(val controller: IPtProxy.Controller) : IPtProxyController {
+class ProxyImpl(val controller: Controller) : IPtProxyController {
     override fun start(proxyType: TransportType, proxy: String): Long {
         val type = when (proxyType) {
             TransportType.SNOWFLAKE -> IPtProxy.Snowflake

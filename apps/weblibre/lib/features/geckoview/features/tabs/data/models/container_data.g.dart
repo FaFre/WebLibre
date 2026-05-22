@@ -11,7 +11,7 @@ abstract class _$ContainerMetadataCWProxy {
 
   ContainerMetadata contextualIdentity(String? contextualIdentity);
 
-  ContainerMetadata useProxy(bool useProxy);
+  ContainerMetadata proxyConnectionId(ProxyConnectionId? proxyConnectionId);
 
   ContainerMetadata clearDataOnExit(bool clearDataOnExit);
 
@@ -27,7 +27,7 @@ abstract class _$ContainerMetadataCWProxy {
   ContainerMetadata call({
     IconData? iconData,
     String? contextualIdentity,
-    bool useProxy,
+    ProxyConnectionId? proxyConnectionId,
     bool clearDataOnExit,
     List<Uri>? assignedSites,
   });
@@ -48,7 +48,8 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
       call(contextualIdentity: contextualIdentity);
 
   @override
-  ContainerMetadata useProxy(bool useProxy) => call(useProxy: useProxy);
+  ContainerMetadata proxyConnectionId(ProxyConnectionId? proxyConnectionId) =>
+      call(proxyConnectionId: proxyConnectionId);
 
   @override
   ContainerMetadata clearDataOnExit(bool clearDataOnExit) =>
@@ -69,7 +70,7 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
   ContainerMetadata call({
     Object? iconData = const $CopyWithPlaceholder(),
     Object? contextualIdentity = const $CopyWithPlaceholder(),
-    Object? useProxy = const $CopyWithPlaceholder(),
+    Object? proxyConnectionId = const $CopyWithPlaceholder(),
     Object? clearDataOnExit = const $CopyWithPlaceholder(),
     Object? assignedSites = const $CopyWithPlaceholder(),
   }) {
@@ -82,10 +83,10 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
           ? _value.contextualIdentity
           // ignore: cast_nullable_to_non_nullable
           : contextualIdentity as String?,
-      useProxy: useProxy == const $CopyWithPlaceholder() || useProxy == null
-          ? _value.useProxy
+      proxyConnectionId: proxyConnectionId == const $CopyWithPlaceholder()
+          ? _value.proxyConnectionId
           // ignore: cast_nullable_to_non_nullable
-          : useProxy as bool,
+          : proxyConnectionId as ProxyConnectionId?,
       clearDataOnExit:
           clearDataOnExit == const $CopyWithPlaceholder() ||
               clearDataOnExit == null
@@ -227,7 +228,9 @@ ContainerMetadata _$ContainerMetadataFromJson(Map<String, dynamic> json) =>
         const IconDataJsonConverter().fromJson,
       ),
       contextualIdentity: json['contextualIdentity'] as String?,
-      useProxy: json['useProxy'] as bool? ?? false,
+      proxyConnectionId: _proxyConnectionIdFromJson(
+        json['proxyConnectionId'] as String?,
+      ),
       clearDataOnExit: json['clearDataOnExit'] as bool? ?? false,
       assignedSites: (json['assignedSites'] as List<dynamic>?)
           ?.map((e) => Uri.parse(e as String))
@@ -242,7 +245,7 @@ Map<String, dynamic> _$ContainerMetadataToJson(
     const IconDataJsonConverter().toJson,
   ),
   'contextualIdentity': instance.contextualIdentity,
-  'useProxy': instance.useProxy,
+  'proxyConnectionId': _proxyConnectionIdToJson(instance.proxyConnectionId),
   'clearDataOnExit': instance.clearDataOnExit,
   'assignedSites': instance.assignedSites?.map((e) => e.toString()).toList(),
 };

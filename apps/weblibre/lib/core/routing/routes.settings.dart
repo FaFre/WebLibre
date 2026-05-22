@@ -113,6 +113,29 @@ part of 'routes.dart';
       name: 'ContextualToolbarSettingsRoute',
       path: 'contextual_toolbar',
     ),
+    TypedGoRoute<SingboxProxyProfilesRoute>(
+      name: 'SingboxProxyProfilesRoute',
+      path: 'singbox_proxy_profiles',
+      routes: [
+        TypedGoRoute<SingboxProxyProfileEditorRoute>(
+          name: 'SingboxProxyProfileEditorRoute',
+          path: 'editor',
+        ),
+        TypedGoRoute<SingboxProxyLogsRoute>(
+          name: 'SingboxProxyLogsRoute',
+          path: 'logs',
+        ),
+        TypedGoRoute<SubscriptionImportRoute>(
+          name: 'SubscriptionImportRoute',
+          path: 'subscription',
+        ),
+      ],
+    ),
+    TypedGoRoute<ProxyRoutingSettingsRoute>(
+      name: 'ProxyRoutingSettingsRoute',
+      path: 'proxy_routing',
+    ),
+    TypedGoRoute<ProxySettingsRoute>(name: 'ProxySettingsRoute', path: 'proxy'),
   ],
 )
 class SettingsRoute extends GoRouteData with $SettingsRoute {
@@ -313,5 +336,66 @@ class ContextualToolbarSettingsRoute extends GoRouteData
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const ContextualToolbarSettingsScreen();
+  }
+}
+
+class SingboxProxyProfilesRoute extends GoRouteData
+    with $SingboxProxyProfilesRoute {
+  const SingboxProxyProfilesRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const SingboxProxyProfilesScreen();
+  }
+}
+
+class SingboxProxyProfileEditorRoute extends GoRouteData
+    with $SingboxProxyProfileEditorRoute {
+  final String? profileId;
+  final ProxyProfileSeed? $extra;
+
+  const SingboxProxyProfileEditorRoute({this.profileId, this.$extra});
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return SingboxProxyProfileEditorScreen(profileId: profileId, seed: $extra);
+  }
+}
+
+class SingboxProxyLogsRoute extends GoRouteData with $SingboxProxyLogsRoute {
+  const SingboxProxyLogsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const SingboxProxyLogsScreen();
+  }
+}
+
+class SubscriptionImportRoute extends GoRouteData
+    with $SubscriptionImportRoute {
+  const SubscriptionImportRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const SubscriptionImportScreen();
+  }
+}
+
+class ProxyRoutingSettingsRoute extends GoRouteData
+    with $ProxyRoutingSettingsRoute {
+  const ProxyRoutingSettingsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const ProxyRoutingSettingsScreen();
+  }
+}
+
+class ProxySettingsRoute extends GoRouteData with $ProxySettingsRoute {
+  const ProxySettingsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const ProxySettingsScreen();
   }
 }

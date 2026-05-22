@@ -55,13 +55,20 @@ class ProfileRestoreScreen extends HookConsumerWidget {
 
     final restoreTarget = useState(forcedTarget ?? RestoreTarget.createNew);
 
+    // One-shot: a successful restore navigates away, but rebuilds before the
+    // route swap completes can otherwise re-fire the success branch.
+    final successHandled = useRef(false);
+
     useEffect(() {
       if (restoreState.hasError) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted) return;
           showErrorMessage(context, restoreState.error!.toString());
         });
-      } else if (restoreState.hasData) {
+      } else if (restoreState.hasData && !successHandled.value) {
+        successHandled.value = true;
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted) return;
           showInfoMessage(context, 'Backup restored successfully');
           if (onRestoreSuccess != null) {
             onRestoreSuccess!(context, restoreState.data);

@@ -20,7 +20,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:search_backend/search_backend.dart';
+import 'package:search_protocol/search_protocol.dart';
 
 part 'web_search_settings.g.dart';
 

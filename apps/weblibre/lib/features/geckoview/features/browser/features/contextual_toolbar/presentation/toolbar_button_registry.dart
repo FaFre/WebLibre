@@ -877,13 +877,10 @@ Future<void> _adjustFontSize(
 
   if (settings.automaticFontSizeAdjustment) {
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Disable automatic font size in settings to adjust manually',
-          ),
-          duration: Duration(seconds: 2),
-        ),
+      ui_helper.showInfoMessage(
+        context,
+        'Disable automatic font size in settings to adjust manually',
+        duration: const Duration(seconds: 2),
       );
     }
     return;

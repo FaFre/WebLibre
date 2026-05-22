@@ -18,3 +18,5 @@ plans/
 .temp/
 certs/
 codenomad/
+native/go_mobile_runtime/.work/
+native/go_mobile_runtime/build/

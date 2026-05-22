@@ -49,13 +49,20 @@ class ProfileBackupScreen extends HookConsumerWidget {
     final backupFuture = useState<Future<bool>?>(null);
     final backupState = useFuture(backupFuture.value);
 
+    // One-shot: success navigates away; rebuilds before the route swap
+    // completes would otherwise re-fire navigation and the snackbar.
+    final successHandled = useRef(false);
+
     useEffect(() {
       if (backupState.hasError) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted) return;
           showErrorMessage(context, backupState.error!.toString());
         });
-      } else if (backupState.hasData) {
+      } else if (backupState.hasData && !successHandled.value) {
+        successHandled.value = true;
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted) return;
           showInfoMessage(context, 'Backup created successfully');
           ProfileListRoute().go(context);
         });

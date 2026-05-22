@@ -54,7 +54,8 @@ class HandoffRedeemResult {
 class HandoffRedeemClient {
   final http.Client _client;
 
-  HandoffRedeemClient({http.Client? client}) : _client = client ?? http.Client();
+  HandoffRedeemClient({http.Client? client})
+    : _client = client ?? http.Client();
 
   void close() => _client.close();
 

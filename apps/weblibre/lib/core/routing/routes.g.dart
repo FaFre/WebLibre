@@ -1660,6 +1660,38 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       name: 'ContextualToolbarSettingsRoute',
       factory: $ContextualToolbarSettingsRoute._fromState,
     ),
+    GoRouteData.$route(
+      path: 'singbox_proxy_profiles',
+      name: 'SingboxProxyProfilesRoute',
+      factory: $SingboxProxyProfilesRoute._fromState,
+      routes: [
+        GoRouteData.$route(
+          path: 'editor',
+          name: 'SingboxProxyProfileEditorRoute',
+          factory: $SingboxProxyProfileEditorRoute._fromState,
+        ),
+        GoRouteData.$route(
+          path: 'logs',
+          name: 'SingboxProxyLogsRoute',
+          factory: $SingboxProxyLogsRoute._fromState,
+        ),
+        GoRouteData.$route(
+          path: 'subscription',
+          name: 'SubscriptionImportRoute',
+          factory: $SubscriptionImportRoute._fromState,
+        ),
+      ],
+    ),
+    GoRouteData.$route(
+      path: 'proxy_routing',
+      name: 'ProxyRoutingSettingsRoute',
+      factory: $ProxyRoutingSettingsRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'proxy',
+      name: 'ProxySettingsRoute',
+      factory: $ProxySettingsRoute._fromState,
+    ),
   ],
 );
 
@@ -2198,6 +2230,146 @@ mixin $ContextualToolbarSettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/contextual_toolbar');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $SingboxProxyProfilesRoute on GoRouteData {
+  static SingboxProxyProfilesRoute _fromState(GoRouterState state) =>
+      const SingboxProxyProfilesRoute();
+
+  @override
+  String get location =>
+      GoRouteData.$location('/settings/singbox_proxy_profiles');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $SingboxProxyProfileEditorRoute on GoRouteData {
+  static SingboxProxyProfileEditorRoute _fromState(GoRouterState state) =>
+      SingboxProxyProfileEditorRoute(
+        profileId: state.uri.queryParameters['profile-id'],
+        $extra: state.extra as ProxyProfileSeed?,
+      );
+
+  SingboxProxyProfileEditorRoute get _self =>
+      this as SingboxProxyProfileEditorRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/settings/singbox_proxy_profiles/editor',
+    queryParams: {if (_self.profileId != null) 'profile-id': _self.profileId},
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+
+  @override
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: _self.$extra);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location, extra: _self.$extra);
+
+  @override
+  void replace(BuildContext context) =>
+      context.replace(location, extra: _self.$extra);
+}
+
+mixin $SingboxProxyLogsRoute on GoRouteData {
+  static SingboxProxyLogsRoute _fromState(GoRouterState state) =>
+      const SingboxProxyLogsRoute();
+
+  @override
+  String get location =>
+      GoRouteData.$location('/settings/singbox_proxy_profiles/logs');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $SubscriptionImportRoute on GoRouteData {
+  static SubscriptionImportRoute _fromState(GoRouterState state) =>
+      const SubscriptionImportRoute();
+
+  @override
+  String get location =>
+      GoRouteData.$location('/settings/singbox_proxy_profiles/subscription');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $ProxyRoutingSettingsRoute on GoRouteData {
+  static ProxyRoutingSettingsRoute _fromState(GoRouterState state) =>
+      const ProxyRoutingSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/proxy_routing');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $ProxySettingsRoute on GoRouteData {
+  static ProxySettingsRoute _fromState(GoRouterState state) =>
+      const ProxySettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/proxy');
 
   @override
   void go(BuildContext context) => context.go(location);

@@ -23,7 +23,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/uuid.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
@@ -31,11 +30,12 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/controlle
 import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/delete_container_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/discard_changes_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_sites.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_icon_picker_sheet.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/color_picker_dialog.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_icon_picker_sheet.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
-import 'package:weblibre/presentation/icons/tor_icons.dart';
+import 'package:weblibre/features/proxy/data/proxy_connection.dart';
+import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
 
 enum _DialogMode { create, edit }
 
@@ -77,12 +77,16 @@ class ContainerEditScreen extends HookConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    final proxyOptions = ref.watch(proxyConnectionOptionsProvider);
+
     final selectedColor = useState(initialContainer.color);
     final selectedIcon = useState(initialContainer.metadata.iconData);
     final contextualIdentity = useState(
       initialContainer.metadata.contextualIdentity,
     );
-    final useProxy = useState(initialContainer.metadata.useProxy);
+    final proxyConnectionId = useState<ProxyConnectionId?>(
+      initialContainer.metadata.proxyConnectionId,
+    );
     final clearDataOnExit = useState(initialContainer.metadata.clearDataOnExit);
     final assignedSites = useState(initialContainer.metadata.assignedSites);
 
@@ -99,7 +103,9 @@ class ContainerEditScreen extends HookConsumerWidget {
         metadata: initialContainer.metadata.copyWith(
           contextualIdentity: contextualIdentity.value,
           iconData: selectedIcon.value,
-          useProxy: useProxy.value && contextualIdentity.value != null,
+          proxyConnectionId: contextualIdentity.value != null
+              ? proxyConnectionId.value
+              : null,
           clearDataOnExit:
               clearDataOnExit.value && contextualIdentity.value != null,
           assignedSites: assignedSites.value,
@@ -217,6 +223,8 @@ class ContainerEditScreen extends HookConsumerWidget {
       selectedColor.value,
     );
     final assignedSiteCount = assignedSites.value?.length ?? 0;
+    final canPickProxy =
+        _mode == _DialogMode.create || contextualIdentity.value != null;
 
     return PopScope(
       canPop: container == comparison,
@@ -358,8 +366,8 @@ class ContainerEditScreen extends HookConsumerWidget {
                                             uuid.v4()
                                       : null;
 
-                                  if (!value && useProxy.value) {
-                                    useProxy.value = false;
+                                  if (!value) {
+                                    proxyConnectionId.value = null;
                                   }
 
                                   if (!value && clearDataOnExit.value) {
@@ -369,29 +377,61 @@ class ContainerEditScreen extends HookConsumerWidget {
                               : null,
                         ),
                         const Divider(height: 1, indent: 56),
-                        SwitchListTile.adaptive(
-                          value: useProxy.value,
-                          title: const Text('Use Tor™ Proxy'),
-                          secondary: const Icon(TorIcons.onionAlt),
-                          onChanged: switch (_mode) {
-                            _DialogMode.create => (value) {
-                              if (value && contextualIdentity.value == null) {
-                                contextualIdentity.value =
-                                    initialContainer
-                                        .metadata
-                                        .contextualIdentity ??
-                                    uuid.v4();
-                              }
+                        ListTile(
+                          leading: const Icon(Icons.route_outlined),
+                          title: const Text('Proxy Connection'),
+                          subtitle: Text(switch (proxyConnectionId.value) {
+                            final id? => proxyConnectionTitle(proxyOptions, id),
+                            null => 'None',
+                          }),
+                          trailing: const Icon(Icons.chevron_right),
+                          enabled: canPickProxy,
+                          onTap: canPickProxy
+                              ? () async {
+                                  final createdTemporaryIdentity =
+                                      contextualIdentity.value == null;
 
-                              useProxy.value = value;
-                            },
-                            _DialogMode.edit =>
-                              (contextualIdentity.value != null)
-                                  ? (value) {
-                                      useProxy.value = value;
-                                    }
-                                  : null,
-                          },
+                                  if (createdTemporaryIdentity) {
+                                    contextualIdentity.value =
+                                        initialContainer
+                                            .metadata
+                                            .contextualIdentity ??
+                                        uuid.v4();
+                                  }
+
+                                  final outcome =
+                                      await showModalBottomSheet<
+                                        _ProxyPickerOutcome
+                                      >(
+                                        context: context,
+                                        showDragHandle: true,
+                                        builder: (context) {
+                                          return _ProxyConnectionPickerSheet(
+                                            options: proxyOptions,
+                                            selectedProxyConnectionId:
+                                                proxyConnectionId.value,
+                                          );
+                                        },
+                                      );
+
+                                  switch (outcome) {
+                                    case null:
+                                      // Dismissed without selecting — leave
+                                      // existing value untouched, but undo any
+                                      // temporary identity we created.
+                                      if (createdTemporaryIdentity) {
+                                        contextualIdentity.value = null;
+                                      }
+                                    case _ProxyPickerCleared():
+                                      proxyConnectionId.value = null;
+                                      if (createdTemporaryIdentity) {
+                                        contextualIdentity.value = null;
+                                      }
+                                    case _ProxyPickerSelected(:final id):
+                                      proxyConnectionId.value = id;
+                                  }
+                                }
+                              : null,
                         ),
                         const Divider(height: 1, indent: 56),
                         SwitchListTile.adaptive(
@@ -521,6 +561,93 @@ class ContainerEditScreen extends HookConsumerWidget {
           icon: const Icon(MdiIcons.creation),
         );
       },
+    );
+  }
+}
+
+/// Result of the proxy picker sheet. `null` (sheet dismissed) is distinct
+/// from `_ProxyPickerCleared` (user explicitly picked None) so the caller can
+/// avoid clobbering the previously-selected proxy on a stray swipe-down.
+sealed class _ProxyPickerOutcome {
+  const _ProxyPickerOutcome();
+}
+
+class _ProxyPickerCleared extends _ProxyPickerOutcome {
+  const _ProxyPickerCleared();
+}
+
+class _ProxyPickerSelected extends _ProxyPickerOutcome {
+  final ProxyConnectionId id;
+
+  const _ProxyPickerSelected(this.id);
+}
+
+class _ProxyConnectionPickerSheet extends StatelessWidget {
+  final List<ProxyConnectionOption> options;
+  final ProxyConnectionId? selectedProxyConnectionId;
+
+  const _ProxyConnectionPickerSheet({
+    required this.options,
+    required this.selectedProxyConnectionId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasUnknownSelectedProxy =
+        selectedProxyConnectionId != null &&
+        !options.any((option) => option.id == selectedProxyConnectionId);
+
+    return SafeArea(
+      child: RadioGroup<ProxyConnectionId?>(
+        onChanged: (value) {
+          Navigator.pop(
+            context,
+            value == null
+                ? const _ProxyPickerCleared()
+                : _ProxyPickerSelected(value),
+          );
+        },
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 4, 24, 12),
+              child: Text(
+                'Proxy Connection',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            const RadioListTile<ProxyConnectionId?>(
+              value: null,
+              title: Text('None'),
+              subtitle: Text('Use the normal browser connection'),
+              secondary: Icon(Icons.public),
+            ),
+            if (hasUnknownSelectedProxy)
+              ListTile(
+                leading: Icon(
+                  Icons.warning_amber_outlined,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                title: const Text('Unknown proxy'),
+                subtitle: const Text('This proxy profile no longer exists'),
+                trailing: TextButton(
+                  onPressed: () =>
+                      Navigator.pop(context, const _ProxyPickerCleared()),
+                  child: const Text('Clear'),
+                ),
+              ),
+            for (final option in options)
+              RadioListTile<ProxyConnectionId?>(
+                value: option.id,
+                title: Text(option.title),
+                subtitle: Text(option.subtitle),
+                secondary: const Icon(Icons.route_outlined),
+              ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
     );
   }
 }

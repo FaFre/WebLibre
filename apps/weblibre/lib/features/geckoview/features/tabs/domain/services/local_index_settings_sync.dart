@@ -55,14 +55,12 @@ class LocalIndexSettingsSync extends _$LocalIndexSettingsSync {
   /// last click. The lock is fine-grained per provider instance.
   final _writeLock = Lock();
 
-  Future<void> _push({
-    required bool enabled,
-    required bool indexPrivate,
-  }) => _writeLock.synchronized(() async {
-    final dao = ref.read(tabDatabaseProvider).historyDao;
-    await dao.upsertSetting(_kEnabledKey, enabled);
-    await dao.upsertSetting(_kIndexPrivateKey, indexPrivate);
-  });
+  Future<void> _push({required bool enabled, required bool indexPrivate}) =>
+      _writeLock.synchronized(() async {
+        final dao = ref.read(tabDatabaseProvider).historyDao;
+        await dao.upsertSetting(_kEnabledKey, enabled);
+        await dao.upsertSetting(_kIndexPrivateKey, indexPrivate);
+      });
 
   @override
   void build() {
@@ -77,7 +75,9 @@ class LocalIndexSettingsSync extends _$LocalIndexSettingsSync {
         if (previous == next) return;
         // Fire-and-forget: `_writeLock` ensures the second flip queues
         // behind the first instead of racing it.
-        unawaited(_push(enabled: next.enabled, indexPrivate: next.indexPrivate));
+        unawaited(
+          _push(enabled: next.enabled, indexPrivate: next.indexPrivate),
+        );
       },
       fireImmediately: true,
     );

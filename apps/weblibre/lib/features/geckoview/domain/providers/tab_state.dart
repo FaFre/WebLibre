@@ -41,14 +41,13 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
-import 'package:weblibre/features/user/data/models/tor_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
+import 'package:weblibre/features/user/data/models/proxy_routing_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/proxy_routing_settings.dart';
 
 part 'tab_state.g.dart';
 
 @Riverpod(keepAlive: true)
 class TabStates extends _$TabStates {
-
   Future<void> _onTabContentStateChange(TabContentState contentState) async {
     final current = await patchedState(contentState.id);
 
@@ -377,25 +376,27 @@ Future<TabState> tabStateWithFallback(Ref ref, String tabId) async {
 @Riverpod()
 Future<bool> isTabTunneled(Ref ref, String? tabId) async {
   final tabState = ref.watch(tabStateProvider(tabId));
-  final torSettings = ref.watch(torSettingsWithDefaultsProvider);
+  final proxyRoutingSettings = ref.watch(
+    proxyRoutingSettingsWithDefaultsProvider,
+  );
 
   if (tabState != null) {
     // Isolated tabs follow the same proxy rules as regular tabs
     // (container-based routing via proxy aliasing)
     if (tabState.tabMode is PrivateTabMode) {
-      return torSettings.proxyPrivateTabsTor;
+      return proxyRoutingSettings.privateTabsProxyConnectionId != null;
     } else {
-      switch (torSettings.proxyRegularTabsMode) {
-        case TorRegularTabProxyMode.container:
+      switch (proxyRoutingSettings.regularTabsMode) {
+        case ProxyRegularTabRoutingMode.container:
           final containerData = await ref
               .read(tabDataRepositoryProvider.notifier)
               .getTabContainerData(tabState.id);
 
           if (!ref.mounted) return false;
 
-          return containerData?.metadata.useProxy ?? false;
-        case TorRegularTabProxyMode.all:
-          return true;
+          return containerData?.metadata.proxyConnectionId != null;
+        case ProxyRegularTabRoutingMode.all:
+          return proxyRoutingSettings.regularTabsProxyConnectionId != null;
       }
     }
   }

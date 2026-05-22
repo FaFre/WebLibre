@@ -27,6 +27,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/tor/data/models/moat.dart';
 import 'package:weblibre/features/tor/data/services/moat_service.dart';
+import 'package:weblibre/features/tor/domain/extensions/tor_status_x.dart';
 import 'package:weblibre/features/tor/domain/repositories/builtin_bridges.dart';
 import 'package:weblibre/features/user/data/models/tor_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
@@ -43,9 +44,7 @@ class TorProxyService extends _$TorProxyService {
   }) async {
     final currentStatus = await _tor.getStatus();
 
-    if (!currentStatus.isRunning ||
-        currentStatus.socksPort == null ||
-        reconfigureIfRunning) {
+    if (!currentStatus.isReady || reconfigureIfRunning) {
       state = const AsyncLoading();
 
       final torSettings = await ref
@@ -164,7 +163,7 @@ class TorProxyService extends _$TorProxyService {
   }
 
   @override
-  Stream<TorStatus> build() {
+  Stream<TorStatus> build() async* {
     _statusSyncController = StreamController();
 
     ref.onDispose(() async {
@@ -172,6 +171,13 @@ class TorProxyService extends _$TorProxyService {
       await _tor.stop();
     });
 
-    return MergeStream([_tor.statusStream, _statusSyncController.stream]);
+    // Seed the provider with the current runtime state so screens that only
+    // watch the stream do not stay stuck in AsyncLoading until a manual sync.
+    yield await _tor.getStatus();
+    yield* MergeStream([_tor.statusStream, _statusSyncController.stream]);
   }
+}
+
+Stream<TorLogMessage> torLogStream(Ref ref) {
+  return ref.watch(torProxyServiceProvider.notifier)._tor.logStream;
 }

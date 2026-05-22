@@ -190,7 +190,7 @@ Stream<List<SiteAssignment>> watchAllAssignedSites(Ref ref) {
 ///
 /// Returns a map from isolation context ID to the set of container IDs it
 /// appears in. An isolation context needs a proxy alias if ANY of its
-/// associated containers has useProxy enabled.
+/// associated containers has a proxy connection assigned.
 @Riverpod(keepAlive: true)
 Stream<Map<String, Set<String>>> watchIsolatedContextContainerMap(Ref ref) {
   final db = ref.watch(tabDatabaseProvider);

@@ -4,7 +4,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/locale.dart' as intl;
-import 'package:search_backend/search_backend.dart';
+import 'package:search_protocol/search_protocol.dart';
 import 'package:weblibre/domain/repositories/locale_resolver.dart';
 
 const _expandableKeys = {'snippet', 'review', 'question'};

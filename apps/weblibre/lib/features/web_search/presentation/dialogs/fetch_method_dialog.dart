@@ -125,7 +125,9 @@ class _MethodTile extends ConsumerWidget {
         failed: failed,
         colorScheme: colorScheme,
       ),
-      onTap: busy ? null : () => _handleTap(context, ref, ready, failed, captured),
+      onTap: busy
+          ? null
+          : () => _handleTap(context, ref, ready, failed, captured),
     );
   }
 
@@ -200,9 +202,6 @@ class _StatusIndicator extends StatelessWidget {
     if (failed) {
       return Icon(Icons.refresh, color: colorScheme.error);
     }
-    return Icon(
-      Icons.download_rounded,
-      color: colorScheme.onSurfaceVariant,
-    );
+    return Icon(Icons.download_rounded, color: colorScheme.onSurfaceVariant);
   }
 }

@@ -3,7 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:intl/intl.dart';
 import 'package:nullability/nullability.dart';
-import 'package:search_backend/search_backend.dart';
+import 'package:search_protocol/search_protocol.dart';
 
 class PageMetadataChips extends HookWidget {
   final PageMetadata metadata;

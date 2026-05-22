@@ -61,6 +61,12 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/c
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_list.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_selection.dart';
 import 'package:weblibre/features/onboarding/presentation/onboarding.dart';
+import 'package:weblibre/features/proxy/data/models/proxy_profile_seed.dart';
+import 'package:weblibre/features/proxy/presentation/screens/proxy_routing_settings.dart';
+import 'package:weblibre/features/proxy/presentation/screens/singbox_proxy_logs.dart';
+import 'package:weblibre/features/proxy/presentation/screens/singbox_proxy_profile_editor.dart';
+import 'package:weblibre/features/proxy/presentation/screens/singbox_proxy_profiles.dart';
+import 'package:weblibre/features/proxy/presentation/screens/subscription_import.dart';
 import 'package:weblibre/features/settings/presentation/screens/addon_collection.dart';
 import 'package:weblibre/features/settings/presentation/screens/advanced_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/bang_settings.dart';
@@ -75,6 +81,7 @@ import 'package:weblibre/features/settings/presentation/screens/fingerprint_sett
 import 'package:weblibre/features/settings/presentation/screens/general_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/locale_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/privacy_security_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/proxy_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/search_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/toolbar_layout_settings.dart';

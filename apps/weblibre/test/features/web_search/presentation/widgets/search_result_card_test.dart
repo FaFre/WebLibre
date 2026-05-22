@@ -23,7 +23,9 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:search_backend/search_backend.dart';
+import 'package:search_protocol/search_protocol.dart';
+import 'package:weblibre/features/search_credits/data/models/web_search_settings.dart';
+import 'package:weblibre/features/search_credits/domain/repositories/web_search_settings.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/web_search/domain/controllers/search_controller.dart';
 import 'package:weblibre/features/web_search/presentation/widgets/search_result_card.dart';
@@ -39,12 +41,15 @@ void main() {
       ProviderScope(
         overrides: [
           ...webSearchTestOverrides(),
-          metaSearchControllerProvider.overrideWithValue(
-            MetaSearchState(status: WebSearchStatus.ready),
-          ),
           watchCachedIconBytesProvider.overrideWith((ref, origin) {
             return Stream.value(null);
           }),
+          metaSearchControllerProvider.overrideWithValue(
+            const MetaSearchState(status: WebSearchStatus.ready),
+          ),
+          webSearchSettingsControllerProvider.overrideWithValue(
+            WebSearchSettings.withDefaults(),
+          ),
         ],
         child: MaterialApp(
           home: Scaffold(
@@ -67,7 +72,7 @@ void main() {
     );
 
     await tester.tap(find.text('LensAI result'));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(openedUris, [Uri.parse(url)]);
   });
@@ -84,15 +89,18 @@ void main() {
         ProviderScope(
           overrides: [
             ...webSearchTestOverrides(),
+            watchCachedIconBytesProvider.overrideWith((ref, origin) {
+              return Stream.value(null);
+            }),
             metaSearchControllerProvider.overrideWithValue(
               MetaSearchState(
                 status: WebSearchStatus.ready,
                 imagesByUrl: {thumbnailUrl: Uint8List.fromList(pngBytes)},
               ),
             ),
-            watchCachedIconBytesProvider.overrideWith((ref, origin) {
-              return Stream.value(null);
-            }),
+            webSearchSettingsControllerProvider.overrideWithValue(
+              WebSearchSettings.withDefaults(),
+            ),
           ],
           child: MaterialApp(
             home: Scaffold(
@@ -114,7 +122,7 @@ void main() {
         ),
       );
 
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 100));
 
       expect(find.byType(Image), findsOneWidget);
     },

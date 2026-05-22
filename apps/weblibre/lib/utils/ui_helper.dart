@@ -43,6 +43,22 @@ SnackBar _createFloatingSnackBar({
   );
 }
 
+/// Maximum number of lines an error/info snackbar will render before
+/// truncating with an ellipsis. Long error messages (e.g. raw exception
+/// dumps) would otherwise overflow the floating snackbar layout.
+const int _kSnackBarMaxLines = 4;
+
+/// Maximum number of characters of a raw error string included in a
+/// snackbar before it is truncated. Keeps stack-trace-like blobs from
+/// dominating the screen while still leaving the full error available
+/// in the log output.
+const int _kSnackBarErrorMaxChars = 240;
+
+String _truncateForSnackBar(String message) {
+  if (message.length <= _kSnackBarErrorMaxChars) return message;
+  return '${message.substring(0, _kSnackBarErrorMaxChars).trimRight()}…';
+}
+
 void showErrorMessage(
   BuildContext context,
   String message, {
@@ -51,7 +67,9 @@ void showErrorMessage(
 }) {
   final snackBar = _createFloatingSnackBar(
     content: Text(
-      message,
+      _truncateForSnackBar(message),
+      maxLines: _kSnackBarMaxLines,
+      overflow: TextOverflow.ellipsis,
       style: TextStyle(color: Theme.of(context).colorScheme.error),
     ),
     backgroundColor: Theme.of(context).colorScheme.onError,
@@ -70,7 +88,11 @@ void showInfoMessage(
   SnackBarAction? action,
 }) {
   final snackBar = _createFloatingSnackBar(
-    content: Text(message),
+    content: Text(
+      _truncateForSnackBar(message),
+      maxLines: _kSnackBarMaxLines,
+      overflow: TextOverflow.ellipsis,
+    ),
     action: action,
     duration: duration,
     persist: persist,

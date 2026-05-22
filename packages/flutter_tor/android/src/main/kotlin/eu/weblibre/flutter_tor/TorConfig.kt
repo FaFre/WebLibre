@@ -1,7 +1,7 @@
 package eu.weblibre.flutter_tor
 
 import eu.weblibre.flutter_tor.generated.TorConfiguration
-import IPtProxy.IPtProxy
+import io.nekohasekai.IPtProxy.IPtProxy
 import java.io.File
 
 /**

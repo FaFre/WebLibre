@@ -43,7 +43,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:weblibre/features/tor/domain/repositories/tor_proxy.dart';
+import 'package:weblibre/features/proxy/domain/repositories/container_proxy.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/debouncer.dart';
@@ -417,7 +417,7 @@ class TabRepository extends _$TabRepository {
     if (!ref.mounted) return false;
 
     if (containerData != null) {
-      if (containerData.metadata.useProxy) {
+      if (containerData.metadata.proxyConnectionId != null) {
         final proxyPluginHealthy = await GeckoContainerProxyService()
             .healthcheck();
 
@@ -711,8 +711,8 @@ class TabRepository extends _$TabRepository {
     // Best-effort: remove proxy alias (no-op if never set)
     try {
       await ref
-          .read(torProxyRepositoryProvider.notifier)
-          .removeContainerProxy(contextId);
+          .read(containerProxyRepositoryProvider.notifier)
+          .clearContainerProxy(contextId);
     } catch (e, st) {
       logger.e(
         'Failed to remove proxy for isolation context $contextId',

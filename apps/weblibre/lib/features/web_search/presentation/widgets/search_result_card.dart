@@ -6,7 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:nullability/nullability.dart';
-import 'package:search_backend/search_backend.dart';
+import 'package:search_protocol/search_protocol.dart';
 import 'package:weblibre/features/search_credits/domain/repositories/web_search_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/search_controller.dart';
 import 'package:weblibre/features/web_search/domain/entities/captured_page_state.dart';

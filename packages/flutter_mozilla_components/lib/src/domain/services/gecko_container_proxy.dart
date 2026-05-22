@@ -24,6 +24,26 @@ class GeckoContainerProxyService {
     return _apiInstance.removeContainerProxy(contextId);
   }
 
+  Future<void> upsertProxy(GeckoProxySettings proxy) {
+    return _apiInstance.upsertProxy(proxy);
+  }
+
+  Future<void> removeProxy(String proxyId) {
+    return _apiInstance.removeProxy(proxyId);
+  }
+
+  Future<void> setContainerProxy(String contextId, String proxyId) {
+    return _apiInstance.setContainerProxy(contextId, proxyId);
+  }
+
+  Future<void> clearContainerProxy(String contextId) {
+    return _apiInstance.clearContainerProxy(contextId);
+  }
+
+  Future<void> removeContainerProxyRelation(String contextId, String proxyId) {
+    return _apiInstance.removeContainerProxyRelation(contextId, proxyId);
+  }
+
   Future<void> setSiteAssignments(Map<String, String> assignments) {
     return _apiInstance.setSiteAssignments(assignments);
   }

@@ -1,6 +1,5 @@
 package eu.weblibre.flutter_tor
 
-import IPtProxy.Controller
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent

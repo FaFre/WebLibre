@@ -38,6 +38,8 @@ dependencies:
     path: ../../packages/flutter_mozilla_components
   flutter_reorderable_grid_view: ^5.6.0
   flutter_slidable: ^4.0.3
+  flutter_singbox_proxy:
+    path: ../../packages/flutter_singbox_proxy
   flutter_svg: ^2.3.0
   flutter_tor:
     path: ../../packages/flutter_tor
@@ -69,8 +71,8 @@ dependencies:
     path: ../../../weblibre_account/packages/privacypass_client
   search_client:
     path: ../../../weblibre_account/packages/search_client
-  search_backend:
-    path: ../../../weblibre_account/apps/search_backend
+  search_protocol:
+    path: ../../../weblibre_account/packages/search_protocol
   pretty_qr_code: ^3.6.0
   qr_code_scanner_plus: ^2.1.1
   quick_actions: ^1.1.0

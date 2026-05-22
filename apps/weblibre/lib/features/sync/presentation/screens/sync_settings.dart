@@ -25,6 +25,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/format.dart';
 import 'package:weblibre/features/qr_scanner/presentation/dialogs/qr_scanner_dialog.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
@@ -454,23 +455,31 @@ class SyncSettingsScreen extends HookConsumerWidget {
                 final newName = controller.text.trim();
                 if (newName.isEmpty) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Device name cannot be empty'),
-                      ),
+                    ui_helper.showErrorMessage(
+                      context,
+                      'Device name cannot be empty',
                     );
                   }
                   return;
                 }
 
-                final success = await onSave(newName).catchError((_) => false);
+                final success = await onSave(newName).catchError((
+                  Object error,
+                  StackTrace stackTrace,
+                ) {
+                  logger.e(
+                    'Failed to update device name',
+                    error: error,
+                    stackTrace: stackTrace,
+                  );
+                  return false;
+                });
 
                 if (!success) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Failed to update device name'),
-                      ),
+                    ui_helper.showErrorMessage(
+                      context,
+                      'Failed to update device name',
                     );
                   }
                   return;
@@ -518,10 +527,9 @@ class SyncSettingsScreen extends HookConsumerWidget {
                   final uri = Uri.tryParse(value);
                   if (uri == null || uri.scheme != 'https') {
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Must be a valid HTTPS URL'),
-                        ),
+                      ui_helper.showErrorMessage(
+                        context,
+                        'Must be a valid HTTPS URL',
                       );
                     }
                     return;

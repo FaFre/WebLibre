@@ -14,6 +14,8 @@ workspace:
   - packages/locale_resolver/example
   - packages/speech_to_text_dialog
   - packages/speech_to_text_dialog/example
+  - packages/flutter_singbox_proxy
+  - packages/flutter_singbox_proxy/example
 dev_dependencies:
   melos: ^7.7.0
 
@@ -77,6 +79,9 @@ melos:
         sh scripts/build-container-proxy.sh
         sh scripts/build-readability.sh
         python3 scripts/build_quotes_db.py
+    build-singbox-libbox:
+      description: Build official sing-box Android libbox AAR for flutter_singbox_proxy
+      run: packages/flutter_singbox_proxy/scripts/build-libbox-android.sh
     build-browser:
       description: Build stable release APK split per ABI
       run: |

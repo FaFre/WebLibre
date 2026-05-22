@@ -37,7 +37,7 @@ import 'package:weblibre/features/user/data/providers.dart';
 
 part 'selected_container.g.dart';
 
-enum SetContainerResult { failed, success, successHasProxy }
+enum SetContainerResult { failed, success }
 
 @Riverpod(keepAlive: true)
 class SelectedContainer extends _$SelectedContainer {
@@ -62,13 +62,13 @@ class SelectedContainer extends _$SelectedContainer {
     bool canApply() => shouldApply?.call() ?? true;
 
     if (ref.mounted && container != null && canApply()) {
-      if (container.metadata.useProxy) {
+      if (container.metadata.proxyConnectionId != null) {
         final proxyPluginHealthy = await GeckoContainerProxyService()
             .healthcheck();
 
         if (ref.mounted && proxyPluginHealthy && canApply()) {
           state = id;
-          return SetContainerResult.successHasProxy;
+          return SetContainerResult.success;
         }
       } else if (canApply()) {
         state = id;

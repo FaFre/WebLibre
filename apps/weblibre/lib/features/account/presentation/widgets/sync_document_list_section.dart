@@ -23,10 +23,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:secure_archive/secure_archive.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/account/data/repositories/account_sync_repository.dart';
 import 'package:weblibre/features/account/domain/services/sync_document_service.dart';
 import 'package:weblibre/features/account/presentation/widgets/sync_document_dialogs.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_content_card.dart';
+import 'package:weblibre/utils/ui_helper.dart';
 
 class SyncDocumentListSection extends HookWidget {
   const SyncDocumentListSection({
@@ -59,12 +61,18 @@ class SyncDocumentListSection extends HookWidget {
     Future<void> refresh() async {
       try {
         final docs = await syncRepo.listDocuments(kind: service.kind);
+
+        if (!context.mounted) return;
+
         documents.value = docs;
-      } catch (e) {
+      } catch (error, stackTrace) {
+        logger.e(
+          'Failed to list ${service.kind.name} sync documents',
+          error: error,
+          stackTrace: stackTrace,
+        );
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to load snapshots: $e')),
-          );
+          showErrorMessage(context, 'Failed to load snapshots: $error');
         }
       } finally {
         if (context.mounted) {
@@ -103,16 +111,17 @@ class SyncDocumentListSection extends HookWidget {
         );
 
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${service.kind.displayName} stored')),
-          );
+          showInfoMessage(context, '${service.kind.displayName} stored');
         }
         await refresh();
-      } catch (e) {
+      } catch (error, stackTrace) {
+        logger.e(
+          'Failed to store ${service.kind.name} sync document',
+          error: error,
+          stackTrace: stackTrace,
+        );
         if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Failed to store: $e')));
+          showErrorMessage(context, 'Failed to store: $error');
         }
       } finally {
         if (context.mounted) {
@@ -133,9 +142,7 @@ class SyncDocumentListSection extends HookWidget {
         final result = await syncRepo.fetchDocument(id: metadata.id);
         if (result == null) {
           if (context.mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('Snapshot not found')));
+            showErrorMessage(context, 'Snapshot not found');
           }
           return;
         }
@@ -145,25 +152,23 @@ class SyncDocumentListSection extends HookWidget {
         await service.applyRestored(plaintext);
 
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${service.kind.displayName} restored')),
-          );
+          showInfoMessage(context, '${service.kind.displayName} restored');
         }
-      } catch (e) {
+      } catch (error, stackTrace) {
+        logger.e(
+          'Failed to restore ${service.kind.name} sync document ${metadata.id}',
+          error: error,
+          stackTrace: stackTrace,
+        );
         if (context.mounted) {
-          if (_isDecryptionFailure(e)) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Decryption failed — wrong password or data corrupted. '
-                  'Try resetting your sync key.',
-                ),
-              ),
+          if (_isDecryptionFailure(error)) {
+            showErrorMessage(
+              context,
+              'Decryption failed — wrong password or data corrupted. '
+              'Try resetting your sync key.',
             );
           } else {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text('Failed to restore: $e')));
+            showErrorMessage(context, 'Failed to restore: $error');
           }
         }
       } finally {
@@ -186,11 +191,14 @@ class SyncDocumentListSection extends HookWidget {
           label: newLabel.isEmpty ? null : newLabel,
         );
         await refresh();
-      } catch (e) {
+      } catch (error, stackTrace) {
+        logger.e(
+          'Failed to update label for sync document ${metadata.id}',
+          error: error,
+          stackTrace: stackTrace,
+        );
         if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Failed to update label: $e')));
+          showErrorMessage(context, 'Failed to update label: $error');
         }
       }
     }
@@ -205,16 +213,17 @@ class SyncDocumentListSection extends HookWidget {
       try {
         await syncRepo.deleteDocument(id: metadata.id);
         if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Snapshot deleted')));
+          showInfoMessage(context, 'Snapshot deleted');
         }
         await refresh();
-      } catch (e) {
+      } catch (error, stackTrace) {
+        logger.e(
+          'Failed to delete sync document ${metadata.id}',
+          error: error,
+          stackTrace: stackTrace,
+        );
         if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Failed to delete: $e')));
+          showErrorMessage(context, 'Failed to delete: $error');
         }
       }
     }

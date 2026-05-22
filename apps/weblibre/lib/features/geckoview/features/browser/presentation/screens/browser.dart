@@ -58,6 +58,9 @@ import 'package:weblibre/features/geckoview/features/find_in_page/presentation/c
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_autofocus.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/features/small_web/presentation/controllers/small_web_mode_controller.dart';
 import 'package:weblibre/features/small_web/presentation/widgets/small_web_browser_overlay.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
@@ -234,6 +237,55 @@ class BrowserScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final eventService = ref.watch(eventServiceProvider);
     final viewportService = ref.watch(viewportServiceProvider);
+    final activeProxyPromptKeys = useRef(<String>{});
+
+    useOnStreamChange(
+      eventService.proxyLoadErrorEvents,
+      onData: (event) async {
+        final selectedTabId = ref.read(selectedTabProvider);
+        final tabId = event.tabId ?? selectedTabId;
+        if (tabId == null || tabId != selectedTabId) return;
+
+        final promptKey = '$tabId:${event.url ?? event.errorType}';
+        if (!activeProxyPromptKeys.value.add(promptKey)) return;
+
+        try {
+          final contextId = event.contextId;
+          final contextContainer = contextId != null && contextId.isNotEmpty
+              ? await ref
+                    .read(containerRepositoryProvider.notifier)
+                    .getContainerByContextualIdentity(contextId)
+              : null;
+          final container =
+              contextContainer ??
+              await ref
+                  .read(tabDataRepositoryProvider.notifier)
+                  .getTabContainerData(tabId);
+
+          if (!context.mounted || container == null) return;
+
+          final isProxyStarted = await ensureProxyStartedForContainer(
+            context,
+            ref,
+            container,
+          );
+
+          if (isProxyStarted &&
+              context.mounted &&
+              ref.read(selectedTabProvider) == tabId) {
+            await ref.read(tabSessionProvider(tabId: tabId).notifier).reload();
+          }
+        } catch (error, stackTrace) {
+          logger.e(
+            'Failed to handle proxy load error',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        } finally {
+          activeProxyPromptKeys.value.remove(promptKey);
+        }
+      },
+    );
 
     final tabInFullScreen = ref.watch(
       selectedTabStateProvider.select((value) => value?.isFullScreen ?? false),

@@ -51,9 +51,8 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
+import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
-import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
-import 'package:weblibre/features/tor/presentation/widgets/tor_dialog.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
@@ -111,26 +110,8 @@ class _TabFilters extends ConsumerWidget {
                   .read(selectedContainerProvider.notifier)
                   .setContainerId(container.id);
 
-              if (context.mounted &&
-                  result == SetContainerResult.successHasProxy) {
-                final shouldStartProxy = await ref
-                    .read(startProxyControllerProvider.notifier)
-                    .shouldPromptProxyStart();
-
-                if (!context.mounted || !shouldStartProxy) return;
-
-                final dialogResult = await showDialog<bool>(
-                  context: context,
-                  builder: (context) {
-                    return const TorDialog();
-                  },
-                );
-
-                if (dialogResult == true) {
-                  await ref
-                      .read(startProxyControllerProvider.notifier)
-                      .startProxy();
-                }
+              if (context.mounted && result == SetContainerResult.success) {
+                await ensureProxyStartedForContainer(context, ref, container);
               }
             } else {
               ref.read(selectedContainerProvider.notifier).clearContainer();

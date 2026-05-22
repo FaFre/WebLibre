@@ -1856,11 +1856,40 @@ abstract class GeckoBrowserExtensionApi {
   List<Object> getMarkdown(List<String> htmlList);
 }
 
+class GeckoProxySettings {
+  final String id;
+  final String title;
+  final String type;
+  final String host;
+  final int port;
+  final String? username;
+  final String? password;
+  final bool proxyDNS;
+  final bool doNotProxyLocal;
+
+  const GeckoProxySettings({
+    required this.id,
+    required this.title,
+    required this.type,
+    required this.host,
+    required this.port,
+    this.username,
+    this.password,
+    this.proxyDNS = true,
+    this.doNotProxyLocal = true,
+  });
+}
+
 @HostApi()
 abstract class GeckoContainerProxyApi {
   void setProxyPort(int port);
   void addContainerProxy(String contextId);
   void removeContainerProxy(String contextId);
+  void upsertProxy(GeckoProxySettings proxy);
+  void removeProxy(String proxyId);
+  void setContainerProxy(String contextId, String proxyId);
+  void clearContainerProxy(String contextId);
+  void removeContainerProxyRelation(String contextId, String proxyId);
   void setSiteAssignments(Map<String, String> assignments);
 
   @async
@@ -1930,6 +1959,20 @@ class ContainerSiteAssignment {
   });
 }
 
+class ProxyLoadError {
+  final String? tabId;
+  final String? contextId;
+  final String? url;
+  final String errorType;
+
+  ProxyLoadError({
+    required this.tabId,
+    required this.contextId,
+    required this.url,
+    required this.errorType,
+  });
+}
+
 @FlutterApi()
 abstract class GeckoStateEvents {
   void onViewReadyStateChange(int sequence, bool state);
@@ -1959,6 +2002,8 @@ abstract class GeckoStateEvents {
   void onPreferenceChange(int sequence, GeckoPref value);
 
   void onContainerSiteAssignment(int sequence, ContainerSiteAssignment details);
+
+  void onProxyLoadError(int sequence, ProxyLoadError details);
 
   void onMlProgress(int sequence, MlProgressData progress);
 

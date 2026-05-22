@@ -44,6 +44,7 @@ class GeckoEventService extends GeckoStateEvents {
   // final _scrollEventSubject = PublishSubject<ScrollEvent>();
   final _prefUpdateSubject = PublishSubject<GeckoPref>();
   final _siteAssignementSubject = PublishSubject<ContainerSiteAssignment>();
+  final _proxyLoadErrorSubject = PublishSubject<ProxyLoadError>();
 
   final _tabAddedSubject = PublishSubject<String>();
   final _mlProgressSubject = PublishSubject<MlProgressData>();
@@ -71,6 +72,8 @@ class GeckoEventService extends GeckoStateEvents {
   Stream<GeckoPref> get prefUpdateEvent => _prefUpdateSubject.stream;
   Stream<ContainerSiteAssignment> get siteAssignementEvent =>
       _siteAssignementSubject.stream;
+  Stream<ProxyLoadError> get proxyLoadErrorEvents =>
+      _proxyLoadErrorSubject.stream;
 
   Stream<String> get tabAddedStream => _tabAddedSubject.stream;
   Stream<MlProgressData> get mlProgressEvents => _mlProgressSubject.stream;
@@ -206,6 +209,11 @@ class GeckoEventService extends GeckoStateEvents {
   }
 
   @override
+  void onProxyLoadError(int sequence, ProxyLoadError details) {
+    _proxyLoadErrorSubject.addWhenMoreRecent(sequence, details.tabId, details);
+  }
+
+  @override
   void onMlProgress(int sequence, MlProgressData progress) {
     _mlProgressSubject.addWhenMoreRecent(sequence, null, progress);
   }
@@ -266,6 +274,7 @@ class GeckoEventService extends GeckoStateEvents {
     await _tabAddedSubject.close();
     await _prefUpdateSubject.close();
     await _siteAssignementSubject.close();
+    await _proxyLoadErrorSubject.close();
     await _mlProgressSubject.close();
     await _manifestUpdateSubject.close();
     await _translationEngineSubject.close();

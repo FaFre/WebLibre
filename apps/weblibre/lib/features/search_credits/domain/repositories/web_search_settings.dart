@@ -21,7 +21,7 @@ import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:search_backend/search_backend.dart';
+import 'package:search_protocol/search_protocol.dart';
 import 'package:weblibre/features/search_credits/data/models/web_search_settings.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 

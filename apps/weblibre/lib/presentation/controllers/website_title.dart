@@ -28,9 +28,10 @@ import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
-import 'package:weblibre/features/user/data/models/tor_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
+import 'package:weblibre/features/user/data/models/proxy_routing_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/proxy_routing_settings.dart';
 
 part 'website_title.g.dart';
 
@@ -86,13 +87,19 @@ Future<WebPageInfo> pageInfo(
         .read(tabDataRepositoryProvider.notifier)
         .getTabContainerData(tabState!.id);
 
-    final torSettings = ref.read(torSettingsWithDefaultsProvider);
+    final proxyRoutingSettings = ref.read(
+      proxyRoutingSettingsWithDefaultsProvider,
+    );
 
-    if (containerData?.metadata.useProxy == true ||
+    if (containerData?.metadata.proxyConnectionId is TorProxyConnectionId ||
         (tabState.tabMode is! PrivateTabMode &&
-            torSettings.proxyRegularTabsMode == TorRegularTabProxyMode.all) ||
+            proxyRoutingSettings.regularTabsMode ==
+                ProxyRegularTabRoutingMode.all &&
+            proxyRoutingSettings.regularTabsProxyConnectionId
+                is TorProxyConnectionId) ||
         (tabState.tabMode is PrivateTabMode &&
-            torSettings.proxyPrivateTabsTor)) {
+            proxyRoutingSettings.privateTabsProxyConnectionId
+                is TorProxyConnectionId)) {
       proxyPort = await ref.read(
         torProxyServiceProvider.selectAsync((value) => value.socksPort),
       );

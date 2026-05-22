@@ -25,6 +25,7 @@ import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:socks5_proxy/socks_client.dart';
 import 'package:weblibre/features/search_credits/domain/repositories/web_search_settings.dart';
+import 'package:weblibre/features/tor/domain/extensions/tor_status_x.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 
 part 'proxy_client.g.dart';
@@ -39,11 +40,7 @@ int? searchProxyPort(Ref ref) {
     webSearchSettingsControllerProvider.select((s) => s.routeThroughTor),
   );
   if (!route) return null;
-  final status = ref.watch(torProxyServiceProvider).value;
-  if (status == null || !status.isRunning || status.bootstrapProgress < 100) {
-    return null;
-  }
-  return status.socksPort;
+  return ref.watch(torProxyServiceProvider).value?.usableSocksPort;
 }
 
 /// HttpClient used by both WebSocket (via `IOWebSocketChannel.customClient`)

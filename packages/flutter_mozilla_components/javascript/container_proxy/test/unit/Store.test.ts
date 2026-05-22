@@ -163,6 +163,15 @@ describe('Store', () => {
       expect(relations.container1).to.be.deep.equal(['proxy1'])
       expect(relations.container2).to.be.deep.equal(['proxy2'])
     })
+
+    it('should keep a missing proxy relation distinguishable from no relation', () => {
+      const isolatedStore = new Store()
+      isolatedStore.setContainerProxyRelation('container1', 'deleted-proxy')
+
+      const result = isolatedStore.getProxiesForContainer('container1')
+
+      expect(result).to.be.deep.equal([])
+    })
   })
 
   describe('wildcard site assignments', function () {

@@ -23,6 +23,7 @@ import 'package:drift_dev/api/migrations_native.dart';
 import 'package:flutter/foundation.dart';
 import 'package:weblibre/features/user/data/database/daos/cache.dart';
 import 'package:weblibre/features/user/data/database/daos/onboarding.dart';
+import 'package:weblibre/features/user/data/database/daos/proxy_profile.dart';
 import 'package:weblibre/features/user/data/database/daos/search_tokens.dart';
 import 'package:weblibre/features/user/data/database/daos/setting.dart';
 import 'package:weblibre/features/user/data/database/daos/toolbar_button_config.dart';
@@ -37,11 +38,12 @@ import 'package:weblibre/features/user/data/database/database.steps.dart';
     OnboardingDao,
     ToolbarButtonConfigDao,
     SearchTokensDao,
+    ProxyProfileDao,
   ],
 )
 class UserDatabase extends $UserDatabase {
   @override
-  final int schemaVersion = 5;
+  final int schemaVersion = 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -102,6 +104,22 @@ class UserDatabase extends $UserDatabase {
     from4To5: (m, schema) async {
       await m.addColumn(schema.searchTokens, schema.searchTokens.reservedAt);
       await m.createIndex(schema.idxSearchTokensReservedAt);
+    },
+    from5To6: (m, schema) async {
+      await m.createTable(schema.proxyProfile);
+      await m.createIndex(schema.idxProxyProfileUpdatedAt);
+      await m.createTable(schema.proxyRoutingSetting);
+    },
+    from6To7: (m, schema) async {
+      await m.addColumn(
+        schema.proxyProfile,
+        schema.proxyProfile.dnsOverrideJson,
+      );
+    },
+    from7To8: (m, schema) async {
+      await m.database.customStatement(
+        'DROP TABLE IF EXISTS proxy_routing_setting',
+      );
     },
   );
 }

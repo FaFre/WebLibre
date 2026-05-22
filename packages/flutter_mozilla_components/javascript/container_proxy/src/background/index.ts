@@ -1,4 +1,4 @@
-import { Socks5ProxySettings } from 'src/domain/ProxySettings';
+import { ProxySettings, Socks5ProxySettings } from 'src/domain/ProxySettings';
 import { Store } from '../store/Store'
 import BackgroundMain from './BackgroundMain'
 
@@ -8,7 +8,16 @@ const store = new Store()
 
 interface Message {
     id: String | undefined;
-    action: 'setProxyPort' | 'addContainerProxy' | 'removeContainerProxy' | 'healthcheck' | 'setSiteAssignments';
+    action: 'setProxyPort' |
+    'addContainerProxy' |
+    'removeContainerProxy' |
+    'upsertProxy' |
+    'removeProxy' |
+    'setContainerProxy' |
+    'clearContainerProxy' |
+    'removeContainerProxyRelation' |
+    'healthcheck' |
+    'setSiteAssignments';
     args: any;
 }
 
@@ -41,6 +50,32 @@ port.onMessage.addListener((raw: unknown): void => {
         case "removeContainerProxy":
             store.removeContainerProxyRelation(message.args, "tor")
             console.log('removed container relation ' + message.args)
+            break
+        case "upsertProxy": {
+            const proxy = ProxySettings.tryFromDao(message.args)
+            if (proxy === undefined) {
+                console.error('invalid proxy settings ' + JSON.stringify(message.args))
+                break
+            }
+            store.putProxy(proxy)
+            console.log('upsert proxy ' + message.args.id)
+            break
+        }
+        case "removeProxy":
+            store.deleteProxyById(message.args)
+            console.log('removed proxy ' + message.args)
+            break
+        case "setContainerProxy":
+            store.setContainerProxyRelation(message.args.contextId, message.args.proxyId)
+            console.log('set container relation ' + message.args.contextId + ' -> ' + message.args.proxyId)
+            break
+        case "clearContainerProxy":
+            store.clearContainerProxyRelation(message.args)
+            console.log('cleared container relation ' + message.args)
+            break
+        case "removeContainerProxyRelation":
+            store.removeContainerProxyRelation(message.args.contextId, message.args.proxyId)
+            console.log('removed container relation ' + message.args.contextId + ' -> ' + message.args.proxyId)
             break
         case "setSiteAssignments":
             const entries = new Map(Object.entries(message.args))

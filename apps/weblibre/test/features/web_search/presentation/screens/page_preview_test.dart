@@ -20,7 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:search_backend/search_backend.dart';
+import 'package:search_protocol/search_protocol.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
@@ -79,14 +79,14 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('Heading'), findsOneWidget);
     expect(find.text('Body copy'), findsOneWidget);
     expect(find.text('Fabian'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Open in browser'));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(opener.openedUris, [Uri.parse(url)]);
   });

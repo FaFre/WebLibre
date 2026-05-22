@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
     as fmc;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:search_backend/search_backend.dart';
+import 'package:search_protocol/search_protocol.dart';
 import 'package:search_client/search_client.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';

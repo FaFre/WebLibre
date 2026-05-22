@@ -27,6 +27,7 @@ import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/utils/exit_app.dart';
+import 'package:weblibre/utils/ui_helper.dart';
 
 const List<SettingsSectionDefinition> experimentalSettingsSections = [
   SettingsSectionDefinition(
@@ -86,7 +87,6 @@ class _UnifiedPushDistributorTile extends StatelessWidget {
       ),
       trailing: const Icon(Icons.chevron_right),
       onTap: () async {
-        final messenger = ScaffoldMessenger.of(context);
         final success = await GeckoBrowserService()
             .pickUnifiedPushDistributor();
 
@@ -94,15 +94,14 @@ class _UnifiedPushDistributorTile extends StatelessWidget {
           return;
         }
 
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              success
-                  ? 'UnifiedPush distributor configured.'
-                  : 'Could not configure UnifiedPush. Install a distributor and try again.',
-            ),
-          ),
-        );
+        if (success) {
+          showInfoMessage(context, 'UnifiedPush distributor configured.');
+        } else {
+          showErrorMessage(
+            context,
+            'Could not configure UnifiedPush. Install a distributor and try again.',
+          );
+        }
       },
     );
   }

@@ -2,9 +2,9 @@ package eu.weblibre.flutter_tor
 
 import android.content.Context
 import android.util.Log
-import IPtProxy.Controller
-import IPtProxy.IPtProxy
-import IPtProxy.OnTransportEvents
+import io.nekohasekai.IPtProxy.Controller
+import io.nekohasekai.IPtProxy.IPtProxy
+import io.nekohasekai.IPtProxy.OnTransportEvents
 import java.io.File
 
 /**

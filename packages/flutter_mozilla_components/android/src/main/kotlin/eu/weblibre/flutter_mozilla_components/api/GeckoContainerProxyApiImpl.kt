@@ -10,6 +10,7 @@ import eu.weblibre.flutter_mozilla_components.feature.BrowserExtensionFeature
 import eu.weblibre.flutter_mozilla_components.feature.ContainerProxyFeature
 import eu.weblibre.flutter_mozilla_components.feature.ResultConsumer
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoContainerProxyApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoProxySettings
 import org.json.JSONObject
 
 class GeckoContainerProxyApiImpl : GeckoContainerProxyApi {
@@ -23,6 +24,38 @@ class GeckoContainerProxyApiImpl : GeckoContainerProxyApi {
 
     override fun removeContainerProxy(contextId: String) {
         ContainerProxyFeature.scheduleRequest("removeContainerProxy", contextId)
+    }
+
+    override fun upsertProxy(proxy: GeckoProxySettings) {
+        ContainerProxyFeature.scheduleRequest("upsertProxy", proxy.toJson())
+    }
+
+    override fun removeProxy(proxyId: String) {
+        ContainerProxyFeature.scheduleRequest("removeProxy", proxyId)
+    }
+
+    override fun setContainerProxy(contextId: String, proxyId: String) {
+        ContainerProxyFeature.scheduleRequest(
+            "setContainerProxy",
+            JSONObject().apply {
+                put("contextId", contextId)
+                put("proxyId", proxyId)
+            }
+        )
+    }
+
+    override fun clearContainerProxy(contextId: String) {
+        ContainerProxyFeature.scheduleRequest("clearContainerProxy", contextId)
+    }
+
+    override fun removeContainerProxyRelation(contextId: String, proxyId: String) {
+        ContainerProxyFeature.scheduleRequest(
+            "removeContainerProxyRelation",
+            JSONObject().apply {
+                put("contextId", contextId)
+                put("proxyId", proxyId)
+            }
+        )
     }
 
     override fun setSiteAssignments(assignments: Map<String, String>) {
@@ -41,5 +74,19 @@ class GeckoContainerProxyApiImpl : GeckoContainerProxyApi {
                 callback(Result.failure(Exception("$errorCode $errorMessage $errorDetails")))
             }
         })
+    }
+
+    private fun GeckoProxySettings.toJson(): JSONObject {
+        return JSONObject().apply {
+            put("id", id)
+            put("title", title)
+            put("type", type)
+            put("host", host)
+            put("port", port)
+            username?.let { put("username", it) }
+            password?.let { put("password", it) }
+            put("proxyDNS", proxyDNS)
+            put("doNotProxyLocal", doNotProxyLocal)
+        }
     }
 }

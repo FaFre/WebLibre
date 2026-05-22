@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'tor_proxy.dart';
+part of 'singbox_proxy_credentials.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,28 +9,31 @@ part of 'tor_proxy.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(TorProxyRepository)
-final torProxyRepositoryProvider = TorProxyRepositoryProvider._();
+@ProviderFor(SingboxProxyCredentialsRepository)
+final singboxProxyCredentialsRepositoryProvider =
+    SingboxProxyCredentialsRepositoryProvider._();
 
-final class TorProxyRepositoryProvider
-    extends $NotifierProvider<TorProxyRepository, void> {
-  TorProxyRepositoryProvider._()
+final class SingboxProxyCredentialsRepositoryProvider
+    extends $NotifierProvider<SingboxProxyCredentialsRepository, void> {
+  SingboxProxyCredentialsRepositoryProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'torProxyRepositoryProvider',
+        name: r'singboxProxyCredentialsRepositoryProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$torProxyRepositoryHash();
+  String debugGetCreateSourceHash() =>
+      _$singboxProxyCredentialsRepositoryHash();
 
   @$internal
   @override
-  TorProxyRepository create() => TorProxyRepository();
+  SingboxProxyCredentialsRepository create() =>
+      SingboxProxyCredentialsRepository();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(void value) {
@@ -41,10 +44,10 @@ final class TorProxyRepositoryProvider
   }
 }
 
-String _$torProxyRepositoryHash() =>
-    r'83c2976750f3f7907274b1ae4f926cd1de89be83';
+String _$singboxProxyCredentialsRepositoryHash() =>
+    r'b4e11b001ccccfbf26417963adf6cb81e1b1e69f';
 
-abstract class _$TorProxyRepository extends $Notifier<void> {
+abstract class _$SingboxProxyCredentialsRepository extends $Notifier<void> {
   void build();
   @$mustCallSuper
   @override

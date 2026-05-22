@@ -200,9 +200,7 @@ class HistorySearchRepository extends _$HistorySearchRepository {
       // last time the engine observed *anything* about this URL.
       final updatedAt = DateTime.fromMillisecondsSinceEpoch(metadata.updatedAt);
       final ageDays = now.difference(updatedAt).inHours / 24.0;
-      final decay = math.exp(
-        -math.max(0.0, ageDays) / _recencyHalfLifeDays,
-      );
+      final decay = math.exp(-math.max(0.0, ageDays) / _recencyHalfLifeDays);
       score -= _recencyRankWeight * decay;
     }
 

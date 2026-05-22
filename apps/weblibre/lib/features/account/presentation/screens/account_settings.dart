@@ -106,7 +106,10 @@ class AccountSettingsScreen extends HookConsumerWidget {
     final syncRepo = syncClient != null
         ? ref.read(accountSyncRepositoryProvider.notifier)
         : null;
-    final sourceDeviceId = ref.read(androidDeviceInfoProvider).value?.deviceName;
+    final sourceDeviceId = ref
+        .read(androidDeviceInfoProvider)
+        .value
+        ?.deviceName;
     final sourceAppVersion = _appVersion(ref);
 
     return <SettingsSectionDefinition>[
@@ -121,7 +124,8 @@ class AccountSettingsScreen extends HookConsumerWidget {
               AccountAuthStatus.error => 'Sign-in failed',
             },
             subtitle: switch (authState.status) {
-              AccountAuthStatus.signedOut => 'Sync your settings across devices',
+              AccountAuthStatus.signedOut =>
+                'Sync your settings across devices',
               AccountAuthStatus.signingIn => 'Complete sign-in in your browser',
               AccountAuthStatus.signedIn =>
                 authState.displayName ?? authState.email ?? 'Signed in',

@@ -83,12 +83,15 @@ class LocalHistorySuggestions extends HookConsumerWidget {
                       final uri = Uri.tryParse(result.urlCanonical);
 
                       final content =
-                          (result.extractedContent?.contains(historyHighlightPrefix) ==
-                                  true)
-                              ? result.extractedContent
-                              : result.fullContent;
+                          (result.extractedContent?.contains(
+                                historyHighlightPrefix,
+                              ) ==
+                              true)
+                          ? result.extractedContent
+                          : result.fullContent;
                       final titleHasMatch =
-                          result.title?.contains(historyHighlightPrefix) ?? false;
+                          result.title?.contains(historyHighlightPrefix) ??
+                          false;
                       final bodyHasMatch =
                           content?.contains(historyHighlightPrefix) ?? false;
 

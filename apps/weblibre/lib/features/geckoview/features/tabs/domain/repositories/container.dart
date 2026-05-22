@@ -28,6 +28,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assig
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/color_palette.dart';
+import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 
 part 'container.g.dart';
 
@@ -76,6 +77,28 @@ class ContainerRepository extends _$ContainerRepository {
         .read(tabDatabaseProvider)
         .containerDao
         .replaceContainer(container);
+  }
+
+  Future<void> clearProxyConnectionAssignments(
+    ProxyConnectionId proxyConnectionId,
+  ) async {
+    final containers = await getAllContainersWithCount();
+    final affectedContainers = containers.where(
+      (container) => container.metadata.proxyConnectionId == proxyConnectionId,
+    );
+
+    for (final container in affectedContainers) {
+      await replaceContainer(
+        ContainerData(
+          id: container.id,
+          name: container.name,
+          color: container.color,
+          orderKey: container.orderKey,
+          isPinned: container.isPinned,
+          metadata: container.metadata.copyWith.proxyConnectionId(null),
+        ),
+      );
+    }
   }
 
   Future<void> assignContainerOrderKey(String id, {required String orderKey}) {
@@ -214,17 +237,25 @@ class ContainerRepository extends _$ContainerRepository {
         .take(targetIndex)
         .where((container) => container.isPinned == movingContainer.isPinned)
         .length
-        .clamp(0, scopedContainers.length - 1)
-        .toInt();
+        .clamp(0, scopedContainers.length - 1);
     if (scopedTargetIndex == scopedOldIndex) return;
 
-    final orderKey = await _orderKeyForReorder(
-      scopedContainers,
-      scopedOldIndex,
-      scopedTargetIndex,
-      movingContainer.isPinned,
-    );
-    await assignContainerOrderKey(movingContainer.id, orderKey: orderKey);
+    // Generate a new order key and assign it in the same transaction so a
+    // crash between the two cannot leave the moving container with a stale
+    // key that no longer matches the surrounding rows.
+    final db = ref.read(tabDatabaseProvider);
+    await db.transaction(() async {
+      final orderKey = await _orderKeyForReorder(
+        scopedContainers,
+        scopedOldIndex,
+        scopedTargetIndex,
+        movingContainer.isPinned,
+      );
+      await db.containerDao.assignOrderKey(
+        movingContainer.id,
+        orderKey: orderKey,
+      );
+    });
   }
 
   Future<String> _orderKeyForReorder(

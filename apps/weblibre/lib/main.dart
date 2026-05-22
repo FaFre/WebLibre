@@ -44,12 +44,15 @@ import 'package:weblibre/core/providers/app_state.dart';
 import 'package:weblibre/core/providers/defaults.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/domain/services/app_initialization.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/services/engine_settings_replication.dart';
 import 'package:weblibre/features/account/domain/services/account_callback_handler.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/services/engine_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_pruner.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_settings_sync.dart';
+import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_logs.dart';
+import 'package:weblibre/features/proxy/domain/services/browser_dns_leak_guard.dart';
+import 'package:weblibre/features/proxy/domain/services/singbox_proxy_endpoint_sync.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_feed/presentation/controllers/fetch_articles.dart';
@@ -123,6 +126,10 @@ class _MainWidget extends HookConsumerWidget {
     // Keep the sandbox capture controller alive for the lifetime of the app
     // so it can react to pigeon events even when no UI subscribes to it.
     ref.watch(sandboxCaptureControllerProvider);
+    // Keep proxy/Tor log subscriptions active from app start so startup
+    // messages reach the ring buffer before the browser view (or logs
+    // screen) mounts and would otherwise drop them.
+    ref.watch(singboxProxyLogsProvider.select((_) => null));
 
     final rootKey = ref.watch(appStateKeyProvider);
 
@@ -274,6 +281,17 @@ class _MainWidget extends HookConsumerWidget {
 
       // Activate account callback deep link handler
       ref.read(accountCallbackHandlerProvider);
+
+      // Activate the proxy DNS leak guard: when any sing-box profile is
+      // running AND the user has opted in, GeckoView TRR is forced to
+      // off so browser DNS follows the SOCKS proxyDNS path instead of
+      // resolving outside the proxy.
+      ref.read(browserDnsLeakGuardProvider);
+
+      // Mirror the sing-box runtime's SOCKS endpoints into Gecko's
+      // container-proxy registry. Side-effect-only notifier.
+      ref.read(singboxProxyEndpointSyncProvider);
+
       if (!kDebugMode) {
         await BackgroundFetch.configure(
           BackgroundFetchConfig(

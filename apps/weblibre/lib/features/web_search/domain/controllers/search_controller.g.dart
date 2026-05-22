@@ -42,7 +42,7 @@ final class MetaSearchControllerProvider
 }
 
 String _$metaSearchControllerHash() =>
-    r'b040527dfb49d9407fe0ea22169f5961d1faef13';
+    r'afb6600f78717df124a6afdb80710eba74666d23';
 
 abstract class _$MetaSearchController extends $Notifier<MetaSearchState> {
   MetaSearchState build();

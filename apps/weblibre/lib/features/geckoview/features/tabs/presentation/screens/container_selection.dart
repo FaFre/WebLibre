@@ -34,6 +34,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
+import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class ContainerSelectionScreen extends HookConsumerWidget {
@@ -221,7 +222,7 @@ class _UnassignedSelectionCard extends StatelessWidget {
   }
 }
 
-class _SelectionContainerCard extends StatelessWidget {
+class _SelectionContainerCard extends ConsumerWidget {
   const _SelectionContainerCard({
     required this.container,
     required this.isSelected,
@@ -233,12 +234,14 @@ class _SelectionContainerCard extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final containerColor = container.color;
     final tabCount = container.tabCount ?? 0;
     final palette = ContainerColors.palette(context, containerColor);
+
+    final proxyOptions = ref.watch(proxyConnectionOptionsProvider);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
@@ -306,10 +309,13 @@ class _SelectionContainerCard extends StatelessWidget {
                                   icon: Icons.cookie_outlined,
                                   label: 'Isolated',
                                 ),
-                              if (container.metadata.useProxy)
-                                const _SelectionInfoChip(
+                              if (container.metadata.proxyConnectionId != null)
+                                _SelectionInfoChip(
                                   icon: Icons.route_outlined,
-                                  label: 'Proxy',
+                                  label: proxyConnectionTitle(
+                                    proxyOptions,
+                                    container.metadata.proxyConnectionId!,
+                                  ),
                                 ),
                               if (container.metadata.clearDataOnExit)
                                 const _SelectionInfoChip(

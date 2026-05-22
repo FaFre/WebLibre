@@ -1082,7 +1082,7 @@ String _$watchAllAssignedSitesHash() =>
 ///
 /// Returns a map from isolation context ID to the set of container IDs it
 /// appears in. An isolation context needs a proxy alias if ANY of its
-/// associated containers has useProxy enabled.
+/// associated containers has a proxy connection assigned.
 
 @ProviderFor(watchIsolatedContextContainerMap)
 final watchIsolatedContextContainerMapProvider =
@@ -1094,7 +1094,7 @@ final watchIsolatedContextContainerMapProvider =
 ///
 /// Returns a map from isolation context ID to the set of container IDs it
 /// appears in. An isolation context needs a proxy alias if ANY of its
-/// associated containers has useProxy enabled.
+/// associated containers has a proxy connection assigned.
 
 final class WatchIsolatedContextContainerMapProvider
     extends
@@ -1112,7 +1112,7 @@ final class WatchIsolatedContextContainerMapProvider
   ///
   /// Returns a map from isolation context ID to the set of container IDs it
   /// appears in. An isolation context needs a proxy alias if ANY of its
-  /// associated containers has useProxy enabled.
+  /// associated containers has a proxy connection assigned.
   WatchIsolatedContextContainerMapProvider._()
     : super(
         from: null,

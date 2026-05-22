@@ -53,8 +53,8 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_field.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_module_reorder_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/bookmark_search.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/feed_search.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/combined_history_suggestions.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/feed_search.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/history_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/local_history_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_providers_section.dart';
@@ -64,8 +64,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolatio
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/compact_container_selector.dart';
-import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
-import 'package:weblibre/features/tor/presentation/widgets/tor_dialog.dart';
+import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/features/search_credits/domain/repositories/web_search_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/search_controller.dart';
@@ -496,26 +495,11 @@ class SearchScreen extends HookConsumerWidget {
 
           if (!context.mounted) return;
 
-          if (result == SetContainerResult.successHasProxy) {
-            final shouldStartProxy = await ref
-                .read(startProxyControllerProvider.notifier)
-                .shouldPromptProxyStart();
-
-            if (context.mounted && shouldStartProxy) {
-              final dialogResult = await showDialog<bool>(
-                context: context,
-                builder: (_) => const TorDialog(),
-              );
-
-              if (dialogResult == true) {
-                await ref
-                    .read(startProxyControllerProvider.notifier)
-                    .startProxy();
-              }
-            }
+          if (result == SetContainerResult.success) {
+            await ensureProxyStartedForContainer(context, ref, container);
           }
 
-          if (context.mounted && result != SetContainerResult.failed) {
+          if (context.mounted && result == SetContainerResult.success) {
             const TabViewRoute().go(context);
           }
         },

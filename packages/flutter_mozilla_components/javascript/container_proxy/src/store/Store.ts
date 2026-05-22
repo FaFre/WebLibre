@@ -224,6 +224,10 @@ export class Store {
     this.relations[cookieStoreId] = [proxyId]
   }
 
+  clearContainerProxyRelation(cookieStoreId: string): void {
+    delete this.relations[cookieStoreId]
+  }
+
   removeContainerProxyRelation(cookieStoreId: string, proxyId: string): void {
     const currentRelations = this.relations[cookieStoreId] ?? []
     this.relations[cookieStoreId] = currentRelations.filter(id => id !== proxyId)

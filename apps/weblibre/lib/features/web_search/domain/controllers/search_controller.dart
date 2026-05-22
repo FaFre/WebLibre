@@ -4,7 +4,7 @@ import 'dart:typed_data';
 
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:search_backend/search_backend.dart';
+import 'package:search_protocol/search_protocol.dart';
 import 'package:search_client/search_client.dart';
 import 'package:weblibre/domain/services/generic_website.dart';
 import 'package:weblibre/features/search_credits/domain/controllers/search_token_issuance_controller.dart';
@@ -12,6 +12,7 @@ import 'package:weblibre/features/search_credits/domain/providers.dart';
 import 'package:weblibre/features/search_credits/domain/providers/proxy_client.dart';
 import 'package:weblibre/features/search_credits/domain/repositories/search_token_stash_repository.dart';
 import 'package:weblibre/features/search_credits/domain/repositories/web_search_settings.dart';
+import 'package:weblibre/features/tor/domain/extensions/tor_status_x.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
 import 'package:weblibre/features/web_search/domain/entities/captured_page_state.dart';
@@ -687,10 +688,7 @@ class MetaSearchController extends _$MetaSearchController {
 
     final completer = Completer<bool>();
     final subscription = ref.listen(torProxyServiceProvider, (previous, next) {
-      final status = next.value;
-      if (status != null &&
-          status.isRunning &&
-          status.bootstrapProgress >= 100) {
+      if (next.isReady) {
         if (!completer.isCompleted) completer.complete(true);
       }
     });

@@ -17,14 +17,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/small_web/presentation/controllers/small_web_mode_controller.dart';
 import 'package:weblibre/features/small_web/presentation/controllers/small_web_session_controller.dart';
 import 'package:weblibre/features/small_web/presentation/widgets/small_web_bottom_bar.dart';
 import 'package:weblibre/features/small_web/presentation/widgets/small_web_menu_sheet.dart';
+import 'package:weblibre/utils/ui_helper.dart';
 
 class SmallWebBrowserOverlay extends HookConsumerWidget {
   const SmallWebBrowserOverlay({super.key});
@@ -51,13 +55,17 @@ class SmallWebBrowserOverlay extends HookConsumerWidget {
     );
 
     ref.listen(smallWebSessionControllerProvider, (prev, next) {
-      final error = next.asError?.error;
+      final asError = next.asError;
+      final error = asError?.error;
       final previousError = prev?.asError?.error;
 
       if (error != null && error != previousError && context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(error.toString())));
+        logger.e(
+          'Small web session error',
+          error: error,
+          stackTrace: asError?.stackTrace,
+        );
+        showErrorMessage(context, 'Small web error: $error');
       }
     });
 
@@ -71,7 +79,7 @@ class SmallWebBrowserOverlay extends HookConsumerWidget {
         currentTabTitle: tabState?.titleOrAuthority,
         onDiscover: () =>
             ref.read(smallWebSessionControllerProvider.notifier).discover(),
-        onMenuTap: () => showSmallWebMenuSheet(context),
+        onMenuTap: () => unawaited(openSmallWebMenuFlow(context)),
         onExit: () => ref.read(smallWebModeControllerProvider.notifier).exit(),
       ),
     );

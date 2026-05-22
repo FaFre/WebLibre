@@ -1,8 +1,22 @@
+import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
+
 CREATE TABLE setting (
   "key" TEXT PRIMARY KEY NOT NULL,
   partition_key TEXT,
   "value" ANY
 ) STRICT;
+
+CREATE TABLE proxy_profile (
+  id TEXT NOT NULL PRIMARY KEY,
+  name TEXT NOT NULL,
+  type ENUMNAME(SingboxProxyProfileType) NOT NULL,
+  config_json TEXT NOT NULL,
+  dns_override_json TEXT,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) AS ProxyProfile;
+
+CREATE INDEX idx_proxy_profile_updated_at ON proxy_profile(updated_at);
 
 CREATE TABLE icon_cache (
   origin TEXT PRIMARY KEY NOT NULL,

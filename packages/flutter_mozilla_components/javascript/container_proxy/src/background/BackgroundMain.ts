@@ -15,7 +15,7 @@ const privateIdentifier = 'firefox-private'
 type DoNotProxy = never[]
 export const doNotProxy: DoNotProxy = []
 
-const emergencyBreak: Socks5ProxyInfo = {
+export const emergencyBreak: Socks5ProxyInfo = {
   type: ProxyType.Socks5,
   host: 'emergency-break-proxy.localhost',
   port: 1,

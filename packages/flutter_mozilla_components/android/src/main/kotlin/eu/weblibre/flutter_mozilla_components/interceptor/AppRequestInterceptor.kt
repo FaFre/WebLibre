@@ -12,9 +12,11 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.feature.InertExternalSchemes
 import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureBridge
 import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureRegistry
+import eu.weblibre.flutter_mozilla_components.pigeons.ProxyLoadError
 import mozilla.components.browser.errorpages.ErrorPages
 import mozilla.components.browser.errorpages.ErrorType
 import mozilla.components.browser.state.selector.findTabOrCustomTab
@@ -145,6 +147,21 @@ class AppRequestInterceptor(private val context: Context) : RequestInterceptor {
         errorType: ErrorType,
         uri: String?,
     ): RequestInterceptor.ErrorResponse {
+        if (errorType == ErrorType.ERROR_PROXY_CONNECTION_REFUSED ||
+            errorType == ErrorType.ERROR_UNKNOWN_PROXY_HOST
+        ) {
+            val tab = components.core.store.state.findTabOrCustomTab(session)
+            components.flutterEvents.onProxyLoadError(
+                EventSequence.next(),
+                ProxyLoadError(
+                    tabId = tab?.id,
+                    contextId = tab?.contextId,
+                    url = uri,
+                    errorType = errorType.name,
+                )
+            ) { _ -> }
+        }
+
         val errorPage = ErrorPages.createUrlEncodedErrorPage(context, errorType, uri)
         return RequestInterceptor.ErrorResponse(errorPage)
     }

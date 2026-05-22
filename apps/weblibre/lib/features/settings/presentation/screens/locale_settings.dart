@@ -55,12 +55,11 @@ class LocaleSettingsScreen extends HookConsumerWidget {
     final availableLocales = useMemoized(
       () =>
           {
-            ...systemLocales,
-            ...userLocales.value,
-            Locale.fromSubtags(languageCode: 'en', countryCode: 'US'),
-          }.toList()..sort(
-            (a, b) => a.toLanguageTag().compareTo(b.toLanguageTag()),
-          ),
+              ...systemLocales,
+              ...userLocales.value,
+              Locale.fromSubtags(languageCode: 'en', countryCode: 'US'),
+            }.toList()
+            ..sort((a, b) => a.toLanguageTag().compareTo(b.toLanguageTag())),
       [systemLocales, userLocales],
     );
 
@@ -69,10 +68,9 @@ class LocaleSettingsScreen extends HookConsumerWidget {
 
     final filteredLocales = availableLocales.where((locale) {
       if (search.normalizedQuery.isEmpty) return true;
-      return locale
-          .toLanguageTag()
-          .toLowerCase()
-          .contains(search.normalizedQuery);
+      return locale.toLanguageTag().toLowerCase().contains(
+        search.normalizedQuery,
+      );
     }).toList();
 
     return SettingsCustomScrollScaffold(

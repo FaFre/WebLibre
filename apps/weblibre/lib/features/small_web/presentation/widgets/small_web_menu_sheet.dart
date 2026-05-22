@@ -34,8 +34,29 @@ import 'package:weblibre/features/small_web/presentation/widgets/small_web_mode_
 import 'package:weblibre/features/small_web/presentation/widgets/wander_console_sheet.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
-Future<void> showSmallWebMenuSheet(BuildContext context) {
-  return showModalBottomSheet(
+/// Hand-off between the small-web menu and the wander-console sheet. Each
+/// sheet pops with one of these so [openSmallWebMenuFlow] can re-present the
+/// next sheet from a stable parent context instead of the popped sheet's
+/// deactivated context.
+enum SmallWebSheetRequest { showMenu, showWander }
+
+/// Top-level entry: opens the small-web menu and re-presents whichever sheet
+/// the user requested next, looping until a sheet is dismissed without a
+/// follow-up request.
+Future<void> openSmallWebMenuFlow(BuildContext context) async {
+  SmallWebSheetRequest? next = SmallWebSheetRequest.showMenu;
+  while (next != null) {
+    if (!context.mounted) return;
+    if (next == SmallWebSheetRequest.showMenu) {
+      next = await showSmallWebMenuSheet(context);
+    } else {
+      next = await showWanderConsoleSheet(context);
+    }
+  }
+}
+
+Future<SmallWebSheetRequest?> showSmallWebMenuSheet(BuildContext context) {
+  return showModalBottomSheet<SmallWebSheetRequest>(
     context: context,
     isScrollControlled: true,
     shape: const RoundedRectangleBorder(
@@ -505,10 +526,8 @@ class _DefaultContentPanel extends ConsumerWidget {
               _WanderConsoleCard(currentConsoleUrl: session.currentConsoleUrl),
               const SizedBox(height: 8),
               FilledButton.tonalIcon(
-                onPressed: () async {
-                  Navigator.of(context).pop();
-                  await showWanderConsoleSheet(context);
-                },
+                onPressed: () =>
+                    Navigator.of(context).pop(SmallWebSheetRequest.showWander),
                 icon: const Icon(Icons.dns, size: 18),
                 label: const Text('Browse Consoles'),
               ),

@@ -29,9 +29,10 @@ import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/sliding_pill_toggle.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/form_validators.dart';
+import 'package:weblibre/utils/ui_helper.dart';
 
-Future<void> showWanderConsoleSheet(BuildContext context) {
-  return showModalBottomSheet(
+Future<SmallWebSheetRequest?> showWanderConsoleSheet(BuildContext context) {
+  return showModalBottomSheet<SmallWebSheetRequest>(
     context: context,
     isScrollControlled: true,
     shape: const RoundedRectangleBorder(
@@ -78,10 +79,9 @@ class _WanderConsoleSheet extends HookConsumerWidget {
               child: Row(
                 children: [
                   IconButton(
-                    onPressed: () async {
-                      Navigator.of(context).pop();
-                      await showSmallWebMenuSheet(context);
-                    },
+                    onPressed: () => Navigator.of(
+                      context,
+                    ).pop(SmallWebSheetRequest.showMenu),
                     icon: const Icon(Icons.arrow_back),
                     style: const ButtonStyle(
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -618,11 +618,10 @@ class _AddConsoleDialog extends HookWidget {
 
         if (!context.mounted) return;
 
+        // Show the snackbar first so it's anchored to a still-mounted context;
+        // popping the dialog afterwards deactivates this BuildContext.
+        showInfoMessage(context, 'Added console ${consoleUrl.host}');
         Navigator.of(context).pop();
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Added console ${consoleUrl.host}')),
-        );
       } on Exception catch (e) {
         if (!context.mounted) return;
         isLoading.value = false;

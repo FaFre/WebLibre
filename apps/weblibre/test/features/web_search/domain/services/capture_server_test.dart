@@ -125,23 +125,25 @@ void main() {
       expect(decoded['url'], contains('t='));
     });
 
-    test('err=1 starts the loader in the error pane with a retry button',
-        () async {
-      final url = await server.loaderUrl(
-        tabId: 'tab-9',
-        captureId: 'failed9',
-        error: true,
-      );
-      final res = await _get(url);
-      expect(res.statusCode, 200);
-      // Retry is now a JS-driven button, not an HTML form — assert the
-      // shell starts in error mode (error pane visible, pending hidden)
-      // and that the button + JS retry endpoint string are present.
-      expect(res.body, contains('id="retry"'));
-      expect(res.body, contains('id="error" class="error"'));
-      expect(res.body, contains('id="pending" class="hidden"'));
-      expect(res.body, contains('/loader/retry?tab='));
-    });
+    test(
+      'err=1 starts the loader in the error pane with a retry button',
+      () async {
+        final url = await server.loaderUrl(
+          tabId: 'tab-9',
+          captureId: 'failed9',
+          error: true,
+        );
+        final res = await _get(url);
+        expect(res.statusCode, 200);
+        // Retry is now a JS-driven button, not an HTML form — assert the
+        // shell starts in error mode (error pane visible, pending hidden)
+        // and that the button + JS retry endpoint string are present.
+        expect(res.body, contains('id="retry"'));
+        expect(res.body, contains('id="error" class="error"'));
+        expect(res.body, contains('id="pending" class="hidden"'));
+        expect(res.body, contains('/loader/retry?tab='));
+      },
+    );
 
     test('loader with invalid capture id returns 404', () async {
       final port = await server.ensureStarted();
@@ -174,9 +176,7 @@ void main() {
       // Start the long-poll while nothing has been published yet — it
       // should block on the per-id completer, not busy-poll the filesystem.
       final pollFuture = _get(
-        Uri.parse(
-          'http://127.0.0.1:$port/loader/wait?tab=t&capture=signaled',
-        ),
+        Uri.parse('http://127.0.0.1:$port/loader/wait?tab=t&capture=signaled'),
       );
       // Race-free: publish only after the request hit the handler. A short
       // microtask flush gives the handler time to register its waiter.
@@ -192,23 +192,25 @@ void main() {
   });
 
   group('retry route', () {
-    test('emits a RetryRequest on retryRequests stream and returns 204',
-        () async {
-      final port = await server.ensureStarted();
-      final retryFuture = server.retryRequests.first;
+    test(
+      'emits a RetryRequest on retryRequests stream and returns 204',
+      () async {
+        final port = await server.ensureStarted();
+        final retryFuture = server.retryRequests.first;
 
-      final res = await _post(
-        Uri.parse(
-          'http://127.0.0.1:$port/loader/retry?tab=tab-42&capture=cap42',
-        ),
-      );
-      // 204 No Content — the JS loader re-polls; a body would be wasted.
-      expect(res.statusCode, 204);
+        final res = await _post(
+          Uri.parse(
+            'http://127.0.0.1:$port/loader/retry?tab=tab-42&capture=cap42',
+          ),
+        );
+        // 204 No Content — the JS loader re-polls; a body would be wasted.
+        expect(res.statusCode, 204);
 
-      final req = await retryFuture.timeout(const Duration(seconds: 2));
-      expect(req.tabId, 'tab-42');
-      expect(req.captureId, 'cap42');
-    });
+        final req = await retryFuture.timeout(const Duration(seconds: 2));
+        expect(req.tabId, 'tab-42');
+        expect(req.captureId, 'cap42');
+      },
+    );
 
     test('retry rejects GET with 405', () async {
       final port = await server.ensureStarted();

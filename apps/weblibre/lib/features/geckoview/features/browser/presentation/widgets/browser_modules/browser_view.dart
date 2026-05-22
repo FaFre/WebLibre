@@ -50,10 +50,10 @@ import 'package:weblibre/features/geckoview/features/history/domain/repositories
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_pruner.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_pruner.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/pending_intent_decision.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/services/intent_gatekeeper.dart';
@@ -636,15 +636,15 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       },
     );
 
-    //Ensure tor events don't get dropped
+    // Keep-alive subscription for Tor status. The body is intentionally empty:
+    // the listener exists so the provider stays active while the browser view
+    // is mounted and Tor state events are not dropped. singboxProxyLogs is
+    // kept alive from main.dart so startup logs are captured even before the
+    // browser view mounts.
     ref.listenManual(
       fireImmediately: true,
       torProxyServiceProvider,
-      (previous, next) {
-        if (next.hasValue) {
-          debugPrint(next.requireValue.toString());
-        }
-      },
+      (previous, next) {},
       onError: (error, stackTrace) {
         logger.e(
           'Error listening to torProxyServiceProvider',

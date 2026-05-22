@@ -31,8 +31,8 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
-import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
-import 'package:weblibre/features/tor/presentation/widgets/tor_dialog.dart';
+import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
+import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class ContainerListScreen extends HookConsumerWidget {
@@ -49,25 +49,8 @@ class ContainerListScreen extends HookConsumerWidget {
           .read(selectedContainerProvider.notifier)
           .setContainerId(container.id);
 
-      if (context.mounted && result == SetContainerResult.successHasProxy) {
-        final shouldStartProxy = await ref
-            .read(startProxyControllerProvider.notifier)
-            .shouldPromptProxyStart();
-
-        if (!context.mounted || !shouldStartProxy) {
-          return;
-        }
-
-        final dialogResult = await showDialog<bool>(
-          context: context,
-          builder: (context) {
-            return const TorDialog();
-          },
-        );
-
-        if (dialogResult == true) {
-          await ref.read(startProxyControllerProvider.notifier).startProxy();
-        }
+      if (context.mounted && result == SetContainerResult.success) {
+        await ensureProxyStartedForContainer(context, ref, container);
       }
     }
 
@@ -202,6 +185,7 @@ class _ContainerCard extends HookConsumerWidget {
     final containerColor = container.color;
     final tabCount = container.tabCount ?? 0;
     final palette = ContainerColors.palette(context, containerColor);
+    final proxyOptions = ref.watch(proxyConnectionOptionsProvider);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
@@ -266,10 +250,13 @@ class _ContainerCard extends HookConsumerWidget {
                                   icon: Icons.cookie_outlined,
                                   label: 'Isolated',
                                 ),
-                              if (container.metadata.useProxy)
-                                const _ContainerInfoChip(
+                              if (container.metadata.proxyConnectionId != null)
+                                _ContainerInfoChip(
                                   icon: Icons.route_outlined,
-                                  label: 'Proxy',
+                                  label: proxyConnectionTitle(
+                                    proxyOptions,
+                                    container.metadata.proxyConnectionId!,
+                                  ),
                                 ),
                               if (container.metadata.clearDataOnExit)
                                 const _ContainerInfoChip(

@@ -601,8 +601,7 @@ class _GroupCard extends StatelessWidget {
 
     for (final entry in parentTree.entries) {
       final parentMatches =
-          groupMatches ||
-          (entry.key?.toLowerCase().contains(query) ?? false);
+          groupMatches || (entry.key?.toLowerCase().contains(query) ?? false);
       final filteredTokens = entry.value.where((tokenKey) {
         if (query.isEmpty || parentMatches) return true;
         final asset = registry[tokenKey];

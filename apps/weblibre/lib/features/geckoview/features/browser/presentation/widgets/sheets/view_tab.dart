@@ -73,6 +73,9 @@ class ViewTabSheetWidget extends HookConsumerWidget {
     useEffect(
       () {
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted) return;
+          if (!draggableScrollableController.isAttached) return;
+
           final diff =
               ((MediaQuery.of(context).viewInsets.bottom / 2) /
                   MediaQuery.of(context).size.height) -

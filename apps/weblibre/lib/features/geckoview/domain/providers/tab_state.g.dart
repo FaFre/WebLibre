@@ -258,7 +258,7 @@ final class IsTabTunneledProvider
   }
 }
 
-String _$isTabTunneledHash() => r'b11134b33ad0c98ffddd14afc2c790fb65735e93';
+String _$isTabTunneledHash() => r'cb3a3afe5b94f7e9c77d6a32266afbb8a225c259';
 
 final class IsTabTunneledFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<bool>, String?> {

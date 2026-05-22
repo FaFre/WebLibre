@@ -3,8 +3,9 @@
 import 'package:drift/drift.dart' as i0;
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     as i1;
-import 'dart:typed_data' as i2;
-import 'package:drift/internal/modular.dart' as i3;
+import 'package:flutter_singbox_proxy/src/singbox_proxy_api.g.dart' as i2;
+import 'dart:typed_data' as i3;
+import 'package:drift/internal/modular.dart' as i4;
 
 typedef $SettingCreateCompanionBuilder =
     i1.SettingCompanion Function({
@@ -170,17 +171,276 @@ typedef $SettingProcessedTableManager =
       i1.SettingData,
       i0.PrefetchHooks Function()
     >;
+typedef $ProxyProfileTableCreateCompanionBuilder =
+    i1.ProxyProfileCompanion Function({
+      required String id,
+      required String name,
+      required i2.SingboxProxyProfileType type,
+      required String configJson,
+      i0.Value<String?> dnsOverrideJson,
+      i0.Value<DateTime> createdAt,
+      i0.Value<DateTime> updatedAt,
+      i0.Value<int> rowid,
+    });
+typedef $ProxyProfileTableUpdateCompanionBuilder =
+    i1.ProxyProfileCompanion Function({
+      i0.Value<String> id,
+      i0.Value<String> name,
+      i0.Value<i2.SingboxProxyProfileType> type,
+      i0.Value<String> configJson,
+      i0.Value<String?> dnsOverrideJson,
+      i0.Value<DateTime> createdAt,
+      i0.Value<DateTime> updatedAt,
+      i0.Value<int> rowid,
+    });
+
+class $ProxyProfileTableFilterComposer
+    extends i0.Composer<i0.GeneratedDatabase, i1.ProxyProfileTable> {
+  $ProxyProfileTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnWithTypeConverterFilters<
+    i2.SingboxProxyProfileType,
+    i2.SingboxProxyProfileType,
+    String
+  >
+  get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => i0.ColumnWithTypeConverterFilters(column),
+  );
+
+  i0.ColumnFilters<String> get configJson => $composableBuilder(
+    column: $table.configJson,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<String> get dnsOverrideJson => $composableBuilder(
+    column: $table.dnsOverrideJson,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+}
+
+class $ProxyProfileTableOrderingComposer
+    extends i0.Composer<i0.GeneratedDatabase, i1.ProxyProfileTable> {
+  $ProxyProfileTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<String> get configJson => $composableBuilder(
+    column: $table.configJson,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<String> get dnsOverrideJson => $composableBuilder(
+    column: $table.dnsOverrideJson,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+}
+
+class $ProxyProfileTableAnnotationComposer
+    extends i0.Composer<i0.GeneratedDatabase, i1.ProxyProfileTable> {
+  $ProxyProfileTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  i0.GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  i0.GeneratedColumnWithTypeConverter<i2.SingboxProxyProfileType, String>
+  get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  i0.GeneratedColumn<String> get configJson => $composableBuilder(
+    column: $table.configJson,
+    builder: (column) => column,
+  );
+
+  i0.GeneratedColumn<String> get dnsOverrideJson => $composableBuilder(
+    column: $table.dnsOverrideJson,
+    builder: (column) => column,
+  );
+
+  i0.GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  i0.GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $ProxyProfileTableTableManager
+    extends
+        i0.RootTableManager<
+          i0.GeneratedDatabase,
+          i1.ProxyProfileTable,
+          i1.ProxyProfile,
+          i1.$ProxyProfileTableFilterComposer,
+          i1.$ProxyProfileTableOrderingComposer,
+          i1.$ProxyProfileTableAnnotationComposer,
+          $ProxyProfileTableCreateCompanionBuilder,
+          $ProxyProfileTableUpdateCompanionBuilder,
+          (
+            i1.ProxyProfile,
+            i0.BaseReferences<
+              i0.GeneratedDatabase,
+              i1.ProxyProfileTable,
+              i1.ProxyProfile
+            >,
+          ),
+          i1.ProxyProfile,
+          i0.PrefetchHooks Function()
+        > {
+  $ProxyProfileTableTableManager(
+    i0.GeneratedDatabase db,
+    i1.ProxyProfileTable table,
+  ) : super(
+        i0.TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              i1.$ProxyProfileTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              i1.$ProxyProfileTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              i1.$ProxyProfileTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                i0.Value<String> id = const i0.Value.absent(),
+                i0.Value<String> name = const i0.Value.absent(),
+                i0.Value<i2.SingboxProxyProfileType> type =
+                    const i0.Value.absent(),
+                i0.Value<String> configJson = const i0.Value.absent(),
+                i0.Value<String?> dnsOverrideJson = const i0.Value.absent(),
+                i0.Value<DateTime> createdAt = const i0.Value.absent(),
+                i0.Value<DateTime> updatedAt = const i0.Value.absent(),
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i1.ProxyProfileCompanion(
+                id: id,
+                name: name,
+                type: type,
+                configJson: configJson,
+                dnsOverrideJson: dnsOverrideJson,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String name,
+                required i2.SingboxProxyProfileType type,
+                required String configJson,
+                i0.Value<String?> dnsOverrideJson = const i0.Value.absent(),
+                i0.Value<DateTime> createdAt = const i0.Value.absent(),
+                i0.Value<DateTime> updatedAt = const i0.Value.absent(),
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i1.ProxyProfileCompanion.insert(
+                id: id,
+                name: name,
+                type: type,
+                configJson: configJson,
+                dnsOverrideJson: dnsOverrideJson,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $ProxyProfileTableProcessedTableManager =
+    i0.ProcessedTableManager<
+      i0.GeneratedDatabase,
+      i1.ProxyProfileTable,
+      i1.ProxyProfile,
+      i1.$ProxyProfileTableFilterComposer,
+      i1.$ProxyProfileTableOrderingComposer,
+      i1.$ProxyProfileTableAnnotationComposer,
+      $ProxyProfileTableCreateCompanionBuilder,
+      $ProxyProfileTableUpdateCompanionBuilder,
+      (
+        i1.ProxyProfile,
+        i0.BaseReferences<
+          i0.GeneratedDatabase,
+          i1.ProxyProfileTable,
+          i1.ProxyProfile
+        >,
+      ),
+      i1.ProxyProfile,
+      i0.PrefetchHooks Function()
+    >;
 typedef $IconCacheCreateCompanionBuilder =
     i1.IconCacheCompanion Function({
       required String origin,
-      required i2.Uint8List iconData,
+      required i3.Uint8List iconData,
       required DateTime fetchDate,
       i0.Value<int> rowid,
     });
 typedef $IconCacheUpdateCompanionBuilder =
     i1.IconCacheCompanion Function({
       i0.Value<String> origin,
-      i0.Value<i2.Uint8List> iconData,
+      i0.Value<i3.Uint8List> iconData,
       i0.Value<DateTime> fetchDate,
       i0.Value<int> rowid,
     });
@@ -199,7 +459,7 @@ class $IconCacheFilterComposer
     builder: (column) => i0.ColumnFilters(column),
   );
 
-  i0.ColumnFilters<i2.Uint8List> get iconData => $composableBuilder(
+  i0.ColumnFilters<i3.Uint8List> get iconData => $composableBuilder(
     column: $table.iconData,
     builder: (column) => i0.ColumnFilters(column),
   );
@@ -224,7 +484,7 @@ class $IconCacheOrderingComposer
     builder: (column) => i0.ColumnOrderings(column),
   );
 
-  i0.ColumnOrderings<i2.Uint8List> get iconData => $composableBuilder(
+  i0.ColumnOrderings<i3.Uint8List> get iconData => $composableBuilder(
     column: $table.iconData,
     builder: (column) => i0.ColumnOrderings(column),
   );
@@ -247,7 +507,7 @@ class $IconCacheAnnotationComposer
   i0.GeneratedColumn<String> get origin =>
       $composableBuilder(column: $table.origin, builder: (column) => column);
 
-  i0.GeneratedColumn<i2.Uint8List> get iconData =>
+  i0.GeneratedColumn<i3.Uint8List> get iconData =>
       $composableBuilder(column: $table.iconData, builder: (column) => column);
 
   i0.GeneratedColumn<DateTime> get fetchDate =>
@@ -290,7 +550,7 @@ class $IconCacheTableManager
           updateCompanionCallback:
               ({
                 i0.Value<String> origin = const i0.Value.absent(),
-                i0.Value<i2.Uint8List> iconData = const i0.Value.absent(),
+                i0.Value<i3.Uint8List> iconData = const i0.Value.absent(),
                 i0.Value<DateTime> fetchDate = const i0.Value.absent(),
                 i0.Value<int> rowid = const i0.Value.absent(),
               }) => i1.IconCacheCompanion(
@@ -302,7 +562,7 @@ class $IconCacheTableManager
           createCompanionCallback:
               ({
                 required String origin,
-                required i2.Uint8List iconData,
+                required i3.Uint8List iconData,
                 required DateTime fetchDate,
                 i0.Value<int> rowid = const i0.Value.absent(),
               }) => i1.IconCacheCompanion.insert(
@@ -866,7 +1126,7 @@ typedef $ToolbarButtonConfigsProcessedTableManager =
 typedef $SearchTokensCreateCompanionBuilder =
     i1.SearchTokensCompanion Function({
       i0.Value<int> id,
-      required i2.Uint8List token,
+      required i3.Uint8List token,
       required DateTime insertedAt,
       required String issuerKeyVersion,
       i0.Value<DateTime?> reservedAt,
@@ -874,7 +1134,7 @@ typedef $SearchTokensCreateCompanionBuilder =
 typedef $SearchTokensUpdateCompanionBuilder =
     i1.SearchTokensCompanion Function({
       i0.Value<int> id,
-      i0.Value<i2.Uint8List> token,
+      i0.Value<i3.Uint8List> token,
       i0.Value<DateTime> insertedAt,
       i0.Value<String> issuerKeyVersion,
       i0.Value<DateTime?> reservedAt,
@@ -894,7 +1154,7 @@ class $SearchTokensFilterComposer
     builder: (column) => i0.ColumnFilters(column),
   );
 
-  i0.ColumnFilters<i2.Uint8List> get token => $composableBuilder(
+  i0.ColumnFilters<i3.Uint8List> get token => $composableBuilder(
     column: $table.token,
     builder: (column) => i0.ColumnFilters(column),
   );
@@ -929,7 +1189,7 @@ class $SearchTokensOrderingComposer
     builder: (column) => i0.ColumnOrderings(column),
   );
 
-  i0.ColumnOrderings<i2.Uint8List> get token => $composableBuilder(
+  i0.ColumnOrderings<i3.Uint8List> get token => $composableBuilder(
     column: $table.token,
     builder: (column) => i0.ColumnOrderings(column),
   );
@@ -962,7 +1222,7 @@ class $SearchTokensAnnotationComposer
   i0.GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  i0.GeneratedColumn<i2.Uint8List> get token =>
+  i0.GeneratedColumn<i3.Uint8List> get token =>
       $composableBuilder(column: $table.token, builder: (column) => column);
 
   i0.GeneratedColumn<DateTime> get insertedAt => $composableBuilder(
@@ -1017,7 +1277,7 @@ class $SearchTokensTableManager
           updateCompanionCallback:
               ({
                 i0.Value<int> id = const i0.Value.absent(),
-                i0.Value<i2.Uint8List> token = const i0.Value.absent(),
+                i0.Value<i3.Uint8List> token = const i0.Value.absent(),
                 i0.Value<DateTime> insertedAt = const i0.Value.absent(),
                 i0.Value<String> issuerKeyVersion = const i0.Value.absent(),
                 i0.Value<DateTime?> reservedAt = const i0.Value.absent(),
@@ -1031,7 +1291,7 @@ class $SearchTokensTableManager
           createCompanionCallback:
               ({
                 i0.Value<int> id = const i0.Value.absent(),
-                required i2.Uint8List token,
+                required i3.Uint8List token,
                 required DateTime insertedAt,
                 required String issuerKeyVersion,
                 i0.Value<DateTime?> reservedAt = const i0.Value.absent(),
@@ -1297,6 +1557,418 @@ class SettingCompanion extends i0.UpdateCompanion<i1.SettingData> {
   }
 }
 
+class ProxyProfileTable extends i0.Table
+    with i0.TableInfo<ProxyProfileTable, i1.ProxyProfile> {
+  @override
+  final i0.GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  ProxyProfileTable(this.attachedDatabase, [this._alias]);
+  late final i0.GeneratedColumn<String> id = i0.GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL PRIMARY KEY',
+  );
+  late final i0.GeneratedColumn<String> name = i0.GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final i0.GeneratedColumnWithTypeConverter<
+    i2.SingboxProxyProfileType,
+    String
+  >
+  type =
+      i0.GeneratedColumn<String>(
+        'type',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.string,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      ).withConverter<i2.SingboxProxyProfileType>(
+        i1.ProxyProfileTable.$convertertype,
+      );
+  late final i0.GeneratedColumn<String> configJson = i0.GeneratedColumn<String>(
+    'config_json',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final i0.GeneratedColumn<String> dnsOverrideJson =
+      i0.GeneratedColumn<String>(
+        'dns_override_json',
+        aliasedName,
+        true,
+        type: i0.DriftSqlType.string,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      );
+  late final i0.GeneratedColumn<DateTime> createdAt =
+      i0.GeneratedColumn<DateTime>(
+        'created_at',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+        $customConstraints: 'NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        defaultValue: const i0.CustomExpression('CURRENT_TIMESTAMP'),
+      );
+  late final i0.GeneratedColumn<DateTime> updatedAt =
+      i0.GeneratedColumn<DateTime>(
+        'updated_at',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+        $customConstraints: 'NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        defaultValue: const i0.CustomExpression('CURRENT_TIMESTAMP'),
+      );
+  @override
+  List<i0.GeneratedColumn> get $columns => [
+    id,
+    name,
+    type,
+    configJson,
+    dnsOverrideJson,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'proxy_profile';
+  @override
+  Set<i0.GeneratedColumn> get $primaryKey => {id};
+  @override
+  i1.ProxyProfile map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return i1.ProxyProfile(
+      id: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      type: i1.ProxyProfileTable.$convertertype.fromSql(
+        attachedDatabase.typeMapping.read(
+          i0.DriftSqlType.string,
+          data['${effectivePrefix}type'],
+        )!,
+      ),
+      configJson: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}config_json'],
+      )!,
+      dnsOverrideJson: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}dns_override_json'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  ProxyProfileTable createAlias(String alias) {
+    return ProxyProfileTable(attachedDatabase, alias);
+  }
+
+  static i0.JsonTypeConverter2<i2.SingboxProxyProfileType, String, String>
+  $convertertype = const i0.EnumNameConverter<i2.SingboxProxyProfileType>(
+    i2.SingboxProxyProfileType.values,
+  );
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class ProxyProfile extends i0.DataClass
+    implements i0.Insertable<i1.ProxyProfile> {
+  final String id;
+  final String name;
+  final i2.SingboxProxyProfileType type;
+  final String configJson;
+  final String? dnsOverrideJson;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const ProxyProfile({
+    required this.id,
+    required this.name,
+    required this.type,
+    required this.configJson,
+    this.dnsOverrideJson,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    map['id'] = i0.Variable<String>(id);
+    map['name'] = i0.Variable<String>(name);
+    {
+      map['type'] = i0.Variable<String>(
+        i1.ProxyProfileTable.$convertertype.toSql(type),
+      );
+    }
+    map['config_json'] = i0.Variable<String>(configJson);
+    if (!nullToAbsent || dnsOverrideJson != null) {
+      map['dns_override_json'] = i0.Variable<String>(dnsOverrideJson);
+    }
+    map['created_at'] = i0.Variable<DateTime>(createdAt);
+    map['updated_at'] = i0.Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  factory ProxyProfile.fromJson(
+    Map<String, dynamic> json, {
+    i0.ValueSerializer? serializer,
+  }) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return ProxyProfile(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      type: i1.ProxyProfileTable.$convertertype.fromJson(
+        serializer.fromJson<String>(json['type']),
+      ),
+      configJson: serializer.fromJson<String>(json['config_json']),
+      dnsOverrideJson: serializer.fromJson<String?>(json['dns_override_json']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+      updatedAt: serializer.fromJson<DateTime>(json['updated_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({i0.ValueSerializer? serializer}) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'type': serializer.toJson<String>(
+        i1.ProxyProfileTable.$convertertype.toJson(type),
+      ),
+      'config_json': serializer.toJson<String>(configJson),
+      'dns_override_json': serializer.toJson<String?>(dnsOverrideJson),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+      'updated_at': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  i1.ProxyProfile copyWith({
+    String? id,
+    String? name,
+    i2.SingboxProxyProfileType? type,
+    String? configJson,
+    i0.Value<String?> dnsOverrideJson = const i0.Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => i1.ProxyProfile(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    type: type ?? this.type,
+    configJson: configJson ?? this.configJson,
+    dnsOverrideJson: dnsOverrideJson.present
+        ? dnsOverrideJson.value
+        : this.dnsOverrideJson,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  ProxyProfile copyWithCompanion(i1.ProxyProfileCompanion data) {
+    return ProxyProfile(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      type: data.type.present ? data.type.value : this.type,
+      configJson: data.configJson.present
+          ? data.configJson.value
+          : this.configJson,
+      dnsOverrideJson: data.dnsOverrideJson.present
+          ? data.dnsOverrideJson.value
+          : this.dnsOverrideJson,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProxyProfile(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('type: $type, ')
+          ..write('configJson: $configJson, ')
+          ..write('dnsOverrideJson: $dnsOverrideJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    name,
+    type,
+    configJson,
+    dnsOverrideJson,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is i1.ProxyProfile &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.type == this.type &&
+          other.configJson == this.configJson &&
+          other.dnsOverrideJson == this.dnsOverrideJson &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class ProxyProfileCompanion extends i0.UpdateCompanion<i1.ProxyProfile> {
+  final i0.Value<String> id;
+  final i0.Value<String> name;
+  final i0.Value<i2.SingboxProxyProfileType> type;
+  final i0.Value<String> configJson;
+  final i0.Value<String?> dnsOverrideJson;
+  final i0.Value<DateTime> createdAt;
+  final i0.Value<DateTime> updatedAt;
+  final i0.Value<int> rowid;
+  const ProxyProfileCompanion({
+    this.id = const i0.Value.absent(),
+    this.name = const i0.Value.absent(),
+    this.type = const i0.Value.absent(),
+    this.configJson = const i0.Value.absent(),
+    this.dnsOverrideJson = const i0.Value.absent(),
+    this.createdAt = const i0.Value.absent(),
+    this.updatedAt = const i0.Value.absent(),
+    this.rowid = const i0.Value.absent(),
+  });
+  ProxyProfileCompanion.insert({
+    required String id,
+    required String name,
+    required i2.SingboxProxyProfileType type,
+    required String configJson,
+    this.dnsOverrideJson = const i0.Value.absent(),
+    this.createdAt = const i0.Value.absent(),
+    this.updatedAt = const i0.Value.absent(),
+    this.rowid = const i0.Value.absent(),
+  }) : id = i0.Value(id),
+       name = i0.Value(name),
+       type = i0.Value(type),
+       configJson = i0.Value(configJson);
+  static i0.Insertable<i1.ProxyProfile> custom({
+    i0.Expression<String>? id,
+    i0.Expression<String>? name,
+    i0.Expression<String>? type,
+    i0.Expression<String>? configJson,
+    i0.Expression<String>? dnsOverrideJson,
+    i0.Expression<DateTime>? createdAt,
+    i0.Expression<DateTime>? updatedAt,
+    i0.Expression<int>? rowid,
+  }) {
+    return i0.RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (type != null) 'type': type,
+      if (configJson != null) 'config_json': configJson,
+      if (dnsOverrideJson != null) 'dns_override_json': dnsOverrideJson,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  i1.ProxyProfileCompanion copyWith({
+    i0.Value<String>? id,
+    i0.Value<String>? name,
+    i0.Value<i2.SingboxProxyProfileType>? type,
+    i0.Value<String>? configJson,
+    i0.Value<String?>? dnsOverrideJson,
+    i0.Value<DateTime>? createdAt,
+    i0.Value<DateTime>? updatedAt,
+    i0.Value<int>? rowid,
+  }) {
+    return i1.ProxyProfileCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      type: type ?? this.type,
+      configJson: configJson ?? this.configJson,
+      dnsOverrideJson: dnsOverrideJson ?? this.dnsOverrideJson,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    if (id.present) {
+      map['id'] = i0.Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = i0.Variable<String>(name.value);
+    }
+    if (type.present) {
+      map['type'] = i0.Variable<String>(
+        i1.ProxyProfileTable.$convertertype.toSql(type.value),
+      );
+    }
+    if (configJson.present) {
+      map['config_json'] = i0.Variable<String>(configJson.value);
+    }
+    if (dnsOverrideJson.present) {
+      map['dns_override_json'] = i0.Variable<String>(dnsOverrideJson.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = i0.Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = i0.Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = i0.Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProxyProfileCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('type: $type, ')
+          ..write('configJson: $configJson, ')
+          ..write('dnsOverrideJson: $dnsOverrideJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+i0.Index get idxProxyProfileUpdatedAt => i0.Index(
+  'idx_proxy_profile_updated_at',
+  'CREATE INDEX idx_proxy_profile_updated_at ON proxy_profile (updated_at)',
+);
+
 class IconCache extends i0.Table
     with i0.TableInfo<IconCache, i1.IconCacheData> {
   @override
@@ -1311,8 +1983,8 @@ class IconCache extends i0.Table
     requiredDuringInsert: true,
     $customConstraints: 'PRIMARY KEY NOT NULL',
   );
-  late final i0.GeneratedColumn<i2.Uint8List> iconData =
-      i0.GeneratedColumn<i2.Uint8List>(
+  late final i0.GeneratedColumn<i3.Uint8List> iconData =
+      i0.GeneratedColumn<i3.Uint8List>(
         'icon_data',
         aliasedName,
         false,
@@ -1369,7 +2041,7 @@ class IconCache extends i0.Table
 class IconCacheData extends i0.DataClass
     implements i0.Insertable<i1.IconCacheData> {
   final String origin;
-  final i2.Uint8List iconData;
+  final i3.Uint8List iconData;
   final DateTime fetchDate;
   const IconCacheData({
     required this.origin,
@@ -1380,7 +2052,7 @@ class IconCacheData extends i0.DataClass
   Map<String, i0.Expression> toColumns(bool nullToAbsent) {
     final map = <String, i0.Expression>{};
     map['origin'] = i0.Variable<String>(origin);
-    map['icon_data'] = i0.Variable<i2.Uint8List>(iconData);
+    map['icon_data'] = i0.Variable<i3.Uint8List>(iconData);
     map['fetch_date'] = i0.Variable<DateTime>(fetchDate);
     return map;
   }
@@ -1392,7 +2064,7 @@ class IconCacheData extends i0.DataClass
     serializer ??= i0.driftRuntimeOptions.defaultSerializer;
     return IconCacheData(
       origin: serializer.fromJson<String>(json['origin']),
-      iconData: serializer.fromJson<i2.Uint8List>(json['icon_data']),
+      iconData: serializer.fromJson<i3.Uint8List>(json['icon_data']),
       fetchDate: serializer.fromJson<DateTime>(json['fetch_date']),
     );
   }
@@ -1401,14 +2073,14 @@ class IconCacheData extends i0.DataClass
     serializer ??= i0.driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'origin': serializer.toJson<String>(origin),
-      'icon_data': serializer.toJson<i2.Uint8List>(iconData),
+      'icon_data': serializer.toJson<i3.Uint8List>(iconData),
       'fetch_date': serializer.toJson<DateTime>(fetchDate),
     };
   }
 
   i1.IconCacheData copyWith({
     String? origin,
-    i2.Uint8List? iconData,
+    i3.Uint8List? iconData,
     DateTime? fetchDate,
   }) => i1.IconCacheData(
     origin: origin ?? this.origin,
@@ -1447,7 +2119,7 @@ class IconCacheData extends i0.DataClass
 
 class IconCacheCompanion extends i0.UpdateCompanion<i1.IconCacheData> {
   final i0.Value<String> origin;
-  final i0.Value<i2.Uint8List> iconData;
+  final i0.Value<i3.Uint8List> iconData;
   final i0.Value<DateTime> fetchDate;
   final i0.Value<int> rowid;
   const IconCacheCompanion({
@@ -1458,7 +2130,7 @@ class IconCacheCompanion extends i0.UpdateCompanion<i1.IconCacheData> {
   });
   IconCacheCompanion.insert({
     required String origin,
-    required i2.Uint8List iconData,
+    required i3.Uint8List iconData,
     required DateTime fetchDate,
     this.rowid = const i0.Value.absent(),
   }) : origin = i0.Value(origin),
@@ -1466,7 +2138,7 @@ class IconCacheCompanion extends i0.UpdateCompanion<i1.IconCacheData> {
        fetchDate = i0.Value(fetchDate);
   static i0.Insertable<i1.IconCacheData> custom({
     i0.Expression<String>? origin,
-    i0.Expression<i2.Uint8List>? iconData,
+    i0.Expression<i3.Uint8List>? iconData,
     i0.Expression<DateTime>? fetchDate,
     i0.Expression<int>? rowid,
   }) {
@@ -1480,7 +2152,7 @@ class IconCacheCompanion extends i0.UpdateCompanion<i1.IconCacheData> {
 
   i1.IconCacheCompanion copyWith({
     i0.Value<String>? origin,
-    i0.Value<i2.Uint8List>? iconData,
+    i0.Value<i3.Uint8List>? iconData,
     i0.Value<DateTime>? fetchDate,
     i0.Value<int>? rowid,
   }) {
@@ -1499,7 +2171,7 @@ class IconCacheCompanion extends i0.UpdateCompanion<i1.IconCacheData> {
       map['origin'] = i0.Variable<String>(origin.value);
     }
     if (iconData.present) {
-      map['icon_data'] = i0.Variable<i2.Uint8List>(iconData.value);
+      map['icon_data'] = i0.Variable<i3.Uint8List>(iconData.value);
     }
     if (fetchDate.present) {
       map['fetch_date'] = i0.Variable<DateTime>(fetchDate.value);
@@ -2245,8 +2917,8 @@ class SearchTokens extends i0.Table
     requiredDuringInsert: false,
     $customConstraints: 'PRIMARY KEY AUTOINCREMENT',
   );
-  late final i0.GeneratedColumn<i2.Uint8List> token =
-      i0.GeneratedColumn<i2.Uint8List>(
+  late final i0.GeneratedColumn<i3.Uint8List> token =
+      i0.GeneratedColumn<i3.Uint8List>(
         'token',
         aliasedName,
         false,
@@ -2335,7 +3007,7 @@ class SearchTokens extends i0.Table
 class SearchToken extends i0.DataClass
     implements i0.Insertable<i1.SearchToken> {
   final int id;
-  final i2.Uint8List token;
+  final i3.Uint8List token;
   final DateTime insertedAt;
   final String issuerKeyVersion;
   final DateTime? reservedAt;
@@ -2350,7 +3022,7 @@ class SearchToken extends i0.DataClass
   Map<String, i0.Expression> toColumns(bool nullToAbsent) {
     final map = <String, i0.Expression>{};
     map['id'] = i0.Variable<int>(id);
-    map['token'] = i0.Variable<i2.Uint8List>(token);
+    map['token'] = i0.Variable<i3.Uint8List>(token);
     map['inserted_at'] = i0.Variable<DateTime>(insertedAt);
     map['issuer_key_version'] = i0.Variable<String>(issuerKeyVersion);
     if (!nullToAbsent || reservedAt != null) {
@@ -2366,7 +3038,7 @@ class SearchToken extends i0.DataClass
     serializer ??= i0.driftRuntimeOptions.defaultSerializer;
     return SearchToken(
       id: serializer.fromJson<int>(json['id']),
-      token: serializer.fromJson<i2.Uint8List>(json['token']),
+      token: serializer.fromJson<i3.Uint8List>(json['token']),
       insertedAt: serializer.fromJson<DateTime>(json['inserted_at']),
       issuerKeyVersion: serializer.fromJson<String>(json['issuer_key_version']),
       reservedAt: serializer.fromJson<DateTime?>(json['reserved_at']),
@@ -2377,7 +3049,7 @@ class SearchToken extends i0.DataClass
     serializer ??= i0.driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'token': serializer.toJson<i2.Uint8List>(token),
+      'token': serializer.toJson<i3.Uint8List>(token),
       'inserted_at': serializer.toJson<DateTime>(insertedAt),
       'issuer_key_version': serializer.toJson<String>(issuerKeyVersion),
       'reserved_at': serializer.toJson<DateTime?>(reservedAt),
@@ -2386,7 +3058,7 @@ class SearchToken extends i0.DataClass
 
   i1.SearchToken copyWith({
     int? id,
-    i2.Uint8List? token,
+    i3.Uint8List? token,
     DateTime? insertedAt,
     String? issuerKeyVersion,
     i0.Value<DateTime?> reservedAt = const i0.Value.absent(),
@@ -2446,7 +3118,7 @@ class SearchToken extends i0.DataClass
 
 class SearchTokensCompanion extends i0.UpdateCompanion<i1.SearchToken> {
   final i0.Value<int> id;
-  final i0.Value<i2.Uint8List> token;
+  final i0.Value<i3.Uint8List> token;
   final i0.Value<DateTime> insertedAt;
   final i0.Value<String> issuerKeyVersion;
   final i0.Value<DateTime?> reservedAt;
@@ -2459,7 +3131,7 @@ class SearchTokensCompanion extends i0.UpdateCompanion<i1.SearchToken> {
   });
   SearchTokensCompanion.insert({
     this.id = const i0.Value.absent(),
-    required i2.Uint8List token,
+    required i3.Uint8List token,
     required DateTime insertedAt,
     required String issuerKeyVersion,
     this.reservedAt = const i0.Value.absent(),
@@ -2468,7 +3140,7 @@ class SearchTokensCompanion extends i0.UpdateCompanion<i1.SearchToken> {
        issuerKeyVersion = i0.Value(issuerKeyVersion);
   static i0.Insertable<i1.SearchToken> custom({
     i0.Expression<int>? id,
-    i0.Expression<i2.Uint8List>? token,
+    i0.Expression<i3.Uint8List>? token,
     i0.Expression<DateTime>? insertedAt,
     i0.Expression<String>? issuerKeyVersion,
     i0.Expression<DateTime>? reservedAt,
@@ -2484,7 +3156,7 @@ class SearchTokensCompanion extends i0.UpdateCompanion<i1.SearchToken> {
 
   i1.SearchTokensCompanion copyWith({
     i0.Value<int>? id,
-    i0.Value<i2.Uint8List>? token,
+    i0.Value<i3.Uint8List>? token,
     i0.Value<DateTime>? insertedAt,
     i0.Value<String>? issuerKeyVersion,
     i0.Value<DateTime?>? reservedAt,
@@ -2505,7 +3177,7 @@ class SearchTokensCompanion extends i0.UpdateCompanion<i1.SearchToken> {
       map['id'] = i0.Variable<int>(id.value);
     }
     if (token.present) {
-      map['token'] = i0.Variable<i2.Uint8List>(token.value);
+      map['token'] = i0.Variable<i3.Uint8List>(token.value);
     }
     if (insertedAt.present) {
       map['inserted_at'] = i0.Variable<DateTime>(insertedAt.value);
@@ -2541,7 +3213,7 @@ i0.Index get idxSearchTokensReservedAt => i0.Index(
   'CREATE INDEX idx_search_tokens_reserved_at ON search_tokens (reserved_at)',
 );
 
-class DefinitionsDrift extends i3.ModularAccessor {
+class DefinitionsDrift extends i4.ModularAccessor {
   DefinitionsDrift(i0.GeneratedDatabase db) : super(db);
   i0.Selectable<String> toolbarLeadingOrderKey({
     required int bucket,
@@ -2596,10 +3268,10 @@ class DefinitionsDrift extends i3.ModularAccessor {
     );
   }
 
-  i1.ToolbarButtonConfigs get toolbarButtonConfigs => i3.ReadDatabaseContainer(
+  i1.ToolbarButtonConfigs get toolbarButtonConfigs => i4.ReadDatabaseContainer(
     attachedDatabase,
   ).resultSet<i1.ToolbarButtonConfigs>('toolbar_button_configs');
-  i1.IconCache get iconCache => i3.ReadDatabaseContainer(
+  i1.IconCache get iconCache => i4.ReadDatabaseContainer(
     attachedDatabase,
   ).resultSet<i1.IconCache>('icon_cache');
 }

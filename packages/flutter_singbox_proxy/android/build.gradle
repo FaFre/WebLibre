@@ -1,0 +1,81 @@
+group = "eu.weblibre.flutter_singbox_proxy"
+version = "1.0-SNAPSHOT"
+
+buildscript {
+    ext.kotlin_version = "2.3.21"
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.13.2")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+def weblibreGoMobileAar = file("../../../native/go_mobile_runtime/build/weblibre-go.aar")
+def requireWebLibreGoMobileAar = {
+    if (!weblibreGoMobileAar.exists()) {
+        throw new GradleException(
+            "Missing combined gomobile runtime AAR: ${weblibreGoMobileAar}. " +
+                "Run native/go_mobile_runtime/scripts/build-android.sh from the repository root."
+        )
+    }
+}
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+
+android {
+    namespace = "eu.weblibre.flutter_singbox_proxy"
+    compileSdk = 36
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_17
+    }
+
+    sourceSets {
+        main.java.srcDirs += "src/main/kotlin"
+        test.java.srcDirs += "src/test/kotlin"
+    }
+
+    defaultConfig {
+        minSdk = 24
+    }
+
+    testOptions {
+        unitTests.all {
+            useJUnitPlatform()
+
+            testLogging {
+               events "passed", "skipped", "failed", "standardOut", "standardError"
+               outputs.upToDateWhen { false }
+               showStandardStreams = true
+            }
+        }
+    }
+}
+
+dependencies {
+    requireWebLibreGoMobileAar()
+    compileOnly(files(weblibreGoMobileAar))
+
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    testImplementation("org.json:json:20250517")
+    testImplementation("org.jetbrains.kotlin:kotlin-test")
+    testImplementation("org.mockito:mockito-core:5.23.0")
+}

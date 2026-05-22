@@ -73,9 +73,9 @@ List<CombinedHistoryItem> combinedHistorySuggestions(Ref ref) {
   final engineAsync = ref.watch(engineSuggestionsProvider);
   final localAsync = ref.watch(historySearchRepositoryProvider);
 
-  final engineSuggestions =
-      engineAsync.value ?? const <GeckoSuggestion>[];
-  final localResults = localAsync.value?.results ?? const <HistoryQueryResult>[];
+  final engineSuggestions = engineAsync.value ?? const <GeckoSuggestion>[];
+  final localResults =
+      localAsync.value?.results ?? const <HistoryQueryResult>[];
 
   // Index the local rows by canonical URL so engine items can pick up
   // snippet/title-highlight without an N×M scan.

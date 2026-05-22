@@ -23,6 +23,7 @@ import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:fading_scroll/fading_scroll.dart';
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -35,6 +36,7 @@ import 'package:nullability/nullability.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/design/app_colors.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
@@ -67,10 +69,14 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/domain/repositories/top_site_repository.dart';
+import 'package:weblibre/features/proxy/data/models/singbox_proxy_profile.dart';
+import 'package:weblibre/features/proxy/domain/providers/assigned_proxy_profiles.dart';
+import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
 import 'package:weblibre/features/small_web/presentation/controllers/small_web_mode_controller.dart';
 import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
+import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -1930,102 +1936,162 @@ class _QuickLinksGrid extends ConsumerWidget {
     final isTorActive = ref.watch(
       torProxyServiceProvider.select((value) => value.value?.isRunning == true),
     );
+    final isTorBusy = ref.watch(startProxyControllerProvider);
 
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: _buildGridItem(
-                context,
-                Icons.history,
-                'History',
-                () async {
-                  Navigator.pop(context);
-                  await const HistoryRoute().push(context);
-                },
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _buildGridItem(
-                context,
-                MdiIcons.bookmarkMultiple,
-                'Bookmarks',
-                () async {
-                  Navigator.pop(context);
-                  await BookmarkListRoute(
-                    entryGuid: BookmarkRoot.root.id,
-                  ).push(context);
-                },
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _buildGridItem(
-                context,
-                MdiIcons.fileDownload,
-                'Downloads',
-                () async {
-                  Navigator.pop(context);
-                  await const HistoryDownloadsRoute().push(context);
-                },
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _buildGridItem(
-                context,
-                MdiIcons.exclamationThick,
-                'Bangs',
-                () async {
-                  Navigator.pop(context);
-                  await const BangMenuRoute().push(context);
-                },
-              ),
-            ),
-          ],
+    final assignedProfiles = ref.watch(assignedSingboxProxyProfilesProvider);
+    final runtimeEndpointIds = ref
+        .watch(
+          singboxProxyRuntimeRepositoryProvider.select((value) {
+            final endpoints = value.value?.endpoints;
+            if (endpoints == null) {
+              return EquatableValue(const <String>{});
+            }
+
+            return EquatableValue({
+              for (final endpoint in endpoints) endpoint.profileId,
+            });
+          }),
+        )
+        .value;
+
+    final torActiveColor = AppColors.of(context).torActiveGreen;
+
+    final items = <_QuickLinkItem>[
+      _QuickLinkItem(
+        icon: Icons.history,
+        label: 'History',
+        onTap: () async {
+          Navigator.pop(context);
+          await const HistoryRoute().push(context);
+        },
+      ),
+      _QuickLinkItem(
+        icon: MdiIcons.bookmarkMultiple,
+        label: 'Bookmarks',
+        onTap: () async {
+          Navigator.pop(context);
+          await BookmarkListRoute(
+            entryGuid: BookmarkRoot.root.id,
+          ).push(context);
+        },
+      ),
+      _QuickLinkItem(
+        icon: MdiIcons.fileDownload,
+        label: 'Downloads',
+        onTap: () async {
+          Navigator.pop(context);
+          await const HistoryDownloadsRoute().push(context);
+        },
+      ),
+      _QuickLinkItem(
+        icon: MdiIcons.exclamationThick,
+        label: 'Bangs',
+        onTap: () async {
+          Navigator.pop(context);
+          await const BangMenuRoute().push(context);
+        },
+      ),
+      _QuickLinkItem(
+        icon: Icons.rss_feed,
+        label: 'Feeds',
+        onTap: () async {
+          Navigator.pop(context);
+          await context.push(FeedListRoute().location);
+        },
+      ),
+      _QuickLinkItem(
+        icon: Icons.explore,
+        label: 'Small Web',
+        onTap: () async {
+          Navigator.pop(context);
+          await ref.read(smallWebModeControllerProvider.notifier).enter();
+        },
+      ),
+      _QuickLinkItem(
+        icon: TorIcons.onionAlt,
+        label: 'Tor\u2122 Proxy',
+        badge: isTorActive,
+        badgeColor: torActiveColor,
+        onTap: () async {
+          if (isTorBusy) return;
+          if (isTorActive) {
+            await ref.read(torProxyServiceProvider.notifier).disconnect();
+          } else {
+            await ref.read(startProxyControllerProvider.notifier).startProxy();
+          }
+        },
+        onLongPress: () async {
+          Navigator.pop(context);
+          await const TorProxyRoute().push(context);
+        },
+      ),
+      for (final profile in assignedProfiles)
+        _QuickLinkItem(
+          icon: MdiIcons.lanConnect,
+          label: profile.name,
+          badge: runtimeEndpointIds.contains(profile.proxyConnectionId),
+          badgeColor: torActiveColor,
+          onTap: () async {
+            final runtime = ref.read(
+              singboxProxyRuntimeRepositoryProvider.notifier,
+            );
+            final isRunning = runtimeEndpointIds.contains(
+              profile.proxyConnectionId,
+            );
+
+            try {
+              if (isRunning) {
+                await runtime.stopProfiles([profile.id]);
+              } else {
+                await runtime.startProfile(profile.id);
+              }
+            } catch (error, stackTrace) {
+              logger.e(
+                'Failed to toggle proxy profile ${profile.id} from menu',
+                error: error,
+                stackTrace: stackTrace,
+              );
+              if (context.mounted) {
+                ui_helper.showErrorMessage(context, 'Proxy error: $error');
+              }
+            }
+          },
+          onLongPress: () async {
+            Navigator.pop(context);
+            await SingboxProxyProfileEditorRoute(
+              profileId: profile.id,
+            ).push(context);
+          },
         ),
-        const SizedBox(height: 8),
-        Row(
+    ];
+
+    const spacing = 8.0;
+    const itemsPerRow = 4;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width =
+            (constraints.maxWidth - spacing * (itemsPerRow - 1)) / itemsPerRow;
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
           children: [
-            Expanded(
-              child: _buildGridItem(
-                context,
-                TorIcons.onionAlt,
-                'Tor\u2122 Proxy',
-                () async {
-                  Navigator.pop(context);
-                  await const TorProxyRoute().push(context);
-                },
-                badge: isTorActive,
-                badgeColor: AppColors.of(context).torActiveGreen,
+            for (final item in items)
+              SizedBox(
+                width: width,
+                child: _buildGridItem(
+                  context,
+                  item.icon,
+                  item.label,
+                  item.onTap,
+                  badge: item.badge,
+                  badgeColor: item.badgeColor,
+                  onLongPress: item.onLongPress,
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _buildGridItem(context, Icons.rss_feed, 'Feeds', () async {
-                Navigator.pop(context);
-                await context.push(FeedListRoute().location);
-              }),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _buildGridItem(
-                context,
-                Icons.explore,
-                'Small Web',
-                () async {
-                  Navigator.pop(context);
-                  await ref
-                      .read(smallWebModeControllerProvider.notifier)
-                      .enter();
-                },
-              ),
-            ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -2036,6 +2102,7 @@ class _QuickLinksGrid extends ConsumerWidget {
     VoidCallback onTap, {
     bool badge = false,
     Color? badgeColor,
+    VoidCallback? onLongPress,
   }) {
     final iconWidget = Icon(
       icon,
@@ -2048,6 +2115,7 @@ class _QuickLinksGrid extends ConsumerWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -2073,6 +2141,24 @@ class _QuickLinksGrid extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _QuickLinkItem {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final VoidCallback? onLongPress;
+  final bool badge;
+  final Color? badgeColor;
+
+  const _QuickLinkItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.onLongPress,
+    this.badge = false,
+    this.badgeColor,
+  });
 }
 
 // ─── Profile Card ───

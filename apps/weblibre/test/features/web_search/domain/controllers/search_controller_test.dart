@@ -24,7 +24,7 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod/riverpod.dart';
-import 'package:search_backend/search_backend.dart';
+import 'package:search_protocol/search_protocol.dart';
 import 'package:weblibre/features/search_credits/domain/controllers/search_token_issuance_controller.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 import 'package:weblibre/features/web_search/domain/controllers/search_controller.dart';

@@ -22,6 +22,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/search_credits/domain/providers/proxy_client.dart';
 import 'package:weblibre/features/search_credits/domain/repositories/web_search_settings.dart';
+import 'package:weblibre/features/tor/domain/extensions/tor_status_x.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
@@ -55,10 +56,9 @@ class RouteThroughTorToggle extends HookConsumerWidget {
     final torStatus = ref.watch(torProxyServiceProvider).value;
     final activePort = ref.watch(searchProxyPortProvider);
 
-    final bootstrapProgress = torStatus?.bootstrapProgress ?? 0;
-
     final showSpinner =
-        routeThroughTor && (activePort == null || bootstrapProgress < 100);
+        routeThroughTor &&
+        (activePort == null || !(torStatus?.isReady ?? false));
 
     // Push the latest native status into the stream on first build so the
     // bar reflects real progress even when the user lands on the search
@@ -161,14 +161,13 @@ class WebSearchTorBootstrapProgress extends HookConsumerWidget {
 
     final torAsync = ref.watch(torProxyServiceProvider);
     final status = torAsync.value;
-    final isRunning = status?.isRunning ?? false;
     final bootstrapProgress = status?.bootstrapProgress ?? 0;
 
     // Hide once Tor is fully running and bootstrapped — otherwise, mirror
     // the Tor settings screen and always show a determinate bar (value
     // anchored to the live bootstrap progress, never indeterminate, so the
     // user can actually track the percentage).
-    if (isRunning && bootstrapProgress >= 100) return const SizedBox.shrink();
+    if (status?.isReady ?? false) return const SizedBox.shrink();
 
     final appColors = AppColors.of(context);
     return Padding(

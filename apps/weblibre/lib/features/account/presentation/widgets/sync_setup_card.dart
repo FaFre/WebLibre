@@ -163,9 +163,7 @@ class SyncSetupCard extends HookConsumerWidget {
           Align(
             alignment: Alignment.centerRight,
             child: FilledButton(
-              onPressed: (busy.value || !passwordsMatch)
-                  ? null
-                  : setupSyncKey,
+              onPressed: (busy.value || !passwordsMatch) ? null : setupSyncKey,
               child: busy.value
                   ? const SizedBox(
                       height: 20,
@@ -236,9 +234,7 @@ Future<void> _uploadValidationProbe(
   String syncKey,
 ) async {
   final payload = utf8.encode('weblibre:sync-probe:v1');
-  final secureData = SecureData(
-    argon2Params: Argon2Params.memoryConstrained(),
-  );
+  final secureData = SecureData(argon2Params: Argon2Params.memoryConstrained());
   final ciphertext = await secureData.encrypt(payload, syncKey);
   await syncRepo.storeDocument(
     kind: SyncDocumentKind.syncValidationProbe,
