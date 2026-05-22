@@ -17,7 +17,7 @@ dependencies:
   country_flags: ^4.1.2
   crypto: ^3.0.7
   cryptography_flutter: ^2.3.4
-  device_info_plus: ^12.4.0
+  device_info_plus: ^13.1.0
   drift: ^2.31.0
   drift_dev: ^2.31.0
   dynamic_color: ^1.8.1
@@ -25,7 +25,7 @@ dependencies:
   fading_scroll: ^0.9.1
   fancy_password_field: ^2.0.8
   fast_equatable: ^1.3.1
-  file_picker: ^11.0.2
+  file_picker: ^12.0.0-beta.4
   flutter:
     sdk: flutter
   flutter_auto_size_text: ^5.0.0
@@ -35,7 +35,7 @@ dependencies:
   flutter_mozilla_components:
     path: ../../packages/flutter_mozilla_components
   flutter_reorderable_grid_view: ^5.6.0
-  flutter_secure_storage: ^10.1.0
+  flutter_secure_storage: ^10.2.0
   flutter_singbox_proxy:
     path: ../../packages/flutter_singbox_proxy
   flutter_slidable: ^4.0.3
@@ -62,7 +62,7 @@ dependencies:
   material_color_utilities: ^0.13.0
   mime: ^2.0.0
   nullability: ^1.0.0
-  package_info_plus: ^9.0.1
+  package_info_plus: ^10.1.0
   path: ^1.9.1
   path_provider: ^2.1.5
   permission_handler: ^12.0.1
@@ -76,7 +76,7 @@ dependencies:
   rss_dart: ^1.0.14
   rxdart: ^0.28.0
   saf_stream: ^2.0.0
-  saf_util: ^2.1.0
+  saf_util: ^2.2.0
   search_client:
     path: ../../../weblibre_account/packages/search_client
   search_protocol:
@@ -86,7 +86,7 @@ dependencies:
       url: https://github.com/FaFre/secure_archive.git
       path: packages/secure_archive
       ref: 0c515813ac2d29e29ab1c66759a396af825bf8b3
-  share_plus: ^12.0.2
+  share_plus: ^13.1.0
   simple_intent_receiver:
     path: ../../packages/simple_intent_receiver
   skeletonizer: ^2.1.3

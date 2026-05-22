@@ -301,8 +301,7 @@ Future<AddProxyAction?> _consumeFile(
   WidgetRef ref,
   ProxyFileImportKind kind,
 ) async {
-  final result = await FilePicker.pickFiles(withData: true);
-  final picked = result?.files.singleOrNull;
+  final picked = await FilePicker.pickFile();
   if (picked == null) return null;
 
   final outcome = await ref

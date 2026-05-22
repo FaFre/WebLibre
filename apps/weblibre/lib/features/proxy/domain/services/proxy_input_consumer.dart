@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
@@ -160,15 +159,8 @@ class ProxyInputConsumer extends _$ProxyInputConsumer {
   }
 
   Future<String> _readFileText(PlatformFile file) async {
-    final bytes = file.bytes;
-    if (bytes != null) {
-      return utf8.decode(bytes, allowMalformed: true);
-    }
-    final path = file.path;
-    if (path == null) {
-      throw const FormatException('Unable to read file contents.');
-    }
-    return File(path).readAsString();
+    final bytes = await file.readAsBytes();
+    return utf8.decode(bytes, allowMalformed: true);
   }
 
   @override

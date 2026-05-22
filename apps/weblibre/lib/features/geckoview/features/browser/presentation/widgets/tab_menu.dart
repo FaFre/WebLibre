@@ -599,7 +599,7 @@ class TabMenu extends HookConsumerWidget {
                 icon: const Icon(MdiIcons.languageMarkdown),
                 shareMarkdownAction: (content, fileName) async {
                   await FilePicker.saveFile(
-                    fileName: fileName,
+                    fileName: fileName ?? 'page',
                     type: FileType.custom,
                     allowedExtensions: ['md'],
                     bytes: utf8.encode(content),
