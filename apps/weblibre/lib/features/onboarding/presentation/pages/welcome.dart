@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
@@ -409,7 +410,13 @@ class _EulaCheckbox extends StatelessWidget {
             ),
             const Divider(height: 1),
             Expanded(
-              child: Markdown(controller: scrollController, data: content),
+              child: FadingScroll(
+                controller: scrollController,
+                fadingSize: 25,
+                builder: (context, controller) {
+                  return Markdown(controller: controller, data: content);
+                },
+              ),
             ),
           ],
         ),

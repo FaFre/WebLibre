@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/entities/url_cleaner_result.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_service.dart';
@@ -103,72 +104,79 @@ class _TrackingDetailsDialogState extends State<TrackingDetailsDialog> {
               const SizedBox(height: 16),
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 220),
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: _items.length,
-                  separatorBuilder: (context, index) =>
-                      Divider(height: 1, color: colorScheme.outlineVariant),
-                  itemBuilder: (context, index) {
-                    final item = _items[index];
-                    final display = _splitMatch(item.match);
+                child: FadingScroll(
+                  fadingSize: 25,
+                  builder: (context, controller) {
+                    return ListView.separated(
+                      controller: controller,
+                      shrinkWrap: true,
+                      itemCount: _items.length,
+                      separatorBuilder: (context, index) =>
+                          Divider(height: 1, color: colorScheme.outlineVariant),
+                      itemBuilder: (context, index) {
+                        final item = _items[index];
+                        final display = _splitMatch(item.match);
 
-                    return CheckboxListTile(
-                      contentPadding: EdgeInsets.zero,
-                      controlAffinity: ListTileControlAffinity.leading,
-                      activeColor: colorScheme.primary,
-                      checkColor: colorScheme.onPrimary,
-                      title: Padding(
-                        padding: const EdgeInsets.only(top: 8, bottom: 4),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                display.key,
-                                style: textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            if (item.type == UrlCleanerMatchType.referralRule)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 3,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: colorScheme.tertiaryContainer,
-                                  borderRadius: BorderRadius.circular(999),
-                                ),
-                                child: Text(
-                                  'Referral marketing',
-                                  style: TextStyle(
-                                    color: colorScheme.onTertiaryContainer,
-                                    fontSize: 11,
+                        return CheckboxListTile(
+                          contentPadding: EdgeInsets.zero,
+                          controlAffinity: ListTileControlAffinity.leading,
+                          activeColor: colorScheme.primary,
+                          checkColor: colorScheme.onPrimary,
+                          title: Padding(
+                            padding: const EdgeInsets.only(top: 8, bottom: 4),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    display.key,
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      subtitle: display.value == null
-                          ? null
-                          : Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
-                              child: Text(
-                                display.value!,
-                                style: textTheme.bodySmall?.copyWith(
-                                  fontFamily: 'monospace',
-                                ),
-                              ),
+                                if (item.type ==
+                                    UrlCleanerMatchType.referralRule)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.tertiaryContainer,
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    child: Text(
+                                      'Referral marketing',
+                                      style: TextStyle(
+                                        color: colorScheme.onTertiaryContainer,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
-                      value: _selected[index],
-                      onChanged: canApply
-                          ? (checked) {
-                              setState(() {
-                                _selected[index] = checked ?? false;
-                              });
-                            }
-                          : null,
+                          ),
+                          subtitle: display.value == null
+                              ? null
+                              : Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: Text(
+                                    display.value!,
+                                    style: textTheme.bodySmall?.copyWith(
+                                      fontFamily: 'monospace',
+                                    ),
+                                  ),
+                                ),
+                          value: _selected[index],
+                          onChanged: canApply
+                              ? (checked) {
+                                  setState(() {
+                                    _selected[index] = checked ?? false;
+                                  });
+                                }
+                              : null,
+                        );
+                      },
                     );
                   },
                 ),

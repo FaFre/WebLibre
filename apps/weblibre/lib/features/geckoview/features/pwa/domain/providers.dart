@@ -29,6 +29,7 @@ import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/pwa_installability.dart';
+import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 
 part 'providers.g.dart';
 
@@ -83,6 +84,15 @@ PwaManifest? currentTabManifest(Ref ref) {
 /// Boolean indicating if the current tab is installable as a PWA.
 @Riverpod()
 bool isCurrentTabInstallable(Ref ref) {
+  final selectedTabId = ref.watch(selectedTabProvider);
+  // Sandbox-captured tabs serve a loopback page; "installing" it would
+  // either pin the loopback URL (broken after the capture server cycles)
+  // or, worse, silently navigate the source URL.
+  final sandboxSourceUri = ref.watch(
+    sandboxSourceUriForTabProvider(tabId: selectedTabId),
+  );
+  if (sandboxSourceUri != null) return false;
+
   final manifest = ref.watch(currentTabManifestProvider);
 
   if (manifest == null) return false;
@@ -125,6 +135,13 @@ Future<List<PwaManifest>> installedWebApps(Ref ref) {
 bool isCurrentTabShortcutable(Ref ref) {
   final selectedTabId = ref.watch(selectedTabProvider);
   if (selectedTabId == null) return false;
+
+  // Same reasoning as `isCurrentTabInstallable`: never offer to pin a
+  // sandbox-captured tab to the home screen.
+  final sandboxSourceUri = ref.watch(
+    sandboxSourceUriForTabProvider(tabId: selectedTabId),
+  );
+  if (sandboxSourceUri != null) return false;
 
   final tabState = ref.watch(tabStateProvider(selectedTabId));
   if (tabState == null) return false;

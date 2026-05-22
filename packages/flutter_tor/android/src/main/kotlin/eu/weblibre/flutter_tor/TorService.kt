@@ -55,6 +55,11 @@ class TorService : Service() {
         Log.d(TAG, "onStartCommand: ${intent?.action}")
 
         when (intent?.action) {
+            ACTION_START -> {
+                // startForegroundService() must promote the service promptly, before
+                // the later binder call reaches startTor().
+                startForeground(NOTIFICATION_ID, createNotification("Tor is connecting..."))
+            }
             ACTION_STOP -> {
                 scope.launch {
                     stopTor()
@@ -66,7 +71,8 @@ class TorService : Service() {
             }
         }
 
-        return START_STICKY
+        // Tor needs explicit user start; don't auto-restart with a null intent.
+        return START_NOT_STICKY
     }
 
     /**
@@ -92,10 +98,7 @@ class TorService : Service() {
     suspend fun startTor(config: TorConfiguration): Int {
         Log.d(TAG, "Starting Tor...")
 
-        // Start foreground service with notification
-        // This keeps the service alive even when the app is backgrounded
         startForeground(NOTIFICATION_ID, createNotification("Tor is connecting..."))
-        Log.d(TAG, "Started foreground service")
 
         val manager = torManager ?: throw IllegalStateException("Service not initialized")
 
@@ -105,9 +108,8 @@ class TorService : Service() {
             return socksPort
         } catch (e: Exception) {
             Log.e(TAG, "Failed to start Tor", e)
-            updateNotification("Failed to start Tor")
-            // Stop foreground on failure
             stopForeground(STOP_FOREGROUND_REMOVE)
+            stopSelf()
             throw e
         }
     }
@@ -120,9 +122,8 @@ class TorService : Service() {
 
         torManager?.stop()
 
-        // Stop foreground service and remove notification
         stopForeground(STOP_FOREGROUND_REMOVE)
-        Log.d(TAG, "Stopped foreground service")
+        stopSelf()
     }
 
     /**
@@ -199,17 +200,13 @@ class TorService : Service() {
         super.onDestroy()
         Log.d(TAG, "Service destroyed")
 
-        // Stop pluggable transports synchronously to release Go references.
-        // Previously this was scope.launch { torManager?.destroy() } followed by
-        // scope.cancel(), which meant the cleanup coroutine was immediately cancelled
-        // and never ran — causing "trackGoRef called with Java refnum" crashes when
-        // TorService was recreated and tried to create a new IPtProxy.Controller.
-        //
-        // Note: We only stop transports here. The PluggableTransportManager singleton
-        // and its Controller persist across service restarts by design.
-        // Full TorManager.destroy() is not called because it would deadlock
-        // (cleanup() uses runBlocking(Dispatchers.Main) while onDestroy runs on Main).
-        torManager?.pluggableTransportManager?.stopAll()
+        // Tear down TorManager synchronously so receivers, transports, and the
+        // upstream tor-android service do not survive wrapper service teardown.
+        try {
+            torManager?.destroy()
+        } catch (e: Exception) {
+            Log.w(TAG, "Error destroying TorManager", e)
+        }
 
         torManager = null
         logHandler = null

@@ -50,6 +50,7 @@ import 'package:weblibre/features/geckoview/features/history/domain/repositories
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_pruner.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -60,6 +61,7 @@ import 'package:weblibre/features/intent_gatekeeper/domain/services/native_gatek
 import 'package:weblibre/features/intent_gatekeeper/presentation/widgets/intent_gatekeeper_dialog.dart';
 import 'package:weblibre/features/share_intent/domain/entities/intent_container_mode.dart';
 import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
+import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
@@ -132,6 +134,8 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                     DateTime(0),
                     DateTime.now().subtract(settings.historyAutoCleanInterval),
                   );
+
+              unawaited(ref.read(localIndexPrunerProvider.notifier).prune());
             }
 
             if (settings.unassignedTabsAutoCleanInterval > Duration.zero) {
@@ -626,6 +630,24 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       onError: (error, stackTrace) {
         logger.e(
           'Error listening to pwaManifestStateProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+
+    //Ensure tor events don't get dropped
+    ref.listenManual(
+      fireImmediately: true,
+      torProxyServiceProvider,
+      (previous, next) {
+        if (next.hasValue) {
+          debugPrint(next.requireValue.toString());
+        }
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to torProxyServiceProvider',
           error: error,
           stackTrace: stackTrace,
         );

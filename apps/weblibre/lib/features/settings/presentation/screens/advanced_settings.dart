@@ -19,7 +19,6 @@
  */
 import 'dart:developer';
 
-import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,7 +31,7 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/dialogs/user_agent_restart_dialog.dart';
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
-import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
@@ -40,76 +39,84 @@ import 'package:weblibre/features/user/domain/repositories/engine_settings.dart'
 import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
+const List<SettingsSectionDefinition> advancedSettingsSections = [
+  SettingsSectionDefinition(
+    title: 'Content & Identity',
+    keywords: ['engine'],
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Enable JavaScript',
+        subtitle: 'Turn website scripting on or off',
+        keywords: ['javascript'],
+        child: _JavaScriptTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Custom User Agent',
+        subtitle: 'Override the browser user agent string',
+        keywords: ['ua'],
+        child: _UserAgentTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Use third party CA certificates',
+        subtitle: 'Allow Android CA store certificates',
+        keywords: ['certificates', 'enterprise roots', 'ca'],
+        child: _EnterpriseRootsTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Experimental',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Experimental Features',
+        subtitle: 'Low-level runtime features and startup behavior',
+        keywords: ['runtime', 'startup'],
+        child: _ExperimentalSettingsTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Developer Tools',
+    keywords: ['debug'],
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Icon Cache',
+        subtitle: 'Stored favicons',
+        keywords: ['favicons', 'cache'],
+        child: _IconCacheTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Error Logs',
+        subtitle: 'View and copy logs for issue reporting',
+        keywords: ['logs'],
+        child: _ErrorLogsTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Dart VM',
+        subtitle: 'Copy Dart VM service URL',
+        keywords: ['service url'],
+        child: _DartVmTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Reset UI',
+        subtitle: 'Rebuild the entire browser UI',
+        keywords: ['refresh ui'],
+        child: _ResetUITile(),
+      ),
+    ],
+  ),
+];
+
 class AdvancedSettingsScreen extends StatelessWidget {
   const AdvancedSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Advanced')),
-      body: SafeArea(
-        child: FadingScroll(
-          fadingSize: 25,
-          builder: (context, controller) {
-            return ListView(
-              controller: controller,
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              children: const [
-                _ContentIdentitySection(),
-                _ExperimentalSection(),
-                _DeveloperToolsSection(),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
-class _ContentIdentitySection extends StatelessWidget {
-  const _ContentIdentitySection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Content & Identity'),
-        _JavaScriptTile(),
-        _UserAgentTile(),
-        _EnterpriseRootsTile(),
-      ],
-    );
-  }
-}
-
-class _ExperimentalSection extends StatelessWidget {
-  const _ExperimentalSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Experimental'),
-        _ExperimentalSettingsTile(),
-      ],
-    );
-  }
-}
-
-class _DeveloperToolsSection extends StatelessWidget {
-  const _DeveloperToolsSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Developer Tools'),
-        _IconCacheTile(),
-        _ErrorLogsTile(),
-        _DartVmTile(),
-        _ResetUITile(),
-      ],
+    return const SettingsDetailScaffold(
+      title: 'Advanced',
+      subtitle: 'Engine behavior, runtime overrides, and developer tools.',
+      icon: MdiIcons.tuneVertical,
+      sections: advancedSettingsSections,
     );
   }
 }

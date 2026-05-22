@@ -311,9 +311,263 @@ i1.GeneratedColumn<String> _column_14(String aliasedName) =>
       $customConstraints:
           'REFERENCES toolbar_button_configs(button_id)ON DELETE SET NULL',
     );
+
+final class Schema4 extends i0.VersionedSchema {
+  Schema4({required super.database}) : super(version: 4);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    setting,
+    iconCache,
+    onboarding,
+    riverpod,
+    toolbarButtonConfigs,
+    idxToolbarOrderKey,
+    searchTokens,
+    idxSearchTokensInsertedAt,
+  ];
+  late final Shape0 setting = Shape0(
+    source: i0.VersionedTable(
+      entityName: 'setting',
+      withoutRowId: false,
+      isStrict: true,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape1 iconCache = Shape1(
+    source: i0.VersionedTable(
+      entityName: 'icon_cache',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_3, _column_4, _column_5],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape2 onboarding = Shape2(
+    source: i0.VersionedTable(
+      entityName: 'onboarding',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_6, _column_7],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape3 riverpod = Shape3(
+    source: i0.VersionedTable(
+      entityName: 'riverpod',
+      withoutRowId: true,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_8, _column_9, _column_10],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape4 toolbarButtonConfigs = Shape4(
+    source: i0.VersionedTable(
+      entityName: 'toolbar_button_configs',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_11, _column_12, _column_13, _column_14],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxToolbarOrderKey = i1.Index(
+    'idx_toolbar_order_key',
+    'CREATE INDEX idx_toolbar_order_key ON toolbar_button_configs (order_key)',
+  );
+  late final Shape5 searchTokens = Shape5(
+    source: i0.VersionedTable(
+      entityName: 'search_tokens',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_15, _column_16, _column_17, _column_18],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxSearchTokensInsertedAt = i1.Index(
+    'idx_search_tokens_inserted_at',
+    'CREATE INDEX idx_search_tokens_inserted_at ON search_tokens (inserted_at)',
+  );
+}
+
+class Shape5 extends i0.VersionedTable {
+  Shape5({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<int> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<i2.Uint8List> get token =>
+      columnsByName['token']! as i1.GeneratedColumn<i2.Uint8List>;
+  i1.GeneratedColumn<int> get insertedAt =>
+      columnsByName['inserted_at']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get issuerKeyVersion =>
+      columnsByName['issuer_key_version']! as i1.GeneratedColumn<String>;
+}
+
+i1.GeneratedColumn<int> _column_15(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'id',
+      aliasedName,
+      false,
+      hasAutoIncrement: true,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'PRIMARY KEY AUTOINCREMENT',
+    );
+i1.GeneratedColumn<i2.Uint8List> _column_16(String aliasedName) =>
+    i1.GeneratedColumn<i2.Uint8List>(
+      'token',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.blob,
+      $customConstraints: 'NOT NULL',
+    );
+i1.GeneratedColumn<int> _column_17(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'inserted_at',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NOT NULL',
+    );
+i1.GeneratedColumn<String> _column_18(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'issuer_key_version',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NOT NULL',
+    );
+
+final class Schema5 extends i0.VersionedSchema {
+  Schema5({required super.database}) : super(version: 5);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    setting,
+    iconCache,
+    onboarding,
+    riverpod,
+    toolbarButtonConfigs,
+    idxToolbarOrderKey,
+    searchTokens,
+    idxSearchTokensInsertedAt,
+    idxSearchTokensReservedAt,
+  ];
+  late final Shape0 setting = Shape0(
+    source: i0.VersionedTable(
+      entityName: 'setting',
+      withoutRowId: false,
+      isStrict: true,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape1 iconCache = Shape1(
+    source: i0.VersionedTable(
+      entityName: 'icon_cache',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_3, _column_4, _column_5],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape2 onboarding = Shape2(
+    source: i0.VersionedTable(
+      entityName: 'onboarding',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_6, _column_7],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape3 riverpod = Shape3(
+    source: i0.VersionedTable(
+      entityName: 'riverpod',
+      withoutRowId: true,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_8, _column_9, _column_10],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape4 toolbarButtonConfigs = Shape4(
+    source: i0.VersionedTable(
+      entityName: 'toolbar_button_configs',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_11, _column_12, _column_13, _column_14],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxToolbarOrderKey = i1.Index(
+    'idx_toolbar_order_key',
+    'CREATE INDEX idx_toolbar_order_key ON toolbar_button_configs (order_key)',
+  );
+  late final Shape6 searchTokens = Shape6(
+    source: i0.VersionedTable(
+      entityName: 'search_tokens',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_15, _column_16, _column_17, _column_18, _column_19],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxSearchTokensInsertedAt = i1.Index(
+    'idx_search_tokens_inserted_at',
+    'CREATE INDEX idx_search_tokens_inserted_at ON search_tokens (inserted_at)',
+  );
+  final i1.Index idxSearchTokensReservedAt = i1.Index(
+    'idx_search_tokens_reserved_at',
+    'CREATE INDEX idx_search_tokens_reserved_at ON search_tokens (reserved_at)',
+  );
+}
+
+class Shape6 extends i0.VersionedTable {
+  Shape6({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<int> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<i2.Uint8List> get token =>
+      columnsByName['token']! as i1.GeneratedColumn<i2.Uint8List>;
+  i1.GeneratedColumn<int> get insertedAt =>
+      columnsByName['inserted_at']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get issuerKeyVersion =>
+      columnsByName['issuer_key_version']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get reservedAt =>
+      columnsByName['reserved_at']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<int> _column_19(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'reserved_at',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.int,
+      $customConstraints: '',
+    );
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
+  required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
+  required Future<void> Function(i1.Migrator m, Schema5 schema) from4To5,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -327,6 +581,16 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from2To3(migrator, schema);
         return 3;
+      case 3:
+        final schema = Schema4(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from3To4(migrator, schema);
+        return 4;
+      case 4:
+        final schema = Schema5(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from4To5(migrator, schema);
+        return 5;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -336,6 +600,13 @@ i0.MigrationStepWithVersion migrationSteps({
 i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
+  required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
+  required Future<void> Function(i1.Migrator m, Schema5 schema) from4To5,
 }) => i0.VersionedSchema.stepByStepHelper(
-  step: migrationSteps(from1To2: from1To2, from2To3: from2To3),
+  step: migrationSteps(
+    from1To2: from1To2,
+    from2To3: from2To3,
+    from3To4: from3To4,
+    from4To5: from4To5,
+  ),
 );

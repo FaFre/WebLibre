@@ -20,17 +20,32 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/settings/presentation/widgets/doh_settings_content.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+
+const List<SettingsSectionDefinition> dohSettingsSections = [
+  SettingsSectionDefinition(
+    title: 'Resolver Settings',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'DNS over HTTPS',
+        subtitle: 'Protection level, provider choice, and custom resolver URL',
+        keywords: ['doh', 'resolver', 'dns provider'],
+        child: DohSettingsContent(),
+      ),
+    ],
+  ),
+];
 
 class DohSettingsScreen extends HookConsumerWidget {
   const DohSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('DNS over HTTPS')),
-      body: const SafeArea(
-        child: SingleChildScrollView(child: DohSettingsContent()),
-      ),
+    return const SettingsDetailScaffold(
+      title: 'DNS over HTTPS',
+      subtitle: 'Encrypted DNS protection level and resolver selection.',
+      icon: Icons.dns_outlined,
+      sections: dohSettingsSections,
     );
   }
 }

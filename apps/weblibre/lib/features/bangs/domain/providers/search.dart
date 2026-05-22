@@ -47,6 +47,12 @@ class BangSearch extends _$BangSearch {
     return bang.getTemplateUrl(searchQuery);
   }
 
+  Future<void> removeSearchEntry(String searchQuery) {
+    return ref
+        .read(bangDataRepositoryProvider.notifier)
+        .removeSearchEntry(searchQuery);
+  }
+
   Future<void> search(String input) async {
     if (input.isNotEmpty) {
       await ref.read(bangDatabaseProvider).bangDao.queryBangs(input).get().then(

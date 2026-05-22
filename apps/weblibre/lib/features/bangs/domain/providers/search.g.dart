@@ -33,7 +33,7 @@ final class BangSearchProvider
   BangSearch create() => BangSearch();
 }
 
-String _$bangSearchHash() => r'feed24edfe703b0697f4a855be9c7359c456b0f2';
+String _$bangSearchHash() => r'a541da1cfd8155abf03bbe19ab7c7200febd821c';
 
 abstract class _$BangSearch extends $StreamNotifier<List<BangData>> {
   Stream<List<BangData>> build();

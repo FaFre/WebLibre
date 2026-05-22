@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
@@ -29,6 +28,7 @@ import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_sourc
 import 'package:weblibre/features/intent_gatekeeper/domain/services/package_label_resolver.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
@@ -36,69 +36,216 @@ import 'package:weblibre/features/user/domain/repositories/engine_settings.dart'
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/exit_app.dart';
 
+const List<SettingsSectionDefinition> privacySecuritySettingsSections = [
+  SettingsSectionDefinition(
+    title: 'Tracking Protection',
+    keywords: ['privacy'],
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Enhanced Tracking Protection',
+        subtitle: 'Choose how aggressively trackers are blocked',
+        keywords: ['etp', 'standard', 'strict', 'custom'],
+        child: _EnhancedTrackingProtectionSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Bounce Tracking Protection',
+        subtitle: 'Remove tracking state left by redirect-based trackers',
+        keywords: ['redirect trackers'],
+        child: _BounceTrackingProtectionTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Query Parameter Stripping',
+        subtitle: 'Remove tracking parameters from URLs',
+        keywords: ['utm'],
+        child: _QueryParameterStrippingSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Tracking Protection Exceptions',
+        subtitle: 'Sites where tracking protection is disabled',
+        keywords: ['exceptions'],
+        child: _TrackingProtectionExceptionsTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'uBlock Filter Lists & Hardenings',
+        subtitle: 'Manage filter lists and apply WebLibre hardenings',
+        keywords: ['ublock', 'filters'],
+        child: _UBlockFilterListsTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Fingerprinting',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Browser Languages',
+        subtitle: 'Choose which languages websites can see',
+        keywords: ['locale'],
+        child: _BrowserLanguagesTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Fingerprint Protection',
+        subtitle: 'Granular control over browser fingerprinting',
+        keywords: ['privacy'],
+        child: _FingerprintProtectionTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Resist Fingerprinting',
+        subtitle: 'Advanced fingerprinting protection hardening',
+        keywords: ['rfp'],
+        child: _ResistFingerprintingTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Connection Security',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Block insecure HTTP connections',
+        subtitle: 'Prefer HTTPS and block insecure connections',
+        keywords: ['https only'],
+        child: _HttpsOnlyModeSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'DNS over HTTPS',
+        subtitle: 'Encrypt DNS lookups',
+        keywords: ['doh'],
+        child: _DnsTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Network Protection',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Local Network Access',
+        subtitle: 'Enable local network and device access blocking',
+        keywords: ['lan'],
+        child: _LnaEnabledTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Block Local Network Requests',
+        subtitle: 'Block requests to local network devices and services',
+        keywords: ['lan'],
+        child: _LnaBlockingTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Block Local Network Trackers',
+        subtitle: 'Block tracker-like local network requests',
+        keywords: ['lan'],
+        child: _LnaBlockTrackersTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Privacy Signals & Modes',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Incognito Mode',
+        subtitle: 'Delete selected browsing data on app restart',
+        keywords: ['private mode'],
+        child: _IncognitoModeSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Screenshot protection',
+        subtitle: 'Prevent app content from appearing in screenshots',
+        keywords: ['screenshots'],
+        child: _ScreenshotProtectionTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Global Privacy Control (GPC)',
+        subtitle: 'Send a privacy preference signal to websites',
+        keywords: ['gpc'],
+        child: _GlobalPrivacyControlTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'App-Opening Protection',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Block apps from opening your browser',
+        subtitle: 'Control which apps may launch WebLibre directly',
+        keywords: ['intent gatekeeper', 'external apps'],
+        child: _AppOpeningProtectionSection(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Data Management',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Delete Browsing Data',
+        subtitle: 'Clear history, cookies, and other browsing data',
+        keywords: ['clear data'],
+        child: _DeleteBrowsingDataTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Auto-Clear History',
+        subtitle: 'Automatically clear history after a chosen duration',
+        keywords: ['history retention'],
+        child: _AutoClearHistorySection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Auto-Clear Unassigned Tabs',
+        subtitle: 'Automatically close tabs not assigned to a container',
+        keywords: ['cleanup tabs'],
+        child: _AutoClearUnassignedTabsSection(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Google Safe Browsing',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Safe Browsing Malware Protection',
+        subtitle: 'Warn about malware and harmful downloads',
+        keywords: ['google safe browsing'],
+        child: _SafeBrowsingMalwareTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Safe Browsing Phishing Protection',
+        subtitle: 'Warn about deceptive websites and login pages',
+        keywords: ['google safe browsing'],
+        child: _SafeBrowsingPhishingTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Advanced Security',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Web Engine Hardening',
+        subtitle: 'Harden browser engine behavior and defaults',
+        keywords: ['hardening'],
+        child: _WebEngineHardeningTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Fission (Site Isolation)',
+        subtitle: 'Use stronger site isolation between origins',
+        keywords: ['site isolation'],
+        child: _FissionEnabledTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Extensions Web API',
+        subtitle: 'Allow extensions to expose web APIs to pages',
+        keywords: ['extension api'],
+        child: _ExtensionsWebAPIEnabledTile(),
+      ),
+    ],
+  ),
+];
+
 class PrivacySecuritySettingsScreen extends StatelessWidget {
   const PrivacySecuritySettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Privacy & Security')),
-      body: SafeArea(
-        child: FadingScroll(
-          fadingSize: 25,
-          builder: (context, controller) {
-            return ListView(
-              controller: controller,
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              children: const [
-                _TrackingProtectionSection(),
-                _FingerprintingSection(),
-                _ConnectionSecuritySection(),
-                _NetworkProtectionSection(),
-                _PrivacySignalsSection(),
-                _AppOpeningProtectionSection(),
-                _DataManagementSection(),
-                _SafeBrowsingSection(),
-                _AdvancedSecuritySection(),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
-class _FingerprintingSection extends StatelessWidget {
-  const _FingerprintingSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Fingerprinting'),
-        _BrowserLanguagesTile(),
-        _FingerprintProtectionTile(),
-        _ResistFingerprintingTile(),
-      ],
-    );
-  }
-}
-
-class _TrackingProtectionSection extends StatelessWidget {
-  const _TrackingProtectionSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Tracking Protection'),
-        _EnhancedTrackingProtectionSection(),
-        _BounceTrackingProtectionTile(),
-        _QueryParameterStrippingSection(),
-        _TrackingProtectionExceptionsTile(),
-        _UBlockFilterListsTile(),
-      ],
+    return const SettingsDetailScaffold(
+      title: 'Privacy & Security',
+      subtitle:
+          'Tracking protection, fingerprinting, browsing data, and network hardening.',
+      icon: MdiIcons.shieldLock,
+      sections: privacySecuritySettingsSections,
     );
   }
 }
@@ -116,84 +263,6 @@ class _TrackingProtectionExceptionsTile extends StatelessWidget {
       onTap: () async {
         await TrackingProtectionExceptionsRoute().push(context);
       },
-    );
-  }
-}
-
-class _ConnectionSecuritySection extends StatelessWidget {
-  const _ConnectionSecuritySection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Connection Security'),
-        _HttpsOnlyModeSection(),
-        _DnsTile(),
-      ],
-    );
-  }
-}
-
-class _PrivacySignalsSection extends StatelessWidget {
-  const _PrivacySignalsSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Privacy Signals & Modes'),
-        _IncognitoModeSection(),
-        _ScreenshotProtectionTile(),
-        _GlobalPrivacyControlTile(),
-      ],
-    );
-  }
-}
-
-class _SafeBrowsingSection extends StatelessWidget {
-  const _SafeBrowsingSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Google Safe Browsing'),
-        _SafeBrowsingMalwareTile(),
-        _SafeBrowsingPhishingTile(),
-      ],
-    );
-  }
-}
-
-class _DataManagementSection extends StatelessWidget {
-  const _DataManagementSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Data Management'),
-        _DeleteBrowsingDataTile(),
-        _AutoClearHistorySection(),
-        _AutoClearUnassignedTabsSection(),
-      ],
-    );
-  }
-}
-
-class _AdvancedSecuritySection extends StatelessWidget {
-  const _AdvancedSecuritySection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Advanced Security'),
-        _WebEngineHardeningTile(),
-        _FissionEnabledTile(),
-        _ExtensionsWebAPIEnabledTile(),
-      ],
     );
   }
 }
@@ -1051,22 +1120,6 @@ class _ManagedAppPolicyTile extends HookConsumerWidget {
 }
 
 enum _PolicyAction { allow, block, remove }
-
-class _NetworkProtectionSection extends StatelessWidget {
-  const _NetworkProtectionSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Network Protection'),
-        _LnaEnabledTile(),
-        _LnaBlockingTile(),
-        _LnaBlockTrackersTile(),
-      ],
-    );
-  }
-}
 
 class _BrowserLanguagesTile extends StatelessWidget {
   const _BrowserLanguagesTile();

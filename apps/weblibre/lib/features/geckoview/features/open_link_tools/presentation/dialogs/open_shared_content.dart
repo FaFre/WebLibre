@@ -455,6 +455,7 @@ class OpenSharedContent extends HookConsumerWidget {
                             alignment: Alignment.centerRight,
                             child: CompactContainerSelector(
                               selectedContainer: selectedContainer.value,
+                              emphasizeSelection: false,
                               onSelectionChanged: (selection) async {
                                 containerSelectionTouched.value = true;
                                 switch (selection) {

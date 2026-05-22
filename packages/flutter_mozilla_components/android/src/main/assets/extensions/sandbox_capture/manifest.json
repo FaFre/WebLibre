@@ -1,0 +1,20 @@
+{
+  "manifest_version": 2,
+  "name": "WebLibre Sandbox Capture",
+  "version": "0.1.0",
+  "description": "Blocks all non-loopback requests from documents served by the WebLibre sandbox capture server.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "sandbox-capture@weblibre.eu"
+    }
+  },
+  "permissions": [
+    "<all_urls>",
+    "geckoViewAddons",
+    "webRequest",
+    "webRequestBlocking"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  }
+}

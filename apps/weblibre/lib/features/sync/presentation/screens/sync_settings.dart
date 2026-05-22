@@ -19,7 +19,6 @@
  */
 import 'dart:async';
 
-import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -29,7 +28,7 @@ import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:weblibre/core/providers/format.dart';
 import 'package:weblibre/features/qr_scanner/presentation/dialogs/qr_scanner_dialog.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -77,6 +76,7 @@ class SyncSettingsScreen extends HookConsumerWidget {
     final syncController = useAnimationController(
       duration: disableAnimations ? Duration.zero : const Duration(seconds: 2),
     );
+    final search = useSettingsSearch();
 
     useEffect(() {
       if (isSyncing && !disableAnimations) {
@@ -88,17 +88,18 @@ class SyncSettingsScreen extends HookConsumerWidget {
       return null;
     }, [isSyncing, disableAnimations]);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Firefox Sync')),
-      body: SafeArea(
-        child: FadingScroll(
-          fadingSize: 25,
-          builder: (context, controller) {
-            return ListView(
-              controller: controller,
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+    final sections = <SettingsSectionDefinition>[
+      SettingsSectionDefinition(
+        title: 'Account',
+        entries: [
+          SettingsEntryDefinition(
+            title: syncInfo?.authenticated == true
+                ? 'Signed in account'
+                : 'Sign in',
+            subtitle: 'Account status, QR pairing, and device name',
+            keywords: const ['pairing', 'device name'],
+            child: Column(
               children: [
-                const SettingSection(name: 'Account'),
                 ListTile(
                   leading: const Icon(Icons.account_circle_outlined),
                   title: Text(syncInfo?.email ?? 'Not signed in'),
@@ -134,7 +135,8 @@ class SyncSettingsScreen extends HookConsumerWidget {
                               .signIn();
                         },
                 ),
-                if (syncInfo?.authenticated != true && !isSyncing)
+                if (syncInfo?.authenticated != true && !isSyncing) ...[
+                  const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.qr_code_scanner),
                     title: const Text('Scan QR Code to pair'),
@@ -168,7 +170,9 @@ class SyncSettingsScreen extends HookConsumerWidget {
                           .signInWithPairing(code);
                     },
                   ),
-                if (syncInfo?.authenticated == true)
+                ],
+                if (syncInfo?.authenticated == true) ...[
+                  const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.devices),
                     title: const Text('Device Name'),
@@ -201,7 +205,21 @@ class SyncSettingsScreen extends HookConsumerWidget {
                             }
                           },
                   ),
-                const SettingSection(name: 'Synchronization'),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+      SettingsSectionDefinition(
+        title: 'Synchronization',
+        entries: [
+          SettingsEntryDefinition(
+            title: 'Sync Now',
+            subtitle: syncText,
+            keywords: const ['history', 'bookmarks', 'tabs'],
+            child: Column(
+              children: [
                 ListTile(
                   leading: RotationTransition(
                     turns: Tween<double>(
@@ -221,6 +239,7 @@ class SyncSettingsScreen extends HookConsumerWidget {
                               .syncNow();
                         },
                 ),
+                const Divider(height: 1),
                 SwitchListTile.adaptive(
                   title: const Text('Sync History'),
                   value: _engineEnabled(syncInfo, SyncEngineValue.history),
@@ -232,6 +251,7 @@ class SyncSettingsScreen extends HookConsumerWidget {
                               .setEngineEnabled(SyncEngineValue.history, value);
                         },
                 ),
+                const Divider(height: 1),
                 SwitchListTile.adaptive(
                   title: const Text('Sync Bookmarks'),
                   value: _engineEnabled(syncInfo, SyncEngineValue.bookmarks),
@@ -246,6 +266,7 @@ class SyncSettingsScreen extends HookConsumerWidget {
                               );
                         },
                 ),
+                const Divider(height: 1),
                 SwitchListTile.adaptive(
                   title: const Text('Sync Open Tabs'),
                   value: _engineEnabled(syncInfo, SyncEngineValue.tabs),
@@ -257,7 +278,20 @@ class SyncSettingsScreen extends HookConsumerWidget {
                               .setEngineEnabled(SyncEngineValue.tabs, value);
                         },
                 ),
-                const SettingSection(name: 'Server Overrides'),
+              ],
+            ),
+          ),
+        ],
+      ),
+      SettingsSectionDefinition(
+        title: 'Server Overrides',
+        entries: [
+          SettingsEntryDefinition(
+            title: 'Server overrides',
+            subtitle: 'Custom Firefox Account and token server endpoints',
+            keywords: const ['fxa', 'token server'],
+            child: Column(
+              children: [
                 ListTile(
                   title: const Text('FxA Server Override'),
                   subtitle: Text(
@@ -286,6 +320,7 @@ class SyncSettingsScreen extends HookConsumerWidget {
                           },
                         ),
                 ),
+                const Divider(height: 1),
                 ListTile(
                   title: const Text('Sync Token Server Override'),
                   subtitle: Text(
@@ -315,6 +350,7 @@ class SyncSettingsScreen extends HookConsumerWidget {
                           },
                         ),
                 ),
+                const Divider(height: 1),
                 const ListTile(
                   dense: true,
                   title: Text(
@@ -323,10 +359,32 @@ class SyncSettingsScreen extends HookConsumerWidget {
                   ),
                 ),
               ],
-            );
-          },
-        ),
+            ),
+          ),
+        ],
       ),
+    ];
+
+    final filteredSections = filterSettingsSections(
+      sections: sections,
+      query: search.rawQuery,
+    );
+
+    return SettingsCustomScrollScaffold(
+      title: 'Firefox Sync',
+      searchController: search.controller,
+      searchHintText: 'Search sync settings',
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
+          sliver: SliverToBoxAdapter(
+            child: SettingsSectionList(
+              sections: filteredSections,
+              query: search.rawQuery,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

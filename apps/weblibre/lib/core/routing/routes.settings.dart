@@ -96,6 +96,10 @@ part of 'routes.dart';
       path: 'custom_tracking_protection',
     ),
     TypedGoRoute<ErrorLogsRoute>(name: 'ErrorLogsRoute', path: 'error_logs'),
+    TypedGoRoute<AccountSettingsRoute>(
+      name: 'AccountSettingsRoute',
+      path: 'account',
+    ),
     TypedGoRoute<SyncSettingsRoute>(name: 'SyncSettingsRoute', path: 'sync'),
     TypedGoRoute<UrlCleanerSettingsRoute>(
       name: 'UrlCleanerSettingsRoute',
@@ -269,6 +273,13 @@ class CustomTrackingProtectionRoute extends GoRouteData
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const CustomTrackingProtectionScreen();
+  }
+}
+
+class AccountSettingsRoute extends GoRouteData with $AccountSettingsRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const AccountSettingsScreen();
   }
 }
 

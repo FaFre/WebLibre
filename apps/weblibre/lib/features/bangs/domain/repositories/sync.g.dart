@@ -42,7 +42,7 @@ final class BangSyncRepositoryProvider
 }
 
 String _$bangSyncRepositoryHash() =>
-    r'1347dcbd03f6a1a4fa3bbbae5d9302098d260c50';
+    r'cdb78ef0243224fdb7b3a8660f0920c471987296';
 
 abstract class _$BangSyncRepository extends $Notifier<void> {
   void build();

@@ -30,6 +30,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/permissions_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/tracking_protection_section.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/widgets/website_title_tile.dart';
 
 class ClampingScrollPhysicsWithoutImplicit extends ClampingScrollPhysics {
@@ -112,16 +113,18 @@ class ViewTabSheetWidget extends HookConsumerWidget {
                       // Dismiss sheet and open search screen with tab context
                       onClose();
 
-                      // Don't pre-fill for internal URLs
-                      final searchText = initialTabState.url.scheme == 'about'
-                          ? ''
-                          : initialTabState.url.toString();
+                      final sandboxSourceUri = ref.read(
+                        sandboxSourceUriForTabProvider(
+                          tabId: initialTabState.id,
+                        ),
+                      );
 
                       await SearchRoute(
                         tabId: initialTabState.id,
-                        searchText: searchText.isEmpty
-                            ? SearchRoute.emptySearchText
-                            : searchText,
+                        searchText: searchTextForTab(
+                          initialTabState,
+                          sandboxSourceUri,
+                        ),
                         tabType: initialTabState.tabMode.toTabType(),
                       ).push(context);
                     },

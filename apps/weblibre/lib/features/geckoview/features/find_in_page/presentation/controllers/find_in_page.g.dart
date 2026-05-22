@@ -20,7 +20,7 @@ final class FindInPageControllerProvider
   }) : super(
          retry: null,
          name: r'findInPageControllerProvider',
-         isAutoDispose: true,
+         isAutoDispose: false,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
@@ -59,7 +59,7 @@ final class FindInPageControllerProvider
 }
 
 String _$findInPageControllerHash() =>
-    r'4aaa0c4b4a623e7274836e70e5f66e97a3ebf80a';
+    r'21ca6178016dc141fcfcb71afc158d9b8eed0a7e';
 
 final class FindInPageControllerFamily extends $Family
     with
@@ -76,7 +76,7 @@ final class FindInPageControllerFamily extends $Family
         name: r'findInPageControllerProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
-        isAutoDispose: true,
+        isAutoDispose: false,
       );
 
   FindInPageControllerProvider call(String tabId) =>

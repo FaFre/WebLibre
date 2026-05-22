@@ -33,6 +33,7 @@ class MaterialPicker extends StatefulWidget {
     this.enableLabel = false,
     this.portraitOnly = false,
     this.displayAlpha,
+    this.displayColorBuilder,
   });
 
   final Color pickerColor;
@@ -41,6 +42,7 @@ class MaterialPicker extends StatefulWidget {
   final bool enableLabel;
   final bool portraitOnly;
   final double? displayAlpha;
+  final Color Function(BuildContext context, Color color)? displayColorBuilder;
 
   @override
   State<StatefulWidget> createState() => _MaterialPickerState();
@@ -71,6 +73,17 @@ class _MaterialPickerState extends State<MaterialPicker> {
     final isPortrait =
         MediaQuery.of(context).orientation == Orientation.portrait ||
         widget.portraitOnly;
+
+    Color resolveDisplayColor(Color color) {
+      final displayColorBuilder = widget.displayColorBuilder;
+      if (displayColorBuilder != null) {
+        return displayColorBuilder(context, color);
+      }
+
+      return widget.displayAlpha != null
+          ? color.withValues(alpha: widget.displayAlpha)
+          : color;
+    }
 
     Widget colorList() {
       return Container(
@@ -127,9 +140,9 @@ class _MaterialPickerState extends State<MaterialPicker> {
                       const Padding(padding: EdgeInsets.only(left: 7)),
                     ...colorTypes.map((List<Color> colors) {
                       final Color colorType = colors[0];
-                      final Color displayColorType = widget.displayAlpha != null
-                          ? colorType.withValues(alpha: widget.displayAlpha)
-                          : colorType;
+                      final Color displayColorType = resolveDisplayColor(
+                        colorType,
+                      );
                       return GestureDetector(
                         onTap: () {
                           if (widget.onPrimaryChanged != null) {
@@ -219,9 +232,7 @@ class _MaterialPickerState extends State<MaterialPicker> {
                   Map<Color, String> colors,
                 ) {
                   final Color color = colors.keys.first;
-                  final Color displayColor = widget.displayAlpha != null
-                      ? color.withValues(alpha: widget.displayAlpha)
-                      : color;
+                  final Color displayColor = resolveDisplayColor(color);
                   return GestureDetector(
                     onTap: () {
                       setState(() => _currentShading = color);

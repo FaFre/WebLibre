@@ -863,6 +863,214 @@ typedef $ToolbarButtonConfigsProcessedTableManager =
       i1.ToolbarButtonConfig,
       i0.PrefetchHooks Function()
     >;
+typedef $SearchTokensCreateCompanionBuilder =
+    i1.SearchTokensCompanion Function({
+      i0.Value<int> id,
+      required i2.Uint8List token,
+      required DateTime insertedAt,
+      required String issuerKeyVersion,
+      i0.Value<DateTime?> reservedAt,
+    });
+typedef $SearchTokensUpdateCompanionBuilder =
+    i1.SearchTokensCompanion Function({
+      i0.Value<int> id,
+      i0.Value<i2.Uint8List> token,
+      i0.Value<DateTime> insertedAt,
+      i0.Value<String> issuerKeyVersion,
+      i0.Value<DateTime?> reservedAt,
+    });
+
+class $SearchTokensFilterComposer
+    extends i0.Composer<i0.GeneratedDatabase, i1.SearchTokens> {
+  $SearchTokensFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<i2.Uint8List> get token => $composableBuilder(
+    column: $table.token,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<DateTime> get insertedAt => $composableBuilder(
+    column: $table.insertedAt,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<String> get issuerKeyVersion => $composableBuilder(
+    column: $table.issuerKeyVersion,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<DateTime> get reservedAt => $composableBuilder(
+    column: $table.reservedAt,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+}
+
+class $SearchTokensOrderingComposer
+    extends i0.Composer<i0.GeneratedDatabase, i1.SearchTokens> {
+  $SearchTokensOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<i2.Uint8List> get token => $composableBuilder(
+    column: $table.token,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<DateTime> get insertedAt => $composableBuilder(
+    column: $table.insertedAt,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<String> get issuerKeyVersion => $composableBuilder(
+    column: $table.issuerKeyVersion,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<DateTime> get reservedAt => $composableBuilder(
+    column: $table.reservedAt,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+}
+
+class $SearchTokensAnnotationComposer
+    extends i0.Composer<i0.GeneratedDatabase, i1.SearchTokens> {
+  $SearchTokensAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  i0.GeneratedColumn<i2.Uint8List> get token =>
+      $composableBuilder(column: $table.token, builder: (column) => column);
+
+  i0.GeneratedColumn<DateTime> get insertedAt => $composableBuilder(
+    column: $table.insertedAt,
+    builder: (column) => column,
+  );
+
+  i0.GeneratedColumn<String> get issuerKeyVersion => $composableBuilder(
+    column: $table.issuerKeyVersion,
+    builder: (column) => column,
+  );
+
+  i0.GeneratedColumn<DateTime> get reservedAt => $composableBuilder(
+    column: $table.reservedAt,
+    builder: (column) => column,
+  );
+}
+
+class $SearchTokensTableManager
+    extends
+        i0.RootTableManager<
+          i0.GeneratedDatabase,
+          i1.SearchTokens,
+          i1.SearchToken,
+          i1.$SearchTokensFilterComposer,
+          i1.$SearchTokensOrderingComposer,
+          i1.$SearchTokensAnnotationComposer,
+          $SearchTokensCreateCompanionBuilder,
+          $SearchTokensUpdateCompanionBuilder,
+          (
+            i1.SearchToken,
+            i0.BaseReferences<
+              i0.GeneratedDatabase,
+              i1.SearchTokens,
+              i1.SearchToken
+            >,
+          ),
+          i1.SearchToken,
+          i0.PrefetchHooks Function()
+        > {
+  $SearchTokensTableManager(i0.GeneratedDatabase db, i1.SearchTokens table)
+    : super(
+        i0.TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              i1.$SearchTokensFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              i1.$SearchTokensOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              i1.$SearchTokensAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                i0.Value<int> id = const i0.Value.absent(),
+                i0.Value<i2.Uint8List> token = const i0.Value.absent(),
+                i0.Value<DateTime> insertedAt = const i0.Value.absent(),
+                i0.Value<String> issuerKeyVersion = const i0.Value.absent(),
+                i0.Value<DateTime?> reservedAt = const i0.Value.absent(),
+              }) => i1.SearchTokensCompanion(
+                id: id,
+                token: token,
+                insertedAt: insertedAt,
+                issuerKeyVersion: issuerKeyVersion,
+                reservedAt: reservedAt,
+              ),
+          createCompanionCallback:
+              ({
+                i0.Value<int> id = const i0.Value.absent(),
+                required i2.Uint8List token,
+                required DateTime insertedAt,
+                required String issuerKeyVersion,
+                i0.Value<DateTime?> reservedAt = const i0.Value.absent(),
+              }) => i1.SearchTokensCompanion.insert(
+                id: id,
+                token: token,
+                insertedAt: insertedAt,
+                issuerKeyVersion: issuerKeyVersion,
+                reservedAt: reservedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $SearchTokensProcessedTableManager =
+    i0.ProcessedTableManager<
+      i0.GeneratedDatabase,
+      i1.SearchTokens,
+      i1.SearchToken,
+      i1.$SearchTokensFilterComposer,
+      i1.$SearchTokensOrderingComposer,
+      i1.$SearchTokensAnnotationComposer,
+      $SearchTokensCreateCompanionBuilder,
+      $SearchTokensUpdateCompanionBuilder,
+      (
+        i1.SearchToken,
+        i0.BaseReferences<
+          i0.GeneratedDatabase,
+          i1.SearchTokens,
+          i1.SearchToken
+        >,
+      ),
+      i1.SearchToken,
+      i0.PrefetchHooks Function()
+    >;
 
 class Setting extends i0.Table with i0.TableInfo<Setting, i1.SettingData> {
   @override
@@ -2020,6 +2228,317 @@ class ToolbarButtonConfigsCompanion
 i0.Index get idxToolbarOrderKey => i0.Index(
   'idx_toolbar_order_key',
   'CREATE INDEX idx_toolbar_order_key ON toolbar_button_configs (order_key)',
+);
+
+class SearchTokens extends i0.Table
+    with i0.TableInfo<SearchTokens, i1.SearchToken> {
+  @override
+  final i0.GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  SearchTokens(this.attachedDatabase, [this._alias]);
+  late final i0.GeneratedColumn<int> id = i0.GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: i0.DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'PRIMARY KEY AUTOINCREMENT',
+  );
+  late final i0.GeneratedColumn<i2.Uint8List> token =
+      i0.GeneratedColumn<i2.Uint8List>(
+        'token',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.blob,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      );
+  late final i0.GeneratedColumn<DateTime> insertedAt =
+      i0.GeneratedColumn<DateTime>(
+        'inserted_at',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.dateTime,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      );
+  late final i0.GeneratedColumn<String> issuerKeyVersion =
+      i0.GeneratedColumn<String>(
+        'issuer_key_version',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.string,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      );
+  late final i0.GeneratedColumn<DateTime> reservedAt =
+      i0.GeneratedColumn<DateTime>(
+        'reserved_at',
+        aliasedName,
+        true,
+        type: i0.DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      );
+  @override
+  List<i0.GeneratedColumn> get $columns => [
+    id,
+    token,
+    insertedAt,
+    issuerKeyVersion,
+    reservedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'search_tokens';
+  @override
+  Set<i0.GeneratedColumn> get $primaryKey => {id};
+  @override
+  i1.SearchToken map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return i1.SearchToken(
+      id: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      token: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.blob,
+        data['${effectivePrefix}token'],
+      )!,
+      insertedAt: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.dateTime,
+        data['${effectivePrefix}inserted_at'],
+      )!,
+      issuerKeyVersion: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}issuer_key_version'],
+      )!,
+      reservedAt: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.dateTime,
+        data['${effectivePrefix}reserved_at'],
+      ),
+    );
+  }
+
+  @override
+  SearchTokens createAlias(String alias) {
+    return SearchTokens(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class SearchToken extends i0.DataClass
+    implements i0.Insertable<i1.SearchToken> {
+  final int id;
+  final i2.Uint8List token;
+  final DateTime insertedAt;
+  final String issuerKeyVersion;
+  final DateTime? reservedAt;
+  const SearchToken({
+    required this.id,
+    required this.token,
+    required this.insertedAt,
+    required this.issuerKeyVersion,
+    this.reservedAt,
+  });
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    map['id'] = i0.Variable<int>(id);
+    map['token'] = i0.Variable<i2.Uint8List>(token);
+    map['inserted_at'] = i0.Variable<DateTime>(insertedAt);
+    map['issuer_key_version'] = i0.Variable<String>(issuerKeyVersion);
+    if (!nullToAbsent || reservedAt != null) {
+      map['reserved_at'] = i0.Variable<DateTime>(reservedAt);
+    }
+    return map;
+  }
+
+  factory SearchToken.fromJson(
+    Map<String, dynamic> json, {
+    i0.ValueSerializer? serializer,
+  }) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return SearchToken(
+      id: serializer.fromJson<int>(json['id']),
+      token: serializer.fromJson<i2.Uint8List>(json['token']),
+      insertedAt: serializer.fromJson<DateTime>(json['inserted_at']),
+      issuerKeyVersion: serializer.fromJson<String>(json['issuer_key_version']),
+      reservedAt: serializer.fromJson<DateTime?>(json['reserved_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({i0.ValueSerializer? serializer}) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'token': serializer.toJson<i2.Uint8List>(token),
+      'inserted_at': serializer.toJson<DateTime>(insertedAt),
+      'issuer_key_version': serializer.toJson<String>(issuerKeyVersion),
+      'reserved_at': serializer.toJson<DateTime?>(reservedAt),
+    };
+  }
+
+  i1.SearchToken copyWith({
+    int? id,
+    i2.Uint8List? token,
+    DateTime? insertedAt,
+    String? issuerKeyVersion,
+    i0.Value<DateTime?> reservedAt = const i0.Value.absent(),
+  }) => i1.SearchToken(
+    id: id ?? this.id,
+    token: token ?? this.token,
+    insertedAt: insertedAt ?? this.insertedAt,
+    issuerKeyVersion: issuerKeyVersion ?? this.issuerKeyVersion,
+    reservedAt: reservedAt.present ? reservedAt.value : this.reservedAt,
+  );
+  SearchToken copyWithCompanion(i1.SearchTokensCompanion data) {
+    return SearchToken(
+      id: data.id.present ? data.id.value : this.id,
+      token: data.token.present ? data.token.value : this.token,
+      insertedAt: data.insertedAt.present
+          ? data.insertedAt.value
+          : this.insertedAt,
+      issuerKeyVersion: data.issuerKeyVersion.present
+          ? data.issuerKeyVersion.value
+          : this.issuerKeyVersion,
+      reservedAt: data.reservedAt.present
+          ? data.reservedAt.value
+          : this.reservedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SearchToken(')
+          ..write('id: $id, ')
+          ..write('token: $token, ')
+          ..write('insertedAt: $insertedAt, ')
+          ..write('issuerKeyVersion: $issuerKeyVersion, ')
+          ..write('reservedAt: $reservedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    i0.$driftBlobEquality.hash(token),
+    insertedAt,
+    issuerKeyVersion,
+    reservedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is i1.SearchToken &&
+          other.id == this.id &&
+          i0.$driftBlobEquality.equals(other.token, this.token) &&
+          other.insertedAt == this.insertedAt &&
+          other.issuerKeyVersion == this.issuerKeyVersion &&
+          other.reservedAt == this.reservedAt);
+}
+
+class SearchTokensCompanion extends i0.UpdateCompanion<i1.SearchToken> {
+  final i0.Value<int> id;
+  final i0.Value<i2.Uint8List> token;
+  final i0.Value<DateTime> insertedAt;
+  final i0.Value<String> issuerKeyVersion;
+  final i0.Value<DateTime?> reservedAt;
+  const SearchTokensCompanion({
+    this.id = const i0.Value.absent(),
+    this.token = const i0.Value.absent(),
+    this.insertedAt = const i0.Value.absent(),
+    this.issuerKeyVersion = const i0.Value.absent(),
+    this.reservedAt = const i0.Value.absent(),
+  });
+  SearchTokensCompanion.insert({
+    this.id = const i0.Value.absent(),
+    required i2.Uint8List token,
+    required DateTime insertedAt,
+    required String issuerKeyVersion,
+    this.reservedAt = const i0.Value.absent(),
+  }) : token = i0.Value(token),
+       insertedAt = i0.Value(insertedAt),
+       issuerKeyVersion = i0.Value(issuerKeyVersion);
+  static i0.Insertable<i1.SearchToken> custom({
+    i0.Expression<int>? id,
+    i0.Expression<i2.Uint8List>? token,
+    i0.Expression<DateTime>? insertedAt,
+    i0.Expression<String>? issuerKeyVersion,
+    i0.Expression<DateTime>? reservedAt,
+  }) {
+    return i0.RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (token != null) 'token': token,
+      if (insertedAt != null) 'inserted_at': insertedAt,
+      if (issuerKeyVersion != null) 'issuer_key_version': issuerKeyVersion,
+      if (reservedAt != null) 'reserved_at': reservedAt,
+    });
+  }
+
+  i1.SearchTokensCompanion copyWith({
+    i0.Value<int>? id,
+    i0.Value<i2.Uint8List>? token,
+    i0.Value<DateTime>? insertedAt,
+    i0.Value<String>? issuerKeyVersion,
+    i0.Value<DateTime?>? reservedAt,
+  }) {
+    return i1.SearchTokensCompanion(
+      id: id ?? this.id,
+      token: token ?? this.token,
+      insertedAt: insertedAt ?? this.insertedAt,
+      issuerKeyVersion: issuerKeyVersion ?? this.issuerKeyVersion,
+      reservedAt: reservedAt ?? this.reservedAt,
+    );
+  }
+
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    if (id.present) {
+      map['id'] = i0.Variable<int>(id.value);
+    }
+    if (token.present) {
+      map['token'] = i0.Variable<i2.Uint8List>(token.value);
+    }
+    if (insertedAt.present) {
+      map['inserted_at'] = i0.Variable<DateTime>(insertedAt.value);
+    }
+    if (issuerKeyVersion.present) {
+      map['issuer_key_version'] = i0.Variable<String>(issuerKeyVersion.value);
+    }
+    if (reservedAt.present) {
+      map['reserved_at'] = i0.Variable<DateTime>(reservedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SearchTokensCompanion(')
+          ..write('id: $id, ')
+          ..write('token: $token, ')
+          ..write('insertedAt: $insertedAt, ')
+          ..write('issuerKeyVersion: $issuerKeyVersion, ')
+          ..write('reservedAt: $reservedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+i0.Index get idxSearchTokensInsertedAt => i0.Index(
+  'idx_search_tokens_inserted_at',
+  'CREATE INDEX idx_search_tokens_inserted_at ON search_tokens (inserted_at)',
+);
+i0.Index get idxSearchTokensReservedAt => i0.Index(
+  'idx_search_tokens_reserved_at',
+  'CREATE INDEX idx_search_tokens_reserved_at ON search_tokens (reserved_at)',
 );
 
 class DefinitionsDrift extends i3.ModularAccessor {

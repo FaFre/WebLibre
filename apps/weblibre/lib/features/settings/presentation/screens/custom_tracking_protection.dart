@@ -17,41 +17,78 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
+
+const List<SettingsSectionDefinition> customTrackingProtectionSections = [
+  SettingsSectionDefinition(
+    title: 'Allowlist Exceptions',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Allowlist exceptions',
+        subtitle: 'Compatibility exceptions for major and minor website issues',
+        child: _AllowlistSection(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Cookies',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Cookies',
+        subtitle: 'Cookie blocking mode and policy selection',
+        child: _CookiesSection(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Tracking Content',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Tracking content',
+        subtitle: 'Tracking scripts and scope for blocking',
+        child: _TrackingContentSection(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Trackers',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Trackers',
+        subtitle: 'Cryptominers, known fingerprinters, and redirect trackers',
+        child: _TrackersSection(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Advanced Fingerprinting Protection',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Advanced fingerprinting protection',
+        subtitle: 'Suspected fingerprinters and tab scope',
+        child: _AdvancedFingerprintingSection(),
+      ),
+    ],
+  ),
+];
 
 class CustomTrackingProtectionScreen extends StatelessWidget {
   const CustomTrackingProtectionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Custom Tracking Protection')),
-      body: SafeArea(
-        child: FadingScroll(
-          fadingSize: 25,
-          builder: (context, controller) {
-            return ListView(
-              controller: controller,
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              children: const [
-                _AllowlistSection(),
-                _CookiesSection(),
-                _TrackingContentSection(),
-                _TrackersSection(),
-                _AdvancedFingerprintingSection(),
-              ],
-            );
-          },
-        ),
-      ),
+    return const SettingsDetailScaffold(
+      title: 'Custom Tracking Protection',
+      subtitle: 'Custom cookie, content, tracker, and fingerprinting controls.',
+      icon: MdiIcons.shieldEditOutline,
+      sections: customTrackingProtectionSections,
     );
   }
 }
@@ -70,7 +107,6 @@ class _AllowlistSection extends HookConsumerWidget {
 
     return Column(
       children: [
-        const SettingSection(name: 'Allowlist Exceptions'),
         SwitchListTile.adaptive(
           title: const Text('Fix website major issues'),
           subtitle: const Text(
@@ -116,7 +152,6 @@ class _CookiesSection extends HookConsumerWidget {
 
     return Column(
       children: [
-        const SettingSection(name: 'Cookies'),
         SwitchListTile.adaptive(
           title: const Text('Block Cookies'),
           subtitle: const Text('Block cookies based on the policy below'),
@@ -198,7 +233,6 @@ class _TrackingContentSection extends HookConsumerWidget {
 
     return Column(
       children: [
-        const SettingSection(name: 'Tracking Content'),
         SwitchListTile.adaptive(
           title: const Text('Block Tracking Content'),
           subtitle: const Text(
@@ -270,7 +304,6 @@ class _TrackersSection extends HookConsumerWidget {
 
     return Column(
       children: [
-        const SettingSection(name: 'Trackers'),
         const ListTile(
           title: Text('Always Blocked'),
           subtitle: Text(
@@ -340,7 +373,6 @@ class _AdvancedFingerprintingSection extends HookConsumerWidget {
 
     return Column(
       children: [
-        const SettingSection(name: 'Advanced Fingerprinting Protection'),
         SwitchListTile.adaptive(
           title: const Text('Suspected Fingerprinters'),
           subtitle: const Text(

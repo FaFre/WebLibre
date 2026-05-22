@@ -26,11 +26,61 @@ class IntentReceiver extends IntentEvents {
   final _controller = StreamController<Intent>.broadcast();
   int? _lastAdded;
 
-  Stream<Intent> get events => _controller.stream;
+  /// Intent events, including the cold-start launch intent for each listener.
+  ///
+  /// New-intent callbacks still arrive through the broadcast controller below.
+  /// The initial intent is replayed per listener so existing callers that only
+  /// listen to [events] continue to receive terminated-app launches.
+  Stream<Intent> get events {
+    return Stream.multi((controller) {
+      final subscription = _controller.stream.listen(
+        controller.add,
+        onError: controller.addError,
+        onDone: controller.close,
+      );
+
+      unawaited(
+        initialIntent.then(
+          (intent) {
+            if (intent != null && !controller.isClosed) {
+              controller.add(intent);
+            }
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            if (!controller.isClosed) {
+              controller.addError(error, stackTrace);
+            }
+          },
+        ),
+      );
+
+      controller.onCancel = subscription.cancel;
+    }, isBroadcast: true);
+  }
+
+  /// The launch intent recovered from the host, if any. Resolves to
+  /// `Future<null>` for instances not constructed via [IntentReceiver.setUp]
+  /// (e.g. test fakes / subclasses), so callers can always `await` without
+  /// guarding for `LateInitializationError`.
+  ///
+  /// On cold start the Android plugin sees the launch intent from
+  /// onAttachedToActivity before Dart has registered the Pigeon handler, so it
+  /// caches the value for Dart to recover. The [events] stream already replays
+  /// this value for compatibility; use this future directly only when the
+  /// launch intent needs one-shot handling outside the event stream.
+  ///
+  /// Note on rotation: the Android plugin's `pendingInitialIntent` cache
+  /// is intentionally overwritten on configuration change. If the user
+  /// triggers a new deep link via the activity launcher before Dart
+  /// drains the previous initial intent (rare — the future is read on
+  /// IntentReceiver construction, which happens during app bootstrap),
+  /// only the newest intent is delivered.
+  Future<Intent?> initialIntent = Future.value(null);
 
   @override
   void onIntentReceived(int sequence, Intent intent) {
     if (_lastAdded == null || sequence > _lastAdded!) {
+      _lastAdded = sequence;
       _controller.add(intent);
     }
   }
@@ -44,6 +94,12 @@ class IntentReceiver extends IntentEvents {
       binaryMessenger: binaryMessenger,
       messageChannelSuffix: messageChannelSuffix,
     );
+
+    final host = IntentHost(
+      binaryMessenger: binaryMessenger,
+      messageChannelSuffix: messageChannelSuffix,
+    );
+    initialIntent = host.getInitialIntent();
   }
 
   Future<void> dispose() async {

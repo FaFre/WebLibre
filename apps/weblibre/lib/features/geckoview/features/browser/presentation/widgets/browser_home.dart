@@ -248,6 +248,7 @@ class _ContainerHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final containerColor = container.color;
+    final containerPalette = ContainerColors.palette(context, containerColor);
 
     return Container(
       width: 112,
@@ -259,22 +260,11 @@ class _ContainerHeader extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color.alphaBlend(
-              ContainerColors.forChip(containerColor),
-              colorScheme.surfaceContainerHighest,
-            ),
-            Color.alphaBlend(
-              containerColor.withValues(alpha: 0.12),
-              colorScheme.surfaceContainer,
-            ),
+            containerPalette.surfaceHighColor,
+            containerPalette.surfaceColor,
           ],
         ),
-        border: Border.all(
-          color: Color.alphaBlend(
-            containerColor.withValues(alpha: 0.25),
-            colorScheme.outlineVariant.withValues(alpha: 0.45),
-          ),
-        ),
+        border: Border.all(color: containerPalette.outlineColor),
         boxShadow: [
           BoxShadow(
             color: colorScheme.shadow.withValues(alpha: 0.08),

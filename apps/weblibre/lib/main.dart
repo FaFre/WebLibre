@@ -35,6 +35,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logger/logger.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
 import 'package:nullability/nullability.dart';
+import 'package:privacypass_client/privacypass_client.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/error_observer.dart';
 import 'package:weblibre/core/filesystem.dart';
@@ -44,12 +45,16 @@ import 'package:weblibre/core/providers/defaults.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/domain/services/app_initialization.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/engine_settings_replication.dart';
+import 'package:weblibre/features/account/domain/services/account_callback_handler.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_pruner.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_settings_sync.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_feed/presentation/controllers/fetch_articles.dart';
 import 'package:weblibre/features/web_feed/utils/fetch_entrypoint.dart';
+import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
 import 'package:weblibre/presentation/main_app.dart';
 
@@ -115,6 +120,10 @@ class _MainWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Keep the sandbox capture controller alive for the lifetime of the app
+    // so it can react to pigeon events even when no UI subscribes to it.
+    ref.watch(sandboxCaptureControllerProvider);
+
     final rootKey = ref.watch(appStateKeyProvider);
 
     final pauseTime = useRef<DateTime?>(null);
@@ -254,6 +263,17 @@ class _MainWidget extends HookConsumerWidget {
 
       unawaited(preloadUrlCleanerCatalog());
 
+      // Wire settings → local_index_setting (tab.db) so the trigger gate
+      // is in sync from the moment tabs start writing.
+      ref.read(localIndexSettingsSyncProvider);
+
+      // Cold-start prune of the local search index — drops rows the engine
+      // has forgotten (Places retention, user-initiated clears). Cheap and
+      // background; failures are logged and ignored.
+      unawaited(ref.read(localIndexPrunerProvider.notifier).prune());
+
+      // Activate account callback deep link handler
+      ref.read(accountCallbackHandlerProvider);
       if (!kDebugMode) {
         await BackgroundFetch.configure(
           BackgroundFetchConfig(
@@ -382,6 +402,8 @@ void main() async {
   };
 
   await filesystem.init();
+
+  await RustLib.init();
 
   if (!kDebugMode) {
     await BackgroundFetch.registerHeadlessTask(backgroundFetch);

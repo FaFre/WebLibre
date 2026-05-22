@@ -17,57 +17,84 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/settings/presentation/widgets/bang_group_list_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
-import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+
+const List<SettingsSectionDefinition> bangSettingsSections = [
+  SettingsSectionDefinition(
+    title: 'Usage Data',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Bang Frequencies',
+        subtitle: 'Tracked usage for bang recommendations',
+        keywords: ['usage', 'recommendations'],
+        child: _BangFrequenciesTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Repositories',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'General Bangs',
+        subtitle: 'Sync on demand from GitHub',
+        keywords: ['repository'],
+        child: BangGroupListTile(
+          group: BangGroup.general,
+          title: 'General Bangs',
+          subtitle: 'Sync on demand from GitHub',
+        ),
+      ),
+      SettingsEntryDefinition(
+        title: 'Kagi Bangs',
+        subtitle: 'Sync on demand from GitHub',
+        keywords: ['repository'],
+        child: BangGroupListTile(
+          group: BangGroup.kagi,
+          title: 'Kagi Bangs',
+          subtitle: 'Sync on-demand from GitHub',
+        ),
+      ),
+    ],
+  ),
+];
 
 class BangSettingsScreen extends HookConsumerWidget {
   const BangSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Bang Settings')),
-      body: SafeArea(
-        child: FadingScroll(
-          fadingSize: 25,
-          builder: (context, controller) {
-            return ListView(
-              controller: controller,
-              children: [
-                CustomListTile(
-                  title: 'Bang Frequencies',
-                  subtitle: 'Tracked usage for Bang recommendations',
-                  suffix: FilledButton.icon(
-                    onPressed: () async {
-                      await ref
-                          .read(bangDataRepositoryProvider.notifier)
-                          .resetFrequencies();
-                    },
-                    icon: const Icon(Icons.delete),
-                    label: const Text('Clear'),
-                  ),
-                ),
-                const SettingSubSection(name: 'Repositories'),
-                const BangGroupListTile(
-                  group: BangGroup.general,
-                  title: 'General Bangs',
-                  subtitle: 'Sync on demand from GitHub',
-                ),
-                const BangGroupListTile(
-                  group: BangGroup.kagi,
-                  title: 'Kagi Bangs',
-                  subtitle: 'Sync on-demand from GitHub',
-                ),
-              ],
-            );
-          },
-        ),
+    return const SettingsDetailScaffold(
+      title: 'Bang Settings',
+      subtitle: 'Bang shortcuts usage, repositories, and on-demand sync.',
+      icon: MdiIcons.exclamationThick,
+      sections: bangSettingsSections,
+    );
+  }
+}
+
+class _BangFrequenciesTile extends HookConsumerWidget {
+  const _BangFrequenciesTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return CustomListTile(
+      title: 'Bang Frequencies',
+      subtitle: 'Tracked usage for bang recommendations',
+      suffix: FilledButton.icon(
+        onPressed: () async {
+          await ref
+              .read(bangDataRepositoryProvider.notifier)
+              .resetFrequencies();
+        },
+        icon: const Icon(Icons.delete),
+        label: const Text('Clear'),
       ),
     );
   }

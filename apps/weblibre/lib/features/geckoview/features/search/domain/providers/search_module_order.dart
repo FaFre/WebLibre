@@ -58,11 +58,15 @@ List<ModuleOrderEntry> _mergeWithDefaults(
   final defaultSet = defaults.toSet();
   // Keep persisted entries that are still valid
   final result = persisted.where((e) => defaultSet.contains(e.type)).toList();
-  // Add any new defaults not in persisted
+  // Insert any new defaults at their position from the defaults list so newly
+  // introduced modules land where they're meant to (e.g. at the top), instead
+  // of trailing the user's persisted order.
   final persistedTypes = result.map((e) => e.type).toSet();
-  for (final type in defaults) {
+  for (var i = 0; i < defaults.length; i++) {
+    final type = defaults[i];
     if (!persistedTypes.contains(type)) {
-      result.add(ModuleOrderEntry(type: type, visible: true));
+      final insertAt = i.clamp(0, result.length);
+      result.insert(insertAt, ModuleOrderEntry(type: type, visible: true));
     }
   }
   return result;

@@ -23,15 +23,14 @@ import 'dart:ui';
 import 'package:exceptions/exceptions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:html/dom.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:http/io_client.dart';
-import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:socks5_proxy/socks_client.dart';
 
 import 'package:weblibre/core/http_error_handler.dart';
 import 'package:weblibre/data/models/web_page_info.dart';
+import 'package:weblibre/domain/services/favicon_resolver.dart';
 import 'package:weblibre/extensions/http_encoding.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/entities/browser_icon.dart';
@@ -41,184 +40,49 @@ import 'package:weblibre/utils/lru_cache.dart';
 
 part 'generic_website.g.dart';
 
-const _typeMap = {
-  "manifest": IconType.manifestIcon,
-  "icon": IconType.favicon,
-  "shortcut icon": IconType.favicon,
-  "fluid-icon": IconType.fluidIcon,
-  "apple-touch-icon": IconType.appleTouchIcon,
-  "image_src": IconType.imageSrc,
-  "apple-touch-icon image_src": IconType.appleTouchIcon,
-  "apple-touch-icon-precomposed": IconType.appleTouchIcon,
-  "og:image": IconType.openGraph,
-  "og:image:url": IconType.openGraph,
-  "og:image:secure_url": IconType.openGraph,
-  "twitter:image": IconType.twitter,
-  "msapplication-TileImage": IconType.microsoftTile,
-};
+@Riverpod(keepAlive: true)
+FaviconResolver faviconResolver(Ref ref) => DdgFaviconResolver();
 
-final class _InFlightFetch {
-  final Future<Result<WebPageInfo>> future;
-
-  const _InFlightFetch(this.future);
-}
-
-Iterable<ResourceSize> sizesToList(String? sizes) sync* {
-  if (sizes != null) {
-    final splitted = sizes
-        .split(' ')
-        .where((size) => size.contains('x'))
-        .toList();
-
-    for (final size in splitted) {
-      final dimensions = size.split('x');
-      if (dimensions.length == 2) {
-        final height = int.tryParse(dimensions[0]);
-        final width = int.tryParse(dimensions[1]);
-
-        if (width != null && height != null) {
-          yield ResourceSize(height: height, width: width);
-        }
-      }
-    }
-  }
-}
+@Riverpod(keepAlive: true)
+GeckoIconService geckoIconService(Ref ref) => GeckoIconService();
 
 @Riverpod(keepAlive: true)
 class GenericWebsiteService extends _$GenericWebsiteService {
-  final GeckoIconService _iconsService;
-
   late CacheRepository _cacheRepository;
+  late FaviconResolver _faviconResolver;
+  late GeckoIconService _iconsService;
   late final LRUCache<String, BrowserIcon> _browserIconCache;
-  final _inFlightFetches = <Uri, _InFlightFetch>{};
+  final _inFlightIconFetches = <String, Future<BrowserIcon?>>{};
 
-  GenericWebsiteService()
-    : _iconsService = GeckoIconService(),
-      _browserIconCache = LRUCache(50, onEvict: (icon) => icon.image.dispose());
+  GenericWebsiteService() : _browserIconCache = LRUCache(50);
 
   @override
   void build() {
     _cacheRepository = ref.watch(cacheRepositoryProvider.notifier);
-  }
-
-  static Map<String, dynamic> _serializeResource(Resource resource) {
-    return {
-      'url': resource.url,
-      'type': resource.type,
-      'sizes': resource.sizes.nonNulls.map((s) => [s.height, s.width]).toList(),
-      'mimeType': resource.mimeType,
-      'maskable': resource.maskable,
-    };
-  }
-
-  static Resource _deserializeResource(Map<String, dynamic> resource) {
-    return Resource(
-      url: resource['url'] as String,
-      type: resource['type'] as IconType,
-      mimeType: resource['mimeType'] as String?,
-      sizes: (resource['sizes'] as List<List<int>>)
-          .map((s) => ResourceSize(height: s[0], width: s[1]))
-          .toList(),
-      maskable: resource['maskable'] as bool,
-    );
-  }
-
-  static Uri _resolveRelativeUri(Uri baseUri, Uri uri) {
-    if (!uri.isAbsolute) {
-      return baseUri.resolveUri(uri);
-    }
-    return uri;
+    _faviconResolver = ref.watch(faviconResolverProvider);
+    _iconsService = ref.watch(geckoIconServiceProvider);
   }
 
   static bool _isHttpUrl(Uri url) => url.isHttpOrHttps;
 
-  static List<Resource> _extractIcons(Uri baseUrl, Document document) {
-    final List<Resource> icons = [];
-
-    void collectLinkIcons(String rel) {
-      final links = document.querySelectorAll('link[rel="$rel"]');
-      for (final link in links) {
-        final href = link.attributes['href'];
-        final type = _typeMap[rel];
-        final mimeType = link.attributes['type'];
-        if (href != null && type != null) {
-          if (Uri.tryParse(href) case final Uri url) {
-            icons.add(
-              Resource(
-                url: _resolveRelativeUri(baseUrl, url).toString(),
-                type: type,
-                sizes: sizesToList(link.attributes['sizes']).toList(),
-                mimeType: mimeType.isNotEmpty ? mimeType : null,
-                maskable: false,
-              ),
-            );
-          }
-        }
-      }
+  static bool _isResolverEligible(Uri url) {
+    if (!_isHttpUrl(url) || url.host.isEmpty || url.isLocalhost) {
+      return false;
     }
 
-    void collectMetaPropertyIcons(String property) {
-      final metas = document.querySelectorAll('meta[property="$property"]');
-      for (final meta in metas) {
-        final content = meta.attributes['content'];
-        final type = _typeMap[property];
-        if (content != null && type != null) {
-          if (Uri.tryParse(content) case final Uri url) {
-            icons.add(
-              Resource(
-                type: type,
-                url: _resolveRelativeUri(baseUrl, url).toString(),
-                sizes: [],
-                maskable: false,
-              ),
-            );
-          }
-        }
-      }
+    final host = url.host.toLowerCase();
+    if (host.endsWith('.onion')) {
+      return false;
     }
 
-    void collectMetaNameIcons(String name) {
-      final metas = document.querySelectorAll('meta[name="$name"]');
-      for (final meta in metas) {
-        final content = meta.attributes['content'];
-        final type = _typeMap[name];
-        if (content != null && type != null) {
-          if (Uri.tryParse(content) case final Uri url) {
-            icons.add(
-              Resource(
-                type: type,
-                url: _resolveRelativeUri(baseUrl, url).toString(),
-                sizes: [],
-                maskable: false,
-              ),
-            );
-          }
-        }
-      }
-    }
-
-    collectLinkIcons("icon");
-    collectLinkIcons("shortcut icon");
-    collectLinkIcons("fluid-icon");
-    collectLinkIcons("apple-touch-icon");
-    collectLinkIcons("image_src");
-    collectLinkIcons("apple-touch-icon image_src");
-    collectLinkIcons("apple-touch-icon-precomposed");
-
-    collectMetaPropertyIcons("og:image");
-    collectMetaPropertyIcons("og:image:url");
-    collectMetaPropertyIcons("og:image:secure_url");
-
-    collectMetaNameIcons("twitter:image");
-    collectMetaNameIcons("msapplication-TileImage");
-
-    return icons;
+    return InternetAddress.tryParse(host) == null;
   }
 
   Future<Result<WebPageInfo>> fetchPageInfo({
     required Uri url,
     required bool isImageRequest,
     required int? proxyPort,
+    bool forceRefresh = false,
   }) {
     return Result.fromAsync(() async {
       final result = await compute((args) async {
@@ -251,7 +115,6 @@ class GenericWebsiteService extends _$GenericWebsiteService {
           final document = html_parser.parse(response.bodyUnicodeFallback);
 
           final title = document.querySelector('title')?.text;
-          final resources = _extractIcons(baseUri, document);
           final feeds = await FeedFinder(
             url: baseUri,
             document: document,
@@ -259,7 +122,6 @@ class GenericWebsiteService extends _$GenericWebsiteService {
 
           return {
             'title': title,
-            'resources': resources.map(_serializeResource).toList(),
             'feeds': feeds.map((uri) => uri.toString()).toList(),
           };
         } finally {
@@ -268,28 +130,21 @@ class GenericWebsiteService extends _$GenericWebsiteService {
       }, <dynamic>[url.toString(), isImageRequest, proxyPort]);
 
       if (result['imageBytes'] case final Uint8List imageBytes) {
-        return WebPageInfo(
-          url: url,
-          favicon: await BrowserIcon.fromBytes(
-            imageBytes,
-            dominantColor: null,
-            source: IconSource.download,
-          ),
+        final favicon = await BrowserIcon.fromBytes(
+          imageBytes,
+          dominantColor: null,
+          source: IconSource.download,
         );
+        if (favicon != null) {
+          await _cacheRepository.cacheIcon(url, imageBytes);
+          _browserIconCache.set(url.origin, favicon);
+        }
+        return WebPageInfo(url: url, favicon: favicon);
       }
-
-      final resources = (result['resources']! as List<Map<String, dynamic>>)
-          .map(_deserializeResource)
-          .toList();
-
-      final favicon =
-          await getCachedIcon(url) ??
-          await loadIcon(url: url, resources: resources);
 
       return WebPageInfo(
         url: url,
         title: (result['title'] as String?)?.trim(),
-        favicon: favicon,
         feeds: Set.from(
           (result['feeds']! as List<String>).map((url) => Uri.tryParse(url)),
         ),
@@ -300,7 +155,9 @@ class GenericWebsiteService extends _$GenericWebsiteService {
   Future<BrowserIcon?> getCachedIcon(Uri url) async {
     if (_isHttpUrl(url)) {
       final cachedBrowserIcon = _browserIconCache.get(url.origin);
-      if (cachedBrowserIcon?.image.value != null) {
+      if (cachedBrowserIcon?.source == IconSource.generator) {
+        _browserIconCache.remove(url.origin);
+      } else if (cachedBrowserIcon?.image.value != null) {
         return cachedBrowserIcon;
       } else if (cachedBrowserIcon != null) {
         _browserIconCache.remove(url.origin);
@@ -308,100 +165,192 @@ class GenericWebsiteService extends _$GenericWebsiteService {
 
       final cachedIcon = await _cacheRepository.getCachedIcon(url.origin);
       if (cachedIcon != null) {
-        return _browserIconCache.set(
-          url.origin,
-          await BrowserIcon.fromBytes(
-            cachedIcon,
-            dominantColor: null,
-            source: IconSource.disk,
-          ),
+        final decoded = await BrowserIcon.fromBytes(
+          cachedIcon,
+          dominantColor: null,
+          source: IconSource.disk,
         );
+        if (decoded != null) {
+          return _browserIconCache.set(url.origin, decoded);
+        }
       }
     }
 
     return null;
   }
 
-  Future<BrowserIcon> loadIcon({
-    required Uri url,
-    required List<Resource> resources,
-    bool isPrivate = false,
-    bool waitOnNetworkLoad = true,
+  Future<BrowserIcon?> _resolveIconWithDdg(
+    Uri url, {
+    required bool cacheMissing,
+  }) {
+    final origin = url.origin;
+    final existing = _inFlightIconFetches[origin];
+    if (existing != null) {
+      return existing;
+    }
+
+    late final Future<BrowserIcon?> inFlight;
+    inFlight = _fetchAndCacheDdgIcon(url, cacheMissing: cacheMissing)
+        .whenComplete(() {
+          if (identical(_inFlightIconFetches[origin], inFlight)) {
+            _inFlightIconFetches.remove(origin);
+          }
+        });
+
+    _inFlightIconFetches[origin] = inFlight;
+    return inFlight;
+  }
+
+  Future<void> primeCachedIcon(Uri url, Uint8List bytes) async {
+    await _cacheRepository.cacheIconIfAbsent(url, bytes);
+  }
+
+  static const _iconStaleTtl = Duration(days: 30);
+  static const _missingIconStaleTtl = Duration(days: 7);
+
+  Future<void> refreshIconIfStale(Uri url) async {
+    if (!_isHttpUrl(url)) return;
+    if (_inFlightIconFetches.containsKey(url.origin)) return;
+
+    final rawIcon = await _cacheRepository.getCachedIconRaw(url.origin);
+    if (rawIcon == null) return;
+
+    final fetchedAt = await _cacheRepository.getCachedIconFetchDate(url.origin);
+    if (fetchedAt == null) return;
+
+    final ttl = _cacheRepository.isMissingIconBytes(rawIcon)
+        ? _missingIconStaleTtl
+        : _iconStaleTtl;
+    if (DateTime.now().difference(fetchedAt) < ttl) return;
+    if (!_isResolverEligible(url)) return;
+
+    if (!ref.mounted) return;
+    await _resolveIconWithDdg(
+      url,
+      cacheMissing: _cacheRepository.isMissingIconBytes(rawIcon),
+    );
+  }
+
+  Future<BrowserIcon?> getUrlIcon(
+    List<Uri> urlList, {
+    bool cacheOnly = false,
   }) async {
+    final eligibleUrls = urlList.where(_isHttpUrl).toList();
+    if (eligibleUrls.isEmpty) {
+      return null;
+    }
+
+    for (final url in eligibleUrls) {
+      final cachedIcon = await getCachedIcon(url);
+      if (cachedIcon != null) {
+        return cachedIcon;
+      }
+    }
+
+    if (cacheOnly) {
+      return _loadIconWithoutNetwork(eligibleUrls.first);
+    }
+
+    for (final url in eligibleUrls) {
+      if (!_isResolverEligible(url)) {
+        continue;
+      }
+
+      if (await _hasFreshMissingIcon(url)) {
+        continue;
+      }
+
+      if (ref.mounted) {
+        final resolved = await _resolveIconWithDdg(url, cacheMissing: true);
+        if (resolved != null) {
+          return resolved;
+        }
+      }
+    }
+
+    BrowserIcon? generatedFallback;
+    for (final url in eligibleUrls) {
+      final icon = await _loadIconWithoutNetwork(url);
+      if (icon == null) {
+        continue;
+      }
+      if (icon.source != IconSource.generator) {
+        return icon;
+      }
+      generatedFallback ??= icon;
+    }
+
+    return generatedFallback;
+  }
+
+  Future<BrowserIcon?> _fetchAndCacheDdgIcon(
+    Uri url, {
+    required bool cacheMissing,
+  }) async {
+    final result = await _faviconResolver.resolve(url);
+    switch (result.status) {
+      case FaviconResolveStatus.hit:
+        final bytes = result.bytes!;
+        final decoded = await BrowserIcon.fromBytes(
+          bytes,
+          dominantColor: null,
+          source: IconSource.download,
+        );
+        if (decoded == null) {
+          return null;
+        }
+
+        await _cacheRepository.cacheIcon(url, bytes);
+        return _browserIconCache.set(url.origin, decoded);
+      case FaviconResolveStatus.missing:
+        if (cacheMissing) {
+          await _cacheRepository.cacheMissingIcon(url);
+        }
+        return null;
+      case FaviconResolveStatus.error:
+        return null;
+    }
+  }
+
+  Future<bool> _hasFreshMissingIcon(Uri url) async {
+    final rawIcon = await _cacheRepository.getCachedIconRaw(url.origin);
+    if (!_cacheRepository.isMissingIconBytes(rawIcon)) {
+      return false;
+    }
+
+    final fetchedAt = await _cacheRepository.getCachedIconFetchDate(url.origin);
+    if (fetchedAt == null) {
+      return false;
+    }
+
+    return DateTime.now().difference(fetchedAt) < _missingIconStaleTtl;
+  }
+
+  Future<BrowserIcon?> _loadIconWithoutNetwork(Uri url) async {
     final result = await _iconsService.loadIcon(
       url: url,
-      resources: resources,
-      isPrivate: isPrivate,
-      waitOnNetworkLoad: waitOnNetworkLoad,
+      waitOnNetworkLoad: false,
     );
+
+    final decoded = await BrowserIcon.fromBytes(
+      result.image,
+      dominantColor: result.color == null ? null : Color(result.color!),
+      source: result.source,
+    );
+    if (decoded == null) {
+      return null;
+    }
+
+    if (result.source == IconSource.generator) {
+      _browserIconCache.remove(url.origin);
+      return decoded;
+    }
 
     if (result.source != IconSource.generator &&
         result.source != IconSource.memory) {
       await _cacheRepository.cacheIcon(url, result.image);
     }
 
-    return _browserIconCache.set(
-      url.origin,
-      await BrowserIcon.fromBytes(
-        result.image,
-        dominantColor: result.color.mapNotNull((color) => Color(color)),
-        source: result.source,
-      ),
-    );
-  }
-
-  Future<Result<WebPageInfo>> _deduplicatedFetchPageInfo(Uri url) {
-    final existing = _inFlightFetches[url];
-    if (existing != null) {
-      return existing.future;
-    }
-
-    late final Future<Result<WebPageInfo>> inFlightFetch;
-    inFlightFetch = fetchPageInfo(url: url, isImageRequest: true, proxyPort: null)
-        .timeout(
-          const Duration(seconds: 20),
-          onTimeout: () => Result.failure(
-            const ErrorMessage(source: 'icon', message: 'Icon fetch timeout'),
-          ),
-        )
-        .whenComplete(() {
-          // Only clear this entry if it is still the active in-flight request.
-          if (identical(_inFlightFetches[url]?.future, inFlightFetch)) {
-            _inFlightFetches.remove(url);
-          }
-        });
-
-    _inFlightFetches[url] = _InFlightFetch(inFlightFetch);
-    return inFlightFetch;
-  }
-
-  Future<BrowserIcon?> getUrlIcon(List<Uri> urlList) async {
-    for (final url in urlList) {
-      if (!_isHttpUrl(url)) {
-        continue;
-      }
-
-      final cachedIcon = await getCachedIcon(url);
-
-      if (cachedIcon != null) {
-        return cachedIcon;
-      }
-
-      if (ref.mounted) {
-        final result = await _deduplicatedFetchPageInfo(url);
-
-        if (result.isSuccess) {
-          if (result.value.favicon case final BrowserIcon favicon) {
-            if (!_browserIconCache.contains(url.origin)) {
-              _browserIconCache.set(url.origin, favicon);
-            }
-
-            return favicon;
-          }
-        }
-      }
-    }
-
-    return null;
+    return _browserIconCache.set(url.origin, decoded);
   }
 }

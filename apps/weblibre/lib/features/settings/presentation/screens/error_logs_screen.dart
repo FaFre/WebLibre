@@ -30,6 +30,7 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/settings/domain/providers/log_filter.dart';
 import 'package:weblibre/features/settings/presentation/dialogs/log_details_dialog.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 IconData _levelIcon(Level level) {
@@ -98,62 +99,75 @@ class ErrorLogsScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final minLogLevel = ref.watch(logFilterProvider);
+    final search = useSettingsSearch();
+    final query = search.normalizedQuery;
 
     final allLogs = useMemoized(() => loggerMemory.buffer.toList());
 
     final sortedLogs = useMemoized(
       () => allLogs.reversed
           .where((e) => e.level.value >= minLogLevel.value)
+          .where((e) {
+            if (query.isEmpty) return true;
+            return matchesSettingsSearch(query, [
+              if (e.origin.message != null) e.origin.message.toString(),
+              if (e.origin.error != null) e.origin.error.toString(),
+            ]);
+          })
           .toList(),
-      [allLogs, minLogLevel.value],
+      [allLogs, minLogLevel.value, query],
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Error Logs'),
-        actions: [
-          MenuAnchor(
-            builder: (context, controller, childAnchor) {
-              return TextButton.icon(
-                onPressed: controller.open,
-                icon: const Icon(Icons.filter_list),
-                label: Text(minLogLevel.name.toUpperCase()),
-              );
-            },
-            menuChildren: [
-              const Divider(height: 0),
-              _buildLevelFilterMenuItem(context, ref, minLogLevel, Level.trace),
-              _buildLevelFilterMenuItem(context, ref, minLogLevel, Level.debug),
-              _buildLevelFilterMenuItem(context, ref, minLogLevel, Level.info),
-              _buildLevelFilterMenuItem(
-                context,
-                ref,
-                minLogLevel,
-                Level.warning,
-              ),
-              _buildLevelFilterMenuItem(context, ref, minLogLevel, Level.error),
-              _buildLevelFilterMenuItem(context, ref, minLogLevel, Level.fatal),
-            ],
+    return SettingsCustomScrollScaffold(
+      title: 'Error Logs',
+      searchController: search.controller,
+      searchHintText: 'Search log messages',
+      actions: [
+        MenuAnchor(
+          builder: (context, controller, childAnchor) {
+            return TextButton.icon(
+              onPressed: controller.open,
+              icon: const Icon(Icons.filter_list),
+              label: Text(minLogLevel.name.toUpperCase()),
+            );
+          },
+          menuChildren: [
+            const Divider(height: 0),
+            _buildLevelFilterMenuItem(context, ref, minLogLevel, Level.trace),
+            _buildLevelFilterMenuItem(context, ref, minLogLevel, Level.debug),
+            _buildLevelFilterMenuItem(context, ref, minLogLevel, Level.info),
+            _buildLevelFilterMenuItem(context, ref, minLogLevel, Level.warning),
+            _buildLevelFilterMenuItem(context, ref, minLogLevel, Level.error),
+            _buildLevelFilterMenuItem(context, ref, minLogLevel, Level.fatal),
+          ],
+        ),
+        IconButton(
+          onPressed: () => _copyToClipboard(context),
+          icon: const Icon(Icons.copy),
+          tooltip: 'Copy logs',
+        ),
+      ],
+      slivers: [
+        if (sortedLogs.isEmpty)
+          const SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(child: Text('No logs available')),
+          )
+        else
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(8, 16, 8, 20),
+            // Log lines render as their own _LogEntryTile cards rather than
+            // settings-section entries because they have nothing to do with
+            // settings semantically — the SettingsSection abstraction was
+            // overkill here. We keep the SettingsSearchField + filtering for
+            // free via the shared scaffold.
+            sliver: SliverList.builder(
+              itemCount: sortedLogs.length,
+              itemBuilder: (context, index) =>
+                  _LogEntryTile(event: sortedLogs[index]),
+            ),
           ),
-          IconButton(
-            onPressed: () => _copyToClipboard(context),
-            icon: const Icon(Icons.copy),
-            tooltip: 'Copy logs',
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: sortedLogs.isEmpty
-            ? const Center(child: Text('No logs available'))
-            : ListView.builder(
-                padding: const EdgeInsets.all(8.0),
-                itemCount: sortedLogs.length,
-                itemBuilder: (context, index) {
-                  final logEntry = sortedLogs[index];
-                  return _LogEntryTile(event: logEntry);
-                },
-              ),
-      ),
+      ],
     );
   }
 

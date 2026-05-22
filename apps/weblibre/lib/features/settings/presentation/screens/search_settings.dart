@@ -17,89 +17,117 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/bang_icon.dart';
 import 'package:weblibre/features/settings/presentation/widgets/default_search_selector.dart';
-import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+
+const List<SettingsSectionDefinition> searchSettingsSections = [
+  SettingsSectionDefinition(
+    title: 'Providers',
+    keywords: ['engines'],
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Default Search Provider',
+        subtitle: 'Choose the default engine for searches',
+        keywords: ['search engine'],
+        child: _DefaultSearchProviderSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Default Autocomplete Provider',
+        subtitle: 'Choose the provider for search suggestions',
+        keywords: ['suggestions'],
+        child: _AutocompleteProviderSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Custom Search Engines',
+        subtitle: 'Add and manage your own search providers',
+        keywords: ['user bangs', 'providers'],
+        child: _CustomSearchEnginesTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Bang Shortcuts',
+    keywords: ['bangs'],
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Bang Settings',
+        subtitle: 'Manage bang repositories and usage data',
+        keywords: ['shortcuts', 'bangs'],
+        child: _BangsTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'History & Suggestions',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Search History Limit',
+        subtitle: 'Maximum number of recent searches to remember',
+        keywords: ['history', 'entries'],
+        child: _MaxSearchHistoryEntriesSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Allow clipboard access for suggestions',
+        subtitle: 'Browser can read clipboard to suggest URLs',
+        keywords: ['clipboard'],
+        child: _AllowClipboardAccessTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Autocomplete on enter',
+        subtitle: 'Accept the inline suggestion when pressing enter',
+        keywords: ['submit', 'keyboard', 'suggestions'],
+        child: _AcceptSuggestionOnSubmitTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Local Search Index',
+    keywords: ['on device search', 'index'],
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Enable local search index',
+        subtitle: 'Index visited pages locally for content search',
+        keywords: ['page text', 'history'],
+        child: _LocalIndexEnabledTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Index private tabs',
+        subtitle: 'Include private tabs in the local index',
+        keywords: ['incognito'],
+        child: _IndexPrivateTabsTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Indexed pages',
+        subtitle: 'View and clear the local index',
+        keywords: ['clear index', 'stats'],
+        child: _LocalIndexStatsTile(),
+      ),
+    ],
+  ),
+];
 
 class SearchSettingsScreen extends StatelessWidget {
   const SearchSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Search')),
-      body: SafeArea(
-        child: FadingScroll(
-          fadingSize: 25,
-          builder: (context, controller) {
-            return ListView(
-              controller: controller,
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              children: const [
-                _ProvidersSection(),
-                _BangShortcutsSection(),
-                _HistorySuggestionsSection(),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
-class _ProvidersSection extends StatelessWidget {
-  const _ProvidersSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Providers'),
-        _DefaultSearchProviderSection(),
-        _AutocompleteProviderSection(),
-        _CustomSearchEnginesTile(),
-      ],
-    );
-  }
-}
-
-class _BangShortcutsSection extends StatelessWidget {
-  const _BangShortcutsSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Bang Shortcuts'),
-        _BangsTile(),
-      ],
-    );
-  }
-}
-
-class _HistorySuggestionsSection extends StatelessWidget {
-  const _HistorySuggestionsSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'History & Suggestions'),
-        _MaxSearchHistoryEntriesSection(),
-        _AllowClipboardAccessTile(),
-      ],
+    return const SettingsDetailScaffold(
+      title: 'Search',
+      subtitle: 'Providers, bangs, history suggestions, and on-device search.',
+      icon: MdiIcons.magnify,
+      sections: searchSettingsSections,
     );
   }
 }
@@ -325,6 +353,156 @@ class _AllowClipboardAccessTile extends HookConsumerWidget {
                   currentSettings.copyWith.allowClipboardAccess(value),
             );
       },
+    );
+  }
+}
+
+class _AcceptSuggestionOnSubmitTile extends HookConsumerWidget {
+  const _AcceptSuggestionOnSubmitTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final acceptSuggestionOnSubmit = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.acceptSuggestionOnSubmit,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Autocomplete on enter'),
+      subtitle: const Text(
+        'Accept the inline suggestion when pressing enter on the keyboard',
+      ),
+      secondary: const Icon(Icons.keyboard_return),
+      value: acceptSuggestionOnSubmit,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.acceptSuggestionOnSubmit(value),
+            );
+      },
+    );
+  }
+}
+
+class _LocalIndexEnabledTile extends HookConsumerWidget {
+  const _LocalIndexEnabledTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final enabled = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.enableLocalSearchIndex,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Enable local search index'),
+      subtitle: const Text(
+        'Index visited pages locally so the browser can search their '
+        'content. Visit metadata stays in the engine; only page text is '
+        'stored on-device.',
+      ),
+      secondary: const Icon(MdiIcons.bookSearchOutline),
+      value: enabled,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.enableLocalSearchIndex(value),
+            );
+      },
+    );
+  }
+}
+
+class _IndexPrivateTabsTile extends HookConsumerWidget {
+  const _IndexPrivateTabsTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final enabled = settings.enableLocalSearchIndex;
+    final indexPrivate = settings.indexPrivateTabs;
+
+    return SwitchListTile.adaptive(
+      title: const Text('Index private tabs'),
+      subtitle: const Text(
+        'Include pages opened in private tabs in the local index. '
+        'Off by default.',
+      ),
+      secondary: const Icon(MdiIcons.incognito),
+      value: indexPrivate,
+      onChanged: enabled
+          ? (value) async {
+              await ref
+                  .read(saveGeneralSettingsControllerProvider.notifier)
+                  .save(
+                    (currentSettings) =>
+                        currentSettings.copyWith.indexPrivateTabs(value),
+                  );
+            }
+          : null,
+    );
+  }
+}
+
+class _LocalIndexStatsTile extends HookConsumerWidget {
+  const _LocalIndexStatsTile();
+
+  Future<bool?> _confirmClear(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Clear local search index?'),
+        content: const Text(
+          'This removes all locally indexed page content. Engine history '
+          '(visit metadata) is not affected.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Bump on Clear to re-trigger the count query.
+    final refreshTick = useState(0);
+    final countSnapshot = useFuture(
+      useMemoized(() => ref.read(tabDatabaseProvider).historyDao.countRows(), [
+        refreshTick.value,
+      ]),
+    );
+    final count = countSnapshot.data;
+
+    return ListTile(
+      leading: const Icon(MdiIcons.databaseOutline),
+      title: const Text('Indexed pages'),
+      subtitle: Text(count.mapNotNull((c) => '$c pages indexed') ?? 'Loading…'),
+      trailing: TextButton.icon(
+        icon: const Icon(MdiIcons.deleteOutline),
+        label: const Text('Clear'),
+        onPressed: count == null || count == 0
+            ? null
+            : () async {
+                final confirmed = await _confirmClear(context);
+                if (confirmed != true) return;
+                await ref.read(tabDatabaseProvider).historyDao.clear();
+                refreshTick.value++;
+              },
+      ),
     );
   }
 }

@@ -19,16 +19,22 @@ Map<String, dynamic> _$ModuleOrderEntryToJson(ModuleOrderEntry instance) =>
     };
 
 const _$SearchModuleTypeEnumMap = {
+  SearchModuleType.recentSearches: 'recentSearches',
+  SearchModuleType.searchProviders: 'searchProviders',
+  SearchModuleType.searchSuggestions: 'searchSuggestions',
   SearchModuleType.tabs: 'tabs',
   SearchModuleType.articles: 'articles',
   SearchModuleType.bookmarks: 'bookmarks',
   SearchModuleType.history: 'history',
+  SearchModuleType.localHistory: 'localHistory',
+  SearchModuleType.combinedHistory: 'combinedHistory',
   SearchModuleType.historyHighlights: 'historyHighlights',
   SearchModuleType.topSites: 'topSites',
   SearchModuleType.recentHistory: 'recentHistory',
   SearchModuleType.recentArticles: 'recentArticles',
   SearchModuleType.recentTabs: 'recentTabs',
   SearchModuleType.containers: 'containers',
+  SearchModuleType.frequentBangs: 'frequentBangs',
 };
 
 // **************************************************************************

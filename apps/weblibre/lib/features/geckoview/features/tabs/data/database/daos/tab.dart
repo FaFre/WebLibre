@@ -49,6 +49,19 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
 
   static const closedTabTombstoneTtl = Duration(hours: 24);
 
+  /// Soft cap for stored extracted/full content bytes (UTF-16 code units).
+  /// The trigram FTS index expansion is roughly 5–10x the source size, so an
+  /// uncapped multi-MB page DOM blows up the shadow tables disproportionately.
+  /// Anything above the cap is truncated at write time; the tail is rarely
+  /// useful for in-page text search anyway.
+  static const _contentSizeCap = 256 * 1024;
+
+  static String? _capContent(String? value) {
+    if (value == null) return null;
+    if (value.length <= _contentSizeCap) return value;
+    return value.substring(0, _contentSizeCap);
+  }
+
   TabDao(super.db);
 
   UpdateStatement<Tab, TabData> _updateByIdStatement(String id) =>
@@ -695,10 +708,10 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     await statement.write(
       TabCompanion(
         isProbablyReaderable: Value(isProbablyReaderable),
-        extractedContentMarkdown: Value(extractedContentMarkdown),
-        extractedContentPlain: Value(extractedContentPlain),
-        fullContentMarkdown: Value(fullContentMarkdown),
-        fullContentPlain: Value(fullContentPlain),
+        extractedContentMarkdown: Value(_capContent(extractedContentMarkdown)),
+        extractedContentPlain: Value(_capContent(extractedContentPlain)),
+        fullContentMarkdown: Value(_capContent(fullContentMarkdown)),
+        fullContentPlain: Value(_capContent(fullContentPlain)),
       ),
     );
   }

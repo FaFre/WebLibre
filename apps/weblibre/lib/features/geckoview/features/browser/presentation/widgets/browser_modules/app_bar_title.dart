@@ -34,7 +34,9 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/provid
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 
 class CompactAppBarTitle extends ConsumerWidget {
@@ -64,6 +66,10 @@ class CompactAppBarTitle extends ConsumerWidget {
       );
     }
 
+    final sandboxSourceUri = ref.watch(
+      sandboxSourceUriForTabProvider(tabId: tabState.id),
+    );
+
     return CompactAppBarTitleView(
       tabState: tabState,
       isTabTunneled:
@@ -71,6 +77,7 @@ class CompactAppBarTitle extends ConsumerWidget {
       siteSettingsBadgeState: siteSettingsBadgeState,
       longPressUrlCopy: settings.tabBarLongPressUrlCopy,
       containerColor: containerColor,
+      sandboxSourceUri: sandboxSourceUri,
       onSiteSettingsTap: () {
         ref
             .read(bottomSheetControllerProvider.notifier)
@@ -79,7 +86,7 @@ class CompactAppBarTitle extends ConsumerWidget {
       onTitleTap: () async {
         await SearchRoute(
           tabId: tabState.id,
-          searchText: _searchTextForTab(tabState),
+          searchText: searchTextForTab(tabState, sandboxSourceUri),
           tabType: tabState.tabMode.toTabType(),
         ).push(context);
       },
@@ -98,6 +105,7 @@ class CompactAppBarTitleView extends StatelessWidget {
     this.tabIcon,
     this.longPressUrlCopy = true,
     this.containerColor,
+    this.sandboxSourceUri,
   });
 
   final TabState tabState;
@@ -108,12 +116,16 @@ class CompactAppBarTitleView extends StatelessWidget {
   final Widget? tabIcon;
   final bool longPressUrlCopy;
   final Color? containerColor;
+  final Uri? sandboxSourceUri;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = AppColors.of(context);
     final containerColor = this.containerColor;
+    final containerPalette = containerColor != null
+        ? ContainerColors.palette(context, containerColor)
+        : null;
 
     return Row(
       children: [
@@ -154,17 +166,11 @@ class CompactAppBarTitleView extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
               decoration: BoxDecoration(
                 color: containerColor != null
-                    ? Color.alphaBlend(
-                        containerColor.withValues(alpha: 0.08),
-                        theme.colorScheme.surfaceContainerHighest,
-                      )
+                    ? containerPalette!.surfaceColor
                     : theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(24),
-                border: containerColor != null
-                    ? Border.all(
-                        color: containerColor.withValues(alpha: 0.5),
-                        width: 2,
-                      )
+                border: containerPalette != null
+                    ? Border.all(color: containerPalette.outlineColor)
                     : null,
               ),
               child: Row(
@@ -190,15 +196,23 @@ class CompactAppBarTitleView extends StatelessWidget {
                     const Icon(MdiIcons.tunnelOutline, size: 16),
                     const SizedBox(width: 4),
                   ],
-                  _SecurityStatusIcon(
-                    tabState: tabState,
-                    size: 16,
-                    containerColor: containerColor,
-                  ),
+                  if (sandboxSourceUri != null) ...[
+                    Icon(
+                      MdiIcons.archiveLockOutline,
+                      color: theme.colorScheme.tertiary,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 4),
+                  ] else
+                    _SecurityStatusIcon(
+                      tabState: tabState,
+                      size: 16,
+                      containerColor: containerPalette?.accentColor,
+                    ),
                   const SizedBox(width: 6),
                   Flexible(
                     child: UriBreadcrumb(
-                      uri: tabState.url,
+                      uri: sandboxSourceUri ?? tabState.url,
                       showHttpScheme: false,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurface,
@@ -206,7 +220,10 @@ class CompactAppBarTitleView extends StatelessWidget {
                       onTooltipTriggered: longPressUrlCopy
                           ? () async {
                               await Clipboard.setData(
-                                ClipboardData(text: tabState.url.toString()),
+                                ClipboardData(
+                                  text: (sandboxSourceUri ?? tabState.url)
+                                      .toString(),
+                                ),
                               );
                             }
                           : null,
@@ -250,6 +267,10 @@ class AppBarTitle extends ConsumerWidget {
       );
     }
 
+    final sandboxSourceUri = ref.watch(
+      sandboxSourceUriForTabProvider(tabId: tabState.id),
+    );
+
     return AppBarTitleView(
       tabState: tabState,
       isTabTunneled:
@@ -257,6 +278,7 @@ class AppBarTitle extends ConsumerWidget {
       siteSettingsBadgeState: siteSettingsBadgeState,
       longPressUrlCopy: settings.tabBarLongPressUrlCopy,
       containerColor: containerColor,
+      sandboxSourceUri: sandboxSourceUri,
       onSiteSettingsTap: () {
         ref
             .read(bottomSheetControllerProvider.notifier)
@@ -265,7 +287,7 @@ class AppBarTitle extends ConsumerWidget {
       onTitleTap: () async {
         await SearchRoute(
           tabId: tabState.id,
-          searchText: _searchTextForTab(tabState),
+          searchText: searchTextForTab(tabState, sandboxSourceUri),
           tabType: tabState.tabMode.toTabType(),
         ).push(context);
       },
@@ -284,6 +306,7 @@ class AppBarTitleView extends StatelessWidget {
     required this.longPressUrlCopy,
     this.tabIcon,
     this.containerColor,
+    this.sandboxSourceUri,
   });
 
   final TabState tabState;
@@ -294,12 +317,16 @@ class AppBarTitleView extends StatelessWidget {
   final Widget? tabIcon;
   final bool longPressUrlCopy;
   final Color? containerColor;
+  final Uri? sandboxSourceUri;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appColors = AppColors.of(context);
     final containerColor = this.containerColor;
+    final containerPalette = containerColor != null
+        ? ContainerColors.palette(context, containerColor)
+        : null;
 
     return Row(
       children: [
@@ -370,17 +397,11 @@ class AppBarTitleView extends StatelessWidget {
                       : EdgeInsets.zero,
                   decoration: BoxDecoration(
                     color: containerColor != null
-                        ? Color.alphaBlend(
-                            containerColor.withValues(alpha: 0.08),
-                            theme.colorScheme.surfaceContainerHighest,
-                          )
+                        ? containerPalette!.surfaceColor
                         : null,
                     borderRadius: BorderRadius.circular(12),
-                    border: containerColor != null
-                        ? Border.all(
-                            color: containerColor.withValues(alpha: 0.5),
-                            width: 2,
-                          )
+                    border: containerPalette != null
+                        ? Border.all(color: containerPalette.outlineColor)
                         : null,
                   ),
                   child: Row(
@@ -404,15 +425,23 @@ class AppBarTitleView extends StatelessWidget {
                         const Icon(MdiIcons.tunnelOutline, size: 14),
                         const SizedBox(width: 4),
                       ],
-                      _SecurityStatusIcon(
-                        tabState: tabState,
-                        size: 14,
-                        containerColor: containerColor,
-                      ),
+                      if (sandboxSourceUri != null) ...[
+                        Icon(
+                          MdiIcons.archiveLockOutline,
+                          color: theme.colorScheme.tertiary,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 4),
+                      ] else
+                        _SecurityStatusIcon(
+                          tabState: tabState,
+                          size: 14,
+                          containerColor: containerPalette?.accentColor,
+                        ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: UriBreadcrumb(
-                          uri: tabState.url,
+                          uri: sandboxSourceUri ?? tabState.url,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurface,
                           ),
@@ -420,7 +449,8 @@ class AppBarTitleView extends StatelessWidget {
                               ? () async {
                                   await Clipboard.setData(
                                     ClipboardData(
-                                      text: tabState.url.toString(),
+                                      text: (sandboxSourceUri ?? tabState.url)
+                                          .toString(),
                                     ),
                                   );
                                 }
@@ -508,12 +538,4 @@ class _EmptyAppBarAddressField extends StatelessWidget {
       ),
     );
   }
-}
-
-String _searchTextForTab(TabState tabState) {
-  final searchText = tabState.url.scheme == 'about'
-      ? ''
-      : tabState.url.toString();
-
-  return searchText.isEmpty ? SearchRoute.emptySearchText : searchText;
 }

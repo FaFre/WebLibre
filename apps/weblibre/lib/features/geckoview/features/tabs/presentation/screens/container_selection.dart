@@ -19,7 +19,6 @@
  */
 import 'dart:convert';
 
-import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
@@ -32,7 +31,9 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/entities/contai
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_list_tile.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class ContainerSelectionScreen extends HookConsumerWidget {
@@ -43,76 +44,70 @@ class ContainerSelectionScreen extends HookConsumerWidget {
     final containersAsync = ref.watch(watchContainersWithCountProvider);
     final selectedContainerId = ref.watch(selectedContainerProvider);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Select Container')),
-      body: SafeArea(
-        child: Skeletonizer(
-          enabled: containersAsync.isLoading,
-          child: containersAsync.when(
-            skipLoadingOnReload: true,
-            data: (containers) => FadingScroll(
-              fadingSize: 25,
-              builder: (context, controller) {
-                return ListView.builder(
-                  controller: controller,
-                  itemCount: containers.length + 1,
-                  itemBuilder: (context, index) {
-                    if (index == 0) {
-                      return ListTileTheme(
-                        selectedColor: Theme.of(
-                          context,
-                        ).colorScheme.onPrimaryContainer,
-                        selectedTileColor: Theme.of(
-                          context,
-                        ).colorScheme.primaryContainer,
-                        child: ListTile(
-                          selected: selectedContainerId == null,
-                          leading: CircleAvatar(
-                            backgroundColor: Theme.of(
-                              context,
-                            ).colorScheme.surfaceContainerHighest,
-                            child: const Icon(MdiIcons.folderHidden),
-                          ),
-                          title: const Text('Unassigned'),
-                          onTap: () {
-                            context.pop<ContainerSelectionResult>(
-                              const ContainerSelectionResult.unassigned(),
-                            );
-                          },
-                        ),
-                      );
-                    }
-
-                    final container = containers[index - 1];
-                    return ContainerListTile(
-                      container,
-                      isSelected: container.id == selectedContainerId,
+    Widget buildList(List<ContainerDataWithCount> containers) {
+      return CustomScrollView(
+        slivers: [
+          const SliverAppBar.large(title: Text('Select Container')),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                if (index == 0) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _UnassignedSelectionCard(
+                      isSelected: selectedContainerId == null,
                       onTap: () {
                         context.pop<ContainerSelectionResult>(
-                          ContainerSelectionResult.selected(container.id),
+                          const ContainerSelectionResult.unassigned(),
                         );
                       },
-                    );
-                  },
+                    ),
+                  );
+                }
+
+                final container = containers[index - 1];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _SelectionContainerCard(
+                    container: container,
+                    isSelected: container.id == selectedContainerId,
+                    onTap: () {
+                      context.pop<ContainerSelectionResult>(
+                        ContainerSelectionResult.selected(container.id),
+                      );
+                    },
+                  ),
                 );
-              },
+              }, childCount: containers.length + 1),
             ),
-            error: (error, stackTrace) => Center(
-              child: FailureWidget(
-                title: 'Failed to load containers',
-                exception: error,
-                onRetry: () => ref.invalidate(watchContainersWithCountProvider),
-              ),
+          ),
+        ],
+      );
+    }
+
+    return Scaffold(
+      body: Skeletonizer(
+        enabled: containersAsync.isLoading,
+        child: containersAsync.when(
+          skipLoadingOnReload: true,
+          data: buildList,
+          error: (error, stackTrace) => Center(
+            child: FailureWidget(
+              title: 'Failed to load containers',
+              exception: error,
+              onRetry: () => ref.invalidate(watchContainersWithCountProvider),
             ),
-            loading: () => ListView.builder(
-              itemCount: 3,
-              itemBuilder: (context, index) => ContainerListTile(
-                ContainerData(
-                  id: Namespace.nil.value,
-                  color: Colors.transparent,
-                ),
-                isSelected: false,
-                onTap: null,
+          ),
+          loading: () => buildList(
+            List.generate(
+              3,
+              (index) => ContainerDataWithCount(
+                id: Namespace.nil.value,
+                name: 'Container',
+                color: Colors.transparent,
+                orderKey: '',
+                tabCount: 0,
               ),
             ),
           ),
@@ -132,6 +127,243 @@ class ContainerSelectionScreen extends HookConsumerWidget {
         },
         label: const Text('Container'),
         icon: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class _UnassignedSelectionCard extends StatelessWidget {
+  const _UnassignedSelectionCard({
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final accentColor = colorScheme.primary;
+    final palette = ContainerColors.palette(context, accentColor);
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      decoration: BoxDecoration(
+        color: isSelected
+            ? palette.surfaceHighColor
+            : colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(20),
+        border: isSelected
+            ? Border.fromBorderSide(palette.borderSide)
+            : Border.all(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.4),
+              ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 22,
+                  backgroundColor: colorScheme.surfaceContainerHighest,
+                  foregroundColor: colorScheme.onSurfaceVariant,
+                  child: const Icon(MdiIcons.folderHidden, size: 22),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Unassigned',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: colorScheme.onSurface,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Tabs without a container',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (isSelected)
+                  Chip(
+                    avatar: Icon(
+                      Icons.check,
+                      size: 16,
+                      color: palette.onContainerColor,
+                    ),
+                    label: const Text('Active'),
+                    side: BorderSide.none,
+                    visualDensity: VisualDensity.compact,
+                    backgroundColor: palette.containerColor,
+                    labelStyle: TextStyle(color: palette.onContainerColor),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SelectionContainerCard extends StatelessWidget {
+  const _SelectionContainerCard({
+    required this.container,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final ContainerDataWithCount container;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final containerColor = container.color;
+    final tabCount = container.tabCount ?? 0;
+    final palette = ContainerColors.palette(context, containerColor);
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      decoration: BoxDecoration(
+        color: isSelected
+            ? palette.surfaceHighColor
+            : colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(20),
+        border: isSelected
+            ? Border.fromBorderSide(palette.borderSide)
+            : Border.all(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.4),
+              ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CircleAvatar(
+                      radius: 22,
+                      backgroundColor: palette.avatarBackgroundColor,
+                      foregroundColor: palette.avatarForegroundColor,
+                      child: Icon(
+                        resolveContainerIcon(container.metadata.iconData),
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          DefaultTextStyle.merge(
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: colorScheme.onSurface,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            child: IconTheme.merge(
+                              data: IconThemeData(color: colorScheme.onSurface),
+                              child: ContainerTitle(container: container),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 6,
+                            children: [
+                              _SelectionInfoChip(
+                                icon: Icons.tab_outlined,
+                                label:
+                                    '$tabCount ${tabCount == 1 ? 'tab' : 'tabs'}',
+                              ),
+                              if (container.metadata.contextualIdentity != null)
+                                const _SelectionInfoChip(
+                                  icon: Icons.cookie_outlined,
+                                  label: 'Isolated',
+                                ),
+                              if (container.metadata.useProxy)
+                                const _SelectionInfoChip(
+                                  icon: Icons.route_outlined,
+                                  label: 'Proxy',
+                                ),
+                              if (container.metadata.clearDataOnExit)
+                                const _SelectionInfoChip(
+                                  icon: Icons.cleaning_services_outlined,
+                                  label: 'Clear on exit',
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (isSelected)
+                      Chip(
+                        avatar: Icon(
+                          Icons.check,
+                          size: 16,
+                          color: palette.onContainerColor,
+                        ),
+                        label: const Text('Active'),
+                        side: BorderSide.none,
+                        visualDensity: VisualDensity.compact,
+                        backgroundColor: palette.containerColor,
+                        labelStyle: TextStyle(color: palette.onContainerColor),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SelectionInfoChip extends StatelessWidget {
+  const _SelectionInfoChip({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return IconTheme.merge(
+      data: IconThemeData(size: 14, color: theme.colorScheme.onSurfaceVariant),
+      child: DefaultTextStyle.merge(
+        style: theme.textTheme.labelMedium?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [Icon(icon), const SizedBox(width: 4), Text(label)],
+        ),
       ),
     );
   }

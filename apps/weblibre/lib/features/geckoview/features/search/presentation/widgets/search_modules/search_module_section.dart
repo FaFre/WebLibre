@@ -30,6 +30,13 @@ const previewItemsPerModule = 3;
 /// - Display state management (preview/expanded/collapsed)
 /// - Pinned header with collapse/expand and show-all/show-less controls
 /// - Visible item count calculation
+///
+/// **Always render this widget, even when [totalCount] is 0.** The header
+/// carries the long-press affordance that activates reorder mode and the
+/// visibility toggle — short-circuiting to `SizedBox.shrink()` at the call
+/// site means the user can lose their only entry-point to module
+/// configuration. Set [hideWhenEmpty] explicitly if the section should
+/// collapse silently.
 class SearchModuleSection extends ConsumerWidget {
   final String title;
   final SearchModuleType moduleType;
@@ -46,6 +53,22 @@ class SearchModuleSection extends ConsumerWidget {
   /// The maximum number of items shown in preview mode for this section.
   final int previewLimit;
 
+  /// If true and [totalCount] is 0, the entire section (header included)
+  /// is omitted. Use sparingly — see the class doc for why hiding the
+  /// header is usually undesirable.
+  final bool hideWhenEmpty;
+
+  /// Set false for modules whose body is a single non-paginated widget
+  /// (e.g. a chip strip with its own scrolling). When false:
+  ///   - the "Show all N / Show less" affordance is suppressed,
+  ///   - [visibleCount] passed to [contentSliverBuilder] is always
+  ///     [totalCount] (the section can't be partially shown),
+  ///   - the section can still be fully collapsed via the header chevron.
+  ///
+  /// This replaces the prior workaround of passing `totalCount: 0,
+  /// previewLimit: 0` to suppress pagination.
+  final bool showPagination;
+
   final List<Widget> Function({
     required bool isCollapsed,
     required int visibleCount,
@@ -60,6 +83,8 @@ class SearchModuleSection extends ConsumerWidget {
     required this.contentSliverBuilder,
     this.headerTrailing,
     this.previewLimit = previewItemsPerModule,
+    this.hideWhenEmpty = false,
+    this.showPagination = true,
   });
 
   @override
@@ -70,12 +95,17 @@ class SearchModuleSection extends ConsumerWidget {
       return MultiSliver(children: const []);
     }
 
+    if (hideWhenEmpty && totalCount == 0) {
+      return MultiSliver(children: const []);
+    }
+
     final displayState = ref.watch(
       searchModuleDisplayStateControllerProvider(moduleType),
     );
 
     final isCollapsed = displayState == SearchModuleDisplayState.collapsed;
     final showAllItems =
+        !showPagination ||
         displayState == SearchModuleDisplayState.expanded ||
         totalCount <= previewLimit;
     final visibleCount = isCollapsed
@@ -95,6 +125,7 @@ class SearchModuleSection extends ConsumerWidget {
               displayState: displayState,
               headerTrailing: isCollapsed ? null : headerTrailing,
               previewLimit: previewLimit,
+              showPagination: showPagination,
               onToggleCollapse: () => ref
                   .read(
                     searchModuleDisplayStateControllerProvider(

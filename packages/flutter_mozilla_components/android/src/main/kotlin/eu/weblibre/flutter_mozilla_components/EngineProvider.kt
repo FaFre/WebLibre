@@ -9,6 +9,7 @@ import eu.weblibre.flutter_mozilla_components.feature.ContainerProxyFeature
 import eu.weblibre.flutter_mozilla_components.feature.CookieManagerFeature
 import eu.weblibre.flutter_mozilla_components.feature.BrowserExtensionFeature
 import eu.weblibre.flutter_mozilla_components.feature.MLEngineFeature
+import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureFeature
 import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMode
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
@@ -131,6 +132,8 @@ object EngineProvider {
                 "resource://android/assets/extensions/readability_extract/",
                 "mozacReaderExtract",
             ).install(it)
+
+            SandboxCaptureFeature.install(it)
 
             BuiltInWebExtensionController(
                 "readerview@mozac.org",

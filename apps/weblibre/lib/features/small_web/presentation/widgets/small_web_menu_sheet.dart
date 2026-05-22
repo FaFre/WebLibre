@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -140,46 +141,45 @@ class _SourceKindChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return PopupMenuButton<SmallWebSourceKind>(
-      initialValue: sourceKind,
-      onSelected: (kind) {
-        if (kind != sourceKind) onChanged(kind);
-      },
-      offset: const Offset(0, 40),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      itemBuilder: (context) => [
+    return MenuAnchor(
+      builder: (context, controller, _) => InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: () => controller.isOpen ? controller.close() : controller.open(),
+        child: Chip(
+          avatar: Icon(sourceKind.icon, size: 18),
+          label: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(sourceKind.label),
+              const SizedBox(width: 2),
+              const Icon(Icons.arrow_drop_down, size: 18),
+            ],
+          ),
+          visualDensity: VisualDensity.compact,
+        ),
+      ),
+      menuChildren: [
         for (final kind in SmallWebSourceKind.values)
-          PopupMenuItem(
-            value: kind,
-            child: ListTile(
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(kind.icon, size: 20),
-              title: Text(kind.label),
-              subtitle: Text(
-                kind.description,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+          MenuItemButton(
+            onPressed: () => onChanged(kind),
+            leadingIcon: Icon(kind.icon, size: 20),
+            trailingIcon: kind == sourceKind
+                ? Icon(Icons.check, size: 20, color: colorScheme.primary)
+                : null,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(kind.label),
+                Text(
+                  kind.description,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
-              trailing: kind == sourceKind
-                  ? Icon(Icons.check, size: 20, color: colorScheme.primary)
-                  : null,
+              ],
             ),
           ),
       ],
-      child: Chip(
-        avatar: Icon(sourceKind.icon, size: 18),
-        label: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(sourceKind.label),
-            const SizedBox(width: 2),
-            const Icon(Icons.arrow_drop_down, size: 18),
-          ],
-        ),
-        visualDensity: VisualDensity.compact,
-      ),
     );
   }
 }
@@ -282,74 +282,80 @@ class _WebCategoriesPanel extends ConsumerWidget {
     final categoriesAsync = ref.watch(kagiCategoriesProvider);
 
     return categoriesAsync.when(
-      data: (kagiCategories) => ListView(
+      data: (kagiCategories) => FadingScroll(
         controller: scrollController,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        children: [
-          if (session.infoMessage != null) ...[
-            _InfoMessageCard(message: session.infoMessage!),
-            const SizedBox(height: 8),
-          ],
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        fadingSize: 25,
+        builder: (context, controller) {
+          return ListView(
+            controller: controller,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             children: [
-              Text('Refine Category', style: theme.textTheme.titleSmall),
-              FilterChip(
-                label: const Text('All'),
-                selected: session.currentCategory == null,
-                showCheckmark: false,
-                onSelected: (_) async {
-                  final notifier = ref.read(
-                    smallWebSessionControllerProvider.notifier,
-                  );
-                  notifier.setCategory(null);
-                  await notifier.discover();
-                },
+              if (session.infoMessage != null) ...[
+                _InfoMessageCard(message: session.infoMessage!),
+                const SizedBox(height: 8),
+              ],
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Refine Category', style: theme.textTheme.titleSmall),
+                  FilterChip(
+                    label: const Text('All'),
+                    selected: session.currentCategory == null,
+                    showCheckmark: false,
+                    onSelected: (_) async {
+                      final notifier = ref.read(
+                        smallWebSessionControllerProvider.notifier,
+                      );
+                      notifier.setCategory(null);
+                      await notifier.discover();
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              for (final MapEntry(key: groupName, value: slugs)
+                  in kagiCategories.groups.entries) ...[
+                _SectionHeader(title: groupName),
+                const SizedBox(height: 6),
+                _CategoryGrid(
+                  categories: kagiCategories.categories,
+                  slugs: slugs,
+                  currentCategory: session.currentCategory,
+                  onCategorySelected: (slug) async {
+                    final notifier = ref.read(
+                      smallWebSessionControllerProvider.notifier,
+                    );
+                    notifier.setCategory(
+                      session.currentCategory == slug ? null : slug,
+                    );
+                    await notifier.discover();
+                  },
+                ),
+                const SizedBox(height: 10),
+              ],
+              SmallWebAttributionCard(
+                data: SmallWebAttributionData.forSelection(
+                  sourceKind: session.sourceKind,
+                  mode: session.mode,
+                ),
+                onOpenUri: (uri) => openSmallWebAttributionUri(context, uri),
+                compact: true,
+              ),
+              const SizedBox(height: 8),
+              const _DiscoverButton(),
+              const SizedBox(height: 12),
+              SmallWebHistoryHeader(
+                sourceKind: session.sourceKind,
+                mode: session.mode,
+              ),
+              const SizedBox(height: 4),
+              SmallWebHistoryList(
+                sourceKind: session.sourceKind,
+                mode: session.mode,
               ),
             ],
-          ),
-          const SizedBox(height: 8),
-          for (final MapEntry(key: groupName, value: slugs)
-              in kagiCategories.groups.entries) ...[
-            _SectionHeader(title: groupName),
-            const SizedBox(height: 6),
-            _CategoryGrid(
-              categories: kagiCategories.categories,
-              slugs: slugs,
-              currentCategory: session.currentCategory,
-              onCategorySelected: (slug) async {
-                final notifier = ref.read(
-                  smallWebSessionControllerProvider.notifier,
-                );
-                notifier.setCategory(
-                  session.currentCategory == slug ? null : slug,
-                );
-                await notifier.discover();
-              },
-            ),
-            const SizedBox(height: 10),
-          ],
-          SmallWebAttributionCard(
-            data: SmallWebAttributionData.forSelection(
-              sourceKind: session.sourceKind,
-              mode: session.mode,
-            ),
-            onOpenUri: (uri) => openSmallWebAttributionUri(context, uri),
-            compact: true,
-          ),
-          const SizedBox(height: 8),
-          const _DiscoverButton(),
-          const SizedBox(height: 12),
-          SmallWebHistoryHeader(
-            sourceKind: session.sourceKind,
-            mode: session.mode,
-          ),
-          const SizedBox(height: 4),
-          SmallWebHistoryList(
-            sourceKind: session.sourceKind,
-            mode: session.mode,
-          ),
-        ],
+          );
+        },
       ),
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (_, _) => const SizedBox.shrink(),
@@ -394,58 +400,71 @@ class _ModeContextPanel extends ConsumerWidget {
       KagiSmallWebMode.web => (Icons.language, ''),
     };
 
-    return ListView(
+    return FadingScroll(
       controller: scrollController,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      children: [
-        if (session.infoMessage != null) ...[
-          _InfoMessageCard(message: session.infoMessage!),
-          const SizedBox(height: 8),
-        ],
-        const SizedBox(height: 16),
-        Center(
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: colorScheme.primaryContainer,
-              shape: BoxShape.circle,
+      fadingSize: 25,
+      builder: (context, controller) {
+        return ListView(
+          controller: controller,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          children: [
+            if (session.infoMessage != null) ...[
+              _InfoMessageCard(message: session.infoMessage!),
+              const SizedBox(height: 8),
+            ],
+            const SizedBox(height: 16),
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  icon,
+                  size: 36,
+                  color: colorScheme.onPrimaryContainer,
+                ),
+              ),
             ),
-            child: Icon(icon, size: 36, color: colorScheme.onPrimaryContainer),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          'Searching ${mode.label}',
-          textAlign: TextAlign.center,
-          style: theme.textTheme.titleMedium,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          description,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 16),
-        SmallWebAttributionCard(
-          data: SmallWebAttributionData.forSelection(
-            sourceKind: session.sourceKind,
-            mode: session.mode,
-          ),
-          onOpenUri: (uri) => openSmallWebAttributionUri(context, uri),
-          compact: true,
-        ),
-        const SizedBox(height: 8),
-        const _DiscoverButton(),
-        const SizedBox(height: 12),
-        SmallWebHistoryHeader(
-          sourceKind: session.sourceKind,
-          mode: session.mode,
-        ),
-        const SizedBox(height: 4),
-        SmallWebHistoryList(sourceKind: session.sourceKind, mode: session.mode),
-      ],
+            const SizedBox(height: 12),
+            Text(
+              'Searching ${mode.label}',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              description,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
+            SmallWebAttributionCard(
+              data: SmallWebAttributionData.forSelection(
+                sourceKind: session.sourceKind,
+                mode: session.mode,
+              ),
+              onOpenUri: (uri) => openSmallWebAttributionUri(context, uri),
+              compact: true,
+            ),
+            const SizedBox(height: 8),
+            const _DiscoverButton(),
+            const SizedBox(height: 12),
+            SmallWebHistoryHeader(
+              sourceKind: session.sourceKind,
+              mode: session.mode,
+            ),
+            const SizedBox(height: 4),
+            SmallWebHistoryList(
+              sourceKind: session.sourceKind,
+              mode: session.mode,
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -462,44 +481,53 @@ class _DefaultContentPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ListView(
+    return FadingScroll(
       controller: scrollController,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      children: [
-        if (session.infoMessage != null) ...[
-          _InfoMessageCard(message: session.infoMessage!),
-          const SizedBox(height: 8),
-        ],
-        SmallWebAttributionCard(
-          data: SmallWebAttributionData.forSelection(
-            sourceKind: session.sourceKind,
-            mode: session.mode,
-          ),
-          onOpenUri: (uri) => openSmallWebAttributionUri(context, uri),
-        ),
-        const SizedBox(height: 12),
-        if (session.sourceKind == SmallWebSourceKind.wander) ...[
-          _WanderConsoleCard(currentConsoleUrl: session.currentConsoleUrl),
-          const SizedBox(height: 8),
-          FilledButton.tonalIcon(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await showWanderConsoleSheet(context);
-            },
-            icon: const Icon(Icons.dns, size: 18),
-            label: const Text('Browse Consoles'),
-          ),
-          const SizedBox(height: 12),
-        ],
-        const _DiscoverButton(),
-        const SizedBox(height: 12),
-        SmallWebHistoryHeader(
-          sourceKind: session.sourceKind,
-          mode: session.mode,
-        ),
-        const SizedBox(height: 4),
-        SmallWebHistoryList(sourceKind: session.sourceKind, mode: session.mode),
-      ],
+      fadingSize: 25,
+      builder: (context, controller) {
+        return ListView(
+          controller: controller,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          children: [
+            if (session.infoMessage != null) ...[
+              _InfoMessageCard(message: session.infoMessage!),
+              const SizedBox(height: 8),
+            ],
+            SmallWebAttributionCard(
+              data: SmallWebAttributionData.forSelection(
+                sourceKind: session.sourceKind,
+                mode: session.mode,
+              ),
+              onOpenUri: (uri) => openSmallWebAttributionUri(context, uri),
+            ),
+            const SizedBox(height: 12),
+            if (session.sourceKind == SmallWebSourceKind.wander) ...[
+              _WanderConsoleCard(currentConsoleUrl: session.currentConsoleUrl),
+              const SizedBox(height: 8),
+              FilledButton.tonalIcon(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  await showWanderConsoleSheet(context);
+                },
+                icon: const Icon(Icons.dns, size: 18),
+                label: const Text('Browse Consoles'),
+              ),
+              const SizedBox(height: 12),
+            ],
+            const _DiscoverButton(),
+            const SizedBox(height: 12),
+            SmallWebHistoryHeader(
+              sourceKind: session.sourceKind,
+              mode: session.mode,
+            ),
+            const SizedBox(height: 4),
+            SmallWebHistoryList(
+              sourceKind: session.sourceKind,
+              mode: session.mode,
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -736,16 +764,25 @@ class _SmallWebMenuLoading extends StatelessWidget {
           ),
           const Divider(height: 1),
           Expanded(
-            child: ListView(
+            child: FadingScroll(
               controller: scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              children: const [
-                Bone.text(words: 2),
-                SizedBox(height: 8),
-                _SkeletonHistoryItem(),
-                _SkeletonHistoryItem(),
-                _SkeletonHistoryItem(),
-              ],
+              fadingSize: 25,
+              builder: (context, controller) {
+                return ListView(
+                  controller: controller,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  children: const [
+                    Bone.text(words: 2),
+                    SizedBox(height: 8),
+                    _SkeletonHistoryItem(),
+                    _SkeletonHistoryItem(),
+                    _SkeletonHistoryItem(),
+                  ],
+                );
+              },
             ),
           ),
         ],
@@ -798,19 +835,25 @@ class _SmallWebMenuError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    return FadingScroll(
       controller: scrollController,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      children: [
-        SizedBox(
-          height: 240,
-          child: FailureWidget(
-            title: 'Small Web unavailable',
-            exception: error,
-            onRetry: onRetry,
-          ),
-        ),
-      ],
+      fadingSize: 25,
+      builder: (context, controller) {
+        return ListView(
+          controller: controller,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          children: [
+            SizedBox(
+              height: 240,
+              child: FailureWidget(
+                title: 'Small Web unavailable',
+                exception: error,
+                onRetry: onRetry,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

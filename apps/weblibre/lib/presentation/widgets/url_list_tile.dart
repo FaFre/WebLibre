@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
@@ -26,7 +27,7 @@ class UrlListTile extends StatelessWidget {
   final Uri uri;
   final Widget? leading;
   final Widget? trailing;
-  final Color? borderColor;
+  final Color? containerColor;
   final bool showHttpScheme;
   final VoidCallback? onTap;
 
@@ -36,7 +37,7 @@ class UrlListTile extends StatelessWidget {
     required this.uri,
     this.leading,
     this.trailing,
-    this.borderColor,
+    this.containerColor,
     this.showHttpScheme = true,
     this.onTap,
   });
@@ -48,13 +49,17 @@ class UrlListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+    final containerPalette = containerColor != null
+        ? ContainerColors.palette(context, containerColor!)
+        : null;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 4.0),
       decoration: BoxDecoration(
+        color: containerPalette?.surfaceColor,
         borderRadius: _borderRadius,
-        border: borderColor != null
-            ? Border(right: BorderSide(color: borderColor!, width: 4.0))
+        border: containerPalette != null
+            ? Border.all(color: containerPalette.outlineColor)
             : null,
       ),
       child: Material(

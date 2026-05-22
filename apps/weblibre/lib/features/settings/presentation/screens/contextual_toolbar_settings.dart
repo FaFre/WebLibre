@@ -29,6 +29,7 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/toolbar_button_registry.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart';
 
 class ContextualToolbarSettingsScreen extends HookConsumerWidget {
@@ -38,138 +39,144 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final configs = ref.watch(effectiveToolbarButtonConfigsProvider);
     final repository = ref.watch(contextualToolbarConfigRepositoryProvider);
+    final search = useSettingsSearch();
+    final query = search.normalizedQuery;
+
+    bool matchesQuery(ToolbarButtonConfig config) {
+      if (query.isEmpty) return true;
+      final def = toolbarButtonRegistryById[config.buttonId];
+      if (def == null) return false;
+      return matchesSettingsSearch(query, [
+        def.label,
+        ...def.longPressActions,
+        config.buttonId,
+      ]);
+    }
 
     final visibleConfigs = useMemoized(
-      () => configs.value.where((c) => c.isVisible).toList(growable: false),
-      [configs],
+      () => configs.value
+          .where((c) => c.isVisible)
+          .where(matchesQuery)
+          .toList(growable: false),
+      [configs, query],
     );
     final hiddenConfigs = useMemoized(
-      () => configs.value.where((c) => !c.isVisible).toList(growable: false),
-      [configs],
+      () => configs.value
+          .where((c) => !c.isVisible)
+          .where(matchesQuery)
+          .toList(growable: false),
+      [configs, query],
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Customize Toolbar'),
-        actions: [
-          MenuAnchor(
-            builder: (context, controller, child) => IconButton(
-              onPressed: () {
-                if (controller.isOpen) {
-                  controller.close();
-                } else {
-                  controller.open();
-                }
-              },
-              icon: const Icon(Icons.more_vert),
-            ),
-            menuChildren: [
-              MenuItemButton(
-                leadingIcon: const Icon(Icons.restore),
-                onPressed: () => _resetToDefaults(ref),
-                child: const Text('Reset to Defaults'),
-              ),
-            ],
+    return SettingsCustomScrollScaffold(
+      title: 'Customize Toolbar',
+      searchController: search.controller,
+      searchHintText: 'Search toolbar buttons',
+      actions: [
+        MenuAnchor(
+          builder: (context, controller, child) => IconButton(
+            onPressed: () {
+              if (controller.isOpen) {
+                controller.close();
+              } else {
+                controller.open();
+              }
+            },
+            icon: const Icon(Icons.more_vert),
           ),
-        ],
-      ),
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: _ToolbarPreviewDelegate(configs: configs.value),
+          menuChildren: [
+            MenuItemButton(
+              leadingIcon: const Icon(Icons.restore),
+              onPressed: () => _resetToDefaults(ref),
+              child: const Text('Reset to Defaults'),
             ),
-            SliverToBoxAdapter(
-              child: ListTile(
-                title: Text(
-                  'Enabled',
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-              ),
-            ),
-            if (visibleConfigs.isEmpty)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: Text(
-                    'No enabled buttons. Toggle a button below to enable it.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              )
-            else
-              SliverReorderableList(
-                itemCount: visibleConfigs.length,
-                onReorder: (oldIndex, newIndex) => _onReorder(
-                  visibleConfigs,
-                  oldIndex,
-                  newIndex,
-                  repository,
-                  isVisible: true,
-                ),
-                itemBuilder: (context, index) {
-                  final config = visibleConfigs[index];
-                  return _ToolbarButtonConfigTile(
-                    key: ValueKey(config.buttonId),
-                    index: index,
-                    config: config,
-                    repository: repository,
-                  );
-                },
-              ),
-            const SliverToBoxAdapter(child: Divider(height: 1)),
-            SliverToBoxAdapter(
-              child: ListTile(
-                title: Text(
-                  'Disabled',
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-              ),
-            ),
-            if (hiddenConfigs.isEmpty)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: Text(
-                    'All buttons are enabled.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              )
-            else
-              SliverReorderableList(
-                itemCount: hiddenConfigs.length,
-                onReorder: (oldIndex, newIndex) => _onReorder(
-                  hiddenConfigs,
-                  oldIndex,
-                  newIndex,
-                  repository,
-                  isVisible: false,
-                ),
-                itemBuilder: (context, index) {
-                  final config = hiddenConfigs[index];
-                  return _ToolbarButtonConfigTile(
-                    key: ValueKey(config.buttonId),
-                    index: index,
-                    config: config,
-                    repository: repository,
-                  );
-                },
-              ),
           ],
         ),
-      ),
+      ],
+      slivers: [
+        const SliverToBoxAdapter(child: SizedBox(height: 16)),
+        SliverPersistentHeader(
+          pinned: true,
+          delegate: _ToolbarPreviewDelegate(configs: configs.value),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+          sliver: SliverToBoxAdapter(child: _SectionLabel(label: 'Enabled')),
+        ),
+        if (visibleConfigs.isEmpty)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                query.isEmpty
+                    ? 'No enabled buttons. Toggle a button below to enable it.'
+                    : 'No enabled buttons match "${search.rawQuery}".',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          )
+        else
+          SliverReorderableList(
+            itemCount: visibleConfigs.length,
+            onReorder: (oldIndex, newIndex) => _onReorder(
+              visibleConfigs,
+              oldIndex,
+              newIndex,
+              repository,
+              isVisible: true,
+            ),
+            itemBuilder: (context, index) {
+              final config = visibleConfigs[index];
+              return _ToolbarButtonConfigTile(
+                key: ValueKey(config.buttonId),
+                index: index,
+                config: config,
+                repository: repository,
+              );
+            },
+          ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+          sliver: SliverToBoxAdapter(child: _SectionLabel(label: 'Disabled')),
+        ),
+        if (hiddenConfigs.isEmpty)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                query.isEmpty
+                    ? 'All buttons are enabled.'
+                    : 'No disabled buttons match "${search.rawQuery}".',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          )
+        else
+          SliverReorderableList(
+            itemCount: hiddenConfigs.length,
+            onReorder: (oldIndex, newIndex) => _onReorder(
+              hiddenConfigs,
+              oldIndex,
+              newIndex,
+              repository,
+              isVisible: false,
+            ),
+            itemBuilder: (context, index) {
+              final config = hiddenConfigs[index];
+              return _ToolbarButtonConfigTile(
+                key: ValueKey(config.buttonId),
+                index: index,
+                config: config,
+                repository: repository,
+              );
+            },
+          ),
+        const SliverToBoxAdapter(child: SizedBox(height: 20)),
+      ],
     );
   }
 
@@ -248,6 +255,26 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
   Future<void> _resetToDefaults(WidgetRef ref) async {
     final repository = ref.read(contextualToolbarConfigRepositoryProvider);
     await repository.replaceAll(defaultToolbarButtonConfigs.value);
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
   }
 }
 

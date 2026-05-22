@@ -512,6 +512,8 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
 
         // 2. Stop component-level services
         try {
+            GlobalComponents.stopPrivateTabsNotificationFeature()
+
             GlobalComponents.components?.let { components ->
                 // Stop the FxA web channel feature
                 runCatching { components.services.fxaWebChannelFeature.stop() }

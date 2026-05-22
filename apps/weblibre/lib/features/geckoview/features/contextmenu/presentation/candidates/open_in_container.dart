@@ -184,7 +184,8 @@ class _ContainerPickerSheet extends HookConsumerWidget {
                   itemBuilder: (context, index) => ContainerListTile(
                     ContainerData(
                       id: Namespace.nil.value,
-                      color: Colors.transparent,
+                      color: Theme.of(context).colorScheme.primary,
+                      orderKey: '',
                     ),
                     isSelected: false,
                     onTap: null,

@@ -109,6 +109,8 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     // Browser scroll-handling detection feature
     private var browserHandlingScrollFeature: BrowserHandlingScrollFeature? = null
 
+    protected open val shouldStartBrowserHandlingScrollFeature: Boolean = true
+
     // Registers a photo picker activity launcher in single-select mode.
     private val singleMediaPicker =
         AndroidPhotoPicker.singleMediaPicker(
@@ -568,8 +570,10 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     it.start(binding.root)
                 }
 
-                browserHandlingScrollFeature = BrowserHandlingScrollFeature(viewportEvents).also {
-                    it.start()
+                if (shouldStartBrowserHandlingScrollFeature) {
+                    browserHandlingScrollFeature = BrowserHandlingScrollFeature(viewportEvents).also {
+                        it.start()
+                    }
                 }
             }
 

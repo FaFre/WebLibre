@@ -30,8 +30,8 @@ import 'package:weblibre/features/bangs/domain/providers/search.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/dialogs/reset_bang_dialog.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/bang_chip_strip.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
-import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/sliding_pill_toggle.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
@@ -92,7 +92,6 @@ class SmartBangSelector extends HookConsumerWidget {
       frequentBangListProvider.select((v) => v.value ?? const []),
     );
 
-    // Use search results if available, otherwise fall back to frequent bangs
     final globalBangs = searchBangs.isNotEmpty ? searchBangs : frequentBangs;
 
     // Trigger search when text changes
@@ -164,8 +163,11 @@ class _TabbedBangSelector extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tabController = useTabController(initialLength: 2);
-    final tabIndex = useState(0);
+    final tabController = useTabController(
+      initialLength: 2,
+      initialIndex: isSiteSelected ? 1 : 0,
+    );
+    final tabIndex = useState(isSiteSelected ? 1 : 0);
 
     useEffect(() {
       void listener() => tabIndex.value = tabController.index;
@@ -181,7 +183,7 @@ class _TabbedBangSelector extends HookConsumerWidget {
           padding: const EdgeInsets.only(right: 12.0),
           child: SlidingPillToggle(
             selectedIndex: tabIndex.value,
-            labels: const ['Search On This Site', 'All Providers'],
+            labels: const ['All Providers', 'Search On This Site'],
             onChanged: (index) => tabController.animateTo(index),
           ),
         ),
@@ -191,21 +193,21 @@ class _TabbedBangSelector extends HookConsumerWidget {
           child: TabBarView(
             controller: tabController,
             children: [
-              // Site tab - uses domain-scoped provider, clears global on select
-              _BangChipsList(
-                domain: domain,
-                siteDomain: domain, // Pass for mutual exclusion
-                bangs: siteBangs,
-                selectedBang: isSiteSelected ? activeBang : null,
-                searchTextController: searchTextController,
-                displayMenu: displayMenu,
-              ),
               // All tab - uses global provider, clears site on select
               _BangChipsList(
                 domain: null,
                 siteDomain: domain, // Pass for mutual exclusion
                 bangs: globalBangs,
                 selectedBang: !isSiteSelected ? activeBang : null,
+                searchTextController: searchTextController,
+                displayMenu: displayMenu,
+              ),
+              // Site tab - uses domain-scoped provider, clears global on select
+              _BangChipsList(
+                domain: domain,
+                siteDomain: domain, // Pass for mutual exclusion
+                bangs: siteBangs,
+                selectedBang: isSiteSelected ? activeBang : null,
                 searchTextController: searchTextController,
                 displayMenu: displayMenu,
               ),
@@ -273,38 +275,16 @@ class _BangChipsList extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasContent = selectedBang != null || bangs.isNotEmpty;
-
-    return SizedBox(
-      height: 48,
-      child: Row(
-        children: [
-          if (hasContent)
-            Expanded(
-              child: SelectableChips(
-                itemId: (bang) => bang.trigger,
-                itemAvatar: (bang) =>
-                    UrlIcon([bang.getDefaultUrl()], iconSize: 20),
-                itemLabel: (bang) => Text(bang.websiteName),
-                itemTooltip: (bang) => bang.trigger,
-                availableItems: bangs,
-                selectedItem: selectedBang,
-                onSelected: (bang) => _handleSelection(context, ref, bang),
-                onDeleted: (bang) => _handleDeletion(context, ref, bang),
-              ),
-            )
-          else if (displayMenu) ...[
-            const _DefaultSearchProviderChip(),
-            const Spacer(),
-          ] else
-            const Spacer(),
-          if (displayMenu)
-            IconButton(
-              onPressed: () => _openBangSearch(context, ref),
-              icon: const Icon(Icons.chevron_right),
-            ),
-        ],
-      ),
+    return BangChipStrip(
+      bangs: bangs,
+      selectedBang: selectedBang,
+      prefixItems: displayMenu
+          ? const [_DefaultSearchProviderChip()]
+          : const [],
+      showTrailingMenu: displayMenu,
+      onMenuPressed: displayMenu ? () => _openBangSearch(context, ref) : null,
+      onSelected: (bang) => _handleSelection(context, ref, bang),
+      onDeleted: (bang) => _handleDeletion(context, ref, bang),
     );
   }
 

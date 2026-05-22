@@ -22,6 +22,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
 
+import 'package:fading_scroll/fading_scroll.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -73,6 +74,7 @@ import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/controllers/website_title.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
@@ -122,47 +124,55 @@ class _BrowserMenuSheet extends HookConsumerWidget {
 
             // Scrollable content
             Expanded(
-              child: ListView(
+              child: FadingScroll(
                 controller: scrollController,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                children: [
-                  // Quick toggles (Desktop Mode / Reader Mode)
-                  if (selectedTabId != null) ...[
-                    _QuickTogglesGrid(selectedTabId: selectedTabId),
-                    const SizedBox(height: 16),
-                  ],
+                fadingSize: 25,
+                builder: (context, controller) {
+                  return ListView(
+                    controller: controller,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    children: [
+                      // Quick toggles (Desktop Mode / Reader Mode)
+                      if (selectedTabId != null) ...[
+                        _QuickTogglesGrid(selectedTabId: selectedTabId),
+                        const SizedBox(height: 16),
+                      ],
 
-                  // Page actions
-                  if (selectedTabId != null) ...[
-                    _PageActionsCard(selectedTabId: selectedTabId),
-                    const SizedBox(height: 16),
-                  ],
+                      // Page actions
+                      if (selectedTabId != null) ...[
+                        _PageActionsCard(selectedTabId: selectedTabId),
+                        const SizedBox(height: 16),
+                      ],
 
-                  // Extensions
-                  _ExtensionsCard(),
-                  const SizedBox(height: 16),
+                      // Extensions
+                      _ExtensionsCard(),
+                      const SizedBox(height: 16),
 
-                  // Tab actions
-                  if (selectedTabId != null) ...[
-                    _TabActionsCard(selectedTabId: selectedTabId),
-                    const SizedBox(height: 16),
-                  ],
+                      // Tab actions
+                      if (selectedTabId != null) ...[
+                        _TabActionsCard(selectedTabId: selectedTabId),
+                        const SizedBox(height: 16),
+                      ],
 
-                  // Quick links grid
-                  _QuickLinksGrid(showContainerUi: settings.showContainerUi),
-                  const SizedBox(height: 16),
+                      // Quick links grid
+                      _QuickLinksGrid(
+                        showContainerUi: settings.showContainerUi,
+                      ),
+                      const SizedBox(height: 16),
 
-                  // Profile
-                  _ProfileCard(),
-                  const SizedBox(height: 16),
+                      // Profile
+                      _ProfileCard(),
+                      const SizedBox(height: 16),
 
-                  // App
-                  const _SettingsCard(),
-                  const SizedBox(height: 24),
-                ],
+                      // App
+                      const _SettingsCard(),
+                      const SizedBox(height: 24),
+                    ],
+                  );
+                },
               ),
             ),
 
@@ -513,12 +523,15 @@ class _PageActionsCard extends HookConsumerWidget {
           title: const Text('Add Bookmark'),
           onTap: () async {
             final tabState = ref.read(tabStateProvider(selectedTabId))!;
+            final bookmarkUrl =
+                ref.read(sandboxSourceUriForTabProvider(tabId: tabState.id)) ??
+                tabState.url;
             Navigator.pop(context);
             await BookmarkEntryAddRoute(
               bookmarkInfo: jsonEncode(
                 BookmarkInfo(
                   title: tabState.titleOrAuthority,
-                  url: tabState.url.toString(),
+                  url: bookmarkUrl.toString(),
                 ).encode(),
               ),
             ).push(context);
@@ -737,7 +750,10 @@ class _PinTopSiteTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tabState = ref.watch(tabStateProvider(selectedTabId));
-    final url = tabState?.url;
+    final sandboxSourceUri = ref.watch(
+      sandboxSourceUriForTabProvider(tabId: selectedTabId),
+    );
+    final url = sandboxSourceUri ?? tabState?.url;
 
     final isPinned = useCachedFuture(
       () => url != null
@@ -978,6 +994,11 @@ class _CloneTabExpansion extends ConsumerWidget {
             icon: MdiIcons.tab,
             onTap: () async {
               final tabState = ref.read(tabStateProvider(selectedTabId))!;
+              final cloneUrl =
+                  ref.read(
+                    sandboxSourceUriForTabProvider(tabId: tabState.id),
+                  ) ??
+                  tabState.url;
               final containerData = await ref
                   .read(tabDataRepositoryProvider.notifier)
                   .getTabContainerData(selectedTabId);
@@ -987,7 +1008,7 @@ class _CloneTabExpansion extends ConsumerWidget {
                         .read(tabRepositoryProvider.notifier)
                         .addTab(
                           tabMode: TabMode.regular,
-                          url: tabState.url,
+                          url: cloneUrl,
                           containerSelection: containerData == null
                               ? const TabContainerSelection.unassigned()
                               : TabContainerSelection.specific(containerData),
@@ -1017,6 +1038,11 @@ class _CloneTabExpansion extends ConsumerWidget {
             iconColor: appColors.privateTabPurple,
             onTap: () async {
               final tabState = ref.read(tabStateProvider(selectedTabId))!;
+              final cloneUrl =
+                  ref.read(
+                    sandboxSourceUriForTabProvider(tabId: tabState.id),
+                  ) ??
+                  tabState.url;
               final containerData = await ref
                   .read(tabDataRepositoryProvider.notifier)
                   .getTabContainerData(selectedTabId);
@@ -1025,7 +1051,7 @@ class _CloneTabExpansion extends ConsumerWidget {
                   ? await ref
                         .read(tabRepositoryProvider.notifier)
                         .addTab(
-                          url: tabState.url,
+                          url: cloneUrl,
                           tabMode: TabMode.private,
                           containerSelection: containerData == null
                               ? const TabContainerSelection.unassigned()
@@ -1057,6 +1083,11 @@ class _CloneTabExpansion extends ConsumerWidget {
               iconColor: appColors.isolatedTabTeal,
               onTap: () async {
                 final tabState = ref.read(tabStateProvider(selectedTabId))!;
+                final cloneUrl =
+                    ref.read(
+                      sandboxSourceUriForTabProvider(tabId: tabState.id),
+                    ) ??
+                    tabState.url;
                 final containerData = await ref
                     .read(tabDataRepositoryProvider.notifier)
                     .getTabContainerData(selectedTabId);
@@ -1064,7 +1095,7 @@ class _CloneTabExpansion extends ConsumerWidget {
                 final tabId = await ref
                     .read(tabRepositoryProvider.notifier)
                     .addTab(
-                      url: tabState.url,
+                      url: cloneUrl,
                       tabMode: TabMode.newIsolated(),
                       containerSelection: containerData == null
                           ? const TabContainerSelection.unassigned()
@@ -1289,7 +1320,12 @@ class _ShareExpansion extends HookConsumerWidget {
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final catalogAsync = ref.watch(urlCleanerCatalogServiceProvider);
     final tabState = ref.watch(tabStateProvider(selectedTabId));
-    final tabUrl = tabState?.url;
+    final sandboxSourceUri = ref.watch(
+      sandboxSourceUriForTabProvider(tabId: selectedTabId),
+    );
+    // Sandbox-captured tabs: every share/copy/QR/cleaner action must operate
+    // on the canonical source URL — never the loopback loader.
+    final tabUrl = sandboxSourceUri ?? tabState?.url;
 
     final cleanedUrl = useState<Uri?>(null);
     final cleaner = useUrlCleanerController(
@@ -1526,16 +1562,23 @@ class _SendToDeviceExpansion extends ConsumerWidget {
                         );
                         if (tabState == null) return;
 
+                        final sendUrl =
+                            ref.read(
+                              sandboxSourceUriForTabProvider(
+                                tabId: tabState.id,
+                              ),
+                            ) ??
+                            tabState.url;
                         final title = tabState.title.isNotEmpty
                             ? tabState.title
-                            : tabState.url.toString();
+                            : sendUrl.toString();
 
                         final success = await ref
                             .read(syncRepositoryProvider.notifier)
                             .sendTabToDevice(
                               deviceId: device.deviceId,
                               title: title,
-                              url: tabState.url.toString(),
+                              url: sendUrl.toString(),
                               private: tabState.tabMode == TabMode.private,
                             );
 
@@ -1884,7 +1927,7 @@ class _QuickLinksGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final torConnected = ref.watch(
+    final isTorActive = ref.watch(
       torProxyServiceProvider.select((value) => value.value?.isRunning == true),
     );
 
@@ -1955,7 +1998,7 @@ class _QuickLinksGrid extends ConsumerWidget {
                   Navigator.pop(context);
                   await const TorProxyRoute().push(context);
                 },
-                badge: torConnected,
+                badge: isTorActive,
                 badgeColor: AppColors.of(context).torActiveGreen,
               ),
             ),
@@ -1980,8 +2023,6 @@ class _QuickLinksGrid extends ConsumerWidget {
                 },
               ),
             ),
-            const SizedBox(width: 8),
-            const Expanded(child: SizedBox.shrink()),
           ],
         ),
       ],

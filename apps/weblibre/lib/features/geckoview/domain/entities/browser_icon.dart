@@ -31,15 +31,18 @@ class BrowserIcon with FastEquatable {
   final Color? dominantColor;
   final IconSource source;
 
-  static Future<BrowserIcon> fromBytes(
+  static Future<BrowserIcon?> fromBytes(
     Uint8List bytes, {
     required Color? dominantColor,
     required IconSource source,
   }) async {
     final image = await tryDecodeImage(bytes);
+    if (image == null) {
+      return null;
+    }
 
     return BrowserIcon(
-      image: image!,
+      image: image,
       dominantColor: dominantColor,
       source: source,
     );

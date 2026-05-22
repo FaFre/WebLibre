@@ -85,12 +85,20 @@ class ContainerData with FastEquatable {
   final String? name;
   @ColorJsonConverter()
   final Color color;
+
+  final String orderKey;
+
+  @JsonKey(defaultValue: false)
+  final bool isPinned;
+
   final ContainerMetadata metadata;
 
   ContainerData({
     required this.id,
     this.name,
     required this.color,
+    required this.orderKey,
+    this.isPinned = false,
     ContainerMetadata? metadata,
   }) : metadata = metadata ?? ContainerMetadata.withDefaults();
 
@@ -100,7 +108,14 @@ class ContainerData with FastEquatable {
   Map<String, dynamic> toJson() => _$ContainerDataToJson(this);
 
   @override
-  List<Object?> get hashParameters => [id, name, color, metadata];
+  List<Object?> get hashParameters => [
+    id,
+    name,
+    color,
+    orderKey,
+    isPinned,
+    metadata,
+  ];
 }
 
 @JsonSerializable()
@@ -111,6 +126,8 @@ class ContainerDataWithCount extends ContainerData {
     required super.id,
     super.name,
     required super.color,
+    required super.orderKey,
+    super.isPinned,
     super.metadata,
     required this.tabCount,
   });

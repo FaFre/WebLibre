@@ -23,6 +23,7 @@ import 'package:exceptions/exceptions.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/providers/format.dart';
 import 'package:weblibre/features/about/domain/providers.dart';
+import 'package:weblibre/features/account/domain/services/account_callback_handler.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 import 'package:weblibre/features/bangs/domain/repositories/sync.dart';
 
@@ -77,6 +78,9 @@ class AppInitializationService extends _$AppInitializationService {
       for (final MapEntry(value: result) in bangSyncResults.entries) {
         result.onFailure(errors.add);
       }
+
+      // Activate account callback deep link handler
+      ref.read(accountCallbackHandlerProvider);
 
       return (initialized: true, stage: null, errors: errors);
     });

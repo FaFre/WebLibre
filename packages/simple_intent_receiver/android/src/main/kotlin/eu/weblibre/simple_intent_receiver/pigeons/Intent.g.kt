@@ -270,6 +270,43 @@ private open class IntentPigeonCodec : StandardMessageCodec() {
   }
 }
 
+/** Generated interface from Pigeon that represents a handler of messages from Flutter. */
+interface IntentHost {
+  /**
+   * Returns the launch intent that started the activity, if any.
+   * This allows Dart to retrieve an intent that arrived before
+   * IntentEvents.setUp() was called (cold-start deep links).
+   * Returns null if no launch intent is pending.
+   */
+  fun getInitialIntent(): Intent?
+
+  companion object {
+    /** The codec used by IntentHost. */
+    val codec: MessageCodec<Any?> by lazy {
+      IntentPigeonCodec()
+    }
+    /** Sets up an instance of `IntentHost` to handle messages through the `binaryMessenger`. */
+    @JvmOverloads
+    fun setUp(binaryMessenger: BinaryMessenger, api: IntentHost?, messageChannelSuffix: String = "") {
+      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.simple_intent_receiver.IntentHost.getInitialIntent$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.getInitialIntent())
+            } catch (exception: Throwable) {
+              IntentPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+    }
+  }
+}
 /** Generated class from Pigeon that represents Flutter messages that can be called from Kotlin. */
 class IntentEvents(private val binaryMessenger: BinaryMessenger, private val messageChannelSuffix: String = "") {
   companion object {

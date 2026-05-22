@@ -41,7 +41,7 @@ final class CacheRepositoryProvider
   }
 }
 
-String _$cacheRepositoryHash() => r'e3cd7461aefe9e034a663169cd81ab7f69c2640e';
+String _$cacheRepositoryHash() => r'60caff8364a3996502a6309925903190db71cd8f';
 
 abstract class _$CacheRepository extends $Notifier<void> {
   void build();

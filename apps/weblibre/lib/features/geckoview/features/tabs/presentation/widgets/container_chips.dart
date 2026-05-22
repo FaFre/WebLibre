@@ -17,8 +17,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -31,11 +34,36 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/containe
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chip_content.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/tab_drag_container_target.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
+
+ContainerColorPalette _palette(BuildContext context, Color color) {
+  return ContainerColors.palette(context, color);
+}
+
+Color _chipColor(BuildContext context, Color color, bool isSelected) {
+  final palette = _palette(context, color);
+  return isSelected ? palette.selectedBackgroundColor : palette.backgroundColor;
+}
+
+BorderSide _chipSide(BuildContext context, Color color, bool isSelected) {
+  final palette = _palette(context, color);
+  return isSelected ? palette.selectedBorderSide : palette.borderSide;
+}
+
+InlineCountBadge _countBadge(BuildContext context, Color color, int count) {
+  final palette = _palette(context, color);
+  return InlineCountBadge(
+    count: count,
+    backgroundColor: palette.badgeBackgroundColor,
+    foregroundColor: palette.badgeForegroundColor,
+  );
+}
 
 class _UnassignedContainerChip extends ConsumerWidget {
   final int? Function()? containerBadgeCount;
@@ -61,11 +89,22 @@ class _UnassignedContainerChip extends ConsumerWidget {
 
     return FilterChip(
       avatar: const Icon(MdiIcons.folderHidden),
-      labelPadding: (tabCount > 0) ? null : const EdgeInsets.only(right: 2.0),
-      label: (tabCount > 0)
-          ? Text(tabCount.toString())
-          : const SizedBox.shrink(),
+      labelPadding: const EdgeInsets.only(left: 6),
+      label: SizedBox(
+        height: 20,
+        child: Center(
+          child: _countBadge(
+            context,
+            Theme.of(context).colorScheme.primary,
+            tabCount,
+          ),
+        ),
+      ),
+      color: WidgetStatePropertyAll(
+        _chipColor(context, Theme.of(context).colorScheme.primary, selected),
+      ),
       selected: selected,
+      side: _chipSide(context, Theme.of(context).colorScheme.primary, selected),
       showCheckmark: false,
       onSelected: (value) {
         if (value) {
@@ -91,9 +130,14 @@ class _SyncedTabsChip extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return FilterChip(
       avatar: const Icon(Icons.devices_other),
-      labelPadding: count > 0 ? null : const EdgeInsets.only(right: 2.0),
-      label: count > 0 ? Text(count.toString()) : const SizedBox.shrink(),
+      label: count > 0
+          ? _countBadge(context, Theme.of(context).colorScheme.primary, count)
+          : const SizedBox.shrink(),
+      color: WidgetStatePropertyAll(
+        _chipColor(context, Theme.of(context).colorScheme.primary, selected),
+      ),
       selected: selected,
+      side: _chipSide(context, Theme.of(context).colorScheme.primary, selected),
       showCheckmark: false,
       onSelected: (value) {
         if (value) {
@@ -134,6 +178,14 @@ class _ContainerSuggestionsChip extends ConsumerWidget {
         return FilterChip(
           avatar: const Icon(MdiIcons.autoFix),
           label: Text(data!.length.toString()),
+          color: WidgetStatePropertyAll(
+            _chipColor(context, Theme.of(context).colorScheme.primary, false),
+          ),
+          side: _chipSide(
+            context,
+            Theme.of(context).colorScheme.primary,
+            false,
+          ),
           showCheckmark: false,
           onSelected: (_) async {
             await const ContainerDraftRoute().push(context);
@@ -149,9 +201,17 @@ class _ContainerSuggestionsChip extends ConsumerWidget {
         return const SizedBox.shrink();
       },
       loading: () {
-        return const FilterChip(
-          avatar: Icon(MdiIcons.autoFix),
-          label: Skeletonizer(child: Text('0')),
+        return FilterChip(
+          avatar: const Icon(MdiIcons.autoFix),
+          label: const Skeletonizer(child: Text('0')),
+          color: WidgetStatePropertyAll(
+            _chipColor(context, Theme.of(context).colorScheme.primary, false),
+          ),
+          side: _chipSide(
+            context,
+            Theme.of(context).colorScheme.primary,
+            false,
+          ),
           showCheckmark: false,
           onSelected: null,
         );
@@ -215,10 +275,79 @@ class ContainerChips extends HookConsumerWidget {
       searchTextListenable,
       () => searchTextListenable?.value.text,
     );
+    final chipScrollController = useScrollController();
+    final activeItemKey = useRef(GlobalKey());
+    final isUserScrolling = useRef(false);
+    final userScrollTimer = useRef<Timer?>(null);
+
+    useEffect(() {
+      return userScrollTimer.value?.cancel;
+    }, []);
 
     final containersAsync = ref.watch(
       matchSortedContainersWithCountProvider(searchText),
     );
+
+    useEffect(() {
+      final selectedId = selectedContainer?.id;
+      if (selectedId == null || isUserScrolling.value) {
+        return null;
+      }
+
+      final renderedContainers =
+          containerFilter.mapNotNull(
+            (filter) => containersAsync.value?.where(filter).toList(),
+          ) ??
+          containersAsync.value;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final activeContext = activeItemKey.value.currentContext;
+        if (activeContext != null) {
+          Scrollable.ensureVisible(
+            activeContext,
+            alignment: 0.5,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+          );
+          return;
+        }
+
+        if (!chipScrollController.hasClients || renderedContainers == null) {
+          return;
+        }
+
+        final activeIndex = renderedContainers.indexWhere(
+          (container) => container.id == selectedId,
+        );
+        if (activeIndex < 0) {
+          return;
+        }
+
+        final totalItems = renderedContainers.length;
+        final maxExtent = chipScrollController.position.maxScrollExtent;
+        if (totalItems <= 0 || maxExtent <= 0) {
+          return;
+        }
+
+        chipScrollController.jumpTo(
+          (activeIndex / totalItems * maxExtent).clamp(0.0, maxExtent),
+        );
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final retryContext = activeItemKey.value.currentContext;
+          if (retryContext != null) {
+            Scrollable.ensureVisible(
+              retryContext,
+              alignment: 0.5,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOut,
+            );
+          }
+        });
+      });
+
+      return null;
+    }, [selectedContainer?.id, containersAsync.value]);
 
     return containersAsync.when(
       skipLoadingOnReload: true,
@@ -235,50 +364,100 @@ class ContainerChips extends HookConsumerWidget {
           return const SizedBox.shrink();
         }
 
-        return SizedBox(
-          height: 48,
-          child: Row(
-            children: [
-              Expanded(
-                child:
-                    SelectableChips<
-                      ContainerDataWithCount,
-                      ContainerData,
-                      String
-                    >(
-                      enableDelete: false,
-                      maxCount: null,
-                      itemId: (container) => container.id,
-                      itemBackgroundColor: (container) =>
-                          ContainerColors.forChip(container.color),
-                      selectedBorderColor: Theme.of(
-                        context,
-                      ).colorScheme.primary,
-                      itemLabel: (container) =>
-                          ContainerTitle(container: container),
-                      itemBadgeCount: (container) =>
-                          containerBadgeCount?.call(container) ??
-                          container.tabCount,
-                      itemWrap: enableDragAndDrop
-                          ? (child, container) {
-                              return TabDragContainerTarget(
-                                container: container,
-                                child: child,
-                              );
-                            }
-                          : null,
-                      prefixListItems: [
-                        if (showSyncedChip)
-                          _SyncedTabsChip(
-                            selected: syncedChipSelected,
-                            count: syncedTabCount,
-                            onSelected: onSyncedChipSelected ?? () {},
-                          ),
-                        if (showUnassignedChip)
-                          enableDragAndDrop
-                              ? TabDragContainerTarget(
-                                  container: null,
-                                  child: _UnassignedContainerChip(
+        return NotificationListener<UserScrollNotification>(
+          onNotification: (notification) {
+            userScrollTimer.value?.cancel();
+            if (notification.direction != ScrollDirection.idle) {
+              isUserScrolling.value = true;
+            }
+            userScrollTimer.value = Timer(
+              const Duration(milliseconds: 1500),
+              () {
+                isUserScrolling.value = false;
+              },
+            );
+            return false;
+          },
+          child: SizedBox(
+            height: 48,
+            child: Row(
+              children: [
+                Expanded(
+                  child:
+                      SelectableChips<
+                        ContainerDataWithCount,
+                        ContainerData,
+                        String
+                      >(
+                        enableDelete: false,
+                        maxCount: null,
+                        scrollController: chipScrollController,
+                        activeItemKey: activeItemKey.value,
+                        cacheExtent: 500,
+                        itemId: (container) => container.id,
+                        decoration: SelectableChipDecoration(
+                          color: (container, isSelected) =>
+                              _chipColor(context, container.color, isSelected),
+                          side: (container, isSelected) =>
+                              _chipSide(context, container.color, isSelected),
+                        ),
+                        itemAvatar: (container) {
+                          final isSelected =
+                              selectedContainer?.id == container.id;
+                          return buildContainerChipAvatar(
+                            context,
+                            container,
+                            isSelected,
+                          );
+                        },
+                        selectedBorderColor: Theme.of(
+                          context,
+                        ).colorScheme.primary,
+                        itemLabel: (container) {
+                          final isSelected =
+                              selectedContainer?.id == container.id;
+                          final count =
+                              containerBadgeCount?.call(container) ??
+                              container.tabCount;
+                          return buildContainerChipLabel(
+                            context,
+                            container,
+                            isSelected,
+                            trailing: count != null && count > 0
+                                ? _countBadge(context, container.color, count)
+                                : null,
+                          );
+                        },
+                        itemWrap: enableDragAndDrop
+                            ? (child, container) {
+                                return TabDragContainerTarget(
+                                  container: container,
+                                  child: child,
+                                );
+                              }
+                            : null,
+                        prefixListItems: [
+                          if (showSyncedChip)
+                            _SyncedTabsChip(
+                              selected: syncedChipSelected,
+                              count: syncedTabCount,
+                              onSelected: onSyncedChipSelected ?? () {},
+                            ),
+                          if (showUnassignedChip)
+                            enableDragAndDrop
+                                ? TabDragContainerTarget(
+                                    container: null,
+                                    child: _UnassignedContainerChip(
+                                      containerBadgeCount: () =>
+                                          containerBadgeCount?.call(null),
+                                      selected:
+                                          unassignedChipSelected ??
+                                          (selectedContainer == null &&
+                                              !syncedChipSelected),
+                                      onSelected: onSelected,
+                                    ),
+                                  )
+                                : _UnassignedContainerChip(
                                     containerBadgeCount: () =>
                                         containerBadgeCount?.call(null),
                                     selected:
@@ -287,35 +466,26 @@ class ContainerChips extends HookConsumerWidget {
                                             !syncedChipSelected),
                                     onSelected: onSelected,
                                   ),
-                                )
-                              : _UnassignedContainerChip(
-                                  containerBadgeCount: () =>
-                                      containerBadgeCount?.call(null),
-                                  selected:
-                                      unassignedChipSelected ??
-                                      (selectedContainer == null &&
-                                          !syncedChipSelected),
-                                  onSelected: onSelected,
-                                ),
-                        if (showGroupSuggestions)
-                          const _ContainerSuggestionsChip(),
-                      ],
-                      availableItems: availableContainers,
-                      selectedItem: selectedContainer,
-                      onSelected: onSelected,
-                      onDeleted: onDeleted,
-                      onLongPress: onLongPress,
-                    ),
-              ),
-              if (displayMenu)
-                IconButton(
-                  // visualDensity: VisualDensity.compact,
-                  onPressed: () async {
-                    await const ContainerListRoute().push(context);
-                  },
-                  icon: const Icon(Icons.chevron_right),
+                          if (showGroupSuggestions)
+                            const _ContainerSuggestionsChip(),
+                        ],
+                        availableItems: availableContainers,
+                        selectedItem: selectedContainer,
+                        onSelected: onSelected,
+                        onDeleted: onDeleted,
+                        onLongPress: onLongPress,
+                      ),
                 ),
-            ],
+                if (displayMenu)
+                  IconButton(
+                    // visualDensity: VisualDensity.compact,
+                    onPressed: () async {
+                      await const ContainerListRoute().push(context);
+                    },
+                    icon: const Icon(Icons.chevron_right),
+                  ),
+              ],
+            ),
           ),
         );
       },

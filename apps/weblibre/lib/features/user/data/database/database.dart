@@ -23,6 +23,7 @@ import 'package:drift_dev/api/migrations_native.dart';
 import 'package:flutter/foundation.dart';
 import 'package:weblibre/features/user/data/database/daos/cache.dart';
 import 'package:weblibre/features/user/data/database/daos/onboarding.dart';
+import 'package:weblibre/features/user/data/database/daos/search_tokens.dart';
 import 'package:weblibre/features/user/data/database/daos/setting.dart';
 import 'package:weblibre/features/user/data/database/daos/toolbar_button_config.dart';
 import 'package:weblibre/features/user/data/database/database.drift.dart';
@@ -30,11 +31,17 @@ import 'package:weblibre/features/user/data/database/database.steps.dart';
 
 @DriftDatabase(
   include: {'definitions.drift'},
-  daos: [SettingDao, CacheDao, OnboardingDao, ToolbarButtonConfigDao],
+  daos: [
+    SettingDao,
+    CacheDao,
+    OnboardingDao,
+    ToolbarButtonConfigDao,
+    SearchTokensDao,
+  ],
 )
 class UserDatabase extends $UserDatabase {
   @override
-  final int schemaVersion = 3;
+  final int schemaVersion = 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -87,6 +94,14 @@ class UserDatabase extends $UserDatabase {
     from2To3: (m, schema) async {
       await m.createTable(schema.toolbarButtonConfigs);
       await m.createIndex(schema.idxToolbarOrderKey);
+    },
+    from3To4: (m, schema) async {
+      await m.createTable(schema.searchTokens);
+      await m.createIndex(schema.idxSearchTokensInsertedAt);
+    },
+    from4To5: (m, schema) async {
+      await m.addColumn(schema.searchTokens, schema.searchTokens.reservedAt);
+      await m.createIndex(schema.idxSearchTokensReservedAt);
     },
   );
 }

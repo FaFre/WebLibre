@@ -27,6 +27,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/addons/presentation/widgets/pinned_addon_bar.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
@@ -50,6 +51,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
@@ -240,6 +242,9 @@ class BrowserTabBar extends HookConsumerWidget {
             displayedSheet is! ViewTabsSheet)
         ? containerColor
         : null;
+    final effectiveContainerPalette = effectiveContainerColor != null
+        ? ContainerColors.palette(context, effectiveContainerColor)
+        : null;
 
     return BrowserTabBarView(
       showMainToolbar: showMainToolbar,
@@ -247,7 +252,7 @@ class BrowserTabBar extends HookConsumerWidget {
       showQuickTabSwitcherBar: showQuickTabSwitcherBar,
       displayAppBar: displayAppBar,
       displayQuickTabSwitcher: displayQuickTabSwitcher,
-      backgroundColor: null,
+      backgroundColor: effectiveContainerPalette?.surfaceColor,
       title: showTabTitle
           ? settings.tabBarLayout == TabBarLayout.compact
                 ? CompactAppBarTitle(containerColor: effectiveContainerColor)
@@ -395,6 +400,8 @@ class BrowserTabBarView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final effectiveBackgroundColor =
+        backgroundColor ?? colorScheme.surfaceContainer;
 
     return GestureDetector(
       // Tap handling moved to AppBarTitle for split icon/title behavior
@@ -402,36 +409,38 @@ class BrowserTabBarView extends StatelessWidget {
       onHorizontalDragEnd: onHorizontalDragEnd,
       onVerticalDragStart: onVerticalDragStart,
       onVerticalDragEnd: onVerticalDragEnd,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (showQuickTabSwitcherBar)
-            Visibility(
-              visible: displayQuickTabSwitcher,
-              maintainState: true,
-              child: quickTabSwitcher,
-            ),
-          if (showMainToolbar)
-            Visibility(
-              visible: displayAppBar,
-              maintainState: true,
-              child: AppBar(
-                primary: false,
-                automaticallyImplyLeading: false,
-                backgroundColor:
-                    backgroundColor ?? colorScheme.surfaceContainer,
-                scrolledUnderElevation: 0,
-                shadowColor: Colors.transparent,
-                surfaceTintColor: Colors.transparent,
-                titleSpacing: 0.0,
-                leadingWidth: 40.0,
-                toolbarHeight: kToolbarHeight,
-                title: title,
-                actions: actions,
+      child: ColoredBox(
+        color: effectiveBackgroundColor,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (showQuickTabSwitcherBar)
+              Visibility(
+                visible: displayQuickTabSwitcher,
+                maintainState: true,
+                child: quickTabSwitcher,
               ),
-            ),
-          if (showContextualToolbar) contextualToolbar,
-        ],
+            if (showMainToolbar)
+              Visibility(
+                visible: displayAppBar,
+                maintainState: true,
+                child: AppBar(
+                  primary: false,
+                  automaticallyImplyLeading: false,
+                  backgroundColor: Colors.transparent,
+                  scrolledUnderElevation: 0,
+                  shadowColor: Colors.transparent,
+                  surfaceTintColor: Colors.transparent,
+                  titleSpacing: 0.0,
+                  leadingWidth: 40.0,
+                  toolbarHeight: kToolbarHeight,
+                  title: title,
+                  actions: actions,
+                ),
+              ),
+            if (showContextualToolbar) contextualToolbar,
+          ],
+        ),
       ),
     );
   }
@@ -444,6 +453,7 @@ class QuickTabSwitcherItem with FastEquatable {
   final TabMode tabMode;
   final bool isHistory;
   final bool isPinned;
+  final bool isSandbox;
   final String title;
   final Uri url;
   final Widget avatar;
@@ -458,6 +468,7 @@ class QuickTabSwitcherItem with FastEquatable {
     required this.title,
     required this.url,
     required this.avatar,
+    this.isSandbox = false,
   });
 
   @override
@@ -468,6 +479,7 @@ class QuickTabSwitcherItem with FastEquatable {
     tabMode,
     isHistory,
     isPinned,
+    isSandbox,
     title,
     url,
     avatar,
@@ -504,20 +516,31 @@ class QuickTabSwitcher extends HookConsumerWidget {
     final historySuggestions = ref
         .watch(quickTabSwitcherHistorySuggestionsProvider(quickTabSwitcherMode))
         .value;
+    final sandboxCaptureMap =
+        ref.watch(sandboxCaptureMapProvider).value ?? const {};
     final availableItems = tabStates.value
-        .map<QuickTabSwitcherItem>(
-          (state) => QuickTabSwitcherItem(
+        .map<QuickTabSwitcherItem>((state) {
+          final sandboxSourceUri = parseSandboxSource(
+            sandboxCaptureMap[state.$1.id],
+          );
+          final displayUrl = sandboxSourceUri ?? state.$1.url;
+          final displayTitle =
+              sandboxSourceUri != null && state.$1.title.isEmpty
+              ? sandboxSourceUri.authority
+              : state.$1.titleOrAuthority;
+          return QuickTabSwitcherItem(
             color: state.$2?.color,
             id: state.$1.id,
             isActive: state.$1.id == selectedTabId,
-            title: state.$1.titleOrAuthority,
+            title: displayTitle,
             tabMode: state.$1.tabMode,
             isHistory: false,
             isPinned: pinnedTabIds?.contains(state.$1.id) ?? false,
-            url: state.$1.url,
+            isSandbox: sandboxSourceUri != null,
+            url: displayUrl,
             avatar: TabIcon(tabState: state.$1, iconSize: 20),
-          ),
-        )
+          );
+        })
         .followedBy(
           (historySuggestions ?? []).map<QuickTabSwitcherItem>((state) {
             final url = Uri.parse(state.url);
@@ -694,6 +717,7 @@ class QuickTabSwitcherView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appColors = AppColors.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
     if (availableItems.isEmpty) {
       return const SizedBox.shrink();
@@ -715,16 +739,42 @@ class QuickTabSwitcherView extends StatelessWidget {
               itemId: (item) => item.id,
               selectedItem: activeItem,
               selectedBorderColor: Theme.of(context).colorScheme.primary,
-              labelPadding: (item) =>
-                  (!showTitles &&
-                      !item.isHistory &&
-                      !item.isPinned &&
-                      item.tabMode is! PrivateTabMode &&
-                      item.tabMode is! IsolatedTabMode)
-                  ? EdgeInsets.zero
-                  : null,
+              decoration: SelectableChipDecoration(
+                color: (item, isSelected) => switch (item.color) {
+                  final color? when isSelected => ContainerColors.palette(
+                    context,
+                    color,
+                  ).selectedBackgroundColor,
+                  final color? => ContainerColors.palette(
+                    context,
+                    color,
+                  ).backgroundColor,
+                  null => null,
+                },
+                side: (item, isSelected) => switch (item.color) {
+                  final color? when isSelected => ContainerColors.palette(
+                    context,
+                    color,
+                  ).selectedBorderSide,
+                  final color? => ContainerColors.palette(
+                    context,
+                    color,
+                  ).borderSide,
+                  null => null,
+                },
+                labelPadding: (item) =>
+                    (!showTitles &&
+                        !item.isHistory &&
+                        !item.isPinned &&
+                        !item.isSandbox &&
+                        item.tabMode is! PrivateTabMode &&
+                        item.tabMode is! IsolatedTabMode)
+                    ? EdgeInsets.zero
+                    : null,
+              ),
               itemLabel: (item) {
-                return Row(
+                final isSelected = activeItem?.id == item.id;
+                final row = Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (item.isHistory || showTitles)
@@ -750,6 +800,15 @@ class QuickTabSwitcherView extends StatelessWidget {
                           size: 20,
                         ),
                       ),
+                    if (item.isSandbox)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Icon(
+                          MdiIcons.archiveLockOutline,
+                          color: Theme.of(context).colorScheme.tertiary,
+                          size: 20,
+                        ),
+                      ),
                     if (item.isPinned)
                       Padding(
                         padding: const EdgeInsets.only(left: 8.0),
@@ -766,11 +825,29 @@ class QuickTabSwitcherView extends StatelessWidget {
                       ),
                   ],
                 );
+
+                return item.color.mapNotNull(
+                      (color) => DefaultTextStyle.merge(
+                        style: TextStyle(
+                          color: isSelected
+                              ? ContainerColors.palette(
+                                  context,
+                                  color,
+                                ).selectedForegroundColor
+                              : ContainerColors.palette(
+                                  context,
+                                  color,
+                                ).foregroundColor,
+                          fontWeight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                        ),
+                        child: row,
+                      ),
+                    ) ??
+                    row;
               },
               itemAvatar: (item) => item.avatar,
-              itemBackgroundColor: (item) => item.color != null
-                  ? ContainerColors.forChip(item.color!)
-                  : null,
               onSelected: onSelected,
               itemWrap: itemWrapBuilder,
               availableItems: availableItems,

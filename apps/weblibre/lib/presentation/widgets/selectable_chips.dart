@@ -54,6 +54,36 @@ class _GestureWrapper extends StatelessWidget {
   }
 }
 
+/// Per-item visual / delete-button overrides for [SelectableChips].
+///
+/// Grouped into a single value so the [SelectableChips] constructor
+/// doesn't grow another knob every time a new variant adds a per-item
+/// override. Pass via [SelectableChips.decoration]; any callback left
+/// null falls back to the [FilterChip] default for that property.
+///
+/// All callbacks receive the item and (where applicable) its current
+/// `isSelected` flag so the decoration can branch on selection state.
+class SelectableChipDecoration<T> {
+  final Color? Function(T item, bool isSelected)? color;
+  final BorderSide? Function(T item, bool isSelected)? side;
+  final Widget? Function(T item)? deleteIcon;
+  final EdgeInsetsGeometry? Function(T item)? labelPadding;
+
+  /// Per-item override for the global [SelectableChips.enableDelete] toggle.
+  /// When [SelectableChips.enableDelete] is false, no item shows a delete
+  /// button regardless of this callback. When it's true, this callback
+  /// can hide the delete button for individual items (returning false).
+  final bool Function(T item)? canDelete;
+
+  const SelectableChipDecoration({
+    this.color,
+    this.side,
+    this.deleteIcon,
+    this.labelPadding,
+    this.canDelete,
+  });
+}
+
 class SelectableChips<T extends S, S, K> extends StatelessWidget {
   final Iterable<T> availableItems;
   final List<Widget> prefixListItems;
@@ -71,9 +101,8 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
   final Widget? Function(T item)? itemAvatar;
   final String? Function(T item)? itemTooltip;
   final int? Function(T item)? itemBadgeCount;
-  final Color? Function(T item)? itemBackgroundColor;
   final Color? selectedBorderColor;
-  final EdgeInsetsGeometry? Function(T item)? labelPadding;
+  final SelectableChipDecoration<T>? decoration;
 
   final Widget Function(Widget child, S item)? itemWrap;
 
@@ -88,8 +117,8 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
     this.itemBadgeCount,
     this.itemWrap,
     this.itemTooltip,
-    this.itemBackgroundColor,
     this.selectedBorderColor,
+    this.decoration,
     this.prefixListItems = const [],
     required this.availableItems,
     this.selectedItem,
@@ -102,7 +131,6 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
     this.scrollController,
     this.activeItemKey,
     this.cacheExtent = 0,
-    this.labelPadding,
     super.key,
   });
 
@@ -137,7 +165,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
           itemBuilder: (context, index) {
             if (index < prefixListItems.length) {
               return Padding(
-                padding: const EdgeInsets.only(right: 8.0, top: 4.0),
+                padding: const EdgeInsets.only(top: 4.0, right: 4),
                 child: prefixListItems[index],
               );
             }
@@ -146,6 +174,10 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
             final isSelected =
                 selectedItem != null &&
                 itemId(item) == itemId(selectedItem as S);
+            final deco = decoration;
+            final itemColorValue = deco?.color?.call(item, isSelected);
+            final canDeleteItem =
+                enableDelete && (deco?.canDelete?.call(item) ?? true);
             final child = Padding(
               padding: const EdgeInsets.only(right: 8.0, top: 4.0),
               child: _BadgeWrapper(
@@ -156,9 +188,13 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
                         () => callback(item),
                   ),
                   child: FilterChip(
+                    color: itemColorValue != null
+                        ? WidgetStatePropertyAll(itemColorValue)
+                        : null,
                     selected: selectedBorderColor == null && isSelected,
                     showCheckmark: false,
-                    labelPadding: labelPadding?.call(item),
+                    labelPadding: deco?.labelPadding?.call(item),
+                    deleteIcon: deco?.deleteIcon?.call(item),
                     onSelected: (value) {
                       if (value) {
                         onSelected?.call(item);
@@ -166,7 +202,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
                         onDeleted?.call(item);
                       }
                     },
-                    onDeleted: enableDelete
+                    onDeleted: canDeleteItem
                         ? () {
                             onDeleted?.call(item);
                           }
@@ -174,10 +210,14 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
                     label: itemLabel.call(item),
                     avatar: itemAvatar?.call(item),
                     tooltip: itemTooltip?.call(item),
-                    backgroundColor: itemBackgroundColor?.call(item),
-                    side: isSelected && selectedBorderColor != null
-                        ? BorderSide(color: selectedBorderColor!, width: 2.0)
-                        : null,
+                    side:
+                        deco?.side?.call(item, isSelected) ??
+                        (isSelected && selectedBorderColor != null
+                            ? BorderSide(
+                                color: selectedBorderColor!,
+                                width: 2.0,
+                              )
+                            : null),
                   ),
                 ),
               ),

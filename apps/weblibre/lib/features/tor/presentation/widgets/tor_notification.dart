@@ -33,8 +33,10 @@ class TorNotification extends HookConsumerWidget {
     final appColors = AppColors.of(context);
 
     ref.listen(torProxyServiceProvider, (previous, next) {
-      if (next.hasValue & next.requireValue.isRunning &&
-          next.requireValue.bootstrapProgress == 100) {
+      final status = next.value;
+      if (status != null &&
+          status.isRunning &&
+          status.bootstrapProgress >= 100) {
         ref.read(overlayControllerProvider.notifier).dismiss();
       }
     });

@@ -17,43 +17,58 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/utils/exit_app.dart';
+
+const List<SettingsSectionDefinition> experimentalSettingsSections = [
+  SettingsSectionDefinition(
+    title: 'Web Push',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Choose UnifiedPush Distributor',
+        subtitle: 'Select the app that delivers website push notifications',
+        keywords: ['notifications', 'push'],
+        child: _UnifiedPushDistributorTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Runtime & Startup',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Isolated Content Process',
+        subtitle: 'Run web content in an isolated process',
+        keywords: ['restart'],
+        child: _IsolatedProcessEnabledTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'App Zygote Process',
+        subtitle: 'Preload the content service for faster isolated startup',
+        keywords: ['restart', 'android 10'],
+        child: _AppZygoteProcessEnabledTile(),
+      ),
+    ],
+  ),
+];
 
 class ExperimentalSettingsScreen extends StatelessWidget {
   const ExperimentalSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Experimental')),
-      body: SafeArea(
-        child: FadingScroll(
-          fadingSize: 25,
-          builder: (context, controller) {
-            return ListView(
-              controller: controller,
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              children: const [
-                SettingSection(name: 'Web Push'),
-                _UnifiedPushDistributorTile(),
-                SettingSection(name: 'Runtime & Startup'),
-                _IsolatedProcessEnabledTile(),
-                _AppZygoteProcessEnabledTile(),
-              ],
-            );
-          },
-        ),
-      ),
+    return const SettingsDetailScaffold(
+      title: 'Experimental',
+      subtitle: 'Push delivery, runtime isolation, and startup behavior.',
+      icon: MdiIcons.flaskOutline,
+      sections: experimentalSettingsSections,
     );
   }
 }

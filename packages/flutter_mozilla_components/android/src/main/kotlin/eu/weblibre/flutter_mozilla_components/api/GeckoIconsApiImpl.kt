@@ -12,6 +12,15 @@ import eu.weblibre.flutter_mozilla_components.pigeons.*
 import kotlinx.coroutines.*
 import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.browser.icons.Icon
+import mozilla.components.browser.icons.loader.DataUriIconLoader
+import mozilla.components.browser.icons.loader.DiskIconLoader
+import mozilla.components.browser.icons.loader.MemoryIconLoader
+import mozilla.components.browser.icons.preparer.DiskIconPreparer
+import mozilla.components.browser.icons.preparer.MemoryIconPreparer
+import mozilla.components.browser.icons.processor.DiskIconProcessor
+import mozilla.components.browser.icons.processor.MemoryIconProcessor
+import mozilla.components.browser.icons.utils.IconDiskCache
+import mozilla.components.browser.icons.utils.IconMemoryCache
 import mozilla.components.concept.engine.manifest.Size as HtmlSize
 import mozilla.components.feature.addons.logger
 
@@ -31,6 +40,29 @@ class GeckoIconsApiImpl : GeckoIconsApi {
 
     private val components by lazy {
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
+    }
+
+    private val noNetworkIcons by lazy {
+        val memoryCache = IconMemoryCache()
+        val diskCache = IconDiskCache()
+
+        BrowserIcons(
+            context = components.profileApplicationContext,
+            httpClient = components.core.client,
+            preparers = listOf(
+                MemoryIconPreparer(memoryCache),
+                DiskIconPreparer(diskCache),
+            ),
+            loaders = listOf(
+                MemoryIconLoader(memoryCache),
+                DiskIconLoader(diskCache),
+                DataUriIconLoader(),
+            ),
+            processors = listOf(
+                MemoryIconProcessor(memoryCache),
+                DiskIconProcessor(diskCache),
+            ),
+        )
     }
 
     override fun loadIcon(request: IconRequest, callback: (Result<IconResult>) -> Unit) {
@@ -54,7 +86,12 @@ class GeckoIconsApiImpl : GeckoIconsApi {
 
     private suspend fun loadIconAsync(request: MozillaIconRequest): IconResult {
         return try {
-            val result = components.core.icons.loadIcon(request).await()
+            val browserIcons = if (request.waitOnNetworkLoad) {
+                components.core.icons
+            } else {
+                noNetworkIcons
+            }
+            val result = browserIcons.loadIcon(request).await()
             val imageBytes = result.bitmap.toWebPBytes()
             IconResult(
                 image = imageBytes,

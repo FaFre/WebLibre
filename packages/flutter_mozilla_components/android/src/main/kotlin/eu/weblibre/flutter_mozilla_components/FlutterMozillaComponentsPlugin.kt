@@ -7,6 +7,7 @@
 package eu.weblibre.flutter_mozilla_components
 
 import eu.weblibre.flutter_mozilla_components.api.GeckoBrowserApiImpl
+import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureFeature
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserApi
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -21,10 +22,11 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     browserApi.attachBinding(flutterPluginBinding)
     GeckoBrowserApi.setUp(flutterPluginBinding.binaryMessenger, browserApi)
+    SandboxCaptureFeature.wireFlutterEvents(flutterPluginBinding.binaryMessenger)
   }
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-
+    SandboxCaptureFeature.detachFlutterEvents(binding.binaryMessenger)
   }
 
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {

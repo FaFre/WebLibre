@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
@@ -27,87 +26,133 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+
+const List<SettingsSectionDefinition> browsingSettingsSections = [
+  SettingsSectionDefinition(
+    title: 'Tabs',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'New Tab Default',
+        subtitle: 'Choose the default type for manually created tabs',
+        keywords: ['regular', 'private', 'isolated'],
+        child: _NewTabDefaultSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Small Web Tab Default',
+        subtitle: 'Choose the tab type used when entering Small Web',
+        keywords: ['regular', 'private', 'isolated'],
+        child: _SmallWebTabDefaultSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Tab List Direction',
+        subtitle: 'Choose how tabs are ordered in the list view',
+        keywords: ['sorting', 'order'],
+        child: _TabListDirectionSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Tab Bar Direction',
+        subtitle: 'Choose how tabs are ordered in the tab bar',
+        keywords: ['sorting', 'order'],
+        child: _TabBarDirectionSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Show Container UI',
+        subtitle: 'Show container selectors, menus, and management',
+        keywords: ['containers'],
+        child: _ShowContainerUiTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Show Isolated Tab UI',
+        subtitle: 'Show isolated-tab creation options in the UI',
+        keywords: ['isolated tabs'],
+        child: _ShowIsolatedTabUiTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Create Child Tabs',
+        subtitle: 'Open links from tabs in the same container context',
+        keywords: ['child tabs'],
+        child: _CreateChildTabsTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Navigation',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Pull to Refresh',
+        subtitle: 'Swipe down on pages to reload them',
+        keywords: ['reload'],
+        child: _PullToRefreshTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Double Back to Close Tab',
+        subtitle: 'Require double back press before closing the current tab',
+        keywords: ['back button'],
+        child: _DoubleBackCloseTabTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Tab Bar Swipe Behavior',
+        subtitle: 'Choose what horizontal swipes on the tab bar do',
+        keywords: ['gestures', 'swipe'],
+        child: _TabBarSwipeBehaviorSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Open Links in Apps',
+        subtitle: 'Choose how external app links open',
+        keywords: ['app links', 'external apps'],
+        child: _AppLinksModeSection(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Home Screen',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Install Sites as Apps',
+        subtitle: 'Allow websites without a manifest to be installed as apps',
+        keywords: ['pwa', 'web apps'],
+        child: _AllowNonManifestPwaInstallTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'External Links',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'External Link Handling',
+        subtitle: 'Choose how external links open in WebLibre',
+        keywords: ['intents'],
+        child: _ExternalLinkHandlingSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'URL Cleaner',
+        subtitle: 'Tracking removal rules and catalog updates',
+        keywords: ['utm', 'tracking parameters'],
+        child: _UrlCleanerSettingsTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Unshortener',
+        subtitle: 'Short link resolver and API token',
+        keywords: ['short links', 'redirects'],
+        child: _UnshortenerSettingsTile(),
+      ),
+    ],
+  ),
+];
 
 class BrowsingSettingsScreen extends StatelessWidget {
   const BrowsingSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Browsing')),
-      body: SafeArea(
-        child: FadingScroll(
-          fadingSize: 25,
-          builder: (context, controller) {
-            return ListView(
-              controller: controller,
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              children: const [
-                _TabsSection(),
-                _NavigationSection(),
-                _HomeScreenSection(),
-                _ExternalLinksSection(),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
-class _TabsSection extends StatelessWidget {
-  const _TabsSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Tabs'),
-        _NewTabDefaultSection(),
-        _SmallWebTabDefaultSection(),
-        _TabListDirectionSection(),
-        _TabBarDirectionSection(),
-        _ShowContainerUiTile(),
-        _ShowIsolatedTabUiTile(),
-        _CreateChildTabsTile(),
-      ],
-    );
-  }
-}
-
-class _NavigationSection extends StatelessWidget {
-  const _NavigationSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Navigation'),
-        _PullToRefreshTile(),
-        _DoubleBackCloseTabTile(),
-        _TabBarSwipeBehaviorSection(),
-        _AppLinksModeSection(),
-      ],
-    );
-  }
-}
-
-class _ExternalLinksSection extends StatelessWidget {
-  const _ExternalLinksSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'External Links'),
-        _ExternalLinkHandlingSection(),
-        _UrlCleanerSettingsTile(),
-        _UnshortenerSettingsTile(),
-      ],
+    return const SettingsDetailScaffold(
+      title: 'Browsing',
+      subtitle: 'Tabs, navigation, app links, and Small Web behavior.',
+      icon: MdiIcons.compassOutline,
+      sections: browsingSettingsSections,
     );
   }
 }
@@ -275,7 +320,6 @@ class _ExternalLinkHandlingSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final appColors = AppColors.of(context);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final tabIntentOpenSetting = settings.tabIntentOpenSetting;
 
@@ -291,62 +335,54 @@ class _ExternalLinkHandlingSection extends HookConsumerWidget {
             leading: Icon(MdiIcons.tabPlus),
             contentPadding: EdgeInsets.zero,
           ),
-          Center(
-            child: SegmentedButton(
-              showSelectedIcon: false,
-              segments: [
-                const ButtonSegment(
-                  value: TabIntentOpenSetting.ask,
-                  label: Text('Prompt'),
-                  icon: Icon(MdiIcons.messageQuestion),
-                ),
-                const ButtonSegment(
-                  value: TabIntentOpenSetting.regular,
-                  label: Text('Regular'),
-                  icon: Icon(MdiIcons.tab),
-                ),
-                ButtonSegment(
-                  value: TabIntentOpenSetting.private,
-                  label: const Text('Private'),
-                  icon: Icon(
-                    MdiIcons.dominoMask,
-                    color: tabIntentOpenSetting == TabIntentOpenSetting.private
-                        ? null
-                        : appColors.privateTabPurple,
-                  ),
-                ),
-                if (settings.showIsolatedTabUi)
-                  ButtonSegment(
-                    value: TabIntentOpenSetting.isolated,
-                    label: const Text('Isolated'),
-                    icon: Icon(
-                      MdiIcons.snowflake,
-                      color:
-                          tabIntentOpenSetting == TabIntentOpenSetting.isolated
-                          ? null
-                          : appColors.isolatedTabTeal,
-                    ),
-                  ),
-              ],
-              selected: {tabIntentOpenSetting},
-              onSelectionChanged: (value) async {
+          RadioGroup(
+            groupValue: tabIntentOpenSetting,
+            onChanged: (value) async {
+              if (value != null) {
                 await ref
                     .read(saveGeneralSettingsControllerProvider.notifier)
                     .save(
-                      (currentSettings) => currentSettings.copyWith
-                          .tabIntentOpenSetting(value.first),
+                      (currentSettings) =>
+                          currentSettings.copyWith.tabIntentOpenSetting(value),
                     );
-              },
-              style: switch (tabIntentOpenSetting) {
-                TabIntentOpenSetting.regular => null,
-                TabIntentOpenSetting.private => SegmentedButton.styleFrom(
-                  selectedBackgroundColor: appColors.privateSelectionOverlay,
+              }
+            },
+            child: Column(
+              children: [
+                const RadioListTile.adaptive(
+                  value: TabIntentOpenSetting.ask,
+                  title: Text('Prompt'),
+                  subtitle: Text('Ask how external links should open'),
+                  secondary: Icon(MdiIcons.messageQuestion),
                 ),
-                TabIntentOpenSetting.isolated => SegmentedButton.styleFrom(
-                  selectedBackgroundColor: appColors.isolatedSelectionOverlay,
+                const RadioListTile.adaptive(
+                  value: TabIntentOpenSetting.regular,
+                  title: Text('Regular'),
+                  subtitle: Text('Open external links in a regular tab'),
+                  secondary: Icon(MdiIcons.tab),
                 ),
-                TabIntentOpenSetting.ask => null,
-              },
+                RadioListTile.adaptive(
+                  value: TabIntentOpenSetting.private,
+                  title: const Text('Private'),
+                  subtitle: const Text('Open external links in a private tab'),
+                  secondary: Icon(
+                    MdiIcons.dominoMask,
+                    color: AppColors.of(context).privateTabPurple,
+                  ),
+                ),
+                if (settings.showIsolatedTabUi)
+                  RadioListTile.adaptive(
+                    value: TabIntentOpenSetting.isolated,
+                    title: const Text('Isolated'),
+                    subtitle: const Text(
+                      'Open external links in an isolated tab',
+                    ),
+                    secondary: Icon(
+                      MdiIcons.snowflake,
+                      color: AppColors.of(context).isolatedTabTeal,
+                    ),
+                  ),
+              ],
             ),
           ),
         ],
@@ -743,20 +779,6 @@ class _DoubleBackCloseTabTile extends HookConsumerWidget {
                   currentSettings.copyWith.doubleBackCloseTab(value),
             );
       },
-    );
-  }
-}
-
-class _HomeScreenSection extends StatelessWidget {
-  const _HomeScreenSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Home Screen'),
-        _AllowNonManifestPwaInstallTile(),
-      ],
     );
   }
 }

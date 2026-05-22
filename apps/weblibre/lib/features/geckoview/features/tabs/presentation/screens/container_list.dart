@@ -17,11 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
 import 'dart:convert';
 
-import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/routing/routes.dart';
@@ -29,7 +28,9 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/container_
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_list_tile.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
 import 'package:weblibre/features/tor/presentation/widgets/tor_dialog.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
@@ -41,137 +42,118 @@ class ContainerListScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final containersAsync = ref.watch(watchContainersWithCountProvider);
     final selectedContainer = ref.watch(selectedContainerProvider);
+    final repository = ref.watch(containerRepositoryProvider.notifier);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Containers')),
-      body: SafeArea(
-        child: Skeletonizer(
-          enabled: containersAsync.isLoading,
-          child: containersAsync.when(
-            skipLoadingOnReload: true,
-            data: (containers) => FadingScroll(
-              fadingSize: 25,
-              builder: (context, controller) {
-                return ListView.builder(
-                  controller: controller,
-                  itemCount: containers.length,
-                  itemBuilder: (context, index) {
-                    final container = containers[index];
-                    return Slidable(
-                      key: ValueKey(container.id),
-                      startActionPane: ActionPane(
-                        motion: const ScrollMotion(),
-                        children: [
-                          if (container.id != selectedContainer)
-                            SlidableAction(
-                              onPressed: (context) async {
-                                final result = await ref
-                                    .read(selectedContainerProvider.notifier)
-                                    .setContainerId(container.id);
+    Future<void> setSelectedContainer(ContainerDataWithCount container) async {
+      final result = await ref
+          .read(selectedContainerProvider.notifier)
+          .setContainerId(container.id);
 
-                                if (context.mounted &&
-                                    result ==
-                                        SetContainerResult.successHasProxy) {
-                                  final shouldStartProxy = await ref
-                                      .read(
-                                        startProxyControllerProvider.notifier,
-                                      )
-                                      .shouldPromptProxyStart();
+      if (context.mounted && result == SetContainerResult.successHasProxy) {
+        final shouldStartProxy = await ref
+            .read(startProxyControllerProvider.notifier)
+            .shouldPromptProxyStart();
 
-                                  if (!context.mounted || !shouldStartProxy) {
-                                    return;
-                                  }
+        if (!context.mounted || !shouldStartProxy) {
+          return;
+        }
 
-                                  final dialogResult = await showDialog<bool>(
-                                    context: context,
-                                    builder: (context) {
-                                      return const TorDialog();
-                                    },
-                                  );
+        final dialogResult = await showDialog<bool>(
+          context: context,
+          builder: (context) {
+            return const TorDialog();
+          },
+        );
 
-                                  if (dialogResult == true) {
-                                    await ref
-                                        .read(
-                                          startProxyControllerProvider.notifier,
-                                        )
-                                        .startProxy();
-                                  }
-                                }
-                              },
-                              foregroundColor: Theme.of(
-                                context,
-                              ).colorScheme.onPrimaryContainer,
-                              backgroundColor: Theme.of(
-                                context,
-                              ).colorScheme.primaryContainer,
-                              icon: Icons.check,
-                              label: 'Select',
-                            )
-                          else
-                            SlidableAction(
-                              onPressed: (context) {
-                                ref
-                                    .read(selectedContainerProvider.notifier)
-                                    .clearContainer();
-                              },
-                              foregroundColor: Theme.of(
-                                context,
-                              ).colorScheme.onPrimaryContainer,
-                              backgroundColor: Theme.of(
-                                context,
-                              ).colorScheme.primaryContainer,
-                              icon: Icons.close,
-                              label: 'Unselect',
-                            ),
-                        ],
-                      ),
-                      endActionPane: ActionPane(
-                        motion: const ScrollMotion(),
-                        children: [
-                          SlidableAction(
-                            onPressed: (context) async {
-                              await ref
-                                  .read(containerRepositoryProvider.notifier)
-                                  .deleteContainer(container.id);
-                            },
-                            backgroundColor: Theme.of(
-                              context,
-                            ).colorScheme.errorContainer,
-                            foregroundColor: Theme.of(
-                              context,
-                            ).colorScheme.onErrorContainer,
-                            icon: Icons.delete,
-                            label: 'Delete',
-                          ),
-                        ],
-                      ),
-                      child: ContainerListTile(
-                        container,
-                        isSelected: container.id == selectedContainer,
-                        onTap: () async {
-                          await ContainerEditRoute(
-                            containerData: jsonEncode(container.toJson()),
-                          ).push(context);
-                        },
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-            error: (error, stackTrace) => Center(
-              child: FailureWidget(
-                title: 'Failed to load containers',
-                exception: error,
-                onRetry: () => ref.invalidate(watchContainersWithCountProvider),
+        if (dialogResult == true) {
+          await ref.read(startProxyControllerProvider.notifier).startProxy();
+        }
+      }
+    }
+
+    Future<void> editContainer(ContainerDataWithCount container) async {
+      await ContainerEditRoute(
+        containerData: jsonEncode(container.toJson()),
+      ).push(context);
+    }
+
+    Widget buildList(List<ContainerDataWithCount> containers) {
+      return CustomScrollView(
+        slivers: [
+          const SliverAppBar.large(title: Text('Containers')),
+          if (containers.isEmpty)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Text(
+                    'No containers yet.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ),
+            )
+          else
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+              sliver: SliverReorderableList(
+                itemCount: containers.length,
+                onReorder: (oldIndex, newIndex) {
+                  unawaited(
+                    repository.reorderContainer(containers, oldIndex, newIndex),
+                  );
+                },
+                itemBuilder: (context, index) {
+                  final container = containers[index];
+                  final isSelected = container.id == selectedContainer;
+                  return Padding(
+                    key: ValueKey(container.id),
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _ContainerCard(
+                      container: container,
+                      index: index,
+                      isSelected: isSelected,
+                      onTap: () => editContainer(container),
+                      onSelect: isSelected
+                          ? () => ref
+                                .read(selectedContainerProvider.notifier)
+                                .clearContainer()
+                          : () => setSelectedContainer(container),
+                      // onDelete: () => repository.deleteContainer(container.id),
+                    ),
+                  );
+                },
               ),
             ),
-            loading: () => ListView.builder(
-              itemCount: 3,
-              itemBuilder: (context, index) => ContainerListTile(
-                ContainerData(id: 'null', color: Colors.transparent),
-                onTap: null,
-                isSelected: false,
+        ],
+      );
+    }
+
+    return Scaffold(
+      body: Skeletonizer(
+        enabled: containersAsync.isLoading,
+        child: containersAsync.when(
+          skipLoadingOnReload: true,
+          data: buildList,
+          error: (error, stackTrace) => Center(
+            child: FailureWidget(
+              title: 'Failed to load containers',
+              exception: error,
+              onRetry: () => ref.invalidate(watchContainersWithCountProvider),
+            ),
+          ),
+          loading: () => buildList(
+            List.generate(
+              3,
+              (index) => ContainerDataWithCount(
+                id: 'loading-$index',
+                name: 'Container',
+                color: Colors.transparent,
+                orderKey: '',
+                tabCount: 0,
               ),
             ),
           ),
@@ -191,6 +173,189 @@ class ContainerListScreen extends HookConsumerWidget {
         },
         label: const Text('Container'),
         icon: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class _ContainerCard extends HookConsumerWidget {
+  const _ContainerCard({
+    required this.container,
+    required this.index,
+    required this.isSelected,
+    required this.onTap,
+    required this.onSelect,
+    this.onDelete,
+  });
+
+  final ContainerDataWithCount container;
+  final int index;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final VoidCallback onSelect;
+  final VoidCallback? onDelete;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final containerColor = container.color;
+    final tabCount = container.tabCount ?? 0;
+    final palette = ContainerColors.palette(context, containerColor);
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      decoration: BoxDecoration(
+        color: isSelected
+            ? palette.surfaceHighColor
+            : colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(20),
+        border: isSelected
+            ? Border.fromBorderSide(palette.borderSide)
+            : Border.all(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.4),
+              ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CircleAvatar(
+                      radius: 22,
+                      backgroundColor: palette.avatarBackgroundColor,
+                      foregroundColor: palette.avatarForegroundColor,
+                      child: Icon(
+                        resolveContainerIcon(container.metadata.iconData),
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          DefaultTextStyle.merge(
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: colorScheme.onSurface,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            child: ContainerTitle(container: container),
+                          ),
+                          const SizedBox(height: 6),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 6,
+                            children: [
+                              _ContainerInfoChip(
+                                icon: Icons.tab_outlined,
+                                label:
+                                    '$tabCount ${tabCount == 1 ? 'tab' : 'tabs'}',
+                              ),
+                              if (container.metadata.contextualIdentity != null)
+                                const _ContainerInfoChip(
+                                  icon: Icons.cookie_outlined,
+                                  label: 'Isolated',
+                                ),
+                              if (container.metadata.useProxy)
+                                const _ContainerInfoChip(
+                                  icon: Icons.route_outlined,
+                                  label: 'Proxy',
+                                ),
+                              if (container.metadata.clearDataOnExit)
+                                const _ContainerInfoChip(
+                                  icon: Icons.cleaning_services_outlined,
+                                  label: 'Clear on exit',
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    ReorderableDragStartListener(
+                      index: index,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8, bottom: 8),
+                        child: Icon(
+                          Icons.drag_indicator,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    if (isSelected)
+                      Chip(
+                        avatar: Icon(
+                          Icons.check,
+                          size: 16,
+                          color: palette.onContainerColor,
+                        ),
+                        label: const Text('Active'),
+                        side: BorderSide.none,
+                        visualDensity: VisualDensity.compact,
+                        backgroundColor: palette.containerColor,
+                        labelStyle: TextStyle(color: palette.onContainerColor),
+                      )
+                    else
+                      const SizedBox.shrink(),
+                    const Spacer(),
+                    if (onDelete != null) ...[
+                      IconButton(
+                        tooltip: 'Delete',
+                        color: colorScheme.error,
+                        onPressed: onDelete,
+                        icon: const Icon(Icons.delete_outline),
+                      ),
+                      const SizedBox(width: 4),
+                    ],
+                    FilledButton.tonalIcon(
+                      onPressed: onSelect,
+                      icon: Icon(isSelected ? Icons.close : Icons.check),
+                      label: Text(isSelected ? 'Unselect' : 'Select'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ContainerInfoChip extends StatelessWidget {
+  const _ContainerInfoChip({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return IconTheme.merge(
+      data: IconThemeData(size: 14, color: theme.colorScheme.onSurfaceVariant),
+      child: DefaultTextStyle.merge(
+        style: theme.textTheme.labelMedium?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [Icon(icon), const SizedBox(width: 4), Text(label)],
+        ),
       ),
     );
   }

@@ -36,6 +36,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart'
     as tab_data;
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -356,6 +357,12 @@ Future<void> _cloneTabAsMode(
   final tabState = ref.read(tabStateProvider(selectedTabId));
   if (tabState == null) return;
 
+  // Sandbox-captured tab: clone the canonical source URL so the new tab
+  // either re-captures or loads the real site — never the loopback loader.
+  final cloneUrl =
+      ref.read(sandboxSourceUriForTabProvider(tabId: tabState.id)) ??
+      tabState.url;
+
   final containerData = await ref
       .read(tab_data.tabDataRepositoryProvider.notifier)
       .getTabContainerData(selectedTabId);
@@ -371,7 +378,7 @@ Future<void> _cloneTabAsMode(
             )
           : await repo.addTab(
               tabMode: TabMode.regular,
-              url: tabState.url,
+              url: cloneUrl,
               containerSelection: containerData == null
                   ? const TabContainerSelection.unassigned()
                   : TabContainerSelection.specific(containerData),
@@ -386,7 +393,7 @@ Future<void> _cloneTabAsMode(
             )
           : await repo.addTab(
               tabMode: TabMode.private,
-              url: tabState.url,
+              url: cloneUrl,
               containerSelection: containerData == null
                   ? const TabContainerSelection.unassigned()
                   : TabContainerSelection.specific(containerData),
@@ -394,7 +401,7 @@ Future<void> _cloneTabAsMode(
             ),
     IsolatedTabMode() => await repo.addTab(
       tabMode: TabMode.newIsolated(),
-      url: tabState.url,
+      url: cloneUrl,
       containerSelection: containerData == null
           ? const TabContainerSelection.unassigned()
           : TabContainerSelection.specific(containerData),

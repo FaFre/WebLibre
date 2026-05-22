@@ -19,7 +19,7 @@
  */
 import 'package:flutter/material.dart';
 
-/// Shows a dialog asking the user whether to keep a tab that was opened from another app.
+/// Shows a dialog asking the user whether to keep a temporary tab.
 ///
 /// Returns true if the user wants to keep the tab, false if they want to discard it.
 Future<bool?> showKeepTabDialog(BuildContext context) {
@@ -27,9 +27,7 @@ Future<bool?> showKeepTabDialog(BuildContext context) {
     context: context,
     builder: (context) => AlertDialog(
       title: const Text('Keep tab?'),
-      content: const Text(
-        'This tab was opened from another app. Do you want to keep it or discard it?',
-      ),
+      content: const Text('Do you want to keep this tab or discard it?'),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),

@@ -26,6 +26,7 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/repositories/tracking_protection.dart';
 import 'package:weblibre/features/settings/presentation/dialogs/delete_all_exceptions_dialog.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -39,59 +40,89 @@ class TrackingProtectionExceptionsScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final exceptionsAsync = ref.watch(trackingProtectionRepositoryProvider);
+    final search = useSettingsSearch();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Tracking Protection Exceptions'),
-        actions: [
-          exceptionsAsync.maybeWhen(
-            data: (exceptions) => exceptions.isNotEmpty
-                ? MenuAnchor(
-                    builder: (context, controller, child) => IconButton(
-                      icon: const Icon(Icons.more_vert),
-                      onPressed: () {
-                        if (controller.isOpen) {
-                          controller.close();
-                        } else {
-                          controller.open();
-                        }
-                      },
+    return SettingsCustomScrollScaffold(
+      title: 'Tracking Protection Exceptions',
+      searchController: search.controller,
+      searchHintText: 'Search exception URLs',
+      actions: [
+        exceptionsAsync.maybeWhen(
+          data: (exceptions) => exceptions.isNotEmpty
+              ? MenuAnchor(
+                  builder: (context, controller, child) => IconButton(
+                    icon: const Icon(Icons.more_vert),
+                    onPressed: () {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                    },
+                  ),
+                  menuChildren: [
+                    MenuItemButton(
+                      leadingIcon: const Icon(Icons.delete_sweep),
+                      onPressed: () => _showDeleteAllDialog(context, ref),
+                      child: const Text('Delete All'),
                     ),
-                    menuChildren: [
-                      MenuItemButton(
-                        leadingIcon: const Icon(Icons.delete_sweep),
-                        onPressed: () => _showDeleteAllDialog(context, ref),
-                        child: const Text('Delete All'),
-                      ),
-                    ],
-                  )
-                : const SizedBox.shrink(),
-            orElse: () => const SizedBox.shrink(),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: exceptionsAsync.when(
-          data: (exceptions) {
-            if (exceptions.isEmpty) {
-              return const _EmptyState();
-            }
+                  ],
+                )
+              : const SizedBox.shrink(),
+          orElse: () => const SizedBox.shrink(),
+        ),
+      ],
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
+          sliver: SliverToBoxAdapter(
+            child: exceptionsAsync.when(
+              data: (exceptions) {
+                final filteredExceptions = exceptions.where((exception) {
+                  if (search.normalizedQuery.isEmpty) return true;
+                  return exception.url.toLowerCase().contains(
+                    search.normalizedQuery,
+                  );
+                }).toList();
 
-            return ListView.builder(
-              itemCount: exceptions.length,
-              itemBuilder: (context, index) {
-                final exception = exceptions[index];
-                return _ExceptionTile(
-                  exception: exception,
-                  onDelete: () => _deleteException(context, ref, exception),
+                if (exceptions.isEmpty) {
+                  return const _EmptyState();
+                }
+
+                if (filteredExceptions.isEmpty) {
+                  return SettingsSectionList(
+                    sections: const [],
+                    query: search.rawQuery,
+                  );
+                }
+
+                return SettingsSectionList(
+                  sections: [
+                    SettingsSectionDefinition(
+                      title: 'Exception List',
+                      entries: [
+                        for (final exception in filteredExceptions)
+                          SettingsEntryDefinition(
+                            title: exception.url,
+                            subtitle: 'Site with tracking protection disabled',
+                            child: _ExceptionTile(
+                              exception: exception,
+                              onDelete: () =>
+                                  _deleteException(context, ref, exception),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                  query: search.rawQuery,
                 );
               },
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => _ErrorState(error: error.toString()),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stack) => _ErrorState(error: error.toString()),
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 

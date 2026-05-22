@@ -22,6 +22,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
 
 class ContainerListTile extends HookWidget {
   final ContainerData container;
@@ -37,13 +38,17 @@ class ContainerListTile extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = ContainerColors.palette(context, container.color);
+
     return ListTileTheme(
-      selectedColor: Theme.of(context).colorScheme.onPrimaryContainer,
-      selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
+      selectedColor: palette.onContainerColor,
+      selectedTileColor: palette.containerColor,
       child: ListTile(
         selected: isSelected,
         leading: CircleAvatar(
-          backgroundColor: ContainerColors.preview(container.color),
+          backgroundColor: palette.avatarBackgroundColor,
+          foregroundColor: palette.avatarForegroundColor,
+          child: Icon(resolveContainerIcon(container.metadata.iconData)),
         ),
         title: ContainerTitle(container: container),
         onTap: onTap,

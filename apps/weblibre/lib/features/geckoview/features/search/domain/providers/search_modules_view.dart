@@ -22,28 +22,58 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'search_modules_view.g.dart';
 
 enum SearchModuleType {
+  recentSearches,
+  searchProviders,
+  searchSuggestions,
   tabs,
   articles,
   bookmarks,
+
+  /// Engine "History" suggestions, frecency-ranked from Places. Engine-only;
+  /// no local FTS hits. Superseded in the default ordering by
+  /// [combinedHistory] but kept as a separate module for users who want a
+  /// pure engine view.
   history,
+
+  /// Local FTS5 hits over the indexed `extracted_content` /
+  /// `full_content`. Pure local view; complementary to [history].
+  /// Superseded in the default ordering by [combinedHistory] which folds
+  /// these hits in alongside engine results — enabling both [localHistory]
+  /// and [combinedHistory] will surface the same local URLs in two
+  /// consecutive sections.
+  localHistory,
+
+  /// Default "History" module: engine frecency results in their existing
+  /// order, augmented with local content snippets where available, then
+  /// padded with local-only matches at the tail. Prefer this over
+  /// enabling [history] and [localHistory] separately.
+  combinedHistory,
+
   historyHighlights,
   topSites,
   recentHistory,
   recentArticles,
   recentTabs,
-  containers;
+  containers,
+  frequentBangs;
 
   String get label => switch (this) {
+    recentSearches => 'Recent Searches',
+    searchProviders => 'Search Providers',
+    searchSuggestions => 'Suggestions',
     tabs => 'Tabs',
     articles => 'Articles',
     bookmarks => 'Bookmarks',
-    history => 'History',
+    history => 'History (engine)',
+    localHistory => 'Local content',
+    combinedHistory => 'History',
     historyHighlights => 'History Highlights',
     topSites => 'Top Sites',
     recentHistory => 'Recent History',
     recentArticles => 'Recent Articles',
     recentTabs => 'Recent Tabs',
     containers => 'Containers',
+    frequentBangs => 'Frequent Bangs',
   };
 }
 
@@ -51,6 +81,8 @@ enum SearchModuleGroup {
   emptyState(
     key: 'EmptyStateModuleOrder',
     defaultModules: [
+      SearchModuleType.recentSearches,
+      SearchModuleType.frequentBangs,
       SearchModuleType.topSites,
       SearchModuleType.recentArticles,
       SearchModuleType.recentTabs,
@@ -62,10 +94,12 @@ enum SearchModuleGroup {
   search(
     key: 'SearchModuleOrder',
     defaultModules: [
+      SearchModuleType.searchProviders,
+      SearchModuleType.searchSuggestions,
       SearchModuleType.tabs,
       SearchModuleType.bookmarks,
       SearchModuleType.articles,
-      SearchModuleType.history,
+      SearchModuleType.combinedHistory,
     ],
   );
 
@@ -76,16 +110,22 @@ enum SearchModuleGroup {
 
 extension SearchModuleTypeGroup on SearchModuleType {
   SearchModuleGroup get group => switch (this) {
+    SearchModuleType.recentSearches ||
     SearchModuleType.topSites ||
     SearchModuleType.recentArticles ||
     SearchModuleType.recentTabs ||
     SearchModuleType.recentHistory ||
     SearchModuleType.historyHighlights ||
-    SearchModuleType.containers => SearchModuleGroup.emptyState,
+    SearchModuleType.containers ||
+    SearchModuleType.frequentBangs => SearchModuleGroup.emptyState,
+    SearchModuleType.searchProviders ||
+    SearchModuleType.searchSuggestions ||
     SearchModuleType.tabs ||
     SearchModuleType.bookmarks ||
     SearchModuleType.articles ||
-    SearchModuleType.history => SearchModuleGroup.search,
+    SearchModuleType.history ||
+    SearchModuleType.localHistory ||
+    SearchModuleType.combinedHistory => SearchModuleGroup.search,
   };
 }
 

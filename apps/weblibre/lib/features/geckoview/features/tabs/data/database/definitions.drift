@@ -2,6 +2,7 @@ import 'package:weblibre/data/database/converters/color.dart';
 import 'package:weblibre/data/database/converters/uri.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/history_query_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/converters/container_metadata_converter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
@@ -11,6 +12,8 @@ CREATE TABLE container (
   id TEXT PRIMARY KEY NOT NULL,
   name TEXT,
   color INTEGER NOT NULL MAPPED BY `const ColorConverter()`,
+  order_key TEXT NOT NULL,
+  is_pinned BOOL NOT NULL DEFAULT 0,
   metadata TEXT MAPPED BY `const ContainerMetadataConverter()`
 ) WITH ContainerData;
 
@@ -31,6 +34,14 @@ CREATE TABLE tab(
   full_content_markdown TEXT,
   full_content_plain TEXT,
   timestamp DATETIME NOT NULL,
+  -- xxh3-64 over (title, extracted_content_plain, full_content_plain).
+  -- Used by the FTS update trigger and the tab→history fan-out trigger to
+  -- short-circuit when the row's UPDATE didn't actually change content.
+  -- VIRTUAL (computed on read) to avoid recreating the table on migration;
+  -- recomputation cost is negligible vs. the FTS rewrite it skips.
+  content_hash INTEGER GENERATED ALWAYS AS (
+    generate_content_hash(title, extracted_content_plain, full_content_plain)
+  ) VIRTUAL,
   CHECK (
     (tab_mode = 2 AND isolation_context_id IS NOT NULL) OR
     (tab_mode != 2 AND isolation_context_id IS NULL)
@@ -48,6 +59,16 @@ CREATE TABLE closed_tab_tombstone(
 -- (`WHERE parent_id = ? AND container_id IS ?`). Without it, both queries
 -- degrade to per-row scans on large containers.
 CREATE INDEX idx_tab_parent_container ON tab(parent_id, container_id);
+
+CREATE TABLE capture_tab (
+  tab_id TEXT NOT NULL PRIMARY KEY REFERENCES tab (id) ON DELETE CASCADE,
+  capture_id TEXT NOT NULL,
+  source_url TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at DATETIME NOT NULL
+);
+
+CREATE INDEX idx_capture_tab_capture_id ON capture_tab(capture_id);
 
 CREATE VIRTUAL TABLE tab_fts
   USING fts5(
@@ -84,17 +105,285 @@ CREATE TRIGGER tab_after_delete AFTER DELETE ON tab BEGIN
     tab_fts(tab_fts, rowid, title, url, extracted_content_plain, full_content_plain) 
     VALUES('delete', old.rowid, old.title, old.url, old.extracted_content_plain, old.full_content_plain);
 END;
-CREATE TRIGGER tab_after_update AFTER UPDATE ON tab BEGIN
-  INSERT INTO 
-    tab_fts(tab_fts, rowid, title, url, extracted_content_plain, full_content_plain) 
+-- Scoped to FTS-relevant columns so unrelated tab updates (order_key,
+-- parent_id, container_id, is_pinned, timestamp, ...) don't trigger a
+-- full trigram reindex of the row. Additionally gated on content_hash so
+-- rewrites of identical content (page reload re-emitting the same extract)
+-- skip the FTS rewrite. URL changes are caught separately because the hash
+-- doesn't include URL.
+CREATE TRIGGER tab_after_update AFTER UPDATE OF
+  title, url, extracted_content_plain, full_content_plain
+ON tab
+WHEN OLD.content_hash IS NOT NEW.content_hash
+   OR OLD.url IS NOT NEW.url
+BEGIN
+  INSERT INTO
+    tab_fts(tab_fts, rowid, title, url, extracted_content_plain, full_content_plain)
     VALUES('delete', old.rowid, old.title, old.url, old.extracted_content_plain, old.full_content_plain);
-  INSERT INTO 
-    tab_fts(rowid, title, url, extracted_content_plain, full_content_plain) 
+  INSERT INTO
+    tab_fts(rowid, title, url, extracted_content_plain, full_content_plain)
     VALUES (new.rowid, new.title, new.url, new.extracted_content_plain, new.full_content_plain);
 END;
 
 optimizeFtsIndex:
   INSERT INTO tab_fts(tab_fts) VALUES ('optimize');
+
+-- Single-row settings table used as the SQL-side gate for the local search
+-- index. Mirrors the user-facing toggles in general settings. Updated by the
+-- settings repository; read by `tab_to_history_on_*` triggers.
+--
+-- Keys: 'enabled' (0/1), 'index_private' (0/1).
+CREATE TABLE local_index_setting (
+  "key" TEXT PRIMARY KEY NOT NULL,
+  value INTEGER NOT NULL
+) STRICT;
+
+-- Local content index. Keyed by canonical URL. Visit metadata (visit_count,
+-- last_visit, frecency, view_time, sync) lives in Mozilla Places — this
+-- table only carries the content needed for FTS and snippet/highlight
+-- rendering. `observed_*` are diagnostic counters tracking how often we
+-- (re)wrote content, NOT visit count.
+CREATE TABLE history (
+  url_canonical TEXT PRIMARY KEY NOT NULL,
+  url_host TEXT NOT NULL,
+  url_path TEXT,
+  title TEXT,
+  is_probably_readerable BOOL,
+  extracted_content_markdown TEXT,
+  extracted_content_plain TEXT,
+  full_content_markdown TEXT,
+  full_content_plain TEXT,
+  content_hash INTEGER,
+  observed_at DATETIME NOT NULL,
+  observed_count INTEGER NOT NULL DEFAULT 1
+);
+
+CREATE INDEX idx_history_host ON history(url_host);
+CREATE INDEX idx_history_observed ON history(observed_at DESC);
+
+CREATE VIRTUAL TABLE history_fts
+  USING fts5(
+    title,
+    url_host,
+    url_path,
+    extracted_content_plain,
+    full_content_plain,
+    content=history,
+    tokenize="trigram"
+  );
+
+-- Mirror of the tab_fts trigger pattern, scoped to FTS-relevant columns so
+-- non-content updates (observed_at touches, observed_count bumps) skip the
+-- trigram reindex.
+CREATE TRIGGER history_after_insert AFTER INSERT ON history BEGIN
+  INSERT INTO
+    history_fts(rowid, title, url_host, url_path, extracted_content_plain, full_content_plain)
+    VALUES (new.rowid, new.title, new.url_host, new.url_path, new.extracted_content_plain, new.full_content_plain);
+END;
+CREATE TRIGGER history_after_delete AFTER DELETE ON history BEGIN
+  INSERT INTO
+    history_fts(history_fts, rowid, title, url_host, url_path, extracted_content_plain, full_content_plain)
+    VALUES('delete', old.rowid, old.title, old.url_host, old.url_path, old.extracted_content_plain, old.full_content_plain);
+END;
+CREATE TRIGGER history_after_update AFTER UPDATE OF
+  title, url_host, url_path, extracted_content_plain, full_content_plain
+ON history BEGIN
+  INSERT INTO
+    history_fts(history_fts, rowid, title, url_host, url_path, extracted_content_plain, full_content_plain)
+    VALUES('delete', old.rowid, old.title, old.url_host, old.url_path, old.extracted_content_plain, old.full_content_plain);
+  INSERT INTO
+    history_fts(rowid, title, url_host, url_path, extracted_content_plain, full_content_plain)
+    VALUES (new.rowid, new.title, new.url_host, new.url_path, new.extracted_content_plain, new.full_content_plain);
+END;
+
+optimizeHistoryFtsIndex:
+  INSERT INTO history_fts(history_fts) VALUES ('optimize');
+
+-- Local content FTS query against the history table. Mirrors
+-- `queryTabsFullContent` but with weights tuned for history semantics:
+-- title and host dominate, path adds a smaller boost, content rounds out
+-- recall. Frecency / recency from Places is layered on at the call site
+-- because Places (not us) owns visit metadata.
+queryHistoryFullContent WITH HistoryQueryResult:
+  WITH weights AS (
+    SELECT
+      10.0 as title_weight,      -- Title matches dominate.
+       8.0 as host_weight,       -- Domain is the next strongest signal.
+       2.0 as path_weight,       -- URL path; small boost.
+       3.0 as extracted_weight,  -- Extracted (reader) content.
+       1.0 as full_weight        -- Full plain content.
+  )
+  SELECT
+    h.url_canonical,
+    h.url_host,
+    h.url_path,
+    highlight(history_fts, 0, :beforeMatch, :afterMatch) AS title,
+    snippet(history_fts, 3, :beforeMatch, :afterMatch, :ellipsis, :snippetLength) AS extracted_content,
+    snippet(history_fts, 4, :beforeMatch, :afterMatch, :ellipsis, :snippetLength) AS full_content,
+    h.observed_at,
+    bm25(history_fts,
+         weights.title_weight,
+         weights.host_weight,
+         weights.path_weight,
+         weights.extracted_weight,
+         weights.full_weight) AS weighted_rank
+  FROM history_fts(:query) fts
+  INNER JOIN history h ON h.rowid = fts.rowid
+  CROSS JOIN weights
+  ORDER BY
+    weighted_rank ASC,
+    h.observed_at DESC
+  LIMIT :limit;
+
+-- Sub-3-char fallback (FTS query empty after tokenization). Hits the host
+-- index instead of doing a LIKE-on-trigram scan. Returns rows ordered by
+-- recency.
+queryHistoryByHostPrefix WITH HistoryQueryResult:
+  SELECT
+    h.url_canonical,
+    h.url_host,
+    h.url_path,
+    h.title,
+    NULL AS extracted_content,
+    NULL AS full_content,
+    h.observed_at,
+    0.0 AS weighted_rank
+  FROM history h
+  WHERE h.url_host LIKE :hostPrefix
+  ORDER BY h.observed_at DESC
+  LIMIT :limit;
+
+-- Bulk hydration: returns content rows for the given canonical URLs.
+-- Used after Places' frecency-ranked autocomplete so we can attach local
+-- titles/snippets without re-running FTS.
+historyByCanonicalUrls WITH HistoryQueryResult:
+  SELECT
+    h.url_canonical,
+    h.url_host,
+    h.url_path,
+    h.title,
+    NULL AS extracted_content,
+    NULL AS full_content,
+    h.observed_at,
+    0.0 AS weighted_rank
+  FROM history h
+  WHERE h.url_canonical IN :canonicalUrls;
+
+-- Settings sync. Called from Dart whenever the user toggles either flag.
+upsertLocalIndexSetting:
+  INSERT INTO local_index_setting ("key", value) VALUES (:key, :value)
+    ON CONFLICT("key") DO UPDATE SET value = excluded.value;
+
+-- Diagnostic: count of indexed pages (settings UI shows this).
+countHistoryRows:
+  SELECT COUNT(*) AS count FROM history;
+
+-- Manual reset path; settings UI offers a "Clear local search index" button.
+clearHistory:
+  DELETE FROM history;
+
+-- Pruner: stable oldest-first pagination over the local index.
+-- The `url_canonical` tiebreaker is critical: `observed_at` is a
+-- coarse timestamp (multiple rows commonly share the same value), so
+-- without a deterministic secondary sort, ties can land in different
+-- orders across two queries — and the pruner's offset arithmetic
+-- (advance by candidates.length - deleted) would then either skip
+-- rows or re-scan ones it already examined.
+historyUrlsPage:
+  SELECT url_canonical FROM history
+  ORDER BY observed_at ASC, url_canonical ASC
+  LIMIT :limit OFFSET :offset;
+
+deleteHistoryByCanonicalUrls:
+  DELETE FROM history WHERE url_canonical IN :canonicalUrls;
+
+-- Tab → history fan-out. Fires when content-bearing columns change AND the
+-- content actually changed (content_hash gate). Settings are read from
+-- local_index_setting at SQL level so the trigger is the single source of
+-- truth for indexing eligibility. tab_mode = 1 is the private tab marker;
+-- private tabs are skipped unless `index_private` is enabled.
+CREATE TRIGGER tab_to_history_on_insert AFTER INSERT ON tab
+WHEN NEW.url IS NOT NULL
+ AND url_indexable(CAST(NEW.url AS TEXT)) = 1
+ AND (SELECT value FROM local_index_setting WHERE "key" = 'enabled') = 1
+ AND (NEW.tab_mode != 1
+      OR (SELECT value FROM local_index_setting WHERE "key" = 'index_private') = 1)
+BEGIN
+  INSERT INTO history (
+    url_canonical, url_host, url_path, title, is_probably_readerable,
+    extracted_content_markdown, extracted_content_plain,
+    full_content_markdown, full_content_plain,
+    content_hash, observed_at, observed_count
+  ) VALUES (
+    url_canonical(CAST(NEW.url AS TEXT)),
+    url_host(CAST(NEW.url AS TEXT)),
+    url_path(CAST(NEW.url AS TEXT)),
+    NEW.title,
+    NEW.is_probably_readerable,
+    NEW.extracted_content_markdown,
+    NEW.extracted_content_plain,
+    NEW.full_content_markdown,
+    NEW.full_content_plain,
+    NEW.content_hash,
+    strftime('%s','now') * 1000,
+    1
+  )
+  ON CONFLICT(url_canonical) DO UPDATE SET
+    title                       = COALESCE(excluded.title, history.title),
+    is_probably_readerable      = excluded.is_probably_readerable,
+    extracted_content_markdown  = excluded.extracted_content_markdown,
+    extracted_content_plain     = excluded.extracted_content_plain,
+    full_content_markdown       = excluded.full_content_markdown,
+    full_content_plain          = excluded.full_content_plain,
+    content_hash                = excluded.content_hash,
+    observed_at                 = excluded.observed_at,
+    observed_count              = history.observed_count + 1
+  WHERE history.content_hash IS NOT excluded.content_hash;
+END;
+
+CREATE TRIGGER tab_to_history_on_update AFTER UPDATE OF
+  title, url, extracted_content_plain, extracted_content_markdown,
+  full_content_plain, full_content_markdown, is_probably_readerable
+ON tab
+WHEN NEW.url IS NOT NULL
+ AND url_indexable(CAST(NEW.url AS TEXT)) = 1
+ AND (OLD.content_hash IS NOT NEW.content_hash
+      OR OLD.url IS NOT NEW.url)
+ AND (SELECT value FROM local_index_setting WHERE "key" = 'enabled') = 1
+ AND (NEW.tab_mode != 1
+      OR (SELECT value FROM local_index_setting WHERE "key" = 'index_private') = 1)
+BEGIN
+  INSERT INTO history (
+    url_canonical, url_host, url_path, title, is_probably_readerable,
+    extracted_content_markdown, extracted_content_plain,
+    full_content_markdown, full_content_plain,
+    content_hash, observed_at, observed_count
+  ) VALUES (
+    url_canonical(CAST(NEW.url AS TEXT)),
+    url_host(CAST(NEW.url AS TEXT)),
+    url_path(CAST(NEW.url AS TEXT)),
+    NEW.title,
+    NEW.is_probably_readerable,
+    NEW.extracted_content_markdown,
+    NEW.extracted_content_plain,
+    NEW.full_content_markdown,
+    NEW.full_content_plain,
+    NEW.content_hash,
+    strftime('%s','now') * 1000,
+    1
+  )
+  ON CONFLICT(url_canonical) DO UPDATE SET
+    title                       = COALESCE(excluded.title, history.title),
+    is_probably_readerable      = excluded.is_probably_readerable,
+    extracted_content_markdown  = excluded.extracted_content_markdown,
+    extracted_content_plain     = excluded.extracted_content_plain,
+    full_content_markdown       = excluded.full_content_markdown,
+    full_content_plain          = excluded.full_content_plain,
+    content_hash                = excluded.content_hash,
+    observed_at                 = excluded.observed_at,
+    observed_count              = history.observed_count + 1
+  WHERE history.content_hash IS NOT excluded.content_hash;
+END;
 
 containersWithCount WITH ContainerDataWithCount:
   SELECT 
@@ -109,7 +398,67 @@ containersWithCount WITH ContainerDataWithCount:
     FROM tab
     GROUP BY container_id
   ) AS tab_agg ON container.id = tab_agg.container_id
-  ORDER BY tab_agg.last_updated DESC NULLS LAST;
+  ORDER BY container.is_pinned DESC, container.order_key ASC;
+
+containerIdsByLastUpdated:
+  SELECT container.id
+  FROM container
+  LEFT JOIN (
+    SELECT
+      container_id,
+      MAX(timestamp) AS last_updated
+    FROM tab
+    GROUP BY container_id
+  ) AS tab_agg ON container.id = tab_agg.container_id
+  ORDER BY tab_agg.last_updated DESC NULLS LAST, container.rowid ASC;
+
+leadingContainerOrderKey(:is_pinned AS BOOL, :bucket AS INTEGER):
+  SELECT lexo_rank_previous(
+    :bucket,
+    (
+      SELECT order_key
+      FROM container
+      WHERE is_pinned = :is_pinned
+      ORDER BY order_key
+      LIMIT 1
+    )
+  );
+
+trailingContainerOrderKey(:is_pinned AS BOOL, :bucket AS INTEGER):
+  SELECT lexo_rank_next(
+    :bucket,
+    (
+      SELECT order_key
+      FROM container
+      WHERE is_pinned = :is_pinned
+      ORDER BY order_key DESC
+      LIMIT 1
+    )
+  );
+
+containerOrderKeyAfter(:container_id AS TEXT, :is_pinned AS BOOL):
+  WITH ordered_table AS (
+    SELECT id,
+          order_key,
+          LEAD(order_key) OVER (ORDER BY order_key) AS next_order_key
+    FROM container
+    WHERE is_pinned = :is_pinned
+  )
+  SELECT lexo_rank_reorder_after(order_key, next_order_key)
+  FROM ordered_table
+  WHERE id = :container_id;
+
+containerOrderKeyBefore(:container_id AS TEXT, :is_pinned AS BOOL):
+  WITH ordered_table AS (
+    SELECT id,
+          order_key,
+          LAG(order_key) OVER (ORDER BY order_key) AS prev_order_key
+    FROM container
+    WHERE is_pinned = :is_pinned
+  )
+  SELECT lexo_rank_reorder_before(order_key, prev_order_key)
+  FROM ordered_table
+  WHERE id = :container_id;
 
 leadingOrderKey(REQUIRED :container_id AS TEXT OR NULL, :bucket AS INTEGER):
   SELECT lexo_rank_previous(

@@ -17,10 +17,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/small_web/data/models/kagi_small_web_mode.dart';
 import 'package:weblibre/features/small_web/domain/providers.dart';
+import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 
 class SmallWebModeChips extends ConsumerWidget {
   final KagiSmallWebMode? currentMode;
@@ -34,16 +36,6 @@ class SmallWebModeChips extends ConsumerWidget {
     required this.onModeSelected,
   });
 
-  static String _formatCount(int count) {
-    if (count >= 1000) {
-      final k = count / 1000;
-      return k == k.roundToDouble()
-          ? '${k.round()}k'
-          : '${k.toStringAsFixed(1)}k';
-    }
-    return count.toString();
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final countsAsync = ref.watch(smallWebAllModeItemCountsProvider);
@@ -52,53 +44,46 @@ class SmallWebModeChips extends ConsumerWidget {
 
     return SizedBox(
       height: 48,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: KagiSmallWebMode.values.length,
-        itemBuilder: (context, index) {
-          final mode = KagiSmallWebMode.values[index];
-          final isSelected = currentMode == mode;
-          final count = counts[mode];
-          return Padding(
-            padding: const EdgeInsets.only(right: 8, top: 4),
-            child: ChoiceChip(
-              avatar: Icon(mode.icon, size: 18),
-              label: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(mode.label),
-                  if (count != null && count > 0) ...[
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 1,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? colorScheme.primary.withValues(alpha: 0.15)
-                            : colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        _formatCount(count),
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: isSelected
+      child: FadingScroll(
+        fadingSize: 15,
+        builder: (context, controller) {
+          return ListView.builder(
+            controller: controller,
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: KagiSmallWebMode.values.length,
+            itemBuilder: (context, index) {
+              final mode = KagiSmallWebMode.values[index];
+              final isSelected = currentMode == mode;
+              final count = counts[mode];
+              return Padding(
+                padding: const EdgeInsets.only(right: 8, top: 4),
+                child: ChoiceChip(
+                  avatar: Icon(mode.icon, size: 18),
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(mode.label),
+                      if (count != null && count > 0) ...[
+                        const SizedBox(width: 6),
+                        InlineCountBadge(
+                          count: count,
+                          backgroundColor: isSelected
+                              ? colorScheme.primary.withValues(alpha: 0.15)
+                              : colorScheme.surfaceContainerHighest,
+                          foregroundColor: isSelected
                               ? colorScheme.onPrimaryContainer
                               : colorScheme.onSurfaceVariant,
                         ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              selected: isSelected,
-              showCheckmark: false,
-              onSelected: isLoading ? null : (_) => onModeSelected(mode),
-            ),
+                      ],
+                    ],
+                  ),
+                  selected: isSelected,
+                  showCheckmark: false,
+                  onSelected: isLoading ? null : (_) => onModeSelected(mode),
+                ),
+              );
+            },
           );
         },
       ),

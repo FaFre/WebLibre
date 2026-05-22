@@ -10,8 +10,10 @@ import 'package:weblibre/features/user/data/database/daos/onboarding.dart'
     as i5;
 import 'package:weblibre/features/user/data/database/daos/toolbar_button_config.dart'
     as i6;
-import 'package:drift/internal/modular.dart' as i7;
-import 'package:sqlite3/common.dart' as i8;
+import 'package:weblibre/features/user/data/database/daos/search_tokens.dart'
+    as i7;
+import 'package:drift/internal/modular.dart' as i8;
+import 'package:sqlite3/common.dart' as i9;
 
 abstract class $UserDatabase extends i0.GeneratedDatabase {
   $UserDatabase(i0.QueryExecutor e) : super(e);
@@ -22,6 +24,7 @@ abstract class $UserDatabase extends i0.GeneratedDatabase {
   late final i1.Riverpod riverpod = i1.Riverpod(this);
   late final i1.ToolbarButtonConfigs toolbarButtonConfigs =
       i1.ToolbarButtonConfigs(this);
+  late final i1.SearchTokens searchTokens = i1.SearchTokens(this);
   late final i2.SettingDao settingDao = i2.SettingDao(this as i3.UserDatabase);
   late final i4.CacheDao cacheDao = i4.CacheDao(this as i3.UserDatabase);
   late final i5.OnboardingDao onboardingDao = i5.OnboardingDao(
@@ -29,7 +32,10 @@ abstract class $UserDatabase extends i0.GeneratedDatabase {
   );
   late final i6.ToolbarButtonConfigDao toolbarButtonConfigDao =
       i6.ToolbarButtonConfigDao(this as i3.UserDatabase);
-  i1.DefinitionsDrift get definitionsDrift => i7.ReadDatabaseContainer(
+  late final i7.SearchTokensDao searchTokensDao = i7.SearchTokensDao(
+    this as i3.UserDatabase,
+  );
+  i1.DefinitionsDrift get definitionsDrift => i8.ReadDatabaseContainer(
     this,
   ).accessor<i1.DefinitionsDrift>(i1.DefinitionsDrift.new);
   @override
@@ -43,6 +49,9 @@ abstract class $UserDatabase extends i0.GeneratedDatabase {
     riverpod,
     toolbarButtonConfigs,
     i1.idxToolbarOrderKey,
+    searchTokens,
+    i1.idxSearchTokensInsertedAt,
+    i1.idxSearchTokensReservedAt,
   ];
 }
 
@@ -59,18 +68,25 @@ class $UserDatabaseManager {
       i1.$RiverpodTableManager(_db, _db.riverpod);
   i1.$ToolbarButtonConfigsTableManager get toolbarButtonConfigs =>
       i1.$ToolbarButtonConfigsTableManager(_db, _db.toolbarButtonConfigs);
+  i1.$SearchTokensTableManager get searchTokens =>
+      i1.$SearchTokensTableManager(_db, _db.searchTokens);
 }
 
-extension DefineFunctions on i8.CommonDatabase {
+extension DefineFunctions on i9.CommonDatabase {
   void defineFunctions({
     required String Function(int, String?) lexoRankNext,
     required String Function(int, String?) lexoRankPrevious,
     required String Function(String?, String?) lexoRankReorderAfter,
     required String Function(String?, String?) lexoRankReorderBefore,
+    required int Function() generateContentHash,
+    required bool Function(String?) urlIndexable,
+    required String Function(String?) urlCanonical,
+    required String Function(String?) urlHost,
+    required String Function(String?) urlPath,
   }) {
     createFunction(
       functionName: 'lexo_rank_next',
-      argumentCount: const i8.AllowedArgumentCount(2),
+      argumentCount: const i9.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as int;
         final arg1 = args[1] as String?;
@@ -79,7 +95,7 @@ extension DefineFunctions on i8.CommonDatabase {
     );
     createFunction(
       functionName: 'lexo_rank_previous',
-      argumentCount: const i8.AllowedArgumentCount(2),
+      argumentCount: const i9.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as int;
         final arg1 = args[1] as String?;
@@ -88,7 +104,7 @@ extension DefineFunctions on i8.CommonDatabase {
     );
     createFunction(
       functionName: 'lexo_rank_reorder_after',
-      argumentCount: const i8.AllowedArgumentCount(2),
+      argumentCount: const i9.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as String?;
         final arg1 = args[1] as String?;
@@ -97,11 +113,50 @@ extension DefineFunctions on i8.CommonDatabase {
     );
     createFunction(
       functionName: 'lexo_rank_reorder_before',
-      argumentCount: const i8.AllowedArgumentCount(2),
+      argumentCount: const i9.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as String?;
         final arg1 = args[1] as String?;
         return lexoRankReorderBefore(arg0, arg1);
+      },
+    );
+    createFunction(
+      functionName: 'generate_content_hash',
+      argumentCount: const i9.AllowedArgumentCount(0),
+      function: (args) {
+        return generateContentHash();
+      },
+    );
+    createFunction(
+      functionName: 'url_indexable',
+      argumentCount: const i9.AllowedArgumentCount(1),
+      function: (args) {
+        final arg0 = args[0] as String?;
+        return urlIndexable(arg0);
+      },
+    );
+    createFunction(
+      functionName: 'url_canonical',
+      argumentCount: const i9.AllowedArgumentCount(1),
+      function: (args) {
+        final arg0 = args[0] as String?;
+        return urlCanonical(arg0);
+      },
+    );
+    createFunction(
+      functionName: 'url_host',
+      argumentCount: const i9.AllowedArgumentCount(1),
+      function: (args) {
+        final arg0 = args[0] as String?;
+        return urlHost(arg0);
+      },
+    );
+    createFunction(
+      functionName: 'url_path',
+      argumentCount: const i9.AllowedArgumentCount(1),
+      function: (args) {
+        final arg0 = args[0] as String?;
+        return urlPath(arg0);
       },
     );
   }

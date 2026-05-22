@@ -22,11 +22,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chip_content.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
@@ -38,11 +39,13 @@ class CompactContainerSelector extends ConsumerWidget {
   final ContainerData? selectedContainer;
   final Future<void> Function(ContainerSelectionResult selection)?
   onSelectionChanged;
+  final bool emphasizeSelection;
 
   const CompactContainerSelector({
     super.key,
     this.selectedContainer,
     this.onSelectionChanged,
+    this.emphasizeSelection = true,
   });
 
   @override
@@ -56,8 +59,11 @@ class CompactContainerSelector extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    final theme = Theme.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     final isSelected = selectedContainer != null;
+    final accentColor = selectedContainer?.color ?? colorScheme.primary;
+    final showSelectedHighlight = isSelected && emphasizeSelection;
+    final palette = ContainerColors.palette(context, accentColor);
 
     return GestureDetector(
       onLongPress: isSelected
@@ -67,16 +73,38 @@ class CompactContainerSelector extends ConsumerWidget {
               ).push(context);
             }
           : null,
-      child: ActionChip(
-        avatar: isSelected ? null : const Icon(MdiIcons.folderHidden),
-        label: isSelected
-            ? ContainerTitle(container: selectedContainer!)
-            : const Text('Unassigned'),
-        backgroundColor: isSelected
-            ? ContainerColors.forChip(selectedContainer!.color)
+      child: FilterChip(
+        avatar: isSelected
+            ? buildContainerChipAvatar(
+                context,
+                selectedContainer!,
+                showSelectedHighlight,
+              )
             : null,
-        side: isSelected ? BorderSide(color: theme.colorScheme.primary) : null,
-        onPressed: () async {
+        label: isSelected
+            ? buildContainerChipLabel(
+                context,
+                selectedContainer!,
+                showSelectedHighlight,
+              )
+            : const Text('Unassigned'),
+        color: WidgetStatePropertyAll(
+          isSelected
+              ? (showSelectedHighlight
+                    ? palette.selectedBackgroundColor
+                    : palette.backgroundColor)
+              : colorScheme.surfaceContainer,
+        ),
+        side: isSelected
+            ? (showSelectedHighlight
+                  ? palette.selectedBorderSide
+                  : palette.borderSide)
+            : BorderSide(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.4),
+              ),
+        selected: false,
+        showCheckmark: false,
+        onSelected: (_) async {
           final selection = await const ContainerSelectionRoute()
               .push<ContainerSelectionResult?>(context);
           if (selection == null) {

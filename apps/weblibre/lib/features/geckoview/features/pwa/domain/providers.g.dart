@@ -207,7 +207,7 @@ final class IsCurrentTabInstallableProvider
 }
 
 String _$isCurrentTabInstallableHash() =>
-    r'293cdb6dcea24446343330ccdb30dc9f21f03618';
+    r'484c048dca283317d30b3847a32092784dde48be';
 
 /// Installs the current tab as a PWA, embedding profile and container context
 /// in the shortcut intent so the PWA reopens with the same isolation.
@@ -398,7 +398,7 @@ final class IsCurrentTabShortcutableProvider
 }
 
 String _$isCurrentTabShortcutableHash() =>
-    r'a18fa837facc92397dacb79f38bdefd303ff5d00';
+    r'5ffd27964eef44991d16e1c07ce4c1315a676549';
 
 /// Creates a basic bookmark shortcut on the home screen for the current tab.
 

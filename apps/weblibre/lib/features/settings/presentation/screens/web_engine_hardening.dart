@@ -26,6 +26,7 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_settings.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/setting_groups_serializer.dart';
 import 'package:weblibre/features/settings/presentation/widgets/hardening_group_icon.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class WebEngineHardeningScreen extends HookConsumerWidget {
@@ -47,104 +48,143 @@ class WebEngineHardeningScreen extends HookConsumerWidget {
     );
 
     final theme = Theme.of(context);
+    final search = useSettingsSearch();
+    final query = search.normalizedQuery;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Web Engine Hardening'),
-        actions: [
-          MenuAnchor(
-            menuChildren: [
-              MenuItemButton(
-                leadingIcon: const Icon(Icons.restore),
-                child: const Text('Reset all preferences'),
-                onPressed: () async {
-                  final confirmed = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Reset all preferences?'),
-                      content: const Text(
-                        'This will reset all user-defined web engine preferences to their defaults.',
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(false),
-                          child: const Text('Cancel'),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(true),
-                          child: const Text('Reset'),
-                        ),
-                      ],
+    return SettingsCustomScrollScaffold(
+      title: 'Web Engine Hardening',
+      searchController: search.controller,
+      searchHintText: 'Search hardening groups',
+      actions: [
+        MenuAnchor(
+          menuChildren: [
+            MenuItemButton(
+              leadingIcon: const Icon(Icons.restore),
+              child: const Text('Reset all preferences'),
+              onPressed: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Reset all preferences?'),
+                    content: const Text(
+                      'This will reset all user-defined web engine preferences to their defaults.',
                     ),
-                  );
-                  if (confirmed == true) {
-                    await ref
-                        .read(
-                          unifiedPreferenceSettingsRepositoryProvider(
-                            PreferencePartition.user,
-                          ).notifier,
-                        )
-                        .reset();
-                  }
-                },
-              ),
-            ],
-            builder: (context, controller, child) => IconButton(
-              icon: const Icon(Icons.more_vert),
-              onPressed: () {
-                if (controller.isOpen) {
-                  controller.close();
-                } else {
-                  controller.open();
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        child: const Text('Reset'),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirmed == true) {
+                  await ref
+                      .read(
+                        unifiedPreferenceSettingsRepositoryProvider(
+                          PreferencePartition.user,
+                        ).notifier,
+                      )
+                      .reset();
                 }
               },
             ),
+          ],
+          builder: (context, controller, child) => IconButton(
+            icon: const Icon(Icons.more_vert),
+            onPressed: () {
+              if (controller.isOpen) {
+                controller.close();
+              } else {
+                controller.open();
+              }
+            },
           ),
-        ],
-      ),
-      body: SafeArea(
-        child: preferenceGroups.when(
-          skipLoadingOnReload: true,
-          data: (data) {
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Card(
-                    color: theme.colorScheme.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: SwitchListTile(
-                        value: allGroupsActive,
-                        title: Text(
-                          'Complete Hardening',
-                          style: TextStyle(
-                            color: theme.colorScheme.onPrimaryContainer,
+        ),
+      ],
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
+          sliver: SliverToBoxAdapter(
+            child: preferenceGroups.when(
+              skipLoadingOnReload: true,
+              data: (data) {
+                final overviewMatches =
+                    query.isEmpty ||
+                    matchesSettingsSearch(query, const [
+                      'overview',
+                      'complete hardening',
+                      'apply reset all grouped hardening preferences',
+                    ]);
+                final filteredGroups = data.entries.where((group) {
+                  if (query.isEmpty) return true;
+                  return matchesSettingsSearch(query, [
+                    group.key,
+                    if (group.value.description != null)
+                      group.value.description!,
+                  ]);
+                }).toList();
+
+                final sections = <SettingsSectionDefinition>[
+                  if (overviewMatches)
+                    SettingsSectionDefinition(
+                      title: 'Overview',
+                      entries: [
+                        SettingsEntryDefinition(
+                          title: 'Complete Hardening',
+                          subtitle:
+                              'Apply or reset all grouped hardening preferences',
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: SwitchListTile.adaptive(
+                                value: allGroupsActive,
+                                title: Text(
+                                  'Complete Hardening',
+                                  style: TextStyle(
+                                    color: theme.colorScheme.onPrimaryContainer,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  'Toggle all grouped hardening preferences at once.',
+                                  style: TextStyle(
+                                    color: theme.colorScheme.onPrimaryContainer,
+                                  ),
+                                ),
+                                onChanged: (value) async {
+                                  final notifier = ref.read(
+                                    unifiedPreferenceSettingsRepositoryProvider(
+                                      PreferencePartition.user,
+                                    ).notifier,
+                                  );
+
+                                  if (value) {
+                                    await notifier.apply();
+                                  } else {
+                                    await notifier.reset();
+                                  }
+                                },
+                              ),
+                            ),
                           ),
                         ),
-                        onChanged: (value) async {
-                          final notifier = ref.read(
-                            unifiedPreferenceSettingsRepositoryProvider(
-                              PreferencePartition.user,
-                            ).notifier,
-                          );
-
-                          if (value) {
-                            await notifier.apply();
-                          } else {
-                            await notifier.reset();
-                          }
-                        },
-                      ),
+                      ],
                     ),
-                  ),
-                ),
-                Expanded(
-                  child: ListView(
-                    children: data.entries.map((group) {
-                      return Row(
-                        children: [
-                          Expanded(
+                  if (filteredGroups.isNotEmpty)
+                    SettingsSectionDefinition(
+                      title: 'Hardening Groups',
+                      entries: [
+                        for (final group in filteredGroups)
+                          SettingsEntryDefinition(
+                            title: group.key,
+                            subtitle: group.value.description,
                             child: ListTile(
                               title: Text(group.key),
                               subtitle: group.value.description.mapNotNull(
@@ -165,26 +205,29 @@ class WebEngineHardeningScreen extends HookConsumerWidget {
                               },
                             ),
                           ),
-                        ],
-                      );
-                    }).toList(),
+                      ],
+                    ),
+                ];
+
+                return SettingsSectionList(
+                  sections: sections,
+                  query: search.rawQuery,
+                );
+              },
+              error: (error, stackTrace) => FailureWidget(
+                title: 'Could not load preference settings',
+                exception: error,
+                onRetry: () => ref.refresh(
+                  unifiedPreferenceSettingsRepositoryProvider(
+                    PreferencePartition.user,
                   ),
                 ),
-              ],
-            );
-          },
-          error: (error, stackTrace) => FailureWidget(
-            title: 'Could not load preference settings',
-            exception: error,
-            onRetry: () => ref.refresh(
-              unifiedPreferenceSettingsRepositoryProvider(
-                PreferencePartition.user,
               ),
+              loading: () => const Center(child: CircularProgressIndicator()),
             ),
           ),
-          loading: () => const Center(child: CircularProgressIndicator()),
         ),
-      ),
+      ],
     );
   }
 }

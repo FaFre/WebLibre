@@ -22,6 +22,7 @@ import 'dart:typed_data';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
+import 'package:weblibre/features/user/data/icon_cache_marker.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 
 part 'cache.g.dart';
@@ -36,11 +37,51 @@ class CacheRepository extends _$CacheRepository {
     return ref.read(userDatabaseProvider).cacheDao.cacheIcon(url.origin, bytes);
   }
 
-  Future<Uint8List?> getCachedIcon(String origin) {
+  Future<void> cacheIconIfAbsent(Uri url, Uint8List bytes) {
+    return ref
+        .read(userDatabaseProvider)
+        .cacheDao
+        .cacheIconIfAbsent(url.origin, bytes);
+  }
+
+  Future<void> cacheMissingIcon(Uri url) {
+    return ref.read(userDatabaseProvider).cacheDao.cacheMissingIcon(url.origin);
+  }
+
+  Future<Uint8List?> getCachedIcon(String origin) async {
+    final bytes = await getCachedIconRaw(origin);
+    if (isMissingIconMarker(bytes)) {
+      return null;
+    }
+    return bytes;
+  }
+
+  Future<Uint8List?> getCachedIconRaw(String origin) {
     return ref
         .read(userDatabaseProvider)
         .cacheDao
         .getCachedIcon(origin)
+        .getSingleOrNull();
+  }
+
+  Stream<Uint8List?> watchCachedIcon(String origin) {
+    return ref
+        .read(userDatabaseProvider)
+        .cacheDao
+        .getCachedIcon(origin)
+        .watchSingleOrNull()
+        .map((bytes) => isMissingIconMarker(bytes) ? null : bytes);
+  }
+
+  bool isMissingIconBytes(Uint8List? bytes) {
+    return isMissingIconMarker(bytes);
+  }
+
+  Future<DateTime?> getCachedIconFetchDate(String origin) {
+    return ref
+        .read(userDatabaseProvider)
+        .cacheDao
+        .getCachedIconFetchDate(origin)
         .getSingleOrNull();
   }
 

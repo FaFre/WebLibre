@@ -52,6 +52,11 @@ extension DefineFunctions on i6.CommonDatabase {
     required String Function(int, String?) lexoRankPrevious,
     required String Function(String?, String?) lexoRankReorderAfter,
     required String Function(String?, String?) lexoRankReorderBefore,
+    required int Function() generateContentHash,
+    required bool Function(String?) urlIndexable,
+    required String Function(String?) urlCanonical,
+    required String Function(String?) urlHost,
+    required String Function(String?) urlPath,
   }) {
     createFunction(
       functionName: 'lexo_rank_next',
@@ -87,6 +92,45 @@ extension DefineFunctions on i6.CommonDatabase {
         final arg0 = args[0] as String?;
         final arg1 = args[1] as String?;
         return lexoRankReorderBefore(arg0, arg1);
+      },
+    );
+    createFunction(
+      functionName: 'generate_content_hash',
+      argumentCount: const i6.AllowedArgumentCount(0),
+      function: (args) {
+        return generateContentHash();
+      },
+    );
+    createFunction(
+      functionName: 'url_indexable',
+      argumentCount: const i6.AllowedArgumentCount(1),
+      function: (args) {
+        final arg0 = args[0] as String?;
+        return urlIndexable(arg0);
+      },
+    );
+    createFunction(
+      functionName: 'url_canonical',
+      argumentCount: const i6.AllowedArgumentCount(1),
+      function: (args) {
+        final arg0 = args[0] as String?;
+        return urlCanonical(arg0);
+      },
+    );
+    createFunction(
+      functionName: 'url_host',
+      argumentCount: const i6.AllowedArgumentCount(1),
+      function: (args) {
+        final arg0 = args[0] as String?;
+        return urlHost(arg0);
+      },
+    );
+    createFunction(
+      functionName: 'url_path',
+      argumentCount: const i6.AllowedArgumentCount(1),
+      function: (args) {
+        final arg0 = args[0] as String?;
+        return urlPath(arg0);
       },
     );
   }

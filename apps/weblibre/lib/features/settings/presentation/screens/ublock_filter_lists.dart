@@ -19,11 +19,11 @@
  */
 import 'dart:async';
 
-import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/ublock_asset.dart';
 import 'package:weblibre/features/user/data/models/ublock_filter_list_settings.dart';
@@ -167,18 +167,17 @@ class UBlockFilterListsScreen extends HookConsumerWidget {
       );
     }
 
-    final colorScheme = Theme.of(context).colorScheme;
+    final search = useSettingsSearch();
 
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      appBar: AppBar(title: const Text('uBlock Filter Lists')),
-      body: SafeArea(
-        child: FadingScroll(
-          fadingSize: 25,
-          builder: (context, controller) {
-            return ListView(
-              controller: controller,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    return SettingsCustomScrollScaffold(
+      title: 'uBlock Filter Lists',
+      searchController: search.controller,
+      searchHintText: 'Search lists, groups, and external URLs',
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
+          sliver: SliverToBoxAdapter(
+            child: Column(
               children: [
                 const _SectionHeader(label: 'Management'),
                 _ManagementCard(
@@ -245,6 +244,7 @@ class UBlockFilterListsScreen extends HookConsumerWidget {
                     registry: registry,
                     settings: settings,
                     onUpdate: updateSettings,
+                    query: search.normalizedQuery,
                   ),
                   loading: () => const Padding(
                     padding: EdgeInsets.all(24),
@@ -260,13 +260,14 @@ class UBlockFilterListsScreen extends HookConsumerWidget {
                 _ExternalListsCard(
                   settings: settings,
                   onUpdate: updateSettings,
+                  query: search.normalizedQuery,
                 ),
                 const SizedBox(height: 32),
               ],
-            );
-          },
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -481,11 +482,13 @@ class _FilterListGroups extends StatelessWidget {
   final UBlockAssetsRegistry registry;
   final UBlockFilterListSettings settings;
   final _SettingsMutator onUpdate;
+  final String query;
 
   const _FilterListGroups({
     required this.registry,
     required this.settings,
     required this.onUpdate,
+    required this.query,
   });
 
   @override
@@ -524,6 +527,7 @@ class _FilterListGroups extends StatelessWidget {
               autoTokens: autoTokens,
               managementEnabled: settings.enabled,
               onToggle: toggle,
+              query: query,
             ),
       ],
     );
@@ -573,6 +577,7 @@ class _GroupCard extends StatelessWidget {
   final Set<String> enabledTokens;
   final Set<String> autoTokens;
   final bool managementEnabled;
+  final String query;
   final Future<void> Function(String token, bool value) onToggle;
 
   const _GroupCard({
@@ -582,13 +587,44 @@ class _GroupCard extends StatelessWidget {
     required this.enabledTokens,
     required this.autoTokens,
     required this.managementEnabled,
+    required this.query,
     required this.onToggle,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final allTokens = parentTree.values.expand((l) => l).toList();
+    // Callers pass `search.normalizedQuery` so trimming/lowercasing already happened.
+    final groupMatches =
+        query.isEmpty || group.label.toLowerCase().contains(query);
+    final filteredParentTree = <String?, List<String>>{};
+
+    for (final entry in parentTree.entries) {
+      final parentMatches =
+          groupMatches ||
+          (entry.key?.toLowerCase().contains(query) ?? false);
+      final filteredTokens = entry.value.where((tokenKey) {
+        if (query.isEmpty || parentMatches) return true;
+        final asset = registry[tokenKey];
+        if (asset == null) return false;
+        return matchesSettingsSearch(query, [
+          tokenKey,
+          if (asset.title != null) asset.title!,
+          if (asset.tags != null) asset.tags!,
+          if (asset.supportURL != null) asset.supportURL!,
+        ]);
+      }).toList();
+
+      if (filteredTokens.isNotEmpty) {
+        filteredParentTree[entry.key] = filteredTokens;
+      }
+    }
+
+    if (filteredParentTree.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final allTokens = filteredParentTree.values.expand((l) => l).toList();
     final totalCount = allTokens.length;
     final enabledCount = allTokens.where(enabledTokens.contains).length;
 
@@ -616,7 +652,7 @@ class _GroupCard extends StatelessWidget {
               color: colorScheme.surfaceContainerLow,
               child: Column(
                 children: [
-                  for (final entry in parentTree.entries)
+                  for (final entry in filteredParentTree.entries)
                     if (entry.key != null)
                       _SubGroupTile(
                         parentTitle: entry.key!,
@@ -828,13 +864,26 @@ class _FilterListTile extends StatelessWidget {
 class _ExternalListsCard extends StatelessWidget {
   final UBlockFilterListSettings settings;
   final _SettingsMutator onUpdate;
+  final String query;
 
-  const _ExternalListsCard({required this.settings, required this.onUpdate});
+  const _ExternalListsCard({
+    required this.settings,
+    required this.onUpdate,
+    required this.query,
+  });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final lists = settings.externalFilterLists;
+    // Callers pass `search.normalizedQuery`.
+    final filteredLists = lists.where((entry) {
+      if (query.isEmpty) return true;
+      return matchesSettingsSearch(query, [
+        entry.url,
+        if (entry.description != null) entry.description!,
+      ]);
+    }).toList();
     final canAdd = settings.enabled && lists.length < kUBlockMaxExternalUrls;
 
     return Card(
@@ -863,8 +912,16 @@ class _ExternalListsCard extends StatelessWidget {
                 child: Text('No external lists configured.'),
               ),
             )
+          else if (filteredLists.isEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text('No external lists match "$query".'),
+              ),
+            )
           else
-            for (var i = 0; i < lists.length; i++) ...[
+            for (var i = 0; i < filteredLists.length; i++) ...[
               if (i > 0)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -874,8 +931,8 @@ class _ExternalListsCard extends StatelessWidget {
                   ),
                 ),
               _ExternalListRow(
-                index: i,
-                entry: lists[i],
+                index: lists.indexOf(filteredLists[i]),
+                entry: filteredLists[i],
                 allEntries: lists,
                 enabled: settings.enabled,
                 onUpdate: onUpdate,

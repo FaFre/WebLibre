@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:typed_data';
+
 import 'package:exceptions/exceptions.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
@@ -27,6 +29,7 @@ import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 import 'package:weblibre/features/user/domain/entities/fingerprint_overrides.dart';
 import 'package:weblibre/features/user/domain/providers/backup_directory.dart';
+import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
@@ -39,6 +42,11 @@ part 'providers.g.dart';
 Stream<double> iconCacheSizeMegabytes(Ref ref) {
   final repository = ref.watch(userDatabaseProvider);
   return repository.cacheDao.getIconCacheSize().watchSingle();
+}
+
+@Riverpod()
+Stream<Uint8List?> watchCachedIconBytes(Ref ref, String origin) {
+  return ref.watch(cacheRepositoryProvider.notifier).watchCachedIcon(origin);
 }
 
 @Riverpod()

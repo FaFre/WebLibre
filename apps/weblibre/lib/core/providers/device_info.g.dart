@@ -33,7 +33,7 @@ final class AndroidDeviceInfoProvider
   AndroidDeviceInfo create() => AndroidDeviceInfo();
 }
 
-String _$androidDeviceInfoHash() => r'05c6cc63a6ee34f137aef538d65e8ab94b9cca89';
+String _$androidDeviceInfoHash() => r'54a5ceafce6ed9260b18baaec18d131f3c7d3833';
 
 abstract class _$AndroidDeviceInfo
     extends $AsyncNotifier<AndroidDeviceInfoData?> {

@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import android.util.Log
+import androidx.core.content.ContextCompat
 import eu.weblibre.flutter_tor.generated.IPtProxyController
 import eu.weblibre.flutter_tor.generated.TorApi
 import eu.weblibre.flutter_tor.generated.TorConfiguration
@@ -29,22 +30,25 @@ class FlutterTorPlugin : FlutterPlugin, TorApi {
     }
 
     private var context: Context? = null
+    private var binaryMessenger: io.flutter.plugin.common.BinaryMessenger? = null
     private var torService: TorService? = null
     private var serviceConnection: ServiceConnection? = null
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     // Service connection state
+    @Volatile
     private var serviceConnected = CompletableDeferred<Unit>()
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         Log.d(TAG, "onAttachedToEngine")
         context = flutterPluginBinding.applicationContext
+        binaryMessenger = flutterPluginBinding.binaryMessenger
 
         // Setup Pigeon API
         TorApi.setUp(flutterPluginBinding.binaryMessenger, this)
 
-        // Bind to TorService
-        bindTorService(flutterPluginBinding)
+        // Reconnect to an already-running TorService without creating a new idle instance.
+        bindTorService(createIfNeeded = false)
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -60,40 +64,62 @@ class FlutterTorPlugin : FlutterPlugin, TorApi {
         scope.cancel()
 
         context = null
+        binaryMessenger = null
     }
 
     /**
-     * Bind to TorService
+     * Bind to TorService. Idempotent — used both for initial bind and rebind on disconnect.
      */
-    private fun bindTorService(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+    private fun bindTorService(createIfNeeded: Boolean) {
         val ctx = context ?: return
+        val messenger = binaryMessenger ?: return
+        if (serviceConnection != null) return
 
         val connection = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 Log.d(TAG, "TorService connected")
                 val binder = service as? TorService.LocalBinder
                 torService = binder?.getService()
-                torService?.initialize(flutterPluginBinding.binaryMessenger)
+                torService?.initialize(messenger)
 
-                // Signal that service is connected
                 serviceConnected.complete(Unit)
             }
 
             override fun onServiceDisconnected(name: ComponentName?) {
-                Log.w(TAG, "TorService disconnected")
+                Log.w(TAG, "TorService disconnected — will rebind")
                 torService = null
-
-                // Reset connection deferred for potential reconnection
                 serviceConnected = CompletableDeferred()
+                // Drop the stale ServiceConnection reference so bindTorService() reattempts.
+                serviceConnection = null
+                scope.launch {
+                    delay(500)
+                    bindTorService(createIfNeeded = true)
+                }
             }
         }
 
         serviceConnection = connection
 
-        val intent = Intent(ctx, TorService::class.java)
-        // Only bind to service, don't start it yet
-        // Service will be started when startTor() is called
-        ctx.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        val intent = Intent(ctx, TorService::class.java).apply {
+            if (createIfNeeded) {
+                action = TorService.ACTION_START
+            }
+        }
+
+        try {
+            if (createIfNeeded) {
+                ContextCompat.startForegroundService(ctx, intent)
+            }
+
+            val flags = if (createIfNeeded) Context.BIND_AUTO_CREATE else 0
+            if (!ctx.bindService(intent, connection, flags)) {
+                Log.w(TAG, "bindService returned false (createIfNeeded=$createIfNeeded)")
+                serviceConnection = null
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "bindService failed", e)
+            serviceConnection = null
+        }
     }
 
     /**
@@ -112,9 +138,12 @@ class FlutterTorPlugin : FlutterPlugin, TorApi {
     }
 
     /**
-     * Wait for service to be connected
+     * Wait for service to be connected. Triggers a rebind if needed.
      */
     private suspend fun waitForService(): TorService {
+        if (serviceConnection == null) {
+            bindTorService(createIfNeeded = true)
+        }
         return withTimeoutOrNull(SERVICE_CONNECTION_TIMEOUT_MS) {
             serviceConnected.await()
             torService

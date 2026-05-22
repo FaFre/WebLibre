@@ -242,47 +242,53 @@ class _ScreenshotsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: 200,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: previews.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 12),
-        itemBuilder: (context, index) {
-          final p = previews[index];
-          return GestureDetector(
-            onTap: () => showDialog<void>(
-              context: context,
-              barrierColor: Colors.black87,
-              builder: (context) => Dialog(
-                backgroundColor: Colors.transparent,
-                insetPadding: EdgeInsets.zero,
-                child: GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: InteractiveViewer(
-                    child: Hero(
-                      tag: p.imageUrl,
-                      child: Image.network(p.imageUrl, fit: BoxFit.contain),
+      child: FadingScroll(
+        fadingSize: 15,
+        builder: (context, controller) {
+          return ListView.separated(
+            controller: controller,
+            scrollDirection: Axis.horizontal,
+            itemCount: previews.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final p = previews[index];
+              return GestureDetector(
+                onTap: () => showDialog<void>(
+                  context: context,
+                  barrierColor: Colors.black87,
+                  builder: (context) => Dialog(
+                    backgroundColor: Colors.transparent,
+                    insetPadding: EdgeInsets.zero,
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: InteractiveViewer(
+                        child: Hero(
+                          tag: p.imageUrl,
+                          child: Image.network(p.imageUrl, fit: BoxFit.contain),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Hero(
-                tag: p.imageUrl,
-                child: Image.network(
-                  p.thumbnailUrl ?? p.imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => Container(
-                    width: 300,
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
-                    child: const Icon(Icons.broken_image_outlined),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Hero(
+                    tag: p.imageUrl,
+                    child: Image.network(
+                      p.thumbnailUrl ?? p.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => Container(
+                        width: 300,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
+                        child: const Icon(Icons.broken_image_outlined),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
+              );
+            },
           );
         },
       ),

@@ -36,6 +36,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/database/definiti
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
+import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -51,8 +52,11 @@ class ShareMenuItemButton extends HookConsumerWidget {
       closeOnActivate: false,
       onPressed: () async {
         final tabState = ref.read(tabStateProvider(selectedTabId))!;
+        final shareUrl =
+            ref.read(sandboxSourceUriForTabProvider(tabId: tabState.id)) ??
+            tabState.url;
 
-        await SharePlus.instance.share(ShareParams(uri: tabState.url));
+        await SharePlus.instance.share(ShareParams(uri: shareUrl));
 
         if (context.mounted) {
           MenuController.maybeOf(context)?.close();
@@ -75,8 +79,11 @@ class ShowQrCodeMenuItemButton extends HookConsumerWidget {
       closeOnActivate: false,
       onPressed: () async {
         final tabState = ref.read(tabStateProvider(selectedTabId))!;
+        final qrUrl =
+            ref.read(sandboxSourceUriForTabProvider(tabId: tabState.id)) ??
+            tabState.url;
 
-        await showQrCode(context, tabState.url.toString());
+        await showQrCode(context, qrUrl.toString());
 
         if (context.mounted) {
           MenuController.maybeOf(context)?.close();
@@ -362,8 +369,11 @@ class CopyAddressMenuItemButton extends HookConsumerWidget {
       child: const Text('Copy Address'),
       onPressed: () async {
         final tabState = ref.read(tabStateProvider(selectedTabId))!;
+        final copyUrl =
+            ref.read(sandboxSourceUriForTabProvider(tabId: tabState.id)) ??
+            tabState.url;
 
-        await Clipboard.setData(ClipboardData(text: tabState.url.toString()));
+        await Clipboard.setData(ClipboardData(text: copyUrl.toString()));
 
         if (context.mounted) {
           MenuController.maybeOf(context)?.close();
@@ -419,16 +429,21 @@ class SendTabToDeviceMenuItemButton extends HookConsumerWidget {
                         return;
                       }
 
+                      final sendUrl =
+                          ref.read(
+                            sandboxSourceUriForTabProvider(tabId: tabState.id),
+                          ) ??
+                          tabState.url;
                       final title = tabState.title.isNotEmpty
                           ? tabState.title
-                          : tabState.url.toString();
+                          : sendUrl.toString();
 
                       final success = await ref
                           .read(syncRepositoryProvider.notifier)
                           .sendTabToDevice(
                             deviceId: device.deviceId,
                             title: title,
-                            url: tabState.url.toString(),
+                            url: sendUrl.toString(),
                             private: tabState.tabMode == TabMode.private,
                           );
 

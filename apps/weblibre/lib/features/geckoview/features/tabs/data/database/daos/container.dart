@@ -39,6 +39,8 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
         id: container.id,
         name: Value(container.name),
         color: container.color,
+        orderKey: container.orderKey,
+        isPinned: Value(container.isPinned),
         metadata: Value(container.metadata),
       ),
     );
@@ -50,8 +52,26 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
         id: Value(container.id),
         name: Value(container.name),
         color: Value(container.color),
+        orderKey: Value(container.orderKey),
+        isPinned: Value(container.isPinned),
         metadata: Value(container.metadata),
       ),
+    );
+  }
+
+  Future<void> assignOrderKey(String id, {required String orderKey}) {
+    return (update(db.container)..where((c) => c.id.equals(id))).write(
+      ContainerCompanion(orderKey: Value(orderKey)),
+    );
+  }
+
+  Future<void> assignPinned(
+    String id, {
+    required bool isPinned,
+    required String orderKey,
+  }) {
+    return (update(db.container)..where((c) => c.id.equals(id))).write(
+      ContainerCompanion(isPinned: Value(isPinned), orderKey: Value(orderKey)),
     );
   }
 
@@ -148,6 +168,46 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
     return db.definitionsDrift.trailingOrderKey(
       bucket: bucket,
       containerId: containerId,
+    );
+  }
+
+  SingleSelectable<String> generateLeadingContainerOrderKey({
+    required bool isPinned,
+    int bucket = 0,
+  }) {
+    return db.definitionsDrift.leadingContainerOrderKey(
+      isPinned: isPinned,
+      bucket: bucket,
+    );
+  }
+
+  SingleSelectable<String> generateTrailingContainerOrderKey({
+    required bool isPinned,
+    int bucket = 0,
+  }) {
+    return db.definitionsDrift.trailingContainerOrderKey(
+      isPinned: isPinned,
+      bucket: bucket,
+    );
+  }
+
+  SingleOrNullSelectable<String> generateOrderKeyAfterContainerId(
+    String containerId, {
+    required bool isPinned,
+  }) {
+    return db.definitionsDrift.containerOrderKeyAfter(
+      containerId: containerId,
+      isPinned: isPinned,
+    );
+  }
+
+  SingleSelectable<String> generateOrderKeyBeforeContainerId(
+    String containerId, {
+    required bool isPinned,
+  }) {
+    return db.definitionsDrift.containerOrderKeyBefore(
+      containerId: containerId,
+      isPinned: isPinned,
     );
   }
 

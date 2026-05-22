@@ -248,6 +248,18 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
       'externalAppIntentPolicies': settings['externalAppIntentPolicies']
           ?.readAs(DriftSqlType.string, db.typeMapping)
           .mapNotNull(jsonDecode),
+      'enableLocalSearchIndex': settings['enableLocalSearchIndex']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'indexPrivateTabs': settings['indexPrivateTabs']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
+      'acceptSuggestionOnSubmit': settings['acceptSuggestionOnSubmit']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
     });
   }
 

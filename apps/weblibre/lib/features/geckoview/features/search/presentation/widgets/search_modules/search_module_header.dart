@@ -34,8 +34,14 @@ class SearchModuleHeader extends StatelessWidget {
   final Widget? headerTrailing;
 
   /// The maximum number of items shown in preview mode.
-  /// The trailing button is hidden when totalCount <= this value.
+  /// The trailing "Show all / Show less" button is hidden when
+  /// totalCount <= this value (or when [showPagination] is false).
   final int previewLimit;
+
+  /// Set false for modules that render a single non-paginated body
+  /// (e.g. a chip strip with its own scrolling). Hides the
+  /// "Show all N / Show less" affordance regardless of [totalCount].
+  final bool showPagination;
 
   /// Called when the header is long-pressed (e.g. to enter reorder mode).
   final VoidCallback? onLongPress;
@@ -49,6 +55,7 @@ class SearchModuleHeader extends StatelessWidget {
     required this.onToggleExpansion,
     this.headerTrailing,
     this.previewLimit = 3,
+    this.showPagination = true,
     this.onLongPress,
   });
 
@@ -57,7 +64,8 @@ class SearchModuleHeader extends StatelessWidget {
     final disableAnimations = MediaQuery.disableAnimationsOf(context);
     final isCollapsed = displayState == SearchModuleDisplayState.collapsed;
     final isExpanded = displayState == SearchModuleDisplayState.expanded;
-    final showTrailing = !isCollapsed && totalCount > previewLimit;
+    final showTrailing =
+        showPagination && !isCollapsed && totalCount > previewLimit;
 
     return Padding(
       padding: const EdgeInsets.only(right: 8.0),

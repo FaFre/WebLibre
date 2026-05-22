@@ -24,6 +24,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 
 class CertificateTile extends HookConsumerWidget {
   const CertificateTile({super.key});
@@ -34,6 +35,24 @@ class CertificateTile extends HookConsumerWidget {
 
     if (tabState == null) {
       return const SizedBox.shrink();
+    }
+
+    final sandboxSourceUri = ref.watch(
+      sandboxSourceUriForTabProvider(tabId: tabState.id),
+    );
+    if (sandboxSourceUri != null) {
+      // Sandbox-captured page is served from a loopback server; the cert
+      // chain shown would be for localhost, not the canonical site.
+      return ListTile(
+        leading: Icon(
+          MdiIcons.archiveLockOutline,
+          color: Theme.of(context).colorScheme.tertiary,
+        ),
+        title: const Text('Sandboxed capture'),
+        subtitle: const Text(
+          'Page is served from an offline archive — no live connection.',
+        ),
+      );
     }
 
     final icon = useMemoized(() {

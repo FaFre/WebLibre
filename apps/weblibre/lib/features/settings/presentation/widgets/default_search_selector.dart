@@ -24,7 +24,6 @@ import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 class DefaultSearchSelector extends HookConsumerWidget {
@@ -35,7 +34,6 @@ class DefaultSearchSelector extends HookConsumerWidget {
     final activeBang = ref.watch(
       defaultSearchBangDataProvider.select((value) => value.value),
     );
-    final availableBangs = ref.watch(frequentBangListProvider);
 
     Future<void> updateSearchProvider(BangKey key) async {
       await ref
@@ -46,47 +44,37 @@ class DefaultSearchSelector extends HookConsumerWidget {
           );
     }
 
-    return availableBangs.when(
-      skipLoadingOnReload: true,
-      data: (availableBangs) {
-        return SizedBox(
-          height: 48,
-          child: Row(
-            children: [
-              Expanded(
-                child: SelectableChips(
-                  itemId: (bang) => bang.trigger,
-                  itemAvatar: (bang) =>
-                      UrlIcon([bang.getDefaultUrl()], iconSize: 20),
-                  itemLabel: (bang) => Text(bang.websiteName),
-                  itemTooltip: (bang) => bang.trigger,
-                  availableItems: availableBangs,
-                  selectedItem: activeBang,
-                  onSelected: (bang) async {
-                    await updateSearchProvider(bang.toKey());
-                  },
-                ),
-              ),
-              IconButton(
-                onPressed: () async {
-                  final trigger = await const BangSearchRoute().push<BangKey?>(
-                    context,
-                  );
+    Future<void> pickProvider() async {
+      final trigger = await const BangSearchRoute().push<BangKey?>(context);
+      if (trigger != null) {
+        await updateSearchProvider(trigger);
+      }
+    }
 
-                  if (trigger != null) {
-                    await updateSearchProvider(trigger);
-                  }
-                },
-                icon: const Icon(Icons.chevron_right),
-              ),
-            ],
+    return SizedBox(
+      height: 48,
+      child: Row(
+        children: [
+          Expanded(
+            child: activeBang == null
+                ? OutlinedButton.icon(
+                    onPressed: pickProvider,
+                    icon: const Icon(Icons.search),
+                    label: const Text('Choose a search provider'),
+                  )
+                : ActionChip(
+                    avatar: UrlIcon([activeBang.getDefaultUrl()], iconSize: 20),
+                    label: Text(activeBang.websiteName),
+                    tooltip: activeBang.trigger,
+                    onPressed: pickProvider,
+                  ),
           ),
-        );
-      },
-      error: (error, stackTrace) => Center(
-        child: Icon(Icons.error, color: Theme.of(context).colorScheme.error),
+          IconButton(
+            onPressed: pickProvider,
+            icon: const Icon(Icons.chevron_right),
+          ),
+        ],
       ),
-      loading: () => const SizedBox(height: 48, width: double.infinity),
     );
   }
 }

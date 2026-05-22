@@ -57,6 +57,7 @@ import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/search_autofocus.dart';
 import 'package:weblibre/features/small_web/presentation/controllers/small_web_mode_controller.dart';
 import 'package:weblibre/features/small_web/presentation/widgets/small_web_browser_overlay.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
@@ -1022,7 +1023,12 @@ class _Browser extends HookConsumerWidget {
         return OverlayPortal(
           controller: overlayController,
           overlayChildBuilder: (context) {
-            return overlayBuilder!.call(context);
+            // The OverlayPortal lifecycle is driven by ref.listen above, but
+            // OverlayPortal can call this builder one extra frame after
+            // dismiss() set the provider back to null (esp. on rebuilds
+            // triggered by unrelated state changes). Render an empty box
+            // instead of force-unwrapping a null builder.
+            return overlayBuilder?.call(context) ?? const SizedBox.shrink();
           },
           child: Listener(
             onPointerDown: sheetDisplayed
@@ -1035,6 +1041,9 @@ class _Browser extends HookConsumerWidget {
             child: BackButtonListener(
               onBackButtonPressed: () async {
                 final tabState = ref.read(selectedTabStateProvider);
+                final promptOnBackBehavior = ref
+                    .read(tabRepositoryProvider.notifier)
+                    .backPromptBehaviorFor(tabState?.id);
 
                 final tabCount = ref.read(
                   tabListProvider.select((tabs) => tabs.value.length),
@@ -1103,27 +1112,22 @@ class _Browser extends HookConsumerWidget {
                   return true;
                 }
 
-                //Go router has routes to go back to
-                if (context.canPop()) {
-                  return true;
-                }
-
-                if (ref
-                    .read(tabRepositoryProvider.notifier)
-                    .hasLaunchedFromIntent(tabState?.id)) {
+                if (promptOnBackBehavior != null) {
                   if (!context.mounted) return false;
 
                   final keep = await showKeepTabDialog(context);
-                  if (keep == true) {
-                    ref
-                        .read(tabRepositoryProvider.notifier)
-                        .clearLaunchedFromIntent(tabState!.id);
-
-                    await moveToBackground();
+                  if (keep == null) {
                     return true;
                   }
 
-                  if (tabState != null) {
+                  if (keep) {
+                    if (tabState == null) {
+                      return true;
+                    }
+                    ref
+                        .read(tabRepositoryProvider.notifier)
+                        .clearBackPromptBehavior(tabState.id);
+                  } else if (tabState != null) {
                     if (!await confirmIsolatedTabCloseIfNeeded(tabState.id)) {
                       return true;
                     }
@@ -1133,7 +1137,25 @@ class _Browser extends HookConsumerWidget {
                         .closeTab(tabState.id);
                   }
 
-                  await moveToBackground();
+                  if (!context.mounted) return true;
+
+                  switch (promptOnBackBehavior) {
+                    case BackgroundAppTabBackPromptBehavior():
+                      await moveToBackground();
+                      break;
+                    case ReturnToSearchTabBackPromptBehavior(:final tabType):
+                      ref
+                          .read(searchAutofocusSuppressionProvider.notifier)
+                          .suppressNext();
+                      await SearchRoute(tabType: tabType).push(context);
+                      break;
+                  }
+
+                  return true;
+                }
+
+                //Go router has routes to go back to
+                if (context.canPop()) {
                   return true;
                 }
 

@@ -19,34 +19,61 @@
  */
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/settings/presentation/screens/advanced_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/browsing_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/extensions_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/general_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/privacy_security_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/search_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/web_content_settings.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/features/settings/presentation/widgets/toolbar_layout_content.dart';
 
-class SettingsScreen extends HookConsumerWidget {
+class SettingsScreen extends HookWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final search = useSettingsSearch();
+
+    final categories = _buildCategories();
+    final sections = search.normalizedQuery.isEmpty
+        ? _buildCategorySections(categories)
+        : _buildSearchSections(categories, search.normalizedQuery);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
       body: SafeArea(
         child: FadingScroll(
           fadingSize: 25,
           builder: (context, controller) {
-            return ListView(
+            return CustomScrollView(
               controller: controller,
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              children: const [
-                _GeneralTile(),
-                _BrowsingTile(),
-                _ToolbarLayoutTile(),
-                _WebContentTile(),
-                _SearchTile(),
-                _PrivacySecurityTile(),
-                _ExtensionsTile(),
-                _SyncTile(),
-                _AdvancedTile(),
+              slivers: [
+                const SliverAppBar.large(
+                  centerTitle: false,
+                  title: Text('Settings'),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  sliver: SliverToBoxAdapter(
+                    child: SettingsSearchField(
+                      controller: search.controller,
+                      hintText: 'Search all settings',
+                    ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
+                  sliver: SliverToBoxAdapter(
+                    child: SettingsSectionList(
+                      sections: sections,
+                      query: search.rawQuery,
+                    ),
+                  ),
+                ),
               ],
             );
           },
@@ -56,227 +83,255 @@ class SettingsScreen extends HookConsumerWidget {
   }
 }
 
-class _GeneralTile extends StatelessWidget {
-  const _GeneralTile();
+List<_SettingsCategoryDefinition> _buildCategories() {
+  return [
+    _SettingsCategoryDefinition(
+      title: 'General',
+      subtitle: 'Appearance, language, downloads',
+      icon: Icons.tune,
+      keywords: const ['theme', 'ui zoom', 'default browser'],
+      sections: generalSettingsSections,
+      onTap: (context) => GeneralSettingsRoute().push(context),
+    ),
+    _SettingsCategoryDefinition(
+      title: 'Browsing',
+      subtitle: 'Tabs, navigation, external links',
+      icon: MdiIcons.compassOutline,
+      keywords: const ['tabs', 'small web', 'url cleaner', 'unshortener'],
+      sections: browsingSettingsSections,
+      onTap: (context) => BrowsingSettingsRoute().push(context),
+    ),
+    _SettingsCategoryDefinition(
+      title: 'Toolbar & Layout',
+      subtitle: 'Tab bar, toolbar, quick switcher, tab view',
+      icon: MdiIcons.viewDashboardOutline,
+      keywords: const ['contextual toolbar', 'quick tab switcher'],
+      sections: toolbarLayoutSettingsSections,
+      onTap: (context) => ToolbarLayoutSettingsRoute().push(context),
+    ),
+    _SettingsCategoryDefinition(
+      title: 'Web Content',
+      subtitle: 'Page display, PDF, reader mode, AI',
+      icon: MdiIcons.fileDocumentOutline,
+      keywords: const ['reader mode', 'pdf', 'fonts'],
+      sections: webContentSettingsSections,
+      onTap: (context) => WebContentSettingsRoute().push(context),
+    ),
+    _SettingsCategoryDefinition(
+      title: 'Search',
+      subtitle: 'Providers, bangs, search history',
+      icon: MdiIcons.magnify,
+      keywords: const ['bangs', 'suggestions', 'local search index'],
+      sections: searchSettingsSections,
+      onTap: (context) => SearchSettingsRoute().push(context),
+    ),
+    _SettingsCategoryDefinition(
+      title: 'Privacy & Security',
+      subtitle: 'Tracking protection, data clearing',
+      icon: MdiIcons.shieldLock,
+      keywords: const [
+        'fingerprinting',
+        'https',
+        'doh',
+        'safe browsing',
+        'network protection',
+      ],
+      sections: privacySecuritySettingsSections,
+      onTap: (context) => PrivacySecuritySettingsRoute().push(context),
+    ),
+    _SettingsCategoryDefinition(
+      title: 'Extensions',
+      subtitle: 'Install and manage extension sources',
+      icon: MdiIcons.puzzleOutline,
+      keywords: const ['addons', 'unsigned extensions'],
+      sections: extensionsSettingsSections,
+      onTap: (context) => ExtensionsSettingsRoute().push(context),
+    ),
+    _SettingsCategoryDefinition(
+      title: 'WebLibre Account',
+      subtitle: 'Sign in, sync settings',
+      icon: Icons.account_circle_outlined,
+      keywords: const ['account', 'subscription'],
+      onTap: (context) => AccountSettingsRoute().push(context),
+    ),
+    _SettingsCategoryDefinition(
+      title: 'Firefox Sync',
+      subtitle: 'Account, sync now, engine selection',
+      icon: Icons.sync,
+      keywords: const ['pair', 'device name', 'engines'],
+      onTap: (context) => SyncSettingsRoute().push(context),
+    ),
+    _SettingsCategoryDefinition(
+      title: 'Advanced',
+      subtitle: 'JavaScript, user agent, debugging',
+      icon: Icons.developer_mode,
+      keywords: const ['experimental', 'error logs', 'javascript'],
+      sections: advancedSettingsSections,
+      onTap: (context) => AdvancedSettingsRoute().push(context),
+    ),
+  ];
+}
+
+List<SettingsSectionDefinition> _buildCategorySections(
+  List<_SettingsCategoryDefinition> categories,
+) {
+  return [
+    SettingsSectionDefinition(
+      title: 'Browser',
+      entries: [
+        for (final category in categories.take(7))
+          _buildCategoryEntry(category),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: 'Services & Advanced',
+      entries: [
+        for (final category in categories.skip(7))
+          _buildCategoryEntry(category),
+      ],
+    ),
+  ];
+}
+
+List<SettingsSectionDefinition> _buildSearchSections(
+  List<_SettingsCategoryDefinition> categories,
+  String normalizedQuery,
+) {
+  final results = <String, List<SettingsEntryDefinition>>{};
+
+  for (final category in categories) {
+    final categoryEntries = <SettingsEntryDefinition>[];
+
+    if (matchesSettingsSearch(normalizedQuery, [
+      category.title,
+      category.subtitle,
+      ...category.keywords,
+    ])) {
+      categoryEntries.add(_buildCategoryEntry(category));
+    }
+
+    for (final section in filterSettingsSections(
+      sections: category.sections,
+      query: normalizedQuery,
+    )) {
+      for (final entry in section.entries) {
+        categoryEntries.add(
+          SettingsEntryDefinition(
+            title: entry.title,
+            subtitle: '${section.title} • ${category.title}',
+            keywords: entry.keywords,
+            child: _SearchResultTile(
+              title: entry.title,
+              subtitle: entry.subtitle,
+              category: category.title,
+              section: section.title,
+              icon: category.icon,
+              onTap: category.onTap,
+            ),
+          ),
+        );
+      }
+    }
+
+    if (categoryEntries.isNotEmpty) {
+      results[category.title] = categoryEntries;
+    }
+  }
+
+  return [
+    for (final result in results.entries)
+      SettingsSectionDefinition(title: result.key, entries: result.value),
+  ];
+}
+
+SettingsEntryDefinition _buildCategoryEntry(
+  _SettingsCategoryDefinition category,
+) {
+  return SettingsEntryDefinition(
+    title: category.title,
+    subtitle: category.subtitle,
+    keywords: category.keywords,
+    child: _CategoryTile(category: category),
+  );
+}
+
+class _SettingsCategoryDefinition {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final List<String> keywords;
+  final List<SettingsSectionDefinition> sections;
+  final Future<void> Function(BuildContext context) onTap;
+
+  const _SettingsCategoryDefinition({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.onTap,
+    this.keywords = const [],
+    this.sections = const [],
+  });
+}
+
+class _CategoryTile extends StatelessWidget {
+  final _SettingsCategoryDefinition category;
+
+  const _CategoryTile({required this.category});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Theme.of(context).colorScheme.surfaceContainerHigh,
-      clipBehavior: Clip.antiAlias,
-      child: ListTile(
-        title: const Text('General'),
-        subtitle: const Text('Appearance, language, downloads'),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 8.0,
-          horizontal: 16.0,
-        ),
-        leading: const Icon(Icons.tune),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () async {
-          await GeneralSettingsRoute().push(context);
-        },
+    return ListTile(
+      title: Text(category.title),
+      subtitle: Text(category.subtitle),
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 8.0,
+        horizontal: 16.0,
       ),
+      leading: Icon(category.icon),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () async {
+        await category.onTap(context);
+      },
     );
   }
 }
 
-class _BrowsingTile extends StatelessWidget {
-  const _BrowsingTile();
+class _SearchResultTile extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  final String category;
+  final String section;
+  final IconData icon;
+  final Future<void> Function(BuildContext context) onTap;
+
+  const _SearchResultTile({
+    required this.title,
+    required this.category,
+    required this.section,
+    required this.icon,
+    required this.onTap,
+    this.subtitle,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Theme.of(context).colorScheme.surfaceContainerHigh,
-      clipBehavior: Clip.antiAlias,
-      child: ListTile(
-        title: const Text('Browsing'),
-        subtitle: const Text('Tabs, navigation, external links'),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 8.0,
-          horizontal: 16.0,
-        ),
-        leading: const Icon(MdiIcons.compassOutline),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () async {
-          await BrowsingSettingsRoute().push(context);
-        },
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      subtitle: Text(
+        subtitle == null || subtitle!.isEmpty
+            ? '$category • $section'
+            : '$category • $section\n$subtitle',
       ),
-    );
-  }
-}
-
-class _ToolbarLayoutTile extends StatelessWidget {
-  const _ToolbarLayoutTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: Theme.of(context).colorScheme.surfaceContainerHigh,
-      clipBehavior: Clip.antiAlias,
-      child: ListTile(
-        title: const Text('Toolbar & Layout'),
-        subtitle: const Text('Tab bar, toolbar, quick switcher, tab view'),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 8.0,
-          horizontal: 16.0,
-        ),
-        leading: const Icon(MdiIcons.viewDashboardOutline),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () async {
-          await ToolbarLayoutSettingsRoute().push(context);
-        },
+      isThreeLine: subtitle != null && subtitle!.isNotEmpty,
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 8.0,
+        horizontal: 16.0,
       ),
-    );
-  }
-}
-
-class _PrivacySecurityTile extends StatelessWidget {
-  const _PrivacySecurityTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: Theme.of(context).colorScheme.surfaceContainerHigh,
-      clipBehavior: Clip.antiAlias,
-      child: ListTile(
-        title: const Text('Privacy & Security'),
-        subtitle: const Text('Tracking protection, data clearing'),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 8.0,
-          horizontal: 16.0,
-        ),
-        leading: const Icon(MdiIcons.shieldLock),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () async {
-          await PrivacySecuritySettingsRoute().push(context);
-        },
-      ),
-    );
-  }
-}
-
-class _WebContentTile extends StatelessWidget {
-  const _WebContentTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: Theme.of(context).colorScheme.surfaceContainerHigh,
-      clipBehavior: Clip.antiAlias,
-      child: ListTile(
-        title: const Text('Web Content'),
-        subtitle: const Text('Page display, PDF, reader mode, AI'),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 8.0,
-          horizontal: 16.0,
-        ),
-        leading: const Icon(MdiIcons.fileDocumentOutline),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () async {
-          await WebContentSettingsRoute().push(context);
-        },
-      ),
-    );
-  }
-}
-
-class _SearchTile extends StatelessWidget {
-  const _SearchTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: Theme.of(context).colorScheme.surfaceContainerHigh,
-      clipBehavior: Clip.antiAlias,
-      child: ListTile(
-        title: const Text('Search'),
-        subtitle: const Text('Providers, bangs, search history'),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 8.0,
-          horizontal: 16.0,
-        ),
-        leading: const Icon(MdiIcons.magnify),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () async {
-          await SearchSettingsRoute().push(context);
-        },
-      ),
-    );
-  }
-}
-
-class _ExtensionsTile extends StatelessWidget {
-  const _ExtensionsTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: Theme.of(context).colorScheme.surfaceContainerHigh,
-      clipBehavior: Clip.antiAlias,
-      child: ListTile(
-        title: const Text('Extensions'),
-        subtitle: const Text('Install and manage extension sources'),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 8.0,
-          horizontal: 16.0,
-        ),
-        leading: const Icon(MdiIcons.puzzleOutline),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () async {
-          await ExtensionsSettingsRoute().push(context);
-        },
-      ),
-    );
-  }
-}
-
-class _SyncTile extends StatelessWidget {
-  const _SyncTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: Theme.of(context).colorScheme.surfaceContainerHigh,
-      clipBehavior: Clip.antiAlias,
-      child: ListTile(
-        title: const Text('Firefox Sync'),
-        subtitle: const Text('Account, sync now, engine selection'),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 8.0,
-          horizontal: 16.0,
-        ),
-        leading: const Icon(Icons.sync),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () async {
-          await SyncSettingsRoute().push(context);
-        },
-      ),
-    );
-  }
-}
-
-class _AdvancedTile extends StatelessWidget {
-  const _AdvancedTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: Theme.of(context).colorScheme.surfaceContainerHigh,
-      clipBehavior: Clip.antiAlias,
-      child: ListTile(
-        title: const Text('Advanced'),
-        subtitle: const Text('JavaScript, user agent, debugging'),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 8.0,
-          horizontal: 16.0,
-        ),
-        leading: const Icon(Icons.developer_mode),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () async {
-          await AdvancedSettingsRoute().push(context);
-        },
-      ),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () async {
+        await onTap(context);
+      },
     );
   }
 }

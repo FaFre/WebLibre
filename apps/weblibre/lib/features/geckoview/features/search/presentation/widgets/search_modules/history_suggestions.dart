@@ -19,19 +19,16 @@
  */
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/history_row_icon.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
-import 'package:weblibre/features/geckoview/utils/image_helper.dart';
-import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
-import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 
 class HistorySuggestions extends HookConsumerWidget {
@@ -85,51 +82,35 @@ class HistorySuggestions extends HookConsumerWidget {
                         Uri.tryParse,
                       );
 
-                      return HookBuilder(
+                      return ListTile(
                         key: ValueKey(suggestion.id),
-                        builder: (context) {
-                          final icon = useCachedFuture(
-                            () async =>
-                                suggestion.icon.mapNotNull(tryDecodeImage),
-                            [suggestion.description, suggestion.icon],
-                          );
-
-                          return ListTile(
-                            leading: RepaintBoundary(
-                              child: SafeRawImage(
-                                image: icon.data,
-                                height: 24,
-                                width: 24,
-                                fallback: const Icon(MdiIcons.web, size: 24),
-                              ),
-                            ),
-                            title: suggestion.title.mapNotNull(
-                              (title) => Text(
-                                title,
+                        leading: HistoryRowIcon(
+                          iconBytes: suggestion.icon,
+                          fallback: const Icon(MdiIcons.web, size: 24),
+                        ),
+                        title: suggestion.title.mapNotNull(
+                          (title) => Text(
+                            title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        subtitle:
+                            uri.mapNotNull(
+                              (uri) =>
+                                  UriBreadcrumb(uri: uri, showHttpScheme: false),
+                            ) ??
+                            suggestion.description.mapNotNull(
+                              (description) => Text(
+                                description,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            subtitle:
-                                uri.mapNotNull(
-                                  (uri) => UriBreadcrumb(
-                                    uri: uri,
-                                    showHttpScheme: false,
-                                  ),
-                                ) ??
-                                suggestion.description.mapNotNull(
-                                  (description) => Text(
-                                    description,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                            onTap: () {
-                              if (uri != null) {
-                                onUriSelected(uri);
-                              }
-                            },
-                          );
+                        onTap: () {
+                          if (uri != null) {
+                            onUriSelected(uri);
+                          }
                         },
                       );
                     },

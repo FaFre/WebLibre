@@ -115,6 +115,10 @@ abstract class _$ContainerDataCWProxy {
 
   ContainerData color(Color color);
 
+  ContainerData orderKey(String orderKey);
+
+  ContainerData isPinned(bool isPinned);
+
   ContainerData metadata(ContainerMetadata? metadata);
 
   /// Creates a new instance with the provided field values.
@@ -128,6 +132,8 @@ abstract class _$ContainerDataCWProxy {
     String id,
     String? name,
     Color color,
+    String orderKey,
+    bool isPinned,
     ContainerMetadata? metadata,
   });
 }
@@ -149,6 +155,12 @@ class _$ContainerDataCWProxyImpl implements _$ContainerDataCWProxy {
   ContainerData color(Color color) => call(color: color);
 
   @override
+  ContainerData orderKey(String orderKey) => call(orderKey: orderKey);
+
+  @override
+  ContainerData isPinned(bool isPinned) => call(isPinned: isPinned);
+
+  @override
   ContainerData metadata(ContainerMetadata? metadata) =>
       call(metadata: metadata);
 
@@ -164,6 +176,8 @@ class _$ContainerDataCWProxyImpl implements _$ContainerDataCWProxy {
     Object? id = const $CopyWithPlaceholder(),
     Object? name = const $CopyWithPlaceholder(),
     Object? color = const $CopyWithPlaceholder(),
+    Object? orderKey = const $CopyWithPlaceholder(),
+    Object? isPinned = const $CopyWithPlaceholder(),
     Object? metadata = const $CopyWithPlaceholder(),
   }) {
     return ContainerData(
@@ -179,6 +193,14 @@ class _$ContainerDataCWProxyImpl implements _$ContainerDataCWProxy {
           ? _value.color
           // ignore: cast_nullable_to_non_nullable
           : color as Color,
+      orderKey: orderKey == const $CopyWithPlaceholder() || orderKey == null
+          ? _value.orderKey
+          // ignore: cast_nullable_to_non_nullable
+          : orderKey as String,
+      isPinned: isPinned == const $CopyWithPlaceholder() || isPinned == null
+          ? _value.isPinned
+          // ignore: cast_nullable_to_non_nullable
+          : isPinned as bool,
       metadata: metadata == const $CopyWithPlaceholder()
           ? _value.metadata
           // ignore: cast_nullable_to_non_nullable
@@ -241,6 +263,8 @@ ContainerData _$ContainerDataFromJson(
   id: json['id'] as String,
   name: json['name'] as String?,
   color: const ColorJsonConverter().fromJson((json['color'] as num).toInt()),
+  orderKey: json['orderKey'] as String,
+  isPinned: json['isPinned'] as bool? ?? false,
   metadata: json['metadata'] == null
       ? null
       : ContainerMetadata.fromJson(json['metadata'] as Map<String, dynamic>),
@@ -251,6 +275,8 @@ Map<String, dynamic> _$ContainerDataToJson(ContainerData instance) =>
       'id': instance.id,
       'name': instance.name,
       'color': const ColorJsonConverter().toJson(instance.color),
+      'orderKey': instance.orderKey,
+      'isPinned': instance.isPinned,
       'metadata': instance.metadata.toJson(),
     };
 
@@ -260,6 +286,8 @@ ContainerDataWithCount _$ContainerDataWithCountFromJson(
   id: json['id'] as String,
   name: json['name'] as String?,
   color: const ColorJsonConverter().fromJson((json['color'] as num).toInt()),
+  orderKey: json['orderKey'] as String,
+  isPinned: json['isPinned'] as bool? ?? false,
   metadata: json['metadata'] == null
       ? null
       : ContainerMetadata.fromJson(json['metadata'] as Map<String, dynamic>),
@@ -272,6 +300,8 @@ Map<String, dynamic> _$ContainerDataWithCountToJson(
   'id': instance.id,
   'name': instance.name,
   'color': const ColorJsonConverter().toJson(instance.color),
+  'orderKey': instance.orderKey,
+  'isPinned': instance.isPinned,
   'metadata': instance.metadata.toJson(),
   'tabCount': instance.tabCount,
 };

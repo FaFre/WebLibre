@@ -199,6 +199,43 @@ class _PigeonCodec extends StandardMessageCodec {
   }
 }
 
+class IntentHost {
+  /// Constructor for [IntentHost].  The [binaryMessenger] named argument is
+  /// available for dependency injection.  If it is left null, the default
+  /// BinaryMessenger will be used which routes to the host platform.
+  IntentHost({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  final BinaryMessenger? pigeonVar_binaryMessenger;
+
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  final String pigeonVar_messageChannelSuffix;
+
+  /// Returns the launch intent that started the activity, if any.
+  /// This allows Dart to retrieve an intent that arrived before
+  /// IntentEvents.setUp() was called (cold-start deep links).
+  /// Returns null if no launch intent is pending.
+  Future<Intent?> getInitialIntent() async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.simple_intent_receiver.IntentHost.getInitialIntent$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+    return pigeonVar_replyValue as Intent?;
+  }
+}
+
 abstract class IntentEvents {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 

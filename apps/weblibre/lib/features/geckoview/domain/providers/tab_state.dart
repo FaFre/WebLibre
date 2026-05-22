@@ -48,23 +48,6 @@ part 'tab_state.g.dart';
 
 @Riverpod(keepAlive: true)
 class TabStates extends _$TabStates {
-  /// Disposes images from a TabState to free GPU memory.
-  void _disposeTabImages(TabState tab) {
-    tab.icon?.dispose();
-    tab.thumbnail?.dispose();
-  }
-
-  /// Updates state while disposing images from removed tabs.
-  void _updateState(Map<String, TabState> newState) {
-    // Find and dispose images from tabs that are being removed
-    for (final tabId in state.keys) {
-      if (!newState.containsKey(tabId)) {
-        _disposeTabImages(state[tabId]!);
-      }
-    }
-
-    state = newState;
-  }
 
   Future<void> _onTabContentStateChange(TabContentState contentState) async {
     final current = await patchedState(contentState.id);
@@ -103,7 +86,7 @@ class TabStates extends _$TabStates {
       showToolbarAsExpanded: contentState.showToolbarAsExpanded,
     );
 
-    _updateState({...state}..[contentState.id] = newState);
+    state = {...state}..[contentState.id] = newState;
 
     if (newState.isFinishedLoading) {
       ref
@@ -139,9 +122,6 @@ class TabStates extends _$TabStates {
     final image = await bytes.mapNotNull((bytes) => tryDecodeImage(bytes));
     final current = state[tabId] ?? TabState.$default(tabId);
 
-    // Dispose old icon only after successfully creating new one
-    current.icon?.dispose();
-
     state = {...state}..[tabId] = current.copyWith.icon(image);
   }
 
@@ -150,9 +130,6 @@ class TabStates extends _$TabStates {
 
     final image = await bytes.mapNotNull((bytes) => tryDecodeImage(bytes));
     final current = state[tabId] ?? TabState.$default(tabId);
-
-    // Dispose old thumbnail only after successfully creating new one
-    current.thumbnail?.dispose();
 
     state = {...state}..[tabId] = current.copyWith.thumbnail(image);
   }
@@ -368,12 +345,6 @@ class TabStates extends _$TabStates {
     );
 
     ref.onDispose(() async {
-      // Dispose all remaining tab images
-      for (final tab in state.values) {
-        _disposeTabImages(tab);
-      }
-
-      // Cancel all stream subscriptions
       for (final sub in subscriptions) {
         await sub.cancel();
       }

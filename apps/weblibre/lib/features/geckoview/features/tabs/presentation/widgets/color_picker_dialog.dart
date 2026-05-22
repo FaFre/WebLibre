@@ -48,7 +48,9 @@ class ColorPickerDialog extends HookWidget {
         onColorChanged: (value) {
           selectedColor.value = value;
         },
-        displayAlpha: ContainerColors.defaultAlpha,
+        displayColorBuilder: (context, color) {
+          return ContainerColors.palette(context, color).containerColor;
+        },
       ),
       actions: [
         TextButton(

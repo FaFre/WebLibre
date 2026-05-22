@@ -27,6 +27,7 @@ import 'package:nullability/nullability.dart';
 import 'package:weblibre/domain/repositories/locale_resolver.dart';
 import 'package:weblibre/extensions/locale.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 
@@ -51,117 +52,174 @@ class LocaleSettingsScreen extends HookConsumerWidget {
       ),
     );
 
-    final availableLocales = {
-      ...systemLocales,
-      ...userLocales.value,
-      Locale.fromSubtags(languageCode: 'en', countryCode: 'US'),
-    };
+    final availableLocales = useMemoized(
+      () =>
+          {
+            ...systemLocales,
+            ...userLocales.value,
+            Locale.fromSubtags(languageCode: 'en', countryCode: 'US'),
+          }.toList()..sort(
+            (a, b) => a.toLanguageTag().compareTo(b.toLanguageTag()),
+          ),
+      [systemLocales, userLocales],
+    );
 
     final customLocaleController = useTextEditingController();
+    final search = useSettingsSearch();
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Browser Languages')),
-      body: SafeArea(
-        child: ListView(
-          children: [
-            ...availableLocales.map((locale) {
-              return CheckboxListTile.adaptive(
-                value: userLocales.value.contains(locale),
-                onChanged: (value) async {
-                  if (value != null) {
-                    await ref
-                        .read(saveEngineSettingsControllerProvider.notifier)
-                        .save(
-                          (currentSettings) => currentSettings.copyWith.locales(
-                            value
-                                ? {
-                                    ...currentSettings.locales,
-                                    locale.toLanguageTag(),
-                                  }.toList()
-                                : ([
-                                    ...currentSettings.locales,
-                                  ]..remove(locale.toLanguageTag())).toList(),
-                          ),
-                        );
-                  }
-                },
-                title: Consumer(
-                  builder: (context, ref, child) {
-                    final resolvedAsync = ref.watch(
-                      resolveLocaleProvider(locale),
-                    );
+    final filteredLocales = availableLocales.where((locale) {
+      if (search.normalizedQuery.isEmpty) return true;
+      return locale
+          .toLanguageTag()
+          .toLowerCase()
+          .contains(search.normalizedQuery);
+    }).toList();
 
-                    return Text(
-                      resolvedAsync.maybeWhen(
-                        data: (data) =>
-                            data.mapNotNull(
-                              (data) =>
-                                  '${data.languageName} ${data.countryName.mapNotNull((country) => '($country)') ?? ''}'
-                                      .trim(),
-                            ) ??
-                            locale.toLanguageTag(),
-                        orElse: () => locale.toLanguageTag(),
-                      ),
-                    );
-                  },
-                ),
-                subtitle: Text(locale.toLanguageTag()),
-                secondary: CountryFlag.fromLanguageCode(
-                  locale.languageCode,
-                  theme: const ImageTheme(shape: RoundedRectangle(8.0)),
-                ),
-              );
-            }),
-            const Divider(),
-            Padding(
-              padding: const EdgeInsets.only(left: 16.0, right: 20),
-              child: Form(
-                key: formKey,
-                child: TextFormField(
-                  controller: customLocaleController,
-                  decoration: InputDecoration(
-                    label: const Text('Custom Locale'),
-                    hint: const Text('en-US'),
-                    floatingLabelBehavior: FloatingLabelBehavior.always,
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        if (formKey.currentState?.validate() == true) {
-                          formKey.currentState?.save();
-                        }
-                      },
-                      icon: const Icon(Icons.add),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value != null && Locale.tryParse(value) == null) {
-                      return 'Invalid locale identifier';
-                    }
+    return SettingsCustomScrollScaffold(
+      title: 'Browser Languages',
+      searchController: search.controller,
+      searchHintText: 'Search locales by tag',
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
+          sliver: SliverToBoxAdapter(
+            child: SettingsSectionList(
+              sections: [
+                SettingsSectionDefinition(
+                  title: 'Language & Region Settings',
+                  entries: [
+                    for (final locale in filteredLocales)
+                      SettingsEntryDefinition(
+                        title: locale.toLanguageTag(),
+                        subtitle: 'Browser language preference',
+                        keywords: [locale.languageCode],
+                        child: CheckboxListTile.adaptive(
+                          value: userLocales.value.contains(locale),
+                          onChanged: (value) async {
+                            if (value != null) {
+                              await ref
+                                  .read(
+                                    saveEngineSettingsControllerProvider
+                                        .notifier,
+                                  )
+                                  .save(
+                                    (currentSettings) =>
+                                        currentSettings.copyWith.locales(
+                                          value
+                                              ? {
+                                                  ...currentSettings.locales,
+                                                  locale.toLanguageTag(),
+                                                }.toList()
+                                              : ([...currentSettings.locales]
+                                                      ..remove(
+                                                        locale.toLanguageTag(),
+                                                      ))
+                                                    .toList(),
+                                        ),
+                                  );
+                            }
+                          },
+                          title: Consumer(
+                            builder: (context, ref, child) {
+                              final resolvedAsync = ref.watch(
+                                resolveLocaleProvider(locale),
+                              );
 
-                    return null;
-                  },
-                  onSaved: (newValue) async {
-                    if (newValue != null) {
-                      await ref
-                          .read(saveEngineSettingsControllerProvider.notifier)
-                          .save(
-                            (currentSettings) =>
-                                currentSettings.copyWith.locales(
-                                  {
-                                    ...currentSettings.locales,
-                                    Locale.parse(newValue).toLanguageTag(),
-                                  }.toList(),
+                              return Text(
+                                resolvedAsync.maybeWhen(
+                                  data: (data) =>
+                                      data.mapNotNull(
+                                        (data) =>
+                                            '${data.languageName} ${data.countryName.mapNotNull((country) => '($country)') ?? ''}'
+                                                .trim(),
+                                      ) ??
+                                      locale.toLanguageTag(),
+                                  orElse: () => locale.toLanguageTag(),
                                 ),
-                          );
-
-                      customLocaleController.clear();
-                    }
-                  },
+                              );
+                            },
+                          ),
+                          subtitle: Text(locale.toLanguageTag()),
+                          secondary: CountryFlag.fromLanguageCode(
+                            locale.languageCode,
+                            theme: const ImageTheme(
+                              shape: RoundedRectangle(8.0),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-              ),
+                SettingsSectionDefinition(
+                  title: 'Custom Locale',
+                  entries: [
+                    SettingsEntryDefinition(
+                      title: 'Add custom locale',
+                      subtitle: 'Enter a locale tag such as en-US',
+                      keywords: const ['locale tag'],
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                        child: Form(
+                          key: formKey,
+                          child: TextFormField(
+                            controller: customLocaleController,
+                            decoration: InputDecoration(
+                              label: const Text('Custom Locale'),
+                              hint: const Text('en-US'),
+                              floatingLabelBehavior:
+                                  FloatingLabelBehavior.always,
+                              suffixIcon: IconButton(
+                                onPressed: () {
+                                  if (formKey.currentState?.validate() ==
+                                      true) {
+                                    formKey.currentState?.save();
+                                  }
+                                },
+                                icon: const Icon(Icons.add),
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value != null &&
+                                  Locale.tryParse(value) == null) {
+                                return 'Invalid locale identifier';
+                              }
+
+                              return null;
+                            },
+                            onSaved: (newValue) async {
+                              if (newValue != null) {
+                                await ref
+                                    .read(
+                                      saveEngineSettingsControllerProvider
+                                          .notifier,
+                                    )
+                                    .save(
+                                      (currentSettings) =>
+                                          currentSettings.copyWith.locales(
+                                            {
+                                              ...currentSettings.locales,
+                                              Locale.parse(
+                                                newValue,
+                                              ).toLanguageTag(),
+                                            }.toList(),
+                                          ),
+                                    );
+
+                                customLocaleController.clear();
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              query: search.rawQuery,
             ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }

@@ -26,6 +26,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/widgets/auto_suggest_text_field.dart';
 import 'package:weblibre/presentation/widgets/qr_scanner_button.dart';
@@ -68,6 +69,11 @@ class SearchField extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final incognitoEnabled = ref.watch(incognitoModeEnabledProvider);
+    final acceptSuggestionOnSubmit = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.acceptSuggestionOnSubmit,
+      ),
+    );
 
     final hasText = useListenableSelector(
       textEditingController,
@@ -120,13 +126,14 @@ class SearchField extends HookConsumerWidget {
       child: AutoSuggestTextField(
         controller: textEditingController,
         suggestion: suggestion.value,
+        acceptSuggestionOnSubmit: acceptSuggestionOnSubmit,
         enableIMEPersonalizedLearning: !incognitoEnabled,
         focusNode: safeFocusNode,
         maxLines: maxLines,
         textFieldKey: textFieldKey,
         textInputAction: (maxLines == null || maxLines! > 1)
             ? TextInputAction.done
-            : null,
+            : TextInputAction.search,
         minLines: minLines,
         autofocus: autofocus,
         onSuggestionDismiss: () {

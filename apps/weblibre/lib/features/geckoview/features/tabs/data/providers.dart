@@ -27,6 +27,7 @@ import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
 import 'package:weblibre/core/database_registry.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
+import 'package:weblibre/data/database/functions/url_functions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 
 part 'providers.g.dart';
@@ -46,6 +47,7 @@ TabDatabase tabDatabase(Ref ref) {
         file,
         setup: (database) {
           registerLexorankFunctions(database);
+          registerUrlFunctions(database);
         },
       );
     }),

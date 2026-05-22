@@ -86,8 +86,6 @@ class AddonManagerScreen extends ConsumerWidget {
   }
 }
 
-enum _AddonManagerMenuAction { checkForUpdates, installFromFile }
-
 class _AddonManagerOverflowMenu extends ConsumerWidget {
   final bool canCheckForUpdates;
 
@@ -99,44 +97,39 @@ class _AddonManagerOverflowMenu extends ConsumerWidget {
       bulkAddonUpdateProvider.select((value) => value.isLoading),
     );
 
-    return PopupMenuButton<_AddonManagerMenuAction>(
-      icon: updatesBusy
-          ? const SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          : const Icon(Icons.more_vert),
-      onSelected: (action) async {
-        switch (action) {
-          case _AddonManagerMenuAction.checkForUpdates:
-            await ref.read(bulkAddonUpdateProvider.notifier).triggerAll();
-            if (!context.mounted) return;
-            showInfoMessage(
-              context,
-              'Background update checks started for installed extensions',
-            );
-          case _AddonManagerMenuAction.installFromFile:
-            await showInstallLocalAddonDialog(context);
-        }
-      },
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          value: _AddonManagerMenuAction.checkForUpdates,
-          enabled: canCheckForUpdates && !updatesBusy,
-          child: const ListTile(
-            leading: Icon(Icons.system_update_alt),
-            title: Text('Check for updates'),
-            contentPadding: EdgeInsets.zero,
-          ),
+    return MenuAnchor(
+      builder: (context, controller, _) => IconButton(
+        icon: updatesBusy
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.more_vert),
+        onPressed: () =>
+            controller.isOpen ? controller.close() : controller.open(),
+      ),
+      menuChildren: [
+        MenuItemButton(
+          leadingIcon: const Icon(Icons.system_update_alt),
+          onPressed: canCheckForUpdates && !updatesBusy
+              ? () async {
+                  await ref.read(bulkAddonUpdateProvider.notifier).triggerAll();
+                  if (!context.mounted) return;
+                  showInfoMessage(
+                    context,
+                    'Background update checks started for installed extensions',
+                  );
+                }
+              : null,
+          child: const Text('Check for updates'),
         ),
-        const PopupMenuItem(
-          value: _AddonManagerMenuAction.installFromFile,
-          child: ListTile(
-            leading: Icon(Icons.file_open),
-            title: Text('Install from file'),
-            contentPadding: EdgeInsets.zero,
-          ),
+        MenuItemButton(
+          leadingIcon: const Icon(Icons.file_open),
+          onPressed: () async {
+            await showInstallLocalAddonDialog(context);
+          },
+          child: const Text('Install from file'),
         ),
       ],
     );

@@ -13,7 +13,12 @@
                 "--device-user",
                 "0",
                 "--flavor",
-                "alpha"
+                "alpha",
+                "--dart-define",
+                "ACCOUNT_BACKEND_ORIGIN=https://account.weblibre.eu/",
+                "--dart-define",
+                "SEARCH_BACKEND_ORIGIN=https://search.weblibre.eu/",
+                "SEARCH_BACKEND_ORIGIN_TOR=http://eyipgwt32zaejr2xwblaswp2ur4qikapofunbqus5dklvf7jxkncirad.onion",
             ]
         },
         {

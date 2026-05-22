@@ -24,6 +24,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/domain/providers/search.dart';
 import 'package:weblibre/features/bangs/presentation/widgets/bang_details.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
@@ -36,7 +37,7 @@ class BangSearchScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final resultsAsync = ref.watch(bangSearchProvider);
+    final resultsAsync = ref.watch(seamlessBangProvider);
     final incognitoEnabled = ref.watch(incognitoModeEnabledProvider);
 
     final focusNode = useFocusNode();
@@ -45,11 +46,9 @@ class BangSearchScreen extends HookConsumerWidget {
     );
 
     useOnListenableChange(textEditingController, () {
-      unawaited(
-        ref
-            .read(bangSearchProvider.notifier)
-            .search(textEditingController.text),
-      );
+      ref
+          .read(seamlessBangProvider.notifier)
+          .search(textEditingController.text);
     });
 
     return Scaffold(
@@ -79,24 +78,26 @@ class BangSearchScreen extends HookConsumerWidget {
       body: SafeArea(
         child: resultsAsync.when(
           skipLoadingOnReload: true,
-          data: (bangs) => FadingScroll(
-            fadingSize: 25,
-            builder: (context, controller) {
-              return ListView.builder(
-                controller: controller,
-                itemCount: bangs.length,
-                itemBuilder: (context, index) {
-                  final bang = bangs[index];
-                  return BangDetails(
-                    bang,
-                    onTap: () {
-                      context.pop(bang.toKey());
-                    },
-                  );
-                },
-              );
-            },
-          ),
+          data: (bangs) {
+            return FadingScroll(
+              fadingSize: 25,
+              builder: (context, controller) {
+                return ListView.builder(
+                  controller: controller,
+                  itemCount: bangs.length,
+                  itemBuilder: (context, index) {
+                    final bang = bangs[index];
+                    return BangDetails(
+                      bang,
+                      onTap: () {
+                        context.pop(bang.toKey());
+                      },
+                    );
+                  },
+                );
+              },
+            );
+          },
           error: (error, stackTrace) => Center(
             child: FailureWidget(title: 'Bang Search failed', exception: error),
           ),

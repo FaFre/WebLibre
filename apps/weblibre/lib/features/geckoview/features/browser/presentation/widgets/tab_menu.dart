@@ -51,6 +51,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/website_feed_menu_button.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -196,12 +197,17 @@ class TabMenu extends HookConsumerWidget {
             child: const Text('Add Bookmark'),
             onPressed: () async {
               final tabState = ref.read(tabStateProvider(selectedTabId))!;
+              final bookmarkUrl =
+                  ref.read(
+                    sandboxSourceUriForTabProvider(tabId: tabState.id),
+                  ) ??
+                  tabState.url;
 
               await BookmarkEntryAddRoute(
                 bookmarkInfo: jsonEncode(
                   BookmarkInfo(
                     title: tabState.titleOrAuthority,
-                    url: tabState.url.toString(),
+                    url: bookmarkUrl.toString(),
                   ).encode(),
                 ),
               ).push(context);
@@ -248,12 +254,17 @@ class TabMenu extends HookConsumerWidget {
                       .read(tabDataRepositoryProvider.notifier)
                       .getTabContainerData(selectedTabId);
 
+                  final cloneUrl =
+                      ref.read(
+                        sandboxSourceUriForTabProvider(tabId: tabState.id),
+                      ) ??
+                      tabState.url;
                   final tabId = (tabState.tabMode is! RegularTabMode)
                       ? await ref
                             .read(tabRepositoryProvider.notifier)
                             .addTab(
                               tabMode: TabMode.regular,
-                              url: tabState.url,
+                              url: cloneUrl,
                               containerSelection: containerData == null
                                   ? const TabContainerSelection.unassigned()
                                   : TabContainerSelection.specific(
@@ -294,11 +305,16 @@ class TabMenu extends HookConsumerWidget {
                       .read(tabDataRepositoryProvider.notifier)
                       .getTabContainerData(selectedTabId);
 
+                  final cloneUrl =
+                      ref.read(
+                        sandboxSourceUriForTabProvider(tabId: tabState.id),
+                      ) ??
+                      tabState.url;
                   final tabId = (tabState.tabMode is! PrivateTabMode)
                       ? await ref
                             .read(tabRepositoryProvider.notifier)
                             .addTab(
-                              url: tabState.url,
+                              url: cloneUrl,
                               tabMode: TabMode.private,
                               containerSelection: containerData == null
                                   ? const TabContainerSelection.unassigned()
@@ -341,10 +357,15 @@ class TabMenu extends HookConsumerWidget {
                         .read(tabDataRepositoryProvider.notifier)
                         .getTabContainerData(selectedTabId);
 
+                    final cloneUrl =
+                        ref.read(
+                          sandboxSourceUriForTabProvider(tabId: tabState.id),
+                        ) ??
+                        tabState.url;
                     final tabId = await ref
                         .read(tabRepositoryProvider.notifier)
                         .addTab(
-                          url: tabState.url,
+                          url: cloneUrl,
                           tabMode: TabMode.newIsolated(),
                           containerSelection: containerData == null
                               ? const TabContainerSelection.unassigned()

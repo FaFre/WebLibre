@@ -32,10 +32,11 @@ import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.PluginRegistry
+import eu.weblibre.simple_intent_receiver.pigeons.IntentHost
 import eu.weblibre.simple_intent_receiver.pigeons.Intent as PigeonIntent
 import eu.weblibre.simple_intent_receiver.pigeons.IntentGatekeeperHostApi
 
-class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.NewIntentListener {
+class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.NewIntentListener, IntentHost {
   companion object {
     // Stable names that must match the notification replay path and shared-prefs schema.
     private const val PREFS_NAME = "weblibre_intent_gatekeeper"
@@ -53,10 +54,28 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
   private var activity: Activity? = null
   private var binaryMessenger: io.flutter.plugin.common.BinaryMessenger? = null
 
+  /**
+   * Caches the launch intent so Dart can retrieve it after setUp().
+   * On cold start, onAttachedToActivity fires before Dart registers its
+   * Pigeon handler, so the initial sendIntent message is lost. This field
+   * lets Dart call getInitialIntent() to recover it.
+   *
+   * On Android configuration change (rotation, theme switch) the activity
+   * is recreated and onAttachedToActivity fires again with the same
+   * launching intent. The `lastHandledIntent` guard below prevents
+   * re-caching that identical intent. If a NEW deep link arrives via the
+   * launcher between two Dart-side reads of getInitialIntent(),
+   * pendingInitialIntent is overwritten — only the latest intent is
+   * delivered. This is intentional: dropping the stale one keeps the
+   * "initial" intent meaning "what should the app open into right now".
+   */
+  private var pendingInitialIntent: PigeonIntent? = null
+
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     context = flutterPluginBinding.applicationContext
     intentReceiver = IntentReceiver(flutterPluginBinding.binaryMessenger)
     binaryMessenger = flutterPluginBinding.binaryMessenger
+    IntentHost.setUp(flutterPluginBinding.binaryMessenger, this)
     IntentGatekeeperHostApi.setUp(
       flutterPluginBinding.binaryMessenger,
       IntentGatekeeperHostApiImpl(flutterPluginBinding.applicationContext),
@@ -65,8 +84,17 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
     intentReceiver = null
-    binaryMessenger?.let { IntentGatekeeperHostApi.setUp(it, null) }
+    binaryMessenger?.let {
+      IntentHost.setUp(it, null)
+      IntentGatekeeperHostApi.setUp(it, null)
+    }
     binaryMessenger = null
+  }
+
+  override fun getInitialIntent(): PigeonIntent? {
+    val intent = pendingInitialIntent
+    pendingInitialIntent = null
+    return intent
   }
 
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {
@@ -76,7 +104,10 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
     binding.activity.intent?.let { intent ->
       val uri = intent.toUri(0)
       if (lastHandledIntent != uri) {
-        handleIntent(intent)
+        // Cache the launch intent for Dart to retrieve via getInitialIntent().
+        // Don't send via Pigeon here — the Dart handler isn't registered yet
+        // during cold start so the message would be lost.
+        pendingInitialIntent = prepareIntentForDelivery(intent)
         lastHandledIntent = uri
       }
     }
@@ -100,8 +131,7 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
     return handleIntent(intent)
   }
 
-  private fun handleIntent(intent: Intent): Boolean {
-    // Grant URI permissions for content URIs
+  private fun grantUriPermissions(intent: Intent) {
     intent.data?.let { uri ->
       if (uri.scheme == "content") {
         try {
@@ -116,7 +146,6 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
       }
     }
 
-    // Handle SEND action with STREAM extra
     intent.getStringExtra(Intent.EXTRA_STREAM)?.let { streamUri ->
       try {
         val uri = Uri.parse(streamUri)
@@ -131,15 +160,23 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
         Log.w("SimpleIntentReceiver", "Could not grant URI permission for stream: $streamUri", e)
       }
     }
+  }
+
+  private fun handleIntent(intent: Intent): Boolean {
+    val pigeonIntent = prepareIntentForDelivery(intent)
+    intentReceiver?.sendIntent(pigeonIntent)
+    return true
+  }
+
+  private fun prepareIntentForDelivery(intent: Intent): PigeonIntent {
+    grantUriPermissions(intent)
 
     if (intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK != 0) {
       intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
     }
 
     val notificationApproval = consumeNotificationApproval(intent)
-    val pigeonIntent = convertToPigeonIntent(intent, notificationApproval)
-    intentReceiver?.sendIntent(pigeonIntent)
-    return true
+    return convertToPigeonIntent(intent, notificationApproval)
   }
 
   private fun resolveCallerPackage(intent: Intent, notificationApproval: NotificationApproval?): String? {

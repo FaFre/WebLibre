@@ -1,0 +1,41 @@
+/*
+ * Copyright (c) 2024-2026 Fabian Freund.
+ *
+ * This file is part of WebLibre
+ * (see https://weblibre.eu).
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+abstract final class SearchBackendConfig {
+  /// Clearnet origin used when the user has not opted to route search through
+  /// Tor. Must be a normal HTTPS URL (or HTTP for dev).
+  static const searchBackendOrigin = String.fromEnvironment(
+    'SEARCH_BACKEND_ORIGIN',
+    defaultValue: 'https://search.weblibre.eu',
+  );
+
+  /// Origin used when the user opts to route search through Tor. Should be
+  /// the WebLibre search service's onion address so the Tor circuit
+  /// terminates inside the Tor network instead of exiting back to the
+  /// clearnet. Falls back to the clearnet origin when no onion address is
+  /// configured at build time.
+  static const searchBackendOriginTor = String.fromEnvironment(
+    'SEARCH_BACKEND_ORIGIN_TOR',
+    defaultValue:
+        'http://eyipgwt32zaejr2xwblaswp2ur4qikapofunbqus5dklvf7jxkncirad.onion',
+  );
+
+  static Uri get originUri => Uri.parse(searchBackendOrigin);
+  static Uri get torOriginUri => Uri.parse(searchBackendOriginTor);
+}

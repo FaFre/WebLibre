@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
+import eu.weblibre.flutter_mozilla_components.widget.BackGestureFilterFrameLayout
 import io.flutter.plugin.common.StandardMessageCodec
 import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.platform.PlatformViewFactory
@@ -52,7 +53,7 @@ private class NativeFragmentView(
             throw IllegalStateException("Activity cannot be null when creating NativeFragmentView")
         }
 
-        container = FrameLayout(activity)
+        container = BackGestureFilterFrameLayout(activity, activity)
         container.layoutParams = vParams
         container.id = containerId
     }

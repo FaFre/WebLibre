@@ -22,35 +22,118 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
+const List<SettingsSectionDefinition> toolbarLayoutSettingsSections = [
+  SettingsSectionDefinition(
+    title: 'Tab Bar',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Tab Bar Position',
+        subtitle: 'Choose whether the tab bar stays at the top or bottom',
+        keywords: ['top', 'bottom'],
+        child: _TabBarPositionSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Tab Bar Style',
+        subtitle: 'Choose between title and compact layouts',
+        keywords: ['layout', 'compact'],
+        child: _TabBarLayoutModeSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Auto Hide Tab Bar',
+        subtitle: 'Hide the tab bar when scrolling',
+        keywords: ['scroll'],
+        child: _AutoHideTabBarTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Long Press URL to Copy',
+        subtitle: 'Copy the current URL from the tab bar',
+        keywords: ['copy url'],
+        child: _TabBarLongPressUrlCopyTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Contextual Toolbar',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Show Contextual Toolbar',
+        subtitle: 'Show an additional toolbar for navigation and actions',
+        keywords: ['bottom toolbar'],
+        child: _ShowContextualTabBarTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Customize Toolbar Buttons',
+        subtitle: 'Choose which actions appear in the contextual toolbar',
+        keywords: ['buttons'],
+        child: _CustomizeToolbarButtonsTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Quick Tab Switcher',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Show Quick Tab Switcher Bar',
+        subtitle: 'Show a bar for switching to recent tabs',
+        keywords: ['recent tabs'],
+        child: _ShowQuickTabSwitcherBarTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Quick Tab Switcher Mode',
+        subtitle: 'Choose how the switcher orders and groups tabs',
+        keywords: ['recently used', 'container tabs'],
+        child: _QuickTabSwitcherModeSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'History Fallback in Quick Tab Switcher',
+        subtitle: 'Use history suggestions when there are no matching tabs',
+        keywords: ['suggestions'],
+        child: _QuickTabSwitcherHistorySuggestionsTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Show Titles in Quick Tab Switcher',
+        subtitle: 'Display page titles in the switcher list',
+        keywords: ['page titles'],
+        child: _QuickTabSwitcherShowTitlesTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Tab View',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Bottom Sheet Tab View',
+        subtitle: 'Open the tab switcher as a bottom sheet',
+        keywords: ['sheet'],
+        child: _BottomSheetTabViewTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Show Favicons in List View',
+        subtitle: 'Display site icons in the tab list',
+        keywords: ['icons'],
+        child: _TabListShowFaviconsTile(),
+      ),
+    ],
+  ),
+];
+
 class ToolbarLayoutContent extends StatelessWidget {
-  const ToolbarLayoutContent({super.key});
+  final String query;
+
+  const ToolbarLayoutContent({super.key, this.query = ''});
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Tab Bar'),
-        _TabBarPositionSection(),
-        _TabBarLayoutModeSection(),
-        _AutoHideTabBarTile(),
-        _TabBarLongPressUrlCopyTile(),
-        SettingSection(name: 'Contextual Toolbar'),
-        _ShowContextualTabBarTile(),
-        _CustomizeToolbarButtonsTile(),
-        SettingSection(name: 'Quick Tab Switcher'),
-        _ShowQuickTabSwitcherBarTile(),
-        _QuickTabSwitcherModeSection(),
-        _QuickTabSwitcherHistorySuggestionsTile(),
-        _QuickTabSwitcherShowTitlesTile(),
-        SettingSection(name: 'Tab View'),
-        _BottomSheetTabViewTile(),
-        _TabListShowFaviconsTile(),
-      ],
+    final filteredSections = filterSettingsSections(
+      sections: toolbarLayoutSettingsSections,
+      query: query,
     );
+
+    return SettingsSectionList(sections: filteredSections, query: query);
   }
 }
 

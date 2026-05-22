@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -117,7 +118,14 @@
                 <action android:name="es.antonborri.home_widget.action.LAUNCH" />
             </intent-filter>
 
-            </activity>
+            <!-- WebLibre Account auth callback deep link -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="weblibre" android:host="account" />
+            </intent-filter>
+        </activity>
 
         <!-- Intent router: receives external VIEW/SEND intents and routes
              Custom Tab / PWA to ExternalAppBrowserActivity, regular intents to MainActivity -->
@@ -245,6 +253,15 @@
             android:name="eu.weblibre.flutter_mozilla_components.services.DownloadService"
             android:foregroundServiceType="dataSync"
             android:exported="false" />
+
+        <service
+            android:name="eu.weblibre.flutter_mozilla_components.services.PrivateTabsNotificationService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="This foreground service allows users to close private tabs from the notification" />
+        </service>
 
         <service android:name="eu.weblibre.flutter_mozilla_components.services.MediaSessionService"
             android:foregroundServiceType="mediaPlayback"

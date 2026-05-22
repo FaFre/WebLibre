@@ -81,6 +81,73 @@ class HistoryRepository extends _$HistoryRepository {
     );
   }
 
+  Future<HistoryMetadata?> getLatestHistoryMetadataForUrl(String url) {
+    return _service.getLatestHistoryMetadataForUrl(url);
+  }
+
+  Future<List<HistoryMetadata?>> getLatestHistoryMetadataForUrls(
+    List<String> urls,
+  ) {
+    return _service.getLatestHistoryMetadataForUrls(urls);
+  }
+
+  Future<List<bool>> getVisited(List<String> urls) {
+    return _service.getVisited(urls);
+  }
+
+  Future<List<HistorySuggestion>> getSuggestions(
+    String query, {
+    int limit = 10,
+  }) {
+    return _service.getSuggestions(query, limit: limit);
+  }
+
+  Future<List<HistoryMetadata>> queryHistoryMetadata(
+    String query, {
+    int limit = 10,
+  }) {
+    return _service.queryHistoryMetadata(query, limit: limit);
+  }
+
+  Future<void> recordObservation(
+    String url, {
+    String? title,
+    String? previewImageUrl,
+  }) {
+    return _service.recordObservation(
+      url,
+      title: title,
+      previewImageUrl: previewImageUrl,
+    );
+  }
+
+  Future<void> noteViewTime(HistoryMetadataKey key, Duration viewTime) {
+    return _service.noteHistoryMetadataViewTime(key, viewTime);
+  }
+
+  Future<void> noteDocumentType(
+    HistoryMetadataKey key,
+    DocumentType documentType,
+  ) {
+    return _service.noteHistoryMetadataDocumentType(key, documentType);
+  }
+
+  Future<void> deleteVisitsFor(String url) {
+    return _service.deleteVisitsFor(url);
+  }
+
+  Future<void> deleteVisitsSince(DateTime since) {
+    return _service.deleteVisitsSince(since);
+  }
+
+  Future<void> deleteEverything() {
+    return _service.deleteEverything();
+  }
+
+  Future<void> deleteHistoryMetadataOlderThan(DateTime olderThan) {
+    return _service.deleteHistoryMetadataOlderThan(olderThan);
+  }
+
   @override
   void build() {}
 }

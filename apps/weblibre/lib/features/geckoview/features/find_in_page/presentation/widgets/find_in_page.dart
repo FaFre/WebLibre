@@ -49,6 +49,22 @@ class FindInPageWidget extends HookConsumerWidget {
       text: searchResult?.lastSearchText ?? findInPageState.lastSearchText,
     );
 
+    // Sync text field when the find-in-page query is set externally (e.g.,
+    // from a tab/history search hit). Comparing previous-vs-next on the
+    // riverpod state, rather than the controller text, lets the user keep
+    // an empty field after clearing without us repopulating it.
+    ref.listen(
+      findInPageControllerProvider(tabId).select((s) => s.lastSearchText),
+      (previous, next) {
+        if (next != null && next != previous && textController.text != next) {
+          textController.text = next;
+          textController.selection = TextSelection.collapsed(
+            offset: next.length,
+          );
+        }
+      },
+    );
+
     // Create debouncer with automatic disposal
     final debouncer = useDebouncer(const Duration(milliseconds: 300));
 

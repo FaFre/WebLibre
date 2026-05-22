@@ -31,8 +31,8 @@ class IconDataJsonConverter
   IconData fromJson(Map<String, dynamic> json) {
     return IconData(
       json['codePoint'] as int,
-      fontFamily: json['fontFamily'] as String,
-      fontPackage: json['fontPackage'] as String,
+      fontFamily: json['fontFamily'] as String?,
+      fontPackage: json['fontPackage'] as String?,
     );
   }
 

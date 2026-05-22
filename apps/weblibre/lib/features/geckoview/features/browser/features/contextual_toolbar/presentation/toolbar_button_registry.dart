@@ -52,6 +52,7 @@ import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/move_to_background.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -327,14 +328,12 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
             : () async {
                 final tabState = scope.tabState;
                 if (tabState != null) {
-                  final searchText = tabState.url.scheme == 'about'
-                      ? SearchRoute.emptySearchText
-                      : tabState.url.toString();
+                  final sandboxSourceUri = ref.read(
+                    sandboxSourceUriForTabProvider(tabId: tabState.id),
+                  );
                   await SearchRoute(
                     tabId: tabState.id,
-                    searchText: searchText.isEmpty
-                        ? SearchRoute.emptySearchText
-                        : searchText,
+                    searchText: searchTextForTab(tabState, sandboxSourceUri),
                     tabType: tabState.tabMode.toTabType(),
                   ).push(context);
                 } else {

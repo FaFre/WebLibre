@@ -20,6 +20,7 @@
 
 // ignore_for_file: deprecated_member_use
 
+import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -122,57 +123,63 @@ class LogDetailsDialog extends StatelessWidget {
       ),
       content: SizedBox(
         width: double.maxFinite,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (message.isNotEmpty) ...[
-                Text(
-                  'Message:',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                SelectableText(
-                  message,
-                  style: GoogleFonts.robotoMono(fontSize: 12),
-                ),
-                const SizedBox(height: 16),
-              ],
-              if (error != null) ...[
-                Text(
-                  'Error:',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: _levelColor(level),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                SelectableText(
-                  error!,
-                  style: GoogleFonts.robotoMono(fontSize: 11),
-                ),
-                const SizedBox(height: 16),
-              ],
-              if (stackTrace != null) ...[
-                Text(
-                  'Stack Trace:',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                SelectableText(
-                  stackTrace!,
-                  style: GoogleFonts.robotoMono(fontSize: 9),
-                ),
-              ],
-            ],
-          ),
+        child: FadingScroll(
+          fadingSize: 25,
+          builder: (context, controller) {
+            return SingleChildScrollView(
+              controller: controller,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (message.isNotEmpty) ...[
+                    Text(
+                      'Message:',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    SelectableText(
+                      message,
+                      style: GoogleFonts.robotoMono(fontSize: 12),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                  if (error != null) ...[
+                    Text(
+                      'Error:',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: _levelColor(level),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    SelectableText(
+                      error!,
+                      style: GoogleFonts.robotoMono(fontSize: 11),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                  if (stackTrace != null) ...[
+                    Text(
+                      'Stack Trace:',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    SelectableText(
+                      stackTrace!,
+                      style: GoogleFonts.robotoMono(fontSize: 9),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
         ),
       ),
       actions: [

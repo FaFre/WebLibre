@@ -26,6 +26,7 @@ import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
@@ -49,6 +50,20 @@ import 'package:weblibre/utils/debouncer.dart';
 
 part 'tab.g.dart';
 
+sealed class TabBackPromptBehavior {
+  const TabBackPromptBehavior();
+}
+
+final class BackgroundAppTabBackPromptBehavior extends TabBackPromptBehavior {
+  const BackgroundAppTabBackPromptBehavior();
+}
+
+final class ReturnToSearchTabBackPromptBehavior extends TabBackPromptBehavior {
+  final TabType tabType;
+
+  const ReturnToSearchTabBackPromptBehavior({required this.tabType});
+}
+
 @Riverpod(keepAlive: true)
 class TabRepository extends _$TabRepository {
   final _tabsService = GeckoTabService();
@@ -57,20 +72,20 @@ class TabRepository extends _$TabRepository {
   bool _reclosing = false;
   bool _suppressNextReclose = false;
 
-  final _tabFromIntent = <String>{};
+  final _tabBackPromptBehavior = <String, TabBackPromptBehavior>{};
   final _closeLock = Lock();
   final _pendingIsolationCleanup = <String>{};
 
-  bool hasLaunchedFromIntent(String? tabId) {
+  TabBackPromptBehavior? backPromptBehaviorFor(String? tabId) {
     if (tabId == null) {
-      return false;
+      return null;
     }
 
-    return _tabFromIntent.contains(tabId);
+    return _tabBackPromptBehavior[tabId];
   }
 
-  void clearLaunchedFromIntent(String tabId) {
-    _tabFromIntent.remove(tabId);
+  void clearBackPromptBehavior(String tabId) {
+    _tabBackPromptBehavior.remove(tabId);
   }
 
   Future<String?> _resolveParentIdForContext({
@@ -105,6 +120,7 @@ class TabRepository extends _$TabRepository {
     TabContainerSelection containerSelection =
         const TabContainerSelection.useSelected(),
     bool launchedFromIntent = false,
+    TabBackPromptBehavior? promptOnBackBehavior,
   }) async {
     final tabDao = ref.read(tabDatabaseProvider).tabDao;
 
@@ -152,10 +168,41 @@ class TabRepository extends _$TabRepository {
     );
 
     if (launchedFromIntent) {
-      _tabFromIntent.add(newTabId);
+      _tabBackPromptBehavior[newTabId] =
+          promptOnBackBehavior ?? const BackgroundAppTabBackPromptBehavior();
+    } else if (promptOnBackBehavior != null) {
+      _tabBackPromptBehavior[newTabId] = promptOnBackBehavior;
     }
 
     return newTabId;
+  }
+
+  Future<bool> _closeRestoredPrivateCaptureTabs(List<String> tabIds) async {
+    if (tabIds.isEmpty) {
+      return false;
+    }
+
+    final captureRows = await ref
+        .read(tabDatabaseProvider)
+        .captureTabDao
+        .findAll();
+    final tabStates = ref.read(tabStatesProvider);
+    final restoredPrivateCaptureTabIds = captureRows
+        .where((row) => row.createdAt.isBefore(_sessionStartedAt))
+        .map((row) => row.tabId)
+        .where((tabId) => tabIds.contains(tabId))
+        .where((tabId) => tabStates[tabId]?.tabMode is PrivateTabMode)
+        .toList(growable: false);
+
+    if (restoredPrivateCaptureTabIds.isEmpty) {
+      return false;
+    }
+
+    await _closeTabsInternal(
+      restoredPrivateCaptureTabIds,
+      recordTombstones: false,
+    );
+    return true;
   }
 
   Future<List<String>> addMultipleTabs({
@@ -571,6 +618,7 @@ class TabRepository extends _$TabRepository {
       }
 
       for (final tabId in tabIds) {
+        _tabBackPromptBehavior.remove(tabId);
         final isolationContextId = ref
             .read(tabStatesProvider)[tabId]
             ?.isolationContextId;
@@ -934,6 +982,8 @@ class TabRepository extends _$TabRepository {
           // future emissions don't treat them as resurrections.
           await _clearTombstonesForCurrentTabs(next.value);
         } else if (await _recloseRestoredClosedTabs(next.value)) {
+          return;
+        } else if (await _closeRestoredPrivateCaptureTabs(next.value)) {
           return;
         }
 

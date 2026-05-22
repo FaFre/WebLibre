@@ -30,6 +30,9 @@ class PluggableTransportManager private constructor(private val context: Context
         private val SNOWFLAKE_AMP_FRONTS = listOf("www.google.com")
         private const val SNOWFLAKE_ICE_SERVERS = "stun:stun.l.google.com:19302,stun:stun.antisip.com:3478,stun:stun.bluesip.net:3478,stun:stun.dus.net:3478,stun:stun.epygi.com:3478,stun:stun.sonetel.com:3478,stun:stun.uls.co.za:3478,stun:stun.voipgate.com:3478,stun:stun.voys.nl:3478"
 
+        private const val PORT_READY_TIMEOUT_MS = 10_000L
+        private const val PORT_READY_POLL_MS = 100L
+
         @Volatile
         private var instance: PluggableTransportManager? = null
 
@@ -102,60 +105,25 @@ class PluggableTransportManager private constructor(private val context: Context
         try {
             when (type) {
                 TransportType.OBFS4 -> {
-                    val transportName = IPtProxy.Obfs4
-                    controller.start(transportName, null) // null = no proxy
-                    activeTransports.add(transportName)
-                    val port = controller.port(transportName)
-                    if (port > 0) {
-                        ports[transportName] = port.toInt()
-                        Log.d(TAG, "$transportName started on port $port")
-                    }
+                    startAndAwait(IPtProxy.Obfs4)?.let { ports[IPtProxy.Obfs4] = it }
                 }
 
                 TransportType.SNOWFLAKE -> {
-                    val transportName = IPtProxy.Snowflake
                     configureSnowflake(useAmp = false)
-                    controller.start(transportName, null)
-                    activeTransports.add(transportName)
-                    val port = controller.port(transportName)
-                    if (port > 0) {
-                        ports[transportName] = port.toInt()
-                        Log.d(TAG, "$transportName started on port $port")
-                    }
+                    startAndAwait(IPtProxy.Snowflake)?.let { ports[IPtProxy.Snowflake] = it }
                 }
 
                 TransportType.SNOWFLAKE_AMP -> {
-                    val transportName = IPtProxy.Snowflake
                     configureSnowflake(useAmp = true)
-                    controller.start(transportName, null)
-                    activeTransports.add(transportName)
-                    val port = controller.port(transportName)
-                    if (port > 0) {
-                        ports[transportName] = port.toInt()
-                        Log.d(TAG, "$transportName (AMP) started on port $port")
-                    }
+                    startAndAwait(IPtProxy.Snowflake)?.let { ports[IPtProxy.Snowflake] = it }
                 }
 
                 TransportType.MEEK, TransportType.MEEK_AZURE -> {
-                    val transportName = IPtProxy.MeekLite
-                    controller.start(transportName, null)
-                    activeTransports.add(transportName)
-                    val port = controller.port(transportName)
-                    if (port > 0) {
-                        ports[transportName] = port.toInt()
-                        Log.d(TAG, "$transportName started on port $port")
-                    }
+                    startAndAwait(IPtProxy.MeekLite)?.let { ports[IPtProxy.MeekLite] = it }
                 }
 
                 TransportType.WEBTUNNEL -> {
-                    val transportName = IPtProxy.Webtunnel
-                    controller.start(transportName, null)
-                    activeTransports.add(transportName)
-                    val port = controller.port(transportName)
-                    if (port > 0) {
-                        ports[transportName] = port.toInt()
-                        Log.d(TAG, "$transportName started on port $port")
-                    }
+                    startAndAwait(IPtProxy.Webtunnel)?.let { ports[IPtProxy.Webtunnel] = it }
                 }
 
                 TransportType.NONE, TransportType.CUSTOM -> {
@@ -167,6 +135,30 @@ class PluggableTransportManager private constructor(private val context: Context
         }
 
         return ports
+    }
+
+    /**
+     * Start a transport and poll until controller.port(name) returns a usable value.
+     * IPtProxy assigns the port asynchronously after `start()`; without this poll, we
+     * may read 0 and silently skip the ClientTransportPlugin line in torrc, causing
+     * tor to bootstrap with `UseBridges 1` but no transport — bootstrap stalls.
+     */
+    private fun startAndAwait(transportName: String): Int? {
+        controller.start(transportName, null) // null = no proxy
+        activeTransports.add(transportName)
+
+        val deadline = System.currentTimeMillis() + PORT_READY_TIMEOUT_MS
+        while (System.currentTimeMillis() < deadline) {
+            val port = controller.port(transportName)
+            if (port > 0) {
+                Log.d(TAG, "$transportName started on port $port")
+                return port.toInt()
+            }
+            Thread.sleep(PORT_READY_POLL_MS)
+        }
+
+        Log.e(TAG, "$transportName failed to bind a port within ${PORT_READY_TIMEOUT_MS}ms")
+        throw IllegalStateException("Pluggable transport $transportName did not become ready in time")
     }
 
     /**

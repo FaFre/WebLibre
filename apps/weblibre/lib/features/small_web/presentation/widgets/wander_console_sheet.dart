@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -263,18 +264,24 @@ class _WanderConsoleSheetLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Skeletonizer(
-      child: ListView(
+      child: FadingScroll(
         controller: scrollController,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        children: const [
-          TextField(
-            decoration: InputDecoration(hintText: 'Filter consoles...'),
-          ),
-          SizedBox(height: 12),
-          _SkeletonConsoleTile(),
-          _SkeletonConsoleTile(),
-          _SkeletonConsoleTile(),
-        ],
+        fadingSize: 25,
+        builder: (context, controller) {
+          return ListView(
+            controller: controller,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            children: const [
+              TextField(
+                decoration: InputDecoration(hintText: 'Filter consoles...'),
+              ),
+              SizedBox(height: 12),
+              _SkeletonConsoleTile(),
+              _SkeletonConsoleTile(),
+              _SkeletonConsoleTile(),
+            ],
+          );
+        },
       ),
     );
   }
@@ -323,19 +330,25 @@ class _WanderConsoleSheetError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    return FadingScroll(
       controller: scrollController,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      children: [
-        SizedBox(
-          height: 240,
-          child: FailureWidget(
-            title: 'Could not load Small Web session',
-            exception: error,
-            onRetry: onRetry,
-          ),
-        ),
-      ],
+      fadingSize: 25,
+      builder: (context, controller) {
+        return ListView(
+          controller: controller,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          children: [
+            SizedBox(
+              height: 240,
+              child: FailureWidget(
+                title: 'Could not load Small Web session',
+                exception: error,
+                onRetry: onRetry,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -381,17 +394,23 @@ class _LinkedConsoleList extends ConsumerWidget {
             ),
           );
         }
-        return ListView.builder(
+        return FadingScroll(
           controller: scrollController,
-          padding: const EdgeInsets.only(top: 4, bottom: 56),
-          itemCount: filtered.length,
-          itemBuilder: (context, index) {
-            final console = filtered[index];
-            return _ConsoleListTile(
-              url: console.url,
-              pageCount: console.pageCount,
-              selectedConsoleUrl: selectedConsoleUrl,
-              isLoading: isLoading,
+          fadingSize: 25,
+          builder: (context, controller) {
+            return ListView.builder(
+              controller: controller,
+              padding: const EdgeInsets.only(top: 4, bottom: 56),
+              itemCount: filtered.length,
+              itemBuilder: (context, index) {
+                final console = filtered[index];
+                return _ConsoleListTile(
+                  url: console.url,
+                  pageCount: console.pageCount,
+                  selectedConsoleUrl: selectedConsoleUrl,
+                  isLoading: isLoading,
+                );
+              },
             );
           },
         );
@@ -430,17 +449,23 @@ class _AllConsoleList extends ConsumerWidget {
             ),
           );
         }
-        return ListView.builder(
+        return FadingScroll(
           controller: scrollController,
-          padding: const EdgeInsets.only(top: 4, bottom: 56),
-          itemCount: consoles.length,
-          itemBuilder: (context, index) {
-            final console = consoles[index];
-            return _ConsoleListTile(
-              url: console.url,
-              pageCount: console.pageCount,
-              selectedConsoleUrl: selectedConsoleUrl,
-              isLoading: isLoading,
+          fadingSize: 25,
+          builder: (context, controller) {
+            return ListView.builder(
+              controller: controller,
+              padding: const EdgeInsets.only(top: 4, bottom: 56),
+              itemCount: consoles.length,
+              itemBuilder: (context, index) {
+                final console = consoles[index];
+                return _ConsoleListTile(
+                  url: console.url,
+                  pageCount: console.pageCount,
+                  selectedConsoleUrl: selectedConsoleUrl,
+                  isLoading: isLoading,
+                );
+              },
             );
           },
         );

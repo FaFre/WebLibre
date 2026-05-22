@@ -45,6 +45,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/ge
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 
 part 'providers.g.dart';
 
@@ -754,19 +755,25 @@ EquatableValue<List<TabPreview>> filteredTabPreviews(
     return EquatableValue([]);
   }
 
+  final sandboxCaptureMap =
+      ref.watch(sandboxCaptureMapProvider).value ?? const {};
+
   return EquatableValue(
     tabSearchResults.results
         .where((tab) => availableTabStates.value.containsKey(tab.id))
         .map((tab) {
           final tabState = availableTabStates.value[tab.id]!;
+          final sandboxSourceUri = parseSandboxSource(
+            sandboxCaptureMap[tab.id],
+          );
 
           return TabPreview(
             id: tab.id,
             containerId: tab.containerId,
             title: tab.title ?? tabState.title,
             icon: tabState.icon,
-            url: tab.cleanUrl ?? tabState.url,
-            highlightedUrl: tab.url,
+            url: sandboxSourceUri ?? tab.cleanUrl ?? tabState.url,
+            highlightedUrl: sandboxSourceUri?.toString() ?? tab.url,
             extractedContent: tab.extractedContent,
             fullContent: tab.fullContent,
             sourceSearchQuery: tabSearchResults.query,

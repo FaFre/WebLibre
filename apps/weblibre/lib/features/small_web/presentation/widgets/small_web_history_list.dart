@@ -49,33 +49,43 @@ class SmallWebHistoryHeader extends ConsumerWidget {
       children: [
         Text('Recent Discoveries', style: theme.textTheme.titleSmall),
         const Spacer(),
-        PopupMenuButton<_ClearAction>(
-          icon: Icon(
-            Icons.more_vert,
-            size: 20,
-            color: colorScheme.onSurfaceVariant,
+        MenuAnchor(
+          builder: (context, controller, _) => IconButton(
+            icon: Icon(
+              Icons.more_vert,
+              size: 20,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            style: const ButtonStyle(
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            onPressed: () =>
+                controller.isOpen ? controller.close() : controller.open(),
           ),
-          iconSize: 20,
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-          style: const ButtonStyle(
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          offset: const Offset(0, 36),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          onSelected: (action) async {
-            switch (action) {
-              case _ClearAction.clearMode:
-                await ref
-                    .read(smallWebDatabaseProvider)
-                    .smallWebVisitDao
-                    .deleteVisitsBySourceAndMode(
-                      sourceKind: sourceKind,
-                      mode: mode,
-                    );
-              case _ClearAction.clearAll:
+          menuChildren: [
+            if (modeLabel != null)
+              MenuItemButton(
+                leadingIcon: const Icon(Icons.delete_sweep, size: 20),
+                onPressed: () async {
+                  await ref
+                      .read(smallWebDatabaseProvider)
+                      .smallWebVisitDao
+                      .deleteVisitsBySourceAndMode(
+                        sourceKind: sourceKind,
+                        mode: mode,
+                      );
+                },
+                child: Text('Clear $modeLabel'),
+              ),
+            MenuItemButton(
+              leadingIcon: Icon(
+                Icons.delete_forever,
+                size: 20,
+                color: colorScheme.error,
+              ),
+              onPressed: () async {
                 final confirmed = await showDialog<bool>(
                   context: context,
                   builder: (context) => AlertDialog(
@@ -101,33 +111,10 @@ class SmallWebHistoryHeader extends ConsumerWidget {
                       .smallWebVisitDao
                       .deleteAllVisits();
                 }
-            }
-          },
-          itemBuilder: (context) => [
-            if (modeLabel != null)
-              PopupMenuItem(
-                value: _ClearAction.clearMode,
-                child: ListTile(
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.delete_sweep, size: 20),
-                  title: Text('Clear $modeLabel'),
-                ),
-              ),
-            PopupMenuItem(
-              value: _ClearAction.clearAll,
-              child: ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(
-                  Icons.delete_forever,
-                  size: 20,
-                  color: colorScheme.error,
-                ),
-                title: Text(
-                  'Clear all discoveries',
-                  style: TextStyle(color: colorScheme.error),
-                ),
+              },
+              child: Text(
+                'Clear all discoveries',
+                style: TextStyle(color: colorScheme.error),
               ),
             ),
           ],
@@ -136,8 +123,6 @@ class SmallWebHistoryHeader extends ConsumerWidget {
     );
   }
 }
-
-enum _ClearAction { clearMode, clearAll }
 
 class SmallWebHistoryList extends HookConsumerWidget {
   static const _initialCount = 10;

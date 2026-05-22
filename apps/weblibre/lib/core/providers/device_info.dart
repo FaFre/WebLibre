@@ -33,12 +33,24 @@ class AndroidDeviceInfo extends _$AndroidDeviceInfo {
     final deviceInfo = DeviceInfoPlugin();
     final androidInfo = await deviceInfo.androidInfo;
 
-    return AndroidDeviceInfoData(sdkInt: androidInfo.version.sdkInt);
+    return AndroidDeviceInfoData(
+      sdkInt: androidInfo.version.sdkInt,
+      manufacturer: androidInfo.manufacturer,
+      model: androidInfo.model,
+    );
   }
 }
 
 class AndroidDeviceInfoData {
   final int sdkInt;
+  final String manufacturer;
+  final String model;
 
-  const AndroidDeviceInfoData({required this.sdkInt});
+  const AndroidDeviceInfoData({
+    required this.sdkInt,
+    required this.manufacturer,
+    required this.model,
+  });
+
+  String get deviceName => '$manufacturer $model';
 }

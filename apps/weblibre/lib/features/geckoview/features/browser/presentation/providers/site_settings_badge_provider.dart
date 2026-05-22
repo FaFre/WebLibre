@@ -24,6 +24,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/repositories/site_permissions.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/tracking_protection_provider.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 
 part 'site_settings_badge_provider.g.dart';
 
@@ -46,6 +47,17 @@ enum SiteSettingsBadgeState {
 Future<SiteSettingsBadgeState> showSiteSettingsBadge(Ref ref) async {
   final tabState = ref.watch(selectedTabStateProvider);
   if (tabState == null) {
+    return SiteSettingsBadgeState.hidden;
+  }
+
+  // Sandbox-captured tabs render content from a loopback server, so
+  // permissions/tracking-exception lookups would key on the loader origin
+  // rather than the canonical site. Suppress the badge entirely — the user
+  // can't meaningfully change permissions for a sandboxed page anyway.
+  final sandboxSourceUri = ref.watch(
+    sandboxSourceUriForTabProvider(tabId: tabState.id),
+  );
+  if (sandboxSourceUri != null) {
     return SiteSettingsBadgeState.hidden;
   }
 

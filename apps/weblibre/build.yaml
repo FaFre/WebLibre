@@ -28,6 +28,11 @@ targets:
                 lexo_rank_previous: "text (int, text null)"
                 lexo_rank_reorder_after: "text (text null, text null)"
                 lexo_rank_reorder_before: "text (text null, text null)"
+                generate_content_hash: "int ()"
+                url_indexable: "bool (text null)"
+                url_canonical: "text (text null)"
+                url_host: "text (text null)"
+                url_path: "text (text null)"
               modules:
                 - json1
                 - fts5

@@ -5,24 +5,22 @@
 
 <!-- Main browser fragment layout -->
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <FrameLayout
         android:id="@+id/customTabAppBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone">
 
         <!-- Placeholder for custom tab toolbar - ExternalAppBrowserFragment provides its own -->
-    </com.google.android.material.appbar.AppBarLayout>
+    </FrameLayout>
 
     <FrameLayout
+        android:id="@+id/browserContent"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:layout_height="match_parent">
 
         <mozilla.components.ui.widgets.VerticalSwipeRefreshLayout
             android:id="@+id/swipeToRefresh"

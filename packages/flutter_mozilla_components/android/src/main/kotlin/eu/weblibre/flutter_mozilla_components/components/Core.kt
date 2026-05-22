@@ -24,6 +24,7 @@ import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
 import eu.weblibre.flutter_mozilla_components.middleware.FlutterEventMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataService
+import eu.weblibre.flutter_mozilla_components.middleware.SandboxCaptureMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.SaveToPDFMiddleware
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
@@ -205,6 +206,9 @@ class Core(
     val store by lazy {
         BrowserStore(
             middleware = listOf(
+                // Must run before any engine middleware so we can rewrite
+                // sandbox new-tab URLs before Gecko issues a request.
+                SandboxCaptureMiddleware,
                 HistoryMetadataMiddleware(historyMetadataService),
                 FlutterEventMiddleware(flutterEvents),
                 DownloadMiddleware(

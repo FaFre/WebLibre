@@ -26,5 +26,8 @@
     <string name="mozac_feature_customtabs_exit_button">Close</string>
     <string name="mozac_feature_customtabs_menu_button">Menu</string>
     <string name="mozac_feature_customtabs_security_indicator">Security</string>
+    <string name="private_tabs_notification_text">Close private tabs</string>
+    <string name="private_tabs_notification_title_android_14">Close private tabs?</string>
+    <string name="private_tabs_notification_text_android_14">Tap or swipe this notification to close private tabs.</string>
 
 </resources>

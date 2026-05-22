@@ -19,6 +19,7 @@
  */
 import 'package:drift/drift.dart';
 import 'package:weblibre/data/database/extensions/database_table_size.dart';
+import 'package:weblibre/features/user/data/icon_cache_marker.dart';
 import 'package:weblibre/features/user/data/database/daos/cache.drift.dart';
 import 'package:weblibre/features/user/data/database/database.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart';
@@ -43,6 +44,14 @@ class CacheDao extends DatabaseAccessor<UserDatabase> with $CacheDaoMixin {
     return query.map((row) => row.read(db.iconCache.iconData));
   }
 
+  SingleOrNullSelectable<DateTime?> getCachedIconFetchDate(String origin) {
+    final query = selectOnly(db.iconCache)
+      ..addColumns([db.iconCache.fetchDate])
+      ..where(db.iconCache.origin.equals(origin));
+
+    return query.map((row) => row.read(db.iconCache.fetchDate));
+  }
+
   Future<int> cacheIcon(String origin, Uint8List bytes) {
     return db.iconCache.insertOne(
       IconCacheCompanion.insert(
@@ -57,5 +66,16 @@ class CacheDao extends DatabaseAccessor<UserDatabase> with $CacheDaoMixin {
         ),
       ),
     );
+  }
+
+  Future<void> cacheIconIfAbsent(String origin, Uint8List bytes) async {
+    final existing = await getCachedIcon(origin).getSingleOrNull();
+    if (existing == null || isMissingIconMarker(existing)) {
+      await cacheIcon(origin, bytes);
+    }
+  }
+
+  Future<int> cacheMissingIcon(String origin) {
+    return cacheIcon(origin, missingIconMarkerBytes);
   }
 }

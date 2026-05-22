@@ -5,39 +5,36 @@ import IPtProxy.IPtProxy
 import java.io.File
 
 /**
- * Generates Tor configuration (torrc) based on user settings
+ * Generates Tor configuration (torrc) based on user settings.
+ *
+ * Notes on what we deliberately do NOT set here:
+ *  - DataDirectory, ControlSocket, CookieAuthentication, RunAsDaemon, CacheDirectory,
+ *    SyslogIdentityTag — upstream org.torproject.jni.TorService passes these on the
+ *    `tor` command line. Setting them here causes duplicate-option warnings or contradicts
+ *    the values upstream needs (e.g. RunAsDaemon must be 0 in-process).
+ *  - SocksPort / HTTPTunnelPort — upstream rewrites defaults-torrc on every start with
+ *    `SOCKSPort 9050|auto` and `HTTPTunnelPort 8118|auto`. tor REJECTS mixing
+ *    `SocksPort 0` with any other SocksPort line ("Invalid SocksPort configuration"),
+ *    so we cannot override these from torrc. Instead we just consume what upstream
+ *    binds — read it from the static `TorService.socksPort` field (or via
+ *    `getInfo net/listeners/socks`).
+ *  - DNSPort / TransPort default to 0 in tor; no need to set them.
  */
 class TorConfig(private val config: TorConfiguration) {
 
-    /**
-     * Generate torrc file content
-     * @param socksPort SOCKS proxy port
-     * @param dataDir Tor data directory
-     * @param geoipFile GeoIP file (optional, for country selection)
-     * @param geoip6File GeoIP6 file (optional, for IPv6 country selection)
-     * @param transportPorts Map of transport name to port (from PluggableTransportManager)
-     * @return torrc content as string
-     *
-     * Note: ControlPort is NOT set in torrc. The tor-android library automatically
-     * uses ControlSocket (Unix domain socket) which is more secure than TCP ControlPort.
-     * See SECURITY_CONTROL_PORT.md for details.
-     */
     fun generateTorrc(
-        socksPort: Int,
-        dataDir: File,
         geoipFile: File?,
         geoip6File: File?,
         transportPorts: Map<String, Int>
     ): String = buildString {
-        // Core Tor settings
         append("# Generated torrc for flutter_tor\n")
-        append("SocksPort 127.0.0.1:$socksPort\n")
-        // ControlPort is NOT set - tor-android uses ControlSocket (Unix domain socket)
-        // This is more secure as it uses file permissions instead of TCP authentication
-        append("DataDirectory ${dataDir.absolutePath}\n")
+
+        // Start with networking disabled. Re-enabled via control port
+        // (setConf DisableNetwork 0) AFTER our event listener is wired up so we
+        // don't miss bootstrap events.
+        append("DisableNetwork 1\n")
         append("\n")
 
-        // GeoIP files for country-based node selection
         if (geoipFile != null && geoipFile.exists()) {
             append("GeoIPFile ${geoipFile.absolutePath}\n")
         }
@@ -46,34 +43,27 @@ class TorConfig(private val config: TorConfiguration) {
         }
         append("\n")
 
-        // Entry node countries
         config.entryNodeCountries?.let { countries ->
             if (countries.isNotBlank()) {
-                val formatted = formatCountries(countries)
-                append("EntryNodes $formatted\n")
+                append("EntryNodes ${formatCountries(countries)}\n")
             }
         }
 
-        // Exit node countries
         config.exitNodeCountries?.let { countries ->
             if (countries.isNotBlank()) {
-                val formatted = formatCountries(countries)
-                append("ExitNodes $formatted\n")
+                append("ExitNodes ${formatCountries(countries)}\n")
             }
         }
 
-        // Strict nodes (only use specified countries)
         if (config.strictNodes == true) {
             append("StrictNodes 1\n")
         }
         append("\n")
 
-        // Pluggable transport configuration
         val transport = TransportType.fromPigeon(config.transport)
         when (transport) {
             TransportType.OBFS4 -> {
                 transportPorts[IPtProxy.Obfs4]?.let { port ->
-                    // Validate port is valid (like Orbot does)
                     if (port > 0) {
                         append("ClientTransportPlugin ${IPtProxy.Obfs4} socks5 127.0.0.1:$port\n")
                     }
@@ -101,17 +91,12 @@ class TorConfig(private val config: TorConfiguration) {
                 }
             }
             TransportType.CUSTOM -> {
-                // Custom bridges - transport plugin defined in bridge line
-                // We'll try to detect and configure based on bridge lines
                 configureCustomTransports(transportPorts)
             }
-            TransportType.NONE -> {
-                // Direct connection, no pluggable transports
-            }
+            TransportType.NONE -> {}
         }
         append("\n")
 
-        // Bridge configuration
         if (transport != TransportType.NONE) {
             val normalizedBridges = BridgeParser.normalize(config.bridgeLines)
             if (normalizedBridges.isNotEmpty()) {
@@ -123,9 +108,6 @@ class TorConfig(private val config: TorConfiguration) {
             }
         }
 
-        // Additional Tor settings (matching Orbot's configuration)
-        append("# Additional settings\n")
-        append("RunAsDaemon 1\n")
         append("AvoidDiskWrites 1\n")
         append("SafeSocks 0\n")
         append("TestSocks 0\n")
@@ -133,14 +115,6 @@ class TorConfig(private val config: TorConfiguration) {
         append("AutomapHostsOnResolve 1\n")
         append("DormantClientTimeout 10 minutes\n")
         append("DormantCanceledByStartup 1\n")
-
-        // CRITICAL: Set DisableNetwork 1 to prevent bootstrap before event listener is ready
-        // This will be changed to 0 via control port AFTER we set up event listeners
-        // This matches Orbot's approach and ensures we receive all bootstrap events
-        append("DisableNetwork 1\n")
-
-        append("Log notice stdout\n")  // Log to stdout for capture
-        append("\n")
     }
 
     /**
@@ -155,15 +129,11 @@ class TorConfig(private val config: TorConfiguration) {
             .split(",")
             .map { it.trim().uppercase() }
             .filter { it.isNotEmpty() }
-            .filter { it.length == 2 }  // ISO 3166-1 alpha-2 codes
+            .filter { it.length == 2 }
 
         return codes.joinToString(",") { "{$it}" }
     }
 
-    /**
-     * Configure custom transports based on bridge lines
-     * Detects transport type from bridge lines and configures accordingly
-     */
     private fun StringBuilder.configureCustomTransports(transportPorts: Map<String, Int>) {
         val bridgeTransports = config.bridgeLines
             .mapNotNull { BridgeParser.extractTransportType(it) }
@@ -195,11 +165,6 @@ class TorConfig(private val config: TorConfiguration) {
         }
     }
 
-    /**
-     * Write torrc to file
-     * @param torrcFile File to write to
-     * @param content torrc content
-     */
     fun writeTorrc(torrcFile: File, content: String) {
         torrcFile.parentFile?.mkdirs()
         torrcFile.writeText(content)

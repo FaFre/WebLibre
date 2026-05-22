@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
@@ -58,11 +59,17 @@ class _SelectFolderSheet extends HookConsumerWidget {
               constraints: BoxConstraints(
                 maxHeight: MediaQuery.of(context).size.height * 0.5,
               ),
-              child: SingleChildScrollView(
-                child: FolderTreePicker(
-                  selectedFolderGuid: selectedFolderGuid,
-                  entryGuid: BookmarkRoot.root.id,
-                ),
+              child: FadingScroll(
+                fadingSize: 25,
+                builder: (context, controller) {
+                  return SingleChildScrollView(
+                    controller: controller,
+                    child: FolderTreePicker(
+                      selectedFolderGuid: selectedFolderGuid,
+                      entryGuid: BookmarkRoot.root.id,
+                    ),
+                  );
+                },
               ),
             ),
             const SizedBox(height: 16),

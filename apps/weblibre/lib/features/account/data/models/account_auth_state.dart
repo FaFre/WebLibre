@@ -1,0 +1,68 @@
+/*
+ * Copyright (c) 2024-2026 Fabian Freund.
+ *
+ * This file is part of WebLibre
+ * (see https://weblibre.eu).
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:fast_equatable/fast_equatable.dart';
+import 'package:supabase/supabase.dart';
+
+part 'account_auth_state.g.dart';
+
+enum AccountAuthStatus { signedOut, signingIn, signedIn, error }
+
+@CopyWith()
+class AccountAuthState with FastEquatable {
+  final AccountAuthStatus status;
+  final String? email;
+  final String? displayName;
+  final String? userId;
+  final String? lastError;
+  final String? syncKey;
+  // The SupabaseClient is intentionally excluded from equality. Two auth
+  // states for the same user but with distinct client instances are still
+  // semantically equal — including identityHashCode here would defeat
+  // Riverpod's caching by treating every reissued state as different.
+  // ignore: missing_field_in_equatable_props
+  final SupabaseClient? client;
+
+  AccountAuthState({
+    this.status = AccountAuthStatus.signedOut,
+    this.email,
+    this.displayName,
+    this.userId,
+    this.lastError,
+    this.syncKey,
+    this.client,
+  });
+
+  bool get isSignedIn => status == AccountAuthStatus.signedIn;
+  bool get isSignedOut => status == AccountAuthStatus.signedOut;
+  bool get isSigningIn => status == AccountAuthStatus.signingIn;
+  bool get hasError => status == AccountAuthStatus.error;
+  bool get hasSyncKey => syncKey != null;
+
+  @override
+  List<Object?> get hashParameters => [
+    status,
+    email,
+    displayName,
+    userId,
+    lastError,
+    syncKey,
+  ];
+}

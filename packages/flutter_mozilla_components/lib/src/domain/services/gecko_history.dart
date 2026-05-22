@@ -74,4 +74,72 @@ class GeckoHistoryService {
   }) {
     return _api.getTopFrecentSites(limit, frecencyThreshold);
   }
+
+  Future<HistoryMetadata?> getLatestHistoryMetadataForUrl(String url) {
+    return _api.getLatestHistoryMetadataForUrl(url);
+  }
+
+  Future<List<HistoryMetadata?>> getLatestHistoryMetadataForUrls(
+    List<String> urls,
+  ) {
+    if (urls.isEmpty) return Future.value(const []);
+    return _api.getLatestHistoryMetadataForUrls(urls);
+  }
+
+  Future<List<bool>> getVisited(List<String> urls) {
+    if (urls.isEmpty) return Future.value(const []);
+    return _api.getVisited(urls);
+  }
+
+  Future<List<HistorySuggestion>> getSuggestions(String query, {int limit = 10}) {
+    return _api.getSuggestions(query, limit);
+  }
+
+  Future<List<HistoryMetadata>> queryHistoryMetadata(
+    String query, {
+    int limit = 10,
+  }) {
+    return _api.queryHistoryMetadata(query, limit);
+  }
+
+  Future<void> recordObservation(
+    String url, {
+    String? title,
+    String? previewImageUrl,
+  }) {
+    return _api.recordObservation(
+      url,
+      PageObservation(title: title, previewImageUrl: previewImageUrl),
+    );
+  }
+
+  Future<void> noteHistoryMetadataViewTime(
+    HistoryMetadataKey key,
+    Duration viewTime,
+  ) {
+    return _api.noteHistoryMetadataViewTime(key, viewTime.inMilliseconds);
+  }
+
+  Future<void> noteHistoryMetadataDocumentType(
+    HistoryMetadataKey key,
+    DocumentType documentType,
+  ) {
+    return _api.noteHistoryMetadataDocumentType(key, documentType);
+  }
+
+  Future<void> deleteVisitsFor(String url) {
+    return _api.deleteVisitsFor(url);
+  }
+
+  Future<void> deleteVisitsSince(DateTime since) {
+    return _api.deleteVisitsSince(since.millisecondsSinceEpoch);
+  }
+
+  Future<void> deleteEverything() {
+    return _api.deleteEverything();
+  }
+
+  Future<void> deleteHistoryMetadataOlderThan(DateTime olderThan) {
+    return _api.deleteHistoryMetadataOlderThan(olderThan.millisecondsSinceEpoch);
+  }
 }

@@ -931,6 +931,898 @@ i1.GeneratedColumn<int> _column_21(String aliasedName) =>
       type: i1.DriftSqlType.int,
       $customConstraints: 'NOT NULL',
     );
+
+final class Schema10 extends i0.VersionedSchema {
+  Schema10({required super.database}) : super(version: 10);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    container,
+    tab,
+    closedTabTombstone,
+    idxTabParentContainer,
+    captureTab,
+    idxCaptureTabCaptureId,
+    tabFts,
+    tabMaintainParentChainOnDelete,
+    tabAfterInsert,
+    tabAfterDelete,
+    tabAfterUpdate,
+  ];
+  late final Shape0 container = Shape0(
+    source: i0.VersionedTable(
+      entityName: 'container',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2, _column_3],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape5 tab = Shape5(
+    source: i0.VersionedTable(
+      entityName: 'tab',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'CHECK((tab_mode = 2 AND isolation_context_id IS NOT NULL)OR(tab_mode != 2 AND isolation_context_id IS NULL))',
+      ],
+      columns: [
+        _column_0,
+        _column_16,
+        _column_4,
+        _column_5,
+        _column_6,
+        _column_7,
+        _column_8,
+        _column_17,
+        _column_18,
+        _column_19,
+        _column_10,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_14,
+        _column_15,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape6 closedTabTombstone = Shape6(
+    source: i0.VersionedTable(
+      entityName: 'closed_tab_tombstone',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_20, _column_21],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxTabParentContainer = i1.Index(
+    'idx_tab_parent_container',
+    'CREATE INDEX idx_tab_parent_container ON tab (parent_id, container_id)',
+  );
+  late final Shape7 captureTab = Shape7(
+    source: i0.VersionedTable(
+      entityName: 'capture_tab',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_22, _column_23, _column_24, _column_25, _column_26],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxCaptureTabCaptureId = i1.Index(
+    'idx_capture_tab_capture_id',
+    'CREATE INDEX idx_capture_tab_capture_id ON capture_tab (capture_id)',
+  );
+  late final Shape2 tabFts = Shape2(
+    source: i0.VersionedVirtualTable(
+      entityName: 'tab_fts',
+      moduleAndArgs:
+          'fts5(title, url, extracted_content_plain, full_content_plain, content=tab, tokenize="trigram")',
+      columns: [_column_8, _column_7, _column_12, _column_14],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Trigger tabMaintainParentChainOnDelete = i1.Trigger(
+    'CREATE TRIGGER tab_maintain_parent_chain_on_delete BEFORE DELETE ON tab BEGIN UPDATE tab SET parent_id = CASE WHEN OLD.parent_id IS NOT NULL AND EXISTS (SELECT 1 FROM tab WHERE id = OLD.parent_id) THEN OLD.parent_id ELSE NULL END WHERE parent_id = OLD.id;END',
+    'tab_maintain_parent_chain_on_delete',
+  );
+  final i1.Trigger tabAfterInsert = i1.Trigger(
+    'CREATE TRIGGER tab_after_insert AFTER INSERT ON tab BEGIN INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
+    'tab_after_insert',
+  );
+  final i1.Trigger tabAfterDelete = i1.Trigger(
+    'CREATE TRIGGER tab_after_delete AFTER DELETE ON tab BEGIN INSERT INTO tab_fts (tab_fts, "rowid", title, url, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url, old.extracted_content_plain, old.full_content_plain);END',
+    'tab_after_delete',
+  );
+  final i1.Trigger tabAfterUpdate = i1.Trigger(
+    'CREATE TRIGGER tab_after_update AFTER UPDATE ON tab BEGIN INSERT INTO tab_fts (tab_fts, "rowid", title, url, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url, old.extracted_content_plain, old.full_content_plain);INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
+    'tab_after_update',
+  );
+}
+
+class Shape7 extends i0.VersionedTable {
+  Shape7({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get tabId =>
+      columnsByName['tab_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get captureId =>
+      columnsByName['capture_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get sourceUrl =>
+      columnsByName['source_url']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get status =>
+      columnsByName['status']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get createdAt =>
+      columnsByName['created_at']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<String> _column_22(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'tab_id',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints:
+          'NOT NULL PRIMARY KEY REFERENCES tab(id)ON DELETE CASCADE',
+    );
+i1.GeneratedColumn<String> _column_23(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'capture_id',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NOT NULL',
+    );
+i1.GeneratedColumn<String> _column_24(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'source_url',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NOT NULL',
+    );
+i1.GeneratedColumn<String> _column_25(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'status',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NOT NULL DEFAULT \'pending\'',
+      defaultValue: const i1.CustomExpression('\'pending\''),
+    );
+i1.GeneratedColumn<int> _column_26(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'created_at',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NOT NULL',
+    );
+
+final class Schema11 extends i0.VersionedSchema {
+  Schema11({required super.database}) : super(version: 11);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    container,
+    tab,
+    closedTabTombstone,
+    idxTabParentContainer,
+    captureTab,
+    idxCaptureTabCaptureId,
+    tabFts,
+    tabMaintainParentChainOnDelete,
+    tabAfterInsert,
+    tabAfterDelete,
+    tabAfterUpdate,
+  ];
+  late final Shape0 container = Shape0(
+    source: i0.VersionedTable(
+      entityName: 'container',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2, _column_3],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape5 tab = Shape5(
+    source: i0.VersionedTable(
+      entityName: 'tab',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'CHECK((tab_mode = 2 AND isolation_context_id IS NOT NULL)OR(tab_mode != 2 AND isolation_context_id IS NULL))',
+      ],
+      columns: [
+        _column_0,
+        _column_16,
+        _column_4,
+        _column_5,
+        _column_6,
+        _column_7,
+        _column_8,
+        _column_17,
+        _column_18,
+        _column_19,
+        _column_10,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_14,
+        _column_15,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape6 closedTabTombstone = Shape6(
+    source: i0.VersionedTable(
+      entityName: 'closed_tab_tombstone',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_20, _column_21],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxTabParentContainer = i1.Index(
+    'idx_tab_parent_container',
+    'CREATE INDEX idx_tab_parent_container ON tab (parent_id, container_id)',
+  );
+  late final Shape7 captureTab = Shape7(
+    source: i0.VersionedTable(
+      entityName: 'capture_tab',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_22, _column_23, _column_24, _column_25, _column_26],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxCaptureTabCaptureId = i1.Index(
+    'idx_capture_tab_capture_id',
+    'CREATE INDEX idx_capture_tab_capture_id ON capture_tab (capture_id)',
+  );
+  late final Shape2 tabFts = Shape2(
+    source: i0.VersionedVirtualTable(
+      entityName: 'tab_fts',
+      moduleAndArgs:
+          'fts5(title, url, extracted_content_plain, full_content_plain, content=tab, tokenize="trigram")',
+      columns: [_column_8, _column_7, _column_12, _column_14],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Trigger tabMaintainParentChainOnDelete = i1.Trigger(
+    'CREATE TRIGGER tab_maintain_parent_chain_on_delete BEFORE DELETE ON tab BEGIN UPDATE tab SET parent_id = CASE WHEN OLD.parent_id IS NOT NULL AND EXISTS (SELECT 1 FROM tab WHERE id = OLD.parent_id) THEN OLD.parent_id ELSE NULL END WHERE parent_id = OLD.id;END',
+    'tab_maintain_parent_chain_on_delete',
+  );
+  final i1.Trigger tabAfterInsert = i1.Trigger(
+    'CREATE TRIGGER tab_after_insert AFTER INSERT ON tab BEGIN INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
+    'tab_after_insert',
+  );
+  final i1.Trigger tabAfterDelete = i1.Trigger(
+    'CREATE TRIGGER tab_after_delete AFTER DELETE ON tab BEGIN INSERT INTO tab_fts (tab_fts, "rowid", title, url, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url, old.extracted_content_plain, old.full_content_plain);END',
+    'tab_after_delete',
+  );
+  final i1.Trigger tabAfterUpdate = i1.Trigger(
+    'CREATE TRIGGER tab_after_update AFTER UPDATE OF title, url, extracted_content_plain, full_content_plain ON tab BEGIN INSERT INTO tab_fts (tab_fts, "rowid", title, url, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url, old.extracted_content_plain, old.full_content_plain);INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
+    'tab_after_update',
+  );
+}
+
+final class Schema12 extends i0.VersionedSchema {
+  Schema12({required super.database}) : super(version: 12);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    container,
+    tab,
+    closedTabTombstone,
+    idxTabParentContainer,
+    captureTab,
+    idxCaptureTabCaptureId,
+    tabFts,
+    tabMaintainParentChainOnDelete,
+    tabAfterInsert,
+    tabAfterDelete,
+    tabAfterUpdate,
+    localIndexSetting,
+    history,
+    idxHistoryHost,
+    idxHistoryObserved,
+    historyFts,
+    historyAfterInsert,
+    historyAfterDelete,
+    historyAfterUpdate,
+    tabToHistoryOnInsert,
+    tabToHistoryOnUpdate,
+  ];
+  late final Shape0 container = Shape0(
+    source: i0.VersionedTable(
+      entityName: 'container',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2, _column_3],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape8 tab = Shape8(
+    source: i0.VersionedTable(
+      entityName: 'tab',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'CHECK((tab_mode = 2 AND isolation_context_id IS NOT NULL)OR(tab_mode != 2 AND isolation_context_id IS NULL))',
+      ],
+      columns: [
+        _column_0,
+        _column_16,
+        _column_4,
+        _column_5,
+        _column_6,
+        _column_7,
+        _column_8,
+        _column_17,
+        _column_18,
+        _column_19,
+        _column_10,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_14,
+        _column_15,
+        _column_27,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape6 closedTabTombstone = Shape6(
+    source: i0.VersionedTable(
+      entityName: 'closed_tab_tombstone',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_20, _column_21],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxTabParentContainer = i1.Index(
+    'idx_tab_parent_container',
+    'CREATE INDEX idx_tab_parent_container ON tab (parent_id, container_id)',
+  );
+  late final Shape7 captureTab = Shape7(
+    source: i0.VersionedTable(
+      entityName: 'capture_tab',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_22, _column_23, _column_24, _column_25, _column_26],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxCaptureTabCaptureId = i1.Index(
+    'idx_capture_tab_capture_id',
+    'CREATE INDEX idx_capture_tab_capture_id ON capture_tab (capture_id)',
+  );
+  late final Shape2 tabFts = Shape2(
+    source: i0.VersionedVirtualTable(
+      entityName: 'tab_fts',
+      moduleAndArgs:
+          'fts5(title, url, extracted_content_plain, full_content_plain, content=tab, tokenize="trigram")',
+      columns: [_column_8, _column_7, _column_12, _column_14],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Trigger tabMaintainParentChainOnDelete = i1.Trigger(
+    'CREATE TRIGGER tab_maintain_parent_chain_on_delete BEFORE DELETE ON tab BEGIN UPDATE tab SET parent_id = CASE WHEN OLD.parent_id IS NOT NULL AND EXISTS (SELECT 1 FROM tab WHERE id = OLD.parent_id) THEN OLD.parent_id ELSE NULL END WHERE parent_id = OLD.id;END',
+    'tab_maintain_parent_chain_on_delete',
+  );
+  final i1.Trigger tabAfterInsert = i1.Trigger(
+    'CREATE TRIGGER tab_after_insert AFTER INSERT ON tab BEGIN INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
+    'tab_after_insert',
+  );
+  final i1.Trigger tabAfterDelete = i1.Trigger(
+    'CREATE TRIGGER tab_after_delete AFTER DELETE ON tab BEGIN INSERT INTO tab_fts (tab_fts, "rowid", title, url, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url, old.extracted_content_plain, old.full_content_plain);END',
+    'tab_after_delete',
+  );
+  final i1.Trigger tabAfterUpdate = i1.Trigger(
+    'CREATE TRIGGER tab_after_update AFTER UPDATE OF title, url, extracted_content_plain, full_content_plain ON tab WHEN OLD.content_hash IS NOT NEW.content_hash OR OLD.url IS NOT NEW.url BEGIN INSERT INTO tab_fts (tab_fts, "rowid", title, url, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url, old.extracted_content_plain, old.full_content_plain);INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
+    'tab_after_update',
+  );
+  late final Shape9 localIndexSetting = Shape9(
+    source: i0.VersionedTable(
+      entityName: 'local_index_setting',
+      withoutRowId: false,
+      isStrict: true,
+      tableConstraints: [],
+      columns: [_column_28, _column_29],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape10 history = Shape10(
+    source: i0.VersionedTable(
+      entityName: 'history',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_30,
+        _column_31,
+        _column_32,
+        _column_8,
+        _column_10,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_14,
+        _column_33,
+        _column_34,
+        _column_35,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxHistoryHost = i1.Index(
+    'idx_history_host',
+    'CREATE INDEX idx_history_host ON history (url_host)',
+  );
+  final i1.Index idxHistoryObserved = i1.Index(
+    'idx_history_observed',
+    'CREATE INDEX idx_history_observed ON history (observed_at DESC)',
+  );
+  late final Shape11 historyFts = Shape11(
+    source: i0.VersionedVirtualTable(
+      entityName: 'history_fts',
+      moduleAndArgs:
+          'fts5(title, url_host, url_path, extracted_content_plain, full_content_plain, content=history, tokenize="trigram")',
+      columns: [_column_8, _column_36, _column_32, _column_12, _column_14],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Trigger historyAfterInsert = i1.Trigger(
+    'CREATE TRIGGER history_after_insert AFTER INSERT ON history BEGIN INSERT INTO history_fts ("rowid", title, url_host, url_path, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url_host, new.url_path, new.extracted_content_plain, new.full_content_plain);END',
+    'history_after_insert',
+  );
+  final i1.Trigger historyAfterDelete = i1.Trigger(
+    'CREATE TRIGGER history_after_delete AFTER DELETE ON history BEGIN INSERT INTO history_fts (history_fts, "rowid", title, url_host, url_path, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url_host, old.url_path, old.extracted_content_plain, old.full_content_plain);END',
+    'history_after_delete',
+  );
+  final i1.Trigger historyAfterUpdate = i1.Trigger(
+    'CREATE TRIGGER history_after_update AFTER UPDATE OF title, url_host, url_path, extracted_content_plain, full_content_plain ON history BEGIN INSERT INTO history_fts (history_fts, "rowid", title, url_host, url_path, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url_host, old.url_path, old.extracted_content_plain, old.full_content_plain);INSERT INTO history_fts ("rowid", title, url_host, url_path, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url_host, new.url_path, new.extracted_content_plain, new.full_content_plain);END',
+    'history_after_update',
+  );
+  final i1.Trigger tabToHistoryOnInsert = i1.Trigger(
+    'CREATE TRIGGER tab_to_history_on_insert AFTER INSERT ON tab WHEN NEW.url IS NOT NULL AND url_indexable(CAST(NEW.url AS TEXT)) = 1 AND (SELECT value FROM local_index_setting WHERE "key" = \'enabled\') = 1 AND(NEW.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE "key" = \'index_private\') = 1)BEGIN INSERT INTO history (url_canonical, url_host, url_path, title, is_probably_readerable, extracted_content_markdown, extracted_content_plain, full_content_markdown, full_content_plain, content_hash, observed_at, observed_count) VALUES (url_canonical(CAST(NEW.url AS TEXT)), url_host(CAST(NEW.url AS TEXT)), url_path(CAST(NEW.url AS TEXT)), NEW.title, NEW.is_probably_readerable, NEW.extracted_content_markdown, NEW.extracted_content_plain, NEW.full_content_markdown, NEW.full_content_plain, NEW.content_hash, strftime(\'%s\', \'now\') * 1000, 1) ON CONFLICT (url_canonical) DO UPDATE SET title = COALESCE(excluded.title, history.title), is_probably_readerable = excluded.is_probably_readerable, extracted_content_markdown = excluded.extracted_content_markdown, extracted_content_plain = excluded.extracted_content_plain, full_content_markdown = excluded.full_content_markdown, full_content_plain = excluded.full_content_plain, content_hash = excluded.content_hash, observed_at = excluded.observed_at, observed_count = history.observed_count + 1 WHERE history.content_hash IS NOT excluded.content_hash;END',
+    'tab_to_history_on_insert',
+  );
+  final i1.Trigger tabToHistoryOnUpdate = i1.Trigger(
+    'CREATE TRIGGER tab_to_history_on_update AFTER UPDATE OF title, url, extracted_content_plain, extracted_content_markdown, full_content_plain, full_content_markdown, is_probably_readerable ON tab WHEN NEW.url IS NOT NULL AND url_indexable(CAST(NEW.url AS TEXT)) = 1 AND(OLD.content_hash IS NOT NEW.content_hash OR OLD.url IS NOT NEW.url)AND (SELECT value FROM local_index_setting WHERE "key" = \'enabled\') = 1 AND(NEW.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE "key" = \'index_private\') = 1)BEGIN INSERT INTO history (url_canonical, url_host, url_path, title, is_probably_readerable, extracted_content_markdown, extracted_content_plain, full_content_markdown, full_content_plain, content_hash, observed_at, observed_count) VALUES (url_canonical(CAST(NEW.url AS TEXT)), url_host(CAST(NEW.url AS TEXT)), url_path(CAST(NEW.url AS TEXT)), NEW.title, NEW.is_probably_readerable, NEW.extracted_content_markdown, NEW.extracted_content_plain, NEW.full_content_markdown, NEW.full_content_plain, NEW.content_hash, strftime(\'%s\', \'now\') * 1000, 1) ON CONFLICT (url_canonical) DO UPDATE SET title = COALESCE(excluded.title, history.title), is_probably_readerable = excluded.is_probably_readerable, extracted_content_markdown = excluded.extracted_content_markdown, extracted_content_plain = excluded.extracted_content_plain, full_content_markdown = excluded.full_content_markdown, full_content_plain = excluded.full_content_plain, content_hash = excluded.content_hash, observed_at = excluded.observed_at, observed_count = history.observed_count + 1 WHERE history.content_hash IS NOT excluded.content_hash;END',
+    'tab_to_history_on_update',
+  );
+}
+
+class Shape8 extends i0.VersionedTable {
+  Shape8({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get source =>
+      columnsByName['source']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get parentId =>
+      columnsByName['parent_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get containerId =>
+      columnsByName['container_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get orderKey =>
+      columnsByName['order_key']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get url =>
+      columnsByName['url']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get title =>
+      columnsByName['title']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get tabMode =>
+      columnsByName['tab_mode']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get isolationContextId =>
+      columnsByName['isolation_context_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get isPinned =>
+      columnsByName['is_pinned']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get isProbablyReaderable =>
+      columnsByName['is_probably_readerable']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get extractedContentMarkdown =>
+      columnsByName['extracted_content_markdown']!
+          as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get extractedContentPlain =>
+      columnsByName['extracted_content_plain']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get fullContentMarkdown =>
+      columnsByName['full_content_markdown']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get fullContentPlain =>
+      columnsByName['full_content_plain']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get timestamp =>
+      columnsByName['timestamp']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get contentHash =>
+      columnsByName['content_hash']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<int> _column_27(
+  String aliasedName,
+) => i1.GeneratedColumn<int>(
+  'content_hash',
+  aliasedName,
+  true,
+  generatedAs: i1.GeneratedAs(
+    const i1.CustomExpression(
+      'generate_content_hash(title, extracted_content_plain, full_content_plain)',
+    ),
+    false,
+  ),
+  type: i1.DriftSqlType.int,
+  $customConstraints:
+      'GENERATED ALWAYS AS (generate_content_hash(title, extracted_content_plain, full_content_plain)) VIRTUAL',
+);
+
+class Shape9 extends i0.VersionedTable {
+  Shape9({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get key =>
+      columnsByName['key']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get value =>
+      columnsByName['value']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<String> _column_28(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'key',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'PRIMARY KEY NOT NULL',
+    );
+i1.GeneratedColumn<int> _column_29(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'value',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NOT NULL',
+    );
+
+class Shape10 extends i0.VersionedTable {
+  Shape10({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get urlCanonical =>
+      columnsByName['url_canonical']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get urlHost =>
+      columnsByName['url_host']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get urlPath =>
+      columnsByName['url_path']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get title =>
+      columnsByName['title']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get isProbablyReaderable =>
+      columnsByName['is_probably_readerable']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get extractedContentMarkdown =>
+      columnsByName['extracted_content_markdown']!
+          as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get extractedContentPlain =>
+      columnsByName['extracted_content_plain']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get fullContentMarkdown =>
+      columnsByName['full_content_markdown']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get fullContentPlain =>
+      columnsByName['full_content_plain']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get contentHash =>
+      columnsByName['content_hash']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get observedAt =>
+      columnsByName['observed_at']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get observedCount =>
+      columnsByName['observed_count']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<String> _column_30(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'url_canonical',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'PRIMARY KEY NOT NULL',
+    );
+i1.GeneratedColumn<String> _column_31(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'url_host',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NOT NULL',
+    );
+i1.GeneratedColumn<String> _column_32(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'url_path',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: '',
+    );
+i1.GeneratedColumn<int> _column_33(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'content_hash',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.int,
+      $customConstraints: '',
+    );
+i1.GeneratedColumn<int> _column_34(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'observed_at',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NOT NULL',
+    );
+i1.GeneratedColumn<int> _column_35(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'observed_count',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NOT NULL DEFAULT 1',
+      defaultValue: const i1.CustomExpression('1'),
+    );
+
+class Shape11 extends i0.VersionedVirtualTable {
+  Shape11({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get title =>
+      columnsByName['title']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get urlHost =>
+      columnsByName['url_host']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get urlPath =>
+      columnsByName['url_path']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get extractedContentPlain =>
+      columnsByName['extracted_content_plain']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get fullContentPlain =>
+      columnsByName['full_content_plain']! as i1.GeneratedColumn<String>;
+}
+
+i1.GeneratedColumn<String> _column_36(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'url_host',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: '',
+    );
+
+final class Schema13 extends i0.VersionedSchema {
+  Schema13({required super.database}) : super(version: 13);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    container,
+    tab,
+    closedTabTombstone,
+    idxTabParentContainer,
+    captureTab,
+    idxCaptureTabCaptureId,
+    tabFts,
+    tabMaintainParentChainOnDelete,
+    tabAfterInsert,
+    tabAfterDelete,
+    tabAfterUpdate,
+    localIndexSetting,
+    history,
+    idxHistoryHost,
+    idxHistoryObserved,
+    historyFts,
+    historyAfterInsert,
+    historyAfterDelete,
+    historyAfterUpdate,
+    tabToHistoryOnInsert,
+    tabToHistoryOnUpdate,
+  ];
+  late final Shape12 container = Shape12(
+    source: i0.VersionedTable(
+      entityName: 'container',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_6,
+        _column_19,
+        _column_3,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape8 tab = Shape8(
+    source: i0.VersionedTable(
+      entityName: 'tab',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'CHECK((tab_mode = 2 AND isolation_context_id IS NOT NULL)OR(tab_mode != 2 AND isolation_context_id IS NULL))',
+      ],
+      columns: [
+        _column_0,
+        _column_16,
+        _column_4,
+        _column_5,
+        _column_6,
+        _column_7,
+        _column_8,
+        _column_17,
+        _column_18,
+        _column_19,
+        _column_10,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_14,
+        _column_15,
+        _column_27,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape6 closedTabTombstone = Shape6(
+    source: i0.VersionedTable(
+      entityName: 'closed_tab_tombstone',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_20, _column_21],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxTabParentContainer = i1.Index(
+    'idx_tab_parent_container',
+    'CREATE INDEX idx_tab_parent_container ON tab (parent_id, container_id)',
+  );
+  late final Shape7 captureTab = Shape7(
+    source: i0.VersionedTable(
+      entityName: 'capture_tab',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_22, _column_23, _column_24, _column_25, _column_26],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxCaptureTabCaptureId = i1.Index(
+    'idx_capture_tab_capture_id',
+    'CREATE INDEX idx_capture_tab_capture_id ON capture_tab (capture_id)',
+  );
+  late final Shape2 tabFts = Shape2(
+    source: i0.VersionedVirtualTable(
+      entityName: 'tab_fts',
+      moduleAndArgs:
+          'fts5(title, url, extracted_content_plain, full_content_plain, content=tab, tokenize="trigram")',
+      columns: [_column_8, _column_7, _column_12, _column_14],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Trigger tabMaintainParentChainOnDelete = i1.Trigger(
+    'CREATE TRIGGER tab_maintain_parent_chain_on_delete BEFORE DELETE ON tab BEGIN UPDATE tab SET parent_id = CASE WHEN OLD.parent_id IS NOT NULL AND EXISTS (SELECT 1 FROM tab WHERE id = OLD.parent_id) THEN OLD.parent_id ELSE NULL END WHERE parent_id = OLD.id;END',
+    'tab_maintain_parent_chain_on_delete',
+  );
+  final i1.Trigger tabAfterInsert = i1.Trigger(
+    'CREATE TRIGGER tab_after_insert AFTER INSERT ON tab BEGIN INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
+    'tab_after_insert',
+  );
+  final i1.Trigger tabAfterDelete = i1.Trigger(
+    'CREATE TRIGGER tab_after_delete AFTER DELETE ON tab BEGIN INSERT INTO tab_fts (tab_fts, "rowid", title, url, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url, old.extracted_content_plain, old.full_content_plain);END',
+    'tab_after_delete',
+  );
+  final i1.Trigger tabAfterUpdate = i1.Trigger(
+    'CREATE TRIGGER tab_after_update AFTER UPDATE OF title, url, extracted_content_plain, full_content_plain ON tab WHEN OLD.content_hash IS NOT NEW.content_hash OR OLD.url IS NOT NEW.url BEGIN INSERT INTO tab_fts (tab_fts, "rowid", title, url, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url, old.extracted_content_plain, old.full_content_plain);INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
+    'tab_after_update',
+  );
+  late final Shape9 localIndexSetting = Shape9(
+    source: i0.VersionedTable(
+      entityName: 'local_index_setting',
+      withoutRowId: false,
+      isStrict: true,
+      tableConstraints: [],
+      columns: [_column_28, _column_29],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape10 history = Shape10(
+    source: i0.VersionedTable(
+      entityName: 'history',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_30,
+        _column_31,
+        _column_32,
+        _column_8,
+        _column_10,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_14,
+        _column_33,
+        _column_34,
+        _column_35,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxHistoryHost = i1.Index(
+    'idx_history_host',
+    'CREATE INDEX idx_history_host ON history (url_host)',
+  );
+  final i1.Index idxHistoryObserved = i1.Index(
+    'idx_history_observed',
+    'CREATE INDEX idx_history_observed ON history (observed_at DESC)',
+  );
+  late final Shape11 historyFts = Shape11(
+    source: i0.VersionedVirtualTable(
+      entityName: 'history_fts',
+      moduleAndArgs:
+          'fts5(title, url_host, url_path, extracted_content_plain, full_content_plain, content=history, tokenize="trigram")',
+      columns: [_column_8, _column_36, _column_32, _column_12, _column_14],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Trigger historyAfterInsert = i1.Trigger(
+    'CREATE TRIGGER history_after_insert AFTER INSERT ON history BEGIN INSERT INTO history_fts ("rowid", title, url_host, url_path, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url_host, new.url_path, new.extracted_content_plain, new.full_content_plain);END',
+    'history_after_insert',
+  );
+  final i1.Trigger historyAfterDelete = i1.Trigger(
+    'CREATE TRIGGER history_after_delete AFTER DELETE ON history BEGIN INSERT INTO history_fts (history_fts, "rowid", title, url_host, url_path, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url_host, old.url_path, old.extracted_content_plain, old.full_content_plain);END',
+    'history_after_delete',
+  );
+  final i1.Trigger historyAfterUpdate = i1.Trigger(
+    'CREATE TRIGGER history_after_update AFTER UPDATE OF title, url_host, url_path, extracted_content_plain, full_content_plain ON history BEGIN INSERT INTO history_fts (history_fts, "rowid", title, url_host, url_path, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url_host, old.url_path, old.extracted_content_plain, old.full_content_plain);INSERT INTO history_fts ("rowid", title, url_host, url_path, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url_host, new.url_path, new.extracted_content_plain, new.full_content_plain);END',
+    'history_after_update',
+  );
+  final i1.Trigger tabToHistoryOnInsert = i1.Trigger(
+    'CREATE TRIGGER tab_to_history_on_insert AFTER INSERT ON tab WHEN NEW.url IS NOT NULL AND url_indexable(CAST(NEW.url AS TEXT)) = 1 AND (SELECT value FROM local_index_setting WHERE "key" = \'enabled\') = 1 AND(NEW.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE "key" = \'index_private\') = 1)BEGIN INSERT INTO history (url_canonical, url_host, url_path, title, is_probably_readerable, extracted_content_markdown, extracted_content_plain, full_content_markdown, full_content_plain, content_hash, observed_at, observed_count) VALUES (url_canonical(CAST(NEW.url AS TEXT)), url_host(CAST(NEW.url AS TEXT)), url_path(CAST(NEW.url AS TEXT)), NEW.title, NEW.is_probably_readerable, NEW.extracted_content_markdown, NEW.extracted_content_plain, NEW.full_content_markdown, NEW.full_content_plain, NEW.content_hash, strftime(\'%s\', \'now\') * 1000, 1) ON CONFLICT (url_canonical) DO UPDATE SET title = COALESCE(excluded.title, history.title), is_probably_readerable = excluded.is_probably_readerable, extracted_content_markdown = excluded.extracted_content_markdown, extracted_content_plain = excluded.extracted_content_plain, full_content_markdown = excluded.full_content_markdown, full_content_plain = excluded.full_content_plain, content_hash = excluded.content_hash, observed_at = excluded.observed_at, observed_count = history.observed_count + 1 WHERE history.content_hash IS NOT excluded.content_hash;END',
+    'tab_to_history_on_insert',
+  );
+  final i1.Trigger tabToHistoryOnUpdate = i1.Trigger(
+    'CREATE TRIGGER tab_to_history_on_update AFTER UPDATE OF title, url, extracted_content_plain, extracted_content_markdown, full_content_plain, full_content_markdown, is_probably_readerable ON tab WHEN NEW.url IS NOT NULL AND url_indexable(CAST(NEW.url AS TEXT)) = 1 AND(OLD.content_hash IS NOT NEW.content_hash OR OLD.url IS NOT NEW.url)AND (SELECT value FROM local_index_setting WHERE "key" = \'enabled\') = 1 AND(NEW.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE "key" = \'index_private\') = 1)BEGIN INSERT INTO history (url_canonical, url_host, url_path, title, is_probably_readerable, extracted_content_markdown, extracted_content_plain, full_content_markdown, full_content_plain, content_hash, observed_at, observed_count) VALUES (url_canonical(CAST(NEW.url AS TEXT)), url_host(CAST(NEW.url AS TEXT)), url_path(CAST(NEW.url AS TEXT)), NEW.title, NEW.is_probably_readerable, NEW.extracted_content_markdown, NEW.extracted_content_plain, NEW.full_content_markdown, NEW.full_content_plain, NEW.content_hash, strftime(\'%s\', \'now\') * 1000, 1) ON CONFLICT (url_canonical) DO UPDATE SET title = COALESCE(excluded.title, history.title), is_probably_readerable = excluded.is_probably_readerable, extracted_content_markdown = excluded.extracted_content_markdown, extracted_content_plain = excluded.extracted_content_plain, full_content_markdown = excluded.full_content_markdown, full_content_plain = excluded.full_content_plain, content_hash = excluded.content_hash, observed_at = excluded.observed_at, observed_count = history.observed_count + 1 WHERE history.content_hash IS NOT excluded.content_hash;END',
+    'tab_to_history_on_update',
+  );
+}
+
+class Shape12 extends i0.VersionedTable {
+  Shape12({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get name =>
+      columnsByName['name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get color =>
+      columnsByName['color']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get orderKey =>
+      columnsByName['order_key']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get isPinned =>
+      columnsByName['is_pinned']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get metadata =>
+      columnsByName['metadata']! as i1.GeneratedColumn<String>;
+}
+
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
   required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
@@ -939,6 +1831,10 @@ i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema7 schema) from6To7,
   required Future<void> Function(i1.Migrator m, Schema8 schema) from7To8,
   required Future<void> Function(i1.Migrator m, Schema9 schema) from8To9,
+  required Future<void> Function(i1.Migrator m, Schema10 schema) from9To10,
+  required Future<void> Function(i1.Migrator m, Schema11 schema) from10To11,
+  required Future<void> Function(i1.Migrator m, Schema12 schema) from11To12,
+  required Future<void> Function(i1.Migrator m, Schema13 schema) from12To13,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -977,6 +1873,26 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from8To9(migrator, schema);
         return 9;
+      case 9:
+        final schema = Schema10(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from9To10(migrator, schema);
+        return 10;
+      case 10:
+        final schema = Schema11(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from10To11(migrator, schema);
+        return 11;
+      case 11:
+        final schema = Schema12(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from11To12(migrator, schema);
+        return 12;
+      case 12:
+        final schema = Schema13(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from12To13(migrator, schema);
+        return 13;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -991,6 +1907,10 @@ i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema7 schema) from6To7,
   required Future<void> Function(i1.Migrator m, Schema8 schema) from7To8,
   required Future<void> Function(i1.Migrator m, Schema9 schema) from8To9,
+  required Future<void> Function(i1.Migrator m, Schema10 schema) from9To10,
+  required Future<void> Function(i1.Migrator m, Schema11 schema) from10To11,
+  required Future<void> Function(i1.Migrator m, Schema12 schema) from11To12,
+  required Future<void> Function(i1.Migrator m, Schema13 schema) from12To13,
 }) => i0.VersionedSchema.stepByStepHelper(
   step: migrationSteps(
     from2To3: from2To3,
@@ -1000,5 +1920,9 @@ i1.OnUpgrade stepByStep({
     from6To7: from6To7,
     from7To8: from7To8,
     from8To9: from8To9,
+    from9To10: from9To10,
+    from10To11: from10To11,
+    from11To12: from11To12,
+    from12To13: from12To13,
   ),
 );

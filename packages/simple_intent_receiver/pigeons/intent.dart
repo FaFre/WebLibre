@@ -49,6 +49,15 @@ class Intent {
     dartPackageName: 'simple_intent_receiver',
   ),
 )
+@HostApi()
+abstract class IntentHost {
+  /// Returns the launch intent that started the activity, if any.
+  /// This allows Dart to retrieve an intent that arrived before
+  /// IntentEvents.setUp() was called (cold-start deep links).
+  /// Returns null if no launch intent is pending.
+  Intent? getInitialIntent();
+}
+
 @FlutterApi()
 abstract class IntentEvents {
   void onIntentReceived(int sequence, Intent intent);

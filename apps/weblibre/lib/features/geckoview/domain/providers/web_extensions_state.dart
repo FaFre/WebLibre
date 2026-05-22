@@ -35,8 +35,7 @@ part 'web_extensions_state.g.dart';
 class WebExtensionsState extends _$WebExtensionsState {
   late final LRUCache<String, EquatableImage> _imageCache;
 
-  WebExtensionsState()
-    : _imageCache = LRUCache(50, onEvict: (image) => image.dispose());
+  WebExtensionsState() : _imageCache = LRUCache(50);
 
   void _onExtensionUpdate(ExtensionDataEvent event) {
     if (!ref.mounted) {
@@ -46,11 +45,6 @@ class WebExtensionsState extends _$WebExtensionsState {
     final ExtensionDataEvent(:extensionId, :data) = event;
 
     if (data != null) {
-      final cachedIcon = _imageCache.get(extensionId);
-      if (cachedIcon != null && cachedIcon.value == null) {
-        _imageCache.remove(extensionId);
-      }
-
       final current =
           state[extensionId] ??
           WebExtensionState(
@@ -74,7 +68,6 @@ class WebExtensionsState extends _$WebExtensionsState {
     } else {
       if (state.containsKey(extensionId)) {
         state = {...state}..remove(extensionId);
-        // remove() triggers onEvict which handles disposal
         _imageCache.remove(extensionId);
       }
     }
@@ -91,7 +84,6 @@ class WebExtensionsState extends _$WebExtensionsState {
     }
 
     if (image != null) {
-      // set() will evict the old entry via onEvict callback, which handles disposal
       _imageCache.set(extensionId, image);
 
       if (state.containsKey(extensionId)) {
@@ -198,7 +190,6 @@ class WebExtensionsState extends _$WebExtensionsState {
       // Dispose all cached images
       _imageCache.clear();
 
-      // Cancel all stream subscriptions
       for (final sub in subscriptions) {
         unawaited(sub.cancel());
       }

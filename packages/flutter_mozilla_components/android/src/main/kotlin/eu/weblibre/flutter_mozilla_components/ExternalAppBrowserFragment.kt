@@ -12,12 +12,13 @@ import android.os.Environment
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.PopupWindow
 import androidx.annotation.CallSuper
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.mikepenz.iconics.IconicsDrawable
@@ -56,6 +57,9 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
 
     private var customTabToolbar: CustomTabToolbar? = null
     private var activePopup: PopupWindow? = null
+    private var fixedToolbarVisible = false
+
+    override val shouldStartBrowserHandlingScrollFeature: Boolean = false
 
     private val customTabSessionId: String?
         get() = arguments?.getString(CUSTOM_TAB_SESSION_ID_KEY)
@@ -130,15 +134,22 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
         if (!isPwaOrTwa) {
             setupCustomTabToolbar(sessionId)
         }
+
+        resetExternalDynamicToolbar()
     }
 
     private fun setupCustomTabToolbar(sessionId: String) {
         val view = requireView()
 
+        if (customTabToolbar != null) {
+            setFixedToolbarVisible(true)
+            return
+        }
+
         val toolbar = CustomTabToolbar(requireContext()).apply {
-            layoutParams = AppBarLayout.LayoutParams(
-                AppBarLayout.LayoutParams.MATCH_PARENT,
-                AppBarLayout.LayoutParams.WRAP_CONTENT
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
             )
         }
         customTabToolbar = toolbar
@@ -146,6 +157,9 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
         binding.customTabAppBar.apply {
             removeAllViews()
             addView(toolbar)
+            addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+                updateBrowserContentMargins()
+            }
             visibility = View.VISIBLE
         }
 
@@ -172,6 +186,38 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
             owner = this,
             view = view
         )
+
+        setFixedToolbarVisible(true)
+    }
+
+    private fun setFixedToolbarVisible(visible: Boolean) {
+        fixedToolbarVisible = visible
+        binding.customTabAppBar.visibility = if (visible) View.VISIBLE else View.GONE
+        resetExternalDynamicToolbar()
+        updateBrowserContentMargins()
+
+        if (visible) {
+            binding.customTabAppBar.post { updateBrowserContentMargins() }
+        }
+    }
+
+    private fun updateBrowserContentMargins() {
+        val toolbarHeight = if (fixedToolbarVisible) binding.customTabAppBar.height else 0
+        val layoutParams = binding.browserContent.layoutParams as ViewGroup.MarginLayoutParams
+        if (layoutParams.topMargin == toolbarHeight && layoutParams.bottomMargin == 0) {
+            return
+        }
+
+        layoutParams.topMargin = toolbarHeight
+        layoutParams.bottomMargin = 0
+        binding.browserContent.layoutParams = layoutParams
+    }
+
+    private fun resetExternalDynamicToolbar() {
+        components.externalAppEngineView?.apply {
+            setDynamicToolbarMaxHeight(0)
+            setVerticalClipping(0)
+        }
     }
 
     private fun showCustomTabMenu(sessionId: String) {
@@ -316,7 +362,7 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
         val store = components.core.store
         val customTab = store.state.findCustomTab(sessionId) ?: return
 
-        components.activeEngineView?.setDynamicToolbarMaxHeight(0)
+        resetExternalDynamicToolbar()
 
         val manifest = webAppManifestUrl?.ifEmpty { null }?.let { url ->
             components.core.webAppManifestStorage.getManifestCache(url)
@@ -341,6 +387,9 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
                     scope = viewLifecycleOwner.lifecycleScope,
                 ) { toolbarVisible ->
                     Logger.debug("Custom tab toolbar visibility: $toolbarVisible")
+                    if (toolbarVisible) {
+                        setupCustomTabToolbar(sessionId)
+                    }
                 },
                 owner = this,
                 view = view,

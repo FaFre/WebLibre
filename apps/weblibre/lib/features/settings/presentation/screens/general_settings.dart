@@ -25,48 +25,76 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
-import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
+
+const List<SettingsSectionDefinition> generalSettingsSections = [
+  SettingsSectionDefinition(
+    title: 'Default Browser',
+    keywords: ['browser defaults'],
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Default Browser',
+        subtitle: 'Set WebLibre as your default browser',
+        keywords: ['system browser'],
+        child: _DefaultBrowserTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Appearance',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Theme',
+        subtitle: 'Choose system, light, or dark mode',
+        keywords: ['light', 'dark', 'theme mode'],
+        child: _ThemeSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'User Interface Zoom',
+        subtitle: 'Make the user interface smaller or larger',
+        keywords: ['ui scale', 'zoom'],
+        child: _UiZoomSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Disable Animations',
+        subtitle: 'Reduce motion and turn off app animations',
+        keywords: ['motion'],
+        child: _DisableAnimationsTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Show Modal Barrier',
+        subtitle: 'Dim the background behind dialogs and bottom sheets',
+        keywords: ['dialogs', 'bottom sheets', 'overlay'],
+        child: _ShowModalBarrierTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Downloads',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Use external download manager',
+        subtitle: 'Manage downloads with another app',
+        keywords: ['downloads'],
+        child: _ExternalDownloadManagerTile(),
+      ),
+    ],
+  ),
+];
 
 class GeneralSettingsScreen extends StatelessWidget {
   const GeneralSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('General')),
-      body: SafeArea(
-        child: FadingScroll(
-          fadingSize: 25,
-          builder: (context, controller) {
-            return ListView(
-              controller: controller,
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              children: const [
-                _DefaultBrowserSection(),
-                _AppearanceSection(),
-                _DownloadsSection(),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
-class _DefaultBrowserSection extends StatelessWidget {
-  const _DefaultBrowserSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Default Browser'),
-        _DefaultBrowserTile(),
-      ],
+    return const SettingsDetailScaffold(
+      title: 'General',
+      subtitle: 'Appearance, language, downloads, and browser defaults.',
+      icon: Icons.tune,
+      sections: generalSettingsSections,
     );
   }
 }
@@ -114,37 +142,6 @@ class _DefaultBrowserTile extends HookConsumerWidget {
         icon: Icon(isCurrentDefaultBrowser ? Icons.check : Icons.open_in_new),
         label: Text(isCurrentDefaultBrowser ? 'Default' : 'Set'),
       ),
-    );
-  }
-}
-
-class _AppearanceSection extends StatelessWidget {
-  const _AppearanceSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Appearance'),
-        _ThemeSection(),
-        _UiZoomSection(),
-        _DisableAnimationsTile(),
-        _ShowModalBarrierTile(),
-      ],
-    );
-  }
-}
-
-class _DownloadsSection extends StatelessWidget {
-  const _DownloadsSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Downloads'),
-        _ExternalDownloadManagerTile(),
-      ],
     );
   }
 }

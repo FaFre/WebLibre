@@ -17,72 +17,94 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+
+const List<SettingsSectionDefinition> webContentSettingsSections = [
+  SettingsSectionDefinition(
+    title: 'Display',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Web Fonts',
+        subtitle: 'Allow websites to use custom fonts',
+        keywords: ['fonts'],
+        child: _WebFontsEnabledTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Automatic Font Size',
+        subtitle: 'Adjust font size based on system settings',
+        keywords: ['text size'],
+        child: _AutomaticFontSizeAdjustmentTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Font Size Factor',
+        subtitle: 'Scale web page text size',
+        keywords: ['zoom', 'text'],
+        child: _FontSizeFactorSlider(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Font Inflation',
+        subtitle: 'Enlarge text on pages without a mobile viewport',
+        keywords: ['readability'],
+        child: _FontInflationTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Input Auto Zoom',
+        subtitle: 'Automatically zoom when focusing text inputs',
+        keywords: ['forms'],
+        child: _InputAutoZoomEnabledTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Content Features',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Built-in PDF Viewer',
+        subtitle: 'Open PDF files directly in the browser',
+        keywords: ['pdf'],
+        child: _PdfViewerTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Enable Reader Mode',
+        subtitle: 'Extract and simplify pages for readability',
+        keywords: ['reader', 'readability'],
+        child: _EnableReaderModeTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Enforce Reader Mode',
+        subtitle: 'Always show Reader Mode capabilities',
+        keywords: ['reader'],
+        child: _EnforceReaderModeTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'On Device AI',
+        subtitle: 'Local AI features including topic and tab suggestions',
+        keywords: ['local ai', 'suggestions'],
+        child: _OnDeviceAiTile(),
+      ),
+    ],
+  ),
+];
 
 class WebContentSettingsScreen extends StatelessWidget {
   const WebContentSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Web Content')),
-      body: SafeArea(
-        child: FadingScroll(
-          fadingSize: 25,
-          builder: (context, controller) {
-            return ListView(
-              controller: controller,
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              children: const [_DisplaySection(), _ContentFeaturesSection()],
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
-class _DisplaySection extends StatelessWidget {
-  const _DisplaySection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Display'),
-        _WebFontsEnabledTile(),
-        _AutomaticFontSizeAdjustmentTile(),
-        _FontSizeFactorSlider(),
-        _FontInflationTile(),
-        _InputAutoZoomEnabledTile(),
-      ],
-    );
-  }
-}
-
-class _ContentFeaturesSection extends StatelessWidget {
-  const _ContentFeaturesSection();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        SettingSection(name: 'Content Features'),
-        _PdfViewerTile(),
-        _EnableReaderModeTile(),
-        _EnforceReaderModeTile(),
-        _OnDeviceAiTile(),
-      ],
+    return const SettingsDetailScaffold(
+      title: 'Web Content',
+      subtitle: 'Text rendering, reader mode, PDFs, and local AI features.',
+      icon: MdiIcons.fileDocumentOutline,
+      sections: webContentSettingsSections,
     );
   }
 }

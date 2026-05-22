@@ -87,7 +87,9 @@ android {
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.release
 
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            shrinkResources = !project.hasProperty("disableOptimization")
+            minifyEnabled = !project.hasProperty("disableOptimization")
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             matchingFallbacks = ['release'] // Use on the "release" build type in dependencies (AARs)
         }
     }

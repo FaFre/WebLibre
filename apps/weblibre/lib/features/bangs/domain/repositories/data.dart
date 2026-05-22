@@ -99,11 +99,17 @@ class BangDataRepository extends _$BangDataRepository {
   }
 
   Stream<List<SearchHistoryEntry>> watchSearchHistory({required int limit}) {
-    return ref
+    final query = ref
         .read(bangDatabaseProvider)
         .definitionsDrift
-        .searchHistoryEntries(limit: limit)
-        .watch();
+        .searchHistoryEntries(limit: limit);
+
+    return () async* {
+      // Emit a direct read first so Recent Searches is populated immediately
+      // on app start instead of waiting for the next bang_history write.
+      yield await query.get();
+      yield* query.watch();
+    }();
   }
 
   Future<void> increaseFrequency(BangKey key) {

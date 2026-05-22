@@ -23,6 +23,7 @@ import android.app.Application
 import android.content.SharedPreferences
 import eu.weblibre.flutter_mozilla_components.ActiveProfile
 import eu.weblibre.flutter_mozilla_components.MegazordSetup
+import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureFeature
 
 class MyApplication : Application() {
     override fun onCreate() {
@@ -33,6 +34,12 @@ class MyApplication : Application() {
         // Resolve active profile EARLY so cold-start WorkManager workers
         // get profile-prefixed SharedPreferences
         ActiveProfile.resolveFromDisk(this)
+
+        // Rehydrate the sandbox capture registry from the on-disk JSON mirror
+        // before Gecko has a chance to start restoring tabs. Each entry gets
+        // redirectUrl="about:blank"; Dart replaces those once CaptureServer is
+        // running with real loader/capture URLs.
+        SandboxCaptureFeature.preRestoreBootstrap(this)
     }
 
     override fun getSharedPreferences(name: String, mode: Int): SharedPreferences {

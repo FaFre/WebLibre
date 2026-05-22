@@ -192,6 +192,12 @@ enum FrecencyThresholdOption {
   skipOneTimePages,
 }
 
+/// Document type associated with a [HistoryMetadata] record.
+enum DocumentType {
+  regular,
+  media,
+}
+
 enum SelectionPattern {
   phone,
   email,
@@ -1996,6 +2002,181 @@ class TopFrecentSiteInfo {
       return true;
     }
     return _deepEquals(url, other.url) && _deepEquals(title, other.title);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+}
+
+/// Per-URL metadata maintained by Places. The unique identity of a record is
+/// [HistoryMetadataKey] (url + searchTerm + referrerUrl); we surface only the
+/// most recent record per URL via `getLatestHistoryMetadataForUrl`.
+class HistoryMetadata {
+  HistoryMetadata({
+    required this.key,
+    this.title,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.totalViewTime,
+    required this.documentType,
+    this.previewImageUrl,
+  });
+
+  HistoryMetadataKey key;
+
+  String? title;
+
+  /// Unix milliseconds.
+  int createdAt;
+
+  /// Unix milliseconds.
+  int updatedAt;
+
+  /// Total view time in milliseconds.
+  int totalViewTime;
+
+  DocumentType documentType;
+
+  String? previewImageUrl;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      key,
+      title,
+      createdAt,
+      updatedAt,
+      totalViewTime,
+      documentType,
+      previewImageUrl,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static HistoryMetadata decode(Object result) {
+    result as List<Object?>;
+    return HistoryMetadata(
+      key: result[0]! as HistoryMetadataKey,
+      title: result[1] as String?,
+      createdAt: result[2]! as int,
+      updatedAt: result[3]! as int,
+      totalViewTime: result[4]! as int,
+      documentType: result[5]! as DocumentType,
+      previewImageUrl: result[6] as String?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! HistoryMetadata || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(key, other.key) && _deepEquals(title, other.title) && _deepEquals(createdAt, other.createdAt) && _deepEquals(updatedAt, other.updatedAt) && _deepEquals(totalViewTime, other.totalViewTime) && _deepEquals(documentType, other.documentType) && _deepEquals(previewImageUrl, other.previewImageUrl);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+}
+
+/// Frecency-ranked autocomplete suggestion. Backs `getSuggestions`.
+class HistorySuggestion {
+  HistorySuggestion({
+    required this.url,
+    this.title,
+    required this.score,
+  });
+
+  String url;
+
+  String? title;
+
+  /// Larger is more relevant. Unbounded; only meaningful relative to other
+  /// suggestions returned in the same call.
+  int score;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      url,
+      title,
+      score,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static HistorySuggestion decode(Object result) {
+    result as List<Object?>;
+    return HistorySuggestion(
+      url: result[0]! as String,
+      title: result[1] as String?,
+      score: result[2]! as int,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! HistorySuggestion || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(url, other.url) && _deepEquals(title, other.title) && _deepEquals(score, other.score);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+}
+
+/// Optional metadata observation for a URL. `null` fields are not written.
+class PageObservation {
+  PageObservation({
+    this.title,
+    this.previewImageUrl,
+  });
+
+  String? title;
+
+  String? previewImageUrl;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      title,
+      previewImageUrl,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static PageObservation decode(Object result) {
+    result as List<Object?>;
+    return PageObservation(
+      title: result[0] as String?,
+      previewImageUrl: result[1] as String?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! PageObservation || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(title, other.title) && _deepEquals(previewImageUrl, other.previewImageUrl);
   }
 
   @override
@@ -5593,6 +5774,76 @@ class PwaManifest {
   int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
 }
 
+/// Per-tab sandbox capture state shared with the native side. The Kotlin
+/// [AppRequestInterceptor] consults an in-memory registry populated from
+/// these entries to decide how to handle loads in sandbox tabs.
+///
+/// [redirectUrl] is precomputed by Dart and always points at a loopback URL
+/// (loader or capture). Dart is responsible for keeping it current; Kotlin
+/// never calls back into Dart to resolve it.
+class SandboxCaptureEntry {
+  SandboxCaptureEntry({
+    required this.tabId,
+    required this.captureId,
+    required this.sourceUrl,
+    required this.redirectUrl,
+    required this.status,
+  });
+
+  String tabId;
+
+  String captureId;
+
+  String sourceUrl;
+
+  /// `http://127.0.0.1:<port>/loader?…` while pending/failed, or
+  /// `http://127.0.0.1:<port>/captures/…?t=<token>` once ready.
+  String redirectUrl;
+
+  /// `pending` | `ready` | `failed`.
+  String status;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      tabId,
+      captureId,
+      sourceUrl,
+      redirectUrl,
+      status,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static SandboxCaptureEntry decode(Object result) {
+    result as List<Object?>;
+    return SandboxCaptureEntry(
+      tabId: result[0]! as String,
+      captureId: result[1]! as String,
+      sourceUrl: result[2]! as String,
+      redirectUrl: result[3]! as String,
+      status: result[4]! as String,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! SandboxCaptureEntry || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(tabId, other.tabId) && _deepEquals(captureId, other.captureId) && _deepEquals(sourceUrl, other.sourceUrl) && _deepEquals(redirectUrl, other.redirectUrl) && _deepEquals(status, other.status);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+}
+
 
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
@@ -5622,332 +5873,347 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is FrecencyThresholdOption) {
       buffer.putUint8(135);
       writeValue(buffer, value.index);
-    }    else if (value is SelectionPattern) {
+    }    else if (value is DocumentType) {
       buffer.putUint8(136);
       writeValue(buffer, value.index);
-    }    else if (value is WebExtensionActionType) {
+    }    else if (value is SelectionPattern) {
       buffer.putUint8(137);
       writeValue(buffer, value.index);
-    }    else if (value is AddonDisabledReason) {
+    }    else if (value is WebExtensionActionType) {
       buffer.putUint8(138);
       writeValue(buffer, value.index);
-    }    else if (value is AddonIncognito) {
+    }    else if (value is AddonDisabledReason) {
       buffer.putUint8(139);
       writeValue(buffer, value.index);
-    }    else if (value is AddonUpdateStatus) {
+    }    else if (value is AddonIncognito) {
       buffer.putUint8(140);
       writeValue(buffer, value.index);
-    }    else if (value is AddonStoreApp) {
+    }    else if (value is AddonUpdateStatus) {
       buffer.putUint8(141);
       writeValue(buffer, value.index);
-    }    else if (value is AddonStorePromoted) {
+    }    else if (value is AddonStoreApp) {
       buffer.putUint8(142);
       writeValue(buffer, value.index);
-    }    else if (value is GeckoSuggestionType) {
+    }    else if (value is AddonStorePromoted) {
       buffer.putUint8(143);
       writeValue(buffer, value.index);
-    }    else if (value is TrackingProtectionPolicy) {
+    }    else if (value is GeckoSuggestionType) {
       buffer.putUint8(144);
       writeValue(buffer, value.index);
-    }    else if (value is HttpsOnlyMode) {
+    }    else if (value is TrackingProtectionPolicy) {
       buffer.putUint8(145);
       writeValue(buffer, value.index);
-    }    else if (value is QueryParameterStripping) {
+    }    else if (value is HttpsOnlyMode) {
       buffer.putUint8(146);
       writeValue(buffer, value.index);
-    }    else if (value is BounceTrackingProtectionMode) {
+    }    else if (value is QueryParameterStripping) {
       buffer.putUint8(147);
       writeValue(buffer, value.index);
-    }    else if (value is ColorScheme) {
+    }    else if (value is BounceTrackingProtectionMode) {
       buffer.putUint8(148);
       writeValue(buffer, value.index);
-    }    else if (value is CookieBannerHandlingMode) {
+    }    else if (value is ColorScheme) {
       buffer.putUint8(149);
       writeValue(buffer, value.index);
-    }    else if (value is AppLinksMode) {
+    }    else if (value is CookieBannerHandlingMode) {
       buffer.putUint8(150);
       writeValue(buffer, value.index);
-    }    else if (value is WebContentIsolationStrategy) {
+    }    else if (value is AppLinksMode) {
       buffer.putUint8(151);
       writeValue(buffer, value.index);
-    }    else if (value is CustomCookiePolicy) {
+    }    else if (value is WebContentIsolationStrategy) {
       buffer.putUint8(152);
       writeValue(buffer, value.index);
-    }    else if (value is TrackingScope) {
+    }    else if (value is CustomCookiePolicy) {
       buffer.putUint8(153);
       writeValue(buffer, value.index);
-    }    else if (value is DohSettingsMode) {
+    }    else if (value is TrackingScope) {
       buffer.putUint8(154);
       writeValue(buffer, value.index);
-    }    else if (value is DownloadStatus) {
+    }    else if (value is DohSettingsMode) {
       buffer.putUint8(155);
       writeValue(buffer, value.index);
-    }    else if (value is LogLevel) {
+    }    else if (value is DownloadStatus) {
       buffer.putUint8(156);
       writeValue(buffer, value.index);
-    }    else if (value is SyncEngineValue) {
+    }    else if (value is LogLevel) {
       buffer.putUint8(157);
       writeValue(buffer, value.index);
-    }    else if (value is MlProgressType) {
+    }    else if (value is SyncEngineValue) {
       buffer.putUint8(158);
       writeValue(buffer, value.index);
-    }    else if (value is MlProgressStatus) {
+    }    else if (value is MlProgressType) {
       buffer.putUint8(159);
       writeValue(buffer, value.index);
-    }    else if (value is ClearDataType) {
+    }    else if (value is MlProgressStatus) {
       buffer.putUint8(160);
       writeValue(buffer, value.index);
-    }    else if (value is GeckoFetchMethod) {
+    }    else if (value is ClearDataType) {
       buffer.putUint8(161);
       writeValue(buffer, value.index);
-    }    else if (value is GeckoFetchRedircet) {
+    }    else if (value is GeckoFetchMethod) {
       buffer.putUint8(162);
       writeValue(buffer, value.index);
-    }    else if (value is GeckoFetchCookiePolicy) {
+    }    else if (value is GeckoFetchRedircet) {
       buffer.putUint8(163);
       writeValue(buffer, value.index);
-    }    else if (value is BookmarkNodeType) {
+    }    else if (value is GeckoFetchCookiePolicy) {
       buffer.putUint8(164);
       writeValue(buffer, value.index);
-    }    else if (value is SitePermissionStatus) {
+    }    else if (value is BookmarkNodeType) {
       buffer.putUint8(165);
       writeValue(buffer, value.index);
-    }    else if (value is AutoplayStatus) {
+    }    else if (value is SitePermissionStatus) {
       buffer.putUint8(166);
       writeValue(buffer, value.index);
-    }    else if (value is TranslationOptions) {
+    }    else if (value is AutoplayStatus) {
       buffer.putUint8(167);
-      writeValue(buffer, value.encode());
-    }    else if (value is TranslationLanguage) {
+      writeValue(buffer, value.index);
+    }    else if (value is TranslationOptions) {
       buffer.putUint8(168);
       writeValue(buffer, value.encode());
-    }    else if (value is TranslationDetectedLanguages) {
+    }    else if (value is TranslationLanguage) {
       buffer.putUint8(169);
       writeValue(buffer, value.encode());
-    }    else if (value is TranslationPair) {
+    }    else if (value is TranslationDetectedLanguages) {
       buffer.putUint8(170);
       writeValue(buffer, value.encode());
-    }    else if (value is TranslationEngineStateData) {
+    }    else if (value is TranslationPair) {
       buffer.putUint8(171);
       writeValue(buffer, value.encode());
-    }    else if (value is TabTranslationStateData) {
+    }    else if (value is TranslationEngineStateData) {
       buffer.putUint8(172);
       writeValue(buffer, value.encode());
-    }    else if (value is ReaderState) {
+    }    else if (value is TabTranslationStateData) {
       buffer.putUint8(173);
       writeValue(buffer, value.encode());
-    }    else if (value is AddTabParams) {
+    }    else if (value is ReaderState) {
       buffer.putUint8(174);
       writeValue(buffer, value.encode());
-    }    else if (value is LastMediaAccessState) {
+    }    else if (value is AddTabParams) {
       buffer.putUint8(175);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryMetadataKey) {
+    }    else if (value is LastMediaAccessState) {
       buffer.putUint8(176);
       writeValue(buffer, value.encode());
-    }    else if (value is PackageCategoryValue) {
+    }    else if (value is HistoryMetadataKey) {
       buffer.putUint8(177);
       writeValue(buffer, value.encode());
-    }    else if (value is ExternalPackage) {
+    }    else if (value is PackageCategoryValue) {
       buffer.putUint8(178);
       writeValue(buffer, value.encode());
-    }    else if (value is LoadUrlFlagsValue) {
+    }    else if (value is ExternalPackage) {
       buffer.putUint8(179);
       writeValue(buffer, value.encode());
-    }    else if (value is SourceValue) {
+    }    else if (value is LoadUrlFlagsValue) {
       buffer.putUint8(180);
       writeValue(buffer, value.encode());
-    }    else if (value is TabState) {
+    }    else if (value is SourceValue) {
       buffer.putUint8(181);
       writeValue(buffer, value.encode());
-    }    else if (value is RecoverableTab) {
+    }    else if (value is TabState) {
       buffer.putUint8(182);
       writeValue(buffer, value.encode());
-    }    else if (value is IconRequest) {
+    }    else if (value is RecoverableTab) {
       buffer.putUint8(183);
       writeValue(buffer, value.encode());
-    }    else if (value is ResourceSize) {
+    }    else if (value is IconRequest) {
       buffer.putUint8(184);
       writeValue(buffer, value.encode());
-    }    else if (value is Resource) {
+    }    else if (value is ResourceSize) {
       buffer.putUint8(185);
       writeValue(buffer, value.encode());
-    }    else if (value is IconResult) {
+    }    else if (value is Resource) {
       buffer.putUint8(186);
       writeValue(buffer, value.encode());
-    }    else if (value is CookiePartitionKey) {
+    }    else if (value is IconResult) {
       buffer.putUint8(187);
       writeValue(buffer, value.encode());
-    }    else if (value is Cookie) {
+    }    else if (value is CookiePartitionKey) {
       buffer.putUint8(188);
       writeValue(buffer, value.encode());
-    }    else if (value is VisitInfo) {
+    }    else if (value is Cookie) {
       buffer.putUint8(189);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryHighlightWeights) {
+    }    else if (value is VisitInfo) {
       buffer.putUint8(190);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryHighlight) {
+    }    else if (value is HistoryHighlightWeights) {
       buffer.putUint8(191);
       writeValue(buffer, value.encode());
-    }    else if (value is TopFrecentSiteInfo) {
+    }    else if (value is HistoryHighlight) {
       buffer.putUint8(192);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryItem) {
+    }    else if (value is TopFrecentSiteInfo) {
       buffer.putUint8(193);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryState) {
+    }    else if (value is HistoryMetadata) {
       buffer.putUint8(194);
       writeValue(buffer, value.encode());
-    }    else if (value is ReaderableState) {
+    }    else if (value is HistorySuggestion) {
       buffer.putUint8(195);
       writeValue(buffer, value.encode());
-    }    else if (value is SecurityInfoState) {
+    }    else if (value is PageObservation) {
       buffer.putUint8(196);
       writeValue(buffer, value.encode());
-    }    else if (value is TabContentState) {
+    }    else if (value is HistoryItem) {
       buffer.putUint8(197);
       writeValue(buffer, value.encode());
-    }    else if (value is FindResultState) {
+    }    else if (value is HistoryState) {
       buffer.putUint8(198);
       writeValue(buffer, value.encode());
-    }    else if (value is CustomSelectionAction) {
+    }    else if (value is ReaderableState) {
       buffer.putUint8(199);
       writeValue(buffer, value.encode());
-    }    else if (value is WebExtensionData) {
+    }    else if (value is SecurityInfoState) {
       buffer.putUint8(200);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonInfo) {
+    }    else if (value is TabContentState) {
       buffer.putUint8(201);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonListingPreview) {
+    }    else if (value is FindResultState) {
       buffer.putUint8(202);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonListing) {
+    }    else if (value is CustomSelectionAction) {
       buffer.putUint8(203);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonStoreInfo) {
+    }    else if (value is WebExtensionData) {
       buffer.putUint8(204);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonUpdateAttemptInfo) {
+    }    else if (value is AddonInfo) {
       buffer.putUint8(205);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoSuggestion) {
+    }    else if (value is AddonListingPreview) {
       buffer.putUint8(206);
       writeValue(buffer, value.encode());
-    }    else if (value is TabContent) {
+    }    else if (value is AddonListing) {
       buffer.putUint8(207);
       writeValue(buffer, value.encode());
-    }    else if (value is ContentBlocking) {
+    }    else if (value is AddonStoreInfo) {
       buffer.putUint8(208);
       writeValue(buffer, value.encode());
-    }    else if (value is DohSettings) {
+    }    else if (value is AddonUpdateAttemptInfo) {
       buffer.putUint8(209);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoEngineSettings) {
+    }    else if (value is GeckoSuggestion) {
       buffer.putUint8(210);
       writeValue(buffer, value.encode());
-    }    else if (value is AutocompleteResult) {
+    }    else if (value is TabContent) {
       buffer.putUint8(211);
       writeValue(buffer, value.encode());
-    }    else if (value is UnknownHitResult) {
+    }    else if (value is ContentBlocking) {
       buffer.putUint8(212);
       writeValue(buffer, value.encode());
-    }    else if (value is ImageHitResult) {
+    }    else if (value is DohSettings) {
       buffer.putUint8(213);
       writeValue(buffer, value.encode());
-    }    else if (value is VideoHitResult) {
+    }    else if (value is GeckoEngineSettings) {
       buffer.putUint8(214);
       writeValue(buffer, value.encode());
-    }    else if (value is AudioHitResult) {
+    }    else if (value is AutocompleteResult) {
       buffer.putUint8(215);
       writeValue(buffer, value.encode());
-    }    else if (value is ImageSrcHitResult) {
+    }    else if (value is UnknownHitResult) {
       buffer.putUint8(216);
       writeValue(buffer, value.encode());
-    }    else if (value is PhoneHitResult) {
+    }    else if (value is ImageHitResult) {
       buffer.putUint8(217);
       writeValue(buffer, value.encode());
-    }    else if (value is EmailHitResult) {
+    }    else if (value is VideoHitResult) {
       buffer.putUint8(218);
       writeValue(buffer, value.encode());
-    }    else if (value is GeoHitResult) {
+    }    else if (value is AudioHitResult) {
       buffer.putUint8(219);
       writeValue(buffer, value.encode());
-    }    else if (value is DownloadState) {
+    }    else if (value is ImageSrcHitResult) {
       buffer.putUint8(220);
       writeValue(buffer, value.encode());
-    }    else if (value is ShareInternetResourceState) {
+    }    else if (value is PhoneHitResult) {
       buffer.putUint8(221);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonCollection) {
+    }    else if (value is EmailHitResult) {
       buffer.putUint8(222);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncEngineStatus) {
+    }    else if (value is GeoHitResult) {
       buffer.putUint8(223);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncAccountInfo) {
+    }    else if (value is DownloadState) {
       buffer.putUint8(224);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncDevice) {
+    }    else if (value is ShareInternetResourceState) {
       buffer.putUint8(225);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncIncomingTab) {
+    }    else if (value is AddonCollection) {
       buffer.putUint8(226);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncRemoteTab) {
+    }    else if (value is SyncEngineStatus) {
       buffer.putUint8(227);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncDeviceTabs) {
+    }    else if (value is SyncAccountInfo) {
       buffer.putUint8(228);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoPref) {
+    }    else if (value is SyncDevice) {
       buffer.putUint8(229);
       writeValue(buffer, value.encode());
-    }    else if (value is MlProgressData) {
+    }    else if (value is SyncIncomingTab) {
       buffer.putUint8(230);
       writeValue(buffer, value.encode());
-    }    else if (value is ContainerSiteAssignment) {
+    }    else if (value is SyncRemoteTab) {
       buffer.putUint8(231);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoHeader) {
+    }    else if (value is SyncDeviceTabs) {
       buffer.putUint8(232);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoFetchRequest) {
+    }    else if (value is GeckoPref) {
       buffer.putUint8(233);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoFetchResponse) {
+    }    else if (value is MlProgressData) {
       buffer.putUint8(234);
       writeValue(buffer, value.encode());
-    }    else if (value is BookmarkNode) {
+    }    else if (value is ContainerSiteAssignment) {
       buffer.putUint8(235);
       writeValue(buffer, value.encode());
-    }    else if (value is BookmarkInfo) {
+    }    else if (value is GeckoHeader) {
       buffer.putUint8(236);
       writeValue(buffer, value.encode());
-    }    else if (value is SitePermissions) {
+    }    else if (value is GeckoFetchRequest) {
       buffer.putUint8(237);
       writeValue(buffer, value.encode());
-    }    else if (value is TrackingProtectionException) {
+    }    else if (value is GeckoFetchResponse) {
       buffer.putUint8(238);
       writeValue(buffer, value.encode());
-    }    else if (value is PwaIcon) {
+    }    else if (value is BookmarkNode) {
       buffer.putUint8(239);
       writeValue(buffer, value.encode());
-    }    else if (value is ShareTargetFiles) {
+    }    else if (value is BookmarkInfo) {
       buffer.putUint8(240);
       writeValue(buffer, value.encode());
-    }    else if (value is ShareTargetParams) {
+    }    else if (value is SitePermissions) {
       buffer.putUint8(241);
       writeValue(buffer, value.encode());
-    }    else if (value is ShareTarget) {
+    }    else if (value is TrackingProtectionException) {
       buffer.putUint8(242);
       writeValue(buffer, value.encode());
-    }    else if (value is ExternalApplicationResource) {
+    }    else if (value is PwaIcon) {
       buffer.putUint8(243);
       writeValue(buffer, value.encode());
-    }    else if (value is PwaManifest) {
+    }    else if (value is ShareTargetFiles) {
       buffer.putUint8(244);
+      writeValue(buffer, value.encode());
+    }    else if (value is ShareTargetParams) {
+      buffer.putUint8(245);
+      writeValue(buffer, value.encode());
+    }    else if (value is ShareTarget) {
+      buffer.putUint8(246);
+      writeValue(buffer, value.encode());
+    }    else if (value is ExternalApplicationResource) {
+      buffer.putUint8(247);
+      writeValue(buffer, value.encode());
+    }    else if (value is PwaManifest) {
+      buffer.putUint8(248);
+      writeValue(buffer, value.encode());
+    }    else if (value is SandboxCaptureEntry) {
+      buffer.putUint8(249);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -5980,253 +6246,264 @@ class _PigeonCodec extends StandardMessageCodec {
         return value == null ? null : FrecencyThresholdOption.values[value];
       case 136:
         final value = readValue(buffer) as int?;
-        return value == null ? null : SelectionPattern.values[value];
+        return value == null ? null : DocumentType.values[value];
       case 137:
         final value = readValue(buffer) as int?;
-        return value == null ? null : WebExtensionActionType.values[value];
+        return value == null ? null : SelectionPattern.values[value];
       case 138:
         final value = readValue(buffer) as int?;
-        return value == null ? null : AddonDisabledReason.values[value];
+        return value == null ? null : WebExtensionActionType.values[value];
       case 139:
         final value = readValue(buffer) as int?;
-        return value == null ? null : AddonIncognito.values[value];
+        return value == null ? null : AddonDisabledReason.values[value];
       case 140:
         final value = readValue(buffer) as int?;
-        return value == null ? null : AddonUpdateStatus.values[value];
+        return value == null ? null : AddonIncognito.values[value];
       case 141:
         final value = readValue(buffer) as int?;
-        return value == null ? null : AddonStoreApp.values[value];
+        return value == null ? null : AddonUpdateStatus.values[value];
       case 142:
         final value = readValue(buffer) as int?;
-        return value == null ? null : AddonStorePromoted.values[value];
+        return value == null ? null : AddonStoreApp.values[value];
       case 143:
         final value = readValue(buffer) as int?;
-        return value == null ? null : GeckoSuggestionType.values[value];
+        return value == null ? null : AddonStorePromoted.values[value];
       case 144:
         final value = readValue(buffer) as int?;
-        return value == null ? null : TrackingProtectionPolicy.values[value];
+        return value == null ? null : GeckoSuggestionType.values[value];
       case 145:
         final value = readValue(buffer) as int?;
-        return value == null ? null : HttpsOnlyMode.values[value];
+        return value == null ? null : TrackingProtectionPolicy.values[value];
       case 146:
         final value = readValue(buffer) as int?;
-        return value == null ? null : QueryParameterStripping.values[value];
+        return value == null ? null : HttpsOnlyMode.values[value];
       case 147:
         final value = readValue(buffer) as int?;
-        return value == null ? null : BounceTrackingProtectionMode.values[value];
+        return value == null ? null : QueryParameterStripping.values[value];
       case 148:
         final value = readValue(buffer) as int?;
-        return value == null ? null : ColorScheme.values[value];
+        return value == null ? null : BounceTrackingProtectionMode.values[value];
       case 149:
         final value = readValue(buffer) as int?;
-        return value == null ? null : CookieBannerHandlingMode.values[value];
+        return value == null ? null : ColorScheme.values[value];
       case 150:
         final value = readValue(buffer) as int?;
-        return value == null ? null : AppLinksMode.values[value];
+        return value == null ? null : CookieBannerHandlingMode.values[value];
       case 151:
         final value = readValue(buffer) as int?;
-        return value == null ? null : WebContentIsolationStrategy.values[value];
+        return value == null ? null : AppLinksMode.values[value];
       case 152:
         final value = readValue(buffer) as int?;
-        return value == null ? null : CustomCookiePolicy.values[value];
+        return value == null ? null : WebContentIsolationStrategy.values[value];
       case 153:
         final value = readValue(buffer) as int?;
-        return value == null ? null : TrackingScope.values[value];
+        return value == null ? null : CustomCookiePolicy.values[value];
       case 154:
         final value = readValue(buffer) as int?;
-        return value == null ? null : DohSettingsMode.values[value];
+        return value == null ? null : TrackingScope.values[value];
       case 155:
         final value = readValue(buffer) as int?;
-        return value == null ? null : DownloadStatus.values[value];
+        return value == null ? null : DohSettingsMode.values[value];
       case 156:
         final value = readValue(buffer) as int?;
-        return value == null ? null : LogLevel.values[value];
+        return value == null ? null : DownloadStatus.values[value];
       case 157:
         final value = readValue(buffer) as int?;
-        return value == null ? null : SyncEngineValue.values[value];
+        return value == null ? null : LogLevel.values[value];
       case 158:
         final value = readValue(buffer) as int?;
-        return value == null ? null : MlProgressType.values[value];
+        return value == null ? null : SyncEngineValue.values[value];
       case 159:
         final value = readValue(buffer) as int?;
-        return value == null ? null : MlProgressStatus.values[value];
+        return value == null ? null : MlProgressType.values[value];
       case 160:
         final value = readValue(buffer) as int?;
-        return value == null ? null : ClearDataType.values[value];
+        return value == null ? null : MlProgressStatus.values[value];
       case 161:
         final value = readValue(buffer) as int?;
-        return value == null ? null : GeckoFetchMethod.values[value];
+        return value == null ? null : ClearDataType.values[value];
       case 162:
         final value = readValue(buffer) as int?;
-        return value == null ? null : GeckoFetchRedircet.values[value];
+        return value == null ? null : GeckoFetchMethod.values[value];
       case 163:
         final value = readValue(buffer) as int?;
-        return value == null ? null : GeckoFetchCookiePolicy.values[value];
+        return value == null ? null : GeckoFetchRedircet.values[value];
       case 164:
         final value = readValue(buffer) as int?;
-        return value == null ? null : BookmarkNodeType.values[value];
+        return value == null ? null : GeckoFetchCookiePolicy.values[value];
       case 165:
         final value = readValue(buffer) as int?;
-        return value == null ? null : SitePermissionStatus.values[value];
+        return value == null ? null : BookmarkNodeType.values[value];
       case 166:
         final value = readValue(buffer) as int?;
-        return value == null ? null : AutoplayStatus.values[value];
+        return value == null ? null : SitePermissionStatus.values[value];
       case 167:
-        return TranslationOptions.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : AutoplayStatus.values[value];
       case 168:
-        return TranslationLanguage.decode(readValue(buffer)!);
+        return TranslationOptions.decode(readValue(buffer)!);
       case 169:
-        return TranslationDetectedLanguages.decode(readValue(buffer)!);
+        return TranslationLanguage.decode(readValue(buffer)!);
       case 170:
-        return TranslationPair.decode(readValue(buffer)!);
+        return TranslationDetectedLanguages.decode(readValue(buffer)!);
       case 171:
-        return TranslationEngineStateData.decode(readValue(buffer)!);
+        return TranslationPair.decode(readValue(buffer)!);
       case 172:
-        return TabTranslationStateData.decode(readValue(buffer)!);
+        return TranslationEngineStateData.decode(readValue(buffer)!);
       case 173:
-        return ReaderState.decode(readValue(buffer)!);
+        return TabTranslationStateData.decode(readValue(buffer)!);
       case 174:
-        return AddTabParams.decode(readValue(buffer)!);
+        return ReaderState.decode(readValue(buffer)!);
       case 175:
-        return LastMediaAccessState.decode(readValue(buffer)!);
+        return AddTabParams.decode(readValue(buffer)!);
       case 176:
-        return HistoryMetadataKey.decode(readValue(buffer)!);
+        return LastMediaAccessState.decode(readValue(buffer)!);
       case 177:
-        return PackageCategoryValue.decode(readValue(buffer)!);
+        return HistoryMetadataKey.decode(readValue(buffer)!);
       case 178:
-        return ExternalPackage.decode(readValue(buffer)!);
+        return PackageCategoryValue.decode(readValue(buffer)!);
       case 179:
-        return LoadUrlFlagsValue.decode(readValue(buffer)!);
+        return ExternalPackage.decode(readValue(buffer)!);
       case 180:
-        return SourceValue.decode(readValue(buffer)!);
+        return LoadUrlFlagsValue.decode(readValue(buffer)!);
       case 181:
-        return TabState.decode(readValue(buffer)!);
+        return SourceValue.decode(readValue(buffer)!);
       case 182:
-        return RecoverableTab.decode(readValue(buffer)!);
+        return TabState.decode(readValue(buffer)!);
       case 183:
-        return IconRequest.decode(readValue(buffer)!);
+        return RecoverableTab.decode(readValue(buffer)!);
       case 184:
-        return ResourceSize.decode(readValue(buffer)!);
+        return IconRequest.decode(readValue(buffer)!);
       case 185:
-        return Resource.decode(readValue(buffer)!);
+        return ResourceSize.decode(readValue(buffer)!);
       case 186:
-        return IconResult.decode(readValue(buffer)!);
+        return Resource.decode(readValue(buffer)!);
       case 187:
-        return CookiePartitionKey.decode(readValue(buffer)!);
+        return IconResult.decode(readValue(buffer)!);
       case 188:
-        return Cookie.decode(readValue(buffer)!);
+        return CookiePartitionKey.decode(readValue(buffer)!);
       case 189:
-        return VisitInfo.decode(readValue(buffer)!);
+        return Cookie.decode(readValue(buffer)!);
       case 190:
-        return HistoryHighlightWeights.decode(readValue(buffer)!);
+        return VisitInfo.decode(readValue(buffer)!);
       case 191:
-        return HistoryHighlight.decode(readValue(buffer)!);
+        return HistoryHighlightWeights.decode(readValue(buffer)!);
       case 192:
-        return TopFrecentSiteInfo.decode(readValue(buffer)!);
+        return HistoryHighlight.decode(readValue(buffer)!);
       case 193:
-        return HistoryItem.decode(readValue(buffer)!);
+        return TopFrecentSiteInfo.decode(readValue(buffer)!);
       case 194:
-        return HistoryState.decode(readValue(buffer)!);
+        return HistoryMetadata.decode(readValue(buffer)!);
       case 195:
-        return ReaderableState.decode(readValue(buffer)!);
+        return HistorySuggestion.decode(readValue(buffer)!);
       case 196:
-        return SecurityInfoState.decode(readValue(buffer)!);
+        return PageObservation.decode(readValue(buffer)!);
       case 197:
-        return TabContentState.decode(readValue(buffer)!);
+        return HistoryItem.decode(readValue(buffer)!);
       case 198:
-        return FindResultState.decode(readValue(buffer)!);
+        return HistoryState.decode(readValue(buffer)!);
       case 199:
-        return CustomSelectionAction.decode(readValue(buffer)!);
+        return ReaderableState.decode(readValue(buffer)!);
       case 200:
-        return WebExtensionData.decode(readValue(buffer)!);
+        return SecurityInfoState.decode(readValue(buffer)!);
       case 201:
-        return AddonInfo.decode(readValue(buffer)!);
+        return TabContentState.decode(readValue(buffer)!);
       case 202:
-        return AddonListingPreview.decode(readValue(buffer)!);
+        return FindResultState.decode(readValue(buffer)!);
       case 203:
-        return AddonListing.decode(readValue(buffer)!);
+        return CustomSelectionAction.decode(readValue(buffer)!);
       case 204:
-        return AddonStoreInfo.decode(readValue(buffer)!);
+        return WebExtensionData.decode(readValue(buffer)!);
       case 205:
-        return AddonUpdateAttemptInfo.decode(readValue(buffer)!);
+        return AddonInfo.decode(readValue(buffer)!);
       case 206:
-        return GeckoSuggestion.decode(readValue(buffer)!);
+        return AddonListingPreview.decode(readValue(buffer)!);
       case 207:
-        return TabContent.decode(readValue(buffer)!);
+        return AddonListing.decode(readValue(buffer)!);
       case 208:
-        return ContentBlocking.decode(readValue(buffer)!);
+        return AddonStoreInfo.decode(readValue(buffer)!);
       case 209:
-        return DohSettings.decode(readValue(buffer)!);
+        return AddonUpdateAttemptInfo.decode(readValue(buffer)!);
       case 210:
-        return GeckoEngineSettings.decode(readValue(buffer)!);
+        return GeckoSuggestion.decode(readValue(buffer)!);
       case 211:
-        return AutocompleteResult.decode(readValue(buffer)!);
+        return TabContent.decode(readValue(buffer)!);
       case 212:
-        return UnknownHitResult.decode(readValue(buffer)!);
+        return ContentBlocking.decode(readValue(buffer)!);
       case 213:
-        return ImageHitResult.decode(readValue(buffer)!);
+        return DohSettings.decode(readValue(buffer)!);
       case 214:
-        return VideoHitResult.decode(readValue(buffer)!);
+        return GeckoEngineSettings.decode(readValue(buffer)!);
       case 215:
-        return AudioHitResult.decode(readValue(buffer)!);
+        return AutocompleteResult.decode(readValue(buffer)!);
       case 216:
-        return ImageSrcHitResult.decode(readValue(buffer)!);
+        return UnknownHitResult.decode(readValue(buffer)!);
       case 217:
-        return PhoneHitResult.decode(readValue(buffer)!);
+        return ImageHitResult.decode(readValue(buffer)!);
       case 218:
-        return EmailHitResult.decode(readValue(buffer)!);
+        return VideoHitResult.decode(readValue(buffer)!);
       case 219:
-        return GeoHitResult.decode(readValue(buffer)!);
+        return AudioHitResult.decode(readValue(buffer)!);
       case 220:
-        return DownloadState.decode(readValue(buffer)!);
+        return ImageSrcHitResult.decode(readValue(buffer)!);
       case 221:
-        return ShareInternetResourceState.decode(readValue(buffer)!);
+        return PhoneHitResult.decode(readValue(buffer)!);
       case 222:
-        return AddonCollection.decode(readValue(buffer)!);
+        return EmailHitResult.decode(readValue(buffer)!);
       case 223:
-        return SyncEngineStatus.decode(readValue(buffer)!);
+        return GeoHitResult.decode(readValue(buffer)!);
       case 224:
-        return SyncAccountInfo.decode(readValue(buffer)!);
+        return DownloadState.decode(readValue(buffer)!);
       case 225:
-        return SyncDevice.decode(readValue(buffer)!);
+        return ShareInternetResourceState.decode(readValue(buffer)!);
       case 226:
-        return SyncIncomingTab.decode(readValue(buffer)!);
+        return AddonCollection.decode(readValue(buffer)!);
       case 227:
-        return SyncRemoteTab.decode(readValue(buffer)!);
+        return SyncEngineStatus.decode(readValue(buffer)!);
       case 228:
-        return SyncDeviceTabs.decode(readValue(buffer)!);
+        return SyncAccountInfo.decode(readValue(buffer)!);
       case 229:
-        return GeckoPref.decode(readValue(buffer)!);
+        return SyncDevice.decode(readValue(buffer)!);
       case 230:
-        return MlProgressData.decode(readValue(buffer)!);
+        return SyncIncomingTab.decode(readValue(buffer)!);
       case 231:
-        return ContainerSiteAssignment.decode(readValue(buffer)!);
+        return SyncRemoteTab.decode(readValue(buffer)!);
       case 232:
-        return GeckoHeader.decode(readValue(buffer)!);
+        return SyncDeviceTabs.decode(readValue(buffer)!);
       case 233:
-        return GeckoFetchRequest.decode(readValue(buffer)!);
+        return GeckoPref.decode(readValue(buffer)!);
       case 234:
-        return GeckoFetchResponse.decode(readValue(buffer)!);
+        return MlProgressData.decode(readValue(buffer)!);
       case 235:
-        return BookmarkNode.decode(readValue(buffer)!);
+        return ContainerSiteAssignment.decode(readValue(buffer)!);
       case 236:
-        return BookmarkInfo.decode(readValue(buffer)!);
+        return GeckoHeader.decode(readValue(buffer)!);
       case 237:
-        return SitePermissions.decode(readValue(buffer)!);
+        return GeckoFetchRequest.decode(readValue(buffer)!);
       case 238:
-        return TrackingProtectionException.decode(readValue(buffer)!);
+        return GeckoFetchResponse.decode(readValue(buffer)!);
       case 239:
-        return PwaIcon.decode(readValue(buffer)!);
+        return BookmarkNode.decode(readValue(buffer)!);
       case 240:
-        return ShareTargetFiles.decode(readValue(buffer)!);
+        return BookmarkInfo.decode(readValue(buffer)!);
       case 241:
-        return ShareTargetParams.decode(readValue(buffer)!);
+        return SitePermissions.decode(readValue(buffer)!);
       case 242:
-        return ShareTarget.decode(readValue(buffer)!);
+        return TrackingProtectionException.decode(readValue(buffer)!);
       case 243:
-        return ExternalApplicationResource.decode(readValue(buffer)!);
+        return PwaIcon.decode(readValue(buffer)!);
       case 244:
+        return ShareTargetFiles.decode(readValue(buffer)!);
+      case 245:
+        return ShareTargetParams.decode(readValue(buffer)!);
+      case 246:
+        return ShareTarget.decode(readValue(buffer)!);
+      case 247:
+        return ExternalApplicationResource.decode(readValue(buffer)!);
+      case 248:
         return PwaManifest.decode(readValue(buffer)!);
+      case 249:
+        return SandboxCaptureEntry.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -9679,6 +9956,251 @@ class GeckoHistoryApi {
     ;
     return (pigeonVar_replyValue! as List<Object?>).cast<TopFrecentSiteInfo>();
   }
+
+  /// Returns the most recent [HistoryMetadata] record for [url], or `null` if
+  /// no metadata has been recorded for that URL.
+  Future<HistoryMetadata?> getLatestHistoryMetadataForUrl(String url) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryApi.getLatestHistoryMetadataForUrl$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[url]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+    return pigeonVar_replyValue as HistoryMetadata?;
+  }
+
+  /// Bulk variant of [getLatestHistoryMetadataForUrl]. Returns one entry per
+  /// input URL aligned by index; entries are `null` for URLs Places has no
+  /// metadata for. Used by the local search re-rank to collapse N IPC
+  /// roundtrips into one.
+  Future<List<HistoryMetadata?>> getLatestHistoryMetadataForUrls(List<String> urls) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryApi.getLatestHistoryMetadataForUrls$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[urls]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return (pigeonVar_replyValue! as List<Object?>).cast<HistoryMetadata?>();
+  }
+
+  /// Bulk visited check: returns booleans aligned with [urls] indicating
+  /// whether Places has any visit recorded for each URL.
+  Future<List<bool>> getVisited(List<String> urls) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryApi.getVisited$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[urls]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return (pigeonVar_replyValue! as List<Object?>).cast<bool>();
+  }
+
+  /// Frecency-ranked autocomplete results. Mirrors Places' awesomebar input.
+  Future<List<HistorySuggestion>> getSuggestions(String query, int limit) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryApi.getSuggestions$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[query, limit]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return (pigeonVar_replyValue! as List<Object?>).cast<HistorySuggestion>();
+  }
+
+  /// Places' built-in metadata text search (matches title / url / searchTerm).
+  /// Useful as a comparison baseline against the local content FTS.
+  Future<List<HistoryMetadata>> queryHistoryMetadata(String query, int limit) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryApi.queryHistoryMetadata$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[query, limit]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return (pigeonVar_replyValue! as List<Object?>).cast<HistoryMetadata>();
+  }
+
+  /// Records a title / preview-image observation for [url] without recording
+  /// a visit. Intended for manual flows; the engine middleware records these
+  /// automatically as the user browses.
+  Future<void> recordObservation(String url, PageObservation observation) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryApi.recordObservation$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[url, observation]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  /// Records a view-time observation against the metadata record identified
+  /// by [key]. View time is added to the existing total.
+  Future<void> noteHistoryMetadataViewTime(HistoryMetadataKey key, int viewTimeMs) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryApi.noteHistoryMetadataViewTime$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[key, viewTimeMs]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  /// Records a document-type observation against the metadata record
+  /// identified by [key].
+  Future<void> noteHistoryMetadataDocumentType(HistoryMetadataKey key, DocumentType documentType) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryApi.noteHistoryMetadataDocumentType$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[key, documentType]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  /// Removes all visits for [url]. May propagate to remote devices via Sync.
+  Future<void> deleteVisitsFor(String url) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryApi.deleteVisitsFor$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[url]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  /// Removes all visits since [sinceMillis] (inclusive). May propagate to
+  /// remote devices via Sync.
+  Future<void> deleteVisitsSince(int sinceMillis) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryApi.deleteVisitsSince$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[sinceMillis]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  /// Removes all locally stored history. Sync will not remove remote history,
+  /// but it will prevent deleted entries from returning.
+  Future<void> deleteEverything() async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryApi.deleteEverything$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  /// Prunes history metadata older than [olderThanMillis] (exclusive).
+  Future<void> deleteHistoryMetadataOlderThan(int olderThanMillis) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryApi.deleteHistoryMetadataOlderThan$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[olderThanMillis]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
 }
 
 class GeckoDownloadsApi {
@@ -10629,5 +11151,150 @@ class GeckoPwaApi {
     )
     ;
     return pigeonVar_replyValue! as bool;
+  }
+}
+
+/// Dart → Kotlin. Mutates the native [SandboxCaptureRegistry] that the
+/// request interceptor consults on every load.
+class SandboxCaptureApi {
+  /// Constructor for [SandboxCaptureApi].  The [binaryMessenger] named argument is
+  /// available for dependency injection.  If it is left null, the default
+  /// BinaryMessenger will be used which routes to the host platform.
+  SandboxCaptureApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  final BinaryMessenger? pigeonVar_binaryMessenger;
+
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  final String pigeonVar_messageChannelSuffix;
+
+  /// Replaces the entire registry with [entries]. Called at startup after
+  /// Dart has brought up [CaptureServer] and reconciled local artifacts with
+  /// the `capture_tab` rows.
+  Future<void> resetAll(List<SandboxCaptureEntry> entries) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.SandboxCaptureApi.resetAll$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[entries]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  /// Inserts or updates the registry entry for [entry.tabId].
+  Future<void> mark(SandboxCaptureEntry entry) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.SandboxCaptureApi.mark$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[entry]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  /// Removes the registry entry for [tabId].
+  Future<void> unmark(String tabId) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.SandboxCaptureApi.unmark$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+}
+
+/// Kotlin → Dart. Fire-and-forget notifications from the request
+/// interceptor / BrowserStore middleware. All handlers are non-blocking;
+/// the interceptor never waits for a Dart response.
+abstract class SandboxCaptureHostEvents {
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  /// Emitted when a sandbox tab attempted to navigate to a non-loopback,
+  /// non-source URL (e.g., user clicked a link or typed a new URL into the
+  /// address bar). Dart should open a new sandbox tab and capture [targetUrl].
+  void onSandboxLinkClick(int sequence, String parentTabId, String targetUrl);
+
+  /// Emitted when GeckoView created a new tab (via `window.open`,
+  /// `target="_blank"`, or a middle-click) whose parent is a sandbox tab.
+  /// The native middleware has already rewritten the new tab's URL to
+  /// `about:blank`; Dart should register it as sandbox and run the capture
+  /// pipeline for [targetUrl].
+  void onSandboxNewTab(int sequence, String parentTabId, String newTabId, String targetUrl);
+
+  static void setUp(SandboxCaptureHostEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.SandboxCaptureHostEvents.onSandboxLinkClick$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          final List<Object?> args = message! as List<Object?>;
+          final int arg_sequence = args[0]! as int;
+          final String arg_parentTabId = args[1]! as String;
+          final String arg_targetUrl = args[2]! as String;
+          try {
+            api.onSandboxLinkClick(arg_sequence, arg_parentTabId, arg_targetUrl);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.SandboxCaptureHostEvents.onSandboxNewTab$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          final List<Object?> args = message! as List<Object?>;
+          final int arg_sequence = args[0]! as int;
+          final String arg_parentTabId = args[1]! as String;
+          final String arg_newTabId = args[2]! as String;
+          final String arg_targetUrl = args[3]! as String;
+          try {
+            api.onSandboxNewTab(arg_sequence, arg_parentTabId, arg_newTabId, arg_targetUrl);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
   }
 }

@@ -34,6 +34,7 @@ final filesystem = _Filesystem();
 
 class _Filesystem {
   late final Directory dataDir;
+  late final Directory tempDir;
   late final Directory profilesDir;
 
   late final UuidValue selectedProfile;
@@ -312,7 +313,8 @@ class _Filesystem {
   Future<void> _setupSqliteCache() async {
     // Make sqlite3 pick a more suitable location for temporary files - the
     // one from the system may be inaccessible due to sandboxing.
-    final cachebase = (await path_provider.getTemporaryDirectory()).path;
+    tempDir = await path_provider.getTemporaryDirectory();
+    final cachebase = tempDir.path;
     // We can't access /tmp on Android, which sqlite3 would try by default.
     // Explicitly tell it about the correct temporary directory.
     sqlite3.tempDirectory = cachebase;

@@ -23,6 +23,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/search/domain/providers/empty_state_content.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
+import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/widgets/url_list_tile.dart';
 
 class RecentTabsSection extends ConsumerWidget {
@@ -49,15 +50,23 @@ class RecentTabsSection extends ConsumerWidget {
                 itemCount: visibleCount,
                 itemBuilder: (context, index) {
                   final (tabState, containerData) = tabs[index];
+                  final sandboxSourceUri = ref.watch(
+                    sandboxSourceUriForTabProvider(tabId: tabState.id),
+                  );
+                  final displayUrl = sandboxSourceUri ?? tabState.url;
+                  final displayTitle =
+                      sandboxSourceUri != null && tabState.title.isEmpty
+                      ? sandboxSourceUri.authority
+                      : tabState.titleOrAuthority;
 
                   return UrlListTile(
-                    title: tabState.titleOrAuthority,
-                    uri: tabState.url,
+                    title: displayTitle,
+                    uri: displayUrl,
                     leading: TabIcon(
                       tabState: tabState,
                       iconSize: UrlListTile.iconSize,
                     ),
-                    borderColor: containerData?.color,
+                    containerColor: containerData?.color,
                     onTap: () => onTabSelected(tabState.id),
                   );
                 },

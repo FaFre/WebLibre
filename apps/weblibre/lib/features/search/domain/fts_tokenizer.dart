@@ -31,7 +31,9 @@ sealed class FtsQueryBuilder {
   ///a whitespace (group 2)
   static final _tokenizePattern = RegExp('"([^"]+)"|([^ ]+)');
 
-  ///Reserved FTS5 baewords
+  ///Reserved FTS5 barewords. Compared case-insensitively — FTS5 treats them
+  ///as operators regardless of casing, so user-typed lowercase `and`/`or`/
+  ///`not` would otherwise leak through as content trigrams and pollute hits.
   static const _reservedBarewords = {'AND', 'OR', 'NOT'};
 
   ///Checks if string is an bareword accoring to:
@@ -43,7 +45,7 @@ sealed class FtsQueryBuilder {
   );
 
   static bool _isReservedBareword(Bareword input) =>
-      _reservedBarewords.contains(input.word);
+      _reservedBarewords.contains(input.word.toUpperCase());
 
   late final _Phrase _tokens;
 

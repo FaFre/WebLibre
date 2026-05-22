@@ -20,6 +20,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -302,18 +303,24 @@ class ViewTabTreesWidget extends HookConsumerWidget {
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    child: GridView.builder(
+                    child: FadingScroll(
                       controller: scrollController,
-                      padding: const EdgeInsets.only(bottom: 56),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        //Sync values for itemHeight calculation _calculateItemHeight
-                        childAspectRatio: 0.75,
-                        mainAxisSpacing: 8.0,
-                        crossAxisSpacing: 8.0,
-                        crossAxisCount: crossAxisCount,
-                      ),
-                      itemCount: tabs.length,
-                      itemBuilder: (context, index) => tabs[index],
+                      fadingSize: 5,
+                      builder: (context, controller) {
+                        return GridView.builder(
+                          controller: controller,
+                          padding: const EdgeInsets.only(bottom: 56),
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            //Sync values for itemHeight calculation _calculateItemHeight
+                            childAspectRatio: 0.75,
+                            mainAxisSpacing: 8.0,
+                            crossAxisSpacing: 8.0,
+                            crossAxisCount: crossAxisCount,
+                          ),
+                          itemCount: tabs.length,
+                          itemBuilder: (context, index) => tabs[index],
+                        );
+                      },
                     ),
                   );
                 },

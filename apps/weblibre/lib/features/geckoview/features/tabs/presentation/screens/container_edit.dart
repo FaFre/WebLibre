@@ -31,8 +31,10 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/controlle
 import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/delete_container_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/discard_changes_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_sites.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_icon_picker_sheet.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/color_picker_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
 
 enum _DialogMode { create, edit }
@@ -72,7 +74,11 @@ class ContainerEditScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final disableAnimations = MediaQuery.disableAnimationsOf(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     final selectedColor = useState(initialContainer.color);
+    final selectedIcon = useState(initialContainer.metadata.iconData);
     final contextualIdentity = useState(
       initialContainer.metadata.contextualIdentity,
     );
@@ -92,6 +98,7 @@ class ContainerEditScreen extends HookConsumerWidget {
         color: selectedColor.value,
         metadata: initialContainer.metadata.copyWith(
           contextualIdentity: contextualIdentity.value,
+          iconData: selectedIcon.value,
           useProxy: useProxy.value && contextualIdentity.value != null,
           clearDataOnExit:
               clearDataOnExit.value && contextualIdentity.value != null,
@@ -115,9 +122,101 @@ class ContainerEditScreen extends HookConsumerWidget {
       return container;
     }
 
+    Future<void> saveAndClose() async {
+      final container = await saveContainer();
+      if (context.mounted) {
+        context.pop(container);
+      }
+    }
+
+    Future<void> openColorPicker() async {
+      final color = await showDialog<Color?>(
+        context: context,
+        builder: (context) => ColorPickerDialog(selectedColor.value),
+      );
+
+      if (color != null) {
+        selectedColor.value = color;
+      }
+    }
+
+    Future<void> openIconPicker() async {
+      final icon = await showModalBottomSheet<IconData>(
+        context: context,
+        isScrollControlled: true,
+        useSafeArea: true,
+        builder: (context) => FractionallySizedBox(
+          heightFactor: 0.92,
+          child: ContainerIconPickerSheet(
+            selectedColor: selectedColor.value,
+            selectedIcon: resolveContainerIcon(selectedIcon.value),
+            onSelected: (iconData) => Navigator.of(context).pop(iconData),
+          ),
+        ),
+      );
+
+      if (icon != null) {
+        selectedIcon.value = icon;
+      }
+    }
+
+    Future<void> openAppearanceMenu() async {
+      await showModalBottomSheet<void>(
+        context: context,
+        useSafeArea: true,
+        builder: (context) {
+          return SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 8),
+                ListTile(
+                  leading: const Icon(Icons.palette_outlined),
+                  title: const Text('Change Color'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    openColorPicker();
+                  },
+                ),
+                ListTile(
+                  leading: Icon(resolveContainerIcon(selectedIcon.value)),
+                  title: const Text('Change Icon'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    openIconPicker();
+                  },
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          );
+        },
+      );
+    }
+
+    Future<void> deleteContainer() async {
+      final result = await showDeleteContainerDialog(context);
+
+      if (result == true) {
+        await ref
+            .read(containerRepositoryProvider.notifier)
+            .deleteContainer(initialContainer.id);
+
+        if (context.mounted) {
+          context.pop();
+        }
+      }
+    }
+
     final container = buildContainer();
     //Empty copy to create comparable container with same type
     final comparison = initialContainer.copyWith();
+    final previewIcon = resolveContainerIcon(selectedIcon.value);
+    final previewPalette = ContainerColors.palette(
+      context,
+      selectedColor.value,
+    );
+    final assignedSiteCount = assignedSites.value?.length ?? 0;
 
     return PopScope(
       canPop: container == comparison,
@@ -133,10 +232,7 @@ class ContainerEditScreen extends HookConsumerWidget {
               context.pop();
             }
           case DiscardChangesChoice.save:
-            final container = await saveContainer();
-            if (context.mounted) {
-              context.pop(container);
-            }
+            await saveAndClose();
         }
       },
       child: Scaffold(
@@ -146,180 +242,238 @@ class ContainerEditScreen extends HookConsumerWidget {
             _DialogMode.edit => 'Edit Container',
           }),
           actions: [
-            IconButton(
-              onPressed: () async {
-                final container = await saveContainer();
-                if (context.mounted) {
-                  context.pop(container);
-                }
-              },
-              icon: const Icon(Icons.check),
-            ),
+            IconButton(onPressed: saveAndClose, icon: const Icon(Icons.check)),
           ],
         ),
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              children: [
-                Expanded(
-                  child: ListView(
-                    children: [
-                      TextField(
-                        decoration: InputDecoration(
-                          prefixIcon: Padding(
-                            padding: const EdgeInsets.all(10.0),
-                            child: AnimatedContainer(
-                              duration: disableAnimations
-                                  ? Duration.zero
-                                  : const Duration(milliseconds: 300),
-                              height: 24,
-                              width: 24,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: ContainerColors.preview(
-                                  selectedColor.value,
+        body: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(20),
+                children: [
+                  Card.filled(
+                    margin: EdgeInsets.zero,
+                    color: colorScheme.surfaceContainer,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          GestureDetector(
+                            onTap: openAppearanceMenu,
+                            child: Stack(
+                              alignment: Alignment.bottomRight,
+                              children: [
+                                AnimatedContainer(
+                                  duration: disableAnimations
+                                      ? Duration.zero
+                                      : const Duration(milliseconds: 200),
+                                  curve: Curves.easeInOut,
+                                  width: 72,
+                                  height: 72,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: previewPalette.avatarBackgroundColor,
+                                    border: Border.all(
+                                      color: previewPalette.outlineColor,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    previewIcon,
+                                    color: previewPalette.avatarForegroundColor,
+                                    size: 34,
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.primary,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: theme.scaffoldBackgroundColor,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    Icons.edit,
+                                    size: 14,
+                                    color: colorScheme.onPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 20),
+                          Expanded(
+                            child: TextField(
+                              controller: textController,
+                              style: theme.textTheme.titleLarge,
+                              decoration: InputDecoration(
+                                labelText: 'Container Name',
+                                filled: true,
+                                fillColor: colorScheme.surfaceContainerHighest
+                                    .withValues(alpha: 0.6),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide.none,
+                                ),
+                                suffixIcon: _buildMagicWandButton(
+                                  context,
+                                  ref,
+                                  textController,
                                 ),
                               ),
                             ),
                           ),
-                          label: const Text('Name'),
-                          suffixIcon: _buildMagicWandButton(
-                            context,
-                            ref,
-                            textController,
-                          ),
-                        ),
-                        controller: textController,
+                        ],
                       ),
-                      TextButton.icon(
-                        label: const Text('Select Color'),
-                        icon: const Icon(Icons.colorize),
-                        onPressed: () async {
-                          final color = await showDialog<Color?>(
-                            context: context,
-                            builder: (context) =>
-                                ColorPickerDialog(selectedColor.value),
-                          );
-
-                          if (color != null) {
-                            selectedColor.value = color;
-                          }
-                        },
-                      ),
-                      SwitchListTile.adaptive(
-                        value: contextualIdentity.value != null,
-                        title: const Text('Cookie Isolation'),
-                        secondary: const Icon(MdiIcons.cookieLock),
-                        contentPadding: EdgeInsets.zero,
-                        onChanged: (_mode == _DialogMode.create)
-                            ? (value) {
-                                contextualIdentity.value = value
-                                    ? initialContainer
-                                              .metadata
-                                              .contextualIdentity ??
-                                          uuid.v4()
-                                    : null;
-
-                                if (!value && useProxy.value) {
-                                  useProxy.value = false;
-                                }
-                              }
-                            : null,
-                      ),
-                      SwitchListTile.adaptive(
-                        value: useProxy.value,
-                        title: const Text('Use Tor™ Proxy'),
-                        secondary: const Icon(TorIcons.onionAlt),
-                        contentPadding: EdgeInsets.zero,
-                        onChanged: switch (_mode) {
-                          _DialogMode.create => (value) {
-                            if (value && contextualIdentity.value == null) {
-                              contextualIdentity.value =
-                                  initialContainer
-                                      .metadata
-                                      .contextualIdentity ??
-                                  uuid.v4();
-                            }
-
-                            useProxy.value = value;
-                          },
-                          _DialogMode.edit =>
-                            (contextualIdentity.value != null)
-                                ? (value) {
-                                    useProxy.value = value;
-                                  }
-                                : null,
-                        },
-                      ),
-                      SwitchListTile.adaptive(
-                        value: clearDataOnExit.value,
-                        title: const Text('Clear Data on Exit'),
-                        subtitle: const Text(
-                          'Clear cookies and site data when app closes',
-                        ),
-                        secondary: const Icon(MdiIcons.databaseRemove),
-                        contentPadding: EdgeInsets.zero,
-                        onChanged: (contextualIdentity.value != null)
-                            ? (value) {
-                                clearDataOnExit.value = value;
-                              }
-                            : null,
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.web),
-                        title: const Text('Assigned Sites'),
-                        trailing: const Icon(Icons.chevron_right),
-                        contentPadding: EdgeInsets.zero,
-                        onTap: () async {
-                          final result = await showDialog<Set<Uri>>(
-                            context: context,
-                            builder: (context) => ContainerSitesScreen(
-                              initialSites: assignedSites.value?.toSet() ?? {},
-                            ),
-                          );
-
-                          if (result.isEmpty) {
-                            assignedSites.value = null;
-                          } else {
-                            assignedSites.value = result!.toList();
-                          }
-                        },
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                if (_mode == _DialogMode.edit)
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          color: Theme.of(context).colorScheme.error,
+                  const SizedBox(height: 28),
+                  Text(
+                    'Privacy & Security',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Card.filled(
+                    margin: EdgeInsets.zero,
+                    color: colorScheme.surfaceContainer,
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      children: [
+                        SwitchListTile.adaptive(
+                          value: contextualIdentity.value != null,
+                          title: const Text('Cookie Isolation'),
+                          secondary: const Icon(MdiIcons.cookieLock),
+                          onChanged: (_mode == _DialogMode.create)
+                              ? (value) {
+                                  contextualIdentity.value = value
+                                      ? initialContainer
+                                                .metadata
+                                                .contextualIdentity ??
+                                            uuid.v4()
+                                      : null;
+
+                                  if (!value && useProxy.value) {
+                                    useProxy.value = false;
+                                  }
+
+                                  if (!value && clearDataOnExit.value) {
+                                    clearDataOnExit.value = false;
+                                  }
+                                }
+                              : null,
                         ),
-                        foregroundColor: Theme.of(context).colorScheme.error,
-                        iconColor: Theme.of(context).colorScheme.error,
-                      ),
-                      label: const Text('Delete'),
-                      icon: const Icon(Icons.delete),
-                      onPressed: () async {
-                        final result = await showDeleteContainerDialog(context);
+                        const Divider(height: 1, indent: 56),
+                        SwitchListTile.adaptive(
+                          value: useProxy.value,
+                          title: const Text('Use Tor™ Proxy'),
+                          secondary: const Icon(TorIcons.onionAlt),
+                          onChanged: switch (_mode) {
+                            _DialogMode.create => (value) {
+                              if (value && contextualIdentity.value == null) {
+                                contextualIdentity.value =
+                                    initialContainer
+                                        .metadata
+                                        .contextualIdentity ??
+                                    uuid.v4();
+                              }
 
-                        if (result == true) {
-                          await ref
-                              .read(containerRepositoryProvider.notifier)
-                              .deleteContainer(initialContainer.id);
+                              useProxy.value = value;
+                            },
+                            _DialogMode.edit =>
+                              (contextualIdentity.value != null)
+                                  ? (value) {
+                                      useProxy.value = value;
+                                    }
+                                  : null,
+                          },
+                        ),
+                        const Divider(height: 1, indent: 56),
+                        SwitchListTile.adaptive(
+                          value: clearDataOnExit.value,
+                          title: const Text('Clear Data on Exit'),
+                          subtitle: const Text(
+                            'Clear cookies and site data when app closes',
+                          ),
+                          secondary: const Icon(MdiIcons.databaseRemove),
+                          onChanged: (contextualIdentity.value != null)
+                              ? (value) {
+                                  clearDataOnExit.value = value;
+                                }
+                              : null,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Assignments',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Card.filled(
+                    margin: EdgeInsets.zero,
+                    color: colorScheme.surfaceContainer,
+                    clipBehavior: Clip.antiAlias,
+                    child: ListTile(
+                      leading: const Icon(Icons.web),
+                      title: const Text('Assigned Sites'),
+                      subtitle: assignedSiteCount > 0
+                          ? Text(
+                              '$assignedSiteCount ${assignedSiteCount == 1 ? 'rule' : 'rules'} configured',
+                            )
+                          : const Text(
+                              'Route matching origins into this container',
+                            ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () async {
+                        final result = await showDialog<Set<Uri>>(
+                          context: context,
+                          builder: (context) => ContainerSitesScreen(
+                            initialSites: assignedSites.value?.toSet() ?? {},
+                          ),
+                        );
 
-                          if (context.mounted) {
-                            context.pop();
-                          }
+                        if (result == null || result.isEmpty) {
+                          assignedSites.value = null;
+                        } else {
+                          assignedSites.value = result.toList();
                         }
                       },
                     ),
                   ),
-              ],
+                ],
+              ),
             ),
-          ),
+            if (_mode == _DialogMode.edit)
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: FilledButton.tonalIcon(
+                      onPressed: deleteContainer,
+                      icon: const Icon(Icons.delete_outline),
+                      label: const Text('Delete Container'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: colorScheme.errorContainer,
+                        foregroundColor: colorScheme.onErrorContainer,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

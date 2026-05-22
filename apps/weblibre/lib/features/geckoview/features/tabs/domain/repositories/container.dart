@@ -43,6 +43,14 @@ class ContainerRepository extends _$ContainerRepository {
       }
     }
 
+    if (container.orderKey.isEmpty) {
+      throw ArgumentError.value(
+        container.orderKey,
+        'container.orderKey',
+        'Containers require an explicit order key',
+      );
+    }
+
     return ref.read(tabDatabaseProvider).containerDao.addContainer(container);
   }
 
@@ -68,6 +76,21 @@ class ContainerRepository extends _$ContainerRepository {
         .read(tabDatabaseProvider)
         .containerDao
         .replaceContainer(container);
+  }
+
+  Future<void> assignContainerOrderKey(String id, {required String orderKey}) {
+    return ref
+        .read(tabDatabaseProvider)
+        .containerDao
+        .assignOrderKey(id, orderKey: orderKey);
+  }
+
+  Future<void> setContainerPinned(String id, {required bool isPinned}) async {
+    final orderKey = await getTrailingContainerOrderKey(isPinned: isPinned);
+    return ref
+        .read(tabDatabaseProvider)
+        .containerDao
+        .assignPinned(id, isPinned: isPinned, orderKey: orderKey);
   }
 
   Future<ContainerData?> getContainerData(String id) {
@@ -125,6 +148,113 @@ class ContainerRepository extends _$ContainerRepository {
         .getSingle();
   }
 
+  Future<String> getLeadingContainerOrderKey({required bool isPinned}) {
+    return ref
+        .read(tabDatabaseProvider)
+        .containerDao
+        .generateLeadingContainerOrderKey(isPinned: isPinned)
+        .getSingle();
+  }
+
+  Future<String> getTrailingContainerOrderKey({required bool isPinned}) {
+    return ref
+        .read(tabDatabaseProvider)
+        .containerDao
+        .generateTrailingContainerOrderKey(isPinned: isPinned)
+        .getSingle();
+  }
+
+  Future<String?> getOrderKeyAfterContainer(
+    String containerId, {
+    required bool isPinned,
+  }) {
+    return ref
+        .read(tabDatabaseProvider)
+        .containerDao
+        .generateOrderKeyAfterContainerId(containerId, isPinned: isPinned)
+        .getSingleOrNull();
+  }
+
+  Future<String> getOrderKeyBeforeContainer(
+    String containerId, {
+    required bool isPinned,
+  }) {
+    return ref
+        .read(tabDatabaseProvider)
+        .containerDao
+        .generateOrderKeyBeforeContainerId(containerId, isPinned: isPinned)
+        .getSingle();
+  }
+
+  Future<void> reorderContainer(
+    List<ContainerData> containers,
+    int oldIndex,
+    int newIndex,
+  ) async {
+    if (containers.isEmpty || oldIndex == newIndex) return;
+
+    var targetIndex = newIndex;
+    if (targetIndex > oldIndex) {
+      targetIndex -= 1;
+    }
+    targetIndex = targetIndex.clamp(0, containers.length - 1);
+    if (targetIndex == oldIndex) return;
+
+    final movingContainer = containers[oldIndex];
+    final scopedContainers = containers
+        .where((container) => container.isPinned == movingContainer.isPinned)
+        .toList();
+    final scopedOldIndex = scopedContainers.indexWhere(
+      (container) => container.id == movingContainer.id,
+    );
+    if (scopedOldIndex < 0) return;
+
+    final containersWithoutMoving = containers.toList()..removeAt(oldIndex);
+    final scopedTargetIndex = containersWithoutMoving
+        .take(targetIndex)
+        .where((container) => container.isPinned == movingContainer.isPinned)
+        .length
+        .clamp(0, scopedContainers.length - 1)
+        .toInt();
+    if (scopedTargetIndex == scopedOldIndex) return;
+
+    final orderKey = await _orderKeyForReorder(
+      scopedContainers,
+      scopedOldIndex,
+      scopedTargetIndex,
+      movingContainer.isPinned,
+    );
+    await assignContainerOrderKey(movingContainer.id, orderKey: orderKey);
+  }
+
+  Future<String> _orderKeyForReorder(
+    List<ContainerData> containers,
+    int oldIndex,
+    int targetIndex,
+    bool isPinned,
+  ) async {
+    if (targetIndex <= 0) {
+      return getLeadingContainerOrderKey(isPinned: isPinned);
+    }
+
+    if (targetIndex >= containers.length - 1) {
+      return getTrailingContainerOrderKey(isPinned: isPinned);
+    }
+
+    if (targetIndex < oldIndex) {
+      return await getOrderKeyAfterContainer(
+            containers[targetIndex - 1].id,
+            isPinned: isPinned,
+          ) ??
+          await getLeadingContainerOrderKey(isPinned: isPinned);
+    }
+
+    return getOrderKeyBeforeContainer(
+      containers[targetIndex + 1].id,
+      isPinned: isPinned,
+    );
+  }
+
   Future<String?> getOrderKeyAfterTab(String tabId, String? containerId) {
     return ref
         .read(tabDatabaseProvider)
@@ -142,12 +272,19 @@ class ContainerRepository extends _$ContainerRepository {
   }
 
   Future<Color> unusedRandomContainerColor() async {
-    final allColors = colorTypes.flattened.toList();
     final usedColors = await getDistinctColors();
+    final unusedColorTypes = colorTypes.where((colors) {
+      return !shadingTypes(
+        colors,
+      ).any((shade) => usedColors.contains(shade.keys.first));
+    }).toList();
+    final availableColors =
+        (unusedColorTypes.isNotEmpty ? unusedColorTypes : colorTypes).flattened
+            .toList();
 
     Color randomColor;
     do {
-      randomColor = randomColorShade(allColors);
+      randomColor = randomColorShade(availableColors);
     } while (usedColors.contains(randomColor));
 
     return randomColor;
@@ -155,8 +292,13 @@ class ContainerRepository extends _$ContainerRepository {
 
   Future<ContainerData> createNewContainer() async {
     final initialColor = await unusedRandomContainerColor();
+    final orderKey = await getTrailingContainerOrderKey(isPinned: false);
 
-    return ContainerData(id: uuid.v7(), color: initialColor);
+    return ContainerData(
+      id: uuid.v7(),
+      color: initialColor,
+      orderKey: orderKey,
+    );
   }
 
   Future<bool> isSiteAssignedToContainer(Uri uri) async {

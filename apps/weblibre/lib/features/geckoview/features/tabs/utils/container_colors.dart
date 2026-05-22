@@ -19,55 +19,101 @@
  */
 import 'package:flutter/material.dart';
 
+class ContainerColorPalette {
+  const ContainerColorPalette({
+    required this.accentColor,
+    required this.onAccentColor,
+    required this.containerColor,
+    required this.onContainerColor,
+    required this.surfaceColor,
+    required this.surfaceHighColor,
+    required this.outlineColor,
+    required this.backgroundColor,
+    required this.selectedBackgroundColor,
+    required this.borderSide,
+    required this.selectedBorderSide,
+    required this.foregroundColor,
+    required this.selectedForegroundColor,
+    required this.badgeBackgroundColor,
+    required this.badgeForegroundColor,
+    required this.avatarColor,
+    required this.selectedAvatarColor,
+    required this.avatarBackgroundColor,
+    required this.avatarForegroundColor,
+  });
+
+  final Color accentColor;
+  final Color onAccentColor;
+  final Color containerColor;
+  final Color onContainerColor;
+  final Color surfaceColor;
+  final Color surfaceHighColor;
+  final Color outlineColor;
+  final Color backgroundColor;
+  final Color selectedBackgroundColor;
+  final BorderSide borderSide;
+  final BorderSide selectedBorderSide;
+  final Color foregroundColor;
+  final Color selectedForegroundColor;
+  final Color badgeBackgroundColor;
+  final Color badgeForegroundColor;
+  final Color avatarColor;
+  final Color selectedAvatarColor;
+  final Color avatarBackgroundColor;
+  final Color avatarForegroundColor;
+}
+
 /// Centralized helper for container color display and theming.
 ///
-/// This class handles the conversion of stored container colors (full opacity)
-/// to their display variants (with transparency) for consistent appearance
-/// across the application.
+/// This class converts the stored container seed color into Material 3 roles
+/// used consistently across the application.
 class ContainerColors {
   ContainerColors._();
 
-  /// Default alpha value for container color display (33% opacity)
-  static const double defaultAlpha = 0.33;
+  static const double surfaceAlpha = 0.18;
+  static const double surfaceHighAlpha = 0.28;
+  static const double outlineBorderAlpha = 0.5;
 
-  /// Returns the display color for container chips and backgrounds.
-  ///
-  /// Applies semi-transparent overlay that works well for backgrounds
-  /// while maintaining color distinction between containers.
-  ///
-  /// [baseColor] The stored container color (typically full opacity)
-  static Color forChip(Color baseColor) {
-    return baseColor.withValues(alpha: defaultAlpha);
-  }
+  static ContainerColorPalette palette(BuildContext context, Color seedColor) {
+    final theme = Theme.of(context);
+    final appScheme = theme.colorScheme;
+    final containerScheme = ColorScheme.fromSeed(
+      seedColor: fullOpacity(seedColor),
+      brightness: theme.brightness,
+    );
+    final surfaceColor = Color.alphaBlend(
+      containerScheme.primaryContainer.withValues(alpha: surfaceAlpha),
+      appScheme.surfaceContainer,
+    );
+    final surfaceHighColor = Color.alphaBlend(
+      containerScheme.primaryContainer.withValues(alpha: surfaceHighAlpha),
+      appScheme.surfaceContainerHighest,
+    );
+    final outlineColor = containerScheme.primary.withValues(
+      alpha: outlineBorderAlpha,
+    );
 
-  /// Returns the display color for container app bar backgrounds.
-  ///
-  /// Uses the same transparency as chips for visual consistency.
-  ///
-  /// [baseColor] The stored container color (typically full opacity)
-  static Color forAppBar(Color baseColor) {
-    return baseColor.withValues(alpha: defaultAlpha);
-  }
-
-  /// Returns the display color with theme-aware blending.
-  ///
-  /// Uses Material Design's color blending algorithm for proper color mixing
-  /// with the surface color, ensuring better visual appearance across themes.
-  ///
-  /// [baseColor] The stored container color (typically full opacity)
-  /// [surface] The surface color to blend with (typically from theme)
-  static Color forSurface(Color baseColor, Color surface) {
-    return Color.alphaBlend(baseColor.withValues(alpha: defaultAlpha), surface);
-  }
-
-  /// Returns the preview color showing how the color will appear in the UI.
-  ///
-  /// This is useful in color pickers to show users the actual appearance
-  /// before they confirm their selection.
-  ///
-  /// [baseColor] The color being previewed
-  static Color preview(Color baseColor) {
-    return baseColor.withValues(alpha: defaultAlpha);
+    return ContainerColorPalette(
+      accentColor: containerScheme.primary,
+      onAccentColor: containerScheme.onPrimary,
+      containerColor: containerScheme.primaryContainer,
+      onContainerColor: containerScheme.onPrimaryContainer,
+      surfaceColor: surfaceColor,
+      surfaceHighColor: surfaceHighColor,
+      outlineColor: outlineColor,
+      backgroundColor: surfaceColor,
+      selectedBackgroundColor: containerScheme.primaryContainer,
+      borderSide: BorderSide(color: outlineColor),
+      selectedBorderSide: const BorderSide(color: Colors.transparent),
+      foregroundColor: appScheme.onSurfaceVariant,
+      selectedForegroundColor: containerScheme.onPrimaryContainer,
+      badgeBackgroundColor: containerScheme.primary,
+      badgeForegroundColor: containerScheme.onPrimary,
+      avatarColor: containerScheme.primary,
+      selectedAvatarColor: containerScheme.onPrimaryContainer,
+      avatarBackgroundColor: surfaceHighColor,
+      avatarForegroundColor: containerScheme.primary,
+    );
   }
 
   /// Returns the full opacity version of a container color.

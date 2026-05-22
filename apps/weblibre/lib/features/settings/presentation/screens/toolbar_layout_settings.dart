@@ -17,9 +17,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/settings/presentation/widgets/toolbar_layout_content.dart';
 import 'package:weblibre/features/settings/presentation/widgets/toolbar_preview.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -30,32 +30,28 @@ class ToolbarLayoutSettingsScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final search = useSettingsSearch();
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Toolbar & Layout')),
-      body: SafeArea(
-        child: FadingScroll(
-          fadingSize: 25,
-          builder: (context, controller) {
-            return CustomScrollView(
-              controller: controller,
-              slivers: [
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: TabBarPreviewHeaderDelegate(
-                    settings: settings,
-                    compact: true,
-                  ),
-                ),
-                const SliverPadding(
-                  padding: EdgeInsets.symmetric(horizontal: 12.0),
-                  sliver: SliverToBoxAdapter(child: ToolbarLayoutContent()),
-                ),
-              ],
-            );
-          },
+    return SettingsCustomScrollScaffold(
+      title: 'Toolbar & Layout',
+      searchController: search.controller,
+      searchHintText: 'Search toolbar and layout settings',
+      slivers: [
+        const SliverToBoxAdapter(child: SizedBox(height: 16)),
+        SliverPersistentHeader(
+          pinned: true,
+          delegate: TabBarPreviewHeaderDelegate(
+            settings: settings,
+            compact: true,
+          ),
         ),
-      ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+          sliver: SliverToBoxAdapter(
+            child: ToolbarLayoutContent(query: search.rawQuery),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -31,6 +31,17 @@ CREATE TABLE toolbar_button_configs (
 
 CREATE INDEX idx_toolbar_order_key ON toolbar_button_configs(order_key);
 
+CREATE TABLE search_tokens (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  token BLOB NOT NULL,
+  inserted_at DATETIME NOT NULL,
+  issuer_key_version TEXT NOT NULL,
+  reserved_at DATETIME
+);
+
+CREATE INDEX idx_search_tokens_inserted_at ON search_tokens(inserted_at);
+CREATE INDEX idx_search_tokens_reserved_at ON search_tokens(reserved_at);
+
 -- All four queries are scoped to a visibility partition (`is_visible`) so the
 -- generated key falls strictly within the targeted section. The Customize
 -- Toolbar UI renders Enabled and Disabled as two independent reorderable

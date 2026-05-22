@@ -125,6 +125,18 @@ class GeneralSettings with FastEquatable {
   final bool blockExternalAppsEnabled;
   final Map<String, IntentSourcePolicy> externalAppIntentPolicies;
 
+  /// Whether the local search index (`history` table populated via tab→
+  /// history triggers) is active. When false, the SQL trigger guard returns
+  /// without writing; existing rows stay until the user clears them.
+  final bool enableLocalSearchIndex;
+
+  /// Whether private tabs feed the local search index. Defaults to false.
+  final bool indexPrivateTabs;
+
+  /// Whether pressing the keyboard submit/enter button should automatically
+  /// accept and complete an inline search suggestion. Defaults to false.
+  final bool acceptSuggestionOnSubmit;
+
   GeneralSettings({
     required this.themeMode,
     required this.uiScaleFactor,
@@ -179,6 +191,9 @@ class GeneralSettings with FastEquatable {
     required this.allowNonManifestPwaInstall,
     required this.blockExternalAppsEnabled,
     required this.externalAppIntentPolicies,
+    required this.enableLocalSearchIndex,
+    required this.indexPrivateTabs,
+    required this.acceptSuggestionOnSubmit,
   });
 
   GeneralSettings.withDefaults({
@@ -235,6 +250,9 @@ class GeneralSettings with FastEquatable {
     bool? allowNonManifestPwaInstall,
     bool? blockExternalAppsEnabled,
     Map<String, IntentSourcePolicy>? externalAppIntentPolicies,
+    bool? enableLocalSearchIndex,
+    bool? indexPrivateTabs,
+    bool? acceptSuggestionOnSubmit,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        uiScaleFactor = uiScaleFactor ?? defaultUiScaleFactor,
        disableAnimations = disableAnimations ?? false,
@@ -297,7 +315,10 @@ class GeneralSettings with FastEquatable {
        unshortenerToken = unshortenerToken ?? '',
        allowNonManifestPwaInstall = allowNonManifestPwaInstall ?? false,
        blockExternalAppsEnabled = blockExternalAppsEnabled ?? false,
-       externalAppIntentPolicies = externalAppIntentPolicies ?? const {};
+       externalAppIntentPolicies = externalAppIntentPolicies ?? const {},
+       enableLocalSearchIndex = enableLocalSearchIndex ?? true,
+       indexPrivateTabs = indexPrivateTabs ?? false,
+       acceptSuggestionOnSubmit = acceptSuggestionOnSubmit ?? false;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) {
     // Migrate legacy `newTabPosition` setting to direction settings.
@@ -404,5 +425,8 @@ class GeneralSettings with FastEquatable {
     allowNonManifestPwaInstall,
     blockExternalAppsEnabled,
     externalAppIntentPolicies,
+    enableLocalSearchIndex,
+    indexPrivateTabs,
+    acceptSuggestionOnSubmit,
   ];
 }

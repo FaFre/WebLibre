@@ -7,6 +7,7 @@
 package eu.weblibre.flutter_mozilla_components
 
 import android.content.Context
+import android.content.Intent
 import eu.weblibre.flutter_mozilla_components.pigeons.AddonCollection
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMode
@@ -21,6 +22,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
 import eu.weblibre.flutter_mozilla_components.pigeons.ReaderViewController
+import eu.weblibre.flutter_mozilla_components.services.PrivateTabsNotificationService
 import eu.weblibre.flutter_mozilla_components.addons.AddonPrefs
 import eu.weblibre.flutter_mozilla_components.api.GeckoViewportApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
@@ -39,6 +41,7 @@ import mozilla.components.browser.state.selector.findCustomTab
 import mozilla.components.ExperimentalAndroidComponentsApi
 import mozilla.components.concept.engine.selection.SelectionActionDelegate
 import mozilla.components.concept.engine.preferences.Branch
+import mozilla.components.feature.privatemode.notification.PrivateNotificationFeature
 import mozilla.components.feature.addons.update.GlobalAddonDependencyProvider
 import mozilla.components.support.base.facts.Facts
 import mozilla.components.support.base.facts.processor.LogFactProcessor
@@ -57,6 +60,8 @@ private const val UBLOCK_FILTER_LISTS_PREF = "browser.weblibre.uBO.filterLists"
 object GlobalComponents {
     private var _components: Components? = null
     private var currentMode: ComponentsMode? = null
+    private var privateTabsNotificationFeature:
+        PrivateNotificationFeature<PrivateTabsNotificationService>? = null
 
     val components: Components?
         get() = _components
@@ -101,6 +106,25 @@ object GlobalComponents {
     // Startup pref written before web extensions initialize.
     var startupUBlockFilterListsPref: String? = null
     var clearStartupUBlockFilterListsPref: Boolean = false
+
+    private fun startPrivateTabsNotificationFeature(components: Components) {
+        privateTabsNotificationFeature = PrivateNotificationFeature(
+            components.profileApplicationContext,
+            components.core.store,
+            PrivateTabsNotificationService::class,
+        ).also {
+            it.start()
+        }
+    }
+
+    fun stopPrivateTabsNotificationFeature() {
+        val context = _components?.profileApplicationContext
+
+        privateTabsNotificationFeature?.stop()
+        privateTabsNotificationFeature = null
+
+        context?.stopService(Intent(context, PrivateTabsNotificationService::class.java))
+    }
 
     fun shouldOpenLinksInApp(isExternalSession: Boolean = false): Boolean {
         return when (engineSettingsApi!!.getAppLinksMode()) {
@@ -244,6 +268,8 @@ object GlobalComponents {
             }
         }
 
+        stopPrivateTabsNotificationFeature()
+
         //newComponents.crashReporter.install(applicationContext)
 
         //Facts.registerProcessor(LogFactProcessor())
@@ -256,6 +282,7 @@ object GlobalComponents {
         if (mode == ComponentsMode.FULL) {
             newComponents.core.engine.warmUp()
             applyStartupUBlockFilterListsPref(newComponents)
+            startPrivateTabsNotificationFeature(newComponents)
         }
 
         fun restorePreviousCustomTabs() {

@@ -43,6 +43,81 @@ final class IconCacheSizeMegabytesProvider
 String _$iconCacheSizeMegabytesHash() =>
     r'5d7f5f6485060b08ce4fd8fa634f07bf8bfdbd2d';
 
+@ProviderFor(watchCachedIconBytes)
+final watchCachedIconBytesProvider = WatchCachedIconBytesFamily._();
+
+final class WatchCachedIconBytesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Uint8List?>,
+          Uint8List?,
+          Stream<Uint8List?>
+        >
+    with $FutureModifier<Uint8List?>, $StreamProvider<Uint8List?> {
+  WatchCachedIconBytesProvider._({
+    required WatchCachedIconBytesFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'watchCachedIconBytesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchCachedIconBytesHash();
+
+  @override
+  String toString() {
+    return r'watchCachedIconBytesProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<Uint8List?> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<Uint8List?> create(Ref ref) {
+    final argument = this.argument as String;
+    return watchCachedIconBytes(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WatchCachedIconBytesProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$watchCachedIconBytesHash() =>
+    r'65881670bd19f2d55e05e68118e1e23b28871c13';
+
+final class WatchCachedIconBytesFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<Uint8List?>, String> {
+  WatchCachedIconBytesFamily._()
+    : super(
+        retry: null,
+        name: r'watchCachedIconBytesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  WatchCachedIconBytesProvider call(String origin) =>
+      WatchCachedIconBytesProvider._(argument: origin, from: this);
+
+  @override
+  String toString() => r'watchCachedIconBytesProvider';
+}
+
 @ProviderFor(incognitoModeEnabled)
 final incognitoModeEnabledProvider = IncognitoModeEnabledProvider._();
 

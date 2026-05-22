@@ -36,6 +36,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
@@ -173,6 +174,14 @@ class GridTabPreview extends HookConsumerWidget {
         ) ??
         TabState.$default(tabId);
 
+    final sandboxSourceUri = ref.watch(
+      sandboxSourceUriForTabProvider(tabId: tabId),
+    );
+    final displayUrl = sandboxSourceUri ?? tabState.url;
+    final displayTitle = sandboxSourceUri != null && tabState.title.isEmpty
+        ? sandboxSourceUri.authority
+        : tabState.titleOrAuthority;
+
     final extendedDeleteMenuController = useMenuController();
 
     // ignore: avoid_bool_literals_in_conditional_expressions
@@ -249,7 +258,7 @@ class GridTabPreview extends HookConsumerWidget {
                         menuChildren: [
                           MenuItemButton(
                             onPressed: () {
-                              onDeleteAll?.call(tabState.url.host);
+                              onDeleteAll?.call(displayUrl.host);
                             },
                             leadingIcon: const Icon(Icons.language),
                             child: const Text('Close from Same Host'),
@@ -389,7 +398,7 @@ class GridTabPreview extends HookConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    tabState.titleOrAuthority,
+                    displayTitle,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: textTheme.bodyMedium?.copyWith(
@@ -404,7 +413,7 @@ class GridTabPreview extends HookConsumerWidget {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          tabState.url.authority,
+                          displayUrl.authority,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: textTheme.bodySmall?.copyWith(
@@ -476,6 +485,14 @@ class ListTabPreview extends HookConsumerWidget {
           ).select((asyncValue) => asyncValue.value),
         ) ??
         TabState.$default(tabId);
+
+    final sandboxSourceUri = ref.watch(
+      sandboxSourceUriForTabProvider(tabId: tabId),
+    );
+    final displayUrl = sandboxSourceUri ?? tabState.url;
+    final displayTitle = sandboxSourceUri != null && tabState.title.isEmpty
+        ? sandboxSourceUri.authority
+        : tabState.titleOrAuthority;
 
     final tabListShowFavicons = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.tabListShowFavicons),
@@ -563,7 +580,7 @@ class ListTabPreview extends HookConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        tabState.titleOrAuthority,
+                        displayTitle,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: textTheme.bodyMedium?.copyWith(
@@ -592,7 +609,7 @@ class ListTabPreview extends HookConsumerWidget {
                           ],
                           Expanded(
                             child: UriBreadcrumb(
-                              uri: tabState.url,
+                              uri: displayUrl,
                               showHttpScheme: false,
                               style: textTheme.bodySmall?.copyWith(
                                 color: subtitleColor,
@@ -616,7 +633,7 @@ class ListTabPreview extends HookConsumerWidget {
                     menuChildren: [
                       MenuItemButton(
                         onPressed: () {
-                          onDeleteAll?.call(tabState.url.host);
+                          onDeleteAll?.call(displayUrl.host);
                         },
                         leadingIcon: const Icon(Icons.language),
                         child: const Text('Close from Same Host'),

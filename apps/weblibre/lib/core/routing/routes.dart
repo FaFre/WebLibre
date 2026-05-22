@@ -28,6 +28,7 @@ import 'package:weblibre/core/routing/widgets/bottom_sheet_page.dart';
 import 'package:weblibre/core/routing/widgets/dialog_page.dart';
 import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/features/about/presentation/screens/about.dart';
+import 'package:weblibre/features/account/presentation/screens/account_settings.dart';
 import 'package:weblibre/features/addons/presentation/screens/addon_details.dart';
 import 'package:weblibre/features/addons/presentation/screens/addon_internal_settings.dart';
 import 'package:weblibre/features/addons/presentation/screens/addon_listing_details.dart';

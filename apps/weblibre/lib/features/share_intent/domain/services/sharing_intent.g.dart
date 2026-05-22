@@ -8,6 +8,60 @@ part of 'sharing_intent.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Shared intent receiver instance. Both the sharing intent stream
+/// and the account callback handler listen to its broadcast events.
+
+@ProviderFor(intentReceiver)
+final intentReceiverProvider = IntentReceiverProvider._();
+
+/// Shared intent receiver instance. Both the sharing intent stream
+/// and the account callback handler listen to its broadcast events.
+
+final class IntentReceiverProvider
+    extends
+        $FunctionalProvider<
+          Raw<IntentReceiver>,
+          Raw<IntentReceiver>,
+          Raw<IntentReceiver>
+        >
+    with $Provider<Raw<IntentReceiver>> {
+  /// Shared intent receiver instance. Both the sharing intent stream
+  /// and the account callback handler listen to its broadcast events.
+  IntentReceiverProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'intentReceiverProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$intentReceiverHash();
+
+  @$internal
+  @override
+  $ProviderElement<Raw<IntentReceiver>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  Raw<IntentReceiver> create(Ref ref) {
+    return intentReceiver(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Raw<IntentReceiver> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Raw<IntentReceiver>>(value),
+    );
+  }
+}
+
+String _$intentReceiverHash() => r'61527e0581f56e82a8eec830ad541c8593502df3';
 
 @ProviderFor(sharingIntentStream)
 final sharingIntentStreamProvider = SharingIntentStreamProvider._();
@@ -56,4 +110,57 @@ final class SharingIntentStreamProvider
 }
 
 String _$sharingIntentStreamHash() =>
-    r'21b189c5df56f81ed5ab88115c11ddce1189cfb7';
+    r'02cef0c00bcb9416f8daf420977f58764c8efaca';
+
+/// Stream of account callback handoff codes extracted from deep link intents.
+
+@ProviderFor(accountCallbackStream)
+final accountCallbackStreamProvider = AccountCallbackStreamProvider._();
+
+/// Stream of account callback handoff codes extracted from deep link intents.
+
+final class AccountCallbackStreamProvider
+    extends
+        $FunctionalProvider<
+          Raw<Stream<String>>,
+          Raw<Stream<String>>,
+          Raw<Stream<String>>
+        >
+    with $Provider<Raw<Stream<String>>> {
+  /// Stream of account callback handoff codes extracted from deep link intents.
+  AccountCallbackStreamProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'accountCallbackStreamProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$accountCallbackStreamHash();
+
+  @$internal
+  @override
+  $ProviderElement<Raw<Stream<String>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  Raw<Stream<String>> create(Ref ref) {
+    return accountCallbackStream(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Raw<Stream<String>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Raw<Stream<String>>>(value),
+    );
+  }
+}
+
+String _$accountCallbackStreamHash() =>
+    r'669354c8000657bcaea046ab6318f89cb10dd7fc';

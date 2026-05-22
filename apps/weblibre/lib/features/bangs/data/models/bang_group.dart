@@ -28,7 +28,8 @@ enum BangGroup {
         'https://raw.githubusercontent.com/FaFre/bangs/main/data/kagi_bangs.json',
     bundled: 'assets/bangs/kagi_bangs.json',
   ),
-  user(remote: null, bundled: null);
+  user(remote: null, bundled: null),
+  weblibre(remote: null, bundled: null);
 
   final String? bundled;
   final String? remote;

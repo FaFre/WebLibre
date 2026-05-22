@@ -555,6 +555,59 @@ class TopFrecentSiteInfo {
 
 enum FrecencyThresholdOption { none, skipOneTimePages }
 
+/// Document type associated with a [HistoryMetadata] record.
+enum DocumentType { regular, media }
+
+/// Per-URL metadata maintained by Places. The unique identity of a record is
+/// [HistoryMetadataKey] (url + searchTerm + referrerUrl); we surface only the
+/// most recent record per URL via `getLatestHistoryMetadataForUrl`.
+class HistoryMetadata {
+  final HistoryMetadataKey key;
+  final String? title;
+
+  /// Unix milliseconds.
+  final int createdAt;
+
+  /// Unix milliseconds.
+  final int updatedAt;
+
+  /// Total view time in milliseconds.
+  final int totalViewTime;
+
+  final DocumentType documentType;
+  final String? previewImageUrl;
+
+  HistoryMetadata(
+    this.key,
+    this.title,
+    this.createdAt,
+    this.updatedAt,
+    this.totalViewTime,
+    this.documentType,
+    this.previewImageUrl,
+  );
+}
+
+/// Frecency-ranked autocomplete suggestion. Backs `getSuggestions`.
+class HistorySuggestion {
+  final String url;
+  final String? title;
+
+  /// Larger is more relevant. Unbounded; only meaningful relative to other
+  /// suggestions returned in the same call.
+  final int score;
+
+  HistorySuggestion(this.url, this.title, this.score);
+}
+
+/// Optional metadata observation for a URL. `null` fields are not written.
+class PageObservation {
+  final String? title;
+  final String? previewImageUrl;
+
+  PageObservation({this.title, this.previewImageUrl});
+}
+
 class HistoryItem {
   final String url;
   final String title;
@@ -2133,6 +2186,69 @@ abstract class GeckoHistoryApi {
     int limit,
     FrecencyThresholdOption frecencyThreshold,
   );
+
+  /// Returns the most recent [HistoryMetadata] record for [url], or `null` if
+  /// no metadata has been recorded for that URL.
+  @async
+  HistoryMetadata? getLatestHistoryMetadataForUrl(String url);
+
+  /// Bulk variant of [getLatestHistoryMetadataForUrl]. Returns one entry per
+  /// input URL aligned by index; entries are `null` for URLs Places has no
+  /// metadata for. Used by the local search re-rank to collapse N IPC
+  /// roundtrips into one.
+  @async
+  List<HistoryMetadata?> getLatestHistoryMetadataForUrls(List<String> urls);
+
+  /// Bulk visited check: returns booleans aligned with [urls] indicating
+  /// whether Places has any visit recorded for each URL.
+  @async
+  List<bool> getVisited(List<String> urls);
+
+  /// Frecency-ranked autocomplete results. Mirrors Places' awesomebar input.
+  @async
+  List<HistorySuggestion> getSuggestions(String query, int limit);
+
+  /// Places' built-in metadata text search (matches title / url / searchTerm).
+  /// Useful as a comparison baseline against the local content FTS.
+  @async
+  List<HistoryMetadata> queryHistoryMetadata(String query, int limit);
+
+  /// Records a title / preview-image observation for [url] without recording
+  /// a visit. Intended for manual flows; the engine middleware records these
+  /// automatically as the user browses.
+  @async
+  void recordObservation(String url, PageObservation observation);
+
+  /// Records a view-time observation against the metadata record identified
+  /// by [key]. View time is added to the existing total.
+  @async
+  void noteHistoryMetadataViewTime(HistoryMetadataKey key, int viewTimeMs);
+
+  /// Records a document-type observation against the metadata record
+  /// identified by [key].
+  @async
+  void noteHistoryMetadataDocumentType(
+    HistoryMetadataKey key,
+    DocumentType documentType,
+  );
+
+  /// Removes all visits for [url]. May propagate to remote devices via Sync.
+  @async
+  void deleteVisitsFor(String url);
+
+  /// Removes all visits since [sinceMillis] (inclusive). May propagate to
+  /// remote devices via Sync.
+  @async
+  void deleteVisitsSince(int sinceMillis);
+
+  /// Removes all locally stored history. Sync will not remove remote history,
+  /// but it will prevent deleted entries from returning.
+  @async
+  void deleteEverything();
+
+  /// Prunes history metadata older than [olderThanMillis] (exclusive).
+  @async
+  void deleteHistoryMetadataOlderThan(int olderThanMillis);
 }
 
 @HostApi()
@@ -2764,5 +2880,72 @@ abstract class GeckoPwaApi {
     String profileUuid,
     String? contextId,
     String? overrideShortcutName,
+  );
+}
+
+/// Per-tab sandbox capture state shared with the native side. The Kotlin
+/// [AppRequestInterceptor] consults an in-memory registry populated from
+/// these entries to decide how to handle loads in sandbox tabs.
+///
+/// [redirectUrl] is precomputed by Dart and always points at a loopback URL
+/// (loader or capture). Dart is responsible for keeping it current; Kotlin
+/// never calls back into Dart to resolve it.
+class SandboxCaptureEntry {
+  final String tabId;
+  final String captureId;
+  final String sourceUrl;
+
+  /// `http://127.0.0.1:<port>/loader?…` while pending/failed, or
+  /// `http://127.0.0.1:<port>/captures/…?t=<token>` once ready.
+  final String redirectUrl;
+
+  /// `pending` | `ready` | `failed`.
+  final String status;
+
+  SandboxCaptureEntry({
+    required this.tabId,
+    required this.captureId,
+    required this.sourceUrl,
+    required this.redirectUrl,
+    required this.status,
+  });
+}
+
+/// Dart → Kotlin. Mutates the native [SandboxCaptureRegistry] that the
+/// request interceptor consults on every load.
+@HostApi()
+abstract class SandboxCaptureApi {
+  /// Replaces the entire registry with [entries]. Called at startup after
+  /// Dart has brought up [CaptureServer] and reconciled local artifacts with
+  /// the `capture_tab` rows.
+  void resetAll(List<SandboxCaptureEntry> entries);
+
+  /// Inserts or updates the registry entry for [entry.tabId].
+  void mark(SandboxCaptureEntry entry);
+
+  /// Removes the registry entry for [tabId].
+  void unmark(String tabId);
+}
+
+/// Kotlin → Dart. Fire-and-forget notifications from the request
+/// interceptor / BrowserStore middleware. All handlers are non-blocking;
+/// the interceptor never waits for a Dart response.
+@FlutterApi()
+abstract class SandboxCaptureHostEvents {
+  /// Emitted when a sandbox tab attempted to navigate to a non-loopback,
+  /// non-source URL (e.g., user clicked a link or typed a new URL into the
+  /// address bar). Dart should open a new sandbox tab and capture [targetUrl].
+  void onSandboxLinkClick(int sequence, String parentTabId, String targetUrl);
+
+  /// Emitted when GeckoView created a new tab (via `window.open`,
+  /// `target="_blank"`, or a middle-click) whose parent is a sandbox tab.
+  /// The native middleware has already rewritten the new tab's URL to
+  /// `about:blank`; Dart should register it as sandbox and run the capture
+  /// pipeline for [targetUrl].
+  void onSandboxNewTab(
+    int sequence,
+    String parentTabId,
+    String newTabId,
+    String targetUrl,
   );
 }

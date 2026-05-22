@@ -19,7 +19,6 @@
  */
 import 'dart:async';
 
-import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -27,37 +26,63 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/utils/open_in_custom_tab.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+
+const List<SettingsSectionDefinition> unshortenerSettingsSections = [
+  SettingsSectionDefinition(
+    title: 'Overview',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Description',
+        subtitle: 'Resolve shortened URLs using the unshorten.me service',
+        keywords: ['short links', 'redirects'],
+        child: _UnshortenerDescriptionTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Behavior',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Enable Unshortener',
+        subtitle: 'Resolve shortened URLs to their destination',
+        keywords: ['short links'],
+        child: _UnshortenerEnabledTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'API Token',
+        subtitle: 'Optional token for higher request limits',
+        keywords: ['token'],
+        child: _UnshortenerTokenField(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Attribution',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Service attribution',
+        subtitle: 'Rate limits, service homepage, and privacy policy',
+        keywords: ['privacy policy', 'rate limit'],
+        child: _UnshortenerAttributionTile(),
+      ),
+    ],
+  ),
+];
 
 class UnshortenerSettingsScreen extends StatelessWidget {
   const UnshortenerSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Unshortener')),
-      body: SafeArea(
-        child: FadingScroll(
-          fadingSize: 25,
-          builder: (context, controller) {
-            return ListView(
-              controller: controller,
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              children: const [
-                SettingSection(name: 'Unshortener'),
-                _UnshortenerDescriptionTile(),
-                SettingSection(name: 'Behavior'),
-                _UnshortenerEnabledTile(),
-                _UnshortenerTokenField(),
-                SettingSection(name: 'Attribution'),
-                _UnshortenerAttributionTile(),
-              ],
-            );
-          },
-        ),
-      ),
+    return const SettingsDetailScaffold(
+      title: 'Unshortener',
+      subtitle:
+          'Short-link resolution behavior, token configuration, and attribution.',
+      icon: MdiIcons.linkVariant,
+      sections: unshortenerSettingsSections,
     );
   }
 }

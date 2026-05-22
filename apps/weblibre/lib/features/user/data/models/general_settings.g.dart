@@ -133,6 +133,12 @@ abstract class _$GeneralSettingsCWProxy {
     Map<String, IntentSourcePolicy> externalAppIntentPolicies,
   );
 
+  GeneralSettings enableLocalSearchIndex(bool enableLocalSearchIndex);
+
+  GeneralSettings indexPrivateTabs(bool indexPrivateTabs);
+
+  GeneralSettings acceptSuggestionOnSubmit(bool acceptSuggestionOnSubmit);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -194,6 +200,9 @@ abstract class _$GeneralSettingsCWProxy {
     bool allowNonManifestPwaInstall,
     bool blockExternalAppsEnabled,
     Map<String, IntentSourcePolicy> externalAppIntentPolicies,
+    bool enableLocalSearchIndex,
+    bool indexPrivateTabs,
+    bool acceptSuggestionOnSubmit,
   });
 }
 
@@ -431,6 +440,18 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   ) => call(externalAppIntentPolicies: externalAppIntentPolicies);
 
   @override
+  GeneralSettings enableLocalSearchIndex(bool enableLocalSearchIndex) =>
+      call(enableLocalSearchIndex: enableLocalSearchIndex);
+
+  @override
+  GeneralSettings indexPrivateTabs(bool indexPrivateTabs) =>
+      call(indexPrivateTabs: indexPrivateTabs);
+
+  @override
+  GeneralSettings acceptSuggestionOnSubmit(bool acceptSuggestionOnSubmit) =>
+      call(acceptSuggestionOnSubmit: acceptSuggestionOnSubmit);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -493,6 +514,9 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? allowNonManifestPwaInstall = const $CopyWithPlaceholder(),
     Object? blockExternalAppsEnabled = const $CopyWithPlaceholder(),
     Object? externalAppIntentPolicies = const $CopyWithPlaceholder(),
+    Object? enableLocalSearchIndex = const $CopyWithPlaceholder(),
+    Object? indexPrivateTabs = const $CopyWithPlaceholder(),
+    Object? acceptSuggestionOnSubmit = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -807,6 +831,24 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.externalAppIntentPolicies
           // ignore: cast_nullable_to_non_nullable
           : externalAppIntentPolicies as Map<String, IntentSourcePolicy>,
+      enableLocalSearchIndex:
+          enableLocalSearchIndex == const $CopyWithPlaceholder() ||
+              enableLocalSearchIndex == null
+          ? _value.enableLocalSearchIndex
+          // ignore: cast_nullable_to_non_nullable
+          : enableLocalSearchIndex as bool,
+      indexPrivateTabs:
+          indexPrivateTabs == const $CopyWithPlaceholder() ||
+              indexPrivateTabs == null
+          ? _value.indexPrivateTabs
+          // ignore: cast_nullable_to_non_nullable
+          : indexPrivateTabs as bool,
+      acceptSuggestionOnSubmit:
+          acceptSuggestionOnSubmit == const $CopyWithPlaceholder() ||
+              acceptSuggestionOnSubmit == null
+          ? _value.acceptSuggestionOnSubmit
+          // ignore: cast_nullable_to_non_nullable
+          : acceptSuggestionOnSubmit as bool,
     );
   }
 }
@@ -928,6 +970,9 @@ GeneralSettings _$GeneralSettingsFromJson(
       (json['externalAppIntentPolicies'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, $enumDecode(_$IntentSourcePolicyEnumMap, e)),
       ),
+  enableLocalSearchIndex: json['enableLocalSearchIndex'] as bool?,
+  indexPrivateTabs: json['indexPrivateTabs'] as bool?,
+  acceptSuggestionOnSubmit: json['acceptSuggestionOnSubmit'] as bool?,
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -999,6 +1044,9 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'externalAppIntentPolicies': instance.externalAppIntentPolicies.map(
     (k, e) => MapEntry(k, _$IntentSourcePolicyEnumMap[e]!),
   ),
+  'enableLocalSearchIndex': instance.enableLocalSearchIndex,
+  'indexPrivateTabs': instance.indexPrivateTabs,
+  'acceptSuggestionOnSubmit': instance.acceptSuggestionOnSubmit,
 };
 
 const _$ThemeModeEnumMap = {

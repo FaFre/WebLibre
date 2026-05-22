@@ -38,6 +38,7 @@ class TabDragContainerTarget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final overlayController = useOverlayPortalController();
+    final layerLink = useMemoized(LayerLink.new);
 
     return DragTarget<TabDragData>(
       onMove: (details) {
@@ -67,28 +68,28 @@ class TabDragContainerTarget extends HookConsumerWidget {
         }
       },
       builder: (context, candidateData, rejectedData) {
-        final renderBox = context.findRenderObject() as RenderBox?;
-        final position = renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
-
         return OverlayPortal(
           controller: overlayController,
-          overlayChildBuilder: (context) => Positioned(
-            top: position.dy,
-            left: position.dx,
+          overlayChildBuilder: (context) => CompositedTransformFollower(
+            link: layerLink,
+            showWhenUnlinked: false,
             child: IgnorePointer(
               child: Transform.scale(scale: 1.1, child: child),
             ),
           ),
-          child: Consumer(
-            child: child,
-            builder: (context, ref, child) {
-              final dragTabId = ref.watch(willAcceptDropProvider);
+          child: CompositedTransformTarget(
+            link: layerLink,
+            child: Consumer(
+              child: child,
+              builder: (context, ref, child) {
+                final dragTabId = ref.watch(willAcceptDropProvider);
 
-              return Opacity(
-                opacity: (dragTabId == null) ? 1.0 : 0.0,
-                child: child,
-              );
-            },
+                return Opacity(
+                  opacity: (dragTabId == null) ? 1.0 : 0.0,
+                  child: child,
+                );
+              },
+            ),
           ),
         );
       },

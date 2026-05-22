@@ -51,6 +51,14 @@ UserDatabase userDatabase(Ref ref) {
         },
       );
     }),
+    onAfterOpen: (db) async {
+      // Release any token reservations stranded by a prior crash so the
+      // tokens go back to the available pool. 10 minutes is generous —
+      // a real redemption round-trip is sub-second.
+      await db.searchTokensDao.releaseStaleReservations(
+        const Duration(minutes: 10),
+      );
+    },
   );
 
   DatabaseRegistry.instance.register('user', db);

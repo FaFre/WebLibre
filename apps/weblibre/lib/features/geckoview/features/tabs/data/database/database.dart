@@ -21,17 +21,26 @@ import 'package:drift/drift.dart';
 import 'package:drift/internal/versioned_schema.dart';
 import 'package:drift_dev/api/migrations_native.dart';
 import 'package:flutter/foundation.dart';
+import 'package:lexo_rank/lexo_rank.dart';
+import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
+import 'package:weblibre/data/database/functions/url_functions.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/capture_tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/history.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.steps.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
 import 'package:weblibre/features/search/domain/fts_tokenizer.dart';
 
-@DriftDatabase(include: {'definitions.drift'}, daos: [ContainerDao, TabDao])
+@DriftDatabase(
+  include: {'definitions.drift'},
+  daos: [ContainerDao, TabDao, CaptureTabDao, HistoryDao],
+)
 class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
   @override
-  final int schemaVersion = 9;
+  final int schemaVersion = 13;
 
   @override
   final int ftsTokenLimit = 10;
@@ -44,11 +53,17 @@ class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
       if (kDebugMode) {
         // This check pulls in a fair amount of code that's not needed
         // anywhere else, so we recommend only doing it in debug builds.
-        await validateDatabaseSchema();
+        await validateDatabaseSchema(
+          setup: (database) {
+            registerLexorankFunctions(database);
+            registerUrlFunctions(database);
+          },
+        );
       }
 
       await customStatement('PRAGMA foreign_keys = ON');
       await definitionsDrift.optimizeFtsIndex();
+      await definitionsDrift.optimizeHistoryFtsIndex();
     },
     onUpgrade: (m, from, to) async {
       // Following the advice from https://drift.simonbinder.eu/Migrations/api/#general-tips
@@ -139,6 +154,85 @@ class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
     },
     from8To9: (m, schema) async {
       await m.create(schema.closedTabTombstone);
+    },
+    from9To10: (m, schema) async {
+      await m.create(schema.captureTab);
+      await m.create(schema.idxCaptureTabCaptureId);
+    },
+    from10To11: (m, schema) async {
+      // Re-scope `tab_after_update` to fire only when FTS-relevant columns
+      // change. Previously every tab UPDATE (order_key reshuffle, container
+      // reassignment, pin toggle, timestamp touch, ...) rewrote the trigram
+      // shadow rows for free.
+      await m.drop(schema.tabAfterUpdate);
+      await m.create(schema.tabAfterUpdate);
+    },
+    from11To12: (m, schema) async {
+      // Local search index — content companion to Mozilla Places (which
+      // remains SoT for visit metadata). See definitions.drift for layout.
+      //
+      // Order matters: the generated `tab.content_hash` column references
+      // the `content_hash()` SQL function, which is registered in the
+      // tab.db `setup` callback. The migration runs after `setup`, so the
+      // function is available here.
+      //
+      // `tab.content_hash` requires recreating the tab table because
+      // SQLite's ALTER TABLE only supports adding VIRTUAL generated
+      // columns when the column is not part of any existing index/trigger
+      // dependency chain — drift's TableMigration handles the rebuild.
+      await m.alterTable(TableMigration(schema.tab));
+
+      // Settings table seeded with defaults: index enabled, private tabs
+      // not indexed.
+      await m.create(schema.localIndexSetting);
+      await m.database.customStatement(
+        "INSERT INTO local_index_setting (key, value) VALUES ('enabled', 1)",
+      );
+      await m.database.customStatement(
+        "INSERT INTO local_index_setting (key, value) VALUES ('index_private', 0)",
+      );
+
+      // History content table + FTS5 + maintenance triggers.
+      await m.create(schema.history);
+      await m.create(schema.idxHistoryHost);
+      await m.create(schema.idxHistoryObserved);
+      await m.create(schema.historyFts);
+      await m.create(schema.historyAfterInsert);
+      await m.create(schema.historyAfterDelete);
+      await m.create(schema.historyAfterUpdate);
+
+      // tab_after_update gains a content_hash WHEN guard. Recreate.
+      await m.drop(schema.tabAfterUpdate);
+      await m.create(schema.tabAfterUpdate);
+
+      // Tab → history fan-out triggers.
+      await m.create(schema.tabToHistoryOnInsert);
+      await m.create(schema.tabToHistoryOnUpdate);
+    },
+    from12To13: (m, schema) async {
+      await m.alterTable(
+        TableMigration(
+          schema.container,
+          newColumns: [schema.container.orderKey, schema.container.isPinned],
+          columnTransformer: {
+            schema.container.orderKey: Constant(LexoRank.middle().value),
+            schema.container.isPinned: const Constant(false),
+          },
+        ),
+      );
+
+      final database = m.database as TabDatabase;
+      final containerIds = await database.definitionsDrift
+          .containerIdsByLastUpdated()
+          .get();
+
+      var rank = LexoRank.middle();
+      for (final containerId in containerIds) {
+        await (database.update(database.container)
+              ..where((container) => container.id.equals(containerId)))
+            .write(ContainerCompanion(orderKey: Value(rank.value)));
+        rank = rank.genNext();
+      }
     },
   );
 }

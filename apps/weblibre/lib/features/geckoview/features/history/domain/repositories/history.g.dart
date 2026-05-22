@@ -41,7 +41,7 @@ final class HistoryRepositoryProvider
   }
 }
 
-String _$historyRepositoryHash() => r'414b68ec6be3cc2eca3681cbc00990e53e6127ce';
+String _$historyRepositoryHash() => r'4fec6cf4ef7cdfcabf3ccfd4a43fbf634bfe377f';
 
 abstract class _$HistoryRepository extends $Notifier<void> {
   void build();

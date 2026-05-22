@@ -30,6 +30,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 
 class TabBarPreviewHeaderDelegate extends SliverPersistentHeaderDelegate {
@@ -136,9 +137,7 @@ class TabBarPreviewCard extends HookWidget {
             settings.effectiveUiQuickTabSwitcherMode() ==
             QuickTabSwitcherMode.containerTabs,
         url: Uri.parse('https://example.com/news'),
-        color: settings.showContainerUi
-            ? colorScheme.primary.withValues(alpha: 0.18)
-            : null,
+        color: settings.showContainerUi ? colorScheme.primary : null,
         avatar: const Icon(MdiIcons.web, size: 20),
       ),
       QuickTabSwitcherItem(
@@ -177,6 +176,9 @@ class TabBarPreviewCard extends HookWidget {
           avatar: const Icon(MdiIcons.web, size: 20),
         ),
     ];
+    final previewContainerPalette = settings.showContainerUi
+        ? ContainerColors.palette(context, colorScheme.primary)
+        : null;
 
     final tabCountButton = TabsCountButtonView(
       isActive: false,
@@ -236,9 +238,8 @@ class TabBarPreviewCard extends HookWidget {
       showQuickTabSwitcherBar: settings.tabBarShowQuickTabSwitcherBar,
       displayAppBar: true,
       displayQuickTabSwitcher: true,
-      backgroundColor: settings.showContainerUi
-          ? colorScheme.primaryContainer.withValues(alpha: 0.55)
-          : colorScheme.surfaceContainer,
+      backgroundColor:
+          previewContainerPalette?.surfaceColor ?? colorScheme.surfaceContainer,
       title: settings.tabBarLayout == TabBarLayout.compact
           ? _CompactPreviewTitle(tabState: previewTabState)
           : _RegularPreviewTitle(tabState: previewTabState),
@@ -253,9 +254,8 @@ class TabBarPreviewCard extends HookWidget {
       showQuickTabSwitcherBar: false,
       displayAppBar: true,
       displayQuickTabSwitcher: false,
-      backgroundColor: settings.showContainerUi
-          ? colorScheme.primaryContainer.withValues(alpha: 0.55)
-          : colorScheme.surfaceContainer,
+      backgroundColor:
+          previewContainerPalette?.surfaceColor ?? colorScheme.surfaceContainer,
       title: settings.tabBarLayout == TabBarLayout.compact
           ? _CompactPreviewTitle(tabState: previewTabState)
           : _RegularPreviewTitle(tabState: previewTabState),

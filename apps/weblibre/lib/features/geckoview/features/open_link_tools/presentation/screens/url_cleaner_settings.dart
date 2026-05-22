@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -27,43 +26,88 @@ import 'package:weblibre/features/geckoview/features/open_link_tools/domain/serv
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/dialogs/url_cleaner_restore_defaults_dialog.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/widgets/attribution_link.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/ui_helper.dart';
+
+const List<SettingsSectionDefinition> urlCleanerSettingsSections = [
+  SettingsSectionDefinition(
+    title: 'Overview',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Description',
+        subtitle: 'Tracking parameter removal and offline redirect cleanup',
+        keywords: ['tracking parameters', 'redirects'],
+        child: _UrlCleanerDescriptionTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Behavior',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Enable URL Cleaner',
+        subtitle: 'Remove tracking parameters from URLs',
+        keywords: ['clean urls'],
+        child: _UrlCleanerEnabledTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Auto-apply',
+        subtitle: 'Automatically replace URL with cleaned version',
+        keywords: ['auto apply'],
+        child: _UrlCleanerAutoApplyTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Allow referral marketing',
+        subtitle: 'Keep referral and affiliate tracking parameters',
+        keywords: ['affiliate', 'referral'],
+        child: _UrlCleanerAllowReferralTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Catalog',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Auto-update catalog',
+        subtitle: 'Check for rule updates weekly',
+        child: _UrlCleanerAutoUpdateTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Update catalog',
+        subtitle: 'Fetch the latest URL cleaner rules',
+        child: _UrlCleanerUpdateButton(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Restore defaults',
+        subtitle: 'Reset to bundled catalog and default settings',
+        child: _UrlCleanerRestoreDefaultsButton(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Attribution',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Attribution',
+        subtitle: 'Credits and source links',
+        child: _UrlCleanerAttributionTile(),
+      ),
+    ],
+  ),
+];
 
 class UrlCleanerSettingsScreen extends StatelessWidget {
   const UrlCleanerSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('URL Cleaner')),
-      body: SafeArea(
-        child: FadingScroll(
-          fadingSize: 25,
-          builder: (context, controller) {
-            return ListView(
-              controller: controller,
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              children: const [
-                SettingSection(name: 'URL Cleaner'),
-                _UrlCleanerDescriptionTile(),
-                SettingSection(name: 'Behavior'),
-                _UrlCleanerEnabledTile(),
-                _UrlCleanerAutoApplyTile(),
-                _UrlCleanerAllowReferralTile(),
-                SettingSection(name: 'Catalog'),
-                _UrlCleanerAutoUpdateTile(),
-                _UrlCleanerUpdateButton(),
-                _UrlCleanerRestoreDefaultsButton(),
-                SettingSection(name: 'Attribution'),
-                _UrlCleanerAttributionTile(),
-              ],
-            );
-          },
-        ),
-      ),
+    return const SettingsDetailScaffold(
+      title: 'URL Cleaner',
+      subtitle: 'URL cleanup behavior, rule catalog updates, and attribution.',
+      icon: MdiIcons.broom,
+      sections: urlCleanerSettingsSections,
     );
   }
 }

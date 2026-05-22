@@ -54,6 +54,10 @@ class AutoSuggestTextField extends HookWidget {
   final bool autocorrect;
   final GlobalKey? textFieldKey;
 
+  /// Whether pressing the keyboard submit/enter button should automatically
+  /// accept and complete an inline search suggestion. Defaults to false.
+  final bool acceptSuggestionOnSubmit;
+
   const AutoSuggestTextField({
     super.key,
     required this.controller,
@@ -84,6 +88,7 @@ class AutoSuggestTextField extends HookWidget {
     this.onSuggestionDismiss,
     this.autocorrect = false,
     this.textFieldKey,
+    this.acceptSuggestionOnSubmit = false,
   });
 
   bool _suggestionHasMatch() =>
@@ -215,7 +220,7 @@ class AutoSuggestTextField extends HookWidget {
           autocorrect: autocorrect,
           onFieldSubmitted: onSubmitted.mapNotNull(
             (onSubmitted) => (value) {
-              if (_suggestionHasMatch()) {
+              if (acceptSuggestionOnSubmit && _suggestionHasMatch()) {
                 onSubmitted(suggestion!);
               } else {
                 onSubmitted(value);

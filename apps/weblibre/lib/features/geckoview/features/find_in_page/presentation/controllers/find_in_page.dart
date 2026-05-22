@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
@@ -26,7 +27,7 @@ import 'package:weblibre/features/geckoview/features/find_in_page/domain/reposit
 
 part 'find_in_page.g.dart';
 
-@Riverpod()
+@Riverpod(keepAlive: true)
 class FindInPageController extends _$FindInPageController {
   void show() {
     state = state.copyWith.visible(true);
@@ -49,7 +50,7 @@ class FindInPageController extends _$FindInPageController {
     final service = ref.read(findInPageRepositoryProvider(tabId).notifier);
 
     final hasMatches =
-        ref.read(selectedTabStateProvider)?.findResultState.hasMatches == true;
+        ref.read(tabStatesProvider)[tabId]?.findResultState.hasMatches == true;
 
     state = state.copyWith.visible(true);
 
@@ -70,7 +71,7 @@ class FindInPageController extends _$FindInPageController {
   FindInPageState build(String tabId) {
     ref.listen(
       fireImmediately: true,
-      tabStateProvider(tabId),
+      tabStatesProvider.select((tabs) => tabs[tabId]),
       (previous, next) async {
         if (!ref.mounted) return;
         //Ensure state is already initialized
@@ -89,7 +90,7 @@ class FindInPageController extends _$FindInPageController {
       },
       onError: (error, stackTrace) {
         logger.e(
-          'Error listening to selectedTabStateProvider',
+          'Error listening to tabStatesProvider',
           error: error,
           stackTrace: stackTrace,
         );
