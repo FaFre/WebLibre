@@ -361,14 +361,14 @@ class CaptureServer {
     final tabIdJson = jsonEncode(tabId);
     final captureIdJson = jsonEncode(captureId);
     final html =
-        '<!doctype html><html><head><meta charset="utf-8">'
-        '<meta name="viewport" content="width=device-width,initial-scale=1">'
-        '<title>Capturing…</title><style>$_loaderStyles</style>'
-        '</head><body>$body'
-        '<script>window.__TAB_ID__=$tabIdJson;'
-        'window.__CAPTURE_ID__=$captureIdJson;</script>'
-        '<script>$_loaderScript</script>'
-        '</body></html>';
+        '''
+<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Capturing…</title><style>$_loaderStyles</style>
+</head><body>$body
+<script>window.__TAB_ID__=$tabIdJson;window.__CAPTURE_ID__=$captureIdJson;</script>
+<script>$_loaderScript</script>
+</body></html>''';
     request.response.write(html);
     await request.response.close();
   }
@@ -510,35 +510,24 @@ class CaptureServer {
       "base-uri 'none'; "
       "form-action 'self'";
 
-  static const _loaderStyles =
-      'html,body{height:100%}'
-      'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,'
-      'sans-serif;display:flex;align-items:center;justify-content:center;'
-      'min-height:100vh;margin:0;background:#0b0d10;color:#e6e8eb}'
-      'main{text-align:center;max-width:480px;padding:32px;opacity:0;'
-      'animation:fade .35s ease-out forwards}'
-      '@keyframes fade{to{opacity:1}}'
-      '.spinner{width:56px;height:56px;margin:0 auto 20px;border-radius:50%;'
-      'border:3px solid rgba(255,255,255,.08);border-top-color:#7aa2f7;'
-      'animation:spin 1s linear infinite}'
-      '@keyframes spin{to{transform:rotate(360deg)}}'
-      'h1{font-size:18px;font-weight:600;margin:0 0 8px;letter-spacing:.2px}'
-      'p{margin:0;color:#9aa1a8;font-size:14px;line-height:1.5}'
-      '.dots::after{display:inline-block;width:1.2em;text-align:left;'
-      'animation:dots 1.4s steps(4,end) infinite;content:""}'
-      '@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}'
-      '75%{content:"..."}100%{content:""}}'
-      '.error h1{color:#f7768e}'
-      '.actions{margin-top:20px;display:flex;gap:8px;justify-content:center}'
-      '.btn{padding:10px 16px;border:0;border-radius:10px;cursor:pointer;'
-      'font:inherit;font-weight:600;background:#7aa2f7;color:#0b0d10}'
-      '.btn.secondary{background:transparent;color:#9aa1a8;'
-      'border:1px solid rgba(255,255,255,.12)}'
-      '.hidden{display:none}'
-      '@media(prefers-color-scheme:light){body{background:#f5f6f8;'
-      'color:#1a1d22}.spinner{border-color:rgba(0,0,0,.08);'
-      'border-top-color:#3b82f6}.btn{background:#3b82f6;color:white}'
-      'p{color:#52606b}}';
+  static const _loaderStyles = '''
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#0b0d10;color:#e6e8eb}
+main{text-align:center;max-width:480px;padding:32px;opacity:0;animation:fade .35s ease-out forwards}
+@keyframes fade{to{opacity:1}}
+.spinner{width:56px;height:56px;margin:0 auto 20px;border-radius:50%;border:3px solid rgba(255,255,255,.08);border-top-color:#7aa2f7;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+h1{font-size:18px;font-weight:600;margin:0 0 8px;letter-spacing:.2px}
+p{margin:0;color:#9aa1a8;font-size:14px;line-height:1.5}
+.dots::after{display:inline-block;width:1.2em;text-align:left;animation:dots 1.4s steps(4,end) infinite;content:""}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}100%{content:""}}
+.error h1{color:#f7768e}
+.actions{margin-top:20px;display:flex;gap:8px;justify-content:center}
+.btn{padding:10px 16px;border:0;border-radius:10px;cursor:pointer;font:inherit;font-weight:600;background:#7aa2f7;color:#0b0d10}
+.btn.secondary{background:transparent;color:#9aa1a8;border:1px solid rgba(255,255,255,.12)}
+.hidden{display:none}
+@media(prefers-color-scheme:light){body{background:#f5f6f8;color:#1a1d22}.spinner{border-color:rgba(0,0,0,.08);border-top-color:#3b82f6}.btn{background:#3b82f6;color:white}p{color:#52606b}}
+''';
 
   // Inline script for the loader shell. Reads window.__TAB_ID__ and
   // window.__CAPTURE_ID__, long-polls /loader/wait, then either redirects
@@ -548,7 +537,7 @@ class CaptureServer {
   // service has gone away doesn't busy-loop forever — after the cap the
   // loader gives up and shows the error pane with a Retry button (which
   // resets the counter via showPending → poll()).
-  static const _loaderScript = r'''
+  static const _loaderScript = '''
 (function(){
   var pending=document.getElementById('pending');
   var error=document.getElementById('error');
@@ -606,18 +595,19 @@ class CaptureServer {
   String _loaderShellBody({required bool initialError}) {
     final pendingClass = initialError ? 'hidden' : '';
     final errorClass = initialError ? 'error' : 'error hidden';
-    return '<main id="pending" class="$pendingClass">'
-        '<div class="spinner"></div>'
-        '<h1>Capturing page<span class="dots"></span></h1>'
-        '<p>Saving an offline copy. This usually takes a few seconds.</p>'
-        '</main>'
-        '<main id="error" class="$errorClass">'
-        '<h1>Capture failed</h1>'
-        '<p>The page could not be saved. Check the notification for details.</p>'
-        '<div class="actions">'
-        '<button id="retry" class="btn" type="button">Retry</button>'
-        '</div>'
-        '</main>';
+    return '''
+<main id="pending" class="$pendingClass">
+<div class="spinner"></div>
+<h1>Capturing page<span class="dots"></span></h1>
+<p>Saving an offline copy. This usually takes a few seconds.</p>
+</main>
+<main id="error" class="$errorClass">
+<h1>Capture failed</h1>
+<p>The page could not be saved. Check the notification for details.</p>
+<div class="actions">
+<button id="retry" class="btn" type="button">Retry</button>
+</div>
+</main>''';
   }
 }
 

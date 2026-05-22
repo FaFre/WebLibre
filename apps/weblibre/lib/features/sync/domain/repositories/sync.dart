@@ -315,21 +315,15 @@ class SyncRepository extends _$SyncRepository {
 
     _syncStartedSub = syncStateService.syncStartedEvents.listen((_) {
       _update(
-        (s) => s.copyWith(
-          lastSyncEvent: SyncEvent.started,
-          // ignore: avoid_redundant_argument_values
-          lastSyncError: null,
-        ),
+        (s) =>
+            s.copyWith(lastSyncEvent: SyncEvent.started, lastSyncError: null),
       );
     });
 
     _syncCompletedSub = syncStateService.syncCompletedEvents.listen((_) {
       _update(
-        (s) => s.copyWith(
-          lastSyncEvent: SyncEvent.completed,
-          // ignore: avoid_redundant_argument_values
-          lastSyncError: null,
-        ),
+        (s) =>
+            s.copyWith(lastSyncEvent: SyncEvent.completed, lastSyncError: null),
       );
       unawaited(Future.wait([_refreshTabs(), _refreshDevices()]));
     });

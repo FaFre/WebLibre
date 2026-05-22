@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
     as fmc;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:search_protocol/search_protocol.dart';
 import 'package:search_client/search_client.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
@@ -18,9 +17,9 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/search_credits/domain/controllers/search_token_issuance_controller.dart';
 import 'package:weblibre/features/search_credits/domain/providers.dart';
+import 'package:weblibre/features/search_credits/domain/providers/proxy_client.dart';
 import 'package:weblibre/features/search_credits/domain/repositories/search_token_stash_repository.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
-import 'package:weblibre/features/search_credits/domain/providers/proxy_client.dart';
 import 'package:weblibre/features/web_search/domain/services/capture_artifact_downloader.dart';
 import 'package:weblibre/features/web_search/domain/services/capture_server.dart';
 import 'package:weblibre/features/web_search/domain/services/sandbox_capture_store.dart';
@@ -114,7 +113,7 @@ SandboxCaptureStore sandboxCaptureStore(Ref ref) => SandboxCaptureStore();
 @Riverpod(keepAlive: true)
 Stream<SandboxCaptureError> sandboxCaptureErrors(Ref ref) {
   final ctrl = ref.watch(sandboxCaptureControllerProvider.notifier);
-  return ctrl.errors;
+  return ctrl.errorStream();
 }
 
 /// Orchestrates sandbox capture browsing:
@@ -148,10 +147,7 @@ class SandboxCaptureController extends _$SandboxCaptureController {
   static const _defaultMethod = 'singlefile';
   static const _defaultVariant = 'balanced';
 
-  StreamSubscription<List<CaptureTabData>>? _captureTabSub;
-  StreamSubscription<RetryRequest>? _retrySub;
-
-  Stream<SandboxCaptureError> get errors => _errors.stream;
+  Stream<SandboxCaptureError> errorStream() => _errors.stream;
 
   @override
   void build() {
@@ -159,9 +155,9 @@ class SandboxCaptureController extends _$SandboxCaptureController {
     fmc.SandboxCaptureHostEvents.setUp(_hostEvents);
 
     final dao = ref.read(tabDatabaseProvider).captureTabDao;
-    _captureTabSub = dao.watchAll().listen(_onCaptureTabChange);
+    final captureTabSub = dao.watchAll().listen(_onCaptureTabChange);
 
-    _retrySub = ref
+    final retrySub = ref
         .read(captureServerProvider)
         .retryRequests
         .listen(_onRetryRequest);
@@ -173,10 +169,8 @@ class SandboxCaptureController extends _$SandboxCaptureController {
       // stream — otherwise an in-flight Pigeon event or DAO emit could
       // race with handler cleanup, or _markFailed could try to add to a
       // closed _errors sink.
-      final captureTabSub = _captureTabSub;
-      final retrySub = _retrySub;
-      if (captureTabSub != null) unawaited(captureTabSub.cancel());
-      if (retrySub != null) unawaited(retrySub.cancel());
+      unawaited(captureTabSub.cancel());
+      unawaited(retrySub.cancel());
       fmc.SandboxCaptureHostEvents.setUp(null);
       _hostEvents.controller = null;
       unawaited(_errors.close());

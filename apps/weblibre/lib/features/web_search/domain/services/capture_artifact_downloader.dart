@@ -5,7 +5,6 @@ import 'dart:ui';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:search_protocol/search_protocol.dart';
 import 'package:search_client/search_client.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/features/search_credits/domain/providers.dart';

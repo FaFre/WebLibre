@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'src/singbox_proxy_api.g.dart';
+import 'package:flutter_singbox_proxy/src/singbox_proxy_api.g.dart';
 
 export 'src/singbox_proxy_api.g.dart'
     show

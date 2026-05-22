@@ -83,19 +83,21 @@ void main() {
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pump();
 
-      expect(repository.refreshCount, 1);
+      expect(repository.refreshCount(), 1);
     },
   );
 }
 
 class _FakeSubscriptionRepository extends SubscriptionRepository {
-  int refreshCount = 0;
+  int _refreshCount = 0;
+
+  int refreshCount() => _refreshCount;
 
   @override
   Future<SubscriptionStatus> build() async => SubscriptionStatus.inactive;
 
   @override
   Future<void> refresh() async {
-    refreshCount++;
+    _refreshCount++;
   }
 }

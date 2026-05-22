@@ -4,7 +4,6 @@ import 'dart:typed_data';
 
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:search_protocol/search_protocol.dart';
 import 'package:search_client/search_client.dart';
 import 'package:weblibre/domain/services/generic_website.dart';
 import 'package:weblibre/features/search_credits/domain/controllers/search_token_issuance_controller.dart';
@@ -1226,7 +1225,10 @@ class WebSearchScrollOffset extends _$WebSearchScrollOffset {
   @override
   double build() => 0;
 
-  void update(double offset) => state = offset;
+  void update(double offset) {
+    if (state == offset) return;
+    state = offset;
+  }
 
   void reset() => state = 0;
 }

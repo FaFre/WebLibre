@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
+
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -104,13 +106,15 @@ class SingboxProxyEndpointSync extends _$SingboxProxyEndpointSync {
       (previous, next) {
         final runtimeState = next.value;
         if (runtimeState == null) return;
-        _sync(runtimeState).catchError((Object error, StackTrace stackTrace) {
-          logger.e(
-            'Failed to sync sing-box proxy endpoints to Gecko',
-            error: error,
-            stackTrace: stackTrace,
-          );
-        });
+        unawaited(
+          _sync(runtimeState).catchError((Object error, StackTrace stackTrace) {
+            logger.e(
+              'Failed to sync sing-box proxy endpoints to Gecko',
+              error: error,
+              stackTrace: stackTrace,
+            );
+          }),
+        );
       },
     );
   }

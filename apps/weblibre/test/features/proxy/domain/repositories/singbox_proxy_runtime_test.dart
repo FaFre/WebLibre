@@ -438,7 +438,7 @@ class _FakeContainerRepository extends ContainerRepository {
 
 class _FakeProxyRoutingSettingsRepository
     extends ProxyRoutingSettingsRepository {
-  ProxyRoutingSettings? _settings;
+  final ProxyRoutingSettings? _settings;
 
   _FakeProxyRoutingSettingsRepository([this._settings]);
 

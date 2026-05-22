@@ -85,12 +85,10 @@ class TabViewFilterController extends _$TabViewFilterController {
   }
 
   void setDateRange(DateTimeRange<DateTime>? range) {
-    // ignore: avoid_redundant_argument_values
     state = state.copyWith(dateRange: range, quickInterval: null);
   }
 
   void setQuickInterval(TabQuickInterval? interval) {
-    // ignore: avoid_redundant_argument_values
     state = state.copyWith(quickInterval: interval, dateRange: null);
   }
 

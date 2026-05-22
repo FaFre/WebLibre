@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
@@ -193,7 +194,7 @@ class GenericWebsiteService extends _$GenericWebsiteService {
     inFlight = _fetchAndCacheDdgIcon(url, cacheMissing: cacheMissing)
         .whenComplete(() {
           if (identical(_inFlightIconFetches[origin], inFlight)) {
-            _inFlightIconFetches.remove(origin);
+            _inFlightIconFetches.remove(origin)?.ignore();
           }
         });
 

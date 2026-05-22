@@ -60,9 +60,7 @@ class FeedSearch extends HookConsumerWidget {
             .read(articleSearchProvider(null).notifier)
             .search(
               searchTextNotifier.value.text,
-              // ignore: avoid_redundant_argument_values dont break things
               matchPrefix: _matchPrefix,
-              // ignore: avoid_redundant_argument_values dont break things
               matchSuffix: _matchSuffix,
             );
       },

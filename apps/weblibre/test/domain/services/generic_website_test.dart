@@ -1,12 +1,11 @@
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:drift/drift.dart' show Variable;
 import 'package:drift/native.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_mozilla_components/src/pigeons/gecko.g.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
 import 'package:weblibre/domain/services/favicon_resolver.dart';
@@ -222,23 +221,26 @@ final _generatorResult = IconResult(
 );
 
 final _cachedSvgBytes = Uint8List.fromList(
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">'
-          '<rect width="16" height="16" fill="#ff0000"/>'
-          '</svg>'
+  '''
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+<rect width="16" height="16" fill="#ff0000"/>
+</svg>'''
       .codeUnits,
 );
 
 final _updatedSvgBytes = Uint8List.fromList(
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">'
-          '<circle cx="8" cy="8" r="8" fill="#0000ff"/>'
-          '</svg>'
+  '''
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+<circle cx="8" cy="8" r="8" fill="#0000ff"/>
+</svg>'''
       .codeUnits,
 );
 
 final _generatedSvgBytes = Uint8List.fromList(
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">'
-          '<rect width="16" height="16" rx="3" fill="#5B8DEF"/>'
-          '<text x="8" y="11" text-anchor="middle" font-size="8" fill="#fff">W</text>'
-          '</svg>'
+  '''
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+<rect width="16" height="16" rx="3" fill="#5B8DEF"/>
+<text x="8" y="11" text-anchor="middle" font-size="8" fill="#fff">W</text>
+</svg>'''
       .codeUnits,
 );

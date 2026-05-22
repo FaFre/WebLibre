@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// ignore_for_file: avoid_redundant_argument_values, avoid_dynamic_calls
+// ignore_for_file: avoid_dynamic_calls
 
 import 'dart:convert';
 import 'dart:io';

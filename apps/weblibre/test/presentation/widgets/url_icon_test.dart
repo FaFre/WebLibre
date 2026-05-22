@@ -3,9 +3,9 @@ import 'dart:typed_data';
 
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_mozilla_components/src/pigeons/gecko.g.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
 import 'package:weblibre/domain/services/favicon_resolver.dart';
@@ -128,7 +128,7 @@ void main() {
 
 final class _NeverCalledResolver implements FaviconResolver {
   @override
-  Future<FaviconResolveResult> resolve(Uri url, {int? proxyPort}) async {
+  Future<FaviconResolveResult> resolve(Uri url, {int? proxyPort}) {
     throw UnimplementedError('cacheOnly should not hit the resolver');
   }
 }

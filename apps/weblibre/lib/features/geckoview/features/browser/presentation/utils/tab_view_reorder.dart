@@ -219,7 +219,7 @@ List<String> _orderedIdsForStorageAnchors(
   required String movingPartitionRootId,
   required bool sortPinnedFirst,
 }) {
-  var storageOrderedIds = tabListDirection == TabDirection.newestFirst
+  final storageOrderedIds = tabListDirection == TabDirection.newestFirst
       // Rendering flips root group order for newest-first; convert the
       // display order back to storage order before choosing anchors.
       ? orderedTabIds.reversed.toList()

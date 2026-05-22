@@ -151,10 +151,10 @@ bool _languageMatchesQuery(String resultLanguage, String? queryTag) {
   final result = resultLanguage
       .trim()
       .toLowerCase()
-      .split(RegExp(r'[-_]'))
+      .split(RegExp('[-_]'))
       .first;
 
-  final query = queryTag.trim().toLowerCase().split(RegExp(r'[-_]')).first;
+  final query = queryTag.trim().toLowerCase().split(RegExp('[-_]')).first;
 
   if (result.isEmpty || query.isEmpty) return false;
 

@@ -801,8 +801,8 @@ class _WebSearchOptionsRow extends StatelessWidget {
           controller: controller,
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Row(
-            children: const [
+          child: const Row(
+            children: [
               WebSearchStatusChip(),
               RouteThroughTorToggle(),
               SizedBox(width: 8),

@@ -67,7 +67,7 @@ class SearchTokensDao extends DatabaseAccessor<UserDatabase> {
 
   /// Release any reservation older than [maxAge] — covers crashes mid-flight.
   /// Returns the number of rows released.
-  Future<int> releaseStaleReservations(Duration maxAge) async {
+  Future<int> releaseStaleReservations(Duration maxAge) {
     final cutoff = DateTime.now().subtract(maxAge);
     return (update(db.searchTokens)..where(
           (t) =>

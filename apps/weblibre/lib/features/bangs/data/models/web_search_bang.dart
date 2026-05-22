@@ -15,7 +15,7 @@ final webSearchBang = BangData(
   searxngApi: false,
 );
 
-final webSearchBangKey = BangKey(
+const webSearchBangKey = BangKey(
   group: BangGroup.weblibre,
   trigger: webSearchBangTrigger,
 );

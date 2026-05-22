@@ -105,7 +105,6 @@ class ContainerListScreen extends HookConsumerWidget {
                                 .read(selectedContainerProvider.notifier)
                                 .clearContainer()
                           : () => setSelectedContainer(container),
-                      // onDelete: () => repository.deleteContainer(container.id),
                     ),
                   );
                 },
@@ -168,7 +167,6 @@ class _ContainerCard extends HookConsumerWidget {
     required this.isSelected,
     required this.onTap,
     required this.onSelect,
-    this.onDelete,
   });
 
   final ContainerDataWithCount container;
@@ -176,7 +174,6 @@ class _ContainerCard extends HookConsumerWidget {
   final bool isSelected;
   final VoidCallback onTap;
   final VoidCallback onSelect;
-  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -299,15 +296,6 @@ class _ContainerCard extends HookConsumerWidget {
                     else
                       const SizedBox.shrink(),
                     const Spacer(),
-                    if (onDelete != null) ...[
-                      IconButton(
-                        tooltip: 'Delete',
-                        color: colorScheme.error,
-                        onPressed: onDelete,
-                        icon: const Icon(Icons.delete_outline),
-                      ),
-                      const SizedBox(width: 4),
-                    ],
                     FilledButton.tonalIcon(
                       onPressed: onSelect,
                       icon: Icon(isSelected ? Icons.close : Icons.check),

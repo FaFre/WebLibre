@@ -19,10 +19,10 @@
  */
 import 'package:drift/drift.dart';
 import 'package:weblibre/data/database/extensions/database_table_size.dart';
-import 'package:weblibre/features/user/data/icon_cache_marker.dart';
 import 'package:weblibre/features/user/data/database/daos/cache.drift.dart';
 import 'package:weblibre/features/user/data/database/database.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart';
+import 'package:weblibre/features/user/data/icon_cache_marker.dart';
 
 @DriftAccessor()
 class CacheDao extends DatabaseAccessor<UserDatabase> with $CacheDaoMixin {

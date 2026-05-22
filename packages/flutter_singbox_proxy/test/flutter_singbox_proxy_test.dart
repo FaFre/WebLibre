@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('profile model keeps generic sing-box config boundary', () {

@@ -6,10 +6,9 @@
 // For more information about Flutter integration tests, please see
 // https://flutter.dev/to/integration-testing
 
+import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-
-import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();

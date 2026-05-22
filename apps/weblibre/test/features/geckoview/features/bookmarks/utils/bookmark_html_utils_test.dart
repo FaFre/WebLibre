@@ -18,8 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// ignore_for_file: avoid_redundant_argument_values
-
 import 'dart:io';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';

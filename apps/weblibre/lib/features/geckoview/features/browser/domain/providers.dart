@@ -1033,7 +1033,7 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
         final unpinned = children
             .where((c) => !pinnedTabIds.contains(c.row.id))
             .toList();
-        final cmp = (_GroupedRow a, _GroupedRow b) =>
+        int cmp(_GroupedRow a, _GroupedRow b) =>
             a.row.orderKey.compareTo(b.row.orderKey);
         final directionCmp = tabListDirection == TabDirection.newestFirst
             ? (_GroupedRow a, _GroupedRow b) => -cmp(a, b)

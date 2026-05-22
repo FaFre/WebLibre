@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -181,7 +183,7 @@ class ContainerEditScreen extends HookConsumerWidget {
                   title: const Text('Change Color'),
                   onTap: () {
                     Navigator.of(context).pop();
-                    openColorPicker();
+                    unawaited(openColorPicker());
                   },
                 ),
                 ListTile(
@@ -189,7 +191,7 @@ class ContainerEditScreen extends HookConsumerWidget {
                   title: const Text('Change Icon'),
                   onTap: () {
                     Navigator.of(context).pop();
-                    openIconPicker();
+                    unawaited(openIconPicker());
                   },
                 ),
                 const SizedBox(height: 8),

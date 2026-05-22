@@ -580,11 +580,13 @@ class QuickTabSwitcher extends HookConsumerWidget {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final context = activeItemKey.value.currentContext;
         if (context != null) {
-          Scrollable.ensureVisible(
-            context,
-            alignment: 0.5,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeInOut,
+          unawaited(
+            Scrollable.ensureVisible(
+              context,
+              alignment: 0.5,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOut,
+            ),
           );
         } else if (chipScrollController.hasClients) {
           final activeIndex = availableItems.indexWhere(
@@ -602,11 +604,13 @@ class QuickTabSwitcher extends HookConsumerWidget {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               final retryContext = activeItemKey.value.currentContext;
               if (retryContext != null) {
-                Scrollable.ensureVisible(
-                  retryContext,
-                  alignment: 0.5,
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeInOut,
+                unawaited(
+                  Scrollable.ensureVisible(
+                    retryContext,
+                    alignment: 0.5,
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut,
+                  ),
                 );
               }
             });
@@ -717,8 +721,6 @@ class QuickTabSwitcherView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appColors = AppColors.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
-
     if (availableItems.isEmpty) {
       return const SizedBox.shrink();
     }

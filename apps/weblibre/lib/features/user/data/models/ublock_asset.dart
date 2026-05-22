@@ -261,7 +261,7 @@ class UBlockAssetsRegistry {
     return count;
   }
 
-  static UBlockAssetsRegistry fromJson(Map<String, dynamic> json) {
+  factory UBlockAssetsRegistry.fromJson(Map<String, dynamic> json) {
     final entries = <String, UBlockAssetEntry>{};
     for (final entry in json.entries) {
       if (entry.value is Map<String, dynamic>) {

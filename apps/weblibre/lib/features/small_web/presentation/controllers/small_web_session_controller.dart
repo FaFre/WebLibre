@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_redundant_argument_values
-
 /*
  * Copyright (c) 2024-2026 Fabian Freund.
  *

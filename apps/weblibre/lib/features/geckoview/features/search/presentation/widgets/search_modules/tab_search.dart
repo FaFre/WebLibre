@@ -123,9 +123,7 @@ class TabSearch extends HookConsumerWidget {
               )
               .addQuery(
                 searchTextListenable.value.text,
-                // ignore: avoid_redundant_argument_values dont break things
                 matchPrefix: _matchPrefix,
-                // ignore: avoid_redundant_argument_values dont break things
                 matchSuffix: _matchSuffix,
               );
         }

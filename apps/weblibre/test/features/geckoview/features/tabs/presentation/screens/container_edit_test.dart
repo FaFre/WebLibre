@@ -24,7 +24,7 @@ void main() {
                 color: Colors.blue,
                 orderKey: 'a',
                 metadata: ContainerMetadata.withDefaults(
-                  proxyConnectionId: SingboxProxyConnectionId('missing-proxy'),
+                  proxyConnectionId: const SingboxProxyConnectionId('missing-proxy'),
                 ),
               ),
             ),

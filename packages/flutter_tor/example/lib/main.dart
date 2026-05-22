@@ -6,10 +6,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_tor/flutter_tor.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:socks5_proxy/socks_client.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {

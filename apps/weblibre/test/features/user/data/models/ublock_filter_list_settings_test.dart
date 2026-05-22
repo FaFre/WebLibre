@@ -127,16 +127,18 @@ void main() {
     test('buildGroupedParentTree creates correct hierarchy', () {
       final registry = _makeRegistry();
       final tree = registry.buildGroupedParentTree();
+      final defaultGroup = tree[UBlockAssetGroup.$default];
+      final adsGroup = tree[UBlockAssetGroup.ads];
 
       expect(tree, contains(UBlockAssetGroup.$default));
-      expect(tree[UBlockAssetGroup.$default]!, contains('uBlock filters'));
+      expect(defaultGroup, contains('uBlock filters'));
       expect(
-        tree[UBlockAssetGroup.$default]!['uBlock filters'],
+        defaultGroup?['uBlock filters'],
         containsAll(['ublock-filters', 'ublock-privacy']),
       );
       expect(tree, contains(UBlockAssetGroup.ads));
-      expect(tree[UBlockAssetGroup.ads]!, contains(null));
-      expect(tree[UBlockAssetGroup.ads]![null], contains('easylist'));
+      expect(adsGroup, contains(null));
+      expect(adsGroup?[null], contains('easylist'));
       expect(tree, contains(UBlockAssetGroup.regions));
     });
 

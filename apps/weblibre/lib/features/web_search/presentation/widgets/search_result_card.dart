@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -211,7 +210,7 @@ class _ContentRow extends StatelessWidget {
 /// instances on every state mutation). Equality is driven instead by scalar
 /// signatures derived from those collections, which is enough to detect any
 /// change a single result card cares about.
-class _FooterState with FastEquatable {
+class _FooterState {
   final bool hasOpenSession;
   final bool isFetching;
   final bool isFetched;
@@ -260,14 +259,26 @@ class _FooterState with FastEquatable {
   }
 
   @override
-  List<Object?> get hashParameters => [
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is _FooterState &&
+            hasOpenSession == other.hasOpenSession &&
+            isFetching == other.isFetching &&
+            isFetched == other.isFetched &&
+            fetchError == other.fetchError &&
+            _capturingSignature == other._capturingSignature &&
+            _capturesSignature == other._capturesSignature;
+  }
+
+  @override
+  int get hashCode => Object.hash(
     hasOpenSession,
     isFetching,
     isFetched,
     fetchError,
     _capturingSignature,
     _capturesSignature,
-  ];
+  );
 }
 
 class _FetchFooter extends ConsumerWidget {

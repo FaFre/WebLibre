@@ -41,6 +41,7 @@ const _alwaysAllowPackageExtra = 'eu.weblibre.gatekeeper.always_allow_package';
 StreamTransformer<Intent, ReceivedIntentParameter>
 _buildSharingIntentTransformer(
   IntentGatekeeper gatekeeper,
+  GeneralSettingsRepository settingsRepository,
 ) => StreamTransformer<Intent, ReceivedIntentParameter>.fromHandlers(
   handleData: (intent, sink) async {
     if (_extractAccountCallback(intent) != null) {
@@ -53,14 +54,12 @@ _buildSharingIntentTransformer(
     final alwaysAllowPackage =
         intent.extra[_alwaysAllowPackageExtra] as String?;
     if (alwaysAllowPackage != null) {
-      await gatekeeper.ref
-          .read(generalSettingsRepositoryProvider.notifier)
-          .updateSettings(
-            (current) => current.copyWith.externalAppIntentPolicies({
-              ...current.externalAppIntentPolicies,
-              alwaysAllowPackage: IntentSourcePolicy.allow,
-            }),
-          );
+      await settingsRepository.updateSettings(
+        (current) => current.copyWith.externalAppIntentPolicies({
+          ...current.externalAppIntentPolicies,
+          alwaysAllowPackage: IntentSourcePolicy.allow,
+        }),
+      );
     }
 
     final shortcutContextId = intent.action == 'android.intent.action.VIEW'
@@ -197,10 +196,13 @@ Raw<Stream<T>> _consumeIntents<T>(
 Raw<Stream<ReceivedIntentParameter>> sharingIntentStream(Ref ref) {
   final receiver = ref.watch(intentReceiverProvider);
   final gatekeeper = ref.watch(intentGatekeeperProvider.notifier);
+  final settingsRepository = ref.watch(
+    generalSettingsRepositoryProvider.notifier,
+  );
   return _consumeIntents(
     ref,
     receiver,
-    _buildSharingIntentTransformer(gatekeeper),
+    _buildSharingIntentTransformer(gatekeeper, settingsRepository),
   );
 }
 

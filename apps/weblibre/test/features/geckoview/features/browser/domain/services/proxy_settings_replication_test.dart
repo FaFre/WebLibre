@@ -28,7 +28,7 @@ void main() {
   test(
     'container assignments ensure sing-box profiles are running before syncing',
     () async {
-      final profileId = SingboxProxyConnectionId('profile-1');
+      const profileId = SingboxProxyConnectionId('profile-1');
       final assignedContainer = _container(
         id: 'container-1',
         contextId: 'context-a',

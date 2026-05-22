@@ -37,7 +37,6 @@ class AccountAuthState with FastEquatable {
   // states for the same user but with distinct client instances are still
   // semantically equal — including identityHashCode here would defeat
   // Riverpod's caching by treating every reissued state as different.
-  // ignore: missing_field_in_equatable_props
   final SupabaseClient? client;
 
   AccountAuthState({
@@ -64,5 +63,6 @@ class AccountAuthState with FastEquatable {
     userId,
     lastError,
     syncKey,
+    client,
   ];
 }

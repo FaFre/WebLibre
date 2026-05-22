@@ -127,7 +127,7 @@ class SingboxProxyRuntimeRepository extends _$SingboxProxyRuntimeRepository {
   Future<SingboxProxyRuntimeState> startProfile(
     String profileId, {
     SingboxProxyRuntimeOptions? options,
-  }) async {
+  }) {
     return _lock.synchronized(() async {
       final currentState = await _stateSnapshotUnlocked();
       final activeProfileIds = _activeProfileIds(currentState);
@@ -320,7 +320,7 @@ class SingboxProxyRuntimeRepository extends _$SingboxProxyRuntimeRepository {
     final profileMap = {for (final profile in profiles) profile.id: profile};
 
     return Future.wait(
-      profileIds.map((profileId) async {
+      profileIds.map((profileId) {
         final profile = profileMap[profileId];
         if (profile == null) {
           throw StateError('Unknown sing-box proxy profile: $profileId');
@@ -340,15 +340,15 @@ class SingboxProxyRuntimeRepository extends _$SingboxProxyRuntimeRepository {
   }
 
   @override
-  Future<SingboxProxyRuntimeState> build() async {
+  Future<SingboxProxyRuntimeState> build() {
     final plugin = ref.watch(singboxProxyClientProvider);
     final stateSubscription = plugin.stateStream.listen((nextState) {
       state = AsyncData(nextState);
     });
 
-    ref.onDispose(() async {
-      await stateSubscription.cancel();
-      await plugin.dispose();
+    ref.onDispose(() {
+      unawaited(stateSubscription.cancel());
+      unawaited(plugin.dispose());
     });
 
     return plugin.getState();

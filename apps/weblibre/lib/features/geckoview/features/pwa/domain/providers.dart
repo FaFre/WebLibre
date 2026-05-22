@@ -107,7 +107,7 @@ Future<bool> installCurrentWebApp(
   Ref ref, {
   String? overrideName,
   String? contextId,
-}) async {
+}) {
   final selectedTabId = ref.read(selectedTabProvider);
 
   if (selectedTabId == null) {
@@ -156,7 +156,7 @@ Future<bool> installBasicShortcut(
   Ref ref, {
   String? overrideName,
   String? contextId,
-}) async {
+}) {
   final selectedTabId = ref.read(selectedTabProvider);
 
   if (selectedTabId == null) {

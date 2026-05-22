@@ -1194,13 +1194,11 @@ class _Browser extends HookConsumerWidget {
                   switch (promptOnBackBehavior) {
                     case BackgroundAppTabBackPromptBehavior():
                       await moveToBackground();
-                      break;
                     case ReturnToSearchTabBackPromptBehavior(:final tabType):
                       ref
                           .read(searchAutofocusSuppressionProvider.notifier)
                           .suppressNext();
                       await SearchRoute(tabType: tabType).push(context);
-                      break;
                   }
 
                   return true;

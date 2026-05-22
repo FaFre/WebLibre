@@ -17,6 +17,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  hooks_riverpod: ^3.3.1
 
   speech_to_text_dialog:
     # When depending on this package from a real application you should use:

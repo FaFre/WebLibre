@@ -271,7 +271,6 @@ class AccountAuthRepository extends _$AccountAuthRepository {
 
     // Clear the pending code verifier so a late browser callback is rejected.
     final data = await _store.read();
-    // ignore: avoid_redundant_argument_values
     await _store.write(data.copyWith(pendingCodeVerifier: null));
 
     state = AsyncData(AccountAuthState());
@@ -327,7 +326,6 @@ class AccountAuthRepository extends _$AccountAuthRepository {
           displayName:
               (user?['user_metadata'] as Map<String, dynamic>?)?['display_name']
                   as String?,
-          // ignore: avoid_redundant_argument_values
           pendingCodeVerifier: null,
         ),
       );
@@ -372,9 +370,7 @@ class AccountAuthRepository extends _$AccountAuthRepository {
 
   Future<void> clearSyncKey() async {
     final data = await _store.read();
-    // ignore: avoid_redundant_argument_values
     await _store.write(data.copyWith(syncKey: null));
-    // ignore: avoid_redundant_argument_values
     state = AsyncData(_currentOrEmpty.copyWith(syncKey: null));
   }
 

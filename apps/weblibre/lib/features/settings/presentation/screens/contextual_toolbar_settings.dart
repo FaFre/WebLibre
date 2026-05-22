@@ -99,8 +99,8 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
           pinned: true,
           delegate: _ToolbarPreviewDelegate(configs: configs.value),
         ),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+        const SliverPadding(
+          padding: EdgeInsets.fromLTRB(16, 20, 16, 0),
           sliver: SliverToBoxAdapter(child: _SectionLabel(label: 'Enabled')),
         ),
         if (visibleConfigs.isEmpty)
@@ -137,8 +137,8 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
               );
             },
           ),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+        const SliverPadding(
+          padding: EdgeInsets.fromLTRB(16, 20, 16, 0),
           sliver: SliverToBoxAdapter(child: _SectionLabel(label: 'Disabled')),
         ),
         if (hiddenConfigs.isEmpty)

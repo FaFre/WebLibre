@@ -34,7 +34,6 @@ void main() {
     );
 
     test('forces animations off when the app setting is enabled', () {
-      // ignore: avoid_redundant_argument_values
       const mediaQuery = MediaQueryData(disableAnimations: false);
 
       final result = applyAppMediaQueryOverrides(

@@ -27,8 +27,8 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_migrations.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/models/preference_setting.dart';
+import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_migrations.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/setting_groups_serializer.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 

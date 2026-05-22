@@ -17,16 +17,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-library;
 
-/// Curated picker options for the web-search language and country selectors.
-///
-/// Codes intersect what Brave (`search_lang`/`country`) and Mojeek
-/// (`lb`/`rb`) accept; English display names so the menu doesn't need a
-/// per-locale translation pass. The protocol carries just the primary
-/// ISO 639-1 / ISO 3166-1 alpha-2 codes — region qualifiers (`en-gb`,
-/// `pt-br`, etc.) are reconstructed server-side from the language+country
-/// pair.
+// Curated picker options for the web-search language and country selectors.
+//
+// Codes intersect what Brave (`search_lang`/`country`) and Mojeek
+// (`lb`/`rb`) accept; English display names so the menu doesn't need a
+// per-locale translation pass. The protocol carries just the primary
+// ISO 639-1 / ISO 3166-1 alpha-2 codes — region qualifiers (`en-gb`,
+// `pt-br`, etc.) are reconstructed server-side from the language+country
+// pair.
 
 class LanguageOption {
   final String code; // ISO 639-1

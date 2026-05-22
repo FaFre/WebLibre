@@ -33,9 +33,7 @@ BackendEndpoints searchBackendEndpoints(Ref ref) {
     webSearchSettingsControllerProvider.select((s) => s.routeThroughTor),
   );
   return BackendEndpoints.fromOrigin(
-    routeThroughTor
-        ? SearchBackendConfig.torOriginUri
-        : SearchBackendConfig.originUri,
+    routeThroughTor ? searchBackendTorOriginUri : searchBackendOriginUri,
   );
 }
 

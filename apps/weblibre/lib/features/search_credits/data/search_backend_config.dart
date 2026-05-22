@@ -17,25 +17,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-abstract final class SearchBackendConfig {
-  /// Clearnet origin used when the user has not opted to route search through
-  /// Tor. Must be a normal HTTPS URL (or HTTP for dev).
-  static const searchBackendOrigin = String.fromEnvironment(
-    'SEARCH_BACKEND_ORIGIN',
-    defaultValue: 'https://search.weblibre.eu',
-  );
+/// Clearnet origin used when the user has not opted to route search through
+/// Tor. Must be a normal HTTPS URL (or HTTP for dev).
+const searchBackendOrigin = String.fromEnvironment(
+  'SEARCH_BACKEND_ORIGIN',
+  defaultValue: 'https://search.weblibre.eu',
+);
 
-  /// Origin used when the user opts to route search through Tor. Should be
-  /// the WebLibre search service's onion address so the Tor circuit
-  /// terminates inside the Tor network instead of exiting back to the
-  /// clearnet. Falls back to the clearnet origin when no onion address is
-  /// configured at build time.
-  static const searchBackendOriginTor = String.fromEnvironment(
-    'SEARCH_BACKEND_ORIGIN_TOR',
-    defaultValue:
-        'http://eyipgwt32zaejr2xwblaswp2ur4qikapofunbqus5dklvf7jxkncirad.onion',
-  );
+/// Origin used when the user opts to route search through Tor. Should be
+/// the WebLibre search service's onion address so the Tor circuit
+/// terminates inside the Tor network instead of exiting back to the
+/// clearnet. Falls back to the clearnet origin when no onion address is
+/// configured at build time.
+const searchBackendOriginTor = String.fromEnvironment(
+  'SEARCH_BACKEND_ORIGIN_TOR',
+  defaultValue:
+      'http://eyipgwt32zaejr2xwblaswp2ur4qikapofunbqus5dklvf7jxkncirad.onion',
+);
 
-  static Uri get originUri => Uri.parse(searchBackendOrigin);
-  static Uri get torOriginUri => Uri.parse(searchBackendOriginTor);
-}
+Uri get searchBackendOriginUri => Uri.parse(searchBackendOrigin);
+Uri get searchBackendTorOriginUri => Uri.parse(searchBackendOriginTor);

@@ -439,7 +439,6 @@ void main() {
           UrlCleanerRule(
             name: 'test',
             data: UrlCleanerRuleData(
-              // ignore: avoid_redundant_argument_values
               completeProvider: false,
               urlPattern: r'^https?://example\.com',
               rules: ['track'],
