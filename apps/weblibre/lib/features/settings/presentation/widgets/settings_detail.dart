@@ -20,6 +20,12 @@
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/features/settings/domain/providers/pending_settings_highlight.dart';
+
+/// Default total-entry count at or below which [SettingsDetailScaffold] hides
+/// its search field — searching three toggles is just visual noise.
+const int kDefaultSettingsSearchEntryThreshold = 10;
 
 class SettingsEntryDefinition {
   final String title;
@@ -82,6 +88,7 @@ class SettingsDetailScaffold extends HookWidget {
   final List<SettingsSectionDefinition> sections;
   final List<Widget> actions;
   final String searchHintText;
+  final int searchEntryThreshold;
 
   const SettingsDetailScaffold({
     super.key,
@@ -91,16 +98,22 @@ class SettingsDetailScaffold extends HookWidget {
     required this.sections,
     this.actions = const [],
     this.searchHintText = 'Search settings',
+    this.searchEntryThreshold = kDefaultSettingsSearchEntryThreshold,
   });
 
   @override
   Widget build(BuildContext context) {
+    final totalEntries = sections.fold<int>(
+      0,
+      (sum, section) => sum + section.entries.length,
+    );
+    final showSearch = totalEntries > searchEntryThreshold;
+
     final search = useSettingsSearch();
 
-    final filteredSections = filterSettingsSections(
-      sections: sections,
-      query: search.rawQuery,
-    );
+    final filteredSections = showSearch
+        ? filterSettingsSections(sections: sections, query: search.rawQuery)
+        : sections;
 
     return Scaffold(
       body: SafeArea(
@@ -115,21 +128,27 @@ class SettingsDetailScaffold extends HookWidget {
                   title: Text(title),
                   actions: actions,
                 ),
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                  sliver: SliverToBoxAdapter(
-                    child: SettingsSearchField(
-                      controller: search.controller,
-                      hintText: searchHintText,
+                if (showSearch)
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    sliver: SliverToBoxAdapter(
+                      child: SettingsSearchField(
+                        controller: search.controller,
+                        hintText: searchHintText,
+                      ),
                     ),
                   ),
-                ),
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
+                  padding: EdgeInsets.fromLTRB(
+                    16,
+                    showSearch ? 24 : 16,
+                    16,
+                    20,
+                  ),
                   sliver: SliverToBoxAdapter(
                     child: SettingsSectionList(
                       sections: filteredSections,
-                      query: search.rawQuery,
+                      query: showSearch ? search.rawQuery : '',
                     ),
                   ),
                 ),
@@ -297,13 +316,101 @@ List<Widget> buildSettingsSectionWidgets(
               entryIndex++
             ) ...[
               if (entryIndex > 0) const Divider(height: 1),
-              sections[sectionIndex].entries[entryIndex].child,
+              _HighlightableEntry(
+                key: ValueKey(
+                  '${sections[sectionIndex].title}/'
+                  '${sections[sectionIndex].entries[entryIndex].title}',
+                ),
+                title: sections[sectionIndex].entries[entryIndex].title,
+                child: sections[sectionIndex].entries[entryIndex].child,
+              ),
             ],
           ],
         ),
       ),
     ],
   ];
+}
+
+/// Wraps a settings entry tile and, when [PendingSettingsHighlight] matches
+/// [title], auto-scrolls it into view and briefly pulses a tint behind it.
+/// Self-clears the pending highlight as soon as the destination entry handles
+/// it so the effect doesn't replay on rebuild or back-navigation.
+class _HighlightableEntry extends HookConsumerWidget {
+  final String title;
+  final Widget child;
+
+  const _HighlightableEntry({
+    super.key,
+    required this.title,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pending = ref.watch(pendingSettingsHighlightProvider);
+    final isTarget = pending != null && pending == title;
+
+    final controller = useAnimationController(
+      duration: const Duration(milliseconds: 1500),
+    );
+
+    final animation = useMemoized(
+      () => TweenSequence<double>([
+        TweenSequenceItem(
+          tween: Tween(
+            begin: 0.0,
+            end: 1.0,
+          ).chain(CurveTween(curve: Curves.easeOut)),
+          weight: 20,
+        ),
+        TweenSequenceItem(tween: ConstantTween(1.0), weight: 30),
+        TweenSequenceItem(
+          tween: Tween(
+            begin: 1.0,
+            end: 0.0,
+          ).chain(CurveTween(curve: Curves.easeIn)),
+          weight: 50,
+        ),
+      ]).animate(controller),
+      [controller],
+    );
+
+    useEffect(() {
+      if (!isTarget) return null;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Clear immediately once this entry claims the highlight so stale
+        // state cannot survive a quick pop or interrupted animation.
+        ref.read(pendingSettingsHighlightProvider.notifier).clear();
+        if (!context.mounted) return;
+        Scrollable.ensureVisible(
+          context,
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeOutCubic,
+          alignment: 0.2,
+        );
+        controller.forward(from: 0);
+      });
+
+      return null;
+    }, [isTarget]);
+
+    final highlightColor = Theme.of(context).colorScheme.secondaryContainer;
+
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        final t = animation.value;
+        if (t == 0.0) return child!;
+        return ColoredBox(
+          color: highlightColor.withValues(alpha: t * 0.7),
+          child: child,
+        );
+      },
+      child: child,
+    );
+  }
 }
 
 List<SettingsSectionDefinition> filterSettingsSections({

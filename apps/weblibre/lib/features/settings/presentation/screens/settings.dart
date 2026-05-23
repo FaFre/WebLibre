@@ -21,7 +21,9 @@ import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/settings/domain/providers/pending_settings_highlight.dart';
 import 'package:weblibre/features/settings/presentation/screens/advanced_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/browsing_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/extensions_settings.dart';
@@ -327,7 +329,7 @@ class _CategoryTile extends StatelessWidget {
   }
 }
 
-class _SearchResultTile extends StatelessWidget {
+class _SearchResultTile extends HookConsumerWidget {
   final String title;
   final String? subtitle;
   final String category;
@@ -345,7 +347,7 @@ class _SearchResultTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return ListTile(
       leading: Icon(icon),
       title: Text(title),
@@ -361,7 +363,16 @@ class _SearchResultTile extends StatelessWidget {
       ),
       trailing: const Icon(Icons.chevron_right),
       onTap: () async {
-        await onTap(context);
+        final pendingHighlight = ref.read(
+          pendingSettingsHighlightProvider.notifier,
+        );
+        pendingHighlight.set(title);
+        try {
+          await onTap(context);
+        } catch (_) {
+          pendingHighlight.clear();
+          rethrow;
+        }
       },
     );
   }
