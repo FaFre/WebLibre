@@ -22,37 +22,6 @@ import 'package:weblibre/features/user/domain/repositories/proxy_routing_setting
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test(
-    'ensureProxyConnectionAvailable starts an assigned stopped profile',
-    () async {
-      final profile = _profile(id: 'profile-1', name: 'First');
-      final client = _FakeSingboxProxyClient(_state(const []));
-      final container = _container(
-        client: client,
-        profilesRepository: _FakeProfilesRepository([profile]),
-      );
-      addTearDown(container.dispose);
-
-      await container.read(singboxProxyRuntimeRepositoryProvider.future);
-      final repository = container.read(
-        singboxProxyRuntimeRepositoryProvider.notifier,
-      );
-
-      await repository.ensureProxyConnectionAvailable(
-        SingboxProxyConnectionId(profile.id),
-      );
-      await repository.ensureProxyConnectionAvailable(
-        SingboxProxyConnectionId(profile.id),
-      );
-
-      expect(client.startCalls, hasLength(1));
-      expect(
-        client.startCalls.single.map((runtimeProfile) => runtimeProfile.id),
-        [profile.proxyConnectionId],
-      );
-    },
-  );
-
   test('startProfile preserves already-running profiles', () async {
     final profile1 = _profile(id: 'profile-1', name: 'First');
     final profile2 = _profile(id: 'profile-2', name: 'Second');

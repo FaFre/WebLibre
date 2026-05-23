@@ -374,7 +374,7 @@ final class SandboxCaptureErrorsProvider
 }
 
 String _$sandboxCaptureErrorsHash() =>
-    r'd6ef9ebba2515f8177a380b822f344128e4ea8c4';
+    r'da9021ba394d2769140408577983bbcf45b0e0fe';
 
 /// Orchestrates sandbox capture browsing:
 ///
@@ -440,7 +440,7 @@ final class SandboxCaptureControllerProvider
 }
 
 String _$sandboxCaptureControllerHash() =>
-    r'fb582cb09504dafd1b9addc1bfc0e6f58fabc9b1';
+    r'6ddcb0df7194f3e35ac0eee3c182204a990f9651';
 
 /// Orchestrates sandbox capture browsing:
 ///

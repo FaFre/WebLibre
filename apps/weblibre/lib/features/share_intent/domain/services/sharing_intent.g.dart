@@ -110,7 +110,7 @@ final class SharingIntentStreamProvider
 }
 
 String _$sharingIntentStreamHash() =>
-    r'02cef0c00bcb9416f8daf420977f58764c8efaca';
+    r'62e9e54bfa168e7400c4c496d0aca0972ccdf4c1';
 
 /// Stream of account callback handoff codes extracted from deep link intents.
 

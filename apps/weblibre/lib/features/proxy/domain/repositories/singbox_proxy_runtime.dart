@@ -139,23 +139,6 @@ class SingboxProxyRuntimeRepository extends _$SingboxProxyRuntimeRepository {
     });
   }
 
-  Future<void> ensureProxyConnectionAvailable(
-    SingboxProxyConnectionId connectionId,
-  ) async {
-    await _lock.synchronized(() async {
-      final currentState = await _stateSnapshotUnlocked();
-      final isRunning = currentState.endpoints.any(
-        (endpoint) => endpoint.profileId == connectionId.encode(),
-      );
-      if (isRunning) return;
-
-      final activeProfileIds = _activeProfileIds(currentState);
-      await _startProfilesUnlocked(
-        {...activeProfileIds, connectionId.profileId}.toList(),
-      );
-    });
-  }
-
   Set<String> _activeProfileIds(SingboxProxyRuntimeState runtimeState) {
     return runtimeState.endpoints
         .map((endpoint) => ProxyConnectionId.decode(endpoint.profileId))

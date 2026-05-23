@@ -17,8 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/features/settings/domain/providers/pending_settings_highlight.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 
 void main() {
@@ -77,5 +79,46 @@ void main() {
         'Use external download manager',
       );
     });
+  });
+
+  testWidgets('clears a pending highlight after the target entry handles it', (
+    tester,
+  ) async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    container.read(pendingSettingsHighlightProvider.notifier).set('Theme');
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          home: SettingsDetailScaffold(
+            title: 'Appearance',
+            subtitle: 'Configure app appearance',
+            icon: Icons.palette,
+            sections: const [
+              SettingsSectionDefinition(
+                title: 'Display',
+                entries: [
+                  SettingsEntryDefinition(
+                    title: 'Theme',
+                    child: SizedBox(height: 48, child: Text('Theme')),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    expect(container.read(pendingSettingsHighlightProvider), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+
+    expect(container.read(pendingSettingsHighlightProvider), isNull);
   });
 }

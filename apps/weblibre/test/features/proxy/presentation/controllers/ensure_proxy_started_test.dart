@@ -48,7 +48,7 @@ void main() {
 
       expect(find.text('Start Proxy Connection?'), findsOneWidget);
       expect(
-        find.textContaining('This container uses Mullvad'),
+        find.textContaining('This tab needs Mullvad'),
         findsOneWidget,
       );
 

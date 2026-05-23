@@ -54,7 +54,7 @@ final class SearchBackendEndpointsProvider
 }
 
 String _$searchBackendEndpointsHash() =>
-    r'f7249075bdf7a83271f7f9030dd12a3a9d2bd483';
+    r'e2f367530cac69a2833b75520d1ac66605822f80';
 
 @ProviderFor(searchClientLogger)
 final searchClientLoggerProvider = SearchClientLoggerProvider._();

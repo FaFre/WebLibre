@@ -81,7 +81,7 @@ final class SingboxProxyEndpointSyncProvider
 }
 
 String _$singboxProxyEndpointSyncHash() =>
-    r'2d6b0641db33638b0b339b510dd63cdddab7f7cf';
+    r'8aeb4097d02c2f6ea37fdb2de26b399d2e6042c2';
 
 /// Mirrors the sing-box runtime's active SOCKS endpoints into Gecko's
 /// container-proxy registry. Listens to [singboxProxyRuntimeRepositoryProvider]

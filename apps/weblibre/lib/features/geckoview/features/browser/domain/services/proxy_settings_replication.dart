@@ -26,9 +26,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/container_
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/repositories/container_proxy.dart';
-import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/models/proxy_routing_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/proxy_routing_settings.dart';
@@ -42,25 +40,6 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
 
   final _recomputeLock = Lock();
   var _recomputeDirty = false;
-
-  Future<void> _ensureProxyConnectionAvailable(
-    ProxyConnectionId proxyConnectionId,
-  ) async {
-    if (proxyConnectionId is! SingboxProxyConnectionId) return;
-
-    try {
-      await ref
-          .read(singboxProxyRuntimeRepositoryProvider.notifier)
-          .ensureProxyConnectionAvailable(proxyConnectionId);
-    } catch (error, stackTrace) {
-      logger.e(
-        'Failed to make proxy connection $proxyConnectionId available; '
-        'assigned traffic will remain blocked',
-        error: error,
-        stackTrace: stackTrace,
-      );
-    }
-  }
 
   Future<void> _queueIsolatedProxyAliasesRecompute() async {
     _recomputeDirty = true;
@@ -187,7 +166,6 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
           await containerProxy.clearContainerProxy('private');
         } else {
           await containerProxy.setContainerProxy('private', next.encode());
-          await _ensureProxyConnectionAvailable(next);
         }
       },
       onError: (error, stackTrace) {
@@ -220,7 +198,6 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
                 'general',
                 proxyConnectionId.encode(),
               );
-              await _ensureProxyConnectionAvailable(proxyConnectionId);
             }
         }
       },
@@ -315,10 +292,6 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
       }
       try {
         if (value != null) {
-          final proxyConnectionId = ProxyConnectionId.decode(value);
-          if (proxyConnectionId != null) {
-            await _ensureProxyConnectionAvailable(proxyConnectionId);
-          }
           await repo.setContainerProxy(key, value);
         } else {
           await repo.clearContainerProxy(key);

@@ -42,7 +42,7 @@ final class MetaSearchControllerProvider
 }
 
 String _$metaSearchControllerHash() =>
-    r'afb6600f78717df124a6afdb80710eba74666d23';
+    r'74ea7c616213dae53d3ac18b2677b797f5f87d53';
 
 abstract class _$MetaSearchController extends $Notifier<MetaSearchState> {
   MetaSearchState build();
@@ -108,7 +108,7 @@ final class WebSearchScrollOffsetProvider
 }
 
 String _$webSearchScrollOffsetHash() =>
-    r'8d622d93aba7712b2bf0e6da7cbde6c90ee00c07';
+    r'404573c2e5e52a0f260d182b7947f4878df45820';
 
 /// Persisted vertical scroll offset of the web-search results list. Kept
 /// alive (like [MetaSearchController]) so returning to the search screen

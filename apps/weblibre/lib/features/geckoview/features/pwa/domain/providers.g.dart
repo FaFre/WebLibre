@@ -272,7 +272,7 @@ final class InstallCurrentWebAppProvider
 }
 
 String _$installCurrentWebAppHash() =>
-    r'0e0013fac7b70441983f7af1e6db3c6470c23900';
+    r'6eeed094b9ea9ade946dab77c691f271c92f89e1';
 
 /// Installs the current tab as a PWA, embedding profile and container context
 /// in the shortcut intent so the PWA reopens with the same isolation.
@@ -460,7 +460,7 @@ final class InstallBasicShortcutProvider
 }
 
 String _$installBasicShortcutHash() =>
-    r'fcb5bec79f375b32a7a0953ad22859a0db222167';
+    r'7155266e635d0016e4d3ed407bc6d8af61434b0f';
 
 /// Creates a basic bookmark shortcut on the home screen for the current tab.
 

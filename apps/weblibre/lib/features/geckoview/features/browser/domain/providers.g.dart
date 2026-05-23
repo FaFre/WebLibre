@@ -1186,7 +1186,7 @@ final class GroupedTabListItemsProvider
 }
 
 String _$groupedTabListItemsHash() =>
-    r'15106bfa42146270245c7178928a834237042c1c';
+    r'dbb510f22c00858fcbadfb94547d46841221fca4';
 
 /// Grouped flat-list rendering for the list and grid views.
 ///

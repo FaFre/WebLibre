@@ -37,7 +37,18 @@ Future<bool> ensureProxyStartedForContainer(
   WidgetRef ref,
   ContainerData container,
 ) async {
-  final proxyConnectionId = container.metadata.proxyConnectionId;
+  return ensureProxyStartedForConnection(
+    context,
+    ref,
+    container.metadata.proxyConnectionId,
+  );
+}
+
+Future<bool> ensureProxyStartedForConnection(
+  BuildContext context,
+  WidgetRef ref,
+  ProxyConnectionId? proxyConnectionId,
+) async {
   if (proxyConnectionId == null) return true;
 
   if (proxyConnectionId is TorProxyConnectionId) {
@@ -45,7 +56,7 @@ Future<bool> ensureProxyStartedForContainer(
   }
 
   if (proxyConnectionId is SingboxProxyConnectionId) {
-    return await _maybeStartSingboxProxyForContainer(context, ref, container);
+    return await _maybeStartSingboxProxy(context, ref, proxyConnectionId);
   }
 
   return true;
@@ -71,16 +82,11 @@ Future<bool> _ensureTorStarted(BuildContext context, WidgetRef ref) async {
   return false;
 }
 
-Future<bool> _maybeStartSingboxProxyForContainer(
+Future<bool> _maybeStartSingboxProxy(
   BuildContext context,
   WidgetRef ref,
-  ContainerData container,
+  SingboxProxyConnectionId proxyConnectionId,
 ) async {
-  final proxyConnectionId = container.metadata.proxyConnectionId;
-  if (proxyConnectionId == null) return true;
-
-  if (proxyConnectionId is! SingboxProxyConnectionId) return true;
-
   // Await any start/stop in flight so we don't prompt the user a second time
   // while a start they already triggered is still resolving. If the runtime
   // provider is already in AsyncError, keep treating that as "not running" so
@@ -116,7 +122,7 @@ Future<bool> _maybeStartSingboxProxyForContainer(
       icon: const Icon(Icons.route_outlined),
       title: const Text('Start Proxy Connection?'),
       content: Text(
-        'This container uses $proxyTitle, but that connection is not running. Start it now?',
+        'This tab needs $proxyTitle, but that connection is not running. Start it now?',
       ),
       actions: [
         TextButton(

@@ -58,14 +58,19 @@ import 'package:weblibre/features/geckoview/features/find_in_page/presentation/c
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/widgets/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_autofocus.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/features/small_web/presentation/controllers/small_web_mode_controller.dart';
 import 'package:weblibre/features/small_web/presentation/widgets/small_web_browser_overlay.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/data/models/proxy_routing_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/proxy_routing_settings.dart';
 import 'package:weblibre/utils/move_to_background.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -230,6 +235,86 @@ class _TabBar extends HookConsumerWidget {
   }
 }
 
+Future<ProxyConnectionId?> _proxyConnectionIdForLoadError(
+  WidgetRef ref, {
+  required String tabId,
+  required String? contextId,
+}) async {
+  final routing = ref.read(proxyRoutingSettingsWithDefaultsProvider);
+  final tabState = ref.read(tabStateProvider(tabId));
+
+  if (contextId == 'private' || tabState?.tabMode is PrivateTabMode) {
+    return routing.privateTabsProxyConnectionId;
+  }
+
+  if (contextId != null && contextId.isNotEmpty && contextId != 'general') {
+    final isolatedContextProxyConnectionId =
+        await _isolatedContextProxyConnectionId(ref, contextId);
+    if (isolatedContextProxyConnectionId != null) {
+      return isolatedContextProxyConnectionId;
+    }
+
+    final contextContainer = await ref
+        .read(containerRepositoryProvider.notifier)
+        .getContainerByContextualIdentity(contextId);
+    final contextProxyConnectionId =
+        contextContainer?.metadata.proxyConnectionId;
+    if (contextProxyConnectionId != null) {
+      return contextProxyConnectionId;
+    }
+  }
+
+  final tabContainer = await ref
+      .read(tabDataRepositoryProvider.notifier)
+      .getTabContainerData(tabId);
+  final tabProxyConnectionId = tabContainer?.metadata.proxyConnectionId;
+  if (tabProxyConnectionId != null) {
+    return tabProxyConnectionId;
+  }
+
+  if (routing.regularTabsMode == ProxyRegularTabRoutingMode.all) {
+    return routing.regularTabsProxyConnectionId;
+  }
+
+  return null;
+}
+
+Future<ProxyConnectionId?> _isolatedContextProxyConnectionId(
+  WidgetRef ref,
+  String contextId,
+) async {
+  final db = ref.read(tabDatabaseProvider);
+  final pairs = await db.tabDao.isolatedContextContainerPairs().get();
+  final containerIds = pairs
+      .where((pair) => pair.isolationContextId == contextId)
+      .map((pair) => pair.containerId)
+      .nonNulls
+      .toSet();
+
+  if (containerIds.isEmpty) return null;
+
+  final containers = await ref
+      .read(containerRepositoryProvider.notifier)
+      .getAllContainersWithCount();
+  final proxyIds =
+      containers
+          .where((container) => containerIds.contains(container.id))
+          .map((container) => container.metadata.proxyConnectionId?.encode())
+          .nonNulls
+          .toSet()
+          .toList()
+        ..sort();
+
+  if (proxyIds.isEmpty) return null;
+  return ProxyConnectionId.decode(proxyIds.first);
+}
+
+typedef _PendingProxyLoadError = ({
+  String? contextId,
+  String errorType,
+  String? url,
+});
+
 class BrowserScreen extends HookConsumerWidget {
   const BrowserScreen({super.key});
 
@@ -238,52 +323,89 @@ class BrowserScreen extends HookConsumerWidget {
     final eventService = ref.watch(eventServiceProvider);
     final viewportService = ref.watch(viewportServiceProvider);
     final activeProxyPromptKeys = useRef(<String>{});
+    final pendingProxyLoadErrors = useRef(<String, _PendingProxyLoadError>{});
+    final selectedTabIdForProxyPrompt = ref.watch(selectedTabProvider);
+
+    Future<void> handleProxyLoadError({
+      required String tabId,
+      required String? contextId,
+      required String? url,
+      required String errorType,
+    }) async {
+      final promptKey = '$tabId:${url ?? errorType}';
+      if (!activeProxyPromptKeys.value.add(promptKey)) return;
+
+      try {
+        final proxyConnectionId = await _proxyConnectionIdForLoadError(
+          ref,
+          tabId: tabId,
+          contextId: contextId,
+        );
+
+        if (!context.mounted || proxyConnectionId == null) return;
+
+        final isProxyStarted = await ensureProxyStartedForConnection(
+          context,
+          ref,
+          proxyConnectionId,
+        );
+
+        if (isProxyStarted &&
+            context.mounted &&
+            ref.read(selectedTabProvider) == tabId) {
+          await ref.read(tabSessionProvider(tabId: tabId).notifier).reload();
+        }
+      } catch (error, stackTrace) {
+        logger.e(
+          'Failed to handle proxy load error',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      } finally {
+        activeProxyPromptKeys.value.remove(promptKey);
+      }
+    }
+
+    useEffect(() {
+      final tabId = selectedTabIdForProxyPrompt;
+      if (tabId == null) return null;
+
+      final pending = pendingProxyLoadErrors.value.remove(tabId);
+      if (pending == null) return null;
+
+      unawaited(
+        handleProxyLoadError(
+          tabId: tabId,
+          contextId: pending.contextId,
+          url: pending.url,
+          errorType: pending.errorType,
+        ),
+      );
+      return null;
+    }, [selectedTabIdForProxyPrompt]);
 
     useOnStreamChange(
       eventService.proxyLoadErrorEvents,
       onData: (event) async {
         final selectedTabId = ref.read(selectedTabProvider);
         final tabId = event.tabId ?? selectedTabId;
-        if (tabId == null || tabId != selectedTabId) return;
+        if (tabId == null) return;
 
-        final promptKey = '$tabId:${event.url ?? event.errorType}';
-        if (!activeProxyPromptKeys.value.add(promptKey)) return;
-
-        try {
-          final contextId = event.contextId;
-          final contextContainer = contextId != null && contextId.isNotEmpty
-              ? await ref
-                    .read(containerRepositoryProvider.notifier)
-                    .getContainerByContextualIdentity(contextId)
-              : null;
-          final container =
-              contextContainer ??
-              await ref
-                  .read(tabDataRepositoryProvider.notifier)
-                  .getTabContainerData(tabId);
-
-          if (!context.mounted || container == null) return;
-
-          final isProxyStarted = await ensureProxyStartedForContainer(
-            context,
-            ref,
-            container,
+        if (tabId != selectedTabId) {
+          pendingProxyLoadErrors.value[tabId] = (
+            contextId: event.contextId,
+            errorType: event.errorType,
+            url: event.url,
           );
-
-          if (isProxyStarted &&
-              context.mounted &&
-              ref.read(selectedTabProvider) == tabId) {
-            await ref.read(tabSessionProvider(tabId: tabId).notifier).reload();
-          }
-        } catch (error, stackTrace) {
-          logger.e(
-            'Failed to handle proxy load error',
-            error: error,
-            stackTrace: stackTrace,
-          );
-        } finally {
-          activeProxyPromptKeys.value.remove(promptKey);
+          return;
         }
+
+        await handleProxyLoadError(
+          tabId: tabId,
+          contextId: event.contextId,
+          url: event.url,
+          errorType: event.errorType,
+        );
       },
     );
 

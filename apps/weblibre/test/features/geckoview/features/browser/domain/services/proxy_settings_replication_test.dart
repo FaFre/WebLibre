@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:drift/native.dart';
-import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_tor/flutter_tor.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -17,7 +16,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/repositories/container_proxy.dart';
-import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/models/proxy_routing_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/proxy_routing_settings.dart';
@@ -26,7 +24,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test(
-    'container assignments ensure sing-box profiles are running before syncing',
+    'container assignments sync without starting stopped sing-box profiles',
     () async {
       const profileId = SingboxProxyConnectionId('profile-1');
       final assignedContainer = _container(
@@ -44,7 +42,6 @@ void main() {
       );
       final containerProxyRepository = _FakeContainerProxyRepository();
       final containerRepository = _FakeContainerRepository([assignedContainer]);
-      final runtimeRepository = _FakeSingboxProxyRuntimeRepository();
       final container = ProviderContainer(
         overrides: [
           tabDatabaseProvider.overrideWith((ref) => db),
@@ -52,9 +49,6 @@ void main() {
             () => containerProxyRepository,
           ),
           containerRepositoryProvider.overrideWith(() => containerRepository),
-          singboxProxyRuntimeRepositoryProvider.overrideWith(
-            () => runtimeRepository,
-          ),
           torProxyServiceProvider.overrideWith(_FakeTorProxyService.new),
           proxyRoutingSettingsWithDefaultsProvider.overrideWith(
             (ref) => ProxyRoutingSettings.withDefaults(),
@@ -83,7 +77,6 @@ void main() {
       addTearDown(subscription.close);
       await pumpEventQueue();
 
-      expect(runtimeRepository.ensuredProxyConnectionIds, [profileId]);
       expect(containerProxyRepository.setContainerProxyCalls, [
         ('context-a', profileId.encode()),
       ]);
@@ -142,25 +135,6 @@ class _FakeContainerRepository extends ContainerRepository {
 
   @override
   void build() {}
-}
-
-class _FakeSingboxProxyRuntimeRepository extends SingboxProxyRuntimeRepository {
-  final ensuredProxyConnectionIds = <SingboxProxyConnectionId>[];
-
-  @override
-  Future<void> ensureProxyConnectionAvailable(
-    SingboxProxyConnectionId connectionId,
-  ) async {
-    ensuredProxyConnectionIds.add(connectionId);
-  }
-
-  @override
-  Future<SingboxProxyRuntimeState> build() async {
-    return SingboxProxyRuntimeState(
-      status: SingboxProxyRuntimeStatus.stopped,
-      endpoints: [],
-    );
-  }
 }
 
 class _FakeTorProxyService extends TorProxyService {
