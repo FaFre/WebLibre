@@ -68,7 +68,10 @@ dependencies:
   permission_handler: ^12.0.1
   pretty_qr_code: ^3.6.0
   privacypass_client:
-    path: ../../../weblibre_account/packages/privacypass_client
+    git:
+      url: https://gitlab.com/weblibre/search_client.git
+      ref: 1b323c7cb2a520e33a7e7fce37a080c9e6e7f2e8
+      path: packages/privacypass_client
   qr_code_scanner_plus: ^2.1.1
   quick_actions: ^1.1.0
   riverpod: ^3.2.1
@@ -78,9 +81,15 @@ dependencies:
   saf_stream: ^2.0.0
   saf_util: ^2.2.0
   search_client:
-    path: ../../../weblibre_account/packages/search_client
+    git:
+      url: https://gitlab.com/weblibre/search_client.git
+      ref: 1b323c7cb2a520e33a7e7fce37a080c9e6e7f2e8
+      path: packages/search_client
   search_protocol:
-    path: ../../../weblibre_account/packages/search_protocol
+    git:
+      url: https://gitlab.com/weblibre/search_client.git
+      ref: 1b323c7cb2a520e33a7e7fce37a080c9e6e7f2e8
+      path: packages/search_protocol
   secure_archive:
     git:
       url: https://github.com/FaFre/secure_archive.git
