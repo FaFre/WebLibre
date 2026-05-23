@@ -38,13 +38,37 @@ class FlutterTorPlugin : FlutterPlugin, TorApi {
     @Volatile
     private var serviceConnected = CompletableDeferred<Unit>()
 
+    private fun startTorService(ctx: Context) {
+        val intent = Intent(ctx, TorService::class.java).apply {
+            action = TorService.ACTION_START
+        }
+        ContextCompat.startForegroundService(ctx, intent)
+    }
+
+    private fun rebindTorService(createIfNeeded: Boolean) {
+        Log.w(TAG, "Rebinding TorService (createIfNeeded=$createIfNeeded)")
+        unbindTorService()
+        serviceConnected = CompletableDeferred()
+        bindTorService(createIfNeeded)
+    }
+
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         Log.d(TAG, "onAttachedToEngine")
-        context = flutterPluginBinding.applicationContext
+        val appContext = flutterPluginBinding.applicationContext
+        context = appContext
         binaryMessenger = flutterPluginBinding.binaryMessenger
 
         // Setup Pigeon API
         TorApi.setUp(flutterPluginBinding.binaryMessenger, this)
+        // PT control is needed before TorService is bound (for MOAT bridge
+        // discovery), so expose it at engine attach time using the process-wide
+        // singleton controller.
+        IPtProxyController.setUp(
+            flutterPluginBinding.binaryMessenger,
+            ProxyImpl(
+                controller = PluggableTransportManager.getInstance(appContext).controller,
+            ),
+        )
 
         // Reconnect to an already-running TorService without creating a new idle instance.
         bindTorService(createIfNeeded = false)
@@ -55,6 +79,7 @@ class FlutterTorPlugin : FlutterPlugin, TorApi {
 
         // Cleanup Pigeon API
         TorApi.setUp(binding.binaryMessenger, null)
+        IPtProxyController.setUp(binding.binaryMessenger, null)
 
         // Unbind service
         unbindTorService()
@@ -72,7 +97,18 @@ class FlutterTorPlugin : FlutterPlugin, TorApi {
     private fun bindTorService(createIfNeeded: Boolean) {
         val ctx = context ?: return
         val messenger = binaryMessenger ?: return
-        if (serviceConnection != null) return
+        if (serviceConnection != null) {
+            if (createIfNeeded && torService == null) {
+                try {
+                    Log.d(TAG, "TorService bind pending; requesting foreground start")
+                    startTorService(ctx)
+                } catch (e: Exception) {
+                    Log.e(TAG, "startForegroundService failed during pending bind", e)
+                    serviceConnection = null
+                }
+            }
+            return
+        }
 
         val connection = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -107,7 +143,7 @@ class FlutterTorPlugin : FlutterPlugin, TorApi {
 
         try {
             if (createIfNeeded) {
-                ContextCompat.startForegroundService(ctx, intent)
+                startTorService(ctx)
             }
 
             val flags = if (createIfNeeded) Context.BIND_AUTO_CREATE else 0
@@ -140,9 +176,24 @@ class FlutterTorPlugin : FlutterPlugin, TorApi {
      * Wait for service to be connected. Triggers a rebind if needed.
      */
     private suspend fun waitForService(): TorService {
+        torService?.let { return it }
+
         if (serviceConnection == null) {
             bindTorService(createIfNeeded = true)
+        } else if (torService == null) {
+            Log.d(TAG, "TorService not connected yet; escalating lazy bind")
+            bindTorService(createIfNeeded = true)
         }
+
+        val connected = withTimeoutOrNull(5_000L) {
+            serviceConnected.await()
+            torService
+        }
+        if (connected != null) {
+            return connected
+        }
+
+        rebindTorService(createIfNeeded = true)
         return withTimeoutOrNull(SERVICE_CONNECTION_TIMEOUT_MS) {
             serviceConnected.await()
             torService

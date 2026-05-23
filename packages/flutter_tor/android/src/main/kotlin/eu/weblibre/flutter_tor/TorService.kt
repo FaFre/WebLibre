@@ -11,7 +11,6 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import eu.weblibre.flutter_tor.generated.IPtProxyController
 import eu.weblibre.flutter_tor.generated.TorConfiguration
 import eu.weblibre.flutter_tor.generated.TorStatus
 import io.flutter.plugin.common.BinaryMessenger
@@ -82,11 +81,6 @@ class TorService : Service() {
         if (logHandler == null) {
             logHandler = LogStreamHandler(messenger)
             torManager = TorManager(applicationContext, logHandler!!)
-
-            IPtProxyController.setUp(
-                messenger,
-                ProxyImpl(controller = torManager!!.pluggableTransportManager.controller)
-            )
 
             Log.d(TAG, "Service initialized with messenger")
         }
