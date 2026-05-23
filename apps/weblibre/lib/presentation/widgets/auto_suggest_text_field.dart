@@ -51,6 +51,7 @@ class AutoSuggestTextField extends HookWidget {
   final TapRegionCallback? onTapOutside;
   final VoidCallback? onTap;
   final VoidCallback? onSuggestionDismiss;
+  final bool enableSuggestions;
   final bool autocorrect;
   final GlobalKey? textFieldKey;
 
@@ -86,6 +87,7 @@ class AutoSuggestTextField extends HookWidget {
     this.onTapOutside,
     this.onTap,
     this.onSuggestionDismiss,
+    this.enableSuggestions = false,
     this.autocorrect = false,
     this.textFieldKey,
     this.acceptSuggestionOnSubmit = false,
@@ -217,6 +219,7 @@ class AutoSuggestTextField extends HookWidget {
           onChanged: onChanged,
           onEditingComplete: onEditingComplete,
           validator: validator,
+          enableSuggestions: enableSuggestions,
           autocorrect: autocorrect,
           onFieldSubmitted: onSubmitted.mapNotNull(
             (onSubmitted) => (value) {

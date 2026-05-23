@@ -127,13 +127,16 @@ class SearchField extends HookConsumerWidget {
         controller: textEditingController,
         suggestion: suggestion.value,
         acceptSuggestionOnSubmit: acceptSuggestionOnSubmit,
+        enableSuggestions: false,
+        autocorrect: false,
         enableIMEPersonalizedLearning: !incognitoEnabled,
         focusNode: safeFocusNode,
         maxLines: maxLines,
         textFieldKey: textFieldKey,
+        keyboardType: TextInputType.webSearch,
         textInputAction: (maxLines == null || maxLines! > 1)
             ? TextInputAction.done
-            : TextInputAction.search,
+            : TextInputAction.send,
         minLines: minLines,
         autofocus: autofocus,
         onSuggestionDismiss: () {
