@@ -432,7 +432,7 @@ class _TabListView extends HookConsumerWidget {
                   onReorderStart: (index) {
                     ref.read(willAcceptDropProvider.notifier).clear();
                   },
-                  onReorder: (oldIndex, newIndex) async {
+                  onReorderItem: (oldIndex, newIndex) async {
                     //Suggestions are at the end and not reorderable, so skip
                     if (oldIndex >= primaryRows.length) {
                       return;

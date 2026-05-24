@@ -85,7 +85,7 @@ class ContainerListScreen extends HookConsumerWidget {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
               sliver: SliverReorderableList(
                 itemCount: containers.length,
-                onReorder: (oldIndex, newIndex) {
+                onReorderItem: (oldIndex, newIndex) {
                   unawaited(
                     repository.reorderContainer(containers, oldIndex, newIndex),
                   );

@@ -216,11 +216,7 @@ class ContainerRepository extends _$ContainerRepository {
   ) async {
     if (containers.isEmpty || oldIndex == newIndex) return;
 
-    var targetIndex = newIndex;
-    if (targetIndex > oldIndex) {
-      targetIndex -= 1;
-    }
-    targetIndex = targetIndex.clamp(0, containers.length - 1);
+    final targetIndex = newIndex.clamp(0, containers.length - 1);
     if (targetIndex == oldIndex) return;
 
     final movingContainer = containers[oldIndex];

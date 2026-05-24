@@ -77,8 +77,7 @@ class SearchModuleOrder extends _$SearchModuleOrder {
   void reorder(int oldIndex, int newIndex) {
     final list = [...state];
     final item = list.removeAt(oldIndex);
-    final insertIndex = newIndex > oldIndex ? newIndex - 1 : newIndex;
-    list.insert(insertIndex, item);
+    list.insert(newIndex, item);
     state = list;
   }
 

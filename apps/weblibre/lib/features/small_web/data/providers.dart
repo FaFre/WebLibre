@@ -25,7 +25,6 @@ import 'package:drift/native.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
 import 'package:weblibre/core/database_registry.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/features/small_web/data/database/database.dart';
@@ -36,14 +35,10 @@ part 'providers.g.dart';
 @Riverpod(keepAlive: true)
 SmallWebDatabase smallWebDatabase(Ref ref) {
   final db = SmallWebDatabase(
-    LazyDatabase(() async {
+    LazyDatabase(() {
       final file = File(
         p.join(filesystem.profileDatabasesDir.path, 'small_web.db'),
       );
-
-      if (Platform.isAndroid) {
-        await applyWorkaroundToOpenSqlite3OnOldAndroidVersions();
-      }
 
       return NativeDatabase.createInBackground(file);
     }),

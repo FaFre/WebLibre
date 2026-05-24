@@ -48,7 +48,7 @@ final class UserDatabaseProvider
   }
 }
 
-String _$userDatabaseHash() => r'05386a087a53dedd5f51859f45eb93ecf449c3c4';
+String _$userDatabaseHash() => r'6751fe70be0d590d529e99b44140076174122acc';
 
 @ProviderFor(riverpodDatabaseStorage)
 final riverpodDatabaseStorageProvider = RiverpodDatabaseStorageProvider._();

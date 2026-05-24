@@ -23,7 +23,6 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
 import 'package:weblibre/core/database_registry.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/features/bangs/data/database/database.dart';
@@ -33,13 +32,8 @@ part 'providers.g.dart';
 @Riverpod(keepAlive: true)
 BangDatabase bangDatabase(Ref ref) {
   final db = BangDatabase(
-    LazyDatabase(() async {
+    LazyDatabase(() {
       final file = File(p.join(filesystem.profileDatabasesDir.path, 'bang.db'));
-
-      // Also work around limitations on old Android versions
-      if (Platform.isAndroid) {
-        await applyWorkaroundToOpenSqlite3OnOldAndroidVersions();
-      }
 
       return NativeDatabase.createInBackground(file);
     }),

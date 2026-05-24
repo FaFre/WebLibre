@@ -53,7 +53,7 @@ final class SmallWebDatabaseProvider
   }
 }
 
-String _$smallWebDatabaseHash() => r'e199e8c1261e8152110fb99f883fed1e550ffdc6';
+String _$smallWebDatabaseHash() => r'4c514677f7944612515ccadfe8ad7ec3a9075f3f';
 
 @ProviderFor(kagiCategories)
 final kagiCategoriesProvider = KagiCategoriesProvider._();

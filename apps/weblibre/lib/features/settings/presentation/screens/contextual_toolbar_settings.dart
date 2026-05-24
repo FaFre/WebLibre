@@ -120,7 +120,7 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
         else
           SliverReorderableList(
             itemCount: visibleConfigs.length,
-            onReorder: (oldIndex, newIndex) => _onReorder(
+            onReorderItem: (oldIndex, newIndex) => _onReorder(
               visibleConfigs,
               oldIndex,
               newIndex,
@@ -158,7 +158,7 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
         else
           SliverReorderableList(
             itemCount: hiddenConfigs.length,
-            onReorder: (oldIndex, newIndex) => _onReorder(
+            onReorderItem: (oldIndex, newIndex) => _onReorder(
               hiddenConfigs,
               oldIndex,
               newIndex,
@@ -185,11 +185,7 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
     int oldIndex,
     int newIndex,
   ) {
-    var targetIndex = newIndex;
-    if (targetIndex > oldIndex) {
-      targetIndex -= 1;
-    }
-    targetIndex = targetIndex.clamp(0, configs.length - 1);
+    final targetIndex = newIndex.clamp(0, configs.length - 1);
     return (movedId: configs[oldIndex].buttonId, targetIndex: targetIndex);
   }
 

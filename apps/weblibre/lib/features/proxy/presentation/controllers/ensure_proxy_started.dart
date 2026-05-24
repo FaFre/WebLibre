@@ -37,7 +37,7 @@ Future<bool> ensureProxyStartedForContainer(
   BuildContext context,
   WidgetRef ref,
   ContainerData container,
-) async {
+) {
   return ensureProxyStartedForConnection(
     context,
     ref,
@@ -117,6 +117,9 @@ Future<bool> _maybeStartSingboxProxy(
     ref,
     proxyConnectionId,
   );
+
+  if (!context.mounted) return false;
+
   final shouldStart = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(

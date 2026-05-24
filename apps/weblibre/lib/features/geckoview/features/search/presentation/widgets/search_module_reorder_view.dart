@@ -56,7 +56,7 @@ class SearchModuleReorderView extends ConsumerWidget {
         ),
         SliverReorderableList(
           itemCount: entries.length,
-          onReorder: (oldIndex, newIndex) {
+          onReorderItem: (oldIndex, newIndex) {
             ref
                 .read(searchModuleOrderProvider(group).notifier)
                 .reorder(oldIndex, newIndex);

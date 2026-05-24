@@ -21,7 +21,17 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:json_annotation/json_annotation.dart';
+
+final Map<String, IconData> _mdiIconsByName = Map.unmodifiable({
+  for (final iconData in MdiIcons.values)
+    if (iconData.mdiMetadata case final metadata?) metadata.name: iconData,
+});
+
+final Map<int, IconData> _mdiIconsByCodePoint = Map.unmodifiable({
+  for (final iconData in MdiIcons.values) iconData.codePoint: iconData,
+});
 
 class IconDataJsonConverter
     implements JsonConverter<IconData, Map<String, dynamic>> {
@@ -29,20 +39,36 @@ class IconDataJsonConverter
 
   @override
   IconData fromJson(Map<String, dynamic> json) {
-    return IconData(
-      json['codePoint'] as int,
-      fontFamily: json['fontFamily'] as String?,
-      fontPackage: json['fontPackage'] as String?,
-    );
+    if (json['name'] case final String name) {
+      final iconData = _mdiIconsByName[name];
+      if (iconData != null) {
+        return iconData;
+      }
+    }
+
+    final codePoint = json['codePoint'];
+    if (codePoint is int) {
+      final iconData = _mdiIconsByCodePoint[codePoint];
+      if (iconData != null) {
+        return iconData;
+      }
+    }
+
+    throw FormatException('Unknown MDI icon data: $json');
   }
 
   @override
   Map<String, dynamic> toJson(IconData iconData) {
-    return <String, dynamic>{
-      'codePoint': iconData.codePoint,
-      'fontFamily': iconData.fontFamily,
-      'fontPackage': iconData.fontPackage,
-    };
+    final metadata = iconData.mdiMetadata;
+    if (metadata == null) {
+      throw ArgumentError.value(
+        iconData,
+        'iconData',
+        'Icon is not an MDI icon',
+      );
+    }
+
+    return <String, dynamic>{'name': metadata.name};
   }
 }
 
@@ -57,11 +83,6 @@ class IconDataTypeConverter implements TypeConverter<IconData, String> {
 
   @override
   String toSql(IconData value) {
-    assert(
-      value.fontFamily != null,
-      'Font family must be provided to identify icon',
-    );
-
     return jsonEncode(const IconDataJsonConverter().toJson(value));
   }
 }

@@ -56,11 +56,7 @@ TabViewReorderResult? buildTabViewReorderResult({
   final reordered = visibleItems.toList();
   final movingItem = reordered.removeAt(oldIndex);
 
-  var insertIndex = newIndex;
-  if (insertIndex > oldIndex) {
-    insertIndex -= 1;
-  }
-  insertIndex = insertIndex.clamp(0, reordered.length);
+  final insertIndex = newIndex.clamp(0, reordered.length);
   reordered.insert(insertIndex, movingItem);
 
   if (!hierarchical) {
