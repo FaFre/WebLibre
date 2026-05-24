@@ -21,4 +21,4 @@ const webSearchBangKey = BangKey(
 );
 
 bool isWebSearchBang(BangData? bang) =>
-    bang != null && bang.group == BangGroup.weblibre;
+    bang != null && bang.toKey() == webSearchBangKey;

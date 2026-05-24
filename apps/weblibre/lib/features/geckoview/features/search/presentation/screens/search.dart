@@ -83,6 +83,7 @@ class SearchScreen extends HookConsumerWidget {
   final String? initialSearchText;
   final TabType tabType;
   final bool launchedFromIntent;
+  final bool autoSubmitSearch;
 
   /// When provided, URLs will be loaded into this existing tab.
   /// When null, a new tab will be created.
@@ -93,6 +94,7 @@ class SearchScreen extends HookConsumerWidget {
     required this.initialSearchText,
     required this.tabType,
     this.launchedFromIntent = false,
+    this.autoSubmitSearch = false,
     this.tabId,
   });
 
@@ -429,6 +431,25 @@ class SearchScreen extends HookConsumerWidget {
         }
       }
     }
+
+    final autoSubmittedInitialSearch = useRef(false);
+    useEffect(() {
+      if (!autoSubmitSearch ||
+          autoSubmittedInitialSearch.value ||
+          initialSearchText == null ||
+          initialSearchText!.trim().isEmpty ||
+          activeBang == null ||
+          !isWebSearchBang(activeBang)) {
+        return null;
+      }
+
+      autoSubmittedInitialSearch.value = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        unawaited(resolveSearchUri(activeBang, initialSearchText!));
+      });
+
+      return null;
+    }, [autoSubmitSearch, initialSearchText, activeBang]);
 
     // Persist the results scroll offset across navigation so returning to
     // the search screen after opening a result restores the user's place

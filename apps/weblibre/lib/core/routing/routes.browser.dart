@@ -91,6 +91,8 @@ class SearchRoute extends GoRouteData with $SearchRoute {
 
   final bool launchedFromIntent;
 
+  final bool autoSubmitSearch;
+
   /// When provided, the search screen will load URLs into this existing tab
   /// instead of creating a new tab. This also changes the UI to show
   /// site-specific bangs instead of the tab type selector.
@@ -100,6 +102,7 @@ class SearchRoute extends GoRouteData with $SearchRoute {
     required this.tabType,
     this.searchText = SearchRoute.emptySearchText,
     this.launchedFromIntent = false,
+    this.autoSubmitSearch = false,
     this.tabId,
   });
 
@@ -111,6 +114,7 @@ class SearchRoute extends GoRouteData with $SearchRoute {
           ? null
           : searchText,
       launchedFromIntent: launchedFromIntent,
+      autoSubmitSearch: autoSubmitSearch,
       tabId: tabId,
     );
   }

@@ -632,6 +632,13 @@ mixin $SearchRoute on GoRouteData {
           _$boolConverter,
         ) ??
         false,
+    autoSubmitSearch:
+        _$convertMapValue(
+          'auto-submit-search',
+          state.uri.queryParameters,
+          _$boolConverter,
+        ) ??
+        false,
     tabId: state.uri.queryParameters['tab-id'],
   );
 
@@ -643,6 +650,8 @@ mixin $SearchRoute on GoRouteData {
     queryParams: {
       if (_self.launchedFromIntent != false)
         'launched-from-intent': _self.launchedFromIntent.toString(),
+      if (_self.autoSubmitSearch != false)
+        'auto-submit-search': _self.autoSubmitSearch.toString(),
       if (_self.tabId != null) 'tab-id': _self.tabId,
     },
   );

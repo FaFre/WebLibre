@@ -26,6 +26,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/bangs/data/models/web_search_bang.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
@@ -82,6 +83,20 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
                     .read(generalSettingsWithDefaultsProvider)
                     .effectiveDefaultCreateTabType,
               );
+
+          if (isWebSearchBang(searchBang)) {
+            final router = await ref.read(routerProvider.future);
+            if (!ref.mounted) return;
+
+            await router.push(
+              SearchRoute(
+                tabType: tabMode.toTabType(),
+                searchText: text,
+                autoSubmitSearch: true,
+              ).location,
+            );
+            return;
+          }
 
           await ref
               .read(tabRepositoryProvider.notifier)
