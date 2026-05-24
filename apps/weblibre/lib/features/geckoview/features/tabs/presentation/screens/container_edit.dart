@@ -38,6 +38,7 @@ import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
+import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 
 enum _DialogMode { create, edit }
 
@@ -80,6 +81,11 @@ class ContainerEditScreen extends HookConsumerWidget {
     final colorScheme = theme.colorScheme;
 
     final proxyOptions = ref.watch(proxyConnectionOptionsProvider);
+    final proxyOptionsLoading = ref.watch(
+      singboxProxyProfilesRepositoryProvider.select(
+        (value) => value.isLoading && !value.hasValue,
+      ),
+    );
 
     final selectedColor = useState(initialContainer.color);
     final selectedIcon = useState(initialContainer.metadata.iconData);
@@ -383,7 +389,11 @@ class ContainerEditScreen extends HookConsumerWidget {
                           leading: const Icon(Icons.route_outlined),
                           title: const Text('Proxy Connection'),
                           subtitle: Text(switch (proxyConnectionId.value) {
-                            final id? => proxyConnectionTitle(proxyOptions, id),
+                            final id? => proxyConnectionTitle(
+                              proxyOptions,
+                              id,
+                              isLoading: proxyOptionsLoading,
+                            ),
                             null => 'None',
                           }),
                           trailing: const Icon(Icons.chevron_right),
@@ -401,6 +411,12 @@ class ContainerEditScreen extends HookConsumerWidget {
                                         uuid.v4();
                                   }
 
+                                  final optionsLoaded = ref
+                                      .read(
+                                        singboxProxyProfilesRepositoryProvider,
+                                      )
+                                      .hasValue;
+
                                   final outcome =
                                       await showModalBottomSheet<
                                         _ProxyPickerOutcome
@@ -410,6 +426,7 @@ class ContainerEditScreen extends HookConsumerWidget {
                                         builder: (context) {
                                           return _ProxyConnectionPickerSheet(
                                             options: proxyOptions,
+                                            optionsLoaded: optionsLoaded,
                                             selectedProxyConnectionId:
                                                 proxyConnectionId.value,
                                           );
@@ -586,10 +603,12 @@ class _ProxyPickerSelected extends _ProxyPickerOutcome {
 
 class _ProxyConnectionPickerSheet extends StatelessWidget {
   final List<ProxyConnectionOption> options;
+  final bool optionsLoaded;
   final ProxyConnectionId? selectedProxyConnectionId;
 
   const _ProxyConnectionPickerSheet({
     required this.options,
+    required this.optionsLoaded,
     required this.selectedProxyConnectionId,
   });
 
@@ -597,7 +616,8 @@ class _ProxyConnectionPickerSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasUnknownSelectedProxy =
         selectedProxyConnectionId != null &&
-        !options.any((option) => option.id == selectedProxyConnectionId);
+        optionsLoaded &&
+        !proxyConnectionOptionExists(options, selectedProxyConnectionId!);
 
     return SafeArea(
       child: RadioGroup<ProxyConnectionId?>(

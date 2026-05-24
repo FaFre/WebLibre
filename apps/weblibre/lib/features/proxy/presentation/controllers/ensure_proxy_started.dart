@@ -24,6 +24,7 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
+import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
 import 'package:weblibre/features/tor/presentation/widgets/tor_dialog.dart';
@@ -112,8 +113,8 @@ Future<bool> _maybeStartSingboxProxy(
 
   if (isRunning) return true;
 
-  final proxyTitle = proxyConnectionTitle(
-    ref.read(proxyConnectionOptionsProvider),
+  final proxyTitle = await _proxyConnectionTitleForPrompt(
+    ref,
     proxyConnectionId,
   );
   final shouldStart = await showDialog<bool>(
@@ -155,6 +156,35 @@ Future<bool> _maybeStartSingboxProxy(
     }
     return false;
   }
+}
+
+Future<String> _proxyConnectionTitleForPrompt(
+  WidgetRef ref,
+  ProxyConnectionId proxyConnectionId,
+) async {
+  final options = ref.read(proxyConnectionOptionsProvider);
+  final title = proxyConnectionTitle(options, proxyConnectionId);
+
+  if (title != unknownProxyTitle) {
+    return title;
+  }
+
+  if (proxyConnectionId is SingboxProxyConnectionId) {
+    try {
+      final profile = await ref
+          .read(singboxProxyProfilesRepositoryProvider.notifier)
+          .findProfile(proxyConnectionId.profileId);
+      if (profile != null) return profile.name;
+    } catch (error, stackTrace) {
+      logger.w(
+        'Failed to resolve sing-box proxy profile ${proxyConnectionId.profileId} for prompt title',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  return proxyConnectionTitle(options, proxyConnectionId);
 }
 
 Future<SingboxProxyRuntimeState> _resolveRuntimeStateForPrompt(

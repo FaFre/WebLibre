@@ -27,6 +27,9 @@ import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profil
 
 part 'proxy_connection_options.g.dart';
 
+const loadingProxyTitle = 'Loading proxy...';
+const unknownProxyTitle = 'Unknown proxy';
+
 class ProxyConnectionOption with FastEquatable {
   final ProxyConnectionId id;
   final String title;
@@ -72,13 +75,21 @@ List<ProxyConnectionOption> proxyConnectionOptions(Ref ref) {
 
 String proxyConnectionTitle(
   List<ProxyConnectionOption> options,
-  ProxyConnectionId proxyConnectionId,
-) {
+  ProxyConnectionId proxyConnectionId, {
+  bool isLoading = false,
+}) {
   for (final option in options) {
     if (option.id == proxyConnectionId) {
       return option.title;
     }
   }
 
-  return 'Unknown proxy';
+  return isLoading ? loadingProxyTitle : unknownProxyTitle;
+}
+
+bool proxyConnectionOptionExists(
+  List<ProxyConnectionOption> options,
+  ProxyConnectionId proxyConnectionId,
+) {
+  return options.any((option) => option.id == proxyConnectionId);
 }

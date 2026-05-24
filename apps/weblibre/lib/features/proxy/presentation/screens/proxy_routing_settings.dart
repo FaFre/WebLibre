@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
+import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/proxy_routing_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/proxy_routing_settings.dart';
@@ -129,8 +130,10 @@ class _GlobalRoutingProxySection extends ConsumerWidget {
     }
 
     final options = ref.watch(proxyConnectionOptionsProvider);
+    final optionsState = ref.watch(singboxProxyProfilesRepositoryProvider);
     return _ProxyConnectionPicker(
       options: options,
+      optionsLoaded: optionsState.hasValue,
       selectedId: settings.regularTabsProxyConnectionId,
       onChanged: (id) => ref
           .read(proxyRoutingSettingsRepositoryProvider.notifier)
@@ -148,8 +151,10 @@ class _PrivateTabsProxySection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(proxyRoutingSettingsWithDefaultsProvider);
     final options = ref.watch(proxyConnectionOptionsProvider);
+    final optionsState = ref.watch(singboxProxyProfilesRepositoryProvider);
     return _ProxyConnectionPicker(
       options: options,
+      optionsLoaded: optionsState.hasValue,
       selectedId: settings.privateTabsProxyConnectionId,
       onChanged: (id) => ref
           .read(proxyRoutingSettingsRepositoryProvider.notifier)
@@ -162,11 +167,13 @@ class _PrivateTabsProxySection extends ConsumerWidget {
 
 class _ProxyConnectionPicker extends StatelessWidget {
   final List<ProxyConnectionOption> options;
+  final bool optionsLoaded;
   final ProxyConnectionId? selectedId;
   final ValueChanged<ProxyConnectionId?> onChanged;
 
   const _ProxyConnectionPicker({
     required this.options,
+    required this.optionsLoaded,
     required this.selectedId,
     required this.onChanged,
   });
@@ -174,7 +181,9 @@ class _ProxyConnectionPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasUnknownSelection =
-        selectedId != null && !options.any((option) => option.id == selectedId);
+        selectedId != null &&
+        optionsLoaded &&
+        !proxyConnectionOptionExists(options, selectedId!);
 
     return RadioGroup<ProxyConnectionId?>(
       groupValue: selectedId,

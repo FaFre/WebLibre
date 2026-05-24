@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -5,8 +7,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
+import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
 import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
+import 'package:weblibre/features/user/data/database/definitions.drift.dart'
+    show ProxyProfile;
 
 void main() {
   testWidgets(
@@ -47,10 +52,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Start Proxy Connection?'), findsOneWidget);
-      expect(
-        find.textContaining('This tab needs Mullvad'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('This tab needs Mullvad'), findsOneWidget);
 
       await tester.tap(find.text('Start'));
       await tester.pumpAndSettle();
@@ -58,6 +60,56 @@ void main() {
       expect(runtimeRepository.startedProfileIds, ['profile-1']);
       expect(find.text('result:true'), findsOneWidget);
     },
+  );
+
+  testWidgets('resolves sing-box prompt title while profile options load', (
+    tester,
+  ) async {
+    final runtimeRepository = _ErrorRuntimeRepository();
+    final profilesRepository = _LoadingProfilesRepository([
+      _profile(id: 'profile-1', name: 'Mullvad'),
+    ]);
+    final container = ContainerData(
+      id: 'container-1',
+      color: Colors.blue,
+      orderKey: 'a',
+      metadata: ContainerMetadata.withDefaults(
+        proxyConnectionId: const SingboxProxyConnectionId('profile-1'),
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          singboxProxyRuntimeRepositoryProvider.overrideWith(
+            () => runtimeRepository,
+          ),
+          singboxProxyProfilesRepositoryProvider.overrideWith(
+            () => profilesRepository,
+          ),
+        ],
+        child: MaterialApp(home: _EnsureProxyHarness(container: container)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Open container'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('This tab needs Mullvad'), findsOneWidget);
+    expect(find.textContaining('Unknown proxy'), findsNothing);
+  });
+}
+
+ProxyProfile _profile({required String id, required String name}) {
+  final createdAt = DateTime(2026);
+  return ProxyProfile(
+    id: id,
+    name: name,
+    type: SingboxProxyProfileType.customOutbound,
+    configJson: '{"type":"socks"}',
+    createdAt: createdAt,
+    updatedAt: createdAt,
   );
 }
 
@@ -126,5 +178,24 @@ class _ErrorRuntimeRepository extends SingboxProxyRuntimeRepository {
         ),
       ],
     );
+  }
+}
+
+class _LoadingProfilesRepository extends SingboxProxyProfilesRepository {
+  final List<ProxyProfile> profiles;
+
+  _LoadingProfilesRepository(this.profiles);
+
+  @override
+  Stream<List<ProxyProfile>> build() async* {
+    await Completer<void>().future;
+  }
+
+  @override
+  Future<ProxyProfile?> findProfile(String id) async {
+    for (final profile in profiles) {
+      if (profile.id == id) return profile;
+    }
+    return null;
   }
 }

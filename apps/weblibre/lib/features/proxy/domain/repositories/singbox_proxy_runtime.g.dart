@@ -87,7 +87,7 @@ final class SingboxProxyRuntimeRepositoryProvider
 }
 
 String _$singboxProxyRuntimeRepositoryHash() =>
-    r'bb84ab57abd3b7261105da85d3e047cef1b31a44';
+    r'660543fd3f82a5fcc5c3c85b11d0a98d472638af';
 
 abstract class _$SingboxProxyRuntimeRepository
     extends $AsyncNotifier<SingboxProxyRuntimeState> {

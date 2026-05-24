@@ -32,6 +32,7 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/c
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
 import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
+import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
@@ -183,6 +184,9 @@ class _ContainerCard extends HookConsumerWidget {
     final tabCount = container.tabCount ?? 0;
     final palette = ContainerColors.palette(context, containerColor);
     final proxyOptions = ref.watch(proxyConnectionOptionsProvider);
+    final proxyOptionsState = ref.watch(singboxProxyProfilesRepositoryProvider);
+    final proxyOptionsLoading =
+        proxyOptionsState.isLoading && !proxyOptionsState.hasValue;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
@@ -253,6 +257,7 @@ class _ContainerCard extends HookConsumerWidget {
                                   label: proxyConnectionTitle(
                                     proxyOptions,
                                     container.metadata.proxyConnectionId!,
+                                    isLoading: proxyOptionsLoading,
                                   ),
                                 ),
                               if (container.metadata.clearDataOnExit)

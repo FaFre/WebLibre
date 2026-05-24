@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -5,6 +7,9 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/container_
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_edit.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
+import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
+import 'package:weblibre/features/user/data/database/definitions.drift.dart'
+    show ProxyProfile;
 
 void main() {
   testWidgets(
@@ -16,6 +21,9 @@ void main() {
             proxyConnectionOptionsProvider.overrideWith(
               (ref) => const <ProxyConnectionOption>[],
             ),
+            singboxProxyProfilesRepositoryProvider.overrideWith(
+              () => _LoadedProfilesRepository(const []),
+            ),
           ],
           child: MaterialApp(
             home: ContainerEditScreen.create(
@@ -24,7 +32,9 @@ void main() {
                 color: Colors.blue,
                 orderKey: 'a',
                 metadata: ContainerMetadata.withDefaults(
-                  proxyConnectionId: const SingboxProxyConnectionId('missing-proxy'),
+                  proxyConnectionId: const SingboxProxyConnectionId(
+                    'missing-proxy',
+                  ),
                 ),
               ),
             ),
@@ -56,6 +66,9 @@ void main() {
             proxyConnectionOptionsProvider.overrideWith(
               (ref) => const <ProxyConnectionOption>[],
             ),
+            singboxProxyProfilesRepositoryProvider.overrideWith(
+              () => _LoadedProfilesRepository(const []),
+            ),
           ],
           child: MaterialApp(
             home: ContainerEditScreen.create(
@@ -83,4 +96,58 @@ void main() {
       expect(find.text('New Container'), findsOneWidget);
     },
   );
+
+  testWidgets('does not offer to clear selected proxy while profiles load', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          proxyConnectionOptionsProvider.overrideWith(
+            (ref) => const <ProxyConnectionOption>[],
+          ),
+          singboxProxyProfilesRepositoryProvider.overrideWith(
+            () => _LoadingProfilesRepository(),
+          ),
+        ],
+        child: MaterialApp(
+          home: ContainerEditScreen.create(
+            initialContainer: ContainerData(
+              id: 'container-1',
+              color: Colors.blue,
+              orderKey: 'a',
+              metadata: ContainerMetadata.withDefaults(
+                proxyConnectionId: const SingboxProxyConnectionId('profile-1'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Loading proxy...'), findsOneWidget);
+
+    await tester.tap(find.text('Proxy Connection'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Unknown proxy'), findsNothing);
+    expect(find.text('Clear'), findsNothing);
+  });
+}
+
+class _LoadedProfilesRepository extends SingboxProxyProfilesRepository {
+  final List<ProxyProfile> profiles;
+
+  _LoadedProfilesRepository(this.profiles);
+
+  @override
+  Stream<List<ProxyProfile>> build() => Stream.value(profiles);
+}
+
+class _LoadingProfilesRepository extends SingboxProxyProfilesRepository {
+  @override
+  Stream<List<ProxyProfile>> build() async* {
+    await Completer<void>().future;
+  }
 }
