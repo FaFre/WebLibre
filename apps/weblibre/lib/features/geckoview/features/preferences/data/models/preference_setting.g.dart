@@ -84,7 +84,7 @@ abstract class _$PreferenceSettingCWProxy {
 
   PreferenceSetting requireUserOptIn(bool requireUserOptIn);
 
-  PreferenceSetting shouldBeDefault(bool shouldBeDefault);
+  PreferenceSetting locked(bool locked);
 
   PreferenceSetting enforceOnStartup(bool enforceOnStartup);
 
@@ -101,7 +101,7 @@ abstract class _$PreferenceSettingCWProxy {
     String? description,
     GeckoPref? current,
     bool requireUserOptIn,
-    bool shouldBeDefault,
+    bool locked,
     bool enforceOnStartup,
   });
 }
@@ -131,8 +131,7 @@ class _$PreferenceSettingCWProxyImpl implements _$PreferenceSettingCWProxy {
       call(requireUserOptIn: requireUserOptIn);
 
   @override
-  PreferenceSetting shouldBeDefault(bool shouldBeDefault) =>
-      call(shouldBeDefault: shouldBeDefault);
+  PreferenceSetting locked(bool locked) => call(locked: locked);
 
   @override
   PreferenceSetting enforceOnStartup(bool enforceOnStartup) =>
@@ -152,7 +151,7 @@ class _$PreferenceSettingCWProxyImpl implements _$PreferenceSettingCWProxy {
     Object? description = const $CopyWithPlaceholder(),
     Object? current = const $CopyWithPlaceholder(),
     Object? requireUserOptIn = const $CopyWithPlaceholder(),
-    Object? shouldBeDefault = const $CopyWithPlaceholder(),
+    Object? locked = const $CopyWithPlaceholder(),
     Object? enforceOnStartup = const $CopyWithPlaceholder(),
   }) {
     return PreferenceSetting(
@@ -178,12 +177,10 @@ class _$PreferenceSettingCWProxyImpl implements _$PreferenceSettingCWProxy {
           ? _value.requireUserOptIn
           // ignore: cast_nullable_to_non_nullable
           : requireUserOptIn as bool,
-      shouldBeDefault:
-          shouldBeDefault == const $CopyWithPlaceholder() ||
-              shouldBeDefault == null
-          ? _value.shouldBeDefault
+      locked: locked == const $CopyWithPlaceholder() || locked == null
+          ? _value.locked
           // ignore: cast_nullable_to_non_nullable
-          : shouldBeDefault as bool,
+          : locked as bool,
       enforceOnStartup:
           enforceOnStartup == const $CopyWithPlaceholder() ||
               enforceOnStartup == null
@@ -212,7 +209,7 @@ PreferenceSetting _$PreferenceSettingFromJson(Map<String, dynamic> json) =>
       title: json['title'] as String?,
       description: json['description'] as String?,
       requireUserOptIn: json['requireUserOptIn'] as bool? ?? false,
-      shouldBeDefault: json['shouldBeDefault'] as bool? ?? false,
+      locked: json['locked'] as bool? ?? false,
       enforceOnStartup: json['enforceOnStartup'] as bool? ?? false,
     );
 
@@ -222,6 +219,6 @@ Map<String, dynamic> _$PreferenceSettingToJson(PreferenceSetting instance) =>
       'title': instance.title,
       'description': instance.description,
       'requireUserOptIn': instance.requireUserOptIn,
-      'shouldBeDefault': instance.shouldBeDefault,
+      'locked': instance.locked,
       'enforceOnStartup': instance.enforceOnStartup,
     };

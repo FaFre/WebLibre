@@ -17,42 +17,42 @@
                 "app.shield.optoutstudies.enabled": {
                     "value": false,
                     "title": "Disable Shield studies",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "app.normandy.enabled": {
                     "value": false,
                     "title": "Disable Normandy",
-                    "shouldBeDefault": true
+                    "locked": true
                 },
                 "app.normandy.api_url": {
                     "value": "",
                     "title": "Clear Normandy API URL",
-                    "shouldBeDefault": true
+                    "locked": true
                 },
                 "app.normandy.run_interval_seconds": {
                     "value": 0,
                     "title": "Disable experiment fetch scheduling",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "datareporting.policy.dataSubmissionEnabled": {
                     "value": false,
                     "title": "Disable data submission",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "datareporting.healthreport.uploadEnabled": {
                     "value": false,
                     "title": "Disable health report upload",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "datareporting.usage.uploadEnabled": {
                     "value": false,
                     "title": "Disable daily usage ping",
                     "description": "Daily activity ping",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "datareporting.dau.cachedUsageProfileID": {
@@ -70,26 +70,26 @@
                 "toolkit.telemetry.enabled": {
                     "value": false,
                     "title": "Disable telemetry",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.unified": {
                     "value": false,
                     "title": "Disable unified telemetry",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.archive.enabled": {
                     "value": false,
                     "title": "Disable telemetry archive",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.server": {
                     "value": "data;",
                     "title": "Block telemetry endpoint",
                     "description": "Uses the data: URI scheme so accidental telemetry posts have no real network destination",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.cachedClientID": {
@@ -100,88 +100,88 @@
                 "toolkit.telemetry.initDelay": {
                     "value": 2147483647,
                     "title": "Delay telemetry initialization indefinitely",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "telemetry.fog.test.localhost_port": {
                     "value": 70000,
                     "title": "Force telemetry to invalid port",
                     "description": "Fallback Glean traffic is redirected to an invalid localhost port",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "telemetry.fog.artifact_build": {
                     "value": false,
                     "title": "Disable artifact-build telemetry registration",
                     "description": "Prevents JOG-style runtime metric registration in artifact-style configurations",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "telemetry.fog.test.activity_limit": {
                     "value": -1,
                     "title": "Disable activity-based Glean submissions",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "telemetry.fog.test.inactivity_limit": {
                     "value": -1,
                     "title": "Disable inactivity-based Glean submissions",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "telemetry.fog.init_on_shutdown": {
                     "value": false,
                     "title": "Prevent Glean initialization during shutdown",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "telemetry.glean.internal.finalInactive": {
                     "value": false,
                     "title": "Disable final inactive Glean ping",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "nimbus.profilesdatastoreservice.enabled": {
                     "value": false,
                     "title": "Disable Nimbus experiment database",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "nimbus.profilesdatastoreservice.read.enabled": {
                     "value": false,
                     "title": "Block reading experiment data",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "nimbus.profilesdatastoreservice.sync.enabled": {
                     "value": false,
                     "title": "Block syncing experiment data",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "nimbus.rollouts.enabled": {
                     "value": false,
                     "title": "Disable Nimbus rollouts",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "nimbus.telemetry.targetingContextEnabled": {
                     "value": false,
                     "title": "Disable Nimbus targeting-context telemetry",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "captchadetection.actor.enabled": {
                     "value": false,
                     "title": "Disable CAPTCHA detection pings",
                     "description": "Prevents CAPTCHA detection measurements from being collected",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "captchadetection.hasUnsubmittedData": {
                     "value": false,
                     "title": "Clear pending CAPTCHA detection data",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "captchadetection.loglevel": {
@@ -192,36 +192,36 @@
                 "extensions.dataCollectionPermissions.enabled": {
                     "value": false,
                     "title": "Disable extension data collection",
-                    "shouldBeDefault": true
+                    "locked": true
                 },
                 "extensions.gleanPingAddons.daily.interval": {
                     "value": 2147483647,
                     "title": "Disable add-on daily Glean scheduler",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "extensions.gleanPingAddons.updated.delay": {
                     "value": 2147483647,
                     "title": "Disable add-on update Glean delay",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "extensions.gleanPingAddons.updated.idleTimeout": {
                     "value": 2147483647,
                     "title": "Disable add-on update idle telemetry",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "extensions.gleanPingAddons.updated.testing": {
                     "value": false,
                     "title": "Disable add-on update testing telemetry",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "extensions.telemetry.EnvironmentAddonBuilder": {
                     "value": false,
                     "title": "Disable add-on environment telemetry builder",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "network.trr.confirmation_telemetry_enabled": {
@@ -233,105 +233,105 @@
                     "value": false,
                     "title": "Disable network traffic analyzer",
                     "description": "Prevents the internal traffic analyzer from collecting extra network diagnostics",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "privacy.trackingprotection.emailtracking.data_collection.enabled": {
                     "value": false,
                     "title": "Disable email tracking protection telemetry",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "browser.safebrowsing.features.emailtracking.datacollection.update": {
                     "value": false,
                     "title": "Disable Safe Browsing email-tracking data updates",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "urlclassifier.features.emailtracking.datacollection.allowlistTables": {
                     "value": "",
                     "title": "Clear email-tracking telemetry allowlist tables",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "urlclassifier.features.emailtracking.datacollection.blocklistTables": {
                     "value": "",
                     "title": "Clear email-tracking telemetry blocklist tables",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "dom.security.unexpected_system_load_telemetry_enabled": {
                     "value": false,
                     "title": "Disable unexpected system load telemetry",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "telemetry.number_of_site_origin.min_interval": {
                     "value": 2147483647,
                     "title": "Disable site-origin telemetry scheduling",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.coverage.enabled": {
                     "value": false,
                     "title": "Disable coverage ping",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.coverage.endpoint.base": {
                     "value": "",
                     "title": "Clear coverage endpoint",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.bhrPing.enabled": {
                     "value": false,
                     "title": "Disable background hang report ping",
                     "description": "Prevents background hang reports from being sent",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.cachedProfileGroupID": {
                     "value": "decafdec-afde-cafd-ecaf-decafdecafde",
                     "title": "Spoof telemetry profile group ID",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.collectInterval": {
                     "value": 2147483647,
                     "title": "Disable telemetry collection interval",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.dap_enabled": {
                     "value": false,
                     "title": "Disable Distributed Aggregation Protocol",
                     "description": "Prevents DAP-based telemetry collection",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.dap.helper.hpke": {
                     "value": "",
                     "title": "Clear DAP helper HPKE config",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.dap.helper.url": {
                     "value": "",
                     "title": "Clear DAP helper URL",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.dap.leader.hpke": {
                     "value": "",
                     "title": "Clear DAP leader HPKE config",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.dap.leader.url": {
                     "value": "",
                     "title": "Clear DAP leader URL",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.dap.logLevel": {
@@ -342,25 +342,25 @@
                 "toolkit.telemetry.dap_task1_enabled": {
                     "value": false,
                     "title": "Disable DAP task 1",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.dap_task1_taskid": {
                     "value": "",
                     "title": "Clear DAP task 1 identifier",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.dap_visit_counting_enabled": {
                     "value": false,
                     "title": "Disable DAP visit counting",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.dap_visit_counting_experiment_list": {
                     "value": "[]",
                     "title": "Clear DAP visit-counting experiments",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.debugSlowSql": {
@@ -371,43 +371,43 @@
                 "toolkit.telemetry.eventping.maximumFrequency": {
                     "value": 2147483647,
                     "title": "Disable event ping maximum frequency",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.eventping.minimumFrequency": {
                     "value": 2147483647,
                     "title": "Disable event ping minimum frequency",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.newProfilePing.enabled": {
                     "value": false,
                     "title": "Disable new profile ping",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.newProfilePing.delay": {
                     "value": 2147483647,
                     "title": "Disable new profile ping delay scheduling",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.updatePing.enabled": {
                     "value": false,
                     "title": "Disable update ping",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.firstShutdownPing.enabled": {
                     "value": false,
                     "title": "Disable first shutdown ping",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.healthping.enabled": {
                     "value": false,
                     "title": "Disable health ping",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.log.dump": {
@@ -423,92 +423,92 @@
                 "toolkit.telemetry.minSubsessionLength": {
                     "value": 2147483647,
                     "title": "Disable subsession telemetry scheduling",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.overrideUpdateChannel": {
                     "value": "release",
                     "title": "Normalize telemetry update channel",
                     "description": "Always reports the release channel to reduce telemetry variability",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.previousBuildID": {
                     "value": "",
                     "title": "Clear previous telemetry build ID",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.reportingpolicy.firstRun": {
                     "value": false,
                     "title": "Disable telemetry first-run reporting policy",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.scheduler.idleTickInterval": {
                     "value": 2147483647,
                     "title": "Disable telemetry idle tick scheduler",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.scheduler.tickInterval": {
                     "value": 2147483647,
                     "title": "Disable telemetry tick scheduler",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.send.overrideOfficialCheck": {
                     "value": false,
                     "title": "Disable telemetry official-build override",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.server_owner": {
                     "value": "",
                     "title": "Clear telemetry server owner",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.shutdownPingSender.backgroundtask.enabled": {
                     "value": false,
                     "title": "Disable background telemetry shutdown sender",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.shutdownPingSender.enabled": {
                     "value": false,
                     "title": "Disable telemetry shutdown sender",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.shutdownPingSender.enabledFirstSession": {
                     "value": false,
                     "title": "Disable telemetry first-session shutdown sender",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.testing.disableFuzzingDelay": {
                     "value": false,
                     "title": "Disable telemetry fuzzing-delay override",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.testing.overridePreRelease": {
                     "value": false,
                     "title": "Disable telemetry prerelease override",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.testing.overrideProductsCheck": {
                     "value": false,
                     "title": "Disable telemetry products-check override",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.testing.suppressPingsender": {
                     "value": true,
                     "title": "Suppress telemetry ping sender",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.translations.logLevel": {
@@ -519,19 +519,19 @@
                 "toolkit.telemetry.untrustedModulesPing.frequency": {
                     "value": 2147483647,
                     "title": "Disable untrusted modules ping scheduling",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.user_characteristics_ping.current_version": {
                     "value": 0,
                     "title": "Reset user-characteristics ping version",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.user_characteristics_ping.last_version_sent": {
                     "value": 0,
                     "title": "Reset last sent user-characteristics version",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.user_characteristics_ping.logLevel": {
@@ -542,26 +542,26 @@
                 "toolkit.telemetry.user_characteristics_ping.opt-out": {
                     "value": true,
                     "title": "Opt out of user-characteristics ping",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.user_characteristics_ping.send-once": {
                     "value": false,
                     "title": "Disable one-time user-characteristics ping",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.user_characteristics_ping.uuid": {
                     "value": "",
                     "title": "Clear user-characteristics ping UUID",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "telemetry.glean.internal.maxPingsPerMinute": {
                     "value": 0,
                     "title": "Block all Glean pings",
                     "description": "Prevents Glean from sending any telemetry pings",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 }
             }
@@ -572,42 +572,42 @@
                 "breakpad.reportURL": {
                     "value": "",
                     "title": "Clear crash report URL",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "browser.crashReports.crashPull": {
                     "value": false,
                     "title": "Disable remote crash report requests",
                     "description": "Prevents remote settings from requesting background-process crash reports",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "browser.crashReports.onDemand": {
                     "value": false,
                     "title": "Disable on-demand crash report requests",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "browser.crashReports.requestedNeverShowAgain": {
                     "value": true,
                     "title": "Never prompt for background crash reports",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "browser.tabs.crashReporting.sendReport": {
                     "value": false,
                     "title": "Disable crashed-tab report sending",
-                    "shouldBeDefault": true
+                    "locked": true
                 },
                 "browser.crashReports.unsubmittedCheck.autoSubmit2": {
                     "value": false,
                     "title": "Disable auto-submit of crash reports",
-                    "shouldBeDefault": true
+                    "locked": true
                 },
                 "toolkit.crashreporter.include_context_heap": {
                     "value": false,
                     "title": "Exclude heap context from crash reports",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 }
             }
@@ -632,7 +632,7 @@
                 "network.predictor.enabled": {
                     "value": false,
                     "title": "Disable prefetching predictor",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "network.http.speculative-parallel-limit": {
@@ -717,21 +717,21 @@
                     "value": "",
                     "title": "Disable OHTTP config URL",
                     "description": "Prevents fetching Oblivious HTTP configuration for telemetry",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "network.ohttp.relayURL": {
                     "value": "",
                     "title": "Disable OHTTP relay URL",
                     "description": "Prevents using Oblivious HTTP relay for telemetry",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "network.android_doh.autoselect_enabled": {
                     "value": false,
                     "title": "Disable Android DoH autoselect",
                     "description": "Prevents Android from automatically selecting a DoH provider",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 }
             }
@@ -859,7 +859,7 @@
                     "value": false,
                     "title": "Disable Privacy-Preserving Attribution",
                     "description": "Mozilla's ad measurement API that allows privacy-preserving conversion tracking",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "privacy.trackingprotection.enabled": {
@@ -972,7 +972,7 @@
                 "webgl.disabled": {
                     "value": false,
                     "title": "Keep WebGL enabled",
-                    "shouldBeDefault": true
+                    "locked": true
                 },
                 "webgl.enable-renderer-query": {
                     "value": false,
@@ -1137,7 +1137,7 @@
                 "extensions.postDownloadThirdPartyPrompt": {
                     "value": false,
                     "title": "Never bypass extension install prompts",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "extensions.webextensions.restrictedDomains": {
@@ -1187,7 +1187,7 @@
                 "dom.events.testing.asyncClipboard": {
                     "value": false,
                     "title": "Disable async Clipboard API",
-                    "shouldBeDefault": true,
+                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "dom.webgpu.enabled": {

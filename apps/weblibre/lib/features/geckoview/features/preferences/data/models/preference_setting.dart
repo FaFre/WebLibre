@@ -64,7 +64,7 @@ class PreferenceSetting with FastEquatable {
   final String? description;
 
   final bool requireUserOptIn;
-  final bool shouldBeDefault;
+  final bool locked;
   final bool enforceOnStartup;
 
   PreferenceSetting({
@@ -73,7 +73,7 @@ class PreferenceSetting with FastEquatable {
     required this.description,
     this.current,
     this.requireUserOptIn = false,
-    this.shouldBeDefault = false,
+    this.locked = false,
     this.enforceOnStartup = false,
   });
 
@@ -89,7 +89,7 @@ class PreferenceSetting with FastEquatable {
     title,
     description,
     requireUserOptIn,
-    shouldBeDefault,
+    locked,
     enforceOnStartup,
   ];
 }

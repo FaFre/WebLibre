@@ -190,7 +190,7 @@ class _HardeningSettingTile extends ConsumerWidget {
 
     return Tooltip(
       message: '$settingKey: $value',
-      child: (!settingValue.shouldBeDefault || !settingValue.isActive)
+      child: (!settingValue.locked || !settingValue.isActive)
           ? SwitchListTile.adaptive(
               value: settingValue.isActive,
               title: Text(settingValue.title ?? settingKey),
