@@ -234,7 +234,11 @@ class Core(
                 LastMediaAccessMiddleware(),
                 // Keep parity with Fenix: do not initialize translations on store init.
                 // EngineObserver will dispatch InitTranslationsBrowserState after first completed page load.
-                TranslationsMiddleware(engine, MainScope(), false),
+                TranslationsMiddleware(
+                    engine,
+                    MainScope(),
+                    false,
+                    isTranslationsEnabled = { true }),
             ) + EngineMiddleware.create(
                 engine,
                 // We are disabling automatic suspending of engine sessions under memory pressure.

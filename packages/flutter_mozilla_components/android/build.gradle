@@ -3,7 +3,7 @@ version = "1.0-SNAPSHOT"
 
 buildscript {
     ext.kotlin_version = "2.3.21"
-    ext.mozillaComponentsVersion = '150.0.1'
+    ext.mozillaComponentsVersion = '151.0'
 
     repositories {
         google()
@@ -139,7 +139,7 @@ dependencies {
     implementation "org.mozilla.components:lib-publicsuffixlist:$mozillaComponentsVersion"
     implementation "org.mozilla.components:service-firefox-accounts:$mozillaComponentsVersion"
     implementation "org.mozilla.components:support-appservices:$mozillaComponentsVersion"
-    implementation "org.ironfoxoss.unifiedpush:unifiedpush:$mozillaComponentsVersion"
+    implementation "org.ironfoxoss.unifiedpush:unifiedpush:151.0.0"
     implementation ('org.unifiedpush.android:connector:3.3.2') {
         exclude group: 'com.google.protobuf', module: 'protobuf-java'
     }
