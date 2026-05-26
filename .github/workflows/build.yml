@@ -93,7 +93,7 @@ jobs:
       - name: Setup Flutter dependencies
         run: |
           dart pub global activate melos
-          melos bootstrap --no-select
+          melos bootstrap
 
       - name: Update external assets
         run: melos run update-assets --no-select
