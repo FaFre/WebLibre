@@ -39,15 +39,20 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_id.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_bar_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_view_reorder.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_context_menu_draggable.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -506,8 +511,8 @@ class QuickTabSwitcher extends HookConsumerWidget {
         (settings) => settings.effectiveUiQuickTabSwitcherMode(),
       ),
     );
-    final pinnedTabIds = ref.watch(
-      watchPinnedTabIdsProvider.select((value) => value.value),
+    final tabBarDirection = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.tabBarDirection),
     );
     final tabStates = ref.watch(
       quickTabSwitcherTabStatesProvider(quickTabSwitcherMode),
@@ -518,52 +523,66 @@ class QuickTabSwitcher extends HookConsumerWidget {
         .value;
     final sandboxCaptureMap =
         ref.watch(sandboxCaptureMapProvider).value ?? const {};
-    final availableItems = tabStates.value
+    // Reorder is only meaningful when the bar renders the user's actual tab
+    // order (containerTabs). Other modes (lastUsedTabs / MRU) sort by recency,
+    // so dragging would just snap back on the next tab switch.
+    final canManualReorder = ref.watch(canManualTabReorderProvider);
+    final sortPinnedFirst = ref.watch(
+      tabViewFilterControllerProvider.select((v) => v.sortPinnedFirst),
+    );
+    final pinnedTabIds = ref.watch(
+      watchPinnedTabIdsProvider.select(
+        (value) => value.value ?? const <String>{},
+      ),
+    );
+    final reorderEnabled =
+        effectiveMode == QuickTabSwitcherMode.containerTabs &&
+        canManualReorder;
+    final tabItems = tabStates.value.map<QuickTabSwitcherItem>((state) {
+      final sandboxSourceUri = parseSandboxSource(
+        sandboxCaptureMap[state.$1.id],
+      );
+      final displayUrl = sandboxSourceUri ?? state.$1.url;
+      final displayTitle = sandboxSourceUri != null && state.$1.title.isEmpty
+          ? sandboxSourceUri.authority
+          : state.$1.titleOrAuthority;
+      return QuickTabSwitcherItem(
+        color: state.$2?.color,
+        id: state.$1.id,
+        isActive: state.$1.id == selectedTabId,
+        title: displayTitle,
+        tabMode: state.$1.tabMode,
+        isHistory: false,
+        isPinned: pinnedTabIds.contains(state.$1.id),
+        isSandbox: sandboxSourceUri != null,
+        url: displayUrl,
+        avatar: TabIcon(tabState: state.$1, iconSize: 20),
+      );
+    }).toList();
+    final historyItems = (historySuggestions ?? [])
         .map<QuickTabSwitcherItem>((state) {
-          final sandboxSourceUri = parseSandboxSource(
-            sandboxCaptureMap[state.$1.id],
-          );
-          final displayUrl = sandboxSourceUri ?? state.$1.url;
-          final displayTitle =
-              sandboxSourceUri != null && state.$1.title.isEmpty
-              ? sandboxSourceUri.authority
-              : state.$1.titleOrAuthority;
+          final url = Uri.parse(state.url);
           return QuickTabSwitcherItem(
-            color: state.$2?.color,
-            id: state.$1.id,
-            isActive: state.$1.id == selectedTabId,
-            title: displayTitle,
-            tabMode: state.$1.tabMode,
-            isHistory: false,
-            isPinned: pinnedTabIds?.contains(state.$1.id) ?? false,
-            isSandbox: sandboxSourceUri != null,
-            url: displayUrl,
-            avatar: TabIcon(tabState: state.$1, iconSize: 20),
+            color: null,
+            id: state.url,
+            isActive: false,
+            title: state.title ?? url.authority,
+            tabMode: TabMode.regular,
+            isHistory: true,
+            isPinned: false,
+            url: url,
+            avatar: UrlIcon([url], iconSize: 20),
           );
         })
-        .followedBy(
-          (historySuggestions ?? []).map<QuickTabSwitcherItem>((state) {
-            final url = Uri.parse(state.url);
-
-            return QuickTabSwitcherItem(
-              color: null,
-              id: state.url,
-              isActive: false,
-              title: state.title ?? url.authority,
-              tabMode: TabMode.regular,
-              isHistory: true,
-              isPinned: false,
-              url: url,
-              avatar: UrlIcon([url], iconSize: 20),
-            );
-          }),
-        )
         .toList();
+    final availableItems = [...tabItems, ...historyItems];
 
-    final activeItem = availableItems.firstWhere(
-      (item) => item.isActive,
-      orElse: () => availableItems.first,
-    );
+    final activeItem = availableItems.isEmpty
+        ? null
+        : availableItems.firstWhere(
+            (item) => item.isActive,
+            orElse: () => availableItems.first,
+          );
 
     final chipScrollController = useScrollController();
     final activeItemKey = useRef(GlobalKey());
@@ -640,11 +659,14 @@ class QuickTabSwitcher extends HookConsumerWidget {
       },
       child: QuickTabSwitcherView(
         availableItems: availableItems,
-        activeItem: activeItem.isActive ? activeItem : null,
+        reorderableItemCount: reorderEnabled ? tabItems.length : 0,
+        activeItem: (activeItem?.isActive ?? false) ? activeItem : null,
         scrollController: chipScrollController,
         activeItemKey: activeItemKey.value,
         showTitles: showTitles,
         showIsolatedTabUi: showIsolatedTabUi,
+        enablePinTabInMenu:
+            effectiveMode == QuickTabSwitcherMode.containerTabs,
         onSelected: (item) async {
           if (!item.isHistory && item.isActive) {
             return;
@@ -661,35 +683,38 @@ class QuickTabSwitcher extends HookConsumerWidget {
             await ref.read(tabRepositoryProvider.notifier).selectTab(item.id);
           }
         },
-        itemWrapBuilder: (child, item) {
-          if (item.isHistory) {
-            return child;
-          }
-
-          return TabMenu(
-            selectedTabId: item.id,
-            enableFindInPage: false,
-            enableFetchFeeds: false,
-            enableDesktopMode: false,
-            enableReaderMode: false,
-            enableReloadButton: false,
-            enableNavigationButtons: false,
-            enableAddToHomeScreen: false,
-            enablePinTab: effectiveMode == QuickTabSwitcherMode.containerTabs,
-            builder: (context, controller, _) {
-              return InkWell(
-                onLongPress: () {
-                  if (controller.isOpen) {
-                    controller.close();
-                  } else {
-                    controller.open();
-                  }
-                },
-                child: child,
-              );
-            },
-          );
-        },
+        onReorderItem: !reorderEnabled
+            ? null
+            : (oldIndex, newIndex) async {
+                if (oldIndex >= tabItems.length ||
+                    newIndex > tabItems.length) {
+                  return;
+                }
+                final visibleItems = [
+                  for (final item in tabItems)
+                    TabViewItem.standalone(tabId: item.id),
+                ];
+                final result = buildTabViewReorderResult(
+                  visibleItems: visibleItems,
+                  treeRows: const [],
+                  collapsedGroups: const {},
+                  pinnedTabIds: pinnedTabIds,
+                  oldIndex: oldIndex,
+                  newIndex: newIndex,
+                  tabListDirection: tabBarDirection,
+                  hierarchical: false,
+                  sortPinnedFirst: sortPinnedFirst,
+                );
+                if (result == null) return;
+                await ref
+                    .read(tabDataRepositoryProvider.notifier)
+                    .reorderTabs(
+                      movingTabIds: result.movingTabIds,
+                      previousTabId: result.previousTabId,
+                      nextTabId: result.nextTabId,
+                      parentChange: result.parentChange,
+                    );
+              },
       ),
     );
   }
@@ -704,8 +729,10 @@ class QuickTabSwitcherView extends StatelessWidget {
     this.activeItemKey,
     required this.showTitles,
     required this.showIsolatedTabUi,
+    required this.enablePinTabInMenu,
     required this.onSelected,
-    required this.itemWrapBuilder,
+    this.onReorderItem,
+    this.reorderableItemCount = 0,
   });
 
   final List<QuickTabSwitcherItem> availableItems;
@@ -714,13 +741,23 @@ class QuickTabSwitcherView extends StatelessWidget {
   final GlobalKey? activeItemKey;
   final bool showTitles;
   final bool showIsolatedTabUi;
+  final bool enablePinTabInMenu;
   final Future<void> Function(QuickTabSwitcherItem item) onSelected;
-  final Widget Function(Widget child, QuickTabSwitcherItem item)
-  itemWrapBuilder;
+
+  /// When non-null, the first [reorderableItemCount] items are rendered as a
+  /// horizontal `ReorderableListView` driven by this callback. Otherwise the
+  /// view falls back to the non-reorderable `SelectableChips` layout.
+  final void Function(int oldIndex, int newIndex)? onReorderItem;
+
+  /// Items at indices `< reorderableItemCount` are reorderable; items at
+  /// or after are appended as a static trailing row (e.g. history hints).
+  final int reorderableItemCount;
+
+  bool get _reorderEnabled =>
+      onReorderItem != null && reorderableItemCount > 0;
 
   @override
   Widget build(BuildContext context) {
-    final appColors = AppColors.of(context);
     if (availableItems.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -730,130 +767,259 @@ class QuickTabSwitcherView extends StatelessWidget {
       child: SizedBox(
         height: 48,
         width: double.maxFinite,
-        child:
-            SelectableChips<QuickTabSwitcherItem, QuickTabSwitcherItem, String>(
-              enableDelete: false,
-              sortSelectedFirst: false,
-              maxCount: null,
-              scrollController: scrollController,
-              activeItemKey: activeItemKey,
-              cacheExtent: 500,
-              itemId: (item) => item.id,
-              selectedItem: activeItem,
-              selectedBorderColor: Theme.of(context).colorScheme.primary,
-              decoration: SelectableChipDecoration(
-                color: (item, isSelected) => switch (item.color) {
-                  final color? when isSelected => ContainerColors.palette(
-                    context,
-                    color,
-                  ).selectedBackgroundColor,
-                  final color? => ContainerColors.palette(
-                    context,
-                    color,
-                  ).backgroundColor,
-                  null => null,
-                },
-                side: (item, isSelected) => switch (item.color) {
-                  final color? when isSelected => ContainerColors.palette(
-                    context,
-                    color,
-                  ).selectedBorderSide,
-                  final color? => ContainerColors.palette(
-                    context,
-                    color,
-                  ).borderSide,
-                  null => null,
-                },
-                labelPadding: (item) =>
-                    (!showTitles &&
-                        !item.isHistory &&
-                        !item.isPinned &&
-                        !item.isSandbox &&
-                        item.tabMode is! PrivateTabMode &&
-                        item.tabMode is! IsolatedTabMode)
-                    ? EdgeInsets.zero
-                    : null,
-              ),
-              itemLabel: (item) {
-                final isSelected = activeItem?.id == item.id;
-                final row = Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (item.isHistory || showTitles)
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 64),
-                        child: Text(item.title),
-                      ),
-                    if (showIsolatedTabUi && item.tabMode is IsolatedTabMode)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Icon(
-                          MdiIcons.snowflake,
-                          color: appColors.isolatedTabTeal,
-                          size: 20,
-                        ),
-                      )
-                    else if (item.tabMode is PrivateTabMode)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Icon(
-                          MdiIcons.dominoMask,
-                          color: appColors.privateTabPurple,
-                          size: 20,
-                        ),
-                      ),
-                    if (item.isSandbox)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Icon(
-                          MdiIcons.archiveLockOutline,
-                          color: Theme.of(context).colorScheme.tertiary,
-                          size: 20,
-                        ),
-                      ),
-                    if (item.isPinned)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Icon(
-                          MdiIcons.pin,
-                          color: Theme.of(context).colorScheme.primary,
-                          size: 20,
-                        ),
-                      ),
-                    if (item.isHistory)
-                      const Padding(
-                        padding: EdgeInsets.only(left: 8.0),
-                        child: Icon(MdiIcons.history, size: 20),
-                      ),
-                  ],
-                );
+        child: _reorderEnabled
+            ? _buildReorderableList(context)
+            : _buildSelectableChips(context),
+      ),
+    );
+  }
 
-                return item.color.mapNotNull(
-                      (color) => DefaultTextStyle.merge(
-                        style: TextStyle(
-                          color: isSelected
-                              ? ContainerColors.palette(
-                                  context,
-                                  color,
-                                ).selectedForegroundColor
-                              : ContainerColors.palette(
-                                  context,
-                                  color,
-                                ).foregroundColor,
-                          fontWeight: isSelected
-                              ? FontWeight.w700
-                              : FontWeight.w500,
-                        ),
-                        child: row,
-                      ),
-                    ) ??
-                    row;
-              },
-              itemAvatar: (item) => item.avatar,
-              onSelected: onSelected,
-              itemWrap: itemWrapBuilder,
-              availableItems: availableItems,
+  Widget _buildSelectableChips(BuildContext context) {
+    return SelectableChips<QuickTabSwitcherItem, QuickTabSwitcherItem, String>(
+      enableDelete: false,
+      sortSelectedFirst: false,
+      maxCount: null,
+      scrollController: scrollController,
+      activeItemKey: activeItemKey,
+      cacheExtent: 500,
+      itemId: (item) => item.id,
+      selectedItem: activeItem,
+      selectedBorderColor: Theme.of(context).colorScheme.primary,
+      decoration: _chipDecoration(context),
+      itemLabel: (item) =>
+          _chipLabel(context, item, activeItem?.id == item.id),
+      itemAvatar: (item) => item.avatar,
+      onSelected: onSelected,
+      itemWrap: (child, item) => item.isHistory
+          ? child
+          : _wrapWithMenu(itemId: item.id, child: child),
+      availableItems: availableItems,
+    );
+  }
+
+  Widget _buildReorderableList(BuildContext context) {
+    // History suggestions only appear when there are no tab items
+    // (see quickTabSwitcherHistorySuggestionsProvider), so reorder mode
+    // is mutually exclusive with the history trailing row in practice.
+    // Defensively cap the reorderable range anyway.
+    final reorderableCount = reorderableItemCount.clamp(
+      0,
+      availableItems.length,
+    );
+
+    return ReorderableListView.builder(
+      scrollController: scrollController,
+      scrollDirection: Axis.horizontal,
+      buildDefaultDragHandles: true,
+      scrollCacheExtent: const ScrollCacheExtent.pixels(500),
+      itemCount: reorderableCount,
+      itemBuilder: (context, index) {
+        final item = availableItems[index];
+        final isSelected = activeItem?.id == item.id;
+        final chip = _ReorderableSwitcherChip(
+          item: item,
+          isSelected: isSelected,
+          showTitles: showTitles,
+          showIsolatedTabUi: showIsolatedTabUi,
+          selectedBorderColor: Theme.of(context).colorScheme.primary,
+          decoration: _chipDecoration(context),
+          label: _chipLabel(context, item, isSelected),
+          onTap: () => onSelected(item),
+        );
+        final keyedForActive = isSelected && activeItemKey != null
+            ? KeyedSubtree(key: activeItemKey, child: chip)
+            : chip;
+        return KeyedSubtree(
+          key: ValueKey(item.id),
+          child: TabContextMenuDraggable(
+            tabId: item.id,
+            externalDrag: true,
+            enableCloseTab: true,
+            feedbackSize: Size.zero,
+            child: keyedForActive,
+          ),
+        );
+      },
+      onReorderItem: onReorderItem,
+    );
+  }
+
+  Widget _wrapWithMenu({required String itemId, required Widget child}) {
+    return TabMenu(
+      selectedTabId: itemId,
+      enableFindInPage: false,
+      enableFetchFeeds: false,
+      enableDesktopMode: false,
+      enableReaderMode: false,
+      enableReloadButton: false,
+      enableNavigationButtons: false,
+      enableAddToHomeScreen: false,
+      enablePinTab: enablePinTabInMenu,
+      builder: (context, controller, _) {
+        return InkWell(
+          onLongPress: () {
+            if (controller.isOpen) {
+              controller.close();
+            } else {
+              controller.open();
+            }
+          },
+          child: child,
+        );
+      },
+    );
+  }
+
+  SelectableChipDecoration<QuickTabSwitcherItem> _chipDecoration(
+    BuildContext context,
+  ) {
+    return SelectableChipDecoration(
+      color: (item, isSelected) => switch (item.color) {
+        final color? when isSelected =>
+          ContainerColors.palette(context, color).selectedBackgroundColor,
+        final color? => ContainerColors.palette(context, color).backgroundColor,
+        null => null,
+      },
+      side: (item, isSelected) => switch (item.color) {
+        final color? when isSelected =>
+          ContainerColors.palette(context, color).selectedBorderSide,
+        final color? => ContainerColors.palette(context, color).borderSide,
+        null => null,
+      },
+      labelPadding: (item) =>
+          (!showTitles &&
+              !item.isHistory &&
+              !item.isPinned &&
+              !item.isSandbox &&
+              item.tabMode is! PrivateTabMode &&
+              item.tabMode is! IsolatedTabMode)
+          ? EdgeInsets.zero
+          : null,
+    );
+  }
+
+  Widget _chipLabel(
+    BuildContext context,
+    QuickTabSwitcherItem item,
+    bool isSelected,
+  ) {
+    final appColors = AppColors.of(context);
+    final row = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (item.isHistory || showTitles)
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 64),
+            child: Text(item.title),
+          ),
+        if (showIsolatedTabUi && item.tabMode is IsolatedTabMode)
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Icon(
+              MdiIcons.snowflake,
+              color: appColors.isolatedTabTeal,
+              size: 20,
             ),
+          )
+        else if (item.tabMode is PrivateTabMode)
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Icon(
+              MdiIcons.dominoMask,
+              color: appColors.privateTabPurple,
+              size: 20,
+            ),
+          ),
+        if (item.isSandbox)
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Icon(
+              MdiIcons.archiveLockOutline,
+              color: Theme.of(context).colorScheme.tertiary,
+              size: 20,
+            ),
+          ),
+        if (item.isPinned)
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Icon(
+              MdiIcons.pin,
+              color: Theme.of(context).colorScheme.primary,
+              size: 20,
+            ),
+          ),
+        if (item.isHistory)
+          const Padding(
+            padding: EdgeInsets.only(left: 8.0),
+            child: Icon(MdiIcons.history, size: 20),
+          ),
+      ],
+    );
+
+    return item.color.mapNotNull(
+          (color) => DefaultTextStyle.merge(
+            style: TextStyle(
+              color: isSelected
+                  ? ContainerColors.palette(
+                      context,
+                      color,
+                    ).selectedForegroundColor
+                  : ContainerColors.palette(context, color).foregroundColor,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            ),
+            child: row,
+          ),
+        ) ??
+        row;
+  }
+}
+
+/// FilterChip matching `SelectableChips`' visual contract, used in the
+/// reorderable render path. Stateless wrapper so the parent
+/// `ReorderableListView` can attach its drag-handle gesture recognizer.
+class _ReorderableSwitcherChip extends StatelessWidget {
+  final QuickTabSwitcherItem item;
+  final bool isSelected;
+  final bool showTitles;
+  final bool showIsolatedTabUi;
+  final Color selectedBorderColor;
+  final SelectableChipDecoration<QuickTabSwitcherItem> decoration;
+  final Widget label;
+  final Future<void> Function() onTap;
+
+  const _ReorderableSwitcherChip({
+    required this.item,
+    required this.isSelected,
+    required this.showTitles,
+    required this.showIsolatedTabUi,
+    required this.selectedBorderColor,
+    required this.decoration,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final itemColor = decoration.color?.call(item, isSelected);
+    final side = decoration.side?.call(item, isSelected) ??
+        (isSelected
+            ? BorderSide(color: selectedBorderColor, width: 2.0)
+            : null);
+    final labelPadding = decoration.labelPadding?.call(item);
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0, top: 4.0),
+      child: FilterChip(
+        color: itemColor != null ? WidgetStatePropertyAll(itemColor) : null,
+        selected: false,
+        showCheckmark: false,
+        labelPadding: labelPadding,
+        onSelected: (_) {
+          unawaited(onTap());
+        },
+        label: label,
+        avatar: item.avatar,
+        side: side,
       ),
     );
   }

@@ -47,12 +47,19 @@ class TabContextMenuDraggable extends HookConsumerWidget {
   /// When true, no [LongPressDraggable] is used; only menu + manual timer.
   final bool externalDrag;
 
+  /// Whether the context menu should expose the "Close Tab" item.
+  /// Default false matches the tab grid/list, where the chip itself has a
+  /// dedicated close affordance. Callers without an inline close button
+  /// (e.g. the quick switcher chip bar) opt in.
+  final bool enableCloseTab;
+
   const TabContextMenuDraggable({
     required this.tabId,
     required this.child,
     required this.feedbackSize,
     this.data,
     this.externalDrag = false,
+    this.enableCloseTab = false,
     super.key,
   });
 
@@ -99,7 +106,7 @@ class TabContextMenuDraggable extends HookConsumerWidget {
       enableReloadButton: false,
       enableNavigationButtons: false,
       enableAddToHomeScreen: false,
-      enableCloseTab: false,
+      enableCloseTab: enableCloseTab,
       builder: builder,
     );
   }

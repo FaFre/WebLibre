@@ -201,8 +201,8 @@ class TabBarPreviewCard extends HookWidget {
         scrollController: quickTabsController,
         showTitles: settings.quickTabSwitcherShowTitles,
         showIsolatedTabUi: settings.showIsolatedTabUi,
+        enablePinTabInMenu: false,
         onSelected: (_) async {},
-        itemWrapBuilder: (child, _) => child,
       );
     }
 
