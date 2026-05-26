@@ -46,12 +46,15 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_context_menu_draggable.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_depth_indicator.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -460,6 +463,7 @@ class QuickTabSwitcherItem with FastEquatable {
   final bool isHistory;
   final bool isPinned;
   final bool isSandbox;
+  final int depth;
   final String title;
   final Uri url;
   final Widget avatar;
@@ -475,6 +479,7 @@ class QuickTabSwitcherItem with FastEquatable {
     required this.url,
     required this.avatar,
     this.isSandbox = false,
+    this.depth = 0,
   });
 
   @override
@@ -486,6 +491,7 @@ class QuickTabSwitcherItem with FastEquatable {
     isHistory,
     isPinned,
     isSandbox,
+    depth,
     title,
     url,
     avatar,
@@ -531,14 +537,36 @@ class QuickTabSwitcher extends HookConsumerWidget {
     final sortPinnedFirst = ref.watch(
       tabViewFilterControllerProvider.select((v) => v.sortPinnedFirst),
     );
+    final showHierarchicalTabs = ref.watch(
+      tabViewFilterControllerProvider.select((v) => v.showHierarchicalTabs),
+    );
+    final selectedContainerId = ref.watch(selectedContainerProvider);
+    final hierarchyContainerId =
+        effectiveMode == QuickTabSwitcherMode.containerTabs
+        ? selectedContainerId
+        : null;
+
+    final tabDepthById = ref
+        .watch(
+          groupedTabListItemsProvider(containerId: hierarchyContainerId).select(
+            (value) {
+              return EquatableValue(<String, int>{
+                if (showHierarchicalTabs)
+                  for (final item in value.value)
+                    if (item is TabListChildItem) item.tabId: item.depth,
+              });
+            },
+          ),
+        )
+        .value;
+
     final pinnedTabIds = ref.watch(
       watchPinnedTabIdsProvider.select(
         (value) => value.value ?? const <String>{},
       ),
     );
     final reorderEnabled =
-        effectiveMode == QuickTabSwitcherMode.containerTabs &&
-        canManualReorder;
+        effectiveMode == QuickTabSwitcherMode.containerTabs && canManualReorder;
     final tabItems = tabStates.value.map<QuickTabSwitcherItem>((state) {
       final sandboxSourceUri = parseSandboxSource(
         sandboxCaptureMap[state.$1.id],
@@ -556,26 +584,27 @@ class QuickTabSwitcher extends HookConsumerWidget {
         isHistory: false,
         isPinned: pinnedTabIds.contains(state.$1.id),
         isSandbox: sandboxSourceUri != null,
+        depth: tabDepthById[state.$1.id] ?? 0,
         url: displayUrl,
         avatar: TabIcon(tabState: state.$1, iconSize: 20),
       );
     }).toList();
-    final historyItems = (historySuggestions ?? [])
-        .map<QuickTabSwitcherItem>((state) {
-          final url = Uri.parse(state.url);
-          return QuickTabSwitcherItem(
-            color: null,
-            id: state.url,
-            isActive: false,
-            title: state.title ?? url.authority,
-            tabMode: TabMode.regular,
-            isHistory: true,
-            isPinned: false,
-            url: url,
-            avatar: UrlIcon([url], iconSize: 20),
-          );
-        })
-        .toList();
+    final historyItems = (historySuggestions ?? []).map<QuickTabSwitcherItem>((
+      state,
+    ) {
+      final url = Uri.parse(state.url);
+      return QuickTabSwitcherItem(
+        color: null,
+        id: state.url,
+        isActive: false,
+        title: state.title ?? url.authority,
+        tabMode: TabMode.regular,
+        isHistory: true,
+        isPinned: false,
+        url: url,
+        avatar: UrlIcon([url], iconSize: 20),
+      );
+    }).toList();
     final availableItems = [...tabItems, ...historyItems];
 
     final activeItem = availableItems.isEmpty
@@ -666,8 +695,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
         activeItemKey: activeItemKey.value,
         showTitles: showTitles,
         showIsolatedTabUi: showIsolatedTabUi,
-        enablePinTabInMenu:
-            effectiveMode == QuickTabSwitcherMode.containerTabs,
+        enablePinTabInMenu: effectiveMode == QuickTabSwitcherMode.containerTabs,
         onSelected: (item) async {
           if (!item.isHistory && item.isActive) {
             return;
@@ -687,8 +715,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
         onReorderItem: !reorderEnabled
             ? null
             : (oldIndex, newIndex) async {
-                if (oldIndex >= tabItems.length ||
-                    newIndex > tabItems.length) {
+                if (oldIndex >= tabItems.length || newIndex > tabItems.length) {
                   return;
                 }
                 final visibleItems = [
@@ -762,8 +789,7 @@ class QuickTabSwitcherView extends StatelessWidget {
   /// or after are appended as a static trailing row (e.g. history hints).
   final int reorderableItemCount;
 
-  bool get _reorderEnabled =>
-      onReorderItem != null && reorderableItemCount > 0;
+  bool get _reorderEnabled => onReorderItem != null && reorderableItemCount > 0;
 
   @override
   Widget build(BuildContext context) {
@@ -795,13 +821,10 @@ class QuickTabSwitcherView extends StatelessWidget {
       selectedItem: activeItem,
       selectedBorderColor: Theme.of(context).colorScheme.primary,
       decoration: _chipDecoration(context),
-      itemLabel: (item) =>
-          _chipLabel(context, item, activeItem?.id == item.id),
-      itemAvatar: (item) => item.avatar,
+      itemLabel: (item) => _chipLabel(context, item, activeItem?.id == item.id),
       onSelected: onSelected,
-      itemWrap: (child, item) => item.isHistory
-          ? child
-          : _wrapWithMenu(itemId: item.id, child: child),
+      itemWrap: (child, item) =>
+          item.isHistory ? child : _wrapWithMenu(itemId: item.id, child: child),
       availableItems: availableItems,
     );
   }
@@ -884,14 +907,18 @@ class QuickTabSwitcherView extends StatelessWidget {
   ) {
     return SelectableChipDecoration(
       color: (item, isSelected) => switch (item.color) {
-        final color? when isSelected =>
-          ContainerColors.palette(context, color).selectedBackgroundColor,
+        final color? when isSelected => ContainerColors.palette(
+          context,
+          color,
+        ).selectedBackgroundColor,
         final color? => ContainerColors.palette(context, color).backgroundColor,
         null => null,
       },
       side: (item, isSelected) => switch (item.color) {
-        final color? when isSelected =>
-          ContainerColors.palette(context, color).selectedBorderSide,
+        final color? when isSelected => ContainerColors.palette(
+          context,
+          color,
+        ).selectedBorderSide,
         final color? => ContainerColors.palette(context, color).borderSide,
         null => null,
       },
@@ -900,6 +927,7 @@ class QuickTabSwitcherView extends StatelessWidget {
               !item.isHistory &&
               !item.isPinned &&
               !item.isSandbox &&
+              item.depth == 0 &&
               item.tabMode is! PrivateTabMode &&
               item.tabMode is! IsolatedTabMode)
           ? EdgeInsets.zero
@@ -913,10 +941,25 @@ class QuickTabSwitcherView extends StatelessWidget {
     bool isSelected,
   ) {
     final appColors = AppColors.of(context);
+    final hasTitle = item.isHistory || showTitles;
     final row = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (item.isHistory || showTitles)
+        if (item.depth > 0)
+          Padding(
+            padding: const EdgeInsets.only(right: 6.0),
+            child: TabDepthIndicator(
+              depth: item.depth,
+              height: 24.0,
+              iconSize: 14.0,
+              horizontalPadding: 4.0,
+            ),
+          ),
+        Padding(
+          padding: EdgeInsets.only(right: hasTitle ? 6.0 : 0.0),
+          child: item.avatar,
+        ),
+        if (hasTitle)
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 64),
             child: Text(item.title),
@@ -1010,7 +1053,8 @@ class _ReorderableSwitcherChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final itemColor = decoration.color?.call(item, isSelected);
-    final side = decoration.side?.call(item, isSelected) ??
+    final side =
+        decoration.side?.call(item, isSelected) ??
         (isSelected
             ? BorderSide(color: selectedBorderColor, width: 2.0)
             : null);
@@ -1027,7 +1071,6 @@ class _ReorderableSwitcherChip extends StatelessWidget {
           unawaited(onTap());
         },
         label: label,
-        avatar: item.avatar,
         side: side,
       ),
     );

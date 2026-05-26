@@ -30,6 +30,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_depth_indicator.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
@@ -308,7 +309,7 @@ class GridTabPreview extends HookConsumerWidget {
                     Positioned(
                       bottom: 6.0,
                       left: 6.0,
-                      child: _GridDepthIndicator(depth: depth),
+                      child: TabDepthIndicator(depth: depth),
                     ),
                   if (trailingChild != null || isPinned || groupToggle != null)
                     Positioned(
@@ -699,45 +700,6 @@ class ListTabPreview extends HookConsumerWidget {
 
 const double _listIndentStep = 16.0;
 const int _listMaxIndentLevels = 3;
-
-// Cap glyph count so the badge stays readable on deep trees.
-const int _gridMaxDepthGlyphs = 4;
-
-class _GridDepthIndicator extends StatelessWidget {
-  final int depth;
-  const _GridDepthIndicator({required this.depth});
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final glyphCount = math.min(depth, _gridMaxDepthGlyphs);
-
-    // Same shell as the top-left toggle / top-right close button:
-    // 28px tall, surfaceContainerHighest with 200 alpha, 8px radius,
-    // onSurfaceVariant icons at 16px.
-    return SizedBox(
-      height: 28,
-      child: Material(
-        color: scheme.surfaceContainerHighest.withAlpha(200),
-        borderRadius: const BorderRadius.all(Radius.circular(8.0)),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (var i = 0; i < glyphCount; i++)
-                Icon(
-                  MdiIcons.subdirectoryArrowRight,
-                  size: 16,
-                  color: scheme.onSurfaceVariant,
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class _IndentGuidePainter extends CustomPainter {
   final Color color;
