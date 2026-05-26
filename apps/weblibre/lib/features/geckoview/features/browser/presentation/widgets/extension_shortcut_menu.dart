@@ -18,8 +18,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/addons/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
@@ -36,11 +39,15 @@ class ExtensionShortcutMenu extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final pinnedIds = ref.watch(pinnedAddonIdsProvider);
     final browserExtensions = ref.watch(
       webExtensionsStateProvider(
         WebExtensionActionType.browser,
       ).select((value) => value.values.toList()),
     );
+    final unpinnedBrowserExtensions = browserExtensions
+        .where((extension) => !pinnedIds.contains(extension.extensionId))
+        .toList();
 
     return MenuAnchor(
       controller: controller,
@@ -48,7 +55,7 @@ class ExtensionShortcutMenu extends HookConsumerWidget {
         return child!;
       },
       menuChildren: [
-        ...browserExtensions.map(
+        ...unpinnedBrowserExtensions.map(
           (extension) => MenuItemButton(
             onPressed: () async {
               //Use parents .ref because after onPressed this consumer gets disposed already
@@ -65,6 +72,14 @@ class ExtensionShortcutMenu extends HookConsumerWidget {
             ),
             child: Text(extension.title ?? ''),
           ),
+        ),
+        if (unpinnedBrowserExtensions.isNotEmpty) const Divider(),
+        MenuItemButton(
+          onPressed: () async {
+            await const AddonManagerRoute().push<void>(context);
+          },
+          leadingIcon: const Icon(MdiIcons.puzzleEdit),
+          child: const Text('Manage extensions'),
         ),
       ],
       child: Visibility(visible: browserExtensions.isNotEmpty, child: child),
