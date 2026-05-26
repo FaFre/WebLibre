@@ -97,6 +97,7 @@ class ContainerEditScreen extends HookConsumerWidget {
     );
     final clearDataOnExit = useState(initialContainer.metadata.clearDataOnExit);
     final assignedSites = useState(initialContainer.metadata.assignedSites);
+    final isPinned = useState(initialContainer.isPinned);
 
     final textController = useTextEditingController(
       text: initialContainer.name,
@@ -108,6 +109,7 @@ class ContainerEditScreen extends HookConsumerWidget {
       return initialContainer.copyWith(
         name: name.isNotEmpty ? name : null,
         color: selectedColor.value,
+        isPinned: isPinned.value,
         metadata: initialContainer.metadata.copyWith(
           contextualIdentity: contextualIdentity.value,
           iconData: selectedIcon.value,
@@ -123,15 +125,18 @@ class ContainerEditScreen extends HookConsumerWidget {
 
     Future<ContainerData> saveContainer() async {
       final container = buildContainer();
+      final repository = ref.read(containerRepositoryProvider.notifier);
       switch (_mode) {
         case _DialogMode.create:
-          await ref
-              .read(containerRepositoryProvider.notifier)
-              .addContainer(container);
+          await repository.addContainer(container);
         case _DialogMode.edit:
-          await ref
-              .read(containerRepositoryProvider.notifier)
-              .replaceContainer(container);
+          await repository.replaceContainer(container);
+      }
+      if (isPinned.value != initialContainer.isPinned) {
+        await repository.setContainerPinned(
+          container.id,
+          isPinned: isPinned.value,
+        );
       }
       return container;
     }
@@ -341,6 +346,31 @@ class ContainerEditScreen extends HookConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 28),
+                  Text(
+                    'Display',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Card.filled(
+                    margin: EdgeInsets.zero,
+                    color: colorScheme.surfaceContainer,
+                    clipBehavior: Clip.antiAlias,
+                    child: SwitchListTile.adaptive(
+                      value: isPinned.value,
+                      title: const Text('Pin Container'),
+                      subtitle: const Text(
+                        'Keep this container at the top of the list',
+                      ),
+                      secondary: const Icon(MdiIcons.pin),
+                      onChanged: (value) {
+                        isPinned.value = value;
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 24),
                   Text(
                     'Privacy & Security',
                     style: theme.textTheme.titleSmall?.copyWith(

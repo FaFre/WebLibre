@@ -21,6 +21,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/routing/routes.dart';
@@ -246,6 +247,11 @@ class _ContainerCard extends HookConsumerWidget {
                                 label:
                                     '$tabCount ${tabCount == 1 ? 'tab' : 'tabs'}',
                               ),
+                              if (container.isPinned)
+                                const _ContainerInfoChip(
+                                  icon: MdiIcons.pin,
+                                  label: 'Pinned',
+                                ),
                               if (container.metadata.contextualIdentity != null)
                                 const _ContainerInfoChip(
                                   icon: Icons.cookie_outlined,

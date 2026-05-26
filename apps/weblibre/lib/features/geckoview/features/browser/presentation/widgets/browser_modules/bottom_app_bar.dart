@@ -59,6 +59,7 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
+import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class BrowserTopAppBar extends StatelessWidget {
   final bool showMainToolbar;
@@ -705,7 +706,15 @@ class QuickTabSwitcher extends HookConsumerWidget {
                   hierarchical: false,
                   sortPinnedFirst: sortPinnedFirst,
                 );
-                if (result == null) return;
+                if (result == null) {
+                  if (context.mounted) {
+                    ui_helper.showInfoMessage(
+                      context,
+                      'Tab cannot be moved here',
+                    );
+                  }
+                  return;
+                }
                 await ref
                     .read(tabDataRepositoryProvider.notifier)
                     .reorderTabs(
