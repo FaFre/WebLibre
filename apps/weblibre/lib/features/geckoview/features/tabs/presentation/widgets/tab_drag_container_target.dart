@@ -73,8 +73,14 @@ class TabDragContainerTarget extends HookConsumerWidget {
           overlayChildBuilder: (context) => CompositedTransformFollower(
             link: layerLink,
             showWhenUnlinked: false,
-            child: IgnorePointer(
-              child: Transform.scale(scale: 1.1, child: child),
+            // The follower fills the Overlay (Positioned.fill semantics),
+            // so the preview subtree gets loose constraints to paint at its
+            // intrinsic size anchored to the leader's top-left.
+            child: Align(
+              alignment: AlignmentDirectional.topStart,
+              child: IgnorePointer(
+                child: Transform.scale(scale: 1.1, child: child),
+              ),
             ),
           ),
           child: CompositedTransformTarget(
