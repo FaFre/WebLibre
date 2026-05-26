@@ -10,6 +10,7 @@ import _OnBeforeRequestDetails = browser.webRequest._OnBeforeRequestDetails
 const localhosts = new Set(['localhost', '127.0.0.1', '[::1]'])
 
 const containerIdentifier = 'firefox-container-'
+const defaultIdentifier = 'firefox-default'
 const privateIdentifier = 'firefox-private'
 
 type DoNotProxy = never[]
@@ -30,6 +31,35 @@ export default class BackgroundMain {
 
   constructor({ store }: { store: Store }) {
     this.store = store
+  }
+
+  private async tabForRequest(tabId?: number): Promise<browser.tabs.Tab | null> {
+    if (tabId === undefined || tabId <= -1) {
+      return null
+    }
+
+    try {
+      return await browser.tabs.get(tabId)
+    } catch (e) {
+      return null
+    }
+  }
+
+  private contextIdFromCookieStoreId(cookieStoreId?: string): string | null {
+    if (cookieStoreId === undefined || cookieStoreId.length === 0) {
+      return null
+    }
+    if (cookieStoreId.startsWith(containerIdentifier)) {
+      return cookieStoreId.substring(containerIdentifier.length)
+    }
+    if (cookieStoreId === privateIdentifier) {
+      return 'private'
+    }
+    if (cookieStoreId === defaultIdentifier) {
+      return 'general'
+    }
+
+    return cookieStoreId
   }
 
   /*
@@ -60,72 +90,50 @@ export default class BackgroundMain {
 */
 
   async onRequest(requestDetails: Pick<_OnRequestDetails, 'cookieStoreId' | 'url' | 'tabId'>): Promise<DoNotProxy | ProxyInfo[]> {
-    const tab = (requestDetails.tabId > -1) ? (await browser.tabs.get(requestDetails.tabId)) : null
+    try {
+      const tab = await this.tabForRequest(requestDetails.tabId)
+      const contextId = this.contextIdFromCookieStoreId(tab?.cookieStoreId ?? requestDetails.cookieStoreId)
 
-    if (this.store.hasGeneralRelation() ||
-      tab === null ||
-      tab.cookieStoreId?.startsWith(containerIdentifier) === true ||
-      tab.cookieStoreId === privateIdentifier
-    ) {
-      try {
-        let cookieStoreId: string
+      if (contextId === null) {
+        return doNotProxy
+      }
 
-        if (tab?.cookieStoreId?.startsWith(containerIdentifier) === true) {
-          cookieStoreId = tab.cookieStoreId.substring(containerIdentifier.length)
-        } else if (tab?.cookieStoreId === privateIdentifier) {
-          // Handle private tabs - use 'private' as identifier
-          cookieStoreId = 'private'
-        } else {
-          cookieStoreId = 'general'
-        }
-
-        let proxies = this.store.getProxiesForContainer(cookieStoreId)
-        if ((proxies?.length ?? 0) == 0 && tab === null) {
-          //When no tab is specified and general relation doesnt exist, we get all proxies to avoid leakage
-          proxies = this.store.getAllProxies()
-
-          if (proxies.length == 0) {
-            return doNotProxy
-          }
-        } else if (proxies === null) {
-          return doNotProxy
-        }
-
-        if (proxies.length > 0) {
-          // proxies.forEach(p => {
-          //   if (p.type === ProxyType.Http || p.type === ProxyType.Https) {
-          //     this.initializeAuthListener(cookieStoreId, p)
-          //   }
-          // })
-
-          const result: ProxyInfo[] = proxies.filter((p: ProxySettings) => {
-            try {
-              const documentUrl = new URL(requestDetails.url)
-              const isLocalhost = localhosts.has(documentUrl.hostname)
-              if (isLocalhost && p.doNotProxyLocal) {
-                return false
-              }
-            } catch (e) {
-              console.error(e)
-            }
-
-            return true
-          }).map(p => p.asProxyInfo())
-
-          if (result.length === 0) {
-            return [emergencyBreak]
-          }
-          return result
-        }
-
-        return [emergencyBreak]
-      } catch (e: unknown) {
-        console.error(`Error in onRequest listener: ${e as string}`)
+      const proxies = this.store.getProxiesForContainer(contextId)
+      if (proxies === null) {
+        return doNotProxy
+      }
+      if (proxies.length === 0) {
         return [emergencyBreak]
       }
-    }
 
-    return doNotProxy
+      // proxies.forEach(p => {
+      //   if (p.type === ProxyType.Http || p.type === ProxyType.Https) {
+      //     this.initializeAuthListener(cookieStoreId, p)
+      //   }
+      // })
+
+      const result: ProxyInfo[] = proxies.filter((p: ProxySettings) => {
+        try {
+          const documentUrl = new URL(requestDetails.url)
+          const isLocalhost = localhosts.has(documentUrl.hostname)
+          if (isLocalhost && p.doNotProxyLocal) {
+            return false
+          }
+        } catch (e) {
+          console.error(e)
+        }
+
+        return true
+      }).map(p => p.asProxyInfo())
+
+      if (result.length === 0) {
+        return doNotProxy
+      }
+      return result
+    } catch (e: unknown) {
+      console.error(`Error in onRequest listener: ${e as string}`)
+      return [emergencyBreak]
+    }
   }
 
   async onBeforeRequest(options: _OnBeforeRequestDetails, port: browser.runtime.Port): Promise<browser.webRequest.BlockingResponse> {

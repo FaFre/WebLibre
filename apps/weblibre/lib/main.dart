@@ -51,7 +51,6 @@ import 'package:weblibre/features/geckoview/features/preferences/data/repositori
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_pruner.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_settings_sync.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_logs.dart';
-import 'package:weblibre/features/proxy/domain/services/browser_dns_leak_guard.dart';
 import 'package:weblibre/features/proxy/domain/services/singbox_proxy_endpoint_sync.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -281,12 +280,6 @@ class _MainWidget extends HookConsumerWidget {
 
       // Activate account callback deep link handler
       ref.read(accountCallbackHandlerProvider);
-
-      // Activate the proxy DNS leak guard: when any sing-box profile is
-      // running AND the user has opted in, GeckoView TRR is forced to
-      // off so browser DNS follows the SOCKS proxyDNS path instead of
-      // resolving outside the proxy.
-      ref.read(browserDnsLeakGuardProvider);
 
       // Mirror the sing-box runtime's SOCKS endpoints into Gecko's
       // container-proxy registry. Side-effect-only notifier.

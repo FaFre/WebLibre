@@ -9,21 +9,20 @@ const tryFromDao = ProxySettings.tryFromDao
 
 const chrome = require('sinon-chrome/extensions');
 
-const store = new Store()
+let store: Store
+let backgroundMain: BackgroundMain
 
 describe('BackgroundMain', function () {
   beforeEach(() => {
     global.browser = chrome
+    store = new Store()
+    backgroundMain = new BackgroundMain({ store })
   })
 
   afterEach(() => {
     // @ts-expect-error
     delete global.browser
   })
-
-  const backgroundMain = new BackgroundMain({ store: store })
-
-  // TODO: Add test for proxyDNS property
 
   describe('onRequest', function () {
     it('should return empty array if no proxy is set up', async () => {
@@ -33,12 +32,37 @@ describe('BackgroundMain', function () {
     })
 
     it('should return proxy if proxy is set up', async () => {
-      await givenSomeProxyIsSetUpForContainer({ containerId: 'firefox-default', host: undefined, doNotProxyLocal: undefined })
+      await givenSomeProxyIsSetUpForContainer({ containerId: 'general', host: undefined, doNotProxyLocal: undefined })
 
       const result = await backgroundMain.onRequest({ cookieStoreId: 'firefox-default', url: 'https://google.com', tabId: 0 })
 
       expect(result).to.be.an('array')
       expect(result).to.be.not.empty
+    })
+
+    it('should not use an unrelated container proxy for default tabs', async () => {
+      await givenSomeProxyIsSetUpForContainer({ containerId: 'container1', host: undefined, doNotProxyLocal: undefined })
+
+      const result = await backgroundMain.onRequest({ cookieStoreId: 'firefox-default', url: 'https://google.com', tabId: -1 })
+
+      expect(result).to.be.deep.equal(doNotProxy)
+    })
+
+    it('should use request cookieStoreId when no tab is available', async () => {
+      await givenSomeProxyIsSetUpForContainer({ containerId: 'container1', host: undefined, doNotProxyLocal: undefined })
+
+      const result = await backgroundMain.onRequest({ cookieStoreId: 'firefox-container-container1', url: 'https://google.com', tabId: -1 })
+
+      expect(result).to.be.an('array')
+      expect(result).to.be.not.empty
+    })
+
+    it('should return empty array for tabless requests without a cookie store', async () => {
+      await givenSomeProxyIsSetUpForContainer({ containerId: 'container1', host: undefined, doNotProxyLocal: undefined })
+
+      const result = await backgroundMain.onRequest({ url: 'https://google.com', tabId: -1 })
+
+      expect(result).to.be.deep.equal(doNotProxy)
     })
 
     it('should block if an assigned proxy no longer exists', async () => {
@@ -52,16 +76,24 @@ describe('BackgroundMain', function () {
     })
 
     it('should remove doNotProxyLocal flag from proxy settings if proxy is set up', async () => {
-      await givenSomeProxyIsSetUpForContainer({ containerId: 'firefox-default', host: undefined, doNotProxyLocal: undefined })
+      await givenSomeProxyIsSetUpForContainer({ containerId: 'general', host: undefined, doNotProxyLocal: undefined })
 
       const result = await backgroundMain.onRequest({ cookieStoreId: 'firefox-default', url: 'https://google.com', tabId: 0 })
 
       expect((result[0] as any).doNotProxyLocal).to.be.undefined
     })
 
+    it('should preserve proxyDNS on SOCKS proxy settings', async () => {
+      await givenSomeProxyIsSetUpForContainer({ containerId: 'container1', host: undefined, doNotProxyLocal: undefined })
+
+      const result = await backgroundMain.onRequest({ cookieStoreId: 'firefox-container-container1', url: 'https://google.com', tabId: -1 })
+
+      expect((result[0] as any).proxyDNS).to.be.true
+    })
+
     it('should return proxy for the container if url is invalid', async () => {
       // To be more on a safe side
-      await givenSomeProxyIsSetUpForContainer({ containerId: 'firefox-default', host: undefined, doNotProxyLocal: undefined })
+      await givenSomeProxyIsSetUpForContainer({ containerId: 'general', host: undefined, doNotProxyLocal: undefined })
 
       const result = await backgroundMain.onRequest({ cookieStoreId: 'firefox-default', url: 'np-protocol-url.com', tabId: 0 })
 
@@ -88,7 +120,7 @@ describe('BackgroundMain', function () {
         it(`should return empty array if the address is local: ${url}`, async () => {
           await givenSomeProxyIsSetUpForContainer({ containerId: 'container1', host: undefined, doNotProxyLocal: true })
 
-          const result = await backgroundMain.onRequest({ cookieStoreId: 'container1', url, tabId: 0 })
+          const result = await backgroundMain.onRequest({ cookieStoreId: 'firefox-container-container1', url, tabId: -1 })
 
           expect(result).to.be.deep.equal(doNotProxy)
         })
@@ -101,7 +133,7 @@ describe('BackgroundMain', function () {
           const host = 'proxyX.example.com'
           await givenSomeProxyIsSetUpForContainer({ host, containerId: 'container1', doNotProxyLocal: false })
 
-          const result = await backgroundMain.onRequest({ cookieStoreId: 'container1', url, tabId: 0 })
+          const result = await backgroundMain.onRequest({ cookieStoreId: 'firefox-container-container1', url, tabId: -1 })
 
           expect(result[0].host).to.be.equal(host)
         })
