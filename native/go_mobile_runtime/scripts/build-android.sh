@@ -18,6 +18,7 @@ DNSTT_SOURCE="${DNSTT_SOURCE:-$IPTPROXY_SOURCE/dnstt}"
 OUTPUT_AAR="${OUTPUT_AAR:-$RUNTIME_DIR/build/weblibre-go.aar}"
 TARGET="${TARGET:-android}"
 ANDROID_API="${ANDROID_API:-24}"
+ANDROID_NDK_VERSION="${ANDROID_NDK_VERSION:-28.2.13676358}"
 INSTALL_GOMOBILE=1
 ALLOW_DIRTY=0
 DEBUG=0
@@ -46,7 +47,8 @@ Options:
 
 Environment:
   SING_BOX_SOURCE, IPTPROXY_SOURCE, DNSTT_SOURCE, OUTPUT_AAR, TARGET,
-  ANDROID_API, GO_MOBILE_TAGS, JAVA_HOME, ANDROID_HOME, ANDROID_NDK_HOME
+  ANDROID_API, ANDROID_NDK_VERSION, GO_MOBILE_TAGS, JAVA_HOME, ANDROID_HOME,
+  ANDROID_NDK_HOME
 EOF
 }
 
@@ -190,6 +192,48 @@ if ! command -v go >/dev/null 2>&1; then
   echo "go is required to build the gomobile runtime." >&2
   exit 1
 fi
+
+if [[ -z "${ANDROID_HOME:-}" && -d "$HOME/Android/Sdk" ]]; then
+  export ANDROID_HOME="$HOME/Android/Sdk"
+fi
+
+if [[ -n "${ANDROID_HOME:-}" ]]; then
+  export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION"
+  export ANDROID_NDK_ROOT="$ANDROID_NDK_HOME"
+  export NDK_HOME="$ANDROID_NDK_HOME"
+fi
+
+if [[ -z "${ANDROID_NDK_HOME:-}" ]]; then
+  echo "ANDROID_NDK_HOME is required to build the gomobile runtime." >&2
+  echo "Install Android NDK $ANDROID_NDK_VERSION and set ANDROID_HOME or ANDROID_NDK_HOME." >&2
+  exit 1
+fi
+
+require_file "$ANDROID_NDK_HOME/source.properties" "Android NDK source.properties"
+actual_ndk_version="$(
+  sed -n 's/^Pkg.Revision[[:space:]]*=[[:space:]]*//p' "$ANDROID_NDK_HOME/source.properties"
+)"
+if [[ "$actual_ndk_version" != "$ANDROID_NDK_VERSION" ]]; then
+  echo "Android NDK at $ANDROID_NDK_HOME is $actual_ndk_version, expected $ANDROID_NDK_VERSION." >&2
+  exit 1
+fi
+
+ndk_host_tag="linux-x86_64"
+case "$(uname -s)" in
+  Darwin) ndk_host_tag="darwin-x86_64" ;;
+  Linux) ndk_host_tag="linux-x86_64" ;;
+  *)
+    echo "Unsupported host OS for Android NDK: $(uname -s)" >&2
+    exit 1
+    ;;
+esac
+ndk_clang="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$ndk_host_tag/bin/aarch64-linux-android${ANDROID_API}-clang"
+if [[ ! -x "$ndk_clang" ]]; then
+  echo "Expected Android NDK clang not found: $ndk_clang" >&2
+  exit 1
+fi
+echo "Using Android NDK $actual_ndk_version at $ANDROID_NDK_HOME"
+echo "Using Android arm64 clang: $ndk_clang"
 
 GOPATH="${GOPATH:-$(go env GOPATH)}"
 if [[ $INSTALL_GOMOBILE -eq 1 ]]; then
