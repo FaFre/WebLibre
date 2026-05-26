@@ -82,6 +82,9 @@ melos:
     build-singbox-libbox:
       description: Build official sing-box Android libbox AAR for flutter_singbox_proxy
       run: packages/flutter_singbox_proxy/scripts/build-libbox-android.sh
+    build-go-runtime:
+      description: Build combined Android gomobile runtime AAR for proxy plugins
+      run: native/go_mobile_runtime/scripts/build-android.sh
     build-browser:
       description: Build stable release APK split per ABI
       run: |

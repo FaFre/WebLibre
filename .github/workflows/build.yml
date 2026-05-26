@@ -33,6 +33,10 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.x'
+
       - name: Determine build type
         id: build-type
         run: |
@@ -55,6 +59,18 @@ jobs:
         with:
           node-version: 20
 
+      - name: Cache Go build dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+            ~/go/bin/gomobile
+            ~/go/bin/gobind
+          key: ${{ runner.os }}-go-runtime-${{ hashFiles('native/go_mobile_runtime/pins.env') }}
+          restore-keys: |
+            ${{ runner.os }}-go-runtime-
+
       - name: Download bundle dependencies
         if: steps.build-type.outputs.is_prerelease == 'false'
         run: |
@@ -71,19 +87,39 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: 3.41.6
+          flutter-version: 3.44.0
           cache: true
 
       - name: Setup Flutter dependencies
         run: |
           dart pub global activate melos
-          melos bootstrap
+          melos bootstrap --no-select
 
       - name: Update external assets
         run: melos run update-assets --no-select
 
       - name: Build components
         run: melos run build-components --no-select
+
+      - name: Checkout native runtime sources
+        run: |
+          set -euo pipefail
+          source native/go_mobile_runtime/pins.env
+
+          git clone https://github.com/SagerNet/sing-box.git "$RUNNER_TEMP/sing-box"
+          git -C "$RUNNER_TEMP/sing-box" checkout "$SING_BOX_TAG"
+          test "$(git -C "$RUNNER_TEMP/sing-box" rev-parse HEAD)" = "$SING_BOX_COMMIT"
+
+          git clone https://github.com/tladesignz/IPtProxy.git "$RUNNER_TEMP/IPtProxy"
+          git -C "$RUNNER_TEMP/IPtProxy" checkout "$IPTPROXY_TAG"
+          test "$(git -C "$RUNNER_TEMP/IPtProxy" rev-parse HEAD)" = "$IPTPROXY_COMMIT"
+          git -C "$RUNNER_TEMP/IPtProxy" submodule update --init dnstt
+
+      - name: Build native gomobile runtime
+        env:
+          SING_BOX_SOURCE: ${{ runner.temp }}/sing-box
+          IPTPROXY_SOURCE: ${{ runner.temp }}/IPtProxy
+        run: melos run build-go-runtime --no-select
 
       - name: Build APK (Alpha)
         if: steps.build-type.outputs.is_prerelease == 'true'

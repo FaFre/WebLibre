@@ -16,7 +16,7 @@ Pinned inputs are defined in `pins.env`:
 Build locally from the repository root:
 
 ```sh
-native/go_mobile_runtime/scripts/build-android.sh
+melos run build-go-runtime --no-select
 ```
 
 The default source locations are sibling checkouts of this repository:
@@ -36,3 +36,6 @@ native/go_mobile_runtime/scripts/build-android.sh \
 ```
 
 The output AAR is written to `native/go_mobile_runtime/build/weblibre-go.aar`.
+
+GitHub release builds clone the pinned sources from `pins.env` and run the same
+Melos command before building the Flutter APK/AAB artifacts.
