@@ -315,6 +315,69 @@ typedef _PendingProxyLoadError = ({
   String? url,
 });
 
+class _BrowserScaffoldTheme extends ConsumerWidget {
+  final String? selectedTabId;
+  final bool isSmallWebActive;
+  final bool tabInFullScreen;
+  final bool sheetDisplayed;
+  final Size bottomAppBarContentSize;
+  final bool findInPageVisible;
+  final double findInPageHeight;
+  final Widget child;
+
+  const _BrowserScaffoldTheme({
+    required this.selectedTabId,
+    required this.isSmallWebActive,
+    required this.tabInFullScreen,
+    required this.sheetDisplayed,
+    required this.bottomAppBarContentSize,
+    required this.findInPageVisible,
+    required this.findInPageHeight,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final toolbarState = isSmallWebActive
+        ? ToolbarVisibility.visible
+        : ref.watch(toolbarVisibilityControllerProvider(selectedTabId));
+    final bottomToolbarVisible = isSmallWebActive
+        ? !tabInFullScreen
+        : sheetDisplayed ||
+              (!tabInFullScreen && toolbarState == ToolbarVisibility.visible);
+    final bottomInset =
+        (bottomToolbarVisible ? bottomAppBarContentSize.height : 0.0) +
+        8 +
+        (findInPageVisible ? findInPageHeight : 0.0);
+
+    final theme = Theme.of(context);
+
+    return Theme(
+      data: theme.copyWith(
+        bottomSheetTheme: theme.bottomSheetTheme.copyWith(
+          constraints: BoxConstraints(
+            maxWidth:
+                MediaQuery.of(context).size.width -
+                math.max(
+                  MediaQuery.of(context).padding.left * 2,
+                  MediaQuery.of(context).padding.right * 2,
+                ),
+          ),
+        ),
+        snackBarTheme: theme.snackBarTheme.copyWith(
+          behavior: SnackBarBehavior.floating,
+          insetPadding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            bottom: bottomInset,
+          ),
+        ),
+      ),
+      child: child,
+    );
+  }
+}
+
 class BrowserScreen extends HookConsumerWidget {
   const BrowserScreen({super.key});
 
@@ -757,37 +820,18 @@ class BrowserScreen extends HookConsumerWidget {
       ],
     );
 
-    // Theme with dynamic snackbar margin to position above bottom toolbar
-    final themeData = Theme.of(context).copyWith(
-      bottomSheetTheme: Theme.of(context).bottomSheetTheme.copyWith(
-        constraints: BoxConstraints(
-          maxWidth:
-              MediaQuery.of(context).size.width -
-              math.max(
-                MediaQuery.of(context).padding.left * 2,
-                MediaQuery.of(context).padding.right * 2,
-              ),
-        ),
-      ),
-      snackBarTheme: SnackBarThemeData(
-        behavior: SnackBarBehavior.floating,
-        insetPadding: EdgeInsets.only(
-          left: 16,
-          right: 16,
-          bottom:
-              bottomAppBarContentSize.height +
-              8 +
-              (findInPageVisible ? findInPageHeight : 0),
-        ),
-      ),
-    );
-
     return PopScope(
       //We need this for BackButtonListener to work downstream
       //No direct pop result will be handled here
       canPop: false,
-      child: Theme(
-        data: themeData,
+      child: _BrowserScaffoldTheme(
+        selectedTabId: selectedTabId,
+        isSmallWebActive: isSmallWebActive,
+        tabInFullScreen: tabInFullScreen,
+        sheetDisplayed: sheetDisplayed,
+        bottomAppBarContentSize: bottomAppBarContentSize,
+        findInPageVisible: findInPageVisible,
+        findInPageHeight: findInPageHeight,
         child: Scaffold(
           // Minimal scaffold - only for Material overlay support (SnackBars)
           resizeToAvoidBottomInset: false,
