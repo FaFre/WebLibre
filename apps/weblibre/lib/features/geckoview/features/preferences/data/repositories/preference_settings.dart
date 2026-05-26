@@ -261,17 +261,9 @@ class _PreferenceRepository extends _$PreferenceRepository {
 class UnifiedPreferenceSettingsRepository
     extends _$UnifiedPreferenceSettingsRepository {
   Future<void> apply() async {
-    final preferenceRepository = ref.read(
-      _preferenceRepositoryProvider(partition).notifier,
-    );
-
     final groups = await ref.read(
       _preferenceSettingGroupsProvider(partition).future,
     );
-
-    if (!ref.mounted) {
-      return;
-    }
 
     final prefs = {
       for (final group in groups.values)
@@ -282,28 +274,35 @@ class UnifiedPreferenceSettingsRepository
         ),
     };
 
-    await preferenceRepository.applyPrefs(prefs);
+    if (ref.mounted) {
+      await ref
+          .read(_preferenceRepositoryProvider(partition).notifier)
+          .applyPrefs(prefs);
+    } else {
+      // This auto-dispose wrapper was torn down during the await (e.g.
+      // invoked from an unawaited future before any UI is watching us).
+      // Apply directly so the prefs still land.
+      await GeckoPrefService().applyPrefs(prefs);
+    }
   }
 
   Future<void> reset() async {
-    final preferenceRepository = ref.read(
-      _preferenceRepositoryProvider(partition).notifier,
-    );
-
     final groups = await ref.read(
       _preferenceSettingGroupsProvider(partition).future,
     );
-
-    if (!ref.mounted) {
-      return;
-    }
 
     final prefs = groups.values
         .map((group) => group.settings.keys)
         .flattened
         .toList();
 
-    await preferenceRepository.resetPrefs(prefs);
+    if (ref.mounted) {
+      await ref
+          .read(_preferenceRepositoryProvider(partition).notifier)
+          .resetPrefs(prefs);
+    } else {
+      await GeckoPrefService().resetPrefs(prefs);
+    }
   }
 
   @override
@@ -335,17 +334,9 @@ class UnifiedPreferenceSettingsRepository
 class PreferenceSettingsGroupRepository
     extends _$PreferenceSettingsGroupRepository {
   Future<void> apply({List<String>? filter}) async {
-    final preferenceRepository = ref.read(
-      _preferenceRepositoryProvider(partition).notifier,
-    );
-
     final settingGroup = await ref.read(
       _preferenceSettingGroupProvider(partition, groupName).future,
     );
-
-    if (!ref.mounted) {
-      return;
-    }
 
     final prefs = Map.fromEntries(
       filter?.map(
@@ -360,30 +351,34 @@ class PreferenceSettingsGroupRepository
               .map((e) => MapEntry(e.key, e.value.value)),
     );
 
-    await preferenceRepository.applyPrefs(prefs);
+    if (ref.mounted) {
+      await ref
+          .read(_preferenceRepositoryProvider(partition).notifier)
+          .applyPrefs(prefs);
+    } else {
+      await GeckoPrefService().applyPrefs(prefs);
+    }
   }
 
   Future<void> reset({List<String>? filter}) async {
-    final preferenceRepository = ref.read(
-      _preferenceRepositoryProvider(partition).notifier,
-    );
-
     final settingGroup = await ref.read(
       _preferenceSettingGroupProvider(partition, groupName).future,
     );
-
-    if (!ref.mounted) {
-      return;
-    }
 
     if (filter != null &&
         filter.any((value) => !settingGroup.settings.containsKey(value))) {
       throw Exception('Preference not part of group');
     }
 
-    await preferenceRepository.resetPrefs(
-      filter ?? settingGroup.settings.keys.toList(),
-    );
+    final prefs = filter ?? settingGroup.settings.keys.toList();
+
+    if (ref.mounted) {
+      await ref
+          .read(_preferenceRepositoryProvider(partition).notifier)
+          .resetPrefs(prefs);
+    } else {
+      await GeckoPrefService().resetPrefs(prefs);
+    }
   }
 
   @override
