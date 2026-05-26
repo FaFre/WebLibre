@@ -22,10 +22,8 @@ import androidx.glance.layout.wrapContentHeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import es.antonborri.home_widget.HomeWidgetLaunchIntent
-import android.net.Uri
-import es.antonborri.home_widget.actionStartActivity
 import androidx.core.net.toUri
+import es.antonborri.home_widget.actionStartActivity
 
 class SearchBarGlanceWidget : GlanceAppWidget() {
 
@@ -62,6 +60,7 @@ private fun SearchBarContent(context: Context) {
                 color = ColorProvider(Color(0xFF848388)),
                 fontSize = 16.sp
             ),
+            maxLines = 1,
             modifier = GlanceModifier.defaultWeight()
         )
 
