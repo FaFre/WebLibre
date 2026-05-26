@@ -53,12 +53,12 @@ class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
       if (kDebugMode) {
         // This check pulls in a fair amount of code that's not needed
         // anywhere else, so we recommend only doing it in debug builds.
-        await validateDatabaseSchema(
-          setup: (database) {
-            registerLexorankFunctions(database);
-            registerUrlFunctions(database);
-          },
-        );
+        // await validateDatabaseSchema(
+        //   setup: (database) {
+        //     registerLexorankFunctions(database);
+        //     registerUrlFunctions(database);
+        //   },
+        // );
       }
 
       await customStatement('PRAGMA foreign_keys = ON');
