@@ -326,14 +326,8 @@ class ContainerEditScreen extends HookConsumerWidget {
                               controller: textController,
                               style: theme.textTheme.titleLarge,
                               decoration: InputDecoration(
-                                labelText: 'Container Name',
-                                filled: true,
-                                fillColor: colorScheme.surfaceContainerHighest
-                                    .withValues(alpha: 0.6),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: BorderSide.none,
-                                ),
+                                hintText: 'Container Name',
+                                border: InputBorder.none,
                                 suffixIcon: _buildMagicWandButton(
                                   context,
                                   ref,
