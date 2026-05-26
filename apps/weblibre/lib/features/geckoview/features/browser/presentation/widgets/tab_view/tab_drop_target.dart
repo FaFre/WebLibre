@@ -20,6 +20,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/drag_data.dart';
@@ -28,14 +29,15 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
-/// A widget that wraps a tab and enables creating a new container
-/// when another tab is dropped onto it.
+enum _TabDropAction { createContainer, assignParent }
+
+/// A widget that wraps a tab and offers tab relationship actions when another
+/// tab is dropped onto it.
 ///
 /// When a tab is dragged and dropped onto this widget:
-/// 1. Both tab titles are collected
-/// 2. An AI-suggested container name is generated
-/// 3. User is redirected to container creation screen to confirm/modify settings
-/// 4. Both tabs are assigned to the new container if user confirms
+/// 1. The user chooses whether to create a container or assign a parent.
+/// 2. Container creation redirects to the container creation screen.
+/// 3. Parent assignment makes the target tab the parent of the dragged tab.
 class TabDropTarget extends HookConsumerWidget {
   /// The tab entity that serves as the drop target
   final String targetTabId;
@@ -67,27 +69,29 @@ class TabDropTarget extends HookConsumerWidget {
       onAcceptWithDetails: (details) async {
         final draggedTabId = details.data.tabId;
 
-        final containerRepo = ref.read(containerRepositoryProvider.notifier);
-        final newContainer = await containerRepo.createNewContainer();
+        final action = await showModalBottomSheet<_TabDropAction>(
+          context: context,
+          showDragHandle: true,
+          builder: (context) => const _TabDropActionSheet(),
+        );
 
-        if (!context.mounted) return;
+        if (action == null || !context.mounted) return;
 
-        final result = await ContainerCreateRoute(
-          containerData: jsonEncode(newContainer.toJson()),
-          tabIds: jsonEncode([draggedTabId, targetTabId]),
-        ).push<ContainerData?>(context);
-
-        if (result != null) {
-          final tabRepo = ref.read(tabDataRepositoryProvider.notifier);
-          await tabRepo.assignContainer(draggedTabId, result);
-          await tabRepo.assignContainer(targetTabId, result);
-
-          if (context.mounted) {
-            showInfoMessage(
-              context,
-              'Created container "${result.name ?? 'New Container'}"',
+        switch (action) {
+          case _TabDropAction.createContainer:
+            await _createContainerForTabs(
+              context: context,
+              ref: ref,
+              draggedTabId: draggedTabId,
+              targetTabId: targetTabId,
             );
-          }
+          case _TabDropAction.assignParent:
+            await _assignParentTab(
+              context: context,
+              ref: ref,
+              draggedTabId: draggedTabId,
+              targetTabId: targetTabId,
+            );
         }
       },
       builder: (context, candidateData, rejectedData) {
@@ -104,6 +108,87 @@ class TabDropTarget extends HookConsumerWidget {
           child: child,
         );
       },
+    );
+  }
+
+  Future<void> _createContainerForTabs({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String draggedTabId,
+    required String targetTabId,
+  }) async {
+    final containerRepo = ref.read(containerRepositoryProvider.notifier);
+    final tabRepo = ref.read(tabDataRepositoryProvider.notifier);
+    final newContainer = await containerRepo.createNewContainer();
+
+    if (!context.mounted) return;
+
+    final result = await ContainerCreateRoute(
+      containerData: jsonEncode(newContainer.toJson()),
+      tabIds: jsonEncode([draggedTabId, targetTabId]),
+    ).push<ContainerData?>(context);
+
+    if (result != null) {
+      await tabRepo.assignContainer(draggedTabId, result);
+      await tabRepo.assignContainer(targetTabId, result);
+
+      if (context.mounted) {
+        showInfoMessage(
+          context,
+          'Created container "${result.name ?? 'New Container'}"',
+        );
+      }
+    }
+  }
+
+  Future<void> _assignParentTab({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String draggedTabId,
+    required String targetTabId,
+  }) async {
+    final didAssign = await ref
+        .read(tabDataRepositoryProvider.notifier)
+        .setTabParent(tabId: draggedTabId, newParentId: targetTabId);
+
+    if (!context.mounted) return;
+
+    if (didAssign) {
+      showInfoMessage(context, 'Assigned parent tab');
+    } else {
+      showErrorMessage(context, 'Could not assign parent tab');
+    }
+  }
+}
+
+class _TabDropActionSheet extends StatelessWidget {
+  const _TabDropActionSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const ListTile(
+            title: Text('Drop tab onto tab'),
+            subtitle: Text('Choose how these tabs should be related.'),
+          ),
+          ListTile(
+            leading: const Icon(MdiIcons.folderPlus),
+            title: const Text('Create container'),
+            subtitle: const Text('Create a new container with both tabs.'),
+            onTap: () =>
+                Navigator.of(context).pop(_TabDropAction.createContainer),
+          ),
+          ListTile(
+            leading: const Icon(MdiIcons.fileTree),
+            title: const Text('Assign new parent'),
+            subtitle: const Text('Make the dropped-on tab the parent.'),
+            onTap: () => Navigator.of(context).pop(_TabDropAction.assignParent),
+          ),
+        ],
+      ),
     );
   }
 }
