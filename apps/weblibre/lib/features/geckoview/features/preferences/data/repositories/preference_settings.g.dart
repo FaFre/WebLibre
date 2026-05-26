@@ -441,7 +441,7 @@ final class UnifiedPreferenceSettingsRepositoryProvider
 }
 
 String _$unifiedPreferenceSettingsRepositoryHash() =>
-    r'c544b5815ec676ddb6cde1ffeb8c9ef4a7dc4469';
+    r'f2153c826e2cba308cf3e8bdfe371e0b6b3e7dbd';
 
 final class UnifiedPreferenceSettingsRepositoryFamily extends $Family
     with
@@ -554,7 +554,7 @@ final class PreferenceSettingsGroupRepositoryProvider
 }
 
 String _$preferenceSettingsGroupRepositoryHash() =>
-    r'c8335b39c4c9fa95c4d415231b103a2feff97d26';
+    r'ae2b8553b895945d2a5c44a8ed24b8bbb00bb985';
 
 final class PreferenceSettingsGroupRepositoryFamily extends $Family
     with

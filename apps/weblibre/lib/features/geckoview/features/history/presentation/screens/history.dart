@@ -45,6 +45,7 @@ import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
+import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class Section extends MultiSliver {
   static final _datePattern = DateFormat.MMMd().addPattern('Hm');
@@ -499,6 +500,34 @@ class HistoryScreen extends HookConsumerWidget {
                               onTap: (item) async {
                                 if (selectedItems.value.isNotEmpty) {
                                   toggleSelected(item);
+                                } else if (isDownloadsMode) {
+                                  final filePath = item.title;
+                                  final file = filePath.mapNotNull(File.new);
+
+                                  if (file == null ||
+                                      await file.exists() != true) {
+                                    if (context.mounted) {
+                                      ui_helper.showErrorMessage(
+                                        context,
+                                        'Downloaded file not found',
+                                      );
+                                    }
+                                    return;
+                                  }
+
+                                  final opened = await GeckoDownloadsService()
+                                      .openDownloadedFile(
+                                        fileName: p.basename(file.path),
+                                        directoryPath: file.parent.path,
+                                        contentType: item.previewImageUrl,
+                                      );
+
+                                  if (!opened && context.mounted) {
+                                    ui_helper.showErrorMessage(
+                                      context,
+                                      'Could not open downloaded file',
+                                    );
+                                  }
                                 } else {
                                   await ref
                                       .read(tabRepositoryProvider.notifier)

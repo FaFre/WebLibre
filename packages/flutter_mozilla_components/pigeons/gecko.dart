@@ -2007,6 +2007,8 @@ abstract class GeckoStateEvents {
 
   void onMlProgress(int sequence, MlProgressData progress);
 
+  void onDownloadStopped(int sequence, DownloadState state);
+
   void onManifestUpdate(int sequence, String tabId, PwaManifest? manifest);
 
   void onTranslationEngineStateChange(
@@ -2301,6 +2303,11 @@ abstract class GeckoDownloadsApi {
   void requestDownload(String tabId, DownloadState state);
   void copyInternetResource(String tabId, ShareInternetResourceState state);
   void shareInternetResource(String tabId, ShareInternetResourceState state);
+  bool openDownloadedFile(
+    String fileName,
+    String directoryPath,
+    String? contentType,
+  );
 }
 
 @FlutterApi()

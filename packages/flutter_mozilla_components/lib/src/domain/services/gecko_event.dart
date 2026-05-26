@@ -23,6 +23,7 @@ typedef ScrollEvent = ({String tabId, int scrollY});
 typedef ManifestUpdateEvent = ({String tabId, PwaManifest? manifest});
 typedef TabTranslationEvent = ({String tabId, TabTranslationStateData state});
 typedef TranslationEngineEvent = TranslationEngineStateData;
+typedef DownloadStoppedEvent = DownloadState;
 
 class GeckoEventService extends GeckoStateEvents {
   // Stream controllers
@@ -48,6 +49,7 @@ class GeckoEventService extends GeckoStateEvents {
 
   final _tabAddedSubject = PublishSubject<String>();
   final _mlProgressSubject = PublishSubject<MlProgressData>();
+  final _downloadStoppedSubject = PublishSubject<DownloadStoppedEvent>();
   final _manifestUpdateSubject = PublishSubject<ManifestUpdateEvent>();
   final _translationEngineSubject = BehaviorSubject<TranslationEngineEvent>();
   final _tabTranslationSubject = ReplaySubject<TabTranslationEvent>();
@@ -77,6 +79,8 @@ class GeckoEventService extends GeckoStateEvents {
 
   Stream<String> get tabAddedStream => _tabAddedSubject.stream;
   Stream<MlProgressData> get mlProgressEvents => _mlProgressSubject.stream;
+  Stream<DownloadStoppedEvent> get downloadStoppedEvents =>
+      _downloadStoppedSubject.stream;
   Stream<ManifestUpdateEvent> get manifestUpdateEvents =>
       _manifestUpdateSubject.stream;
   ValueStream<TranslationEngineEvent> get translationEngineEvents =>
@@ -219,6 +223,11 @@ class GeckoEventService extends GeckoStateEvents {
   }
 
   @override
+  void onDownloadStopped(int sequence, DownloadState state) {
+    _downloadStoppedSubject.addWhenMoreRecent(sequence, state.id, state);
+  }
+
+  @override
   void onManifestUpdate(int sequence, String tabId, PwaManifest? manifest) {
     _manifestUpdateSubject.addWhenMoreRecent(sequence, tabId, (
       tabId: tabId,
@@ -276,6 +285,7 @@ class GeckoEventService extends GeckoStateEvents {
     await _siteAssignementSubject.close();
     await _proxyLoadErrorSubject.close();
     await _mlProgressSubject.close();
+    await _downloadStoppedSubject.close();
     await _manifestUpdateSubject.close();
     await _translationEngineSubject.close();
     await _tabTranslationSubject.close();

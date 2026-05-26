@@ -9046,6 +9046,23 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
       } 
     }
   }
+  fun onDownloadStopped(sequenceArg: Long, stateArg: DownloadState, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onDownloadStopped$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg, stateArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
   fun onManifestUpdate(sequenceArg: Long, tabIdArg: String, manifestArg: PwaManifest?, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
@@ -10537,6 +10554,7 @@ interface GeckoDownloadsApi {
   fun requestDownload(tabId: String, state: DownloadState)
   fun copyInternetResource(tabId: String, state: ShareInternetResourceState)
   fun shareInternetResource(tabId: String, state: ShareInternetResourceState)
+  fun openDownloadedFile(fileName: String, directoryPath: String, contentType: String?): Boolean
 
   companion object {
     /** The codec used by GeckoDownloadsApi. */
@@ -10595,6 +10613,25 @@ interface GeckoDownloadsApi {
             val wrapped: List<Any?> = try {
               api.shareInternetResource(tabIdArg, stateArg)
               listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoDownloadsApi.openDownloadedFile$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val fileNameArg = args[0] as String
+            val directoryPathArg = args[1] as String
+            val contentTypeArg = args[2] as String?
+            val wrapped: List<Any?> = try {
+              listOf(api.openDownloadedFile(fileNameArg, directoryPathArg, contentTypeArg))
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
             }

@@ -72,4 +72,12 @@ class GeckoDownloadsService {
       ),
     );
   }
+
+  Future<bool> openDownloadedFile({
+    required String fileName,
+    required String directoryPath,
+    String? contentType,
+  }) {
+    return _api.openDownloadedFile(fileName, directoryPath, contentType);
+  }
 }

@@ -64,6 +64,8 @@ export 'src/pigeons/gecko.g.dart'
         DocumentType,
         DohSettings,
         DohSettingsMode,
+        DownloadState,
+        DownloadStatus,
         EmailHitResult,
         FrecencyThresholdOption,
         GeckoDeleteBrowsingDataController,

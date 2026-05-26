@@ -26,7 +26,9 @@ import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import eu.weblibre.flutter_mozilla_components.addons.WebExtensionPromptFeature
 import eu.weblibre.flutter_mozilla_components.databinding.FragmentBrowserBinding
+import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
+import eu.weblibre.flutter_mozilla_components.ext.toPigeonDownloadState
 import eu.weblibre.flutter_mozilla_components.feature.BrowserHandlingScrollFeature
 import eu.weblibre.flutter_mozilla_components.feature.KeyboardVisibilityFeature
 import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
@@ -320,6 +322,15 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     fragmentManager = childFragmentManager,
                     onDownloadStopped = { download, id, status ->
                         Logger.debug("Download done. ID#$id $download with status $status")
+                        if (
+                            status == mozilla.components.browser.state.state.content.DownloadState.Status.COMPLETED ||
+                            status == mozilla.components.browser.state.state.content.DownloadState.Status.FAILED
+                        ) {
+                            components.flutterEvents.onDownloadStopped(
+                                EventSequence.next(),
+                                download.toPigeonDownloadState(status),
+                            ) { _ -> }
+                        }
                     },
                     downloadFileUtils = DefaultDownloadFileUtils(
                         context = components.profileApplicationContext,

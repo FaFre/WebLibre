@@ -18,9 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/domain/services/app_initialization.dart';
+import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
@@ -99,7 +102,9 @@ class MainApp extends HookConsumerWidget {
               disableAnimations: disableAnimations,
               child: _SyncEventListener(
                 child: _SandboxCaptureErrorListener(
-                  child: child ?? const SizedBox.shrink(),
+                  child: _DownloadStoppedListener(
+                    child: child ?? const SizedBox.shrink(),
+                  ),
                 ),
               ),
             );
@@ -139,6 +144,65 @@ class MainApp extends HookConsumerWidget {
         );
       },
     );
+  }
+}
+
+class _DownloadStoppedListener extends HookConsumerWidget {
+  final Widget child;
+
+  const _DownloadStoppedListener({required this.child});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final downloadStoppedEvents = ref.watch(
+      eventServiceProvider.select((service) => service.downloadStoppedEvents),
+    );
+
+    useOnStreamChange(
+      downloadStoppedEvents,
+      onData: (download) {
+        switch (download.status) {
+          case DownloadStatus.completed:
+            ui_helper.showInfoMessage(
+              context,
+              'Download completed',
+              duration: const Duration(seconds: 6),
+              action: SnackBarAction(
+                label: 'Open',
+                onPressed: () async {
+                  final opened = await GeckoDownloadsService()
+                      .openDownloadedFile(
+                        fileName: download.fileName ?? '',
+                        directoryPath: download.directoryPath ?? '',
+                        contentType: download.contentType,
+                      );
+
+                  if (!opened && context.mounted) {
+                    ui_helper.showErrorMessage(
+                      context,
+                      'Could not open downloaded file',
+                    );
+                  }
+                },
+              ),
+            );
+          case DownloadStatus.failed:
+            ui_helper.showErrorMessage(
+              context,
+              'Download failed: ${download.fileName ?? download.url}',
+              persist: true,
+            );
+          case DownloadStatus.initiated:
+          case DownloadStatus.downloading:
+          case DownloadStatus.paused:
+          case DownloadStatus.cancelled:
+          case null:
+            break;
+        }
+      },
+    );
+
+    return child;
   }
 }
 

@@ -15,6 +15,7 @@ import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.action.CopyInternetResourceAction
 import mozilla.components.browser.state.action.ShareResourceAction
 import mozilla.components.browser.state.state.content.ShareResourceState
+import mozilla.components.support.utils.DefaultDownloadFileUtils
 import java.util.UUID
 
 class GeckoDownloadsApiImpl : GeckoDownloadsApi {
@@ -37,6 +38,23 @@ class GeckoDownloadsApiImpl : GeckoDownloadsApi {
 
     override fun shareInternetResource(tabId: String, state: ShareInternetResourceState) {
         components.core.store.dispatch(ShareResourceAction.AddShareAction(tabId, state.toMozillaShareInternetResourceState()))
+    }
+
+    override fun openDownloadedFile(
+        fileName: String,
+        directoryPath: String,
+        contentType: String?,
+    ): Boolean {
+        return DefaultDownloadFileUtils(
+            context = components.profileApplicationContext,
+            downloadLocation = {
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+            },
+        ).openFile(
+            fileName = fileName,
+            directoryPath = directoryPath,
+            contentType = contentType,
+        )
     }
 
     private fun ShareInternetResourceState.toMozillaShareInternetResourceState(): ShareResourceState.InternetResource {
