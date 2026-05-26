@@ -2,6 +2,7 @@
 ext {
     compileSdkVersion   = 36
     targetSdkVersion    = 36
+    ndkVersion          = "28.2.13676358"
 }
 
 buildscript {
@@ -34,6 +35,7 @@ subprojects {
         if (it.hasProperty("android")) {
             android {
                 compileSdkVersion 36
+                ndkVersion rootProject.ext.ndkVersion
             }
         }
     }

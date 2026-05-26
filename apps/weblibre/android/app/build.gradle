@@ -29,7 +29,7 @@ def weblibreGoMobileAar = file("../../../../native/go_mobile_runtime/build/webli
 android {
     namespace = "eu.weblibre.gecko"
     compileSdk = 36
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = rootProject.ext.ndkVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
