@@ -289,23 +289,17 @@ class _BangChipsList extends HookConsumerWidget {
   }
 
   void _handleSelection(BuildContext context, WidgetRef ref, BangData bang) {
-    // Text clearing logic:
-    // - Site tab (domain != null): only clear if text is a valid URL
-    // - All tab (domain == null): always clear (same as original BangChips)
-    if (domain == null) {
-      // All tab / new tab mode - always clear
-      searchTextController.clear();
-    } else {
-      // Site tab - only clear if text is a valid URL
-      final hasSupportedScheme =
-          uri_parser
-              .tryParseUrl(searchTextController.text)
-              .mapNotNull((uri) => uri.hasSupportedScheme) ??
-          false;
+    // Only clear text when it parses as a URL — searching a URL via a bang
+    // makes no sense. Otherwise preserve the query so the user can run it
+    // against the newly selected provider.
+    final hasSupportedScheme =
+        uri_parser
+            .tryParseUrl(searchTextController.text)
+            .mapNotNull((uri) => uri.hasSupportedScheme) ??
+        false;
 
-      if (hasSupportedScheme) {
-        searchTextController.clear();
-      }
+    if (hasSupportedScheme) {
+      searchTextController.clear();
     }
 
     // Clear the OTHER provider for mutual exclusion
