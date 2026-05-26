@@ -17,13 +17,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 
-// Cap glyph count so the badge stays readable on deep trees.
-const int _maxDepthGlyphs = 4;
+// Above this depth, collapse the chevrons into a single icon + count badge.
+const int _maxInlineGlyphs = 3;
 
 class TabDepthIndicator extends StatelessWidget {
   final int depth;
@@ -42,7 +41,8 @@ class TabDepthIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final glyphCount = math.min(depth, _maxDepthGlyphs);
+    final showBadge = depth > _maxInlineGlyphs;
+    final glyphCount = showBadge ? 1 : depth;
 
     return SizedBox(
       height: height,
@@ -60,6 +60,14 @@ class TabDepthIndicator extends StatelessWidget {
                   size: iconSize,
                   color: scheme.onSurfaceVariant,
                 ),
+              if (showBadge) ...[
+                const SizedBox(width: 2),
+                InlineCountBadge(
+                  count: depth,
+                  backgroundColor: scheme.secondaryContainer,
+                  foregroundColor: scheme.onSecondaryContainer,
+                ),
+              ],
             ],
           ),
         ),
