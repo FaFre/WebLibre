@@ -33,6 +33,7 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chip_content.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/tab_drag_container_target.dart';
@@ -360,6 +361,10 @@ class ContainerChips extends HookConsumerWidget {
               (filter) => containers.where(filter).toList(),
             ) ??
             containers;
+        final enableContainerReorder =
+            enableDragAndDrop &&
+            containerFilter == null &&
+            searchTextListenable == null;
 
         if (selectedContainer == null &&
             availableContainers.isEmpty &&
@@ -477,6 +482,21 @@ class ContainerChips extends HookConsumerWidget {
                         onSelected: onSelected,
                         onDeleted: onDeleted,
                         onLongPress: onLongPress,
+                        onReorder: enableContainerReorder
+                            ? (oldIndex, newIndex) {
+                                unawaited(
+                                  ref
+                                      .read(
+                                        containerRepositoryProvider.notifier,
+                                      )
+                                      .reorderContainer(
+                                        availableContainers,
+                                        oldIndex,
+                                        newIndex,
+                                      ),
+                                );
+                              }
+                            : null,
                       ),
                 ),
                 if (displayMenu)

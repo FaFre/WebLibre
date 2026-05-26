@@ -18,7 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:fading_scroll/fading_scroll.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:nullability/nullability.dart';
 
 class _BadgeWrapper extends StatelessWidget {
@@ -40,17 +43,63 @@ class _BadgeWrapper extends StatelessWidget {
   }
 }
 
-class _GestureWrapper extends StatelessWidget {
+class _GestureWrapper extends HookWidget {
   final Widget child;
   final GestureLongPressCallback? onLongPress;
 
-  const _GestureWrapper({required this.child, this.onLongPress});
+  /// When true, long-press detection is done via a passive [Listener] so it
+  /// doesn't claim the gesture from the surrounding
+  /// `ReorderableDelayedDragStartListener`. The callback fires only on pointer
+  /// release if the touch was held longer than [kLongPressTimeout] without
+  /// moving more than [kTouchSlop]. Any movement above slop arms the drag and
+  /// suppresses the callback.
+  final bool reorderMode;
+
+  const _GestureWrapper({
+    required this.child,
+    this.onLongPress,
+    this.reorderMode = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return onLongPress != null
-        ? InkWell(onLongPress: onLongPress, child: child)
-        : child;
+    final startPosition = useRef(Offset.zero);
+    final pressStart = useRef<Duration?>(null);
+    final moved = useRef(false);
+
+    if (onLongPress == null) {
+      return child;
+    }
+
+    if (!reorderMode) {
+      return InkWell(onLongPress: onLongPress, child: child);
+    }
+
+    return Listener(
+      onPointerDown: (event) {
+        startPosition.value = event.position;
+        pressStart.value = event.timeStamp;
+        moved.value = false;
+      },
+      onPointerMove: (event) {
+        if (!moved.value &&
+            (event.position - startPosition.value).distance > kTouchSlop) {
+          moved.value = true;
+        }
+      },
+      onPointerUp: (event) {
+        final start = pressStart.value;
+        pressStart.value = null;
+        if (start == null || moved.value) return;
+        if (event.timeStamp - start >= kLongPressTimeout) {
+          onLongPress!();
+        }
+      },
+      onPointerCancel: (_) {
+        pressStart.value = null;
+      },
+      child: child,
+    );
   }
 }
 
@@ -110,6 +159,12 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
   final void Function(T item)? onDeleted;
   final void Function(T item)? onLongPress;
 
+  /// Long-press-to-drag reorder among the main items. Indices are
+  /// passed in the same coordinate space as [availableItems] (prefix
+  /// items are excluded). Null disables reorder entirely and the
+  /// non-reorderable [ListView] path is used.
+  final void Function(int oldIndex, int newIndex)? onReorder;
+
   const SelectableChips({
     required this.itemId,
     required this.itemLabel,
@@ -127,6 +182,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
     this.onSelected,
     this.onDeleted,
     this.onLongPress,
+    this.onReorder,
     this.sortSelectedFirst = true,
     this.scrollController,
     this.activeItemKey,
@@ -140,7 +196,10 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
         ? availableItems.take(maxCount!).toList()
         : availableItems.toList();
 
-    if (sortSelectedFirst) {
+    // Selection-first reorder fights with manual drag-reorder, so when
+    // reorder is on, DB order wins.
+    final sortSelected = sortSelectedFirst && onReorder == null;
+    if (sortSelected) {
       if (selectedItem case final T selectedItem) {
         final selectedIndex = items.indexWhere(
           (item) => itemId(item) == itemId(selectedItem),
@@ -153,83 +212,121 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
       }
     }
 
+    final prefixCount = prefixListItems.length;
+    final totalCount = prefixCount + items.length;
+
+    Widget buildPrefix(int index) {
+      return Padding(
+        key: ValueKey('__selectable_chips_prefix_$index'),
+        padding: const EdgeInsets.only(top: 4.0, right: 4),
+        child: prefixListItems[index],
+      );
+    }
+
+    Widget buildItem(int index) {
+      final item = items[index];
+      final isSelected =
+          selectedItem != null && itemId(item) == itemId(selectedItem as S);
+      final deco = decoration;
+      final itemColorValue = deco?.color?.call(item, isSelected);
+      final canDeleteItem =
+          enableDelete && (deco?.canDelete?.call(item) ?? true);
+      final child = Padding(
+        padding: const EdgeInsets.only(right: 8.0, top: 4.0),
+        child: _BadgeWrapper(
+          count: itemBadgeCount?.call(item),
+          child: _GestureWrapper(
+            reorderMode: onReorder != null,
+            onLongPress: onLongPress.mapNotNull(
+              (callback) =>
+                  () => callback(item),
+            ),
+            child: FilterChip(
+              color: itemColorValue != null
+                  ? WidgetStatePropertyAll(itemColorValue)
+                  : null,
+              selected: selectedBorderColor == null && isSelected,
+              showCheckmark: false,
+              labelPadding: deco?.labelPadding?.call(item),
+              deleteIcon: deco?.deleteIcon?.call(item),
+              onSelected: (value) {
+                if (value) {
+                  onSelected?.call(item);
+                } else {
+                  onDeleted?.call(item);
+                }
+              },
+              onDeleted: canDeleteItem
+                  ? () {
+                      onDeleted?.call(item);
+                    }
+                  : null,
+              label: itemLabel.call(item),
+              avatar: itemAvatar?.call(item),
+              tooltip: itemTooltip?.call(item),
+              side:
+                  deco?.side?.call(item, isSelected) ??
+                  (isSelected && selectedBorderColor != null
+                      ? BorderSide(color: selectedBorderColor!, width: 2.0)
+                      : null),
+            ),
+          ),
+        ),
+      );
+
+      final wrappedChild = (itemWrap != null) ? itemWrap!(child, item) : child;
+      final keyed = KeyedSubtree(
+        key: isSelected && activeItemKey != null
+            ? activeItemKey
+            : ValueKey(itemId(item)),
+        child: wrappedChild,
+      );
+      return onReorder != null
+          ? ReorderableDelayedDragStartListener(
+              key: ValueKey('__selectable_chips_item_${itemId(item)}'),
+              index: prefixCount + index,
+              child: keyed,
+            )
+          : keyed;
+    }
+
     return FadingScroll(
       controller: scrollController,
       fadingSize: 15,
       builder: (context, controller) {
-        return ListView.builder(
-          controller: controller,
-          cacheExtent: cacheExtent,
+        if (onReorder == null) {
+          return ListView.builder(
+            controller: controller,
+            scrollCacheExtent: cacheExtent.mapNotNull(
+              (extent) => ScrollCacheExtent.pixels(extent),
+            ),
+            scrollDirection: Axis.horizontal,
+            itemCount: totalCount,
+            itemBuilder: (context, index) => index < prefixCount
+                ? buildPrefix(index)
+                : buildItem(index - prefixCount),
+          );
+        }
+
+        return ReorderableListView.builder(
+          scrollController: controller,
+          scrollCacheExtent: cacheExtent.mapNotNull(
+            (extent) => ScrollCacheExtent.pixels(extent),
+          ),
           scrollDirection: Axis.horizontal,
-          itemCount: prefixListItems.length + items.length,
-          itemBuilder: (context, index) {
-            if (index < prefixListItems.length) {
-              return Padding(
-                padding: const EdgeInsets.only(top: 4.0, right: 4),
-                child: prefixListItems[index],
-              );
+          buildDefaultDragHandles: false,
+          itemCount: totalCount,
+          itemBuilder: (context, index) => index < prefixCount
+              ? buildPrefix(index)
+              : buildItem(index - prefixCount),
+          onReorderItem: (oldIndex, newIndex) {
+            // onReorderItem newIndex is already post-removal.
+            if (oldIndex < prefixCount || newIndex < prefixCount) {
+              // Either source or target is in the non-draggable prefix
+              // region; ignore.
+              return;
             }
-
-            final item = items[index - prefixListItems.length];
-            final isSelected =
-                selectedItem != null &&
-                itemId(item) == itemId(selectedItem as S);
-            final deco = decoration;
-            final itemColorValue = deco?.color?.call(item, isSelected);
-            final canDeleteItem =
-                enableDelete && (deco?.canDelete?.call(item) ?? true);
-            final child = Padding(
-              padding: const EdgeInsets.only(right: 8.0, top: 4.0),
-              child: _BadgeWrapper(
-                count: itemBadgeCount?.call(item),
-                child: _GestureWrapper(
-                  onLongPress: onLongPress.mapNotNull(
-                    (callback) =>
-                        () => callback(item),
-                  ),
-                  child: FilterChip(
-                    color: itemColorValue != null
-                        ? WidgetStatePropertyAll(itemColorValue)
-                        : null,
-                    selected: selectedBorderColor == null && isSelected,
-                    showCheckmark: false,
-                    labelPadding: deco?.labelPadding?.call(item),
-                    deleteIcon: deco?.deleteIcon?.call(item),
-                    onSelected: (value) {
-                      if (value) {
-                        onSelected?.call(item);
-                      } else {
-                        onDeleted?.call(item);
-                      }
-                    },
-                    onDeleted: canDeleteItem
-                        ? () {
-                            onDeleted?.call(item);
-                          }
-                        : null,
-                    label: itemLabel.call(item),
-                    avatar: itemAvatar?.call(item),
-                    tooltip: itemTooltip?.call(item),
-                    side:
-                        deco?.side?.call(item, isSelected) ??
-                        (isSelected && selectedBorderColor != null
-                            ? BorderSide(
-                                color: selectedBorderColor!,
-                                width: 2.0,
-                              )
-                            : null),
-                  ),
-                ),
-              ),
-            );
-
-            final wrappedChild = (itemWrap != null)
-                ? itemWrap!(child, item)
-                : child;
-
-            return isSelected && activeItemKey != null
-                ? KeyedSubtree(key: activeItemKey, child: wrappedChild)
-                : wrappedChild;
+            onReorder!(oldIndex - prefixCount, newIndex - prefixCount);
           },
         );
       },
