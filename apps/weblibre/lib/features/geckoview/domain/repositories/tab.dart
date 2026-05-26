@@ -21,12 +21,14 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
@@ -49,6 +51,20 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 import 'package:weblibre/utils/debouncer.dart';
 
 part 'tab.g.dart';
+
+@visibleForTesting
+ContainerData? resolveAssignedContainerForTabOpen({
+  required TabContainerSelection containerSelection,
+  required ContainerData? requestedContainer,
+  required ContainerData? siteAssignedContainer,
+}) {
+  return switch (containerSelection) {
+    UseSelectedContainerTabSelection() =>
+      siteAssignedContainer ?? requestedContainer,
+    UnassignedContainerTabSelection() ||
+    SpecificContainerTabSelection() => requestedContainer,
+  };
+}
 
 sealed class TabBackPromptBehavior {
   const TabBackPromptBehavior();
@@ -124,12 +140,31 @@ class TabRepository extends _$TabRepository {
   }) async {
     final tabDao = ref.read(tabDatabaseProvider).tabDao;
 
-    final assignedContainer = switch (containerSelection) {
+    var assignedContainer = switch (containerSelection) {
       UseSelectedContainerTabSelection() =>
         await ref.read(selectedContainerProvider.notifier).fetchData(),
       UnassignedContainerTabSelection() => null,
       SpecificContainerTabSelection(:final container) => container,
     };
+
+    if (tabMode is RegularTabMode &&
+        url != null &&
+        url.hasAuthority &&
+        url.isHttpOrHttps) {
+      final siteAssignedContainerId = await ref
+          .read(containerRepositoryProvider.notifier)
+          .siteAssignedContainerId(url);
+      final siteAssignedContainer = await siteAssignedContainerId.mapNotNull(
+        (id) =>
+            ref.read(containerRepositoryProvider.notifier).getContainerData(id),
+      );
+
+      assignedContainer = resolveAssignedContainerForTabOpen(
+        containerSelection: containerSelection,
+        requestedContainer: assignedContainer,
+        siteAssignedContainer: siteAssignedContainer,
+      );
+    }
 
     // For isolated tabs, skip parent context validation since
     // isolated tabs use their own immutable context ID.
@@ -869,7 +904,7 @@ class TabRepository extends _$TabRepository {
                   currentTabState.historyState.items.isEmpty;
 
               if (event.blocked || tabIsEmpty) {
-                await addTab(
+                final newTabId = await addTab(
                   url: uri,
                   tabMode: currentTabState.tabMode,
                   containerSelection: TabContainerSelection.specific(
@@ -885,6 +920,10 @@ class TabRepository extends _$TabRepository {
 
                 if (currentTabState.historyState.items.isEmpty) {
                   await closeTab(currentTabState.id);
+                  if (!ref.mounted) {
+                    return;
+                  }
+                  await selectTab(newTabId);
                 }
               } else {
                 final tabContainerId = await ref

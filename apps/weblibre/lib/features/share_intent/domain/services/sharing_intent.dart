@@ -65,11 +65,17 @@ _buildSharingIntentTransformer(
     final shortcutContextId = intent.action == 'android.intent.action.VIEW'
         ? intent.extra['pwa_context_id'] as String?
         : null;
+    final shortcutContainerMode =
+        intent.extra['shortcut_container_mode'] as String?;
+    final hasShortcutContainerMetadata =
+        shortcutContextId != null || shortcutContainerMode != null;
     final containerMode = intent.action == 'android.intent.action.VIEW'
-        ? IntentContainerMode.fromWireValue(
-            intent.extra['shortcut_container_mode'] as String?,
-            contextId: shortcutContextId,
-          )
+        ? hasShortcutContainerMetadata
+              ? IntentContainerMode.fromWireValue(
+                  shortcutContainerMode,
+                  contextId: shortcutContextId,
+                )
+              : IntentContainerMode.unassigned
         : IntentContainerMode.useSelected;
 
     final allowed = await gatekeeper.shouldAllow(
