@@ -2,7 +2,7 @@
 ext {
     compileSdkVersion   = 36
     targetSdkVersion    = 36
-    ndkVersion          = "28.2.13676358"
+    ndkVersion          = providers.gradleProperty("weblibre.ndkVersion").get()
 }
 
 buildscript {

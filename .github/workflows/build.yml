@@ -13,7 +13,6 @@ jobs:
       KEY_PATH: ${{ github.workspace }}/apps/weblibre/key.jks
       KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-      ANDROID_NDK_VERSION: 28.2.13676358
     permissions:
       contents: write
     steps:
@@ -41,6 +40,14 @@ jobs:
       - name: Install Android NDK
         run: |
           set -euo pipefail
+          ANDROID_NDK_VERSION="$(
+            sed -n 's/^weblibre\.ndkVersion[[:space:]]*=[[:space:]]*//p' \
+              apps/weblibre/android/gradle.properties
+          )"
+          if [[ -z "$ANDROID_NDK_VERSION" ]]; then
+            echo "Missing weblibre.ndkVersion in apps/weblibre/android/gradle.properties" >&2
+            exit 1
+          fi
           set +e
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;$ANDROID_NDK_VERSION"
           sdkmanager_status=${PIPESTATUS[1]}
@@ -50,6 +57,7 @@ jobs:
           fi
           test -f "$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION/source.properties"
           {
+            echo "ANDROID_NDK_VERSION=$ANDROID_NDK_VERSION"
             echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION"
             echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION"
             echo "NDK_HOME=$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION"

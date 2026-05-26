@@ -9,6 +9,11 @@ REPO_ROOT="$(cd "$RUNTIME_DIR/../.." && pwd -P)"
 # shellcheck source=../pins.env
 source "$RUNTIME_DIR/pins.env"
 
+GRADLE_PROPERTIES="$REPO_ROOT/apps/weblibre/android/gradle.properties"
+DEFAULT_ANDROID_NDK_VERSION="$(
+  sed -n 's/^weblibre\.ndkVersion[[:space:]]*=[[:space:]]*//p' "$GRADLE_PROPERTIES"
+)"
+
 DEFAULT_SING_BOX_SOURCE="$(cd "$REPO_ROOT/.." && pwd -P)/sing-box"
 DEFAULT_IPTPROXY_SOURCE="$(cd "$REPO_ROOT/.." && pwd -P)/IPtProxy"
 
@@ -18,7 +23,7 @@ DNSTT_SOURCE="${DNSTT_SOURCE:-$IPTPROXY_SOURCE/dnstt}"
 OUTPUT_AAR="${OUTPUT_AAR:-$RUNTIME_DIR/build/weblibre-go.aar}"
 TARGET="${TARGET:-android}"
 ANDROID_API="${ANDROID_API:-24}"
-ANDROID_NDK_VERSION="${ANDROID_NDK_VERSION:-28.2.13676358}"
+ANDROID_NDK_VERSION="${ANDROID_NDK_VERSION:-$DEFAULT_ANDROID_NDK_VERSION}"
 INSTALL_GOMOBILE=1
 ALLOW_DIRTY=0
 DEBUG=0
@@ -190,6 +195,11 @@ fi
 
 if ! command -v go >/dev/null 2>&1; then
   echo "go is required to build the gomobile runtime." >&2
+  exit 1
+fi
+
+if [[ -z "$ANDROID_NDK_VERSION" ]]; then
+  echo "Missing weblibre.ndkVersion in $GRADLE_PROPERTIES." >&2
   exit 1
 fi
 

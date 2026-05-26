@@ -39,6 +39,7 @@ The output AAR is written to `native/go_mobile_runtime/build/weblibre-go.aar`.
 
 GitHub release builds clone the pinned sources from `pins.env` and run the same
 Melos command before building the Flutter APK/AAB artifacts. The app Gradle
-build and CI native runtime build both use Android NDK r28c (`28.2.13676358`),
-matching Flutter 3.44's default NDK. This is new enough for the `cronet-go`
-Android arm64 archives linked by sing-box's naive outbound path.
+build and CI native runtime build both read `weblibre.ndkVersion` from
+`apps/weblibre/android/gradle.properties`; it is currently Android NDK r28c
+(`28.2.13676358`), matching Flutter 3.44's default NDK. This is new enough for
+the `cronet-go` Android arm64 archives linked by sing-box's naive outbound path.
