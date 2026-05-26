@@ -297,17 +297,28 @@ historyUrlsPage:
 deleteHistoryByCanonicalUrls:
   DELETE FROM history WHERE url_canonical IN :canonicalUrls;
 
--- Tab → history fan-out. Fires when content-bearing columns change AND the
--- content actually changed (content_hash gate). Settings are read from
--- local_index_setting at SQL level so the trigger is the single source of
--- truth for indexing eligibility. tab_mode = 1 is the private tab marker;
--- private tabs are skipped unless `index_private` is enabled.
+-- Tab -> history fan-out. Content triggers fire when content-bearing columns
+-- change AND the content actually changed (content_hash gate). Re-evaluation
+-- triggers fire when indexing eligibility changes without a content update
+-- (container assignment or container exclude flag changes). Settings are read
+-- from local_index_setting at SQL level so these triggers are the single source
+-- of truth for indexing eligibility. tab_mode = 1 is the private tab marker;
+-- private tabs are skipped unless `index_private` is enabled. Per-container
+-- opt-out lives in container.metadata.excludeFromIndex (JSON); tabs without
+-- a container fall through (NULL container_id -> no matching row -> indexable).
+-- Re-evaluation must refresh observed_at even when content_hash is unchanged,
+-- because the winning eligible tab for a canonical URL may have changed.
 CREATE TRIGGER tab_to_history_on_insert AFTER INSERT ON tab
 WHEN NEW.url IS NOT NULL
  AND url_indexable(CAST(NEW.url AS TEXT)) = 1
  AND (SELECT value FROM local_index_setting WHERE "key" = 'enabled') = 1
  AND (NEW.tab_mode != 1
       OR (SELECT value FROM local_index_setting WHERE "key" = 'index_private') = 1)
+ AND NOT EXISTS (
+   SELECT 1 FROM container
+   WHERE container.id = NEW.container_id
+     AND json_extract(container.metadata, '$.excludeFromIndex') = 1
+ )
 BEGIN
   INSERT INTO history (
     url_canonical, url_host, url_path, title, is_probably_readerable,
@@ -352,6 +363,11 @@ WHEN NEW.url IS NOT NULL
  AND (SELECT value FROM local_index_setting WHERE "key" = 'enabled') = 1
  AND (NEW.tab_mode != 1
       OR (SELECT value FROM local_index_setting WHERE "key" = 'index_private') = 1)
+ AND NOT EXISTS (
+   SELECT 1 FROM container
+   WHERE container.id = NEW.container_id
+     AND json_extract(container.metadata, '$.excludeFromIndex') = 1
+ )
 BEGIN
   INSERT INTO history (
     url_canonical, url_host, url_path, title, is_probably_readerable,
@@ -383,6 +399,168 @@ BEGIN
     observed_at                 = excluded.observed_at,
     observed_count              = history.observed_count + 1
   WHERE history.content_hash IS NOT excluded.content_hash;
+END;
+
+CREATE TRIGGER tab_to_history_on_container_update AFTER UPDATE OF container_id
+ON tab
+WHEN NEW.url IS NOT NULL
+ AND url_indexable(CAST(NEW.url AS TEXT)) = 1
+ AND (SELECT value FROM local_index_setting WHERE "key" = 'enabled') = 1
+BEGIN
+  DELETE FROM history
+  WHERE url_canonical = url_canonical(CAST(NEW.url AS TEXT))
+    AND NOT EXISTS (
+      SELECT 1
+      FROM tab AS candidate
+      WHERE candidate.url IS NOT NULL
+        AND url_indexable(CAST(candidate.url AS TEXT)) = 1
+        AND url_canonical(CAST(candidate.url AS TEXT)) = history.url_canonical
+        AND (candidate.tab_mode != 1
+             OR (SELECT value FROM local_index_setting WHERE "key" = 'index_private') = 1)
+        AND NOT EXISTS (
+          SELECT 1 FROM container
+          WHERE container.id = candidate.container_id
+            AND json_extract(container.metadata, '$.excludeFromIndex') = 1
+        )
+    );
+
+  INSERT INTO history (
+    url_canonical, url_host, url_path, title, is_probably_readerable,
+    extracted_content_markdown, extracted_content_plain,
+    full_content_markdown, full_content_plain,
+    content_hash, observed_at, observed_count
+  )
+  SELECT
+    url_canonical(CAST(candidate.url AS TEXT)),
+    url_host(CAST(candidate.url AS TEXT)),
+    url_path(CAST(candidate.url AS TEXT)),
+    candidate.title,
+    candidate.is_probably_readerable,
+    candidate.extracted_content_markdown,
+    candidate.extracted_content_plain,
+    candidate.full_content_markdown,
+    candidate.full_content_plain,
+    candidate.content_hash,
+    strftime('%s','now') * 1000,
+    1
+  FROM tab AS candidate
+  WHERE candidate.url IS NOT NULL
+    AND url_indexable(CAST(candidate.url AS TEXT)) = 1
+    AND url_canonical(CAST(candidate.url AS TEXT)) = url_canonical(CAST(NEW.url AS TEXT))
+    AND (candidate.tab_mode != 1
+         OR (SELECT value FROM local_index_setting WHERE "key" = 'index_private') = 1)
+    AND NOT EXISTS (
+      SELECT 1 FROM container
+      WHERE container.id = candidate.container_id
+        AND json_extract(container.metadata, '$.excludeFromIndex') = 1
+    )
+  ORDER BY candidate.timestamp DESC, candidate.rowid DESC
+  LIMIT 1
+  ON CONFLICT(url_canonical) DO UPDATE SET
+    title                       = COALESCE(excluded.title, history.title),
+    is_probably_readerable      = excluded.is_probably_readerable,
+    extracted_content_markdown  = excluded.extracted_content_markdown,
+    extracted_content_plain     = excluded.extracted_content_plain,
+    full_content_markdown       = excluded.full_content_markdown,
+    full_content_plain          = excluded.full_content_plain,
+    content_hash                = excluded.content_hash,
+    observed_at                 = excluded.observed_at,
+    observed_count              = history.observed_count + 1;
+END;
+
+CREATE TRIGGER container_to_history_on_metadata_update AFTER UPDATE OF metadata
+ON container
+WHEN COALESCE(json_extract(OLD.metadata, '$.excludeFromIndex') = 1, 0)
+     != COALESCE(json_extract(NEW.metadata, '$.excludeFromIndex') = 1, 0)
+ AND (SELECT value FROM local_index_setting WHERE "key" = 'enabled') = 1
+BEGIN
+  DELETE FROM history
+  WHERE url_canonical IN (
+      SELECT DISTINCT url_canonical(CAST(affected.url AS TEXT))
+      FROM tab AS affected
+      WHERE affected.container_id = NEW.id
+        AND affected.url IS NOT NULL
+        AND url_indexable(CAST(affected.url AS TEXT)) = 1
+    )
+    AND NOT EXISTS (
+      SELECT 1
+      FROM tab AS candidate
+      WHERE candidate.url IS NOT NULL
+        AND url_indexable(CAST(candidate.url AS TEXT)) = 1
+        AND url_canonical(CAST(candidate.url AS TEXT)) = history.url_canonical
+        AND (candidate.tab_mode != 1
+             OR (SELECT value FROM local_index_setting WHERE "key" = 'index_private') = 1)
+        AND NOT EXISTS (
+          SELECT 1 FROM container
+          WHERE container.id = candidate.container_id
+            AND json_extract(container.metadata, '$.excludeFromIndex') = 1
+        )
+    );
+
+  INSERT INTO history (
+    url_canonical, url_host, url_path, title, is_probably_readerable,
+    extracted_content_markdown, extracted_content_plain,
+    full_content_markdown, full_content_plain,
+    content_hash, observed_at, observed_count
+  )
+  SELECT
+    url_canonical(CAST(candidate.url AS TEXT)),
+    url_host(CAST(candidate.url AS TEXT)),
+    url_path(CAST(candidate.url AS TEXT)),
+    candidate.title,
+    candidate.is_probably_readerable,
+    candidate.extracted_content_markdown,
+    candidate.extracted_content_plain,
+    candidate.full_content_markdown,
+    candidate.full_content_plain,
+    candidate.content_hash,
+    strftime('%s','now') * 1000,
+    1
+  FROM tab AS candidate
+  WHERE candidate.url IS NOT NULL
+    AND url_indexable(CAST(candidate.url AS TEXT)) = 1
+    AND url_canonical(CAST(candidate.url AS TEXT)) IN (
+      SELECT DISTINCT url_canonical(CAST(affected.url AS TEXT))
+      FROM tab AS affected
+      WHERE affected.container_id = NEW.id
+        AND affected.url IS NOT NULL
+        AND url_indexable(CAST(affected.url AS TEXT)) = 1
+    )
+    AND (candidate.tab_mode != 1
+         OR (SELECT value FROM local_index_setting WHERE "key" = 'index_private') = 1)
+    AND NOT EXISTS (
+      SELECT 1 FROM container
+      WHERE container.id = candidate.container_id
+        AND json_extract(container.metadata, '$.excludeFromIndex') = 1
+    )
+    AND NOT EXISTS (
+      SELECT 1
+      FROM tab AS newer
+      WHERE newer.url IS NOT NULL
+        AND url_indexable(CAST(newer.url AS TEXT)) = 1
+        AND url_canonical(CAST(newer.url AS TEXT)) = url_canonical(CAST(candidate.url AS TEXT))
+        AND (newer.tab_mode != 1
+             OR (SELECT value FROM local_index_setting WHERE "key" = 'index_private') = 1)
+        AND NOT EXISTS (
+          SELECT 1 FROM container
+          WHERE container.id = newer.container_id
+            AND json_extract(container.metadata, '$.excludeFromIndex') = 1
+        )
+        AND (
+          newer.timestamp > candidate.timestamp
+          OR (newer.timestamp = candidate.timestamp AND newer.rowid > candidate.rowid)
+        )
+    )
+  ON CONFLICT(url_canonical) DO UPDATE SET
+    title                       = COALESCE(excluded.title, history.title),
+    is_probably_readerable      = excluded.is_probably_readerable,
+    extracted_content_markdown  = excluded.extracted_content_markdown,
+    extracted_content_plain     = excluded.extracted_content_plain,
+    full_content_markdown       = excluded.full_content_markdown,
+    full_content_plain          = excluded.full_content_plain,
+    content_hash                = excluded.content_hash,
+    observed_at                 = excluded.observed_at,
+    observed_count              = history.observed_count + 1;
 END;
 
 containersWithCount WITH ContainerDataWithCount:

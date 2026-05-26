@@ -15,6 +15,8 @@ abstract class _$ContainerMetadataCWProxy {
 
   ContainerMetadata clearDataOnExit(bool clearDataOnExit);
 
+  ContainerMetadata excludeFromIndex(bool excludeFromIndex);
+
   ContainerMetadata assignedSites(List<Uri>? assignedSites);
 
   /// Creates a new instance with the provided field values.
@@ -29,6 +31,7 @@ abstract class _$ContainerMetadataCWProxy {
     String? contextualIdentity,
     ProxyConnectionId? proxyConnectionId,
     bool clearDataOnExit,
+    bool excludeFromIndex,
     List<Uri>? assignedSites,
   });
 }
@@ -56,6 +59,10 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
       call(clearDataOnExit: clearDataOnExit);
 
   @override
+  ContainerMetadata excludeFromIndex(bool excludeFromIndex) =>
+      call(excludeFromIndex: excludeFromIndex);
+
+  @override
   ContainerMetadata assignedSites(List<Uri>? assignedSites) =>
       call(assignedSites: assignedSites);
 
@@ -72,6 +79,7 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
     Object? contextualIdentity = const $CopyWithPlaceholder(),
     Object? proxyConnectionId = const $CopyWithPlaceholder(),
     Object? clearDataOnExit = const $CopyWithPlaceholder(),
+    Object? excludeFromIndex = const $CopyWithPlaceholder(),
     Object? assignedSites = const $CopyWithPlaceholder(),
   }) {
     return ContainerMetadata(
@@ -93,6 +101,12 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
           ? _value.clearDataOnExit
           // ignore: cast_nullable_to_non_nullable
           : clearDataOnExit as bool,
+      excludeFromIndex:
+          excludeFromIndex == const $CopyWithPlaceholder() ||
+              excludeFromIndex == null
+          ? _value.excludeFromIndex
+          // ignore: cast_nullable_to_non_nullable
+          : excludeFromIndex as bool,
       assignedSites: assignedSites == const $CopyWithPlaceholder()
           ? _value.assignedSites
           // ignore: cast_nullable_to_non_nullable
@@ -232,6 +246,7 @@ ContainerMetadata _$ContainerMetadataFromJson(Map<String, dynamic> json) =>
         json['proxyConnectionId'] as String?,
       ),
       clearDataOnExit: json['clearDataOnExit'] as bool? ?? false,
+      excludeFromIndex: json['excludeFromIndex'] as bool? ?? false,
       assignedSites: (json['assignedSites'] as List<dynamic>?)
           ?.map((e) => Uri.parse(e as String))
           .toList(),
@@ -247,6 +262,7 @@ Map<String, dynamic> _$ContainerMetadataToJson(
   'contextualIdentity': instance.contextualIdentity,
   'proxyConnectionId': _proxyConnectionIdToJson(instance.proxyConnectionId),
   'clearDataOnExit': instance.clearDataOnExit,
+  'excludeFromIndex': instance.excludeFromIndex,
   'assignedSites': instance.assignedSites?.map((e) => e.toString()).toList(),
 };
 

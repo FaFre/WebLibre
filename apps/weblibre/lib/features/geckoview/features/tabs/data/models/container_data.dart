@@ -44,6 +44,12 @@ class ContainerMetadata with FastEquatable {
   @JsonKey(defaultValue: false)
   final bool clearDataOnExit;
 
+  // Read by the `tab_to_history_on_*` SQL triggers via
+  // `json_extract(metadata, '$.excludeFromIndex')`. Keep this key name in
+  // sync with the trigger gate in definitions.drift.
+  @JsonKey(defaultValue: false)
+  final bool excludeFromIndex;
+
   final List<Uri>? assignedSites;
 
   ContainerMetadata({
@@ -51,6 +57,7 @@ class ContainerMetadata with FastEquatable {
     required this.contextualIdentity,
     required this.proxyConnectionId,
     required this.clearDataOnExit,
+    required this.excludeFromIndex,
     required this.assignedSites,
   });
 
@@ -59,12 +66,14 @@ class ContainerMetadata with FastEquatable {
     String? contextualIdentity,
     ProxyConnectionId? proxyConnectionId,
     bool? clearDataOnExit,
+    bool? excludeFromIndex,
     List<Uri>? assignedSites,
   }) : this(
          iconData: iconData,
          contextualIdentity: contextualIdentity,
          proxyConnectionId: proxyConnectionId,
          clearDataOnExit: clearDataOnExit ?? false,
+         excludeFromIndex: excludeFromIndex ?? false,
          assignedSites: assignedSites,
        );
 
@@ -81,6 +90,7 @@ class ContainerMetadata with FastEquatable {
     contextualIdentity,
     proxyConnectionId,
     clearDataOnExit,
+    excludeFromIndex,
     assignedSites,
   ];
 }

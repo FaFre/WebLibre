@@ -68,6 +68,8 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
     i1.historyAfterUpdate,
     i1.tabToHistoryOnInsert,
     i1.tabToHistoryOnUpdate,
+    i1.tabToHistoryOnContainerUpdate,
+    i1.containerToHistoryOnMetadataUpdate,
   ];
   @override
   i0.StreamQueryUpdateRules get streamUpdateRules =>
@@ -148,6 +150,26 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
             limitUpdateKind: i0.UpdateKind.update,
           ),
           result: [i0.TableUpdate('history', kind: i0.UpdateKind.insert)],
+        ),
+        i0.WritePropagation(
+          on: i0.TableUpdateQuery.onTableName(
+            'tab',
+            limitUpdateKind: i0.UpdateKind.update,
+          ),
+          result: [
+            i0.TableUpdate('history', kind: i0.UpdateKind.delete),
+            i0.TableUpdate('history', kind: i0.UpdateKind.insert),
+          ],
+        ),
+        i0.WritePropagation(
+          on: i0.TableUpdateQuery.onTableName(
+            'container',
+            limitUpdateKind: i0.UpdateKind.update,
+          ),
+          result: [
+            i0.TableUpdate('history', kind: i0.UpdateKind.delete),
+            i0.TableUpdate('history', kind: i0.UpdateKind.insert),
+          ],
         ),
       ]);
 }

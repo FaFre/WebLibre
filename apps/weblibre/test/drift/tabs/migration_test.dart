@@ -2,8 +2,9 @@
 // ignore_for_file: unused_local_variable, unused_import
 import 'package:drift/drift.dart';
 import 'package:drift_dev/api/migrations_native.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:weblibre/data/database/functions/url_functions.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'generated/schema.dart';
 
 import 'generated/schema_v2.dart' as v2;
@@ -14,7 +15,7 @@ void main() {
   late SchemaVerifier verifier;
 
   setUpAll(() {
-    verifier = SchemaVerifier(GeneratedHelper());
+    verifier = SchemaVerifier(GeneratedHelper(), setup: registerUrlFunctions);
   });
 
   group('simple database migrations', () {

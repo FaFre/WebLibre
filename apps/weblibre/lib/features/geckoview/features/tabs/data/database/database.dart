@@ -40,7 +40,7 @@ import 'package:weblibre/features/search/domain/fts_tokenizer.dart';
 )
 class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
   @override
-  final int schemaVersion = 13;
+  final int schemaVersion = 14;
 
   @override
   final int ftsTokenLimit = 10;
@@ -63,7 +63,9 @@ class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
 
       await customStatement('PRAGMA foreign_keys = ON');
       await definitionsDrift.optimizeFtsIndex();
-      await definitionsDrift.optimizeHistoryFtsIndex();
+      if (details.versionNow >= 12) {
+        await definitionsDrift.optimizeHistoryFtsIndex();
+      }
     },
     onUpgrade: (m, from, to) async {
       // Following the advice from https://drift.simonbinder.eu/Migrations/api/#general-tips
@@ -233,6 +235,17 @@ class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
             .write(ContainerCompanion(orderKey: Value(rank.value)));
         rank = rank.genNext();
       }
+    },
+    from13To14: (m, schema) async {
+      // Add per-container exclude-from-index gate to the tab→history
+      // triggers, plus re-evaluation triggers for container assignment and
+      // exclude-flag changes.
+      await m.drop(schema.tabToHistoryOnInsert);
+      await m.create(schema.tabToHistoryOnInsert);
+      await m.drop(schema.tabToHistoryOnUpdate);
+      await m.create(schema.tabToHistoryOnUpdate);
+      await m.create(schema.tabToHistoryOnContainerUpdate);
+      await m.create(schema.containerToHistoryOnMetadataUpdate);
     },
   );
 }

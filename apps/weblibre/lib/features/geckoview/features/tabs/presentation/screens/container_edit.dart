@@ -96,6 +96,9 @@ class ContainerEditScreen extends HookConsumerWidget {
       initialContainer.metadata.proxyConnectionId,
     );
     final clearDataOnExit = useState(initialContainer.metadata.clearDataOnExit);
+    final excludeFromIndex = useState(
+      initialContainer.metadata.excludeFromIndex,
+    );
     final assignedSites = useState(initialContainer.metadata.assignedSites);
     final isPinned = useState(initialContainer.isPinned);
 
@@ -118,6 +121,7 @@ class ContainerEditScreen extends HookConsumerWidget {
               : null,
           clearDataOnExit:
               clearDataOnExit.value && contextualIdentity.value != null,
+          excludeFromIndex: excludeFromIndex.value,
           assignedSites: assignedSites.value,
         ),
       );
@@ -489,6 +493,18 @@ class ContainerEditScreen extends HookConsumerWidget {
                                   clearDataOnExit.value = value;
                                 }
                               : null,
+                        ),
+                        const Divider(height: 1, indent: 56),
+                        SwitchListTile.adaptive(
+                          value: excludeFromIndex.value,
+                          title: const Text('Exclude from Search Index'),
+                          subtitle: const Text(
+                            'Skip pages in this container from the local search index',
+                          ),
+                          secondary: const Icon(MdiIcons.magnifyRemoveOutline),
+                          onChanged: (value) {
+                            excludeFromIndex.value = value;
+                          },
                         ),
                       ],
                     ),

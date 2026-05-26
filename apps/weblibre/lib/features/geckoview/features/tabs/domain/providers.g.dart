@@ -503,7 +503,7 @@ final class WatchTabDbDataProvider
   }
 }
 
-String _$watchTabDbDataHash() => r'c505be1cdeaffced2615fdb075ed8a9a2132754a';
+String _$watchTabDbDataHash() => r'90d9f479d9d6c5475185b0490089ea67edff7894';
 
 final class WatchTabDbDataFamily extends $Family
     with $FunctionalFamilyOverride<Stream<TabData?>, String> {
