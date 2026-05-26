@@ -458,6 +458,7 @@ class _TabListView extends HookConsumerWidget {
                           movingTabIds: result.movingTabIds,
                           previousTabId: result.previousTabId,
                           nextTabId: result.nextTabId,
+                          parentChange: result.parentChange,
                         );
                   },
                   itemBuilder: (context, index) {

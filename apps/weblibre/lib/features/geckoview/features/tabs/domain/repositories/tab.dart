@@ -27,6 +27,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/database/definiti
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/entities/tab_parent_change.dart';
 
 part 'tab.g.dart';
 
@@ -126,6 +127,7 @@ class TabDataRepository extends _$TabDataRepository {
     required List<String> movingTabIds,
     required String? previousTabId,
     required String? nextTabId,
+    TabParentChange parentChange = const TabParentChange.unchanged(),
   }) {
     return ref
         .read(tabDatabaseProvider)
@@ -134,7 +136,35 @@ class TabDataRepository extends _$TabDataRepository {
           movingTabIds: movingTabIds,
           previousTabId: previousTabId,
           nextTabId: nextTabId,
+          parentChange: parentChange,
         );
+  }
+
+  Future<bool> setTabParent({
+    required String tabId,
+    required String? newParentId,
+  }) {
+    return ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .setTabParent(tabId: tabId, newParentId: newParentId);
+  }
+
+  Future<bool> promoteChildToParent(String childId) {
+    return ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .promoteChildToParent(childId);
+  }
+
+  Future<bool> moveTabAmongSiblings(
+    String tabId, {
+    required bool down,
+  }) {
+    return ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .moveTabAmongSiblings(tabId, down: down);
   }
 
   Future<int> closeAllTabs({

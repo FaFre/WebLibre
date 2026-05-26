@@ -38,6 +38,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/menu_item_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/tab_parent_picker.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/translation_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
@@ -50,6 +51,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/entities/contai
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
@@ -74,6 +76,7 @@ class TabMenu extends HookConsumerWidget {
   final bool enablePinTab;
   final bool enableReloadButton;
   final bool enableNavigationButtons;
+  final bool enableHierarchy;
 
   const TabMenu({
     super.key,
@@ -94,6 +97,7 @@ class TabMenu extends HookConsumerWidget {
     this.enablePinTab = true,
     this.enableReloadButton = true,
     this.enableNavigationButtons = true,
+    this.enableHierarchy = true,
   });
 
   @override
@@ -559,6 +563,84 @@ class TabMenu extends HookConsumerWidget {
             ],
             leadingIcon: const Icon(MdiIcons.folder),
             child: const Text('Container'),
+          ),
+        if (enableHierarchy)
+          Consumer(
+            builder: (childContext, childRef, child) {
+              // `MenuItemButton.onPressed` is dispatched as a post-frame
+              // callback by Flutter's menu_anchor — by the time it fires,
+              // this `Consumer` element (and any context/ref captured from
+              // its builder params) has been deactivated as the menu
+              // overlay tears down. So:
+              //  - use `childContext` / `childRef` only synchronously
+              //    inside this builder (the `watch` below),
+              //  - inside `onPressed`, use the outer `context` and `ref`
+              //    from TabMenu.build, which live above the menu overlay
+              //    and stay mounted with the trigger button.
+              final movingTab = childRef.watch(
+                watchTabDbDataProvider(selectedTabId),
+              );
+              final tabData = movingTab.value;
+              final hasParent = tabData?.parentId != null;
+
+              final repo = ref.read(tabDataRepositoryProvider.notifier);
+
+              return SubmenuButton(
+                leadingIcon: const Icon(MdiIcons.fileTree),
+                menuChildren: [
+                  MenuItemButton(
+                    leadingIcon: const Icon(MdiIcons.swapHorizontal),
+                    onPressed: () async {
+                      controller.close();
+                      await showTabParentPicker(
+                        context: context,
+                        ref: ref,
+                        tabId: selectedTabId,
+                      );
+                    },
+                    child: const Text('Change parent…'),
+                  ),
+                  MenuItemButton(
+                    leadingIcon: const Icon(MdiIcons.fileTreeOutline),
+                    onPressed: hasParent
+                        ? () async {
+                            await repo.setTabParent(
+                              tabId: selectedTabId,
+                              newParentId: null,
+                            );
+                          }
+                        : null,
+                    child: const Text('Detach from parent'),
+                  ),
+                  const Divider(),
+                  MenuItemButton(
+                    leadingIcon: const Icon(MdiIcons.chevronUp),
+                    onPressed: () async {
+                      await repo.moveTabAmongSiblings(
+                        selectedTabId,
+                        down:
+                            settings.tabListDirection ==
+                            TabDirection.newestFirst,
+                      );
+                    },
+                    child: const Text('Move up'),
+                  ),
+                  MenuItemButton(
+                    leadingIcon: const Icon(MdiIcons.chevronDown),
+                    onPressed: () async {
+                      await repo.moveTabAmongSiblings(
+                        selectedTabId,
+                        down:
+                            settings.tabListDirection !=
+                            TabDirection.newestFirst,
+                      );
+                    },
+                    child: const Text('Move down'),
+                  ),
+                ],
+                child: const Text('Hierarchy'),
+              );
+            },
           ),
         if (enableShare)
           SubmenuButton(

@@ -20,6 +20,7 @@
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/entities/tab_parent_change.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 
 class TabViewReorderResult {
@@ -27,10 +28,16 @@ class TabViewReorderResult {
   final String? previousTabId;
   final String? nextTabId;
 
+  /// Parent assignment implied by the drop position. `unchanged` for plain
+  /// reorders; `detach` / `toParent` only emitted in hierarchical mode when
+  /// the drop lands outside the moving root's current parent scope.
+  final TabParentChange parentChange;
+
   const TabViewReorderResult({
     required this.movingTabIds,
     required this.previousTabId,
     required this.nextTabId,
+    this.parentChange = const TabParentChange.unchanged(),
   });
 }
 
@@ -108,20 +115,30 @@ TabViewReorderResult? buildTabViewReorderResult({
     return null;
   }
 
-  final parentScope = _parentScope(movingItem);
-  final resolvedInsertIndex = _resolveInsertIndexInParentScope(
+  // Derive the new parent scope purely from the visual drop position. The
+  // rule is "adopt the parent of the item you dropped above"; when dropped
+  // past the last visible item, adopt the parent of that last item. This
+  // unifies plain reorder ("same parent as the target slot") and
+  // drag-to-reparent ("different parent than the moving root") behind a
+  // single predicate.
+  final String? newParentScope = _dropParentScopeFor(
     remaining,
     requestedInsertIndex,
-    parentScope,
-    parentById,
   );
-  if (resolvedInsertIndex == null) {
-    logger.t(
-      'reorder snapped: no anchor for parent scope $parentScope — drop '
-      'rejected so the moving tab stays in its original parent',
-    );
+
+  // Cycle guard: the new parent must not be inside the moving subtree.
+  if (newParentScope != null && moveBlockIds.contains(newParentScope)) {
+    logger.t('reorder refused: new parent scope is inside moving subtree');
     return null;
   }
+
+  final originalParentScope = _parentScope(movingItem);
+  final TabParentChange parentChange = newParentScope == originalParentScope
+      ? const TabParentChange.unchanged()
+      : newParentScope == null
+      ? const TabParentChange.detach()
+      : TabParentChange.toParent(newParentScope);
+  final resolvedInsertIndex = requestedInsertIndex.clamp(0, remaining.length);
 
   final reorderedBlocks = remaining.toList()
     ..insert(resolvedInsertIndex, movingItem);
@@ -204,7 +221,24 @@ TabViewReorderResult? buildTabViewReorderResult({
       movingPartitionRootId: _rootIdFor(movingItem.tabId, parentById),
       sortPinnedFirst: sortPinnedFirst,
     ),
+    parentChange: parentChange,
   );
+}
+
+/// Returns the parent scope implied by dropping just before
+/// `remaining[insertIndex]` (or "at the end" when `insertIndex == length`).
+///
+/// Rule: adopt the parent of the item you dropped above. For a tail-drop,
+/// adopt the parent of the last item. The resulting scope is the
+/// candidate `parent_id` for the moving subtree's root.
+String? _dropParentScopeFor(List<TabViewItem> remaining, int insertIndex) {
+  if (remaining.isEmpty) {
+    return null;
+  }
+  if (insertIndex < remaining.length) {
+    return _parentScope(remaining[insertIndex]);
+  }
+  return _parentScope(remaining.last);
 }
 
 List<String> _orderedIdsForStorageAnchors(
@@ -237,6 +271,7 @@ List<String> _orderedIdsForStorageAnchors(
 TabViewReorderResult? _resultFromOrderedIds({
   required List<String> movingTabIds,
   required List<String> orderedTabIds,
+  TabParentChange parentChange = const TabParentChange.unchanged(),
 }) {
   if (movingTabIds.isEmpty) {
     return null;
@@ -260,113 +295,11 @@ TabViewReorderResult? _resultFromOrderedIds({
     nextTabId: lastIndex + 1 < orderedTabIds.length
         ? orderedTabIds[lastIndex + 1]
         : null,
+    parentChange: parentChange,
   );
 }
 
 String? _parentScope(TabViewItem item) => item.childItem?.parentId;
-
-int? _resolveInsertIndexInParentScope(
-  List<TabViewItem> items,
-  int requestedInsertIndex,
-  String? parentScope,
-  Map<String, String?> parentById,
-) {
-  final target = requestedInsertIndex < items.length
-      ? items[requestedInsertIndex]
-      : null;
-
-  if (target != null && _isDirectScopeAnchor(target, parentScope, parentById)) {
-    return target.tabId == parentScope
-        ? requestedInsertIndex + 1
-        : requestedInsertIndex;
-  }
-
-  final previousAnchorIndex = _nearestPreviousScopeAnchorIndex(
-    items,
-    requestedInsertIndex - 1,
-    parentScope,
-    parentById,
-  );
-  if (previousAnchorIndex != null) {
-    return _indexAfterVisibleSubtree(items, previousAnchorIndex, parentById);
-  }
-
-  return _nearestNextScopeAnchorIndex(
-    items,
-    requestedInsertIndex,
-    parentScope,
-    parentById,
-  );
-}
-
-bool _isDirectScopeAnchor(
-  TabViewItem item,
-  String? parentScope,
-  Map<String, String?> parentById,
-) {
-  return item.tabId == parentScope || parentById[item.tabId] == parentScope;
-}
-
-int? _nearestPreviousScopeAnchorIndex(
-  List<TabViewItem> items,
-  int startIndex,
-  String? parentScope,
-  Map<String, String?> parentById,
-) {
-  for (var i = startIndex; i >= 0; i--) {
-    if (_isDirectScopeAnchor(items[i], parentScope, parentById)) {
-      return i;
-    }
-  }
-  return null;
-}
-
-int? _nearestNextScopeAnchorIndex(
-  List<TabViewItem> items,
-  int startIndex,
-  String? parentScope,
-  Map<String, String?> parentById,
-) {
-  for (var i = startIndex; i < items.length; i++) {
-    if (_isDirectScopeAnchor(items[i], parentScope, parentById)) {
-      return items[i].tabId == parentScope ? i + 1 : i;
-    }
-  }
-  return null;
-}
-
-int _indexAfterVisibleSubtree(
-  List<TabViewItem> items,
-  int anchorIndex,
-  Map<String, String?> parentById,
-) {
-  final anchorId = items[anchorIndex].tabId;
-  var index = anchorIndex + 1;
-  while (index < items.length &&
-      _isDescendantOf(items[index].tabId, anchorId, parentById)) {
-    index++;
-  }
-  return index;
-}
-
-bool _isDescendantOf(
-  String tabId,
-  String ancestorId,
-  Map<String, String?> parentById,
-) {
-  var parentId = parentById[tabId];
-  final seen = <String>{tabId};
-  while (parentId != null) {
-    if (parentId == ancestorId) {
-      return true;
-    }
-    if (!seen.add(parentId)) {
-      return false;
-    }
-    parentId = parentById[parentId];
-  }
-  return false;
-}
 
 Map<String, List<TabsWithRootAndDepthResult>> _buildChildrenByParent(
   Map<String, TabsWithRootAndDepthResult> rowsById,

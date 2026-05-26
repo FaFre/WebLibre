@@ -31,6 +31,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_query_result.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/entities/tab_parent_change.dart';
 
 class SyncTabsResult {
   final Set<String> deletedIsolationContextIds;
@@ -188,7 +189,14 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
           .getLastChildTabId(containerId.value, parentId.value!)
           .getSingleOrNull();
 
-      final anchorTabId = lastChildId ?? parentId.value!;
+      final lastChildSubtreeId = lastChildId == null
+          ? null
+          : await lastSubtreeTabIdByOrderKey(
+              lastChildId,
+              containerId: containerId.value,
+            ).getSingleOrNull();
+
+      final anchorTabId = lastChildSubtreeId ?? lastChildId ?? parentId.value!;
 
       final key = await db.containerDao
           .generateOrderKeyAfterTabId(containerId.value, anchorTabId)
@@ -433,6 +441,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     required List<String> movingTabIds,
     required String? previousTabId,
     required String? nextTabId,
+    TabParentChange parentChange = const TabParentChange.unchanged(),
   }) {
     if (movingTabIds.isEmpty) {
       return Future.value();
@@ -468,15 +477,347 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         nextRank: nextRank,
       );
 
+      // Resolve the parent_id / container_id companion values once.
+      //
+      // For a `TabParentToSpecific` whose target row is missing, fall back
+      // to "unchanged" so we don't issue a parent_id FK violation — the
+      // caller passed a stale id, but the order_key change is still
+      // useful. The container cascade fires whenever the parent_id is
+      // being assigned to a concrete tab (including unassigned parents,
+      // container_id = null), since `tabsWithRootAndDepth` is
+      // container-scoped and a divergent child would vanish from
+      // hierarchical views.
+      Value<String?> parentValue = const Value.absent();
+      Value<String?> containerValue = const Value.absent();
+      switch (parentChange) {
+        case TabParentUnchanged():
+          break;
+        case TabParentDetach():
+          parentValue = const Value(null);
+        case TabParentToSpecific(:final parentTabId):
+          final parent =
+              anchors[parentTabId] ??
+              await getTabDataById(parentTabId).getSingleOrNull();
+          if (parent != null) {
+            parentValue = Value(parentTabId);
+            containerValue = Value(parent.containerId);
+          }
+      }
+
       await batch((batch) {
         for (var i = 0; i < movingTabIds.length; i++) {
+          final isRoot = i == 0;
           batch.update(
             db.tab,
-            TabCompanion(orderKey: Value(orderKeys[i])),
+            TabCompanion(
+              orderKey: Value(orderKeys[i]),
+              // parent_id change applies only to the moving root;
+              // descendants keep their existing parent_id pointers.
+              parentId: isRoot ? parentValue : const Value.absent(),
+              // Container cascade applies to the whole subtree.
+              containerId: containerValue,
+            ),
             where: (t) => t.id.equals(movingTabIds[i]),
           );
         }
       });
+    });
+  }
+
+  /// Returns the recursive set of [tabId] and its descendants.
+  Future<Set<String>> _collectSubtreeIds(String tabId) async {
+    final rows = await db.definitionsDrift
+        .unorderedTabDescendants(tabId: tabId)
+        .get();
+    return {for (final r in rows) r.id};
+  }
+
+  /// Re-parents [tabId] to [newParentId] (or detaches when null).
+  ///
+  /// Returns `true` on success, `false` when the move was rejected
+  /// (cycle, unknown tab, or no-op).
+  ///
+  /// - Cycle-safe: rejects when [newParentId] is the moving tab itself or
+  ///   any of its descendants.
+  /// - When attaching to a non-null parent, the whole moving subtree adopts
+  ///   the new parent's `container_id` (otherwise the row vanishes from
+  ///   hierarchical views, which are container-scoped).
+  /// - Slots the moving subtree immediately after the new parent's last
+  ///   existing child (or after the parent itself if it has none), as an
+  ///   atomic order_key block. When detaching, order_keys are left
+  ///   untouched — the tab simply becomes a root in its current slot.
+  Future<bool> setTabParent({
+    required String tabId,
+    required String? newParentId,
+  }) {
+    if (tabId == newParentId) {
+      return Future.value(false);
+    }
+
+    return db.transaction(() async {
+      final movingTab = await getTabDataById(tabId).getSingleOrNull();
+      if (movingTab == null) {
+        return false;
+      }
+      if (movingTab.parentId == newParentId) {
+        return false;
+      }
+
+      final subtreeIds = await _collectSubtreeIds(tabId);
+
+      String? targetContainerId;
+      if (newParentId != null) {
+        if (subtreeIds.contains(newParentId)) {
+          return false;
+        }
+        final newParent = await getTabDataById(newParentId).getSingleOrNull();
+        if (newParent == null) {
+          return false;
+        }
+        targetContainerId = newParent.containerId;
+      } else {
+        targetContainerId = movingTab.containerId;
+      }
+
+      // Cascade container update for the whole subtree when crossing
+      // container boundaries. `tabsWithRootAndDepth` is container-scoped
+      // — a child whose `container_id` differs from its parent's would
+      // vanish from hierarchical views.
+      if (targetContainerId != movingTab.containerId) {
+        await (update(db.tab)..where((t) => t.id.isIn(subtreeIds))).write(
+          TabCompanion(containerId: Value(targetContainerId)),
+        );
+      }
+
+      if (newParentId == null) {
+        // Detach: keep existing order_keys. The row becomes a root in its
+        // current slot and the subtree under it stays intact.
+        await _updateByIdStatement(
+          tabId,
+        ).write(const TabCompanion(parentId: Value(null)));
+        return true;
+      }
+
+      // Pull the (now container-adjusted) subtree rows so we can re-rank
+      // them as an atomic block. We must compute anchors BEFORE writing
+      // the new parent_id, otherwise `getLastChildTabId(newParentId)`
+      // would pick up the moving root itself as a sibling.
+      final subtreeRows =
+          await (select(db.tab)
+                ..where((t) => t.id.isIn(subtreeIds))
+                ..orderBy([(t) => OrderingTerm.asc(t.orderKey)]))
+              .get();
+      final orderedIds = subtreeRows.map((r) => r.id).toList();
+      if (orderedIds.isEmpty) {
+        return true;
+      }
+
+      final lastSiblingId = await db.containerDao
+          .getLastChildTabId(targetContainerId, newParentId)
+          .getSingleOrNull();
+      final lastSiblingSubtreeId = lastSiblingId == null
+          ? null
+          : await lastSubtreeTabIdByOrderKey(
+              lastSiblingId,
+              containerId: targetContainerId,
+            ).getSingleOrNull();
+      final anchorId = lastSiblingSubtreeId ?? lastSiblingId ?? newParentId;
+
+      final anchorRow = await getTabDataById(anchorId).getSingleOrNull();
+      if (anchorRow == null) {
+        return false;
+      }
+      final previousRank = LexoRank.parse(anchorRow.orderKey);
+
+      // Next-rank = first non-subtree tab in the destination container with
+      // order_key strictly greater than the anchor. Skipping subtree members
+      // keeps the moved block compact even when the subtree's old keys
+      // sat near the anchor in storage.
+      final nextRow =
+          await (select(db.tab)
+                ..where((t) {
+                  final containerEq = targetContainerId != null
+                      ? t.containerId.equals(targetContainerId)
+                      : t.containerId.isNull();
+                  return containerEq &
+                      t.orderKey.isBiggerThanValue(anchorRow.orderKey) &
+                      t.id.isNotIn(subtreeIds);
+                })
+                ..orderBy([(t) => OrderingTerm.asc(t.orderKey)])
+                ..limit(1))
+              .getSingleOrNull();
+      final nextRank = nextRow == null
+          ? null
+          : LexoRank.parse(nextRow.orderKey);
+
+      final orderKeys = _generateOrderKeysBetween(
+        count: orderedIds.length,
+        previousRank: previousRank,
+        nextRank: nextRank,
+      );
+
+      await batch((batch) {
+        // parent_id change is applied on the moving root only; subtree
+        // descendants keep their existing parent_id pointers.
+        batch.update(
+          db.tab,
+          TabCompanion(
+            parentId: Value(newParentId),
+            orderKey: Value(orderKeys[0]),
+          ),
+          where: (t) => t.id.equals(orderedIds[0]),
+        );
+        for (var i = 1; i < orderedIds.length; i++) {
+          batch.update(
+            db.tab,
+            TabCompanion(orderKey: Value(orderKeys[i])),
+            where: (t) => t.id.equals(orderedIds[i]),
+          );
+        }
+      });
+
+      return true;
+    });
+  }
+
+  /// Swaps a direct child with its parent: the child takes the parent's
+  /// slot in the tree (parent_id + order_key), and the parent becomes a
+  /// child of the (formerly) child, placed after its existing siblings.
+  ///
+  /// Returns `false` when [childId] has no parent or the tabs cross a
+  /// container boundary (which would imply data corruption).
+  Future<bool> promoteChildToParent(String childId) {
+    return db.transaction(() async {
+      final child = await getTabDataById(childId).getSingleOrNull();
+      if (child == null || child.parentId == null) {
+        return false;
+      }
+      final parentId = child.parentId!;
+      final parent = await getTabDataById(parentId).getSingleOrNull();
+      if (parent == null) {
+        return false;
+      }
+      if (parent.containerId != child.containerId) {
+        return false;
+      }
+
+      final containerId = child.containerId;
+
+      // The (about-to-be-demoted) parent gets placed after the new
+      // parent's (= former child's) existing other children. We read the
+      // anchor's order_key BEFORE any writes — `generateOrderKeyAfterTabId`
+      // reads from storage, so the captured key reflects pre-swap state.
+      final lastChildOfChild = await db.containerDao
+          .getLastChildTabId(containerId, childId)
+          .getSingleOrNull();
+      final lastChildSubtreeId = lastChildOfChild == null
+          ? null
+          : await lastSubtreeTabIdByOrderKey(
+              lastChildOfChild,
+              containerId: containerId,
+            ).getSingleOrNull();
+      final anchorId = lastChildSubtreeId ?? lastChildOfChild ?? childId;
+      final newParentOrderKey = await db.containerDao
+          .generateOrderKeyAfterTabId(containerId, anchorId)
+          .getSingleOrNull();
+      if (newParentOrderKey == null) {
+        return false;
+      }
+
+      await batch((batch) {
+        batch.update(
+          db.tab,
+          TabCompanion(
+            parentId: Value(parent.parentId),
+            orderKey: Value(parent.orderKey),
+          ),
+          where: (t) => t.id.equals(childId),
+        );
+        batch.update(
+          db.tab,
+          TabCompanion(
+            parentId: Value(childId),
+            orderKey: Value(newParentOrderKey),
+          ),
+          where: (t) => t.id.equals(parentId),
+        );
+      });
+
+      return true;
+    });
+  }
+
+  /// Moves [tabId] one sibling slot up (or down) within its parent scope,
+  /// carrying its whole subtree as an atomic block.
+  ///
+  /// Returns `false` when the tab is unknown or already at the relevant
+  /// end of its sibling list.
+  Future<bool> moveTabAmongSiblings(String tabId, {required bool down}) {
+    // Transactional so the sibling-list read, subtree resolution, and the
+    // anchor lookup all observe the same DB snapshot. `reorderTabs` opens
+    // a nested savepoint internally, which is fine.
+    return db.transaction(() async {
+      final tab = await getTabDataById(tabId).getSingleOrNull();
+      if (tab == null) {
+        return false;
+      }
+
+      final siblings =
+          await (select(db.tab)
+                ..where((t) {
+                  final containerEq = tab.containerId != null
+                      ? t.containerId.equals(tab.containerId!)
+                      : t.containerId.isNull();
+                  final parentEq = tab.parentId != null
+                      ? t.parentId.equals(tab.parentId!)
+                      : t.parentId.isNull();
+                  return containerEq & parentEq;
+                })
+                ..orderBy([(t) => OrderingTerm.asc(t.orderKey)]))
+              .get();
+
+      final idx = siblings.indexWhere((s) => s.id == tabId);
+      if (idx < 0) {
+        return false;
+      }
+      final newIdx = down ? idx + 1 : idx - 1;
+      if (newIdx < 0 || newIdx >= siblings.length) {
+        return false;
+      }
+
+      final reordered = siblings.toList()..removeAt(idx);
+      reordered.insert(newIdx, tab);
+
+      final previousIdx = newIdx - 1;
+      final nextIdx = newIdx + 1;
+      final previousSiblingId = previousIdx >= 0
+          ? reordered[previousIdx].id
+          : null;
+      final previousTabId = previousSiblingId == null
+          ? null
+          : await lastSubtreeTabIdByOrderKey(
+                  previousSiblingId,
+                  containerId: tab.containerId,
+                ).getSingleOrNull() ??
+                previousSiblingId;
+      final nextTabId = nextIdx < reordered.length
+          ? reordered[nextIdx].id
+          : null;
+
+      final subtreeIds = await _collectSubtreeIds(tabId);
+      final subtreeRows =
+          await (select(db.tab)
+                ..where((t) => t.id.isIn(subtreeIds))
+                ..orderBy([(t) => OrderingTerm.asc(t.orderKey)]))
+              .get();
+      final movingTabIds = subtreeRows.map((r) => r.id).toList();
+
+      await reorderTabs(
+        movingTabIds: movingTabIds,
+        previousTabId: previousTabId,
+        nextTabId: nextTabId,
+      );
+      return true;
     });
   }
 

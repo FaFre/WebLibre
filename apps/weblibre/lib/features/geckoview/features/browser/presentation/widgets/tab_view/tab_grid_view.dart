@@ -399,6 +399,7 @@ class _TabGridView extends HookConsumerWidget {
                           movingTabIds: result.movingTabIds,
                           previousTabId: result.previousTabId,
                           nextTabId: result.nextTabId,
+                          parentChange: result.parentChange,
                         );
                   },
                   childBuilder: (reorderableItemBuilder) {

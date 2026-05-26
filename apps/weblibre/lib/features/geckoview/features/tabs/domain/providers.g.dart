@@ -453,6 +453,76 @@ final class WatchTabsWithRootAndDepthFamily extends $Family
   String toString() => r'watchTabsWithRootAndDepthProvider';
 }
 
+@ProviderFor(watchTabDbData)
+final watchTabDbDataProvider = WatchTabDbDataFamily._();
+
+final class WatchTabDbDataProvider
+    extends
+        $FunctionalProvider<AsyncValue<TabData?>, TabData?, Stream<TabData?>>
+    with $FutureModifier<TabData?>, $StreamProvider<TabData?> {
+  WatchTabDbDataProvider._({
+    required WatchTabDbDataFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'watchTabDbDataProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchTabDbDataHash();
+
+  @override
+  String toString() {
+    return r'watchTabDbDataProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<TabData?> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<TabData?> create(Ref ref) {
+    final argument = this.argument as String;
+    return watchTabDbData(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WatchTabDbDataProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$watchTabDbDataHash() => r'c505be1cdeaffced2615fdb075ed8a9a2132754a';
+
+final class WatchTabDbDataFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<TabData?>, String> {
+  WatchTabDbDataFamily._()
+    : super(
+        retry: null,
+        name: r'watchTabDbDataProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  WatchTabDbDataProvider call(String tabId) =>
+      WatchTabDbDataProvider._(argument: tabId, from: this);
+
+  @override
+  String toString() => r'watchTabDbDataProvider';
+}
+
 @ProviderFor(watchTabDescendants)
 final watchTabDescendantsProvider = WatchTabDescendantsFamily._();
 

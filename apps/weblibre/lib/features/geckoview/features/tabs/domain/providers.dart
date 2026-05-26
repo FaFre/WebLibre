@@ -109,6 +109,12 @@ Stream<List<TabsWithRootAndDepthResult>> watchTabsWithRootAndDepth(
 }
 
 @Riverpod()
+Stream<TabData?> watchTabDbData(Ref ref, String tabId) {
+  final db = ref.watch(tabDatabaseProvider);
+  return db.tabDao.getTabDataById(tabId).watchSingleOrNull();
+}
+
+@Riverpod()
 Stream<Map<String, String?>> watchTabDescendants(Ref ref, String tabId) {
   final db = ref.watch(tabDatabaseProvider);
   return db.definitionsDrift.unorderedTabDescendants(tabId: tabId).watch().map((
