@@ -46,6 +46,7 @@ class SyncTabsResult {
 @DriftAccessor()
 class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   final _undoHistory = <String, TabData>{};
+  final _pendingParentIds = <String, String>{};
   Timer? _clearHistoryTimer;
 
   static const closedTabTombstoneTtl = Duration(hours: 24);
@@ -164,6 +165,54 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
 
     return query.map(
       (row) => MapEntry(row.read(db.tab.id)!, row.read(db.tab.orderKey)!),
+    );
+  }
+
+  Future<void> _resolvePendingParents() async {
+    if (_pendingParentIds.isEmpty) return;
+
+    final pendingChildren = selectOnly(db.tab)
+      ..addColumns([db.tab.id])
+      ..where(
+        db.tab.id.isIn(_pendingParentIds.keys) &
+            db.tab.parentId.isNull() &
+            db.tab.source.isNotValue(TabSource.manual.index),
+      );
+    final pendingChildIds = (await pendingChildren.get())
+        .map((row) => row.read(db.tab.id)!)
+        .toSet();
+
+    if (pendingChildIds.isEmpty) {
+      _pendingParentIds.clear();
+      return;
+    }
+
+    final resolvableParents = await getExistingTabIds(
+      pendingChildIds.map((childId) => _pendingParentIds[childId]!).toSet(),
+    ).get().then((ids) => ids.toSet());
+
+    await batch((batch) {
+      for (final childId in pendingChildIds) {
+        final parentId = _pendingParentIds[childId];
+        if (parentId == null || !resolvableParents.contains(parentId)) {
+          continue;
+        }
+
+        batch.update(
+          db.tab,
+          TabCompanion(
+            parentId: Value(parentId),
+            source: const Value(TabSource.manual),
+          ),
+          where: (t) => t.id.equals(childId),
+        );
+      }
+    });
+
+    _pendingParentIds.removeWhere(
+      (childId, parentId) =>
+          !pendingChildIds.contains(childId) ||
+          resolvableParents.contains(parentId),
     );
   }
 
@@ -1081,35 +1130,33 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
       // change from Gecko.
       final parentSyncEligibleIds = next.isEmpty
           ? const <String>{}
-          : {
-              for (final tab in await (select(
-                db.tab,
-              )..where((t) => t.id.isIn(next.keys))).get())
-                if (tab.source != TabSource.manual && tab.parentId == null)
-                  tab.id,
-            };
+          : await (() async {
+              final query = selectOnly(db.tab)
+                ..addColumns([db.tab.id, db.tab.source])
+                ..where(db.tab.id.isIn(next.keys) & db.tab.parentId.isNull());
+              return {
+                for (final row in await query.get())
+                  if (row.readWithConverter(db.tab.source) != TabSource.manual)
+                    row.read(db.tab.id)!,
+              };
+            })();
 
-      // Collect parent IDs that need database validation
-      final parentIdsToValidate = <String>{};
-      final validatedParentIds = <String, String?>{};
-
-      for (final state in next.values) {
-        if (parentSyncEligibleIds.contains(state.id) &&
-            state.parentId != null) {
-          if (next.containsKey(state.parentId)) {
-            // Parent exists in current state
-            validatedParentIds[state.id] = state.parentId;
-          } else {
-            // Need to validate against database
-            parentIdsToValidate.add(state.parentId!);
-          }
-        }
-      }
-
-      // Batch validate parent IDs that aren't in the current state
+      // Validate every candidate parent against the database — a parentId
+      // present in `next` is not proof the row has been persisted yet (e.g.
+      // engine state snapshot arriving before the matching tab-list insert).
+      // Without the DB check we could write a parent_id pointing at a row
+      // that does not exist, triggering the self-referential FK violation
+      // and aborting the whole batch.
+      final parentIdsToValidate = <String>{
+        for (final state in next.values)
+          if (parentSyncEligibleIds.contains(state.id) &&
+              state.parentId != null)
+            state.parentId!,
+      };
       final existingParentIds = await getExistingTabIds(
         parentIdsToValidate,
       ).get().then((ids) => ids.toSet());
+      final validatedParentIds = <String, String?>{};
 
       final containerRepairCandidates = {
         for (final state in next.values)
@@ -1137,17 +1184,22 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
               entry.key: containerId,
       };
 
-      // Complete validation map
       for (final state in next.values) {
-        if (!parentSyncEligibleIds.contains(state.id) ||
-            validatedParentIds.containsKey(state.id) ||
-            state.parentId == null) {
+        if (!parentSyncEligibleIds.contains(state.id)) {
+          _pendingParentIds.remove(state.id);
           continue;
         }
 
-        // This parent ID needed database validation
+        if (state.parentId == null) {
+          _pendingParentIds.remove(state.id);
+          continue;
+        }
+
         if (existingParentIds.contains(state.parentId)) {
           validatedParentIds[state.id] = state.parentId;
+          _pendingParentIds.remove(state.id);
+        } else {
+          _pendingParentIds[state.id] = state.parentId!;
         }
       }
 
@@ -1220,6 +1272,13 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         });
       }
 
+      final retainedTabIds = retainTabIds.toSet();
+      _pendingParentIds.removeWhere(
+        (childId, parentId) =>
+            !retainedTabIds.contains(childId) ||
+            !retainedTabIds.contains(parentId),
+      );
+
       var currentOrderKey = await db.containerDao
           .generateLeadingOrderKey(null)
           .getSingle();
@@ -1241,6 +1300,8 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         }),
         onConflict: DoNothing(),
       );
+
+      await _resolvePendingParents();
 
       return SyncTabsResult(
         deletedIsolationContextIds: deletedIsolationContextIds,

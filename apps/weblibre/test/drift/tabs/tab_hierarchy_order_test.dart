@@ -151,6 +151,35 @@ void main() {
   );
 
   test(
+    'tab-list sync resolves an unresolved engine parent after inserting the parent row',
+    () async {
+      await _insertTabs(db, const [
+        _TabFixture('child', source: TabSource.addedEvent),
+      ]);
+
+      await db.tabDao.updateTabs(null, {
+        'child': _tabState('child', parentId: 'late-parent'),
+      });
+
+      final unresolvedChild = await db.tabDao
+          .getTabDataById('child')
+          .getSingleOrNull();
+      expect(unresolvedChild, isNotNull);
+      expect(unresolvedChild!.parentId, isNull);
+      expect(unresolvedChild.source, TabSource.addedEvent);
+
+      await db.tabDao.syncTabs(retainTabIds: const ['late-parent', 'child']);
+
+      final resolvedChild = await db.tabDao
+          .getTabDataById('child')
+          .getSingleOrNull();
+      expect(resolvedChild, isNotNull);
+      expect(resolvedChild!.parentId, 'late-parent');
+      expect(resolvedChild.source, TabSource.manual);
+    },
+  );
+
+  test(
     'content-state sync ignores parent-only changes with unresolved parents',
     () async {
       await _insertTabs(db, const [
