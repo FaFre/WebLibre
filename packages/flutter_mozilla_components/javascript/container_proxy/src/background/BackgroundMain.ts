@@ -92,7 +92,12 @@ export default class BackgroundMain {
   async onRequest(requestDetails: Pick<_OnRequestDetails, 'cookieStoreId' | 'url' | 'tabId'>): Promise<DoNotProxy | ProxyInfo[]> {
     try {
       const tab = await this.tabForRequest(requestDetails.tabId)
-      const contextId = this.contextIdFromCookieStoreId(tab?.cookieStoreId ?? requestDetails.cookieStoreId)
+      // `||` (not `??`) so an empty-string cookieStoreId on the tab falls
+      // back to the request's cookieStoreId. Some extension code paths
+      // surface `''` for tabs without an explicit container assignment,
+      // which `??` would treat as a real value and stop the fallback.
+      const cookieStoreId = (tab?.cookieStoreId || requestDetails.cookieStoreId)
+      const contextId = this.contextIdFromCookieStoreId(cookieStoreId)
 
       if (contextId === null) {
         return doNotProxy
