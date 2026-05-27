@@ -489,11 +489,13 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
       // hierarchical views.
       Value<String?> parentValue = const Value.absent();
       Value<String?> containerValue = const Value.absent();
+      Value<TabSource> rootSource = const Value.absent();
       switch (parentChange) {
         case TabParentUnchanged():
           break;
         case TabParentDetach():
           parentValue = const Value(null);
+          rootSource = const Value(TabSource.manual);
         case TabParentToSpecific(:final parentTabId):
           final parent =
               anchors[parentTabId] ??
@@ -501,6 +503,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
           if (parent != null) {
             parentValue = Value(parentTabId);
             containerValue = Value(parent.containerId);
+            rootSource = const Value(TabSource.manual);
           }
       }
 
@@ -510,6 +513,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
           batch.update(
             db.tab,
             TabCompanion(
+              source: isRoot ? rootSource : const Value.absent(),
               orderKey: Value(orderKeys[i]),
               // parent_id change applies only to the moving root;
               // descendants keep their existing parent_id pointers.
@@ -592,9 +596,12 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
       if (newParentId == null) {
         // Detach: keep existing order_keys. The row becomes a root in its
         // current slot and the subtree under it stays intact.
-        await _updateByIdStatement(
-          tabId,
-        ).write(const TabCompanion(parentId: Value(null)));
+        await _updateByIdStatement(tabId).write(
+          const TabCompanion(
+            source: Value(TabSource.manual),
+            parentId: Value(null),
+          ),
+        );
         return true;
       }
 
@@ -662,6 +669,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         batch.update(
           db.tab,
           TabCompanion(
+            source: const Value(TabSource.manual),
             parentId: Value(newParentId),
             orderKey: Value(orderKeys[0]),
           ),
@@ -728,6 +736,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         batch.update(
           db.tab,
           TabCompanion(
+            source: const Value(TabSource.manual),
             parentId: Value(parent.parentId),
             orderKey: Value(parent.orderKey),
           ),
@@ -736,6 +745,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         batch.update(
           db.tab,
           TabCompanion(
+            source: const Value(TabSource.manual),
             parentId: Value(childId),
             orderKey: Value(newParentOrderKey),
           ),
@@ -1062,14 +1072,29 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     Map<String, TabState> next,
   ) {
     return db.transaction(() async {
+      // Gecko exposes a parentId in content-state events, but local DB tab
+      // hierarchy becomes authoritative once a row has a DB parent or has
+      // been manually created/reparented. Only use Gecko parent data to seed
+      // engine-event rows that have not been claimed by local hierarchy yet.
+      // Keep retrying while the row remains unclaimed so out-of-order tab-list
+      // inserts can seed the parent later without needing another parentId
+      // change from Gecko.
+      final parentSyncEligibleIds = next.isEmpty
+          ? const <String>{}
+          : {
+              for (final tab in await (select(
+                db.tab,
+              )..where((t) => t.id.isIn(next.keys))).get())
+                if (tab.source != TabSource.manual && tab.parentId == null)
+                  tab.id,
+            };
+
       // Collect parent IDs that need database validation
       final parentIdsToValidate = <String>{};
       final validatedParentIds = <String, String?>{};
 
       for (final state in next.values) {
-        final previousState = previous?[state.id];
-
-        if (previousState?.parentId != state.parentId &&
+        if (parentSyncEligibleIds.contains(state.id) &&
             state.parentId != null) {
           if (next.containsKey(state.parentId)) {
             // Parent exists in current state
@@ -1114,50 +1139,52 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
 
       // Complete validation map
       for (final state in next.values) {
-        final previousState = previous?[state.id];
+        if (!parentSyncEligibleIds.contains(state.id) ||
+            validatedParentIds.containsKey(state.id) ||
+            state.parentId == null) {
+          continue;
+        }
 
-        if (previousState?.parentId != state.parentId) {
-          if (!validatedParentIds.containsKey(state.id)) {
-            // This parent ID needed database validation
-            if (state.parentId != null &&
-                existingParentIds.contains(state.parentId)) {
-              validatedParentIds[state.id] = state.parentId;
-            } else {
-              validatedParentIds[state.id] = null;
-            }
-          }
+        // This parent ID needed database validation
+        if (existingParentIds.contains(state.parentId)) {
+          validatedParentIds[state.id] = state.parentId;
         }
       }
 
       await batch((batch) {
         for (final state in next.values) {
           final previousState = previous?[state.id];
+          final hasParentUpdate = validatedParentIds.containsKey(state.id);
+          final hasContainerRepair = repairedContainerIds.containsKey(state.id);
+          final hasUrlChange = previousState?.url != state.url;
+          final hasTitleChange = previousState?.title != state.title;
+          final hasTabModeChange = previousState?.tabMode != state.tabMode;
 
-          if (previousState == null ||
-              previousState.url != state.url ||
-              previousState.title != state.title ||
-              previousState.parentId != state.parentId ||
-              previousState.tabMode != state.tabMode ||
-              repairedContainerIds.containsKey(state.id)) {
+          if (hasUrlChange ||
+              hasTitleChange ||
+              hasTabModeChange ||
+              hasParentUpdate ||
+              hasContainerRepair) {
             batch.update(
               db.tab,
               TabCompanion(
-                parentId: validatedParentIds.containsKey(state.id)
+                parentId: hasParentUpdate
                     ? Value(validatedParentIds[state.id])
+                    : const Value.absent(),
+                source: hasParentUpdate
+                    ? const Value(TabSource.manual)
                     : const Value.absent(),
                 containerId:
                     repairedContainerIds[state.id].mapNotNull(Value.new) ??
                     const Value.absent(),
-                url: (previousState?.url != state.url)
-                    ? Value(state.url)
-                    : const Value.absent(),
-                title: (previousState?.title != state.title)
+                url: hasUrlChange ? Value(state.url) : const Value.absent(),
+                title: hasTitleChange
                     ? Value(state.title)
                     : const Value.absent(),
-                tabMode: (previousState?.tabMode != state.tabMode)
+                tabMode: hasTabModeChange
                     ? Value(state.tabMode.toDbValue())
                     : const Value.absent(),
-                isolationContextId: (previousState?.tabMode != state.tabMode)
+                isolationContextId: hasTabModeChange
                     ? Value(state.isolationContextId)
                     : const Value.absent(),
               ),
