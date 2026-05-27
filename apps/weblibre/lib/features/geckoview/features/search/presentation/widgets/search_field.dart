@@ -49,6 +49,11 @@ class SearchField extends HookConsumerWidget {
   final BangData? activeBang;
   final bool showBangIcon;
 
+  /// Overrides the clear (`x`) button behaviour. When null, the button just
+  /// clears the text. When provided, the callback decides what to do (e.g.
+  /// restore a previous value first, then clear on the next press).
+  final VoidCallback? onClearPressed;
+
   const SearchField({
     super.key,
     required this.textEditingController,
@@ -64,6 +69,7 @@ class SearchField extends HookConsumerWidget {
     this.autofocus = false,
     this.textFieldKey,
     this.hint,
+    this.onClearPressed,
   });
 
   @override
@@ -160,7 +166,11 @@ class SearchField extends HookConsumerWidget {
                   padding: const EdgeInsetsDirectional.only(end: 8.0),
                   child: IconButton(
                     onPressed: () {
-                      textEditingController.clear();
+                      if (onClearPressed != null) {
+                        onClearPressed!();
+                      } else {
+                        textEditingController.clear();
+                      }
                     },
                     icon: const Icon(Icons.clear),
                   ),

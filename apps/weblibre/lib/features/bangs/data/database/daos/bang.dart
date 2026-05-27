@@ -128,6 +128,17 @@ class BangDao extends DatabaseAccessor<BangDatabase> with $BangDaoMixin {
     );
   }
 
+  Selectable<BangData> getBangDataByTemplateHost(String host) {
+    final httpsPrefix = 'https://$host/%';
+    final httpPrefix = 'http://$host/%';
+
+    return select(db.bangDataView)
+      ..where(
+        (t) =>
+            t.urlTemplate.like(httpsPrefix) | t.urlTemplate.like(httpPrefix),
+      );
+  }
+
   Selectable<BangData> queryBangs(String searchString) {
     final ftsQuery = db.buildFtsQuery(searchString);
 

@@ -29,6 +29,7 @@ import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/data/models/web_search_bang.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/providers/search.dart';
+import 'package:weblibre/features/bangs/domain/services/reverse_match.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
@@ -188,6 +189,12 @@ class SearchScreen extends HookConsumerWidget {
     final isUrlInput = useState(false);
     final isEditingAfterSearch = useState(false);
 
+    // Holds the original URL when reverse bang-matching has swapped the
+    // address-bar text for an extracted query. First tap of the clear button
+    // restores this URL; a subsequent tap clears the field normally.
+    final revertUrl = useState<String?>(null);
+    final reverseMatchedQuery = useState<String?>(null);
+
     useOnListenableChangeSelector(
       searchTextController,
       () => searchTextController.text,
@@ -254,6 +261,49 @@ class SearchScreen extends HookConsumerWidget {
           );
         });
       }
+      return null;
+    }, []);
+
+    // Try to recognise the current URL as a bang search. If a bang matches,
+    // swap the URL for its extracted query and pre-select the bang so the
+    // user can refine the search instead of editing the raw URL.
+    useEffect(() {
+      if (!startedWithUrl || initialSearchText == null) return null;
+      final uri = Uri.tryParse(initialSearchText!);
+      if (uri == null) return null;
+
+      unawaited(() async {
+        final match = await ref
+            .read(reverseBangMatcherProvider.notifier)
+            .match(uri);
+        if (!context.mounted) return;
+        if (match == null) return;
+        // Bail out if the user has already started editing while we matched.
+        if (searchTextController.text != initialSearchText) return;
+
+        revertUrl.value = initialSearchText;
+        reverseMatchedQuery.value = match.query;
+        searchTextController.value = TextEditingValue(
+          text: match.query,
+          selection: TextSelection(
+            baseOffset: 0,
+            extentOffset: match.query.length,
+          ),
+        );
+        // Mutual exclusion: clear any site-scoped selection so the global
+        // auto-match isn't hidden behind a stale site bang (mirrors the
+        // SmartBangSelector selection logic).
+        final tabHost = existingTabState?.url.host;
+        if (tabHost != null && tabHost.isNotEmpty) {
+          ref
+              .read(selectedBangTriggerProvider(domain: tabHost).notifier)
+              .clearTrigger();
+        }
+        ref
+            .read(selectedBangTriggerProvider().notifier)
+            .setTrigger(match.bang.toKey());
+      }());
+
       return null;
     }, []);
 
@@ -671,6 +721,32 @@ class SearchScreen extends HookConsumerWidget {
                     maxLines: isEditMode ? 3 : 1,
                     label: const Text('Search or enter URL'),
                     unfocusOnTapOutside: false,
+                    onClearPressed: () {
+                      final url = revertUrl.value;
+                      if (url != null &&
+                          searchTextController.text ==
+                              reverseMatchedQuery.value) {
+                        // First press after a reverse-match swap: restore the
+                        // original URL and drop the auto-selected bang. The
+                        // user can press again to actually clear.
+                        searchTextController.value = TextEditingValue(
+                          text: url,
+                          selection: TextSelection(
+                            baseOffset: 0,
+                            extentOffset: url.length,
+                          ),
+                        );
+                        revertUrl.value = null;
+                        reverseMatchedQuery.value = null;
+                        ref
+                            .read(selectedBangTriggerProvider().notifier)
+                            .clearTrigger();
+                      } else {
+                        revertUrl.value = null;
+                        reverseMatchedQuery.value = null;
+                        searchTextController.clear();
+                      }
+                    },
                     onSubmitted: (value) async {
                       if (value.isEmpty) return;
 
