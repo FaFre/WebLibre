@@ -127,6 +127,14 @@ class Core(
             cookieBannerHandlingGlobalRules = true,
             cookieBannerHandlingGlobalRulesSubFrames = true,
             webContentIsolationStrategy = WebContentIsolationStrategy.ISOLATE_HIGH_VALUE,
+            downloadDelegate = EngineDownloadDelegate(
+                context = context,
+                downloadLocation = {
+                    Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_DOWNLOADS,
+                    ).path
+                },
+            ),
         )
     }
 
