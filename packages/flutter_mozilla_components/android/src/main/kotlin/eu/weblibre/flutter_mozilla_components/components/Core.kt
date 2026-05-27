@@ -30,6 +30,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import kotlinx.coroutines.FlowPreview
 import mozilla.components.browser.engine.gecko.permission.GeckoSitePermissionsStorage
+import mozilla.components.browser.engine.gecko.util.EngineDownloadDelegate
 import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.browser.session.storage.SessionStorage
 import mozilla.components.browser.state.engine.EngineMiddleware
@@ -135,6 +136,7 @@ class Core(
                     ).path
                 },
             ),
+            useContentBlockingDatabase = true
         )
     }
 
