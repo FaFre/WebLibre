@@ -84,6 +84,7 @@ interface WildcardAssignment {
 export class Store {
   private proxies: ProxyDao[] = []
   private relations: { [key: string]: string[] } = {}
+  private directRelationScopes: { [key: string]: string } = {}
 
   private siteAssignments: Map<string, string> = new Map<string, string>()
   private wildcardAssignments: WildcardAssignment[] = []
@@ -147,15 +148,35 @@ export class Store {
     return this.lookupAssignment(uri) !== undefined
   }
 
+  private hasRelation(contextId: string): boolean {
+    return Object.prototype.hasOwnProperty.call(this.relations, contextId)
+  }
+
   /**
-   * Returns the effective proxy relation for a context ID, mirroring the
-   * fallback logic in getProxiesForContainer: explicit relation first,
-   * then 'general' for non-private contexts, then empty.
+   * Returns the effective proxy relation for a context ID, preserving the
+   * difference between "no explicit relation" (undefined, may inherit) and
+   * "explicit direct connection" ([]).
    */
-  private getEffectiveRelation(contextId: string): string[] {
-    return this.relations[contextId]
-      ?? ((contextId !== 'private') ? this.relations['general'] : undefined)
-      ?? [];
+  private getEffectiveRelation(contextId: string): string[] | undefined {
+    if (this.hasRelation(contextId)) {
+      return this.relations[contextId]
+    }
+    if (contextId !== 'private' && this.hasRelation('general')) {
+      return this.relations['general']
+    }
+    return undefined
+  }
+
+  private getEffectiveDirectScope(contextId: string): string | undefined {
+    if (this.hasRelation(contextId) && this.relations[contextId].length === 0) {
+      return this.directRelationScopes[contextId] ?? contextId
+    }
+    if (contextId !== 'private' &&
+      this.hasRelation('general') &&
+      this.relations['general'].length === 0) {
+      return this.directRelationScopes['general'] ?? 'general'
+    }
+    return undefined
   }
 
   isSiteOriginInSameContext(uri: URL, contextId: string): boolean {
@@ -169,10 +190,19 @@ export class Store {
     const assignedRelation = this.getEffectiveRelation(assignedContextId);
     const currentRelation = this.getEffectiveRelation(contextId);
 
-    // Only treat as equivalent if both have actual proxy relations —
-    // empty relations mean no proxy, and different non-proxied contexts
-    // should not be considered equivalent.
-    if (assignedRelation.length > 0 &&
+    const assignedDirectScope = this.getEffectiveDirectScope(assignedContextId)
+    const currentDirectScope = this.getEffectiveDirectScope(contextId)
+    if (assignedDirectScope !== undefined || currentDirectScope !== undefined) {
+      return assignedDirectScope !== undefined &&
+        assignedDirectScope === currentDirectScope
+    }
+
+    // Treat proxy-routed contexts as equivalent only when both resolve to an
+    // explicit non-direct relation. Direct relations are scoped above so two
+    // unrelated bypassed containers do not collapse into the same context.
+    if (assignedRelation !== undefined &&
+      currentRelation !== undefined &&
+      assignedRelation.length > 0 &&
       assignedRelation.length === currentRelation.length &&
       assignedRelation.every((id, i) => id === currentRelation[i])) {
       return true;
@@ -222,10 +252,17 @@ export class Store {
 
   setContainerProxyRelation(cookieStoreId: string, proxyId: string): void {
     this.relations[cookieStoreId] = [proxyId]
+    delete this.directRelationScopes[cookieStoreId]
+  }
+
+  setContainerDirectRelation(cookieStoreId: string, scopeId: string = cookieStoreId): void {
+    this.relations[cookieStoreId] = []
+    this.directRelationScopes[cookieStoreId] = scopeId
   }
 
   clearContainerProxyRelation(cookieStoreId: string): void {
     delete this.relations[cookieStoreId]
+    delete this.directRelationScopes[cookieStoreId]
   }
 
   removeContainerProxyRelation(cookieStoreId: string, proxyId: string): void {

@@ -9,6 +9,7 @@ void main() {
       final metadata = ContainerMetadata.withDefaults(
         proxyConnectionId: const SingboxProxyConnectionId('profile-1'),
         clearDataOnExit: true,
+        bypassGlobalProxy: true,
       );
 
       final json = metadata.toJson();
@@ -19,7 +20,9 @@ void main() {
         const SingboxProxyConnectionId('profile-1').encode(),
       );
       expect(json['clearDataOnExit'], isTrue);
+      expect(json['bypassGlobalProxy'], isTrue);
       expect(restored.proxyConnectionId, metadata.proxyConnectionId);
+      expect(restored.bypassGlobalProxy, isTrue);
       expect(restored.usesTorProxy, isFalse);
     });
 

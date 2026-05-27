@@ -50,6 +50,9 @@ class ContainerMetadata with FastEquatable {
   @JsonKey(defaultValue: false)
   final bool excludeFromIndex;
 
+  @JsonKey(defaultValue: false)
+  final bool bypassGlobalProxy;
+
   final List<Uri>? assignedSites;
 
   ContainerMetadata({
@@ -58,6 +61,7 @@ class ContainerMetadata with FastEquatable {
     required this.proxyConnectionId,
     required this.clearDataOnExit,
     required this.excludeFromIndex,
+    required this.bypassGlobalProxy,
     required this.assignedSites,
   });
 
@@ -67,6 +71,7 @@ class ContainerMetadata with FastEquatable {
     ProxyConnectionId? proxyConnectionId,
     bool? clearDataOnExit,
     bool? excludeFromIndex,
+    bool? bypassGlobalProxy,
     List<Uri>? assignedSites,
   }) : this(
          iconData: iconData,
@@ -74,6 +79,7 @@ class ContainerMetadata with FastEquatable {
          proxyConnectionId: proxyConnectionId,
          clearDataOnExit: clearDataOnExit ?? false,
          excludeFromIndex: excludeFromIndex ?? false,
+         bypassGlobalProxy: bypassGlobalProxy ?? false,
          assignedSites: assignedSites,
        );
 
@@ -91,6 +97,7 @@ class ContainerMetadata with FastEquatable {
     proxyConnectionId,
     clearDataOnExit,
     excludeFromIndex,
+    bypassGlobalProxy,
     assignedSites,
   ];
 }

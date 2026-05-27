@@ -1888,6 +1888,7 @@ abstract class GeckoContainerProxyApi {
   void upsertProxy(GeckoProxySettings proxy);
   void removeProxy(String proxyId);
   void setContainerProxy(String contextId, String proxyId);
+  void setContainerDirectConnection(String contextId, String scopeId);
   void clearContainerProxy(String contextId);
   void removeContainerProxyRelation(String contextId, String proxyId);
   void setSiteAssignments(Map<String, String> assignments);

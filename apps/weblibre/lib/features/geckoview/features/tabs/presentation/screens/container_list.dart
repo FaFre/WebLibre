@@ -266,6 +266,13 @@ class _ContainerCard extends HookConsumerWidget {
                                     isLoading: proxyOptionsLoading,
                                   ),
                                 ),
+                              if (container.metadata.proxyConnectionId ==
+                                      null &&
+                                  container.metadata.bypassGlobalProxy)
+                                const _ContainerInfoChip(
+                                  icon: Icons.public,
+                                  label: 'Direct',
+                                ),
                               if (container.metadata.clearDataOnExit)
                                 const _ContainerInfoChip(
                                   icon: Icons.cleaning_services_outlined,

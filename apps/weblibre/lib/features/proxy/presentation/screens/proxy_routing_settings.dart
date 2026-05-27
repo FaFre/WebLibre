@@ -104,7 +104,7 @@ class _RegularTabsModeSection extends ConsumerWidget {
             value: ProxyRegularTabRoutingMode.all,
             title: Text('Global Routing'),
             subtitle: Text(
-              'Route every regular tab through the selected proxy.',
+              'Route regular tabs through the selected proxy unless a container bypasses it.',
             ),
           ),
         ],

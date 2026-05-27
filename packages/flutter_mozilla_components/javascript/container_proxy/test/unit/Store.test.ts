@@ -172,6 +172,17 @@ describe('Store', () => {
 
       expect(result).to.be.deep.equal([])
     })
+
+    it('should let an explicit direct relation bypass the general relation', () => {
+      const isolatedStore = new Store()
+      isolatedStore.putProxy(someProxyWith('global-proxy'))
+      isolatedStore.setContainerProxyRelation('general', 'global-proxy')
+      isolatedStore.setContainerDirectRelation('container1')
+
+      const result = isolatedStore.getProxiesForContainer('container1')
+
+      expect(result).to.be.null
+    })
   })
 
   describe('wildcard site assignments', function () {
@@ -245,6 +256,25 @@ describe('Store', () => {
       await store.setContainerProxyRelation('iso1_blocked', 'proxy_two')
 
       const result = store.isSiteOriginInSameContext(new URL('https://blocked.example/another'), 'iso1_blocked')
+      expect(result).to.be.equal(false)
+    })
+
+    it('should allow direct aliases scoped to the assigned container', async () => {
+      store.setSiteAssignments(new Map([['https://direct.example/path', 'container_direct']]))
+      await store.setContainerProxyRelation('general', 'proxy_global')
+      await store.setContainerDirectRelation('container_direct')
+      await store.setContainerDirectRelation('iso1_direct', 'container_direct')
+
+      const result = store.isSiteOriginInSameContext(new URL('https://direct.example/another'), 'iso1_direct')
+      expect(result).to.be.equal(true)
+    })
+
+    it('should not allow unrelated direct containers as equivalent', async () => {
+      store.setSiteAssignments(new Map([['https://direct.example/path', 'container_direct']]))
+      await store.setContainerDirectRelation('container_direct')
+      await store.setContainerDirectRelation('other_direct')
+
+      const result = store.isSiteOriginInSameContext(new URL('https://direct.example/another'), 'other_direct')
       expect(result).to.be.equal(false)
     })
   })

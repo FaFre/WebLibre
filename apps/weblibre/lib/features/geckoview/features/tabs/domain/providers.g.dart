@@ -1151,8 +1151,8 @@ String _$watchAllAssignedSitesHash() =>
 /// aliases for isolated contexts.
 ///
 /// Returns a map from isolation context ID to the set of container IDs it
-/// appears in. An isolation context needs a proxy alias if ANY of its
-/// associated containers has a proxy connection assigned.
+/// appears in. An isolation context needs an explicit routing alias if any
+/// associated container has a proxy connection or bypasses global routing.
 
 @ProviderFor(watchIsolatedContextContainerMap)
 final watchIsolatedContextContainerMapProvider =
@@ -1163,8 +1163,8 @@ final watchIsolatedContextContainerMapProvider =
 /// aliases for isolated contexts.
 ///
 /// Returns a map from isolation context ID to the set of container IDs it
-/// appears in. An isolation context needs a proxy alias if ANY of its
-/// associated containers has a proxy connection assigned.
+/// appears in. An isolation context needs an explicit routing alias if any
+/// associated container has a proxy connection or bypasses global routing.
 
 final class WatchIsolatedContextContainerMapProvider
     extends
@@ -1181,8 +1181,8 @@ final class WatchIsolatedContextContainerMapProvider
   /// aliases for isolated contexts.
   ///
   /// Returns a map from isolation context ID to the set of container IDs it
-  /// appears in. An isolation context needs a proxy alias if ANY of its
-  /// associated containers has a proxy connection assigned.
+  /// appears in. An isolation context needs an explicit routing alias if any
+  /// associated container has a proxy connection or bypasses global routing.
   WatchIsolatedContextContainerMapProvider._()
     : super(
         from: null,

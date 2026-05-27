@@ -396,6 +396,19 @@ Future<bool> isTabTunneled(Ref ref, String? tabId) async {
 
           return containerData?.metadata.proxyConnectionId != null;
         case ProxyRegularTabRoutingMode.all:
+          final containerData = await ref
+              .read(tabDataRepositoryProvider.notifier)
+              .getTabContainerData(tabState.id);
+
+          if (!ref.mounted) return false;
+
+          if (containerData?.metadata.proxyConnectionId != null) {
+            return true;
+          }
+          if (containerData?.metadata.bypassGlobalProxy == true) {
+            return false;
+          }
+
           return proxyRoutingSettings.regularTabsProxyConnectionId != null;
       }
     }

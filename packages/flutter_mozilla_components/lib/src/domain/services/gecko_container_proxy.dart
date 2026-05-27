@@ -36,6 +36,13 @@ class GeckoContainerProxyService {
     return _apiInstance.setContainerProxy(contextId, proxyId);
   }
 
+  Future<void> setContainerDirectConnection(
+    String contextId, {
+    required String scopeId,
+  }) {
+    return _apiInstance.setContainerDirectConnection(contextId, scopeId);
+  }
+
   Future<void> clearContainerProxy(String contextId) {
     return _apiInstance.clearContainerProxy(contextId);
   }

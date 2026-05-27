@@ -322,6 +322,13 @@ class _SelectionContainerCard extends ConsumerWidget {
                                     isLoading: proxyOptionsLoading,
                                   ),
                                 ),
+                              if (container.metadata.proxyConnectionId ==
+                                      null &&
+                                  container.metadata.bypassGlobalProxy)
+                                const _SelectionInfoChip(
+                                  icon: Icons.public,
+                                  label: 'Direct',
+                                ),
                               if (container.metadata.clearDataOnExit)
                                 const _SelectionInfoChip(
                                   icon: Icons.cleaning_services_outlined,

@@ -44,6 +44,16 @@ class GeckoContainerProxyApiImpl : GeckoContainerProxyApi {
         )
     }
 
+    override fun setContainerDirectConnection(contextId: String, scopeId: String) {
+        ContainerProxyFeature.scheduleRequest(
+            "setContainerDirectConnection",
+            JSONObject().apply {
+                put("contextId", contextId)
+                put("scopeId", scopeId)
+            }
+        )
+    }
+
     override fun clearContainerProxy(contextId: String) {
         ContainerProxyFeature.scheduleRequest("clearContainerProxy", contextId)
     }

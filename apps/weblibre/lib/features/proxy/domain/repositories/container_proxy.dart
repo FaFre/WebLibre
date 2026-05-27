@@ -83,6 +83,16 @@ class ContainerProxyRepository extends _$ContainerProxyRepository {
     );
   }
 
+  Future<void> setContainerDirectConnection(
+    String contextId, {
+    required String scopeId,
+  }) {
+    return _runLocked(
+      body: () =>
+          _service.setContainerDirectConnection(contextId, scopeId: scopeId),
+    );
+  }
+
   Future<void> clearContainerProxy(String contextId) {
     return _runLocked(body: () => _service.clearContainerProxy(contextId));
   }

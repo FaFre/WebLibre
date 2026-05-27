@@ -99,6 +99,9 @@ class ContainerEditScreen extends HookConsumerWidget {
     final excludeFromIndex = useState(
       initialContainer.metadata.excludeFromIndex,
     );
+    final bypassGlobalProxy = useState(
+      initialContainer.metadata.bypassGlobalProxy,
+    );
     final assignedSites = useState(initialContainer.metadata.assignedSites);
     final isPinned = useState(initialContainer.isPinned);
 
@@ -122,6 +125,10 @@ class ContainerEditScreen extends HookConsumerWidget {
           clearDataOnExit:
               clearDataOnExit.value && contextualIdentity.value != null,
           excludeFromIndex: excludeFromIndex.value,
+          bypassGlobalProxy:
+              contextualIdentity.value != null &&
+              proxyConnectionId.value == null &&
+              bypassGlobalProxy.value,
           assignedSites: assignedSites.value,
         ),
       );
@@ -242,6 +249,8 @@ class ContainerEditScreen extends HookConsumerWidget {
     final assignedSiteCount = assignedSites.value?.length ?? 0;
     final canPickProxy =
         _mode == _DialogMode.create || contextualIdentity.value != null;
+    final canBypassGlobalProxy =
+        contextualIdentity.value != null && proxyConnectionId.value == null;
 
     return PopScope(
       canPop: container == comparison,
@@ -404,6 +413,7 @@ class ContainerEditScreen extends HookConsumerWidget {
 
                                   if (!value) {
                                     proxyConnectionId.value = null;
+                                    bypassGlobalProxy.value = false;
                                   }
 
                                   if (!value && clearDataOnExit.value) {
@@ -473,10 +483,27 @@ class ContainerEditScreen extends HookConsumerWidget {
                                       proxyConnectionId.value = null;
                                       if (createdTemporaryIdentity) {
                                         contextualIdentity.value = null;
+                                        bypassGlobalProxy.value = false;
                                       }
                                     case _ProxyPickerSelected(:final id):
                                       proxyConnectionId.value = id;
+                                      bypassGlobalProxy.value = false;
                                   }
+                                }
+                              : null,
+                        ),
+                        const Divider(height: 1, indent: 56),
+                        SwitchListTile.adaptive(
+                          value:
+                              canBypassGlobalProxy && bypassGlobalProxy.value,
+                          title: const Text('Bypass Global Proxy'),
+                          subtitle: const Text(
+                            'Use the normal connection for this container when global routing is enabled',
+                          ),
+                          secondary: const Icon(Icons.public),
+                          onChanged: canBypassGlobalProxy
+                              ? (value) {
+                                  bypassGlobalProxy.value = value;
                                 }
                               : null,
                         ),
@@ -661,6 +688,7 @@ class _ProxyConnectionPickerSheet extends StatelessWidget {
 
     return SafeArea(
       child: RadioGroup<ProxyConnectionId?>(
+        groupValue: selectedProxyConnectionId,
         onChanged: (value) {
           Navigator.pop(
             context,

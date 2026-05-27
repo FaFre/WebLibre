@@ -17,6 +17,8 @@ abstract class _$ContainerMetadataCWProxy {
 
   ContainerMetadata excludeFromIndex(bool excludeFromIndex);
 
+  ContainerMetadata bypassGlobalProxy(bool bypassGlobalProxy);
+
   ContainerMetadata assignedSites(List<Uri>? assignedSites);
 
   /// Creates a new instance with the provided field values.
@@ -32,6 +34,7 @@ abstract class _$ContainerMetadataCWProxy {
     ProxyConnectionId? proxyConnectionId,
     bool clearDataOnExit,
     bool excludeFromIndex,
+    bool bypassGlobalProxy,
     List<Uri>? assignedSites,
   });
 }
@@ -63,6 +66,10 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
       call(excludeFromIndex: excludeFromIndex);
 
   @override
+  ContainerMetadata bypassGlobalProxy(bool bypassGlobalProxy) =>
+      call(bypassGlobalProxy: bypassGlobalProxy);
+
+  @override
   ContainerMetadata assignedSites(List<Uri>? assignedSites) =>
       call(assignedSites: assignedSites);
 
@@ -80,6 +87,7 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
     Object? proxyConnectionId = const $CopyWithPlaceholder(),
     Object? clearDataOnExit = const $CopyWithPlaceholder(),
     Object? excludeFromIndex = const $CopyWithPlaceholder(),
+    Object? bypassGlobalProxy = const $CopyWithPlaceholder(),
     Object? assignedSites = const $CopyWithPlaceholder(),
   }) {
     return ContainerMetadata(
@@ -107,6 +115,12 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
           ? _value.excludeFromIndex
           // ignore: cast_nullable_to_non_nullable
           : excludeFromIndex as bool,
+      bypassGlobalProxy:
+          bypassGlobalProxy == const $CopyWithPlaceholder() ||
+              bypassGlobalProxy == null
+          ? _value.bypassGlobalProxy
+          // ignore: cast_nullable_to_non_nullable
+          : bypassGlobalProxy as bool,
       assignedSites: assignedSites == const $CopyWithPlaceholder()
           ? _value.assignedSites
           // ignore: cast_nullable_to_non_nullable
@@ -247,6 +261,7 @@ ContainerMetadata _$ContainerMetadataFromJson(Map<String, dynamic> json) =>
       ),
       clearDataOnExit: json['clearDataOnExit'] as bool? ?? false,
       excludeFromIndex: json['excludeFromIndex'] as bool? ?? false,
+      bypassGlobalProxy: json['bypassGlobalProxy'] as bool? ?? false,
       assignedSites: (json['assignedSites'] as List<dynamic>?)
           ?.map((e) => Uri.parse(e as String))
           .toList(),
@@ -263,6 +278,7 @@ Map<String, dynamic> _$ContainerMetadataToJson(
   'proxyConnectionId': _proxyConnectionIdToJson(instance.proxyConnectionId),
   'clearDataOnExit': instance.clearDataOnExit,
   'excludeFromIndex': instance.excludeFromIndex,
+  'bypassGlobalProxy': instance.bypassGlobalProxy,
   'assignedSites': instance.assignedSites?.map((e) => e.toString()).toList(),
 };
 

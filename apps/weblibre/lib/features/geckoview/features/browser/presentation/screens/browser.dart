@@ -249,9 +249,9 @@ Future<ProxyConnectionId?> _proxyConnectionIdForLoadError(
 
   if (contextId != null && contextId.isNotEmpty && contextId != 'general') {
     final isolatedContextProxyConnectionId =
-        await _isolatedContextProxyConnectionId(ref, contextId);
+        await _isolatedContextProxyAssignment(ref, contextId);
     if (isolatedContextProxyConnectionId != null) {
-      return isolatedContextProxyConnectionId;
+      return isolatedContextProxyConnectionId.proxyConnectionId;
     }
 
     final contextContainer = await ref
@@ -262,6 +262,9 @@ Future<ProxyConnectionId?> _proxyConnectionIdForLoadError(
     if (contextProxyConnectionId != null) {
       return contextProxyConnectionId;
     }
+    if (contextContainer?.metadata.bypassGlobalProxy == true) {
+      return null;
+    }
   }
 
   final tabContainer = await ref
@@ -271,6 +274,9 @@ Future<ProxyConnectionId?> _proxyConnectionIdForLoadError(
   if (tabProxyConnectionId != null) {
     return tabProxyConnectionId;
   }
+  if (tabContainer?.metadata.bypassGlobalProxy == true) {
+    return null;
+  }
 
   if (routing.regularTabsMode == ProxyRegularTabRoutingMode.all) {
     return routing.regularTabsProxyConnectionId;
@@ -279,7 +285,12 @@ Future<ProxyConnectionId?> _proxyConnectionIdForLoadError(
   return null;
 }
 
-Future<ProxyConnectionId?> _isolatedContextProxyConnectionId(
+typedef _LoadErrorProxyAssignment = ({
+  bool direct,
+  ProxyConnectionId? proxyConnectionId,
+});
+
+Future<_LoadErrorProxyAssignment?> _isolatedContextProxyAssignment(
   WidgetRef ref,
   String contextId,
 ) async {
@@ -296,17 +307,32 @@ Future<ProxyConnectionId?> _isolatedContextProxyConnectionId(
   final containers = await ref
       .read(containerRepositoryProvider.notifier)
       .getAllContainersWithCount();
+  final matchedContainers = containers.where(
+    (container) => containerIds.contains(container.id),
+  );
   final proxyIds =
-      containers
-          .where((container) => containerIds.contains(container.id))
+      matchedContainers
           .map((container) => container.metadata.proxyConnectionId?.encode())
           .nonNulls
           .toSet()
           .toList()
         ..sort();
 
-  if (proxyIds.isEmpty) return null;
-  return ProxyConnectionId.decode(proxyIds.first);
+  if (proxyIds.isNotEmpty) {
+    return (
+      direct: false,
+      proxyConnectionId: ProxyConnectionId.decode(proxyIds.first),
+    );
+  }
+  final matchedContainerList = matchedContainers.toList();
+  if (matchedContainerList.isNotEmpty &&
+      matchedContainerList.every(
+        (container) => container.metadata.bypassGlobalProxy,
+      )) {
+    return (direct: true, proxyConnectionId: null);
+  }
+
+  return null;
 }
 
 typedef _PendingProxyLoadError = ({

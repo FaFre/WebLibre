@@ -14,6 +14,7 @@ interface Message {
     'upsertProxy' |
     'removeProxy' |
     'setContainerProxy' |
+    'setContainerDirectConnection' |
     'clearContainerProxy' |
     'removeContainerProxyRelation' |
     'healthcheck' |
@@ -68,6 +69,15 @@ port.onMessage.addListener((raw: unknown): void => {
         case "setContainerProxy":
             store.setContainerProxyRelation(message.args.contextId, message.args.proxyId)
             console.log('set container relation ' + message.args.contextId + ' -> ' + message.args.proxyId)
+            break
+        case "setContainerDirectConnection":
+            if (typeof message.args === 'string') {
+                store.setContainerDirectRelation(message.args)
+                console.log('set container direct relation ' + message.args)
+            } else {
+                store.setContainerDirectRelation(message.args.contextId, message.args.scopeId)
+                console.log('set container direct relation ' + message.args.contextId + ' scoped to ' + message.args.scopeId)
+            }
             break
         case "clearContainerProxy":
             store.clearContainerProxyRelation(message.args)

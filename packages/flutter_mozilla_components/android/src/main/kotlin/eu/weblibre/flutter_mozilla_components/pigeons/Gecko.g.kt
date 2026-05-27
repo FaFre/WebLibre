@@ -8412,6 +8412,7 @@ interface GeckoContainerProxyApi {
   fun upsertProxy(proxy: GeckoProxySettings)
   fun removeProxy(proxyId: String)
   fun setContainerProxy(contextId: String, proxyId: String)
+  fun setContainerDirectConnection(contextId: String, scopeId: String)
   fun clearContainerProxy(contextId: String)
   fun removeContainerProxyRelation(contextId: String, proxyId: String)
   fun setSiteAssignments(assignments: Map<String, String>)
@@ -8525,6 +8526,25 @@ interface GeckoContainerProxyApi {
             val proxyIdArg = args[1] as String
             val wrapped: List<Any?> = try {
               api.setContainerProxy(contextIdArg, proxyIdArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.setContainerDirectConnection$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val contextIdArg = args[0] as String
+            val scopeIdArg = args[1] as String
+            val wrapped: List<Any?> = try {
+              api.setContainerDirectConnection(contextIdArg, scopeIdArg)
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
