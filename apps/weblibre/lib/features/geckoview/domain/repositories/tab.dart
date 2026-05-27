@@ -209,6 +209,17 @@ class TabRepository extends _$TabRepository {
       _tabBackPromptBehavior[newTabId] = promptOnBackBehavior;
     }
 
+    if (selectTab && ref.mounted) {
+      final selectedContainerNotifier = ref.read(
+        selectedContainerProvider.notifier,
+      );
+      if (assignedContainer != null) {
+        await selectedContainerNotifier.setContainerId(assignedContainer.id);
+      } else {
+        selectedContainerNotifier.clearContainer();
+      }
+    }
+
     return newTabId;
   }
 
