@@ -22,7 +22,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 
 // Above this depth, collapse the chevrons into a single icon + count badge.
-const int _maxInlineGlyphs = 3;
+const int _maxInlineGlyphs = 2;
 
 class TabDepthIndicator extends StatelessWidget {
   final int depth;
