@@ -248,7 +248,7 @@ class _HardeningSettingTile extends ConsumerWidget {
               leading: HardeningGroupIcon(isActive: settingValue.isActive),
               trailing: const Padding(
                 padding: EdgeInsets.only(right: 18.0),
-                child: Icon(Icons.check),
+                child: Icon(Icons.lock),
               ),
             ),
     );
