@@ -42,22 +42,45 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 
-ContainerColorPalette _palette(BuildContext context, Color color) {
-  return ContainerColors.palette(context, color);
+ContainerColorPalette _palette(
+  BuildContext context,
+  Color color, {
+  bool useCustomColor = false,
+}) {
+  return ContainerColors.palette(
+    context,
+    color,
+    useCustomColor: useCustomColor,
+  );
 }
 
-Color _chipColor(BuildContext context, Color color, bool isSelected) {
-  final palette = _palette(context, color);
+Color _chipColor(
+  BuildContext context,
+  Color color,
+  bool isSelected, {
+  bool useCustomColor = false,
+}) {
+  final palette = _palette(context, color, useCustomColor: useCustomColor);
   return isSelected ? palette.selectedBackgroundColor : palette.backgroundColor;
 }
 
-BorderSide _chipSide(BuildContext context, Color color, bool isSelected) {
-  final palette = _palette(context, color);
+BorderSide _chipSide(
+  BuildContext context,
+  Color color,
+  bool isSelected, {
+  bool useCustomColor = false,
+}) {
+  final palette = _palette(context, color, useCustomColor: useCustomColor);
   return isSelected ? palette.selectedBorderSide : palette.borderSide;
 }
 
-InlineCountBadge _countBadge(BuildContext context, Color color, int count) {
-  final palette = _palette(context, color);
+InlineCountBadge _countBadge(
+  BuildContext context,
+  Color color,
+  int count, {
+  bool useCustomColor = false,
+}) {
+  final palette = _palette(context, color, useCustomColor: useCustomColor);
   return InlineCountBadge(
     count: count,
     backgroundColor: palette.badgeBackgroundColor,
@@ -404,10 +427,18 @@ class ContainerChips extends HookConsumerWidget {
                         cacheExtent: 500,
                         itemId: (container) => container.id,
                         decoration: SelectableChipDecoration(
-                          color: (container, isSelected) =>
-                              _chipColor(context, container.color, isSelected),
-                          side: (container, isSelected) =>
-                              _chipSide(context, container.color, isSelected),
+                          color: (container, isSelected) => _chipColor(
+                            context,
+                            container.color,
+                            isSelected,
+                            useCustomColor: container.metadata.useCustomColor,
+                          ),
+                          side: (container, isSelected) => _chipSide(
+                            context,
+                            container.color,
+                            isSelected,
+                            useCustomColor: container.metadata.useCustomColor,
+                          ),
                         ),
                         itemAvatar: (container) {
                           final isSelected =
@@ -432,7 +463,13 @@ class ContainerChips extends HookConsumerWidget {
                             container,
                             isSelected,
                             trailing: count != null && count > 0
-                                ? _countBadge(context, container.color, count)
+                                ? _countBadge(
+                                    context,
+                                    container.color,
+                                    count,
+                                    useCustomColor:
+                                        container.metadata.useCustomColor,
+                                  )
                                 : null,
                           );
                         },

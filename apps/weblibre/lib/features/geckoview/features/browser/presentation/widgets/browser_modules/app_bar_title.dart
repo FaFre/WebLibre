@@ -40,9 +40,14 @@ import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 
 class CompactAppBarTitle extends ConsumerWidget {
-  const CompactAppBarTitle({super.key, this.containerColor});
+  const CompactAppBarTitle({
+    super.key,
+    this.containerColor,
+    this.useCustomColor = false,
+  });
 
   final Color? containerColor;
+  final bool useCustomColor;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -77,6 +82,7 @@ class CompactAppBarTitle extends ConsumerWidget {
       siteSettingsBadgeState: siteSettingsBadgeState,
       longPressUrlCopy: settings.tabBarLongPressUrlCopy,
       containerColor: containerColor,
+      useCustomColor: useCustomColor,
       sandboxSourceUri: sandboxSourceUri,
       onSiteSettingsTap: () {
         ref
@@ -105,6 +111,7 @@ class CompactAppBarTitleView extends StatelessWidget {
     this.tabIcon,
     this.longPressUrlCopy = true,
     this.containerColor,
+    this.useCustomColor = false,
     this.sandboxSourceUri,
   });
 
@@ -116,6 +123,7 @@ class CompactAppBarTitleView extends StatelessWidget {
   final Widget? tabIcon;
   final bool longPressUrlCopy;
   final Color? containerColor;
+  final bool useCustomColor;
   final Uri? sandboxSourceUri;
 
   @override
@@ -124,7 +132,11 @@ class CompactAppBarTitleView extends StatelessWidget {
     final appColors = AppColors.of(context);
     final containerColor = this.containerColor;
     final containerPalette = containerColor != null
-        ? ContainerColors.palette(context, containerColor)
+        ? ContainerColors.palette(
+            context,
+            containerColor,
+            useCustomColor: useCustomColor,
+          )
         : null;
 
     return Row(
@@ -241,9 +253,14 @@ class CompactAppBarTitleView extends StatelessWidget {
 }
 
 class AppBarTitle extends ConsumerWidget {
-  const AppBarTitle({super.key, this.containerColor});
+  const AppBarTitle({
+    super.key,
+    this.containerColor,
+    this.useCustomColor = false,
+  });
 
   final Color? containerColor;
+  final bool useCustomColor;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -278,6 +295,7 @@ class AppBarTitle extends ConsumerWidget {
       siteSettingsBadgeState: siteSettingsBadgeState,
       longPressUrlCopy: settings.tabBarLongPressUrlCopy,
       containerColor: containerColor,
+      useCustomColor: useCustomColor,
       sandboxSourceUri: sandboxSourceUri,
       onSiteSettingsTap: () {
         ref
@@ -306,6 +324,7 @@ class AppBarTitleView extends StatelessWidget {
     required this.longPressUrlCopy,
     this.tabIcon,
     this.containerColor,
+    this.useCustomColor = false,
     this.sandboxSourceUri,
   });
 
@@ -317,6 +336,7 @@ class AppBarTitleView extends StatelessWidget {
   final Widget? tabIcon;
   final bool longPressUrlCopy;
   final Color? containerColor;
+  final bool useCustomColor;
   final Uri? sandboxSourceUri;
 
   @override
@@ -325,7 +345,11 @@ class AppBarTitleView extends StatelessWidget {
     final appColors = AppColors.of(context);
     final containerColor = this.containerColor;
     final containerPalette = containerColor != null
-        ? ContainerColors.palette(context, containerColor)
+        ? ContainerColors.palette(
+            context,
+            containerColor,
+            useCustomColor: useCustomColor,
+          )
         : null;
 
     return Row(

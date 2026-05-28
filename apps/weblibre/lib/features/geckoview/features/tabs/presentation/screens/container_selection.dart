@@ -240,7 +240,11 @@ class _SelectionContainerCard extends ConsumerWidget {
     final colorScheme = theme.colorScheme;
     final containerColor = container.color;
     final tabCount = container.tabCount ?? 0;
-    final palette = ContainerColors.palette(context, containerColor);
+    final palette = ContainerColors.palette(
+      context,
+      containerColor,
+      useCustomColor: container.metadata.useCustomColor,
+    );
 
     final proxyOptions = ref.watch(proxyConnectionOptionsProvider);
     final proxyOptionsState = ref.watch(singboxProxyProfilesRepositoryProvider);

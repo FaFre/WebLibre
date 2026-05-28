@@ -61,7 +61,11 @@ class CompactContainerSelector extends ConsumerWidget {
     final isSelected = selectedContainer != null;
     final accentColor = selectedContainer?.color ?? colorScheme.primary;
     final showSelectedHighlight = isSelected && emphasizeSelection;
-    final palette = ContainerColors.palette(context, accentColor);
+    final palette = ContainerColors.palette(
+      context,
+      accentColor,
+      useCustomColor: selectedContainer?.metadata.useCustomColor ?? false,
+    );
 
     return GestureDetector(
       onLongPress: isSelected

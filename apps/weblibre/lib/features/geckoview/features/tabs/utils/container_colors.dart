@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:material_color_utilities/material_color_utilities.dart';
 
 class ContainerColorPalette {
   const ContainerColorPalette({
@@ -65,8 +66,17 @@ class ContainerColorPalette {
 
 /// Centralized helper for container color display and theming.
 ///
-/// This class converts the stored container seed color into Material 3 roles
-/// used consistently across the application.
+/// Converts the stored container color into Material 3 roles used
+/// consistently across the application. Supports two modes:
+///
+/// - **Seed mode** (default): the color is treated as a seed and fed through
+///   [ColorScheme.fromSeed], yielding an M3-harmonized palette. The actual
+///   container background depends on the theme brightness (T90 light / T30
+///   dark) — picking a dark seed does not produce a dark container.
+/// - **Custom mode** (`useCustomColor: true`): the color is used directly as
+///   `primaryContainer`. Accent/outline are derived via HCT tone shifts and
+///   on-colors via WCAG contrast. Enables true any-color choice (including
+///   black/dark grey) at the cost of strict M3 harmonization.
 class ContainerColors {
   ContainerColors._();
 
@@ -74,55 +84,100 @@ class ContainerColors {
   static const double surfaceHighAlpha = 0.28;
   static const double outlineBorderAlpha = 0.5;
 
-  static ContainerColorPalette palette(BuildContext context, Color seedColor) {
+  static ContainerColorPalette palette(
+    BuildContext context,
+    Color color, {
+    bool useCustomColor = false,
+  }) {
     final theme = Theme.of(context);
     final appScheme = theme.colorScheme;
-    final containerScheme = ColorScheme.fromSeed(
-      seedColor: fullOpacity(seedColor),
-      brightness: theme.brightness,
-    );
+    final fullColor = fullOpacity(color);
+
+    final containerColor = useCustomColor
+        ? fullColor
+        : ColorScheme.fromSeed(
+            seedColor: fullColor,
+            brightness: theme.brightness,
+          ).primaryContainer;
+    final accentColor = useCustomColor
+        ? _shiftTone(fullColor, theme.brightness)
+        : ColorScheme.fromSeed(
+            seedColor: fullColor,
+            brightness: theme.brightness,
+          ).primary;
+    final onContainerColor = useCustomColor
+        ? _contrastingForeground(containerColor)
+        : ColorScheme.fromSeed(
+            seedColor: fullColor,
+            brightness: theme.brightness,
+          ).onPrimaryContainer;
+    final onAccentColor = useCustomColor
+        ? _contrastingForeground(accentColor)
+        : ColorScheme.fromSeed(
+            seedColor: fullColor,
+            brightness: theme.brightness,
+          ).onPrimary;
+
     final surfaceColor = Color.alphaBlend(
-      containerScheme.primaryContainer.withValues(alpha: surfaceAlpha),
+      containerColor.withValues(alpha: surfaceAlpha),
       appScheme.surfaceContainer,
     );
     final surfaceHighColor = Color.alphaBlend(
-      containerScheme.primaryContainer.withValues(alpha: surfaceHighAlpha),
+      containerColor.withValues(alpha: surfaceHighAlpha),
       appScheme.surfaceContainerHighest,
     );
-    final outlineColor = containerScheme.primary.withValues(
-      alpha: outlineBorderAlpha,
-    );
+    final outlineColor = accentColor.withValues(alpha: outlineBorderAlpha);
 
     return ContainerColorPalette(
-      accentColor: containerScheme.primary,
-      onAccentColor: containerScheme.onPrimary,
-      containerColor: containerScheme.primaryContainer,
-      onContainerColor: containerScheme.onPrimaryContainer,
+      accentColor: accentColor,
+      onAccentColor: onAccentColor,
+      containerColor: containerColor,
+      onContainerColor: onContainerColor,
       surfaceColor: surfaceColor,
       surfaceHighColor: surfaceHighColor,
       outlineColor: outlineColor,
       backgroundColor: surfaceColor,
-      selectedBackgroundColor: containerScheme.primaryContainer,
+      selectedBackgroundColor: containerColor,
       borderSide: BorderSide(color: outlineColor),
       selectedBorderSide: const BorderSide(color: Colors.transparent),
       foregroundColor: appScheme.onSurfaceVariant,
-      selectedForegroundColor: containerScheme.onPrimaryContainer,
-      badgeBackgroundColor: containerScheme.primary,
-      badgeForegroundColor: containerScheme.onPrimary,
-      avatarColor: containerScheme.primary,
-      selectedAvatarColor: containerScheme.onPrimaryContainer,
+      selectedForegroundColor: onContainerColor,
+      badgeBackgroundColor: accentColor,
+      badgeForegroundColor: onAccentColor,
+      avatarColor: accentColor,
+      selectedAvatarColor: onContainerColor,
       avatarBackgroundColor: surfaceHighColor,
-      avatarForegroundColor: containerScheme.primary,
+      avatarForegroundColor: accentColor,
     );
   }
 
   /// Returns the full opacity version of a container color.
-  ///
-  /// Useful when you need the original color for comparison or display
-  /// in contexts where full opacity is needed.
-  ///
-  /// [baseColor] The color to ensure has full opacity
   static Color fullOpacity(Color baseColor) {
     return baseColor.withValues(alpha: 1.0);
+  }
+
+  /// Shifts the color in HCT to a tone suitable for use as an accent against
+  /// the theme surface. Light theme uses T40 (darker); dark theme uses T80
+  /// (lighter). Mirrors M3's primary tone targets.
+  static Color _shiftTone(Color color, Brightness brightness) {
+    final hct = Hct.fromInt(color.toARGB32());
+    final targetTone = brightness == Brightness.light ? 40.0 : 80.0;
+    return Color(Hct.from(hct.hue, hct.chroma, targetTone).toInt());
+  }
+
+  /// Picks whichever of black or white has higher contrast against
+  /// [background].
+  static Color _contrastingForeground(Color background) {
+    final blackContrast = _contrastRatio(background, Colors.black);
+    final whiteContrast = _contrastRatio(background, Colors.white);
+    return blackContrast >= whiteContrast ? Colors.black : Colors.white;
+  }
+
+  static double _contrastRatio(Color a, Color b) {
+    final aLuminance = a.computeLuminance();
+    final bLuminance = b.computeLuminance();
+    final lighter = aLuminance > bLuminance ? aLuminance : bLuminance;
+    final darker = aLuminance > bLuminance ? bLuminance : aLuminance;
+    return (lighter + 0.05) / (darker + 0.05);
   }
 }

@@ -19,6 +19,8 @@ abstract class _$ContainerMetadataCWProxy {
 
   ContainerMetadata bypassGlobalProxy(bool bypassGlobalProxy);
 
+  ContainerMetadata useCustomColor(bool useCustomColor);
+
   ContainerMetadata assignedSites(List<Uri>? assignedSites);
 
   /// Creates a new instance with the provided field values.
@@ -35,6 +37,7 @@ abstract class _$ContainerMetadataCWProxy {
     bool clearDataOnExit,
     bool excludeFromIndex,
     bool bypassGlobalProxy,
+    bool useCustomColor,
     List<Uri>? assignedSites,
   });
 }
@@ -70,6 +73,10 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
       call(bypassGlobalProxy: bypassGlobalProxy);
 
   @override
+  ContainerMetadata useCustomColor(bool useCustomColor) =>
+      call(useCustomColor: useCustomColor);
+
+  @override
   ContainerMetadata assignedSites(List<Uri>? assignedSites) =>
       call(assignedSites: assignedSites);
 
@@ -88,6 +95,7 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
     Object? clearDataOnExit = const $CopyWithPlaceholder(),
     Object? excludeFromIndex = const $CopyWithPlaceholder(),
     Object? bypassGlobalProxy = const $CopyWithPlaceholder(),
+    Object? useCustomColor = const $CopyWithPlaceholder(),
     Object? assignedSites = const $CopyWithPlaceholder(),
   }) {
     return ContainerMetadata(
@@ -121,6 +129,12 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
           ? _value.bypassGlobalProxy
           // ignore: cast_nullable_to_non_nullable
           : bypassGlobalProxy as bool,
+      useCustomColor:
+          useCustomColor == const $CopyWithPlaceholder() ||
+              useCustomColor == null
+          ? _value.useCustomColor
+          // ignore: cast_nullable_to_non_nullable
+          : useCustomColor as bool,
       assignedSites: assignedSites == const $CopyWithPlaceholder()
           ? _value.assignedSites
           // ignore: cast_nullable_to_non_nullable
@@ -262,6 +276,7 @@ ContainerMetadata _$ContainerMetadataFromJson(Map<String, dynamic> json) =>
       clearDataOnExit: json['clearDataOnExit'] as bool? ?? false,
       excludeFromIndex: json['excludeFromIndex'] as bool? ?? false,
       bypassGlobalProxy: json['bypassGlobalProxy'] as bool? ?? false,
+      useCustomColor: json['useCustomColor'] as bool? ?? false,
       assignedSites: (json['assignedSites'] as List<dynamic>?)
           ?.map((e) => Uri.parse(e as String))
           .toList(),
@@ -279,6 +294,7 @@ Map<String, dynamic> _$ContainerMetadataToJson(
   'clearDataOnExit': instance.clearDataOnExit,
   'excludeFromIndex': instance.excludeFromIndex,
   'bypassGlobalProxy': instance.bypassGlobalProxy,
+  'useCustomColor': instance.useCustomColor,
   'assignedSites': instance.assignedSites?.map((e) => e.toString()).toList(),
 };
 

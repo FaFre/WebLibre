@@ -17,117 +17,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:material_color_utilities/material_color_utilities.dart';
 
-final _rnd = Random();
+const int _hueCount = 24;
+const double _seedChroma = 60.0;
+const double _seedTone = 60.0;
 
-/// Check if is good condition to use white foreground color by passing
-/// the background color, and optional bias.
-///
-/// Reference:
-///
-/// Old: https://www.w3.org/TR/WCAG20-TECHS/G18.html
-///
-/// New: https://github.com/mchome/flutter_statusbarcolor/issues/40
-bool useWhiteForeground(Color backgroundColor, {double bias = 0.0}) {
-  // Old:
-  // return 1.05 / (color.computeLuminance() + 0.05) > 4.5;
-
-  // New:
-  final v = sqrt(
-    pow(backgroundColor.r, 2) * 0.299 +
-        pow(backgroundColor.g, 2) * 0.587 +
-        pow(backgroundColor.b, 2) * 0.114,
-  ).round();
-  return v < (130 + bias);
-}
-
-const List<List<Color>> colorTypes = [
-  [Colors.red, Colors.redAccent],
-  [Colors.pink, Colors.pinkAccent],
-  [Colors.purple, Colors.purpleAccent],
-  [Colors.deepPurple, Colors.deepPurpleAccent],
-  [Colors.indigo, Colors.indigoAccent],
-  [Colors.blue, Colors.blueAccent],
-  [Colors.lightBlue, Colors.lightBlueAccent],
-  [Colors.cyan, Colors.cyanAccent],
-  [Colors.teal, Colors.tealAccent],
-  [Colors.green, Colors.greenAccent],
-  [Colors.lightGreen, Colors.lightGreenAccent],
-  [Colors.lime, Colors.limeAccent],
-  [Colors.yellow, Colors.yellowAccent],
-  [Colors.amber, Colors.amberAccent],
-  [Colors.orange, Colors.orangeAccent],
-  [Colors.deepOrange, Colors.deepOrangeAccent],
-  [Colors.brown],
-  [Colors.grey],
-  [Colors.blueGrey],
-  [Colors.black],
-];
-
-List<Map<Color, String>> shadingTypes(List<Color> colors) {
-  final List<Map<Color, String>> result = [];
-
-  for (final Color colorType in colors) {
-    if (colorType == Colors.grey) {
-      result.addAll(
-        [
-          50,
-          100,
-          200,
-          300,
-          350,
-          400,
-          500,
-          600,
-          700,
-          800,
-          850,
-          900,
-        ].map((int shade) => {Colors.grey[shade]!: shade.toString()}).toList(),
-      );
-    } else if (colorType == Colors.black || colorType == Colors.white) {
-      result.addAll([
-        {Colors.black: ''},
-        {Colors.white: ''},
-      ]);
-    } else if (colorType is MaterialAccentColor) {
-      result.addAll(
-        [
-          100,
-          200,
-          400,
-          700,
-        ].map((int shade) => {colorType[shade]!: 'A$shade'}).toList(),
-      );
-    } else if (colorType is MaterialColor) {
-      result.addAll(
-        [
-          50,
-          100,
-          200,
-          300,
-          400,
-          500,
-          600,
-          700,
-          800,
-          900,
-        ].map((int shade) => {colorType[shade]!: shade.toString()}).toList(),
-      );
-    } else {
-      result.add({Colors.transparent: ''});
-    }
-  }
-
-  return result;
-}
-
-Color randomColorShade(List<Color> colors) {
-  final color = colors[_rnd.nextInt(colors.length)];
-  final shades = shadingTypes([color]);
-
-  return shades[_rnd.nextInt(shades.length)].keys.first;
-}
+// Evenly spaced HCT hues. ColorScheme.fromSeed extracts the seed's hue and
+// normalizes tone, so spacing in HCT (not HSL) guarantees each swatch yields
+// a perceptually distinct primaryContainer.
+final List<Color> containerSeedColors = List<Color>.unmodifiable(
+  List.generate(_hueCount, (i) {
+    final hue = i * 360.0 / _hueCount;
+    return Color(Hct.from(hue, _seedChroma, _seedTone).toInt());
+  }),
+);

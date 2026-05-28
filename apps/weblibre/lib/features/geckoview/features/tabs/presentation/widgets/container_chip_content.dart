@@ -31,7 +31,11 @@ Widget? buildContainerChipAvatar(
   bool isSelected, {
   double size = 18,
 }) {
-  final palette = ContainerColors.palette(context, container.color);
+  final palette = ContainerColors.palette(
+    context,
+    container.color,
+    useCustomColor: container.metadata.useCustomColor,
+  );
 
   return chipContainerIcon(container.metadata.iconData).mapNotNull(
     (iconData) => Icon(
@@ -48,7 +52,11 @@ Widget buildContainerChipLabel(
   bool isSelected, {
   Widget? trailing,
 }) {
-  final palette = ContainerColors.palette(context, container.color);
+  final palette = ContainerColors.palette(
+    context,
+    container.color,
+    useCustomColor: container.metadata.useCustomColor,
+  );
   final foregroundColor = isSelected
       ? palette.selectedForegroundColor
       : palette.foregroundColor;

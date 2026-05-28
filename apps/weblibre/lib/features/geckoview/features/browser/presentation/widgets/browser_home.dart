@@ -248,7 +248,11 @@ class _ContainerHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final containerColor = container.color;
-    final containerPalette = ContainerColors.palette(context, containerColor);
+    final containerPalette = ContainerColors.palette(
+      context,
+      containerColor,
+      useCustomColor: container.metadata.useCustomColor,
+    );
 
     return Container(
       width: 112,

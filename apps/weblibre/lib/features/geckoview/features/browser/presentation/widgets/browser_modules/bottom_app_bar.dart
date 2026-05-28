@@ -236,6 +236,11 @@ class BrowserTabBar extends HookConsumerWidget {
         selectedTabId,
       ).select((data) => data.value?.color),
     );
+    final containerUseCustomColor = ref.watch(
+      watchTabContainerDataProvider(
+        selectedTabId,
+      ).select((data) => data.value?.metadata.useCustomColor ?? false),
+    );
 
     final quickTabSwitcherMode = settings.effectiveUiQuickTabSwitcherMode();
 
@@ -251,8 +256,14 @@ class BrowserTabBar extends HookConsumerWidget {
             displayedSheet is! ViewTabsSheet)
         ? containerColor
         : null;
+    final effectiveUseCustomColor =
+        effectiveContainerColor != null && containerUseCustomColor;
     final effectiveContainerPalette = effectiveContainerColor != null
-        ? ContainerColors.palette(context, effectiveContainerColor)
+        ? ContainerColors.palette(
+            context,
+            effectiveContainerColor,
+            useCustomColor: effectiveUseCustomColor,
+          )
         : null;
 
     return BrowserTabBarView(
@@ -264,8 +275,14 @@ class BrowserTabBar extends HookConsumerWidget {
       backgroundColor: effectiveContainerPalette?.surfaceColor,
       title: showTabTitle
           ? settings.tabBarLayout == TabBarLayout.compact
-                ? CompactAppBarTitle(containerColor: effectiveContainerColor)
-                : AppBarTitle(containerColor: effectiveContainerColor)
+                ? CompactAppBarTitle(
+                    containerColor: effectiveContainerColor,
+                    useCustomColor: effectiveUseCustomColor,
+                  )
+                : AppBarTitle(
+                    containerColor: effectiveContainerColor,
+                    useCustomColor: effectiveUseCustomColor,
+                  )
           : null,
       actions: [
         const PinnedAddonBar(),
@@ -457,6 +474,7 @@ class BrowserTabBarView extends StatelessWidget {
 
 class QuickTabSwitcherItem with FastEquatable {
   final Color? color;
+  final bool useCustomColor;
   final String id;
   final bool isActive;
   final TabMode tabMode;
@@ -478,6 +496,7 @@ class QuickTabSwitcherItem with FastEquatable {
     required this.title,
     required this.url,
     required this.avatar,
+    this.useCustomColor = false,
     this.isSandbox = false,
     this.depth = 0,
   });
@@ -485,6 +504,7 @@ class QuickTabSwitcherItem with FastEquatable {
   @override
   List<Object?> get hashParameters => [
     color,
+    useCustomColor,
     id,
     isActive,
     tabMode,
@@ -577,6 +597,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
           : state.$1.titleOrAuthority;
       return QuickTabSwitcherItem(
         color: state.$2?.color,
+        useCustomColor: state.$2?.metadata.useCustomColor ?? false,
         id: state.$1.id,
         isActive: state.$1.id == selectedTabId,
         title: displayTitle,
@@ -910,16 +931,26 @@ class QuickTabSwitcherView extends StatelessWidget {
         final color? when isSelected => ContainerColors.palette(
           context,
           color,
+          useCustomColor: item.useCustomColor,
         ).selectedBackgroundColor,
-        final color? => ContainerColors.palette(context, color).backgroundColor,
+        final color? => ContainerColors.palette(
+          context,
+          color,
+          useCustomColor: item.useCustomColor,
+        ).backgroundColor,
         null => null,
       },
       side: (item, isSelected) => switch (item.color) {
         final color? when isSelected => ContainerColors.palette(
           context,
           color,
+          useCustomColor: item.useCustomColor,
         ).selectedBorderSide,
-        final color? => ContainerColors.palette(context, color).borderSide,
+        final color? => ContainerColors.palette(
+          context,
+          color,
+          useCustomColor: item.useCustomColor,
+        ).borderSide,
         null => null,
       },
       labelPadding: (item) =>
@@ -1015,8 +1046,13 @@ class QuickTabSwitcherView extends StatelessWidget {
                   ? ContainerColors.palette(
                       context,
                       color,
+                      useCustomColor: item.useCustomColor,
                     ).selectedForegroundColor
-                  : ContainerColors.palette(context, color).foregroundColor,
+                  : ContainerColors.palette(
+                      context,
+                      color,
+                      useCustomColor: item.useCustomColor,
+                    ).foregroundColor,
               fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
             ),
             child: row,

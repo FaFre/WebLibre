@@ -88,6 +88,7 @@ class ContainerEditScreen extends HookConsumerWidget {
     );
 
     final selectedColor = useState(initialContainer.color);
+    final useCustomColor = useState(initialContainer.metadata.useCustomColor);
     final selectedIcon = useState(initialContainer.metadata.iconData);
     final contextualIdentity = useState(
       initialContainer.metadata.contextualIdentity,
@@ -129,6 +130,7 @@ class ContainerEditScreen extends HookConsumerWidget {
               contextualIdentity.value != null &&
               proxyConnectionId.value == null &&
               bypassGlobalProxy.value,
+          useCustomColor: useCustomColor.value,
           assignedSites: assignedSites.value,
         ),
       );
@@ -160,13 +162,17 @@ class ContainerEditScreen extends HookConsumerWidget {
     }
 
     Future<void> openColorPicker() async {
-      final color = await showDialog<Color?>(
+      final result = await showDialog<ColorPickerResult?>(
         context: context,
-        builder: (context) => ColorPickerDialog(selectedColor.value),
+        builder: (context) => ColorPickerDialog(
+          selectedColor.value,
+          initialUseCustomColor: useCustomColor.value,
+        ),
       );
 
-      if (color != null) {
-        selectedColor.value = color;
+      if (result != null) {
+        selectedColor.value = result.color;
+        useCustomColor.value = result.useCustomColor;
       }
     }
 
@@ -179,6 +185,7 @@ class ContainerEditScreen extends HookConsumerWidget {
           heightFactor: 0.92,
           child: ContainerIconPickerSheet(
             selectedColor: selectedColor.value,
+            useCustomColor: useCustomColor.value,
             selectedIcon: resolveContainerIcon(selectedIcon.value),
             onSelected: (iconData) => Navigator.of(context).pop(iconData),
           ),
@@ -245,6 +252,7 @@ class ContainerEditScreen extends HookConsumerWidget {
     final previewPalette = ContainerColors.palette(
       context,
       selectedColor.value,
+      useCustomColor: useCustomColor.value,
     );
     final assignedSiteCount = assignedSites.value?.length ?? 0;
     final canPickProxy =

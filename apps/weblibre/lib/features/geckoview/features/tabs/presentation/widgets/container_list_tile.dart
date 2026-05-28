@@ -38,7 +38,11 @@ class ContainerListTile extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = ContainerColors.palette(context, container.color);
+    final palette = ContainerColors.palette(
+      context,
+      container.color,
+      useCustomColor: container.metadata.useCustomColor,
+    );
 
     return ListTileTheme(
       selectedColor: palette.onContainerColor,

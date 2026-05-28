@@ -53,6 +53,12 @@ class ContainerMetadata with FastEquatable {
   @JsonKey(defaultValue: false)
   final bool bypassGlobalProxy;
 
+  // When true, ContainerData.color is used directly as primaryContainer
+  // instead of being fed through ColorScheme.fromSeed. Lets power users pick
+  // any color (including dark/black) at the cost of M3 harmonization.
+  @JsonKey(defaultValue: false)
+  final bool useCustomColor;
+
   final List<Uri>? assignedSites;
 
   ContainerMetadata({
@@ -62,6 +68,7 @@ class ContainerMetadata with FastEquatable {
     required this.clearDataOnExit,
     required this.excludeFromIndex,
     required this.bypassGlobalProxy,
+    required this.useCustomColor,
     required this.assignedSites,
   });
 
@@ -72,6 +79,7 @@ class ContainerMetadata with FastEquatable {
     bool? clearDataOnExit,
     bool? excludeFromIndex,
     bool? bypassGlobalProxy,
+    bool? useCustomColor,
     List<Uri>? assignedSites,
   }) : this(
          iconData: iconData,
@@ -80,6 +88,7 @@ class ContainerMetadata with FastEquatable {
          clearDataOnExit: clearDataOnExit ?? false,
          excludeFromIndex: excludeFromIndex ?? false,
          bypassGlobalProxy: bypassGlobalProxy ?? false,
+         useCustomColor: useCustomColor ?? false,
          assignedSites: assignedSites,
        );
 
@@ -98,6 +107,7 @@ class ContainerMetadata with FastEquatable {
     clearDataOnExit,
     excludeFromIndex,
     bypassGlobalProxy,
+    useCustomColor,
     assignedSites,
   ];
 }

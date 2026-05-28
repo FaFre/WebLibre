@@ -17,9 +17,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:math';
 import 'dart:ui';
 
-import 'package:collection/collection.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/uuid.dart';
@@ -299,22 +299,12 @@ class ContainerRepository extends _$ContainerRepository {
   }
 
   Future<Color> unusedRandomContainerColor() async {
-    final usedColors = await getDistinctColors();
-    final unusedColorTypes = colorTypes.where((colors) {
-      return !shadingTypes(
-        colors,
-      ).any((shade) => usedColors.contains(shade.keys.first));
-    }).toList();
-    final availableColors =
-        (unusedColorTypes.isNotEmpty ? unusedColorTypes : colorTypes).flattened
-            .toList();
-
-    Color randomColor;
-    do {
-      randomColor = randomColorShade(availableColors);
-    } while (usedColors.contains(randomColor));
-
-    return randomColor;
+    final usedColors = (await getDistinctColors()).toSet();
+    final unused = containerSeedColors
+        .where((color) => !usedColors.contains(color))
+        .toList();
+    final pool = unused.isNotEmpty ? unused : containerSeedColors;
+    return pool[Random().nextInt(pool.length)];
   }
 
   Future<ContainerData> createNewContainer() async {

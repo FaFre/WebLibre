@@ -42,17 +42,23 @@ class ContainerIconPickerSheet extends HookWidget {
     required this.selectedColor,
     required this.selectedIcon,
     required this.onSelected,
+    this.useCustomColor = false,
     super.key,
   });
 
   final Color selectedColor;
   final IconData selectedIcon;
+  final bool useCustomColor;
   final ValueChanged<IconData> onSelected;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = ContainerColors.palette(context, selectedColor);
+    final palette = ContainerColors.palette(
+      context,
+      selectedColor,
+      useCustomColor: useCustomColor,
+    );
     final searchController = useTextEditingController();
     useListenable(searchController);
 

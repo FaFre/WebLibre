@@ -28,6 +28,7 @@ class UrlListTile extends StatelessWidget {
   final Widget? leading;
   final Widget? trailing;
   final Color? containerColor;
+  final bool useCustomColor;
   final bool showHttpScheme;
   final VoidCallback? onTap;
 
@@ -38,6 +39,7 @@ class UrlListTile extends StatelessWidget {
     this.leading,
     this.trailing,
     this.containerColor,
+    this.useCustomColor = false,
     this.showHttpScheme = true,
     this.onTap,
   });
@@ -50,7 +52,11 @@ class UrlListTile extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     final containerPalette = containerColor != null
-        ? ContainerColors.palette(context, containerColor!)
+        ? ContainerColors.palette(
+            context,
+            containerColor!,
+            useCustomColor: useCustomColor,
+          )
         : null;
 
     return Container(
