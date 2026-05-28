@@ -19,8 +19,12 @@ const SMART_TAB_GROUPING_CONFIG = {
         taskName: ML_TASK_FEATURE_EXTRACTION,
         featureId: "smart-tab-embedding",
         engineId: FEATURES["smart-tab-embedding"].engineId,
-        backend: "onnx-native",
-        fallbackBackend: "onnx",
+        // GeckoView's Android build has no native InferenceSession, so the
+        // onnx-native backend always fails. Use the WASM onnx backend directly.
+        backend: "onnx",
+        // The threaded WASM runtime can't spawn worker threads in the GeckoView
+        // ML worker context, so force single-threaded execution.
+        numThreads: 1,
     },
     topicGeneration: {
         dtype: "q8",
@@ -28,8 +32,12 @@ const SMART_TAB_GROUPING_CONFIG = {
         taskName: ML_TASK_TEXT2TEXT,
         featureId: "smart-tab-topic",
         engineId: FEATURES["smart-tab-topic"].engineId,
-        backend: "onnx-native",
-        fallbackBackend: "onnx",
+        // GeckoView's Android build has no native InferenceSession, so the
+        // onnx-native backend always fails. Use the WASM onnx backend directly.
+        backend: "onnx",
+        // The threaded WASM runtime can't spawn worker threads in the GeckoView
+        // ML worker context, so force single-threaded execution.
+        numThreads: 1,
     },
     // dataConfig: {
     //     titleKey: "label",
@@ -132,7 +140,7 @@ async function createMlEngine(engineConfig, progressCallback) {
         modelId,
         modelRevision,
         backend,
-        fallbackBackend,
+        numThreads,
     } = engineConfig;
     const initData = {
         featureId,
@@ -143,29 +151,10 @@ async function createMlEngine(engineConfig, progressCallback) {
         modelId,
         modelRevision,
         backend,
+        numThreads,
     };
 
-    try {
         return await createEngine(initData, progressCallback);
-    } catch (error) {
-        if (!fallbackBackend || fallbackBackend === backend) {
-            throw error;
-        }
-
-        try {
-            return await createEngine(
-                {
-                    ...initData,
-                    backend: fallbackBackend,
-                },
-                progressCallback
-            );
-        } catch (fallbackError) {
-            throw new Error(
-                `Failed to create ML engine with ${backend} (${error?.message || error}) or ${fallbackBackend} (${fallbackError?.message || fallbackError})`
-            );
-        }
-    }
 }
 
 this.ml = class extends ExtensionAPI {
