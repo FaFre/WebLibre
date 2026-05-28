@@ -24,6 +24,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/providers/app_state.dart';
@@ -84,6 +85,12 @@ const List<SettingsSectionDefinition> advancedSettingsSections = [
         subtitle: 'Stored favicons',
         keywords: ['favicons', 'cache'],
         child: _IconCacheTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'ML Downloads',
+        subtitle: 'Downloaded AI models and runtime files',
+        keywords: ['ai', 'ml', 'models', 'onnx', 'cache'],
+        child: _MlCacheTile(),
       ),
       SettingsEntryDefinition(
         title: 'Error Logs',
@@ -289,6 +296,92 @@ class _IconCacheTile extends HookConsumerWidget {
         },
         icon: const Icon(Icons.delete),
         label: const Text('Clear'),
+      ),
+    );
+  }
+}
+
+class _MlCacheTile extends HookWidget {
+  const _MlCacheTile();
+
+  Future<bool> _confirmClear(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Clear ML downloads?'),
+        content: const Text(
+          'This clears downloaded AI models and ONNX runtime files for this profile. '
+          'They will be downloaded again when needed. Restart WebLibre before retrying ML features.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
+
+    return result ?? false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isClearing = useState(false);
+
+    return CustomListTile(
+      title: 'ML Downloads',
+      subtitle: 'Downloaded AI models and runtime files',
+      prefix: Padding(
+        padding: const EdgeInsets.only(right: 16.0),
+        child: Icon(
+          Icons.memory,
+          size: 24,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+      ),
+      suffix: FilledButton.icon(
+        onPressed: isClearing.value
+            ? null
+            : () async {
+                if (!await _confirmClear(context)) {
+                  return;
+                }
+
+                isClearing.value = true;
+                try {
+                  await GeckoMlService().clearMlCache();
+
+                  if (context.mounted) {
+                    showInfoMessage(
+                      context,
+                      'ML downloads cleared. Restart WebLibre before retrying.',
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    showErrorMessage(
+                      context,
+                      'Failed to clear ML downloads: $e',
+                    );
+                  }
+                } finally {
+                  if (context.mounted) {
+                    isClearing.value = false;
+                  }
+                }
+              },
+        icon: isClearing.value
+            ? const SizedBox.square(
+                dimension: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.delete),
+        label: Text(isClearing.value ? 'Clearing' : 'Clear'),
       ),
     );
   }

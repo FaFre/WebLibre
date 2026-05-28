@@ -1848,6 +1848,8 @@ abstract class GeckoMlApi {
   String predictDocumentTopic(List<String> documents);
   @async
   List generateDocumentEmbeddings(List<String> documents);
+  @async
+  void clearMlCache();
 }
 
 @HostApi()

@@ -6,8 +6,11 @@
 
 const {
     createEngine,
+    EngineProcess,
     FEATURES,
 } = ChromeUtils.importESModule("chrome://global/content/ml/EngineProcess.sys.mjs");
+const { ModelHub } = ChromeUtils.importESModule("chrome://global/content/ml/ModelHub.sys.mjs");
+const { OPFS } = ChromeUtils.importESModule("chrome://global/content/ml/OPFS.sys.mjs");
 
 const ML_TASK_FEATURE_EXTRACTION = "feature-extraction";
 const ML_TASK_TEXT2TEXT = "text2text-generation";
@@ -154,7 +157,7 @@ async function createMlEngine(engineConfig, progressCallback) {
         numThreads,
     };
 
-        return await createEngine(initData, progressCallback);
+    return await createEngine(initData, progressCallback);
 }
 
 this.ml = class extends ExtensionAPI {
@@ -234,6 +237,16 @@ this.ml = class extends ExtensionAPI {
                         const generated = cutAtDuplicateWords((res[0]["generated_text"] || "").trim());
 
                         return generated;
+                    },
+                    async clearCache() {
+                        self.embeddingEngine = null;
+                        self.topicEngine = null;
+
+                        await EngineProcess.destroyMLEngine();
+                        await new ModelHub().purgeDatabase();
+                        await OPFS.remove("mlRuntimeFiles", { recursive: true });
+
+                        return true;
                     }
                 }
             }

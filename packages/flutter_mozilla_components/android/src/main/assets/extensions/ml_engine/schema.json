@@ -85,6 +85,13 @@
                         "description": "Array of document titles/content"
                     }
                 ]
+            },
+            {
+                "name": "clearCache",
+                "type": "function",
+                "description": "Clear downloaded ML models and runtime files",
+                "async": true,
+                "parameters": []
             }
         ]
     }

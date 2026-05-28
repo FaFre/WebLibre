@@ -56,6 +56,12 @@ port.onMessage.addListener(async (message) => {
                 sendJsonResultForRequest(requestId)(result);
                 break;
             }
+            case "clearMlCache": {
+                const result = await browser.experiments.ml.clearCache();
+
+                sendJsonResultForRequest(requestId)(result);
+                break;
+            }
             default:
                 throw new Error(`Unsupported ML action: ${message["action"]}`);
         }

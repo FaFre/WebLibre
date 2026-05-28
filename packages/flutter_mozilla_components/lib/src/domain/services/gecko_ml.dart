@@ -28,4 +28,8 @@ class GeckoMlService {
         .map((values) => (values! as List).cast<double>())
         .toList();
   }
+
+  Future<void> clearMlCache() {
+    return _apiInstance.clearMlCache();
+  }
 }

@@ -8315,6 +8315,7 @@ interface GeckoPrefApi {
 interface GeckoMlApi {
   fun predictDocumentTopic(documents: List<String>, callback: (Result<String>) -> Unit)
   fun generateDocumentEmbeddings(documents: List<String>, callback: (Result<List<Any?>>) -> Unit)
+  fun clearMlCache(callback: (Result<Unit>) -> Unit)
 
   companion object {
     /** The codec used by GeckoMlApi. */
@@ -8358,6 +8359,23 @@ interface GeckoMlApi {
               } else {
                 val data = result.getOrNull()
                 reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoMlApi.clearMlCache$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            api.clearMlCache{ result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                reply.reply(GeckoPigeonUtils.wrapResult(null))
               }
             }
           }

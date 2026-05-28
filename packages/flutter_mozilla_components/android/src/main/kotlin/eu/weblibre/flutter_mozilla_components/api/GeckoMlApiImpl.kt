@@ -131,4 +131,16 @@ class GeckoMlApiImpl(
         })
     }
 
+    override fun clearMlCache(callback: (Result<Unit>) -> Unit) {
+        MLEngineFeature.scheduleRequest("clearMlCache", JSONObject(), object : ResultConsumer<JSONObject> {
+            override fun success(result: JSONObject) {
+                callback(Result.success(Unit))
+            }
+
+            override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
+                callback(Result.failure(Exception("$errorCode $errorMessage $errorDetails")))
+            }
+        })
+    }
+
 }
