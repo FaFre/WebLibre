@@ -28,6 +28,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
@@ -98,47 +99,6 @@ class OpenSharedContent extends HookConsumerWidget {
       carriedIsolatedContextId != null ? TabType.isolated : defaultTabType,
     );
 
-    useEffect(() {
-      if (!containerSelectionTouched.value &&
-          containerMode == IntentContainerMode.useSelected) {
-        selectedContainer.value = globalSelectedContainer;
-      }
-      return null;
-    }, [globalSelectedContainer, containerMode]);
-
-    useEffect(() {
-      if (containerMode != IntentContainerMode.specific ||
-          contextId == null ||
-          isIsolatedContextId(contextId)) {
-        if (!containerSelectionTouched.value &&
-            containerMode == IntentContainerMode.unassigned) {
-          selectedContainer.value = null;
-        }
-        return null;
-      }
-
-      var cancelled = false;
-
-      unawaited(
-        Future(() async {
-          final container = await ref
-              .read(containerRepositoryProvider.notifier)
-              .getContainerByContextualIdentity(contextId!);
-          if (cancelled ||
-              !context.mounted ||
-              containerSelectionTouched.value) {
-            return;
-          }
-
-          selectedContainer.value = container;
-        }),
-      );
-
-      return () {
-        cancelled = true;
-      };
-    }, [containerMode, contextId]);
-
     TabMode resolveTabMode() {
       if (selectedTabType.value == TabType.isolated &&
           carriedIsolatedContextId != null) {
@@ -165,6 +125,69 @@ class OpenSharedContent extends HookConsumerWidget {
       debouncedUrl.value,
       eagerParsing: false,
     );
+
+    final selectionUrlKey =
+        parsedDebouncedUrl != null &&
+            parsedDebouncedUrl.hasAuthority &&
+            parsedDebouncedUrl.isHttpOrHttps
+        ? parsedDebouncedUrl.toString()
+        : null;
+
+    useEffect(() {
+      if (containerSelectionTouched.value) {
+        return null;
+      }
+
+      var cancelled = false;
+
+      unawaited(
+        Future(() async {
+          ContainerData? resolved;
+          final containerRepo = ref.read(
+            containerRepositoryProvider.notifier,
+          );
+
+          // Priority: explicit intent container (PWA shortcut) > site
+          // assignment for the URL > mode default.
+          if (containerMode == IntentContainerMode.specific &&
+              contextId != null &&
+              !isIsolatedContextId(contextId)) {
+            resolved = await containerRepo.getContainerByContextualIdentity(
+              contextId!,
+            );
+          } else {
+            if (selectionUrlKey != null) {
+              final siteAssignedId = await containerRepo
+                  .siteAssignedContainerId(Uri.parse(selectionUrlKey));
+              if (siteAssignedId != null) {
+                resolved = await containerRepo.getContainerData(
+                  siteAssignedId,
+                );
+              }
+            }
+
+            resolved ??= switch (containerMode) {
+              IntentContainerMode.useSelected => globalSelectedContainer,
+              IntentContainerMode.unassigned ||
+              IntentContainerMode.specific => null,
+            };
+          }
+
+          if (cancelled ||
+              !context.mounted ||
+              containerSelectionTouched.value) {
+            return;
+          }
+
+          selectedContainer.value = resolved;
+        }),
+      );
+
+      return () {
+        cancelled = true;
+      };
+    }, [containerMode, contextId, selectionUrlKey, globalSelectedContainer]);
+
     final hasExternalApp = useCachedFuture(
       // ignore: discarded_futures useFuture
       () => parsedDebouncedUrl != null
