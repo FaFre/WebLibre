@@ -387,9 +387,6 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
                     scope = viewLifecycleOwner.lifecycleScope,
                 ) { toolbarVisible ->
                     Logger.debug("Custom tab toolbar visibility: $toolbarVisible")
-                    if (toolbarVisible) {
-                        setupCustomTabToolbar(sessionId)
-                    }
                 },
                 owner = this,
                 view = view,
