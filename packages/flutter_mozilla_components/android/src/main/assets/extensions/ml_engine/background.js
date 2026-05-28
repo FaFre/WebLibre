@@ -15,10 +15,14 @@ function sendJsonResultForRequest(id) {
 function sendErrorForRequest(id) {
     return function (error) {
         console.error(error);
+        const message = error?.message || String(error);
         port.postMessage({
             "id": id,
             "status": "error",
-            "error": error?.message || String(error)
+            "error": message,
+            "errorName": error?.name,
+            "errorStack": error?.stack,
+            "errorString": String(error)
         });
     }
 }

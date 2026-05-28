@@ -114,10 +114,23 @@ object MLEngineFeature {
                         if (status == "success") {
                             handler?.success(message)
                         } else {
+                            val errorDetails = buildString {
+                                append(messageJSON.optString("error", "Unknown ML engine error"))
+                                messageJSON.optString("errorName").takeIf { it.isNotBlank() }?.let {
+                                    append("\nName: ").append(it)
+                                }
+                                messageJSON.optString("errorString").takeIf { it.isNotBlank() }?.let {
+                                    append("\nString: ").append(it)
+                                }
+                                messageJSON.optString("errorStack").takeIf { it.isNotBlank() }?.let {
+                                    append("\nStack: ").append(it)
+                                }
+                            }
+
                             handler?.error(
                                 "ML Engine",
                                 "Failed to perform operation",
-                                messageJSON.optString("error", "Unknown ML engine error")
+                                errorDetails
                             )
                         }
                     }
