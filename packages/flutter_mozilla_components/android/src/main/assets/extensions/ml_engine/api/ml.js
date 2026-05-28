@@ -4,7 +4,10 @@
 
 "use strict";
 
-const { createEngine } = ChromeUtils.importESModule("chrome://global/content/ml/EngineProcess.sys.mjs");
+const {
+    createEngine,
+    FEATURES,
+} = ChromeUtils.importESModule("chrome://global/content/ml/EngineProcess.sys.mjs");
 
 const ML_TASK_FEATURE_EXTRACTION = "feature-extraction";
 const ML_TASK_TEXT2TEXT = "text2text-generation";
@@ -15,7 +18,8 @@ const SMART_TAB_GROUPING_CONFIG = {
         timeoutMS: 2 * 60 * 1000, // 2 minutes
         taskName: ML_TASK_FEATURE_EXTRACTION,
         featureId: "smart-tab-embedding",
-        backend: "onnx",
+        engineId: FEATURES["smart-tab-embedding"].engineId,
+        backend: "onnx-native",
         fallbackBackend: "onnx",
     },
     topicGeneration: {
@@ -23,7 +27,8 @@ const SMART_TAB_GROUPING_CONFIG = {
         timeoutMS: 2 * 60 * 1000, // 2 minutes
         taskName: ML_TASK_TEXT2TEXT,
         featureId: "smart-tab-topic",
-        backend: "onnx",
+        engineId: FEATURES["smart-tab-topic"].engineId,
+        backend: "onnx-native",
         fallbackBackend: "onnx",
     },
     // dataConfig: {
@@ -117,6 +122,52 @@ function createProgressCallback(modelType, progressEmitter) {
     };
 }
 
+async function createMlEngine(engineConfig, progressCallback) {
+    const {
+        featureId,
+        engineId,
+        dtype,
+        taskName,
+        timeoutMS,
+        modelId,
+        modelRevision,
+        backend,
+        fallbackBackend,
+    } = engineConfig;
+    const initData = {
+        featureId,
+        engineId,
+        dtype,
+        taskName,
+        timeoutMS,
+        modelId,
+        modelRevision,
+        backend,
+    };
+
+    try {
+        return await createEngine(initData, progressCallback);
+    } catch (error) {
+        if (!fallbackBackend || fallbackBackend === backend) {
+            throw error;
+        }
+
+        try {
+            return await createEngine(
+                {
+                    ...initData,
+                    backend: fallbackBackend,
+                },
+                progressCallback
+            );
+        } catch (fallbackError) {
+            throw new Error(
+                `Failed to create ML engine with ${backend} (${error?.message || error}) or ${fallbackBackend} (${fallbackError?.message || fallbackError})`
+            );
+        }
+    }
+}
+
 this.ml = class extends ExtensionAPI {
     constructor(extension) {
         super(extension);
@@ -151,7 +202,7 @@ this.ml = class extends ExtensionAPI {
                         };
 
                         if (isEngineClosed(self.embeddingEngine)) {
-                            self.embeddingEngine = await createEngine(
+                            self.embeddingEngine = await createMlEngine(
                                 SMART_TAB_GROUPING_CONFIG.embedding,
                                 createProgressCallback("Embedding Model", self.progressEmitter)
                             );
@@ -168,30 +219,8 @@ this.ml = class extends ExtensionAPI {
                     },
                     async predictTopic(keywords, documents) {
                         if (isEngineClosed(self.topicEngine)) {
-                            const {
-                                featureId,
-                                engineId,
-                                dtype,
-                                taskName,
-                                timeoutMS,
-                                modelId,
-                                modelRevision,
-                                backend,
-                            } = SMART_TAB_GROUPING_CONFIG.topicGeneration;
-
-                            let initData = {
-                                featureId,
-                                engineId,
-                                dtype,
-                                taskName,
-                                timeoutMS,
-                                modelId,
-                                modelRevision,
-                                backend,
-                            };
-
-                            self.topicEngine = await createEngine(
-                                initData,
+                            self.topicEngine = await createMlEngine(
+                                SMART_TAB_GROUPING_CONFIG.topicGeneration,
                                 createProgressCallback("Topic Generation Model", self.progressEmitter)
                             );
                         }

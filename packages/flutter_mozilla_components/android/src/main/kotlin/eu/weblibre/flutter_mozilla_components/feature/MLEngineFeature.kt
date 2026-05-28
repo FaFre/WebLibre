@@ -7,7 +7,11 @@
 package eu.weblibre.flutter_mozilla_components.feature
 
 import androidx.annotation.VisibleForTesting
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -26,10 +30,12 @@ object MLEngineFeature {
     private const val ML_ENGINE_REPORTER_EXTENSION_ID = "ml-engine@weblibre.eu"
     private const val ML_ENGINE_REPORTER_EXTENSION_URL = "resource://android/assets/extensions/ml_engine/"
     private const val ML_ENGINE_REPORTER_MESSAGING_ID = "mlEngine"
+    private const val REQUEST_TIMEOUT_MS = 130_000L
 
     private var nextRequestId: Int = 0
     private val requestHandlers = HashMap<Int, ResultConsumer<JSONObject>>()
     private val mutex = Mutex()
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     // Progress callback for ML operations
     var progressCallback: ((JSONObject) -> Unit)? = null
@@ -44,21 +50,46 @@ object MLEngineFeature {
 
     fun scheduleRequest(command: String, args: Any, callback: ResultConsumer<JSONObject>) {
         val message = JSONObject()
-        message.put("action", command);
+        message.put("action", command)
         message.put("args", args)
 
-        runBlocking {
+        val requestId = runBlocking {
             withContext(Dispatchers.Default) {
                 mutex.withLock {
-                    message.put("id", nextRequestId)
+                    val requestId = nextRequestId
+                    message.put("id", requestId)
 
-                    requestHandlers[nextRequestId] = callback
+                    requestHandlers[requestId] = callback
 
                     nextRequestId += 1
 
-                    extensionController.sendBackgroundMessage(message)
+                    try {
+                        extensionController.sendBackgroundMessage(message)
+                    } catch (throwable: Throwable) {
+                        requestHandlers.remove(requestId)
+                        callback.error(
+                            "ML Engine",
+                            "Failed to schedule request",
+                            throwable.message,
+                        )
+                    }
+
+                    requestId
                 }
             }
+        }
+
+        scope.launch {
+            delay(REQUEST_TIMEOUT_MS)
+            val handler = mutex.withLock {
+                requestHandlers.remove(requestId)
+            }
+
+            handler?.error(
+                "ML Engine",
+                "Request timed out",
+                "No response received for $command",
+            )
         }
     }
 
@@ -66,7 +97,7 @@ object MLEngineFeature {
         override fun onPortMessage(message: Any, port: Port) {
             runBlocking {
                 withContext(Dispatchers.Default) {
-                    val messageJSON = message as JSONObject;
+                    val messageJSON = message as JSONObject
 
                     // Check if this is a progress message
                     if (messageJSON.has("type") && messageJSON.getString("type") == "mlProgress") {
@@ -86,7 +117,7 @@ object MLEngineFeature {
                             handler?.error(
                                 "ML Engine",
                                 "Failed to perform operation",
-                                message.getString("error")
+                                messageJSON.optString("error", "Unknown ML engine error")
                             )
                         }
                     }

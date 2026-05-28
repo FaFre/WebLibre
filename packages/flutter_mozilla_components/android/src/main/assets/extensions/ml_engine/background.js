@@ -18,7 +18,7 @@ function sendErrorForRequest(id) {
         port.postMessage({
             "id": id,
             "status": "error",
-            "error": error
+            "error": error?.message || String(error)
         });
     }
 }
@@ -31,27 +31,31 @@ browser.experiments.ml.onProgress.addListener((progressData) => {
 });
 
 port.onMessage.addListener(async (message) => {
-    let requestId = message["id"]
-    switch (message["action"]) {
-        case "predictDocumentTopic": {
-            const documents = message["args"];
-            const keywords = (documents.length > 1)
-                ? await browser.experiments.nlp.extractKeywords([documents.slice(0, 3).join(" ")])
-                : [[]];
+    const requestId = message["id"];
 
-            browser.experiments.ml.predictTopic(keywords[0], documents)
-                .then(sendJsonResultForRequest(requestId))
-                .catch(sendErrorForRequest(requestId));
+    try {
+        switch (message["action"]) {
+            case "predictDocumentTopic": {
+                const documents = message["args"];
+                const keywords = (documents.length > 1)
+                    ? await browser.experiments.nlp.extractKeywords([documents.slice(0, 3).join(" ")])
+                    : [[]];
+                const result = await browser.experiments.ml.predictTopic(keywords[0], documents);
 
-            break;
+                sendJsonResultForRequest(requestId)(result);
+                break;
+            }
+            case "generateDocumentEmbeddings": {
+                const documents = message["args"];
+                const result = await browser.experiments.ml.generateEmbeddings(documents);
+
+                sendJsonResultForRequest(requestId)(result);
+                break;
+            }
+            default:
+                throw new Error(`Unsupported ML action: ${message["action"]}`);
         }
-        case "generateDocumentEmbeddings": {
-            const documents = message["args"];
-            await browser.experiments.ml.generateEmbeddings(documents)
-                .then(sendJsonResultForRequest(requestId))
-                .catch(sendErrorForRequest(requestId));
-
-            break;
-        }
+    } catch (error) {
+        sendErrorForRequest(requestId)(error);
     }
 });

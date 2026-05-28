@@ -202,6 +202,11 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
                   .toList(),
         );
 
+        final idsByTitle = <String, List<String>>{};
+        for (final MapEntry(:key, :value) in unassignedDocumentsInput.entries) {
+          (idsByTitle[value] ??= []).add(key);
+        }
+
         final clusterResult = await clusters.mapNotNull(
           (cluster) => Future.wait(
             cluster.map((clusterTitles) async {
@@ -224,11 +229,7 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
                   },
                 ),
                 tabIds: originalTitles
-                    .map(
-                      (title) => unassignedDocumentsInput.entries
-                          .firstWhere((entry) => entry.value == title)
-                          .key,
-                    )
+                    .expand((title) => idsByTitle[title] ?? const <String>[])
                     .toList(),
               );
             }),
@@ -266,7 +267,8 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
           await _initialLoadComplete.future;
 
           final embeddings = await Result.fromAsync(
-            () async => await _service.generateDocumentEmbeddings(documents),
+            () async =>
+                await _service.generateDocumentEmbeddings(embeddingsToGenerate),
           );
 
           return embeddings;
@@ -276,8 +278,25 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
           return Result.failure(generatedEmbeddings.error!);
         }
 
+        final generated = generatedEmbeddings.value;
+        if (generated.length != embeddingsToGenerate.length) {
+          return Result.failure(
+            ErrorMessage(
+              source: 'Document Embeddings',
+              message: 'Unexpected embedding count',
+              details: {
+                'expected': embeddingsToGenerate.length,
+                'actual': generated.length,
+              },
+            ),
+          );
+        }
+
         for (var i = 0; i < embeddingsToGenerate.length; i++) {
-          embeddings[embeddingsToGenerate[i]] = generatedEmbeddings.value[i];
+          final embedding = generated[i];
+          final document = embeddingsToGenerate[i];
+          embeddings[document] = embedding;
+          _embeddingCache.set(document, embedding);
         }
       }
 
@@ -288,6 +307,15 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
     } on TimeoutException {
       return Result.failure(
         const ErrorMessage(source: 'Document Embeddings', message: 'Timeout'),
+      );
+    } catch (e, s) {
+      return Result.failure(
+        ErrorMessage(
+          source: 'Document Embeddings',
+          message: e.toString(),
+          details: e,
+          stackTrace: s,
+        ),
       );
     }
   }
@@ -456,15 +484,18 @@ Future<List<String>?> containerTabSuggestions(
                 .toList(),
           );
 
-      return suggestedTitles.mapNotNull(
-        (titles) => titles
-            .map(
-              (title) => unassignedTitles.value
-                  .firstWhere((tab) => tab.$2 == title)
-                  .$1,
-            )
-            .toList(),
-      );
+      final idsByTitle = <String, List<String>>{};
+      for (final (id, title) in unassignedTitles.value) {
+        (idsByTitle[title] ??= []).add(id);
+      }
+
+      return suggestedTitles.mapNotNull((titles) {
+        final tabIds = titles
+            .expand((title) => idsByTitle[title] ?? const <String>[])
+            .toList();
+
+        return tabIds.isEmpty ? null : tabIds;
+      });
     }
   }
 
