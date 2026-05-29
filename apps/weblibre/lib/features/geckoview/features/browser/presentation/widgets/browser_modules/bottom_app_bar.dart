@@ -501,6 +501,57 @@ class QuickTabSwitcherItem with FastEquatable {
     this.depth = 0,
   });
 
+  /// Builds a switcher entry for an open tab. [sandboxSourceUri] is the
+  /// canonical source URL when the tab is a sandbox capture (otherwise null),
+  /// so the bar shows the real site instead of the loopback capture URL.
+  factory QuickTabSwitcherItem.tab(
+    TabStateWithContainer state, {
+    required String? selectedTabId,
+    required Set<String> pinnedTabIds,
+    required Map<String, int> tabDepthById,
+    required Uri? sandboxSourceUri,
+  }) {
+    final (tab, container) = state;
+
+    return QuickTabSwitcherItem(
+      color: container?.color,
+      useCustomColor: container?.metadata.useCustomColor ?? false,
+      id: tab.id,
+      isActive: tab.id == selectedTabId,
+      title: sandboxSourceUri != null && tab.title.isEmpty
+          ? sandboxSourceUri.authority
+          : tab.titleOrAuthority,
+      tabMode: tab.tabMode,
+      isHistory: false,
+      isPinned: pinnedTabIds.contains(tab.id),
+      isSandbox: sandboxSourceUri != null,
+      depth: tabDepthById[tab.id] ?? 0,
+      url: sandboxSourceUri ?? tab.url,
+      avatar: TabIcon(tabState: tab, iconSize: 20),
+    );
+  }
+
+  /// Builds a switcher entry for a history suggestion (shown only when there
+  /// are no open tabs in the active mode).
+  factory QuickTabSwitcherItem.history({
+    required String url,
+    required String? title,
+  }) {
+    final parsedUrl = Uri.parse(url);
+
+    return QuickTabSwitcherItem(
+      color: null,
+      id: url,
+      isActive: false,
+      title: title ?? parsedUrl.authority,
+      tabMode: TabMode.regular,
+      isHistory: true,
+      isPinned: false,
+      url: parsedUrl,
+      avatar: UrlIcon([parsedUrl], iconSize: 20),
+    );
+  }
+
   @override
   List<Object?> get hashParameters => [
     color,
@@ -587,45 +638,25 @@ class QuickTabSwitcher extends HookConsumerWidget {
     );
     final reorderEnabled =
         effectiveMode == QuickTabSwitcherMode.containerTabs && canManualReorder;
-    final tabItems = tabStates.value.map<QuickTabSwitcherItem>((state) {
-      final sandboxSourceUri = parseSandboxSource(
-        sandboxCaptureMap[state.$1.id],
-      );
-      final displayUrl = sandboxSourceUri ?? state.$1.url;
-      final displayTitle = sandboxSourceUri != null && state.$1.title.isEmpty
-          ? sandboxSourceUri.authority
-          : state.$1.titleOrAuthority;
-      return QuickTabSwitcherItem(
-        color: state.$2?.color,
-        useCustomColor: state.$2?.metadata.useCustomColor ?? false,
-        id: state.$1.id,
-        isActive: state.$1.id == selectedTabId,
-        title: displayTitle,
-        tabMode: state.$1.tabMode,
-        isHistory: false,
-        isPinned: pinnedTabIds.contains(state.$1.id),
-        isSandbox: sandboxSourceUri != null,
-        depth: tabDepthById[state.$1.id] ?? 0,
-        url: displayUrl,
-        avatar: TabIcon(tabState: state.$1, iconSize: 20),
-      );
-    }).toList();
-    final historyItems = (historySuggestions ?? []).map<QuickTabSwitcherItem>((
-      state,
-    ) {
-      final url = Uri.parse(state.url);
-      return QuickTabSwitcherItem(
-        color: null,
-        id: state.url,
-        isActive: false,
-        title: state.title ?? url.authority,
-        tabMode: TabMode.regular,
-        isHistory: true,
-        isPinned: false,
-        url: url,
-        avatar: UrlIcon([url], iconSize: 20),
-      );
-    }).toList();
+    final tabItems = tabStates.value
+        .map(
+          (state) => QuickTabSwitcherItem.tab(
+            state,
+            selectedTabId: selectedTabId,
+            pinnedTabIds: pinnedTabIds,
+            tabDepthById: tabDepthById,
+            sandboxSourceUri: parseSandboxSource(
+              sandboxCaptureMap[state.$1.id],
+            ),
+          ),
+        )
+        .toList();
+    final historyItems = (historySuggestions ?? [])
+        .map(
+          (visit) =>
+              QuickTabSwitcherItem.history(url: visit.url, title: visit.title),
+        )
+        .toList();
     final availableItems = [...tabItems, ...historyItems];
 
     final activeItem = availableItems.isEmpty

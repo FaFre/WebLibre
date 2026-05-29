@@ -145,6 +145,11 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
   final GlobalKey? activeItemKey;
   final double? cacheExtent;
 
+  /// Key applied to the underlying scroll view. Supply a [PageStorageKey] to
+  /// preserve the scroll offset across rebuilds/remounts (e.g. when a host
+  /// widget is torn down and recreated by a bottom sheet open/close).
+  final Key? scrollKey;
+
   final K Function(S item) itemId;
   final Widget Function(T item) itemLabel;
   final Widget? Function(T item)? itemAvatar;
@@ -187,6 +192,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
     this.scrollController,
     this.activeItemKey,
     this.cacheExtent = 0,
+    this.scrollKey,
     super.key,
   });
 
@@ -296,6 +302,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
       builder: (context, controller) {
         if (onReorder == null) {
           return ListView.builder(
+            key: scrollKey,
             controller: controller,
             scrollCacheExtent: cacheExtent.mapNotNull(
               (extent) => ScrollCacheExtent.pixels(extent),

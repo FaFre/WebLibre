@@ -1142,12 +1142,7 @@ class TabViewHeader extends HookConsumerWidget {
                   ),
                 ),
               const Divider(),
-              if (showContainerUi)
-                Consumer(
-                  builder: (context, ref, child) {
-                    return _TabFilters(tabsViewMode: tabsViewMode);
-                  },
-                ),
+              if (showContainerUi) _TabFilters(tabsViewMode: tabsViewMode),
               const SizedBox(height: 8),
             ],
           ),

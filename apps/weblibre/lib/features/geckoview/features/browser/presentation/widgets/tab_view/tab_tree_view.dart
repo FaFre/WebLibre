@@ -192,138 +192,9 @@ class ViewTabTreesWidget extends HookConsumerWidget {
           children: [
             TabViewHeader(onClose: onClose, tabsViewMode: TabsViewMode.tree),
             Expanded(
-              child: HookConsumer(
-                builder: (context, ref, child) {
-                  final screenWidth = MediaQuery.of(context).size.width;
-                  final disableAnimations = MediaQuery.disableAnimationsOf(
-                    context,
-                  );
-
-                  final containerId = ref.watch(selectedContainerProvider);
-
-                  final filteredTabEntities = ref.watch(
-                    seamlessFilteredTabEntitiesProvider(
-                      searchPartition: TabSearchPartition.preview,
-                      // ignore: document_ignores using fast equatable
-                      // ignore: provider_parameters
-                      containerFilter: ContainerFilterById(
-                        containerId: containerId,
-                      ),
-                      groupTrees: true,
-                    ),
-                  );
-
-                  final activeTab = ref.watch(selectedTabProvider);
-
-                  final crossAxisCount = useMemoized(() {
-                    final calculatedCount = calculateCrossAxisItemCount(
-                      screenWidth: screenWidth,
-                      horizontalPadding: 4.0,
-                      crossAxisSpacing: 8.0,
-                    );
-
-                    return math.max(
-                      math.min(
-                        calculatedCount,
-                        filteredTabEntities.value.length,
-                      ),
-                      2,
-                    );
-                  }, [screenWidth, filteredTabEntities.value.length]);
-
-                  final itemSize = useMemoized(
-                    () => calculateItemSize(
-                      screenWidth: screenWidth,
-                      childAspectRatio: 0.75,
-                      horizontalPadding: 4.0,
-                      crossAxisSpacing: 8.0,
-                      crossAxisCount: crossAxisCount,
-                      mainAxisSpacing: 8.0,
-                    ),
-                    [screenWidth, crossAxisCount],
-                  );
-
-                  useEffect(() {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (!scrollController.hasClients || activeTab == null) {
-                        return;
-                      }
-
-                      final index = filteredTabEntities.value.indexWhere(
-                        (entity) => entity.tabId == activeTab,
-                      );
-
-                      if (index < 0) return;
-
-                      final row = index ~/ 2;
-                      final tabStart = row * itemSize.height;
-                      final viewportDimension =
-                          scrollController.position.viewportDimension;
-
-                      final targetOffset =
-                          (tabStart -
-                                  viewportDimension / 2 +
-                                  itemSize.height / 2)
-                              .clamp(
-                                0.0,
-                                scrollController.position.maxScrollExtent,
-                              );
-
-                      if (targetOffset == scrollController.offset) return;
-
-                      if (disableAnimations) {
-                        scrollController.jumpTo(targetOffset);
-                      } else {
-                        unawaited(
-                          scrollController.animateTo(
-                            targetOffset,
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeInOut,
-                          ),
-                        );
-                      }
-                    });
-
-                    return null;
-                  }, [filteredTabEntities, activeTab]);
-
-                  final tabs = useMemoized(() {
-                    return filteredTabEntities.value
-                        .whereType<TabTreeEntity>()
-                        .map((entity) {
-                          return _TabTreePreview(
-                            entity: entity,
-                            activeTabId: activeTab,
-                            onClose: onClose,
-                            stackPadding: const Offset(8, 8),
-                          );
-                        })
-                        .toList();
-                  }, [filteredTabEntities, activeTab]);
-
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    child: FadingScroll(
-                      controller: scrollController,
-                      fadingSize: 5,
-                      builder: (context, controller) {
-                        return GridView.builder(
-                          controller: controller,
-                          padding: const EdgeInsets.only(bottom: 56),
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            //Sync values for itemHeight calculation _calculateItemHeight
-                            childAspectRatio: 0.75,
-                            mainAxisSpacing: 8.0,
-                            crossAxisSpacing: 8.0,
-                            crossAxisCount: crossAxisCount,
-                          ),
-                          itemCount: tabs.length,
-                          itemBuilder: (context, index) => tabs[index],
-                        );
-                      },
-                    ),
-                  );
-                },
+              child: _TabTreesGrid(
+                scrollController: scrollController,
+                onClose: onClose,
               ),
             ),
           ],
@@ -350,6 +221,143 @@ class ViewTabTreesWidget extends HookConsumerWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// Scrollable grid of tab-tree previews.
+///
+/// Extracted into its own [HookConsumerWidget] (rather than an inline
+/// `HookConsumer`) so the heavy `seamlessFilteredTabEntitiesProvider` watch
+/// and the layout/scroll-sync hook state live in a stable, dedicated element
+/// instead of an anonymous builder closure. This keeps the surrounding
+/// [TabViewHeader] and FAB out of this subtree's rebuild scope.
+class _TabTreesGrid extends HookConsumerWidget {
+  final ScrollController scrollController;
+  final VoidCallback onClose;
+
+  const _TabTreesGrid({required this.scrollController, required this.onClose});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
+
+    final containerId = ref.watch(selectedContainerProvider);
+
+    final filteredTabEntities = ref.watch(
+      seamlessFilteredTabEntitiesProvider(
+        searchPartition: TabSearchPartition.preview,
+        // ignore: document_ignores using fast equatable
+        // ignore: provider_parameters
+        containerFilter: ContainerFilterById(containerId: containerId),
+        groupTrees: true,
+      ),
+    );
+
+    final activeTab = ref.watch(selectedTabProvider);
+
+    final crossAxisCount = useMemoized(() {
+      final calculatedCount = calculateCrossAxisItemCount(
+        screenWidth: screenWidth,
+        horizontalPadding: 4.0,
+        crossAxisSpacing: 8.0,
+      );
+
+      return math.max(
+        math.min(calculatedCount, filteredTabEntities.value.length),
+        2,
+      );
+    }, [screenWidth, filteredTabEntities.value.length]);
+
+    final itemSize = useMemoized(
+      () => calculateItemSize(
+        screenWidth: screenWidth,
+        childAspectRatio: 0.75,
+        horizontalPadding: 4.0,
+        crossAxisSpacing: 8.0,
+        crossAxisCount: crossAxisCount,
+        mainAxisSpacing: 8.0,
+      ),
+      [screenWidth, crossAxisCount],
+    );
+
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!scrollController.hasClients || activeTab == null) {
+          return;
+        }
+
+        final index = filteredTabEntities.value.indexWhere(
+          (entity) => entity.tabId == activeTab,
+        );
+
+        if (index < 0) return;
+
+        final row = index ~/ 2;
+        final tabStart = row * itemSize.height;
+        final viewportDimension =
+            scrollController.position.viewportDimension;
+
+        final targetOffset =
+            (tabStart - viewportDimension / 2 + itemSize.height / 2).clamp(
+              0.0,
+              scrollController.position.maxScrollExtent,
+            );
+
+        if (targetOffset == scrollController.offset) return;
+
+        if (disableAnimations) {
+          scrollController.jumpTo(targetOffset);
+        } else {
+          unawaited(
+            scrollController.animateTo(
+              targetOffset,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOut,
+            ),
+          );
+        }
+      });
+
+      return null;
+    }, [filteredTabEntities, activeTab]);
+
+    final tabs = useMemoized(() {
+      return filteredTabEntities.value
+          .whereType<TabTreeEntity>()
+          .map((entity) {
+            return _TabTreePreview(
+              entity: entity,
+              activeTabId: activeTab,
+              onClose: onClose,
+              stackPadding: const Offset(8, 8),
+            );
+          })
+          .toList();
+    }, [filteredTabEntities, activeTab]);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: FadingScroll(
+        controller: scrollController,
+        fadingSize: 5,
+        builder: (context, controller) {
+          return GridView.builder(
+            controller: controller,
+            padding: const EdgeInsets.only(bottom: 56),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              //Sync values for itemHeight calculation _calculateItemHeight
+              childAspectRatio: 0.75,
+              mainAxisSpacing: 8.0,
+              crossAxisSpacing: 8.0,
+              crossAxisCount: crossAxisCount,
+            ),
+            itemCount: tabs.length,
+            itemBuilder: (context, index) => tabs[index],
+          );
+        },
+      ),
     );
   }
 }

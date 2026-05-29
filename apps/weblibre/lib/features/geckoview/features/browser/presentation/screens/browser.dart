@@ -950,7 +950,11 @@ class BrowserScreen extends HookConsumerWidget {
                         ),
                       )
                     : Consumer(
-                        builder: (context, ref, _) {
+                        // _TabBar is passed via `child` so it is built once and
+                        // reused across toolbar show/hide toggles; only the
+                        // `visible` flag fed to _AnimatedToolbar depends on the
+                        // watched provider.
+                        builder: (context, ref, child) {
                           final toolbarState = ref.watch(
                             toolbarVisibilityControllerProvider(selectedTabId),
                           );
@@ -961,21 +965,21 @@ class BrowserScreen extends HookConsumerWidget {
                           return _AnimatedToolbar(
                             position: TabBarPosition.bottom,
                             visible: visible,
-                            child: _TabBar(
-                              tabBarPosition: TabBarPosition.bottom,
-                              showMainToolbar:
-                                  tabBarPosition == TabBarPosition.bottom,
-                              showContextualToolbar: showContextualToolbar,
-                              showQuickTabSwitcherBar:
-                                  displayQuickTabSwitcherBar,
-                              isSmallWebMode: false,
-                              pointerMoveEvents:
-                                  tabBarPosition == TabBarPosition.bottom
-                                  ? pointerMoveEventsController.stream
-                                  : null,
-                            ),
+                            child: child!,
                           );
                         },
+                        child: _TabBar(
+                          tabBarPosition: TabBarPosition.bottom,
+                          showMainToolbar:
+                              tabBarPosition == TabBarPosition.bottom,
+                          showContextualToolbar: showContextualToolbar,
+                          showQuickTabSwitcherBar: displayQuickTabSwitcherBar,
+                          isSmallWebMode: false,
+                          pointerMoveEvents:
+                              tabBarPosition == TabBarPosition.bottom
+                              ? pointerMoveEventsController.stream
+                              : null,
+                        ),
                       ),
               ),
 
@@ -986,7 +990,11 @@ class BrowserScreen extends HookConsumerWidget {
                   right: 0,
                   top: 0,
                   child: Consumer(
-                    builder: (context, ref, _) {
+                    // _TabBar is passed via `child` so it is built once and
+                    // reused across toolbar show/hide toggles; only the
+                    // `visible` flag fed to _AnimatedToolbar depends on the
+                    // watched provider.
+                    builder: (context, ref, child) {
                       final toolbarState = ref.watch(
                         toolbarVisibilityControllerProvider(selectedTabId),
                       );
@@ -997,19 +1005,20 @@ class BrowserScreen extends HookConsumerWidget {
                       return _AnimatedToolbar(
                         position: TabBarPosition.top,
                         visible: visible,
-                        child: _TabBar(
-                          tabBarPosition: TabBarPosition.top,
-                          showMainToolbar: true,
-                          showContextualToolbar: showContextualToolbar,
-                          showQuickTabSwitcherBar: displayQuickTabSwitcherBar,
-                          isSmallWebMode: isSmallWebActive,
-                          enableGestures: !isSmallWebActive,
-                          pointerMoveEvents: isSmallWebActive
-                              ? null
-                              : pointerMoveEventsController.stream,
-                        ),
+                        child: child!,
                       );
                     },
+                    child: _TabBar(
+                      tabBarPosition: TabBarPosition.top,
+                      showMainToolbar: true,
+                      showContextualToolbar: showContextualToolbar,
+                      showQuickTabSwitcherBar: displayQuickTabSwitcherBar,
+                      isSmallWebMode: isSmallWebActive,
+                      enableGestures: !isSmallWebActive,
+                      pointerMoveEvents: isSmallWebActive
+                          ? null
+                          : pointerMoveEventsController.stream,
+                    ),
                   ),
                 ),
 

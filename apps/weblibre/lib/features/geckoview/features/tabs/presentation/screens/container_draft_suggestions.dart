@@ -52,6 +52,24 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
         ? selectedContainerTabs.value[selectedContainer.value!]
         : null;
 
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    final crossAxisCount = useMemoized(() {
+      final calculatedCount = calculateCrossAxisItemCount(
+        screenWidth: screenWidth,
+        horizontalPadding: 4.0,
+        crossAxisSpacing: 8.0,
+      );
+
+      return math.max(
+        math.min(
+          calculatedCount,
+          selectedContainer.value?.tabIds.length ?? 0,
+        ),
+        2,
+      );
+    }, [screenWidth, selectedContainer.value?.tabIds.length]);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Draft Containers')),
       body: SafeArea(
@@ -60,24 +78,6 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
           child: suggestionsAsync.when(
             skipLoadingOnReload: true,
             data: (suggestions) {
-              final screenWidth = MediaQuery.of(context).size.width;
-
-              final crossAxisCount = useMemoized(() {
-                final calculatedCount = calculateCrossAxisItemCount(
-                  screenWidth: screenWidth,
-                  horizontalPadding: 4.0,
-                  crossAxisSpacing: 8.0,
-                );
-
-                return math.max(
-                  math.min(
-                    calculatedCount,
-                    selectedContainer.value?.tabIds.length ?? 0,
-                  ),
-                  2,
-                );
-              }, [screenWidth, selectedContainer.value?.tabIds.length]);
-
               return Column(
                 children: [
                   SizedBox(
@@ -88,35 +88,10 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
                       itemId: (container) => container,
                       itemAvatar: (container) =>
                           const Icon(MdiIcons.creation, size: 20),
-                      itemLabel: (container) => HookConsumer(
-                        builder: (context, ref, child) {
-                          final items = useListenableSelector(
-                            selectedContainerTabs,
-                            () => selectedContainerTabs.value[container],
-                          );
-
-                          final topic = items.isNotEmpty
-                              ? ref.watch(
-                                  tabsTopicProvider(EquatableValue(items!)),
-                                )
-                              : AsyncValue.data(container.topic);
-
-                          return topic.when(
-                            skipLoadingOnReload: true,
-                            data: (topic) => Text(topic ?? 'Untitled'),
-                            error: (error, stackTrace) {
-                              logger.e(
-                                'Failed predicting selected tabs topic',
-                                error: error,
-                                stackTrace: stackTrace,
-                              );
-
-                              return Text(container.topic ?? 'Untitled');
-                            },
-                            loading: () =>
-                                const Skeletonizer(child: Text('Untitled')),
-                          );
-                        },
+                      itemLabel: (container) => _SuggestedContainerLabel(
+                        key: ValueKey(container),
+                        container: container,
+                        selectedContainerTabs: selectedContainerTabs,
                       ),
                       itemBadgeCount: (container) => container.tabIds.length,
                       availableItems: suggestions!,
@@ -234,6 +209,51 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
               },
             )
           : null,
+    );
+  }
+}
+
+/// Label for a single suggested-container chip.
+///
+/// Extracted into its own [HookConsumerWidget] (rather than an inline
+/// `HookConsumer` in `itemLabel`) so its hook state is bound to a stable
+/// element identity per container, and the heavy `tabsTopicProvider` watch
+/// is scoped to just this chip.
+class _SuggestedContainerLabel extends HookConsumerWidget {
+  final SuggestedContainer container;
+  final ValueNotifier<Map<SuggestedContainer, Set<String>>>
+  selectedContainerTabs;
+
+  const _SuggestedContainerLabel({
+    required this.container,
+    required this.selectedContainerTabs,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final items = useListenableSelector(
+      selectedContainerTabs,
+      () => selectedContainerTabs.value[container],
+    );
+
+    final topic = items.isNotEmpty
+        ? ref.watch(tabsTopicProvider(EquatableValue(items!)))
+        : AsyncValue.data(container.topic);
+
+    return topic.when(
+      skipLoadingOnReload: true,
+      data: (topic) => Text(topic ?? 'Untitled'),
+      error: (error, stackTrace) {
+        logger.e(
+          'Failed predicting selected tabs topic',
+          error: error,
+          stackTrace: stackTrace,
+        );
+
+        return Text(container.topic ?? 'Untitled');
+      },
+      loading: () => const Skeletonizer(child: Text('Untitled')),
     );
   }
 }
