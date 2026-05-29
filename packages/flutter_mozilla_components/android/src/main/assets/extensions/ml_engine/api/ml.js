@@ -25,9 +25,6 @@ const SMART_TAB_GROUPING_CONFIG = {
         // GeckoView's Android build has no native InferenceSession, so the
         // onnx-native backend always fails. Use the WASM onnx backend directly.
         backend: "onnx",
-        // The threaded WASM runtime can't spawn worker threads in the GeckoView
-        // ML worker context, so force single-threaded execution.
-        numThreads: 1,
     },
     topicGeneration: {
         dtype: "q8",
@@ -38,9 +35,6 @@ const SMART_TAB_GROUPING_CONFIG = {
         // GeckoView's Android build has no native InferenceSession, so the
         // onnx-native backend always fails. Use the WASM onnx backend directly.
         backend: "onnx",
-        // The threaded WASM runtime can't spawn worker threads in the GeckoView
-        // ML worker context, so force single-threaded execution.
-        numThreads: 1,
     },
     // dataConfig: {
     //     titleKey: "label",
@@ -143,7 +137,6 @@ async function createMlEngine(engineConfig, progressCallback) {
         modelId,
         modelRevision,
         backend,
-        numThreads,
     } = engineConfig;
     const initData = {
         featureId,
@@ -154,7 +147,6 @@ async function createMlEngine(engineConfig, progressCallback) {
         modelId,
         modelRevision,
         backend,
-        numThreads,
     };
 
     return await createEngine(initData, progressCallback);
@@ -239,12 +231,42 @@ this.ml = class extends ExtensionAPI {
                         return generated;
                     },
                     async clearCache() {
+                        // Always drop our cached engine references, even if a
+                        // later step fails, so the next request rebuilds them.
                         self.embeddingEngine = null;
                         self.topicEngine = null;
 
-                        await EngineProcess.destroyMLEngine();
-                        await new ModelHub().purgeDatabase();
-                        await OPFS.remove("mlRuntimeFiles", { recursive: true });
+                        // Tear the engine down first so it releases its OPFS and
+                        // IndexedDB handles before we delete the underlying data.
+                        // destroyMLEngine() uses Promise.allSettled internally and
+                        // never rejects, but guard it anyway.
+                        const errors = [];
+                        try {
+                            await EngineProcess.destroyMLEngine();
+                        } catch (error) {
+                            errors.push(error);
+                        }
+
+                        // Run the storage wipes independently: a failure in one
+                        // must not skip the other, otherwise the cache is left
+                        // half-cleared and the corruption persists.
+                        const results = await Promise.allSettled([
+                            new ModelHub().purgeDatabase(),
+                            OPFS.remove("mlRuntimeFiles", { recursive: true }),
+                        ]);
+                        for (const result of results) {
+                            if (result.status === "rejected") {
+                                errors.push(result.reason);
+                            }
+                        }
+
+                        if (errors.length) {
+                            throw new Error(
+                                `Failed to fully clear ML cache: ${errors
+                                    .map((e) => e?.message || String(e))
+                                    .join("; ")}`
+                            );
+                        }
 
                         return true;
                     }
