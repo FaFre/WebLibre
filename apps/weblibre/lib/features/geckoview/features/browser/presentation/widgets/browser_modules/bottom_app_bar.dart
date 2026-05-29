@@ -670,6 +670,10 @@ class QuickTabSwitcher extends HookConsumerWidget {
     final activeItemKey = useRef(GlobalKey());
     final isUserScrolling = useRef(false);
     final userScrollTimer = useRef<Timer?>(null);
+    final didRunInitialAutoScroll = useRef(false);
+    final scrollKey = PageStorageKey(
+      'quick_tab_switcher_${quickTabSwitcherMode.name}',
+    );
 
     useEffect(() {
       return userScrollTimer.value?.cancel;
@@ -678,7 +682,16 @@ class QuickTabSwitcher extends HookConsumerWidget {
     useEffect(() {
       if (isUserScrolling.value) return null;
 
+      final isInitialAutoScroll = !didRunInitialAutoScroll.value;
+      didRunInitialAutoScroll.value = true;
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (isInitialAutoScroll &&
+            chipScrollController.hasClients &&
+            chipScrollController.offset != 0) {
+          return;
+        }
+
         final context = activeItemKey.value.currentContext;
         if (context != null) {
           unawaited(
@@ -744,6 +757,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
         reorderableItemCount: reorderEnabled ? tabItems.length : 0,
         activeItem: (activeItem?.isActive ?? false) ? activeItem : null,
         scrollController: chipScrollController,
+        scrollKey: scrollKey,
         activeItemKey: activeItemKey.value,
         showTitles: showTitles,
         showIsolatedTabUi: showIsolatedTabUi,
@@ -814,6 +828,7 @@ class QuickTabSwitcherView extends StatelessWidget {
     required this.availableItems,
     required this.activeItem,
     required this.scrollController,
+    this.scrollKey,
     this.activeItemKey,
     required this.showTitles,
     required this.showIsolatedTabUi,
@@ -826,6 +841,7 @@ class QuickTabSwitcherView extends StatelessWidget {
   final List<QuickTabSwitcherItem> availableItems;
   final QuickTabSwitcherItem? activeItem;
   final ScrollController scrollController;
+  final Key? scrollKey;
   final GlobalKey? activeItemKey;
   final bool showTitles;
   final bool showIsolatedTabUi;
@@ -867,6 +883,7 @@ class QuickTabSwitcherView extends StatelessWidget {
       sortSelectedFirst: false,
       maxCount: null,
       scrollController: scrollController,
+      scrollKey: scrollKey,
       activeItemKey: activeItemKey,
       cacheExtent: 500,
       itemId: (item) => item.id,
@@ -892,6 +909,7 @@ class QuickTabSwitcherView extends StatelessWidget {
     );
 
     return ReorderableListView.builder(
+      key: scrollKey,
       scrollController: scrollController,
       scrollDirection: Axis.horizontal,
       buildDefaultDragHandles: true,
