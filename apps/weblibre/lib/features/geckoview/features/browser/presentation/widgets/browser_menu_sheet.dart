@@ -110,6 +110,9 @@ class _BrowserMenuSheet extends HookConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final selectedTabId = ref.watch(selectedTabProvider);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final gesturesEnabled = ref.watch(
+      gestureSettingsWithDefaultsProvider.select((s) => s.enabled),
+    );
 
     return DraggableScrollableSheet(
       initialChildSize: 0.85,
@@ -143,8 +146,8 @@ class _BrowserMenuSheet extends HookConsumerWidget {
                       vertical: 8,
                     ),
                     children: [
-                      // Quick toggles (Desktop Mode / Reader Mode)
-                      if (selectedTabId != null) ...[
+                      // Quick toggles (Desktop / Reader / Gestures)
+                      if (selectedTabId != null || gesturesEnabled) ...[
                         _QuickTogglesGrid(selectedTabId: selectedTabId),
                         const SizedBox(height: 16),
                       ],
@@ -171,19 +174,13 @@ class _BrowserMenuSheet extends HookConsumerWidget {
                       ),
                       const SizedBox(height: 16),
 
+                      // Connection (Tor + proxy profiles)
+                      const _ConnectionCard(),
+                      const SizedBox(height: 16),
+
                       // Profile
                       _ProfileCard(),
                       const SizedBox(height: 16),
-
-                      // Gestures quick toggle (only when the master switch is on)
-                      if (ref.watch(
-                        gestureSettingsWithDefaultsProvider.select(
-                          (s) => s.enabled,
-                        ),
-                      )) ...[
-                        const _GestureToggleTile(),
-                        const SizedBox(height: 16),
-                      ],
 
                       // App
                       const _SettingsCard(),
@@ -585,136 +582,210 @@ class _PageActionsCard extends HookConsumerWidget {
 
 // ─── Quick Toggles Grid ───
 
-class _QuickTogglesGrid extends HookConsumerWidget {
-  final String selectedTabId;
+/// Unified bar of quick toggles. Page-scoped toggles (Desktop / Reader) appear
+/// only when a tab is selected; the global Gestures toggle appears whenever the
+/// gesture master switch is on. They are laid out as a connected, equal-width
+/// segmented bar (icon over label) that wraps to a new row past four toggles.
+class _QuickTogglesGrid extends ConsumerWidget {
+  final String? selectedTabId;
 
   const _QuickTogglesGrid({required this.selectedTabId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final desktopEnabled = ref.watch(desktopModeProvider(selectedTabId));
+    final gestureSettings = ref.watch(gestureSettingsWithDefaultsProvider);
 
-    final readerChanging = ref.watch(readerableScreenControllerProvider);
-    final readerabilityState = ref.watch(
-      selectedTabStateProvider.select(
-        (state) => state?.readerableState ?? ReaderableState.$default(),
-      ),
-    );
-    final isReaderActive = readerabilityState.active;
-    final isReaderLoading = readerChanging.isLoading;
+    final toggles = <_QuickToggle>[];
 
-    final enableReadability = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.enableReadability,
-      ),
-    );
-    final enforceReadability = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.enforceReadability,
-      ),
-    );
-    final readerVisible =
-        (readerabilityState.readerable &&
-            (enableReadability || readerabilityState.active)) ||
-        (enforceReadability && enableReadability);
-
-    return Row(
-      children: [
-        Expanded(
-          child: _ToggleTile(
-            icon: MdiIcons.monitor,
-            label: 'Desktop Mode',
-            active: desktopEnabled,
-            onTap: () {
-              ref
-                  .read(desktopModeProvider(selectedTabId).notifier)
-                  .enabled(!desktopEnabled);
-            },
-          ),
+    if (selectedTabId case final tabId?) {
+      final desktopEnabled = ref.watch(desktopModeProvider(tabId));
+      toggles.add(
+        _QuickToggle(
+          icon: MdiIcons.monitor,
+          label: 'Desktop',
+          active: desktopEnabled,
+          onTap: () {
+            ref
+                .read(desktopModeProvider(tabId).notifier)
+                .enabled(!desktopEnabled);
+          },
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: readerVisible
-              ? _ToggleTile(
-                  icon: isReaderActive
-                      ? MdiIcons.bookOpen
-                      : MdiIcons.bookOpenOutline,
-                  label: 'Reader Mode',
-                  active: isReaderActive,
-                  enabled: !isReaderLoading,
-                  onTap: () async {
-                    await ref
-                        .read(readerableScreenControllerProvider.notifier)
-                        .toggleReaderView(!isReaderActive);
-                  },
-                )
-              : _ToggleTile(
-                  icon: MdiIcons.bookOpenOutline,
-                  label: 'Reader Mode',
-                  active: false,
-                  enabled: false,
-                  onTap: () {},
-                ),
+      );
+
+      final isReaderLoading = ref
+          .watch(readerableScreenControllerProvider)
+          .isLoading;
+      final readerabilityState = ref.watch(
+        selectedTabStateProvider.select(
+          (state) => state?.readerableState ?? ReaderableState.$default(),
         ),
-      ],
-    );
+      );
+      final isReaderActive = readerabilityState.active;
+      final enableReadability = ref.watch(
+        generalSettingsWithDefaultsProvider.select(
+          (value) => value.enableReadability,
+        ),
+      );
+      final enforceReadability = ref.watch(
+        generalSettingsWithDefaultsProvider.select(
+          (value) => value.enforceReadability,
+        ),
+      );
+      final readerVisible =
+          (readerabilityState.readerable &&
+              (enableReadability || readerabilityState.active)) ||
+          (enforceReadability && enableReadability);
+
+      toggles.add(
+        _QuickToggle(
+          icon: (readerVisible && isReaderActive)
+              ? MdiIcons.bookOpen
+              : MdiIcons.bookOpenOutline,
+          label: 'Reader',
+          active: readerVisible && isReaderActive,
+          enabled: readerVisible && !isReaderLoading,
+          onTap: () async {
+            await ref
+                .read(readerableScreenControllerProvider.notifier)
+                .toggleReaderView(!isReaderActive);
+          },
+        ),
+      );
+    }
+
+    if (gestureSettings.enabled) {
+      toggles.add(
+        _QuickToggle(
+          icon: MdiIcons.gestureSwipe,
+          label: 'Gestures',
+          active: gestureSettings.active,
+          onTap: () async {
+            await ref
+                .read(gestureSettingsRepositoryProvider.notifier)
+                .updateSettings(
+                  (s) => s.copyWith(active: !gestureSettings.active),
+                );
+          },
+        ),
+      );
+    }
+
+    if (toggles.isEmpty) return const SizedBox.shrink();
+
+    return _QuickToggleBar(toggles: toggles);
   }
 }
 
-class _ToggleTile extends StatelessWidget {
+/// A single quick toggle's display + behavior, rendered as one segment of a
+/// [_QuickToggleBar].
+class _QuickToggle {
   final IconData icon;
   final String label;
   final bool active;
   final bool enabled;
   final VoidCallback onTap;
 
-  const _ToggleTile({
+  const _QuickToggle({
     required this.icon,
     required this.label,
     required this.active,
-    this.enabled = true,
     required this.onTap,
+    this.enabled = true,
   });
+}
+
+/// Connected, equal-width segmented bar (icon over label) for the quick
+/// toggles. Segments are split across rows of at most [_maxPerRow] so the bar
+/// stays compact and resizes to however many toggles are present.
+class _QuickToggleBar extends StatelessWidget {
+  final List<_QuickToggle> toggles;
+
+  static const int _maxPerRow = 4;
+
+  const _QuickToggleBar({required this.toggles});
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = <List<_QuickToggle>>[];
+    for (var i = 0; i < toggles.length; i += _maxPerRow) {
+      final end = i + _maxPerRow <= toggles.length
+          ? i + _maxPerRow
+          : toggles.length;
+      rows.add(toggles.sublist(i, end));
+    }
+
+    return Column(
+      children: [
+        for (var r = 0; r < rows.length; r++) ...[
+          if (r > 0) const SizedBox(height: 8),
+          _buildRow(context, rows[r]),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildRow(BuildContext context, List<_QuickToggle> items) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Material(
+      color: colorScheme.surfaceContainerHigh,
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            for (var i = 0; i < items.length; i++) ...[
+              if (i > 0)
+                VerticalDivider(
+                  width: 1,
+                  thickness: 1,
+                  color: colorScheme.outlineVariant,
+                ),
+              Expanded(child: _QuickToggleSegment(toggle: items[i])),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickToggleSegment extends StatelessWidget {
+  final _QuickToggle toggle;
+
+  const _QuickToggleSegment({required this.toggle});
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final backgroundColor = active
-        ? colorScheme.primary
-        : colorScheme.surfaceContainerHigh;
-    final foregroundColor = active
-        ? colorScheme.onPrimary
-        : colorScheme.onSurface;
-    final effectiveAlpha = enabled ? 1.0 : 0.38;
+    final foregroundColor = !toggle.enabled
+        ? colorScheme.onSurface.withValues(alpha: 0.38)
+        : toggle.active
+        ? colorScheme.onSecondaryContainer
+        : colorScheme.onSurfaceVariant;
 
     return Material(
-      color: backgroundColor.withValues(alpha: enabled ? 1.0 : 0.5),
-      borderRadius: BorderRadius.circular(28),
-      clipBehavior: Clip.antiAlias,
+      color: toggle.active
+          ? colorScheme.secondaryContainer
+          : Colors.transparent,
       child: InkWell(
-        onTap: enabled ? onTap : null,
-        borderRadius: BorderRadius.circular(28),
+        onTap: toggle.enabled ? toggle.onTap : null,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-          child: Row(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                icon,
-                color: foregroundColor.withValues(alpha: effectiveAlpha),
-                size: 22,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: foregroundColor.withValues(alpha: effectiveAlpha),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              Icon(toggle.icon, color: foregroundColor, size: 22),
+              const SizedBox(height: 6),
+              Text(
+                toggle.label,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: foregroundColor,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
@@ -943,34 +1014,6 @@ class _FetchFeedsTile extends HookConsumerWidget {
 }
 
 // ─── Gestures Quick Toggle ───
-
-class _GestureToggleTile extends ConsumerWidget {
-  const _GestureToggleTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final active = ref.watch(
-      gestureSettingsWithDefaultsProvider.select((s) => s.active),
-    );
-
-    return _buildMenuCard(
-      context,
-      children: [
-        SwitchListTile.adaptive(
-          secondary: const Icon(MdiIcons.gestureSwipe),
-          title: const Text('Gestures'),
-          subtitle: Text(active ? 'Active' : 'Suspended'),
-          value: active,
-          onChanged: (value) async {
-            await ref
-                .read(gestureSettingsRepositoryProvider.notifier)
-                .updateSettings((s) => s.copyWith(active: value));
-          },
-        ),
-      ],
-    );
-  }
-}
 
 // ─── Tab Actions Card ───
 
@@ -1966,12 +2009,13 @@ class _ExtensionsCard extends HookConsumerWidget {
   }
 }
 
-// ─── Quick Links Grid ───
+// ─── Connection Card ───
 
-class _QuickLinksGrid extends ConsumerWidget {
-  final bool showContainerUi;
-
-  const _QuickLinksGrid({required this.showContainerUi});
+/// Tor and assigned sing-box proxy connections. Each row toggles its connection
+/// on tap and opens the corresponding editor via the trailing chevron, keeping
+/// these connection *state* controls out of the navigation-only Quick Links.
+class _ConnectionCard extends ConsumerWidget {
+  const _ConnectionCard();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1996,8 +2040,142 @@ class _QuickLinksGrid extends ConsumerWidget {
         )
         .value;
 
-    final torActiveColor = AppColors.of(context).torActiveGreen;
+    final rows = <Widget>[
+      _ConnectionRow(
+        icon: TorIcons.onionAlt,
+        label: 'Tor™ Proxy',
+        active: isTorActive,
+        enabled: !isTorBusy,
+        onToggle: () async {
+          if (isTorBusy) return;
+          if (isTorActive) {
+            await ref.read(torProxyServiceProvider.notifier).disconnect();
+          } else {
+            await ref.read(startProxyControllerProvider.notifier).startProxy();
+          }
+        },
+        onEdit: () async {
+          Navigator.pop(context);
+          await const TorProxyRoute().push(context);
+        },
+      ),
+      for (final profile in assignedProfiles)
+        _ConnectionRow(
+          icon: MdiIcons.lanConnect,
+          label: profile.name,
+          active: runtimeEndpointIds.contains(profile.proxyConnectionId),
+          onToggle: () async {
+            final runtime = ref.read(
+              singboxProxyRuntimeRepositoryProvider.notifier,
+            );
+            final isRunning = runtimeEndpointIds.contains(
+              profile.proxyConnectionId,
+            );
 
+            try {
+              if (isRunning) {
+                await runtime.stopProfiles([profile.id]);
+              } else {
+                await runtime.startProfile(profile.id);
+              }
+            } catch (error, stackTrace) {
+              logger.e(
+                'Failed to toggle proxy profile ${profile.id} from menu',
+                error: error,
+                stackTrace: stackTrace,
+              );
+              if (context.mounted) {
+                ui_helper.showErrorMessage(context, 'Proxy error: $error');
+              }
+            }
+          },
+          onEdit: () async {
+            Navigator.pop(context);
+            await SingboxProxyProfileEditorRoute(
+              profileId: profile.id,
+            ).push(context);
+          },
+        ),
+    ];
+
+    return _buildMenuCard(
+      context,
+      children: [
+        for (var i = 0; i < rows.length; i++) ...[
+          if (i > 0) _buildDivider(),
+          rows[i],
+        ],
+      ],
+    );
+  }
+}
+
+class _ConnectionRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool active;
+  final bool enabled;
+  final Future<void> Function() onToggle;
+  final Future<void> Function() onEdit;
+
+  const _ConnectionRow({
+    required this.icon,
+    required this.label,
+    required this.active,
+    required this.onToggle,
+    required this.onEdit,
+    this.enabled = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final activeColor = AppColors.of(context).torActiveGreen;
+
+    return ListTile(
+      // Trim the right padding by the IconButton's internal inset (~12px) so the
+      // edit chevron's glyph lands at the same 16px from the edge as the plain
+      // trailing icons used by the Share/More/Containers rows, while keeping the
+      // button's full 48px touch target.
+      contentPadding: const EdgeInsets.only(left: 16, right: 16),
+      leading: Icon(
+        icon,
+        color: active ? activeColor : colorScheme.onSurfaceVariant,
+      ),
+      title: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+      subtitle: Text(active ? 'Connected' : 'Off'),
+      onTap: enabled ? () => onToggle() : null,
+      dense: true,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            active ? Icons.circle : Icons.circle_outlined,
+            size: 12,
+            color: active ? activeColor : colorScheme.outline,
+          ),
+          const SizedBox(width: 16),
+          const VerticalDivider(indent: 4, endIndent: 4),
+          IconButton(
+            icon: const Icon(Icons.chevron_right),
+            tooltip: 'Edit',
+            onPressed: () => onEdit(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Quick Links Grid ───
+
+class _QuickLinksGrid extends ConsumerWidget {
+  final bool showContainerUi;
+
+  const _QuickLinksGrid({required this.showContainerUi});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final items = <_QuickLinkItem>[
       _QuickLinkItem(
         icon: Icons.history,
@@ -2049,62 +2227,6 @@ class _QuickLinksGrid extends ConsumerWidget {
           await ref.read(smallWebModeControllerProvider.notifier).enter();
         },
       ),
-      _QuickLinkItem(
-        icon: TorIcons.onionAlt,
-        label: 'Tor\u2122 Proxy',
-        badge: isTorActive,
-        badgeColor: torActiveColor,
-        onTap: () async {
-          if (isTorBusy) return;
-          if (isTorActive) {
-            await ref.read(torProxyServiceProvider.notifier).disconnect();
-          } else {
-            await ref.read(startProxyControllerProvider.notifier).startProxy();
-          }
-        },
-        onLongPress: () async {
-          Navigator.pop(context);
-          await const TorProxyRoute().push(context);
-        },
-      ),
-      for (final profile in assignedProfiles)
-        _QuickLinkItem(
-          icon: MdiIcons.lanConnect,
-          label: profile.name,
-          badge: runtimeEndpointIds.contains(profile.proxyConnectionId),
-          badgeColor: torActiveColor,
-          onTap: () async {
-            final runtime = ref.read(
-              singboxProxyRuntimeRepositoryProvider.notifier,
-            );
-            final isRunning = runtimeEndpointIds.contains(
-              profile.proxyConnectionId,
-            );
-
-            try {
-              if (isRunning) {
-                await runtime.stopProfiles([profile.id]);
-              } else {
-                await runtime.startProfile(profile.id);
-              }
-            } catch (error, stackTrace) {
-              logger.e(
-                'Failed to toggle proxy profile ${profile.id} from menu',
-                error: error,
-                stackTrace: stackTrace,
-              );
-              if (context.mounted) {
-                ui_helper.showErrorMessage(context, 'Proxy error: $error');
-              }
-            }
-          },
-          onLongPress: () async {
-            Navigator.pop(context);
-            await SingboxProxyProfileEditorRoute(
-              profileId: profile.id,
-            ).push(context);
-          },
-        ),
     ];
 
     const spacing = 8.0;
@@ -2126,9 +2248,6 @@ class _QuickLinksGrid extends ConsumerWidget {
                   item.icon,
                   item.label,
                   item.onTap,
-                  badge: item.badge,
-                  badgeColor: item.badgeColor,
-                  onLongPress: item.onLongPress,
                 ),
               ),
           ],
@@ -2141,33 +2260,21 @@ class _QuickLinksGrid extends ConsumerWidget {
     BuildContext context,
     IconData icon,
     String label,
-    VoidCallback onTap, {
-    bool badge = false,
-    Color? badgeColor,
-    VoidCallback? onLongPress,
-  }) {
-    final iconWidget = Icon(
-      icon,
-      color: Theme.of(context).colorScheme.onSurface,
-    );
-
+    VoidCallback onTap,
+  ) {
     return Material(
       color: Theme.of(context).colorScheme.surfaceContainerHigh,
       borderRadius: BorderRadius.circular(12),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 16.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (badge)
-                Badge(backgroundColor: badgeColor, child: iconWidget)
-              else
-                iconWidget,
+              Icon(icon, color: Theme.of(context).colorScheme.onSurface),
               const SizedBox(height: 8),
               Text(
                 label,
@@ -2189,17 +2296,11 @@ class _QuickLinkItem {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  final VoidCallback? onLongPress;
-  final bool badge;
-  final Color? badgeColor;
 
   const _QuickLinkItem({
     required this.icon,
     required this.label,
     required this.onTap,
-    this.onLongPress,
-    this.badge = false,
-    this.badgeColor,
   });
 }
 
