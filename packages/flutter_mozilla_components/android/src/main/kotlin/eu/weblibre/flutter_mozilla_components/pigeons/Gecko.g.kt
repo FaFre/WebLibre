@@ -5572,6 +5572,81 @@ data class SandboxCaptureEntry (
     return result
   }
 }
+
+/**
+ * Configuration for native touch-gesture recognition.
+ *
+ * Pushed from Dart whenever the user's gesture settings change. Native
+ * recognition is purely observational: it assembles a canonical stroke key
+ * (start-position prefix + finger-count prefix + dash-joined directions, e.g.
+ * `R:2:D-L`) and only emits when that key matches an entry in
+ * [activeGestureKeys]. Strokes that do not match are ignored, so normal
+ * scrolling, tapping and pinch-zoom are never affected.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class GestureConfig (
+  val enabled: Boolean,
+  /**
+   * Base stroke length in logical pixels, scaled at runtime by
+   * `min(viewWidth, viewHeight) / 320` to match the reference gesture add-on.
+   */
+  val strokeSize: Long,
+  /**
+   * Milliseconds of inactivity after which an in-progress gesture is
+   * discarded.
+   */
+  val timeoutMs: Long,
+  /** Maximum number of simultaneous pointers a gesture may use. */
+  val maxFingers: Long,
+  /**
+   * Canonical keys that currently have an action bound, e.g. `D-R`,
+   * `R:2:D-L`. Native only emits [GeckoGestureEvents.onGestureRecognized]
+   * when an assembled stroke matches one of these.
+   */
+  val activeGestureKeys: List<String>
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): GestureConfig {
+      val enabled = pigeonVar_list[0] as Boolean
+      val strokeSize = pigeonVar_list[1] as Long
+      val timeoutMs = pigeonVar_list[2] as Long
+      val maxFingers = pigeonVar_list[3] as Long
+      val activeGestureKeys = pigeonVar_list[4] as List<String>
+      return GestureConfig(enabled, strokeSize, timeoutMs, maxFingers, activeGestureKeys)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      enabled,
+      strokeSize,
+      timeoutMs,
+      maxFingers,
+      activeGestureKeys,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as GestureConfig
+    return GeckoPigeonUtils.deepEquals(this.enabled, other.enabled) && GeckoPigeonUtils.deepEquals(this.strokeSize, other.strokeSize) && GeckoPigeonUtils.deepEquals(this.timeoutMs, other.timeoutMs) && GeckoPigeonUtils.deepEquals(this.maxFingers, other.maxFingers) && GeckoPigeonUtils.deepEquals(this.activeGestureKeys, other.activeGestureKeys)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.enabled)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.strokeSize)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.timeoutMs)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.maxFingers)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.activeGestureKeys)
+    return result
+  }
+}
 private open class GeckoPigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return when (type) {
@@ -6190,6 +6265,11 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
           SandboxCaptureEntry.fromList(it)
         }
       }
+      252.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          GestureConfig.fromList(it)
+        }
+      }
       else -> super.readValueOfType(type, buffer)
     }
   }
@@ -6685,6 +6765,10 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
       }
       is SandboxCaptureEntry -> {
         stream.write(251)
+        writeValue(stream, value.toList())
+      }
+      is GestureConfig -> {
+        stream.write(252)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -11817,6 +11901,127 @@ class SandboxCaptureHostEvents(private val binaryMessenger: BinaryMessenger, pri
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.SandboxCaptureHostEvents.onSandboxNewTab$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
     channel.send(listOf(sequenceArg, parentTabIdArg, newTabIdArg, targetUrlArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+}
+/**
+ * Dart → Kotlin. Pushes the current gesture-recognition configuration.
+ *
+ * Generated interface from Pigeon that represents a handler of messages from Flutter.
+ */
+interface GeckoGestureApi {
+  fun setGestureConfig(config: GestureConfig)
+
+  companion object {
+    /** The codec used by GeckoGestureApi. */
+    val codec: MessageCodec<Any?> by lazy {
+      GeckoPigeonCodec()
+    }
+    /** Sets up an instance of `GeckoGestureApi` to handle messages through the `binaryMessenger`. */
+    @JvmOverloads
+    fun setUp(binaryMessenger: BinaryMessenger, api: GeckoGestureApi?, messageChannelSuffix: String = "") {
+      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoGestureApi.setGestureConfig$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val configArg = args[0] as GestureConfig
+            val wrapped: List<Any?> = try {
+              api.setGestureConfig(configArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+    }
+  }
+}
+/**
+ * Kotlin → Dart. Emitted when an assembled touch stroke matches a configured
+ * gesture key.
+ *
+ * Generated class from Pigeon that represents Flutter messages that can be called from Kotlin.
+ */
+class GeckoGestureEvents(private val binaryMessenger: BinaryMessenger, private val messageChannelSuffix: String = "") {
+  companion object {
+    /** The codec used by GeckoGestureEvents. */
+    val codec: MessageCodec<Any?> by lazy {
+      GeckoPigeonCodec()
+    }
+  }
+  /**
+   * [sequence] Event sequence number for ordering.
+   * [gestureKey] Canonical key of the recognized gesture, e.g. `D-R`.
+   */
+  fun onGestureRecognized(sequenceArg: Long, gestureKeyArg: String, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoGestureEvents.onGestureRecognized$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg, gestureKeyArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  /**
+   * Emitted while a stroke is being drawn, each time a new direction arrow is
+   * appended. Drives the live feedback overlay.
+   *
+   * [sequence] Event sequence number for ordering.
+   * [partialKey] Current partial canonical key including start/finger
+   * prefixes, e.g. `R:D`.
+   */
+  fun onGestureProgress(sequenceArg: Long, partialKeyArg: String, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoGestureEvents.onGestureProgress$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg, partialKeyArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  /**
+   * Emitted when an in-progress stroke ends (release, cancel or idle timeout)
+   * so the live feedback overlay can be hidden.
+   *
+   * [sequence] Event sequence number for ordering.
+   */
+  fun onGestureReset(sequenceArg: Long, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoGestureEvents.onGestureReset$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))

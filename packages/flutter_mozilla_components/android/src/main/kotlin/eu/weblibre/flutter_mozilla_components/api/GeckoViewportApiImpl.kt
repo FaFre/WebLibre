@@ -36,6 +36,7 @@ class GeckoViewportApiImpl : GeckoViewportApi {
      */
     override fun setDynamicToolbarMaxHeight(heightPx: Long) {
         val height = heightPx.toInt()
+        GlobalComponents.dynamicToolbarMaxHeightPx = height
 
         val engineView = components.mainBrowserEngineView
         if (engineView == null) {
@@ -65,6 +66,7 @@ class GeckoViewportApiImpl : GeckoViewportApi {
      */
     override fun setVerticalClipping(clippingPx: Long) {
         val clipping = clippingPx.toInt()
+        GlobalComponents.verticalClippingPx = clipping
 
         val engineView = components.mainBrowserEngineView
         if (engineView == null) {

@@ -1553,6 +1553,11 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       factory: $BrowsingSettingsRoute._fromState,
     ),
     GoRouteData.$route(
+      path: 'gestures',
+      name: 'GestureSettingsRoute',
+      factory: $GestureSettingsRoute._fromState,
+    ),
+    GoRouteData.$route(
       path: 'privacy_security',
       name: 'PrivacySecuritySettingsRoute',
       factory: $PrivacySecuritySettingsRoute._fromState,
@@ -1751,6 +1756,27 @@ mixin $BrowsingSettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/browsing');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $GestureSettingsRoute on GoRouteData {
+  static GestureSettingsRoute _fromState(GoRouterState state) =>
+      GestureSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/gestures');
 
   @override
   void go(BuildContext context) => context.go(location);

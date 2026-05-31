@@ -224,6 +224,18 @@ GeckoViewportService viewportService(Ref ref) {
 }
 
 @Riverpod(keepAlive: true)
+GeckoGestureService gestureService(Ref ref) {
+  final service = GeckoGestureService();
+  service.setUp();
+
+  ref.onDispose(() async {
+    await service.dispose();
+  });
+
+  return service;
+}
+
+@Riverpod(keepAlive: true)
 class EngineReadyState extends _$EngineReadyState {
   Future<bool> waitUntilReady({
     Duration timeout = const Duration(seconds: 3),

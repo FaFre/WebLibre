@@ -60,6 +60,7 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/c
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_edit.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_list.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_selection.dart';
+import 'package:weblibre/features/gestures/presentation/screens/gesture_settings_screen.dart';
 import 'package:weblibre/features/onboarding/presentation/onboarding.dart';
 import 'package:weblibre/features/proxy/data/models/proxy_profile_seed.dart';
 import 'package:weblibre/features/proxy/presentation/screens/proxy_routing_settings.dart';

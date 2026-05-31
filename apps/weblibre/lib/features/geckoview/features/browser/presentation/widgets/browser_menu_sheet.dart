@@ -69,6 +69,8 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/domain/repositories/top_site_repository.dart';
+import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
+import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/proxy/data/models/singbox_proxy_profile.dart';
 import 'package:weblibre/features/proxy/domain/providers/assigned_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
@@ -172,6 +174,16 @@ class _BrowserMenuSheet extends HookConsumerWidget {
                       // Profile
                       _ProfileCard(),
                       const SizedBox(height: 16),
+
+                      // Gestures quick toggle (only when the master switch is on)
+                      if (ref.watch(
+                        gestureSettingsWithDefaultsProvider.select(
+                          (s) => s.enabled,
+                        ),
+                      )) ...[
+                        const _GestureToggleTile(),
+                        const SizedBox(height: 16),
+                      ],
 
                       // App
                       const _SettingsCard(),
@@ -926,6 +938,36 @@ class _FetchFeedsTile extends HookConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ─── Gestures Quick Toggle ───
+
+class _GestureToggleTile extends ConsumerWidget {
+  const _GestureToggleTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final active = ref.watch(
+      gestureSettingsWithDefaultsProvider.select((s) => s.active),
+    );
+
+    return _buildMenuCard(
+      context,
+      children: [
+        SwitchListTile.adaptive(
+          secondary: const Icon(MdiIcons.gestureSwipe),
+          title: const Text('Gestures'),
+          subtitle: Text(active ? 'Active' : 'Suspended'),
+          value: active,
+          onChanged: (value) async {
+            await ref
+                .read(gestureSettingsRepositoryProvider.notifier)
+                .updateSettings((s) => s.copyWith(active: value));
+          },
+        ),
+      ],
     );
   }
 }

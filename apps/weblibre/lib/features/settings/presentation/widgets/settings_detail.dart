@@ -167,6 +167,7 @@ class SettingsCustomScrollScaffold extends StatelessWidget {
   final TextEditingController? searchController;
   final String searchHintText;
   final List<Widget> slivers;
+  final Widget? floatingActionButton;
 
   const SettingsCustomScrollScaffold({
     super.key,
@@ -175,11 +176,13 @@ class SettingsCustomScrollScaffold extends StatelessWidget {
     this.actions = const [],
     this.searchController,
     this.searchHintText = 'Search settings',
+    this.floatingActionButton,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: floatingActionButton,
       body: SafeArea(
         child: FadingScroll(
           fadingSize: 25,

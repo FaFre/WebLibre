@@ -293,6 +293,53 @@ final class ViewportServiceProvider
 
 String _$viewportServiceHash() => r'bab39db3180bb6a1cf8c055966b7f5910b41b424';
 
+@ProviderFor(gestureService)
+final gestureServiceProvider = GestureServiceProvider._();
+
+final class GestureServiceProvider
+    extends
+        $FunctionalProvider<
+          GeckoGestureService,
+          GeckoGestureService,
+          GeckoGestureService
+        >
+    with $Provider<GeckoGestureService> {
+  GestureServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'gestureServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$gestureServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<GeckoGestureService> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  GeckoGestureService create(Ref ref) {
+    return gestureService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GeckoGestureService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GeckoGestureService>(value),
+    );
+  }
+}
+
+String _$gestureServiceHash() => r'81e90a1adb64f596190b52aba0e2ab9dcab3c5e7';
+
 @ProviderFor(EngineReadyState)
 final engineReadyStateProvider = EngineReadyStateProvider._();
 

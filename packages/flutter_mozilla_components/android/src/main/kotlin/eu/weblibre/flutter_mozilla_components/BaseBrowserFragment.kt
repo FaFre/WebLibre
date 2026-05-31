@@ -55,7 +55,7 @@ import mozilla.components.feature.prompts.file.AndroidPhotoPicker
 import mozilla.components.feature.session.FullScreenFeature
 import mozilla.components.feature.session.PictureInPictureFeature
 import mozilla.components.feature.session.SessionFeature
-import mozilla.components.feature.session.SwipeRefreshFeature
+import eu.weblibre.flutter_mozilla_components.feature.GestureAwareSwipeRefreshFeature
 import mozilla.components.feature.sitepermissions.SitePermissionsFeature
 import mozilla.components.feature.sitepermissions.SitePermissionsRules
 import mozilla.components.feature.sitepermissions.SitePermissionsRules.AutoplayAction
@@ -87,7 +87,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     private val promptFeature = ViewBoundFeatureWrapper<PromptFeature>()
     private val webExtensionPromptFeature = ViewBoundFeatureWrapper<WebExtensionPromptFeature>()
     private val sitePermissionsFeature = ViewBoundFeatureWrapper<SitePermissionsFeature>()
-    private val swipeRefreshFeature = ViewBoundFeatureWrapper<SwipeRefreshFeature>()
+    private val swipeRefreshFeature = ViewBoundFeatureWrapper<GestureAwareSwipeRefreshFeature>()
     private val secureWindowFeature = ViewBoundFeatureWrapper<SecureWindowFeature>()
     private val fullScreenFeature = ViewBoundFeatureWrapper<FullScreenFeature>()
     private val mediaSessionFullscreenFeature =
@@ -272,7 +272,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
             )
 
             swipeRefreshFeature.set(
-                feature = SwipeRefreshFeature(
+                feature = GestureAwareSwipeRefreshFeature(
                     components.core.store,
                     components.useCases.sessionUseCases.reload,
                     binding.swipeToRefresh,

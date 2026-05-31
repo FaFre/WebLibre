@@ -6098,6 +6098,87 @@ class SandboxCaptureEntry {
   int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
 }
 
+/// Configuration for native touch-gesture recognition.
+///
+/// Pushed from Dart whenever the user's gesture settings change. Native
+/// recognition is purely observational: it assembles a canonical stroke key
+/// (start-position prefix + finger-count prefix + dash-joined directions, e.g.
+/// `R:2:D-L`) and only emits when that key matches an entry in
+/// [activeGestureKeys]. Strokes that do not match are ignored, so normal
+/// scrolling, tapping and pinch-zoom are never affected.
+class GestureConfig {
+  GestureConfig({
+    required this.enabled,
+    required this.strokeSize,
+    required this.timeoutMs,
+    required this.maxFingers,
+    required this.activeGestureKeys,
+  });
+
+  bool enabled;
+
+  /// Base stroke length in logical pixels, scaled at runtime by
+  /// `min(viewWidth, viewHeight) / 320` to match the reference gesture add-on.
+  int strokeSize;
+
+  /// Milliseconds of inactivity after which an in-progress gesture is
+  /// discarded.
+  int timeoutMs;
+
+  /// Maximum number of simultaneous pointers a gesture may use.
+  int maxFingers;
+
+  /// Canonical keys that currently have an action bound, e.g. `D-R`,
+  /// `R:2:D-L`. Native only emits [GeckoGestureEvents.onGestureRecognized]
+  /// when an assembled stroke matches one of these.
+  List<String> activeGestureKeys;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      enabled,
+      strokeSize,
+      timeoutMs,
+      maxFingers,
+      activeGestureKeys,
+    ];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static GestureConfig decode(Object result) {
+    result as List<Object?>;
+    return GestureConfig(
+      enabled: result[0]! as bool,
+      strokeSize: result[1]! as int,
+      timeoutMs: result[2]! as int,
+      maxFingers: result[3]! as int,
+      activeGestureKeys: (result[4]! as List<Object?>).cast<String>(),
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! GestureConfig || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(enabled, other.enabled) &&
+        _deepEquals(strokeSize, other.strokeSize) &&
+        _deepEquals(timeoutMs, other.timeoutMs) &&
+        _deepEquals(maxFingers, other.maxFingers) &&
+        _deepEquals(activeGestureKeys, other.activeGestureKeys);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+}
+
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
   @override
@@ -6474,6 +6555,9 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is SandboxCaptureEntry) {
       buffer.putUint8(251);
       writeValue(buffer, value.encode());
+    } else if (value is GestureConfig) {
+      buffer.putUint8(252);
+      writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
     }
@@ -6769,6 +6853,8 @@ class _PigeonCodec extends StandardMessageCodec {
         return PwaManifest.decode(readValue(buffer)!);
       case 251:
         return SandboxCaptureEntry.decode(readValue(buffer)!);
+      case 252:
+        return GestureConfig.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -12732,6 +12818,156 @@ abstract class SandboxCaptureHostEvents {
               arg_newTabId,
               arg_targetUrl,
             );
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+  }
+}
+
+/// Dart → Kotlin. Pushes the current gesture-recognition configuration.
+class GeckoGestureApi {
+  /// Constructor for [GeckoGestureApi].  The [binaryMessenger] named argument is
+  /// available for dependency injection.  If it is left null, the default
+  /// BinaryMessenger will be used which routes to the host platform.
+  GeckoGestureApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
+  final BinaryMessenger? pigeonVar_binaryMessenger;
+
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  final String pigeonVar_messageChannelSuffix;
+
+  Future<void> setGestureConfig(GestureConfig config) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoGestureApi.setGestureConfig$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[config],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+}
+
+/// Kotlin → Dart. Emitted when an assembled touch stroke matches a configured
+/// gesture key.
+abstract class GeckoGestureEvents {
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  /// [sequence] Event sequence number for ordering.
+  /// [gestureKey] Canonical key of the recognized gesture, e.g. `D-R`.
+  void onGestureRecognized(int sequence, String gestureKey);
+
+  /// Emitted while a stroke is being drawn, each time a new direction arrow is
+  /// appended. Drives the live feedback overlay.
+  ///
+  /// [sequence] Event sequence number for ordering.
+  /// [partialKey] Current partial canonical key including start/finger
+  /// prefixes, e.g. `R:D`.
+  void onGestureProgress(int sequence, String partialKey);
+
+  /// Emitted when an in-progress stroke ends (release, cancel or idle timeout)
+  /// so the live feedback overlay can be hidden.
+  ///
+  /// [sequence] Event sequence number for ordering.
+  void onGestureReset(int sequence);
+
+  static void setUp(
+    GeckoGestureEvents? api, {
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty
+        ? '.$messageChannelSuffix'
+        : '';
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoGestureEvents.onGestureRecognized$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          final List<Object?> args = message! as List<Object?>;
+          final int arg_sequence = args[0]! as int;
+          final String arg_gestureKey = args[1]! as String;
+          try {
+            api.onGestureRecognized(arg_sequence, arg_gestureKey);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoGestureEvents.onGestureProgress$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          final List<Object?> args = message! as List<Object?>;
+          final int arg_sequence = args[0]! as int;
+          final String arg_partialKey = args[1]! as String;
+          try {
+            api.onGestureProgress(arg_sequence, arg_partialKey);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoGestureEvents.onGestureReset$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          final List<Object?> args = message! as List<Object?>;
+          final int arg_sequence = args[0]! as int;
+          try {
+            api.onGestureReset(arg_sequence);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

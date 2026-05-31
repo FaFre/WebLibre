@@ -12,6 +12,9 @@ import android.content.Context
 import android.view.MotionEvent
 import android.widget.FrameLayout
 import androidx.core.view.WindowInsetsCompat
+import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.ext.EventSequence
+import eu.weblibre.flutter_mozilla_components.feature.GestureRecognizer
 import kotlin.math.abs
 
 /**
@@ -34,6 +37,12 @@ import kotlin.math.abs
  *
  * Taps and vertical drags that originate in the inset still reach the engine
  * view, so links and vertical scrolling continue to work at the edges.
+ *
+ * This container is also the single observation point for configurable touch
+ * gestures: every event is fed to a [GestureRecognizer] before the back-gesture
+ * filter runs. Recognition is purely observational (events are never consumed
+ * for gestures), so pages scroll and tap normally; a recognized multi-stroke
+ * gesture is reported to Dart on touch-up via [GlobalComponents.gestureEvents].
  */
 class BackGestureFilterFrameLayout(
     context: Context,
@@ -44,7 +53,35 @@ class BackGestureFilterFrameLayout(
     private var startedInEdgeZone = false
     private var hasIntercepted = false
 
+    private val gestureRecognizer = GestureRecognizer()
+    private val gestureTimeoutRunnable = Runnable { cancelGesture() }
+
+    /**
+     * Whether the live feedback overlay is currently being shown for an
+     * in-progress stroke. Tracked so a reset is reported to Dart only after a
+     * progress event, keeping plain taps and scrolls off the platform channel.
+     */
+    private var gestureFeedbackActive = false
+
+    init {
+        // A new direction arrow was registered: restart the idle-timeout (the
+        // reference add-on restarts only on a new arrow, not on every move) and
+        // forward the partial stroke to the live feedback overlay.
+        gestureRecognizer.onProgress = { partialKey ->
+            val config = GlobalComponents.gestureConfig
+            if (config != null && config.enabled) {
+                removeCallbacks(gestureTimeoutRunnable)
+                postDelayed(gestureTimeoutRunnable, config.timeoutMs)
+                gestureFeedbackActive = true
+                GlobalComponents.gestureEvents
+                    ?.onGestureProgress(EventSequence.next(), partialKey) { }
+            }
+        }
+    }
+
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        feedGestureRecognizer(ev)
+
         when (ev.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 downX = ev.x
@@ -68,6 +105,9 @@ class BackGestureFilterFrameLayout(
                         // already scrolled the page. Cancel APZ now and swallow the rest.
                         dx > dy + 1 -> {
                             hasIntercepted = true
+                            // The stream now belongs to the system back gesture;
+                            // discard any partial touch gesture so it can't fire.
+                            cancelGesture()
                             // Log.d(TAG, "INTERCEPT dx=$dx dy=$dy")
                             dispatchSyntheticCancel(ev)
                             return true
@@ -91,6 +131,69 @@ class BackGestureFilterFrameLayout(
             }
         }
         return super.dispatchTouchEvent(ev)
+    }
+
+    /**
+     * Observes every touch event for configurable gestures. Reads the latest
+     * config pushed from Dart, drives the idle-timeout, and reports a matched
+     * gesture key on touch-up. Runs on the UI thread (dispatchTouchEvent), so
+     * the event sink can be invoked directly.
+     */
+    private fun feedGestureRecognizer(ev: MotionEvent) {
+        val config = GlobalComponents.gestureConfig
+        gestureRecognizer.config = config
+
+        val key = gestureRecognizer.feed(
+            ev,
+            width,
+            height,
+            GlobalComponents.bottomViewportInsetPx,
+        )
+
+        when (ev.actionMasked) {
+            // Start the idle window on touch-down; subsequent restarts happen
+            // only when the recognizer reports a new arrow (see onProgress).
+            MotionEvent.ACTION_DOWN -> {
+                // New touch: clear any gesture claim so pull-to-refresh is only
+                // suppressed when this stroke actually matches a gesture.
+                GlobalComponents.touchConsumedByGesture = false
+                if (config != null && config.enabled) {
+                    removeCallbacks(gestureTimeoutRunnable)
+                    postDelayed(gestureTimeoutRunnable, config.timeoutMs)
+                }
+            }
+
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL -> {
+                removeCallbacks(gestureTimeoutRunnable)
+                emitGestureReset()
+            }
+        }
+
+        if (key != null) {
+            // Mark this touch as gesture-handled before the event propagates to
+            // the swipe-refresh layout's own ACTION_UP handling, so a redundant
+            // pull-to-refresh reload is suppressed (see
+            // GestureAwareSwipeRefreshFeature).
+            GlobalComponents.touchConsumedByGesture = true
+            GlobalComponents.gestureEvents
+                ?.onGestureRecognized(EventSequence.next(), key) { }
+        }
+    }
+
+    /** Discards any in-progress gesture and clears its feedback overlay. */
+    private fun cancelGesture() {
+        removeCallbacks(gestureTimeoutRunnable)
+        gestureRecognizer.cancel()
+        emitGestureReset()
+    }
+
+    /** Tells Dart to hide the live feedback overlay, if one is showing. */
+    private fun emitGestureReset() {
+        if (!gestureFeedbackActive) return
+        gestureFeedbackActive = false
+        GlobalComponents.gestureEvents
+            ?.onGestureReset(EventSequence.next()) { }
     }
 
     private fun dispatchSyntheticCancel(source: MotionEvent) {

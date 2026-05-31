@@ -47,6 +47,8 @@ import 'package:weblibre/features/geckoview/features/find_in_page/presentation/c
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
+import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
@@ -396,6 +398,34 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
       return IconButton(
         onPressed: scope.isPreview ? () {} : moveToBackground,
         icon: const Icon(MdiIcons.arrowCollapseDown),
+      );
+    },
+  ),
+  ToolbarButtonDefinition(
+    spec: toggleGesturesToolbarButtonSpec,
+    label: 'Gestures',
+    icon: MdiIcons.gestureSwipe,
+    builder: (scope, context, ref) {
+      final on = ref.watch(
+        gestureSettingsWithDefaultsProvider.select((s) => s.effectiveEnabled),
+      );
+      return IconButton(
+        isSelected: on,
+        tooltip: on ? 'Disable gestures' : 'Enable gestures',
+        onPressed: scope.isPreview
+            ? () {}
+            : () async {
+                final newActive = !on;
+                await ref
+                    .read(gestureSettingsRepositoryProvider.notifier)
+                    .updateSettings(
+                      (s) => s.copyWith(
+                        enabled: s.enabled || newActive,
+                        active: newActive,
+                      ),
+                    );
+              },
+        icon: Icon(on ? MdiIcons.gestureSwipe : MdiIcons.gestureDoubleTap),
       );
     },
   ),

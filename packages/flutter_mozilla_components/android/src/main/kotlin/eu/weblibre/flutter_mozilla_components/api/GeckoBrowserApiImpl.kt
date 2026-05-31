@@ -41,6 +41,8 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoHistoryApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoIconsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPublicSuffixListApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSitePermissionsApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoGestureApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoGestureEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTrackingProtectionApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoLogging
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoMlApi
@@ -336,6 +338,14 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         // Store viewport events and API for keyboard feature and pending settings
         GlobalComponents.viewportEvents = viewportEvents
         GlobalComponents.viewportApi = viewportApi
+
+        // Touch-gesture recognition: event sink (Kotlin → Dart) + config API
+        GlobalComponents.gestureEvents =
+            GeckoGestureEvents(_flutterPluginBinding.binaryMessenger)
+        GeckoGestureApi.setUp(
+            _flutterPluginBinding.binaryMessenger,
+            GeckoGestureApiImpl()
+        )
 
         ReaderViewEvents.setUp(
             _flutterPluginBinding.binaryMessenger,

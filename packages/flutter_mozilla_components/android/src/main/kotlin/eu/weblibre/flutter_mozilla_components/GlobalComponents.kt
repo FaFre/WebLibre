@@ -14,12 +14,14 @@ import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMo
 import eu.weblibre.flutter_mozilla_components.pigeons.ContentBlocking
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettings
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoGestureEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSyncStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportEvents
+import eu.weblibre.flutter_mozilla_components.pigeons.GestureConfig
 import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
 import eu.weblibre.flutter_mozilla_components.pigeons.ReaderViewController
 import eu.weblibre.flutter_mozilla_components.services.PrivateTabsNotificationService
@@ -96,6 +98,38 @@ object GlobalComponents {
 
     // Engine settings API for managing engine-specific settings
     var engineSettingsApi: GeckoEngineSettingsApiImpl? = null
+
+    // Touch-gesture recognition: event sink (Kotlin → Dart) and the current
+    // configuration pushed from Dart. Read by the browser container's
+    // GestureRecognizer on the UI thread.
+    var gestureEvents: GeckoGestureEvents? = null
+
+    @Volatile
+    var gestureConfig: GestureConfig? = null
+
+    /**
+     * Set true when the in-flight touch sequence was recognized as a configured
+     * gesture, so pull-to-refresh ([GestureAwareSwipeRefreshFeature]) can
+     * suppress the otherwise-redundant reload for down-leading gestures started
+     * at the top of the page. Reset on each ACTION_DOWN by the gesture
+     * container. Read and written on the UI thread.
+     */
+    @Volatile
+    var touchConsumedByGesture: Boolean = false
+
+    // Current dynamic-toolbar viewport insets (physical px), tracked from the
+    // viewport API so gesture edge-detection can exclude the bottom toolbar
+    // area the engine view never receives touches in.
+    @Volatile
+    var dynamicToolbarMaxHeightPx: Int = 0
+
+    @Volatile
+    var verticalClippingPx: Int = 0
+
+    /** Currently visible bottom inset: full toolbar height when shown, 0 when
+     *  auto-hidden (clipping cancels it out). */
+    val bottomViewportInsetPx: Int
+        get() = (dynamicToolbarMaxHeightPx + verticalClippingPx).coerceAtLeast(0)
 
     // External download manager setting
     var useExternalDownloadManager: Boolean = false

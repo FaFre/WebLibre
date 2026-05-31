@@ -3004,3 +3004,72 @@ abstract class SandboxCaptureHostEvents {
     String targetUrl,
   );
 }
+
+// =============================================================================
+// Touch Gestures API
+// =============================================================================
+
+/// Configuration for native touch-gesture recognition.
+///
+/// Pushed from Dart whenever the user's gesture settings change. Native
+/// recognition is purely observational: it assembles a canonical stroke key
+/// (start-position prefix + finger-count prefix + dash-joined directions, e.g.
+/// `R:2:D-L`) and only emits when that key matches an entry in
+/// [activeGestureKeys]. Strokes that do not match are ignored, so normal
+/// scrolling, tapping and pinch-zoom are never affected.
+class GestureConfig {
+  final bool enabled;
+
+  /// Base stroke length in logical pixels, scaled at runtime by
+  /// `min(viewWidth, viewHeight) / 320` to match the reference gesture add-on.
+  final int strokeSize;
+
+  /// Milliseconds of inactivity after which an in-progress gesture is
+  /// discarded.
+  final int timeoutMs;
+
+  /// Maximum number of simultaneous pointers a gesture may use.
+  final int maxFingers;
+
+  /// Canonical keys that currently have an action bound, e.g. `D-R`,
+  /// `R:2:D-L`. Native only emits [GeckoGestureEvents.onGestureRecognized]
+  /// when an assembled stroke matches one of these.
+  final List<String> activeGestureKeys;
+
+  GestureConfig({
+    this.enabled = false,
+    this.strokeSize = 50,
+    this.timeoutMs = 1500,
+    this.maxFingers = 1,
+    this.activeGestureKeys = const [],
+  });
+}
+
+/// Dart → Kotlin. Pushes the current gesture-recognition configuration.
+@HostApi()
+abstract class GeckoGestureApi {
+  void setGestureConfig(GestureConfig config);
+}
+
+/// Kotlin → Dart. Emitted when an assembled touch stroke matches a configured
+/// gesture key.
+@FlutterApi()
+abstract class GeckoGestureEvents {
+  /// [sequence] Event sequence number for ordering.
+  /// [gestureKey] Canonical key of the recognized gesture, e.g. `D-R`.
+  void onGestureRecognized(int sequence, String gestureKey);
+
+  /// Emitted while a stroke is being drawn, each time a new direction arrow is
+  /// appended. Drives the live feedback overlay.
+  ///
+  /// [sequence] Event sequence number for ordering.
+  /// [partialKey] Current partial canonical key including start/finger
+  /// prefixes, e.g. `R:D`.
+  void onGestureProgress(int sequence, String partialKey);
+
+  /// Emitted when an in-progress stroke ends (release, cancel or idle timeout)
+  /// so the live feedback overlay can be hidden.
+  ///
+  /// [sequence] Event sequence number for ordering.
+  void onGestureReset(int sequence);
+}
