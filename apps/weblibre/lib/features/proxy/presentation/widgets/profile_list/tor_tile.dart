@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
@@ -72,7 +73,7 @@ class TorProfileTile extends ConsumerWidget {
         child: Icon(TorIcons.onionAlt, color: foreground, size: 24),
       ),
       title: Text(
-        'Tor',
+        torBrand,
         style: TextStyle(
           fontWeight: isRunning ? FontWeight.w600 : FontWeight.w500,
         ),
@@ -145,8 +146,8 @@ class TorProfileTile extends ConsumerWidget {
         showErrorMessage(
           context,
           isRunning
-              ? 'Failed to stop Tor: $error'
-              : 'Failed to start Tor: $error',
+              ? 'Failed to stop $torBrand: $error'
+              : 'Failed to start $torBrand: $error',
         );
       }
     }

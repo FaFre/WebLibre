@@ -20,6 +20,7 @@
 import 'dart:convert';
 
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/features/proxy/data/parsers/host_port.dart';
 
 class WireguardConfigImport with FastEquatable {
@@ -42,7 +43,7 @@ class WireguardConfigImport with FastEquatable {
     final peer = sections['peer'];
     if (interface == null || peer == null) {
       throw const FormatException(
-        'WireGuard config must contain [Interface] and [Peer] sections.',
+        '$wireGuardBrand config must contain [Interface] and [Peer] sections.',
       );
     }
 
@@ -51,7 +52,7 @@ class WireguardConfigImport with FastEquatable {
         ? (host: '', port: '')
         : parseHostPort(
             rawEndpoint,
-            invalidMessage: 'WireGuard endpoint must be host:port.',
+            invalidMessage: '$wireGuardBrand endpoint must be host:port.',
           );
     final mtu = interface['mtu']?.trim();
 
@@ -103,7 +104,9 @@ Map<String, Map<String, String>> _parseWireguardConfig(String configText) {
     if (line.startsWith('[') && line.endsWith(']')) {
       currentSection = line.substring(1, line.length - 1).trim().toLowerCase();
       if (currentSection.isEmpty) {
-        throw const FormatException('WireGuard config contains empty section.');
+        throw const FormatException(
+          '$wireGuardBrand config contains empty section.',
+        );
       }
       sections.putIfAbsent(currentSection, () => <String, String>{});
       continue;
@@ -111,19 +114,19 @@ Map<String, Map<String, String>> _parseWireguardConfig(String configText) {
 
     if (currentSection == null) {
       throw const FormatException(
-        'WireGuard config entries must be inside a section.',
+        '$wireGuardBrand config entries must be inside a section.',
       );
     }
 
     final separatorIndex = line.indexOf('=');
     if (separatorIndex < 1) {
-      throw FormatException('Invalid WireGuard config line: $rawLine');
+      throw FormatException('Invalid $wireGuardBrand config line: $rawLine');
     }
 
     final key = line.substring(0, separatorIndex).trim().toLowerCase();
     final value = line.substring(separatorIndex + 1).trim();
     if (key.isEmpty) {
-      throw FormatException('Invalid WireGuard config line: $rawLine');
+      throw FormatException('Invalid $wireGuardBrand config line: $rawLine');
     }
     sections[currentSection]![key] = value;
   }

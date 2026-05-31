@@ -57,7 +57,7 @@ class TorService : Service() {
             ACTION_START -> {
                 // startForegroundService() must promote the service promptly, before
                 // the later binder call reaches startTor().
-                startForeground(NOTIFICATION_ID, createNotification("Tor is connecting..."))
+                startForeground(NOTIFICATION_ID, createNotification("Tor™ is connecting..."))
             }
             ACTION_STOP -> {
                 scope.launch {
@@ -92,13 +92,13 @@ class TorService : Service() {
     suspend fun startTor(config: TorConfiguration): Int {
         Log.d(TAG, "Starting Tor...")
 
-        startForeground(NOTIFICATION_ID, createNotification("Tor is connecting..."))
+        startForeground(NOTIFICATION_ID, createNotification("Tor™ is connecting..."))
 
         val manager = torManager ?: throw IllegalStateException("Service not initialized")
 
         try {
             val socksPort = manager.start(config)
-            updateNotification("Tor connected")
+            updateNotification("Tor™ connected")
             return socksPort
         } catch (e: Exception) {
             Log.e(TAG, "Failed to start Tor", e)
@@ -162,7 +162,7 @@ class TorService : Service() {
         )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("WebLibre Tor")
+            .setContentTitle("WebLibre Tor™")
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_onion)
             .setContentIntent(pendingIntent)
@@ -178,10 +178,10 @@ class TorService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Tor Service",
+                "Tor™ Service",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Keeps Tor running in the background"
+                description = "Keeps Tor™ running in the background"
                 setShowBadge(false)
             }
 

@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:search_client/search_client.dart';
+import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/domain/services/generic_website.dart';
 import 'package:weblibre/features/search_credits/domain/controllers/search_token_issuance_controller.dart';
 import 'package:weblibre/features/search_credits/domain/providers.dart';
@@ -302,7 +303,7 @@ class MetaSearchController extends _$MetaSearchController {
       state = state.copyWith(
         status: WebSearchStatus.error,
         errorMessage:
-            'Could not start Tor for the search. Disable the Tor toggle or try again.',
+            'Could not start $torBrand for the search. Disable the $torBrand toggle or try again.',
         hasOpenSession: false,
       );
       return;

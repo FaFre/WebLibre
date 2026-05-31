@@ -19,6 +19,8 @@
  */
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 
+import 'package:weblibre/core/branding/proxy_brands.dart';
+
 extension SingboxProxyProfileTypeExt on SingboxProxyProfileType {
   /// Long human label for menus, dialogs, subtitles.
   String get label => switch (this) {
@@ -33,7 +35,7 @@ extension SingboxProxyProfileTypeExt on SingboxProxyProfileType {
     SingboxProxyProfileType.hysteria2 => 'Hysteria2',
     SingboxProxyProfileType.tuic => 'TUIC',
     SingboxProxyProfileType.ssh => 'SSH',
-    SingboxProxyProfileType.wireguard => 'WireGuard',
+    SingboxProxyProfileType.wireguard => wireGuardBrand,
     SingboxProxyProfileType.shadowTls => 'ShadowTLS',
     SingboxProxyProfileType.anyTls => 'AnyTLS',
     SingboxProxyProfileType.customOutbound => 'Custom Outbound',

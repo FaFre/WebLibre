@@ -22,6 +22,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/features/proxy/presentation/controllers/proxy_profile_draft_controller.dart';
 import 'package:weblibre/features/user/data/models/proxy_dns_override.dart';
 
@@ -87,7 +88,7 @@ class ProfileDnsOverrideSection extends HookConsumerWidget {
       children: [
         Text(
           'Resolve names through a server reachable inside this profile '
-          '(e.g. an internal DoH server behind a corporate WireGuard). '
+          '(e.g. an internal DoH server behind a corporate $wireGuardBrand tunnel). '
           'Leave off to use automatic DNS handling.',
           style: Theme.of(context).textTheme.bodySmall,
         ),

@@ -23,7 +23,7 @@
             android:foregroundServiceType="specialUse">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Tor proxy service for anonymous networking" />
+                android:value="Tor™ proxy service for anonymous networking" />
         </service>
     </application>
 </manifest>

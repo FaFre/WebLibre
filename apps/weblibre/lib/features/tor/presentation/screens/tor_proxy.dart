@@ -23,6 +23,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
@@ -41,8 +42,8 @@ const List<SettingsSectionDefinition> torProxySettingsSections = [
     keywords: ['power', 'start', 'stop'],
     entries: [
       SettingsEntryDefinition(
-        title: 'Tor™ Service',
-        subtitle: 'Start or stop the Tor service',
+        title: torServiceLabel,
+        subtitle: 'Start or stop the $torBrand service',
         keywords: ['enable', 'connect'],
         child: _TorServiceTile(),
       ),
@@ -68,7 +69,7 @@ const List<SettingsSectionDefinition> torProxySettingsSections = [
       SettingsEntryDefinition(
         title: 'Transport',
         subtitle:
-            'Choose how to reach the Tor network when not auto-configured',
+            'Choose how to reach the $torNetworkLabel when not auto-configured',
         keywords: ['direct', 'obfs4', 'snowflake'],
         child: _TransportSection(),
       ),
@@ -103,7 +104,7 @@ const List<SettingsSectionDefinition> torProxySettingsSections = [
           leading: Icon(Icons.info_outline),
           title: Text('Trademark'),
           subtitle: Text(
-            'Tor is a trademark of The Tor Project; all rights reserved. '
+            '$torBrand is a trademark of The Tor Project; all rights reserved. '
             'WebLibre is not endorsed or sponsored by, or affiliated with, '
             'the Tor Project.',
           ),
@@ -133,7 +134,7 @@ class TorProxyScreen extends HookConsumerWidget {
     });
 
     return const SettingsDetailScaffold(
-      title: 'Tor™ Proxy',
+      title: torProxyLabel,
       subtitle:
           'Onion routing, pluggable transports, bridges and country restrictions.',
       icon: TorIcons.onionAlt,
@@ -177,8 +178,8 @@ class _TorServiceTile extends HookConsumerWidget {
       children: [
         SwitchListTile.adaptive(
           secondary: const Icon(MdiIcons.power),
-          title: const Text('Tor™ Service'),
-          subtitle: const Text('Start or stop the Tor service'),
+          title: const Text(torServiceLabel),
+          subtitle: const Text('Start or stop the $torBrand service'),
           value: pendingRequest.value ?? isRunning,
           onChanged: isBusy
               ? null
@@ -225,7 +226,7 @@ class _RequestNewIdentityTile extends ConsumerWidget {
       onTap: () async {
         await ref.read(torProxyServiceProvider.notifier).requestNewIdentity();
         if (context.mounted) {
-          showInfoMessage(context, 'Requesting new Tor identity...');
+          showInfoMessage(context, 'Requesting new $torBrand identity...');
         }
       },
     );
@@ -248,7 +249,7 @@ class _AutoConfigureTransportTile extends ConsumerWidget {
           secondary: const Icon(MdiIcons.arrowDecisionAuto),
           title: const Text('Auto Configure Transport'),
           subtitle: const Text(
-            'From some locations, it is necessary to use a pluggable transport to connect to Tor',
+            'From some locations, it is necessary to use a pluggable transport to connect to $torBrand',
           ),
           value: torSettings.config == TorConnectionConfig.auto,
           onChanged: isBusy
@@ -323,7 +324,7 @@ class _TransportSection extends ConsumerWidget {
                 enabled: !isBusy,
                 title: const Text('Direct Connection'),
                 subtitle: const Text(
-                  'The best way to connect to Tor if Tor is not blocked',
+                  'The best way to connect to $torBrand if $torBrand is not blocked',
                 ),
               ),
               RadioListTile<TorConnectionConfig>.adaptive(

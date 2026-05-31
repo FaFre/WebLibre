@@ -22,6 +22,7 @@ import 'dart:async';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
+import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 
@@ -57,7 +58,7 @@ class ContainerProxyRepository extends _$ContainerProxyRepository {
         return _service.upsertProxy(
           GeckoProxySettings(
             id: const TorProxyConnectionId().encode(),
-            title: 'Tor',
+            title: torBrand,
             type: 'socks',
             host: '127.0.0.1',
             port: port,

@@ -19,6 +19,7 @@
  */
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/proxy/data/models/singbox_proxy_profile.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
@@ -61,8 +62,8 @@ List<ProxyConnectionOption> proxyConnectionOptions(Ref ref) {
   return [
     ProxyConnectionOption(
       id: const TorProxyConnectionId(),
-      title: 'Tor',
-      subtitle: 'Route through the Tor network',
+      title: torBrand,
+      subtitle: 'Route through the $torNetworkLabel',
     ),
     for (final profile in singboxProfiles)
       ProxyConnectionOption(

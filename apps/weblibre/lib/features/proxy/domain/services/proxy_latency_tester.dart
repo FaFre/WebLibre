@@ -26,6 +26,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:socks5_proxy/socks_client.dart';
+import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
 import 'package:weblibre/features/tor/domain/extensions/tor_status_x.dart';
@@ -118,7 +119,7 @@ class ProxyLatencyResults extends _$ProxyLatencyResults {
     if (socksPort == null) {
       _set(
         const TorProxyConnectionId(),
-        AsyncError('Tor is not ready', StackTrace.current),
+        AsyncError('$torBrand is not ready', StackTrace.current),
       );
       return;
     }

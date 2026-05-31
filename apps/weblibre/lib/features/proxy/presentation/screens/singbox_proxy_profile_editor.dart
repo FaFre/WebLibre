@@ -22,6 +22,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/features/proxy/data/forms/singbox_form_specs.dart';
 import 'package:weblibre/features/proxy/data/models/proxy_profile_seed.dart';
 import 'package:weblibre/features/proxy/domain/extensions/singbox_proxy_profile_type_x.dart';
@@ -161,6 +163,10 @@ class _Editor extends ConsumerWidget {
                                 ?.copyWith(color: scheme.onSurfaceVariant),
                           ),
                         ),
+                      if (draft.type == SingboxProxyProfileType.wireguard) ...[
+                        const SizedBox(height: 12),
+                        const _WireGuardDisclaimer(),
+                      ],
                     ]),
                   ),
                 ),
@@ -168,6 +174,26 @@ class _Editor extends ConsumerWidget {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _WireGuardDisclaimer extends StatelessWidget {
+  const _WireGuardDisclaimer();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Text(
+        '$wireGuardBrand is a registered trademark of Jason A. Donenfeld; all '
+        'rights reserved. WebLibre is not endorsed or sponsored by, or '
+        'affiliated with, Jason A. Donenfeld.',
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
       ),
     );
   }

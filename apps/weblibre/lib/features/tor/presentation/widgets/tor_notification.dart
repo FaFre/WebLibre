@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/overlay.dart';
 import 'package:weblibre/features/tor/domain/extensions/tor_status_x.dart';
@@ -68,7 +69,7 @@ class TorNotification extends HookConsumerWidget {
                     ),
                     Expanded(
                       child: Text(
-                        'Tor Proxy is connecting...',
+                        '$torProxyLabel is connecting...',
                         style: Theme.of(
                           context,
                         ).textTheme.bodyMedium?.copyWith(color: Colors.white),

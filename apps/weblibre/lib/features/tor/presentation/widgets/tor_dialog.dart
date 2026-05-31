@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
 
@@ -30,9 +31,9 @@ class TorDialog extends StatelessWidget {
     final appColors = AppColors.of(context);
     return AlertDialog(
       icon: Icon(TorIcons.onionAlt, color: appColors.torPurple),
-      title: const Text('Tor™ Proxy'),
+      title: const Text(torProxyLabel),
       content: const Text(
-        'This container requires a Tor proxy for secure connections, which is not currently running.',
+        'This container requires a $torBrand proxy for secure connections, which is not currently running.',
       ),
       actions: [
         TextButton(

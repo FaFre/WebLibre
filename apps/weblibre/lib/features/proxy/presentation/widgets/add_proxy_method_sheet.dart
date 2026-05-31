@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
+import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/features/proxy/data/models/proxy_profile_seed.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_input_consumer.dart';
 import 'package:weblibre/features/qr_scanner/presentation/dialogs/qr_scanner_dialog.dart';
@@ -274,7 +275,7 @@ class _FileKindPicker extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.vpn_lock),
-              title: const Text('WireGuard config'),
+              title: const Text(wireGuardConfigLabel),
               subtitle: const Text('.conf file with [Interface]/[Peer]'),
               onTap: () =>
                   Navigator.of(context).pop(ProxyFileImportKind.wireguardConf),

@@ -23,6 +23,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/features/proxy/data/models/proxy_log_message.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_logs.dart';
 import 'package:weblibre/utils/ui_helper.dart';
@@ -202,7 +203,7 @@ class _EmptyLogs extends StatelessWidget {
         child: Text(
           hasFilter
               ? 'No log lines match the current filter.'
-              : 'No log lines yet. Start a proxy or Tor to see output here.',
+              : 'No log lines yet. Start a proxy or $torBrand to see output here.',
           textAlign: TextAlign.center,
         ),
       ),

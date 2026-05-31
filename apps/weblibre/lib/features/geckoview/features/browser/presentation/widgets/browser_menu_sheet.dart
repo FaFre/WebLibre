@@ -35,6 +35,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/persisted_bool.dart';
@@ -2043,7 +2044,7 @@ class _ConnectionCard extends ConsumerWidget {
     final rows = <Widget>[
       _ConnectionRow(
         icon: TorIcons.onionAlt,
-        label: 'Tor™ Proxy',
+        label: torProxyLabel,
         active: isTorActive,
         enabled: !isTorBusy,
         onToggle: () async {

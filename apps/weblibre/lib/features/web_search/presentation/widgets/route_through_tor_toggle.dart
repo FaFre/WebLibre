@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/search_credits/domain/providers/proxy_client.dart';
 import 'package:weblibre/features/search_credits/domain/repositories/web_search_settings.dart';
@@ -121,7 +122,7 @@ class RouteThroughTorToggle extends HookConsumerWidget {
               ),
             const SizedBox(width: 6),
             Text(
-              routeThroughTor ? 'Tor on' : 'Tor off',
+              routeThroughTor ? '$torBrand on' : '$torBrand off',
               style: textTheme.labelLarge?.copyWith(
                 color: routeThroughTor
                     ? colorScheme.onPrimaryContainer

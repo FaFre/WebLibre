@@ -22,6 +22,7 @@ import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/proxy/data/forms/singbox_form_specs.dart';
 import 'package:weblibre/features/proxy/data/models/proxy_profile_seed.dart';
@@ -70,8 +71,8 @@ class ProxyInputConsumer extends _$ProxyInputConsumer {
 
     if (_looksLikeWireguardConf(trimmed)) {
       return _seedOutcome(
-        () => _seedFromWireguardConf(trimmed, fileName: 'WireGuard'),
-        logMessage: 'Failed to parse WireGuard configuration',
+        () => _seedFromWireguardConf(trimmed, fileName: wireGuardBrand),
+        logMessage: 'Failed to parse $wireGuardBrand configuration',
       );
     }
 

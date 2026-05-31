@@ -1,6 +1,7 @@
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod/riverpod.dart';
+import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
@@ -41,7 +42,38 @@ void main() {
         const TorProxyConnectionId(),
         const SingboxProxyConnectionId('profile-1'),
       ]);
-      expect(options.map((option) => option.title), ['Tor', 'Mullvad']);
+      expect(options.map((option) => option.title), [torBrand, 'Mullvad']);
+    });
+
+    test('uses standardized WireGuard branding for subtitles', () async {
+      final createdAt = DateTime(2026);
+      final container = ProviderContainer(
+        overrides: [
+          singboxProxyProfilesRepositoryProvider.overrideWith(
+            () => _FakeProfilesRepository([
+              ProxyProfile(
+                id: 'profile-1',
+                name: 'Home Tunnel',
+                type: SingboxProxyProfileType.wireguard,
+                configJson: '{"type":"wireguard"}',
+                createdAt: createdAt,
+                updatedAt: createdAt,
+              ),
+            ]),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      container.listen(
+        singboxProxyProfilesRepositoryProvider,
+        (_, _) {},
+        fireImmediately: true,
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      final options = container.read(proxyConnectionOptionsProvider);
+      expect(options[1].subtitle, wireGuardBrand);
     });
 
     test('labels unknown proxy ids explicitly', () {
