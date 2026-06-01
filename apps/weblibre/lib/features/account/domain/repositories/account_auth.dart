@@ -19,9 +19,9 @@
  */
 import 'dart:async';
 
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase/supabase.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/device_info.dart';
 import 'package:weblibre/features/about/domain/providers.dart';
@@ -222,16 +222,7 @@ class AccountAuthRepository extends _$AccountAuthRepository {
       final baseUri = Uri.parse(SupabaseConfig.accountWebUrl);
       final uri = baseUri.replace(queryParameters: queryParams);
 
-      final launched = await launchUrl(uri, mode: LaunchMode.inAppBrowserView);
-      if (!launched) {
-        state = AsyncData(
-          _currentOrEmpty.copyWith(
-            status: AccountAuthStatus.error,
-            lastError: 'Could not open sign-in page',
-          ),
-        );
-        return;
-      }
+      await GeckoBrowserService().openInCustomTab(url: uri, private: false);
 
       // Set the timer last so any earlier error path doesn't have to think
       // about cancelling a timer it never started. Guard the body so that a

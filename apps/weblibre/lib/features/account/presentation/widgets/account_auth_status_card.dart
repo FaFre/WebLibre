@@ -76,7 +76,7 @@ class _SigningInTile extends ConsumerWidget {
           const Text('Signing in...'),
           const SizedBox(height: 8),
           Text(
-            'Complete sign-in in your browser',
+            'Complete sign-in in WebLibre',
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 16),
