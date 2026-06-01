@@ -191,6 +191,7 @@ class GeckoBookmarksApiImpl() : GeckoBookmarksApi {
                     title = info.title,
                     url = info.url
                 )
+                val oldNode = components.core.bookmarksStorage.getBookmark(guid).getOrNull()
                 val result = components.core.bookmarksStorage.updateNode(guid, conceptInfo)
                 result.fold(
                     { callback(Result.success(Unit)) },
@@ -199,10 +200,10 @@ class GeckoBookmarksApiImpl() : GeckoBookmarksApi {
                 if (result.isSuccess) {
                     components.core.bookmarksStorage.getBookmark(guid).getOrNull()?.let { node ->
                         if (info.title != null || info.url != null) {
-                            GeckoBookmarksExtensionBridge.emitChanged(node)
+                            GeckoBookmarksExtensionBridge.emitChanged(node, oldNode)
                         }
                         if (info.parentGuid != null || info.position != null) {
-                            GeckoBookmarksExtensionBridge.emitMoved(node)
+                            GeckoBookmarksExtensionBridge.emitMoved(node, oldNode)
                         }
                     }
                 }

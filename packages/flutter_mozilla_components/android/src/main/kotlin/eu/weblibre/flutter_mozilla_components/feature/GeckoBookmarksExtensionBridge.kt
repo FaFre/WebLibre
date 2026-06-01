@@ -249,6 +249,12 @@ object GeckoBookmarksExtensionBridge : BundleEventListener {
                 .getOrNull()?.children?.size ?: 0).toUInt()
         }
 
+        val oldNode = store.getBookmark(guid).getOrNull()
+        if (oldNode == null) {
+            callback.sendError("Bookmark not found: $guid")
+            return
+        }
+
         store.updateNode(
             guid,
             BookmarkInfo(parentGuid = parentGuid, position = position, title = null, url = null),
@@ -259,7 +265,7 @@ object GeckoBookmarksExtensionBridge : BundleEventListener {
             callback.sendError("Bookmark not found: $guid")
             return
         }
-        emitMoved(node)
+        emitMoved(node, oldNode)
         callback.sendSuccess(nodeToBundle(node, includeChildren = false))
     }
 
@@ -276,6 +282,12 @@ object GeckoBookmarksExtensionBridge : BundleEventListener {
         val title = message.getString("title")
         val url = message.getString("url")
 
+        val oldNode = store.getBookmark(guid).getOrNull()
+        if (oldNode == null) {
+            callback.sendError("Bookmark not found: $guid")
+            return
+        }
+
         store.updateNode(
             guid,
             BookmarkInfo(parentGuid = null, position = null, title = title, url = url),
@@ -286,7 +298,7 @@ object GeckoBookmarksExtensionBridge : BundleEventListener {
             callback.sendError("Bookmark not found: $guid")
             return
         }
-        emitChanged(node)
+        emitChanged(node, oldNode)
         callback.sendSuccess(nodeToBundle(node, includeChildren = false))
     }
 
@@ -312,7 +324,11 @@ object GeckoBookmarksExtensionBridge : BundleEventListener {
                 return
             }
         }
-        store.deleteNode(guid).getOrThrow()
+        val deleted = store.deleteNode(guid).getOrThrow()
+        if (!deleted) {
+            callback.sendError("Bookmark not found: $guid")
+            return
+        }
         if (node != null) {
             emitRemoved(node)
         }
@@ -349,20 +365,35 @@ object GeckoBookmarksExtensionBridge : BundleEventListener {
     }
 
     /** Notify extension listeners that a bookmark's title and/or url changed. */
-    fun emitChanged(node: BookmarkNode) {
+    fun emitChanged(
+        node: BookmarkNode,
+        oldNode: BookmarkNode? = null,
+        titleChanged: Boolean = oldNode?.title != node.title,
+        urlChanged: Boolean = oldNode?.url != node.url,
+    ) {
+        if (!titleChanged && !urlChanged) {
+            return
+        }
+
         val bundle = GeckoBundle()
         bundle.putString("guid", node.guid)
-        node.title?.let { bundle.putString("title", it) }
-        node.url?.let { bundle.putString("url", it) }
+        if (titleChanged) {
+            node.title?.let { bundle.putString("title", it) }
+        }
+        if (urlChanged) {
+            node.url?.let { bundle.putString("url", it) }
+        }
         dispatch(EVENT_ON_CHANGED, bundle)
     }
 
     /** Notify extension listeners that a bookmark moved to a new parent/index. */
-    fun emitMoved(node: BookmarkNode) {
+    fun emitMoved(node: BookmarkNode, oldNode: BookmarkNode? = null) {
         val bundle = GeckoBundle()
         bundle.putString("guid", node.guid)
         node.parentGuid?.let { bundle.putString("parentId", it) }
         node.position?.let { bundle.putInt("index", it.toInt()) }
+        oldNode?.parentGuid?.let { bundle.putString("oldParentId", it) }
+        oldNode?.position?.let { bundle.putInt("oldIndex", it.toInt()) }
         dispatch(EVENT_ON_MOVED, bundle)
     }
 
