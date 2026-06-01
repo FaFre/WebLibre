@@ -29,6 +29,7 @@ import eu.weblibre.flutter_mozilla_components.addons.AddonPrefs
 import eu.weblibre.flutter_mozilla_components.api.GeckoViewportApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
 import eu.weblibre.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
+import eu.weblibre.flutter_mozilla_components.feature.GeckoBookmarksExtensionBridge
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -406,6 +407,10 @@ object GlobalComponents {
                 // Web extension support is only available for engine gecko
                 Logger.error("Failed to initialize web extension support", e)
             }
+
+            // Answer browser.bookmarks requests from extensions (e.g. floccus)
+            // out of the shared application-services Places store.
+            GeckoBookmarksExtensionBridge.register()
 
             GlobalScope.launch(Dispatchers.IO) {
                 newComponents.core.fileUploadsDirCleaner.cleanUploadsDirectory()

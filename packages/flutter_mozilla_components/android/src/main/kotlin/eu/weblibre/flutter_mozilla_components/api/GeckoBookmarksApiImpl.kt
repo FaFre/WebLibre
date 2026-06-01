@@ -1,6 +1,7 @@
 package eu.weblibre.flutter_mozilla_components.api
 
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.feature.GeckoBookmarksExtensionBridge
 import eu.weblibre.flutter_mozilla_components.pigeons.BookmarkInfo
 import eu.weblibre.flutter_mozilla_components.pigeons.BookmarkNode
 import eu.weblibre.flutter_mozilla_components.pigeons.BookmarkNodeType
@@ -147,11 +148,13 @@ class GeckoBookmarksApiImpl() : GeckoBookmarksApi {
     ) {
         coroutineScope.launch {
             withContext(Dispatchers.Main) {
-                components.core.bookmarksStorage.addItem(parentGuid, url, title, position?.toUInt())
-                    .fold(
-                        { guid -> callback(Result.success(guid)) },
-                        { e -> callback(Result.failure(e)) }
-                    )
+                val result =
+                    components.core.bookmarksStorage.addItem(parentGuid, url, title, position?.toUInt())
+                result.fold(
+                    { guid -> callback(Result.success(guid)) },
+                    { e -> callback(Result.failure(e)) }
+                )
+                emitCreated(result.getOrNull())
             }
         }
     }
@@ -164,11 +167,13 @@ class GeckoBookmarksApiImpl() : GeckoBookmarksApi {
     ) {
         coroutineScope.launch {
             withContext(Dispatchers.Main) {
-                components.core.bookmarksStorage.addFolder(parentGuid, title, position?.toUInt())
-                    .fold(
-                        { guid -> callback(Result.success(guid)) },
-                        { e -> callback(Result.failure(e)) }
-                    )
+                val result =
+                    components.core.bookmarksStorage.addFolder(parentGuid, title, position?.toUInt())
+                result.fold(
+                    { guid -> callback(Result.success(guid)) },
+                    { e -> callback(Result.failure(e)) }
+                )
+                emitCreated(result.getOrNull())
             }
         }
     }
@@ -186,10 +191,21 @@ class GeckoBookmarksApiImpl() : GeckoBookmarksApi {
                     title = info.title,
                     url = info.url
                 )
-                components.core.bookmarksStorage.updateNode(guid, conceptInfo).fold(
+                val result = components.core.bookmarksStorage.updateNode(guid, conceptInfo)
+                result.fold(
                     { callback(Result.success(Unit)) },
                     { e -> callback(Result.failure(e)) }
                 )
+                if (result.isSuccess) {
+                    components.core.bookmarksStorage.getBookmark(guid).getOrNull()?.let { node ->
+                        if (info.title != null || info.url != null) {
+                            GeckoBookmarksExtensionBridge.emitChanged(node)
+                        }
+                        if (info.parentGuid != null || info.position != null) {
+                            GeckoBookmarksExtensionBridge.emitMoved(node)
+                        }
+                    }
+                }
             }
         }
     }
@@ -200,11 +216,31 @@ class GeckoBookmarksApiImpl() : GeckoBookmarksApi {
     ) {
         coroutineScope.launch {
             withContext(Dispatchers.Main) {
+                val node = components.core.bookmarksStorage.getBookmark(guid).getOrNull()
                 components.core.bookmarksStorage.deleteNode(guid).fold(
-                    { deleted -> callback(Result.success(deleted)) },
+                    { deleted ->
+                        callback(Result.success(deleted))
+                        if (deleted && node != null) {
+                            GeckoBookmarksExtensionBridge.emitRemoved(node)
+                        }
+                    },
                     { e -> callback(Result.failure(e)) }
                 )
             }
+        }
+    }
+
+    /**
+     * Notifies extension `bookmarks.onCreated` listeners about a node created
+     * through the app UI, so extensions (e.g. floccus) observe app-side edits to
+     * the shared store.
+     */
+    private suspend fun emitCreated(guid: String?) {
+        if (guid == null) {
+            return
+        }
+        components.core.bookmarksStorage.getBookmark(guid).getOrNull()?.let {
+            GeckoBookmarksExtensionBridge.emitCreated(it)
         }
     }
 
