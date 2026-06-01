@@ -91,7 +91,7 @@ class GeneralSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const SettingsDetailScaffold(
       title: 'General',
-      subtitle: 'Appearance, language, downloads, and browser defaults.',
+      subtitle: 'Appearance, downloads, and browser defaults.',
       icon: Icons.tune,
       sections: generalSettingsSections,
     );

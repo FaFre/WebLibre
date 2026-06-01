@@ -98,7 +98,7 @@ _CategoryGroups _buildCategories() {
   final browser = [
     _SettingsCategoryDefinition(
       title: 'General',
-      subtitle: 'Appearance, language, downloads',
+      subtitle: 'Appearance, downloads',
       icon: Icons.tune,
       keywords: const ['theme', 'ui zoom', 'default browser'],
       sections: generalSettingsSections,
