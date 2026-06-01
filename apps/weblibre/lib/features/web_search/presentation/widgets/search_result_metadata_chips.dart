@@ -49,8 +49,8 @@ const _keyOrder = <String>[
 ];
 
 const _hiddenKeys = {
-  // The publisher-declared article date duplicates the inline `publishedDate`
-  // shown under the title. Keep only the inline version.
+  // The publisher-declared article date duplicates the result's own
+  // `publishedDate`, surfaced as the `released` chip. Keep only that one.
   'date',
   'score',
   'gravity',
@@ -191,7 +191,76 @@ List<MetadataItem> _metadataFromPage(PageMetadata? pageMetadata) {
   return items;
 }
 
-class SearchResultMetadataChips extends StatelessWidget {
+/// Resolves and de-duplicates the decorative chips for a result. The result's
+/// own published date wins over any publisher-declared date from the fetched
+/// page; page metadata then takes priority over result metadata on
+/// per-key deduplication. Returns the list already sorted into [_keyOrder].
+List<_ResolvedMetadataItem> _resolveChips({
+  required List<MetadataItem> metadata,
+  required PageMetadata? pageMetadata,
+  required String? queryLanguage,
+  required String? publishedDate,
+}) {
+  final seen = <String>{};
+  final merged = <_ResolvedMetadataItem>[];
+
+  if (publishedDate?.trim() case final String date when date.isNotEmpty) {
+    seen.add('released');
+    merged.add(
+      _ResolvedMetadataItem(
+        item: MetadataItem(key: 'released', value: date),
+        isLanguage: false,
+      ),
+    );
+  }
+
+  void absorb(List<MetadataItem> items) {
+    for (final item in items) {
+      if (_expandableKeys.contains(item.key)) continue;
+      if (_hiddenKeys.contains(item.key)) continue;
+      if (item.value.trim().isEmpty) continue;
+      if (item.key == 'language' &&
+          _languageMatchesQuery(item.value, queryLanguage)) {
+        continue;
+      }
+      if (!seen.add(item.key)) continue;
+      merged.add(
+        _ResolvedMetadataItem(item: item, isLanguage: item.key == 'language'),
+      );
+    }
+  }
+
+  // Page metadata first so it takes priority on deduplication.
+  absorb(_metadataFromPage(pageMetadata));
+  absorb(metadata);
+
+  merged.sort((a, b) {
+    final ai = _keyOrderIndex[a.item.key] ?? _keyOrder.length;
+    final bi = _keyOrderIndex[b.item.key] ?? _keyOrder.length;
+    return ai.compareTo(bi);
+  });
+
+  return merged;
+}
+
+/// The snippet/review/question entries worth revealing in the snippets panel.
+/// Exposed so a parent (e.g. the result card) can decide whether to show the
+/// snippets toggle and render the panel itself.
+List<MetadataItem> resolveSnippetEntries(List<MetadataItem> metadata) {
+  return metadata
+      .where((item) => _expandableKeys.contains(item.key))
+      .where((item) => item.value.trim().isNotEmpty)
+      .toList();
+}
+
+/// Decorative metadata chips for a search result. An optional [trailing] action
+/// (the snippets toggle) is pinned to the end of the same row, outside the
+/// horizontal scroll. The expanding snippets panel itself is *not* rendered
+/// here — the parent owns it so it can sit full-bleed at the card's edge rather
+/// than nested inside the chip row's padding.
+///
+/// Collapses to nothing when there are neither chips nor a trailing action.
+class SearchResultMetadataSection extends StatelessWidget {
   final List<MetadataItem> metadata;
   final PageMetadata? pageMetadata;
 
@@ -200,57 +269,135 @@ class SearchResultMetadataChips extends StatelessWidget {
   /// chip is suppressed as redundant.
   final String? queryLanguage;
 
-  const SearchResultMetadataChips({
+  /// The result's published date, surfaced as a leading `released` chip
+  /// (calendar icon, formatted).
+  final String? publishedDate;
+
+  /// Applied only when the section actually renders content, so callers can
+  /// reserve spacing without having to predict whether the section is empty.
+  final EdgeInsetsGeometry padding;
+
+  /// Optional trailing action pinned to the end of the chip row (typically a
+  /// [SearchResultSnippetsToggle]).
+  final Widget? trailing;
+
+  const SearchResultMetadataSection({
     super.key,
     required this.metadata,
     this.pageMetadata,
     this.queryLanguage,
+    this.publishedDate,
+    this.padding = EdgeInsets.zero,
+    this.trailing,
   });
 
   @override
   Widget build(BuildContext context) {
+    final chips = _resolveChips(
+      metadata: metadata,
+      pageMetadata: pageMetadata,
+      queryLanguage: queryLanguage,
+      publishedDate: publishedDate,
+    );
+
+    final trailingAction = trailing;
+
+    if (chips.isEmpty && trailingAction == null) {
+      return const SizedBox.shrink();
+    }
+
+    final Widget header;
+    if (trailingAction == null) {
+      header = _MetadataChipRow(items: chips);
+    } else if (chips.isEmpty) {
+      header = Align(alignment: Alignment.centerLeft, child: trailingAction);
+    } else {
+      header = Row(
+        children: [
+          Expanded(child: _MetadataChipRow(items: chips)),
+          const SizedBox(width: 8),
+          trailingAction,
+        ],
+      );
+    }
+
+    return Padding(padding: padding, child: header);
+  }
+}
+
+/// Horizontally-scrolling run of decorative metadata, rendered as a single
+/// [Text.rich] rather than bordered chips: each item is an inline icon followed
+/// by its value, with neighbouring items joined by a faded middot. This is far
+/// more horizontally compact than a row of pills (no per-chip border, padding
+/// or background), and since the items are purely decorative there's no tap
+/// target to preserve. The leading icon of each group doubles as a visual
+/// separator; the middot keeps multi-word values from blurring into the next
+/// icon.
+class _MetadataChipRow extends StatelessWidget {
+  final List<_ResolvedMetadataItem> items;
+
+  const _MetadataChipRow({required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    if (items.isEmpty) return const SizedBox.shrink();
+
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
-    final seen = <String>{};
-    final merged = <_ResolvedMetadataItem>[];
+    final labelStyle = textTheme.bodySmall?.copyWith(
+      color: colorScheme.onSurfaceVariant,
+    );
 
-    // Page metadata items first so they take priority on deduplication.
-    for (final item in _metadataFromPage(pageMetadata)) {
-      if (_expandableKeys.contains(item.key)) continue;
-      if (_hiddenKeys.contains(item.key)) continue;
-      if (item.value.trim().isEmpty) continue;
-      if (item.key == 'language' &&
-          _languageMatchesQuery(item.value, queryLanguage)) {
-        continue;
+    final spans = <InlineSpan>[];
+    for (var i = 0; i < items.length; i++) {
+      if (i > 0) {
+        spans.add(
+          TextSpan(
+            text: '  ·  ',
+            style: labelStyle?.copyWith(color: colorScheme.outlineVariant),
+          ),
+        );
       }
-      if (!seen.add(item.key)) continue;
-      merged.add(
-        _ResolvedMetadataItem(item: item, isLanguage: item.key == 'language'),
-      );
-    }
 
-    for (final item in metadata) {
-      if (_expandableKeys.contains(item.key)) continue;
-      if (_hiddenKeys.contains(item.key)) continue;
-      if (item.value.trim().isEmpty) continue;
-      if (item.key == 'language' &&
-          _languageMatchesQuery(item.value, queryLanguage)) {
-        continue;
+      final item = items[i];
+
+      spans.add(
+        WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: Icon(
+              _iconFor(item.item.key),
+              size: 14,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      );
+
+      if (item.isLanguage) {
+        // The language value resolves asynchronously via a provider, so it has
+        // to be an embedded consumer widget rather than a plain TextSpan.
+        spans.add(
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: _ResolvedLanguageLabel(
+              languageTag: item.item.value,
+              style: labelStyle,
+            ),
+          ),
+        );
+      } else {
+        spans.add(
+          TextSpan(
+            text:
+                _formatValue(item.item.key, item.item.value) ?? item.item.value,
+            style: labelStyle,
+          ),
+        );
       }
-      // Skip if page metadata already provided this key (preview takes priority).
-      if (!seen.add(item.key)) continue;
-      merged.add(
-        _ResolvedMetadataItem(item: item, isLanguage: item.key == 'language'),
-      );
     }
-
-    if (merged.isEmpty) return const SizedBox.shrink();
-
-    merged.sort((a, b) {
-      final ai = _keyOrderIndex[a.item.key] ?? _keyOrder.length;
-      final bi = _keyOrderIndex[b.item.key] ?? _keyOrder.length;
-      return ai.compareTo(bi);
-    });
 
     return FadingScroll(
       fadingSize: 15,
@@ -258,40 +405,113 @@ class SearchResultMetadataChips extends StatelessWidget {
         return SingleChildScrollView(
           controller: controller,
           scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              for (var i = 0; i < merged.length; i++) ...[
-                if (i > 0) const SizedBox(width: 8),
-                // Decorative — these chips don't filter or navigate. Using a
-                // plain Chip (instead of an OutlinedButton with an empty
-                // onPressed) avoids the misleading tap ripple.
-                Chip(
-                  avatar: Icon(
-                    _iconFor(merged[i].item.key),
-                    size: 16,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  label: merged[i].isLanguage
-                      ? _ResolvedLanguageLabel(
-                          languageTag: merged[i].item.value,
-                        )
-                      : Text(
-                          _formatValue(
-                                merged[i].item.key,
-                                merged[i].item.value,
-                              ) ??
-                              merged[i].item.value,
-                        ),
-                  side: BorderSide(color: colorScheme.outlineVariant),
-                  labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
-                  backgroundColor: Colors.transparent,
-                  visualDensity: VisualDensity.compact,
-                ),
-              ],
-            ],
+          child: Text.rich(
+            TextSpan(children: spans),
+            maxLines: 1,
+            softWrap: false,
           ),
         );
       },
+    );
+  }
+}
+
+/// The trailing chevron toggle for the snippets panel. Mirrors the card's
+/// Fetch button (tonal fill, compact density) so the two trailing actions read
+/// as a consistent pair; the chevron rotates to reflect the expanded state.
+class SearchResultSnippetsToggle extends StatelessWidget {
+  final bool expanded;
+  final VoidCallback onToggle;
+
+  const SearchResultSnippetsToggle({
+    super.key,
+    required this.expanded,
+    required this.onToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: onToggle,
+      icon: AnimatedRotation(
+        turns: expanded ? 0.5 : 0,
+        duration: const Duration(milliseconds: 200),
+        child: const Icon(Icons.expand_more, size: 16),
+      ),
+      visualDensity: VisualDensity.compact,
+      tooltip: 'Snippets',
+    );
+  }
+}
+
+/// The expanded snippet/review/question entries, in a tinted full-bleed panel.
+/// Intended to be placed *outside* the card's content padding so it spans edge
+/// to edge and its bottom corners are clipped by the card (pass [borderRadius]
+/// when used somewhere without a clipping ancestor). Questions get a bold `Q:`
+/// prefix and italic body; snippets and reviews render plain.
+class SearchResultSnippetsPanel extends StatelessWidget {
+  final List<MetadataItem> entries;
+  final BorderRadius borderRadius;
+
+  const SearchResultSnippetsPanel({
+    super.key,
+    required this.entries,
+    this.borderRadius = BorderRadius.zero,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: borderRadius,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Additional Snippets',
+            style: textTheme.labelMedium?.copyWith(
+              color: colorScheme.primary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 6),
+          for (final item in entries) ...[
+            if (item != entries.first) const SizedBox(height: 8),
+            Text.rich(
+              TextSpan(
+                children: [
+                  if (item.key == 'question')
+                    TextSpan(
+                      text: 'Q: ',
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w600,
+                        height: 1.5,
+                      ),
+                    ),
+                  TextSpan(
+                    text: item.value,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      height: 1.5,
+                      fontStyle: item.key == 'question'
+                          ? FontStyle.italic
+                          : null,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
@@ -304,14 +524,15 @@ class _ResolvedMetadataItem {
 
 class _ResolvedLanguageLabel extends ConsumerWidget {
   final String languageTag;
+  final TextStyle? style;
 
-  const _ResolvedLanguageLabel({required this.languageTag});
+  const _ResolvedLanguageLabel({required this.languageTag, this.style});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = intl.Locale.tryParse(languageTag);
 
-    if (locale == null) return Text(languageTag);
+    if (locale == null) return Text(languageTag, style: style);
 
     final resolved = ref.watch(resolveLocaleProvider(locale));
 
@@ -320,88 +541,7 @@ class _ResolvedLanguageLabel extends ConsumerWidget {
         data: (data) => data.languageName,
         orElse: () => languageTag,
       ),
-    );
-  }
-}
-
-class SearchResultMetadataExpandable extends StatelessWidget {
-  final List<MetadataItem> metadata;
-
-  const SearchResultMetadataExpandable({super.key, required this.metadata});
-
-  @override
-  Widget build(BuildContext context) {
-    final entries = metadata
-        .where((item) => _expandableKeys.contains(item.key))
-        .where((item) => item.value.trim().isNotEmpty)
-        .toList();
-
-    if (entries.isEmpty) return const SizedBox.shrink();
-
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final hasSnippets = entries.any((e) => e.key == 'snippet');
-    final hasReview = entries.any((e) => e.key == 'review');
-    final hasQuestion = entries.any((e) => e.key == 'question');
-
-    final parts = [
-      if (hasQuestion) 'question',
-      if (hasSnippets) 'snippets',
-      if (hasReview) 'review',
-    ];
-
-    final label = parts.isEmpty ? 'More' : 'Show ${parts.join(' & ')}';
-
-    return Theme(
-      data: Theme.of(context).copyWith(
-        dividerColor: Colors.transparent,
-        splashColor: Colors.transparent,
-      ),
-      child: ExpansionTile(
-        tilePadding: EdgeInsets.zero,
-        childrenPadding: const EdgeInsets.only(bottom: 8),
-        dense: true,
-        visualDensity: VisualDensity.compact,
-        title: Text(
-          label,
-          style: textTheme.labelLarge?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ),
-        children: [
-          for (final item in entries) ...[
-            if (item != entries.first) const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text.rich(
-                TextSpan(
-                  children: [
-                    if (item.key == 'question')
-                      TextSpan(
-                        text: 'Q: ',
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurface,
-                          fontWeight: FontWeight.w600,
-                          height: 1.5,
-                        ),
-                      ),
-                    TextSpan(
-                      text: item.value,
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        height: 1.5,
-                        fontStyle: item.key == 'question'
-                            ? FontStyle.italic
-                            : null,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
+      style: style,
     );
   }
 }

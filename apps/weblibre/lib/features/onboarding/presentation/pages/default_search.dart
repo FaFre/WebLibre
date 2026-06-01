@@ -24,6 +24,7 @@ import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
+import 'package:weblibre/features/bangs/presentation/widgets/bang_label.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/bang_icon.dart';
@@ -85,7 +86,7 @@ class DefaultSearchPage extends HookConsumerWidget {
                     alignment: Alignment.centerLeft,
                     child: FilterChip(
                       showCheckmark: false,
-                      label: Text(activeBang.websiteName),
+                      label: BangLabel(activeBang),
                       avatar: UrlIcon([
                         activeBang.getDefaultUrl(),
                       ], iconSize: 20),
@@ -100,7 +101,7 @@ class DefaultSearchPage extends HookConsumerWidget {
                     ...availableBangs.map(
                       (bang) => FilterChip(
                         showCheckmark: false,
-                        label: Text(bang.websiteName),
+                        label: BangLabel(bang),
                         avatar: UrlIcon([bang.getDefaultUrl()], iconSize: 20),
                         selected: activeBang?.trigger == bang.trigger,
                         onSelected: (selected) async {

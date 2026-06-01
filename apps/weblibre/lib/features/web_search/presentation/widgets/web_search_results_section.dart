@@ -179,8 +179,6 @@ class WebSearchResultsSection extends HookConsumerWidget {
                   result: result,
                   onOpen: openUri,
                   onFetch: onFetch,
-                  onPreview: showPreview,
-                  onOpenCapture: openCapture,
                 );
               },
             ),

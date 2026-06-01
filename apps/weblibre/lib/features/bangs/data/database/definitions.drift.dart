@@ -3374,6 +3374,7 @@ class DefinitionsDrift extends i7.ModularAccessor {
     ).map(
       (i0.QueryRow row) => i8.SearchHistoryEntry(
         searchQuery: row.read<String>('search_query'),
+        group: i3.BangHistory.$convertergroup.fromSql(row.read<int>('group')),
         trigger: row.read<String>('trigger'),
         searchDate: row.read<DateTime>('search_date'),
       ),

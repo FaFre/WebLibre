@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
+import 'package:weblibre/features/bangs/presentation/widgets/bang_label.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
@@ -97,7 +98,7 @@ class BangChipStrip extends StatelessWidget {
                 itemId: (bang) => bang.trigger,
                 itemAvatar: (bang) =>
                     UrlIcon([bang.getDefaultUrl()], iconSize: 20),
-                itemLabel: (bang) => Text(bang.websiteName),
+                itemLabel: (bang) => BangLabel(bang),
                 itemTooltip: (bang) => bang.trigger,
                 availableItems: bangs,
                 selectedItem: selectedBang,

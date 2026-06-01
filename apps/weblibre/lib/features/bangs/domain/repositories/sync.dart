@@ -21,7 +21,6 @@ import 'package:exceptions/exceptions.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/bangs/data/database/database.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
-import 'package:weblibre/features/bangs/data/models/web_search_bang.dart';
 import 'package:weblibre/features/bangs/data/providers.dart';
 import 'package:weblibre/features/bangs/data/services/data_source.dart';
 
@@ -67,12 +66,6 @@ class BangSyncRepository extends _$BangSyncRepository {
     if (group.bundled == null) {
       return Result.failure(
         const ErrorMessage(source: 'BangSync', message: 'Not bundled'),
-      );
-    }
-
-    if (group.remote == null) {
-      return Result.failure(
-        const ErrorMessage(source: 'BangSync', message: 'No remote source'),
       );
     }
 
@@ -171,21 +164,6 @@ class BangSyncRepository extends _$BangSyncRepository {
         .watchSingleOrNull();
   }
 
-  Future<Result<void>> _syncSyntheticBangs() async {
-    try {
-      await ref.read(bangDatabaseProvider).bangDao.upsertBang(webSearchBang);
-      return Result.success(null);
-    } catch (e) {
-      return Result.failure(
-        ErrorMessage(
-          message: 'Failed to sync synthetic Bangs',
-          source: 'BangSync',
-          details: e,
-        ),
-      );
-    }
-  }
-
   Future<Map<BangGroup, Result<void>>> syncBundledBangGroups({
     Set<BangGroup>? groups,
   }) async {
@@ -199,10 +177,7 @@ class BangSyncRepository extends _$BangSyncRepository {
       ).then((result) => MapEntry(source, result)),
     );
 
-    return {
-      ...Map.fromEntries(await Future.wait(futures)),
-      BangGroup.weblibre: await _syncSyntheticBangs(),
-    };
+    return Map.fromEntries(await Future.wait(futures));
   }
 
   @override

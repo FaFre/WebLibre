@@ -18,10 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
+import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -77,6 +79,15 @@ class BangDetails extends HookConsumerWidget {
                       ],
                     ),
                   ),
+                  if (bangData.group == BangGroup.weblibre)
+                    const Tooltip(
+                      message: 'Official WebLibre search',
+                      child: Icon(
+                        MdiIcons.crown,
+                        color: Colors.amber,
+                        size: 20.0,
+                      ),
+                    ),
                 ],
               ),
               const SizedBox(height: 8.0),

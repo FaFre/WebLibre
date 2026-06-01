@@ -32,6 +32,13 @@ import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 
+/// Origins served by a bundled asset instead of a network-fetched favicon.
+/// Lets first-party properties (e.g. the WebLibre search bang) show their
+/// brand mark rather than a generic globe or a remotely fetched icon.
+const _bundledIconByOrigin = {
+  'https://weblibre.eu': 'assets/icon/bang_icon.png',
+};
+
 Uint8List? selectFirstCachedIconBytes(Iterable<Uint8List?> cachedBytesByUrl) {
   for (final cachedBytes in cachedBytesByUrl) {
     if (cachedBytes != null) {
@@ -59,6 +66,20 @@ class UrlIcon extends HookConsumerWidget {
     final eligibleUrls = urlList
         .where((u) => u.isScheme('http') || u.isScheme('https'))
         .toList();
+
+    for (final url in eligibleUrls) {
+      final asset = _bundledIconByOrigin[url.origin];
+      if (asset != null) {
+        return RepaintBoundary(
+          child: Image.asset(
+            asset,
+            height: iconSize,
+            width: iconSize,
+            fit: BoxFit.contain,
+          ),
+        );
+      }
+    }
 
     final cachedBytesByUrl = [
       for (final url in eligibleUrls)

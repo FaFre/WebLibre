@@ -28,6 +28,7 @@ import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/providers/search.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
+import 'package:weblibre/features/bangs/presentation/widgets/bang_label.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/dialogs/reset_bang_dialog.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/bang_chip_strip.dart';
@@ -235,7 +236,7 @@ class _DefaultSearchProviderChip extends ConsumerWidget {
 
         return ActionChip(
           avatar: UrlIcon([bang.getDefaultUrl()], iconSize: 20),
-          label: Text(bang.websiteName),
+          label: BangLabel(bang),
           onPressed: () async {
             // Open bang search when tapped
             await const BangSearchRoute().push(context);

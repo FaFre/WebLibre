@@ -29,7 +29,7 @@ enum BangGroup {
     bundled: 'assets/bangs/kagi_bangs.json',
   ),
   user(remote: null, bundled: null),
-  weblibre(remote: null, bundled: null);
+  weblibre(remote: null, bundled: 'assets/bangs/weblibre_bangs.json');
 
   final String? bundled;
   final String? remote;

@@ -22,6 +22,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
+import 'package:weblibre/features/bangs/presentation/widgets/bang_label.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
@@ -64,7 +65,7 @@ class DefaultSearchSelector extends HookConsumerWidget {
                   )
                 : ActionChip(
                     avatar: UrlIcon([activeBang.getDefaultUrl()], iconSize: 20),
-                    label: Text(activeBang.websiteName),
+                    label: BangLabel(activeBang),
                     tooltip: activeBang.trigger,
                     onPressed: pickProvider,
                   ),

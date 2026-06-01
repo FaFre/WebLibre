@@ -17,22 +17,33 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:fast_equatable/fast_equatable.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:weblibre/features/bangs/data/models/bang.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 
-class SearchHistoryEntry with FastEquatable {
-  final String searchQuery;
-  final BangGroup group;
-  final String trigger;
-  final DateTime searchDate;
+/// Renders a bang's website name, appending an amber crown for the official
+/// WebLibre bang ([BangGroup.weblibre]) so it stands out as first-party.
+class BangLabel extends StatelessWidget {
+  final Bang bang;
 
-  SearchHistoryEntry({
-    required this.searchQuery,
-    required this.group,
-    required this.trigger,
-    required this.searchDate,
-  });
+  const BangLabel(this.bang, {super.key});
 
   @override
-  List<Object?> get hashParameters => [searchQuery, group, trigger, searchDate];
+  Widget build(BuildContext context) {
+    final label = Text(bang.websiteName);
+
+    if (bang.group != BangGroup.weblibre) {
+      return label;
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(child: label),
+        const SizedBox(width: 4.0),
+        const Icon(MdiIcons.crown, color: Colors.amber, size: 16.0),
+      ],
+    );
+  }
 }

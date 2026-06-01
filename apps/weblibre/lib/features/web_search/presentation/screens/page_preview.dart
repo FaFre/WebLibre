@@ -74,14 +74,19 @@ class PagePreviewScreen extends ConsumerWidget {
                   uri: uri,
                   icon: UrlIcon([uri], iconSize: 16, cacheOnly: true),
                 ),
-                const SizedBox(height: 16),
-                SearchResultMetadataChips(
+                SearchResultMetadataSection(
                   metadata: result?.metadata ?? const [],
                   pageMetadata: document.metadata,
+                  padding: const EdgeInsets.only(top: 16),
                 ),
-                if (result?.metadata case final metadata?
-                    when metadata.isNotEmpty)
-                  SearchResultMetadataExpandable(metadata: metadata),
+                if (resolveSnippetEntries(result?.metadata ?? const [])
+                    case final entries when entries.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  SearchResultSnippetsPanel(
+                    entries: entries,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ],
                 const SizedBox(height: 16),
                 MarkdownBody(selectable: true, data: document.content),
               ],
