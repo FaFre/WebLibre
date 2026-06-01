@@ -26,6 +26,7 @@ import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
+import eu.weblibre.flutter_mozilla_components.feature.PwaWindowFeature
 import eu.weblibre.flutter_mozilla_components.widget.CustomTabToolbar
 import eu.weblibre.flutter_mozilla_components.widget.CustomTabToolbarFeature
 import mozilla.components.feature.contextmenu.ContextMenuCandidate
@@ -39,6 +40,7 @@ import mozilla.components.feature.pwa.feature.WebAppActivityFeature
 import mozilla.components.feature.pwa.feature.WebAppContentFeature
 import mozilla.components.feature.pwa.feature.WebAppHideToolbarFeature
 import mozilla.components.feature.pwa.feature.WebAppSiteControlsFeature
+import mozilla.components.support.base.feature.LifecycleAwareFeature
 import mozilla.components.support.base.feature.UserInteractionHandler
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import mozilla.components.support.base.log.logger.Logger
@@ -53,7 +55,7 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
     private val customTabsToolbarFeature = ViewBoundFeatureWrapper<CustomTabToolbarFeature>()
     private val contextMenuFeature = ViewBoundFeatureWrapper<ContextMenuFeature>()
     private val hideToolbarFeature = ViewBoundFeatureWrapper<WebAppHideToolbarFeature>()
-    private val windowFeature = ViewBoundFeatureWrapper<CustomTabWindowFeature>()
+    private val windowFeature = ViewBoundFeatureWrapper<LifecycleAwareFeature>()
 
     private var customTabToolbar: CustomTabToolbar? = null
     private var activePopup: PopupWindow? = null
@@ -368,14 +370,22 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
             components.core.webAppManifestStorage.getManifestCache(url)
         } ?: customTab.content.webAppManifest
 
+        val isPwaOrTwa = customTab.config.externalAppType == ExternalAppType.PROGRESSIVE_WEB_APP ||
+            customTab.config.externalAppType == ExternalAppType.TRUSTED_WEB_ACTIVITY
+
         windowFeature.set(
-            feature = CustomTabWindowFeature(activity, store, sessionId),
+            feature = if (isPwaOrTwa) {
+                PwaWindowFeature(
+                    store = store,
+                    loadUrlUseCase = components.useCases.sessionUseCases.loadUrl,
+                    sessionId = sessionId,
+                )
+            } else {
+                CustomTabWindowFeature(activity, store, sessionId)
+            },
             owner = this,
             view = view,
         )
-
-        val isPwaOrTwa = customTab.config.externalAppType == ExternalAppType.PROGRESSIVE_WEB_APP ||
-            customTab.config.externalAppType == ExternalAppType.TRUSTED_WEB_ACTIVITY
 
         if (isPwaOrTwa) {
             hideToolbarFeature.set(
