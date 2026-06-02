@@ -32,7 +32,9 @@ Future<GestureAction?> showGestureActionPicker(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    showDragHandle: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
     builder: (context) => _GestureActionPicker(selected: selected),
   );
 }
@@ -52,27 +54,39 @@ class _GestureActionPicker extends StatelessWidget {
       byCategory.putIfAbsent(action.category, () => []).add(action);
     }
 
-    // Cap the sheet height so the long action list scrolls inside a sheet that
-    // never covers the whole screen.
-    final maxHeight = MediaQuery.sizeOf(context).height * 0.8;
-
-    return ConstrainedBox(
-      constraints: BoxConstraints(maxHeight: maxHeight),
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    // A draggable sheet (matching the main browser menu) so the whole surface —
+    // not just a small handle — can be swiped down to dismiss.
+    return DraggableScrollableSheet(
+      initialChildSize: 0.7,
+      minChildSize: 0.4,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (context, scrollController) {
+        return Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-              child: Text(
-                'Choose action',
-                style: theme.textTheme.titleLarge,
+            // Drag handle.
+            Container(
+              margin: const EdgeInsets.only(top: 12, bottom: 8),
+              height: 4,
+              width: 40,
+              decoration: BoxDecoration(
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
-            Flexible(
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Choose action',
+                  style: theme.textTheme.titleLarge,
+                ),
+              ),
+            ),
+            Expanded(
               child: ListView(
+                controller: scrollController,
                 padding: const EdgeInsets.only(bottom: 8),
                 children: [
                   for (final category in GestureActionCategory.values)
@@ -104,8 +118,8 @@ class _GestureActionPicker extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
+        );
+      },
     );
   }
 }

@@ -243,7 +243,10 @@ class _GestureBindingEditor extends HookWidget {
                                   ).colorScheme.onSurfaceVariant,
                                 ),
                           )
-                        : GestureStrokeView(stroke: stroke),
+                        : GestureStrokeView(
+                            stroke: stroke,
+                            showQualifiers: false,
+                          ),
                   ),
                   const SizedBox(height: 16),
 

@@ -58,6 +58,7 @@ class GestureRecognizer {
     private var lastX = 0f
     private var lastY = 0f
     private var lastArrow = ' '
+    private var lastArrowTime = 0L
     private var strokeSize = 0f
     private var edgeWidth = 0f
     private var contentBottom = 0f
@@ -159,7 +160,17 @@ class GestureRecognizer {
         }
         // Collapse consecutive identical directions into a single stroke.
         if (arrow == lastArrow) return
+        // Reject gestures whose direction changes come faster than the
+        // configured minimum (e.g. an accidental fast scribble). The first
+        // arrow has no predecessor, so it is never gated.
+        val minInterval = cfg.minStrokeIntervalMs
+        if (lastArrow != ' ' && minInterval > 0 &&
+            event.eventTime - lastArrowTime < minInterval) {
+            aborted = true
+            return
+        }
         lastArrow = arrow
+        lastArrowTime = event.eventTime
         arrows.add(arrow)
         onProgress?.invoke(currentKey())
     }
@@ -217,6 +228,7 @@ class GestureRecognizer {
         fingers = ""
         fingersNum = 1
         lastArrow = ' '
+        lastArrowTime = 0L
         aborted = false
         active = false
     }

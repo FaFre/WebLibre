@@ -62,6 +62,10 @@ class GestureSettingsRepository extends _$GestureSettingsRepository {
         DriftSqlType.int,
         db.typeMapping,
       ),
+      'minStrokeIntervalMs': settings['minStrokeIntervalMs']?.readAs(
+        DriftSqlType.int,
+        db.typeMapping,
+      ),
       'showFeedback': settings['showFeedback']?.readAs(
         DriftSqlType.bool,
         db.typeMapping,

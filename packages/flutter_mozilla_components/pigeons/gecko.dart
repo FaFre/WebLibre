@@ -3031,6 +3031,12 @@ class GestureConfig {
   /// Maximum number of simultaneous pointers a gesture may use.
   final int maxFingers;
 
+  /// Minimum milliseconds required between two consecutive direction changes
+  /// within a single gesture. A new direction registered faster than this
+  /// aborts the in-progress gesture, so accidental fast scribbles match
+  /// nothing. `0` disables the check.
+  final int minStrokeIntervalMs;
+
   /// Canonical keys that currently have an action bound, e.g. `D-R`,
   /// `R:2:D-L`. Native only emits [GeckoGestureEvents.onGestureRecognized]
   /// when an assembled stroke matches one of these.
@@ -3041,6 +3047,7 @@ class GestureConfig {
     this.strokeSize = 50,
     this.timeoutMs = 1500,
     this.maxFingers = 1,
+    this.minStrokeIntervalMs = 0,
     this.activeGestureKeys = const [],
   });
 }

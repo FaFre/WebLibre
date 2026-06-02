@@ -24,12 +24,16 @@ class InlineCountBadge extends StatelessWidget {
     required this.count,
     required this.backgroundColor,
     required this.foregroundColor,
+    this.icon,
     super.key,
   });
 
   final int count;
   final Color backgroundColor;
   final Color foregroundColor;
+
+  /// Optional glyph rendered inside the badge, trailing the count.
+  final IconData? icon;
 
   static String formatCount(int count) {
     if (count >= 1000) {
@@ -49,13 +53,22 @@ class InlineCountBadge extends StatelessWidget {
         color: backgroundColor,
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Text(
-        formatCount(count),
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-          color: foregroundColor,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            formatCount(count),
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: foregroundColor,
+            ),
+          ),
+          if (icon case final icon?) ...[
+            const SizedBox(width: 2),
+            Icon(icon, size: 12, color: foregroundColor),
+          ],
+        ],
       ),
     );
   }

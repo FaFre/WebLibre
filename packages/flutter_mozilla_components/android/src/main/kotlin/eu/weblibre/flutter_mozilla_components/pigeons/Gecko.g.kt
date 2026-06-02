@@ -5600,6 +5600,13 @@ data class GestureConfig (
   /** Maximum number of simultaneous pointers a gesture may use. */
   val maxFingers: Long,
   /**
+   * Minimum milliseconds required between two consecutive direction changes
+   * within a single gesture. A new direction registered faster than this
+   * aborts the in-progress gesture, so accidental fast scribbles match
+   * nothing. `0` disables the check.
+   */
+  val minStrokeIntervalMs: Long,
+  /**
    * Canonical keys that currently have an action bound, e.g. `D-R`,
    * `R:2:D-L`. Native only emits [GeckoGestureEvents.onGestureRecognized]
    * when an assembled stroke matches one of these.
@@ -5613,8 +5620,9 @@ data class GestureConfig (
       val strokeSize = pigeonVar_list[1] as Long
       val timeoutMs = pigeonVar_list[2] as Long
       val maxFingers = pigeonVar_list[3] as Long
-      val activeGestureKeys = pigeonVar_list[4] as List<String>
-      return GestureConfig(enabled, strokeSize, timeoutMs, maxFingers, activeGestureKeys)
+      val minStrokeIntervalMs = pigeonVar_list[4] as Long
+      val activeGestureKeys = pigeonVar_list[5] as List<String>
+      return GestureConfig(enabled, strokeSize, timeoutMs, maxFingers, minStrokeIntervalMs, activeGestureKeys)
     }
   }
   fun toList(): List<Any?> {
@@ -5623,6 +5631,7 @@ data class GestureConfig (
       strokeSize,
       timeoutMs,
       maxFingers,
+      minStrokeIntervalMs,
       activeGestureKeys,
     )
   }
@@ -5634,7 +5643,7 @@ data class GestureConfig (
       return true
     }
     val other = other as GestureConfig
-    return GeckoPigeonUtils.deepEquals(this.enabled, other.enabled) && GeckoPigeonUtils.deepEquals(this.strokeSize, other.strokeSize) && GeckoPigeonUtils.deepEquals(this.timeoutMs, other.timeoutMs) && GeckoPigeonUtils.deepEquals(this.maxFingers, other.maxFingers) && GeckoPigeonUtils.deepEquals(this.activeGestureKeys, other.activeGestureKeys)
+    return GeckoPigeonUtils.deepEquals(this.enabled, other.enabled) && GeckoPigeonUtils.deepEquals(this.strokeSize, other.strokeSize) && GeckoPigeonUtils.deepEquals(this.timeoutMs, other.timeoutMs) && GeckoPigeonUtils.deepEquals(this.maxFingers, other.maxFingers) && GeckoPigeonUtils.deepEquals(this.minStrokeIntervalMs, other.minStrokeIntervalMs) && GeckoPigeonUtils.deepEquals(this.activeGestureKeys, other.activeGestureKeys)
   }
 
   override fun hashCode(): Int {
@@ -5643,6 +5652,7 @@ data class GestureConfig (
     result = 31 * result + GeckoPigeonUtils.deepHash(this.strokeSize)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.timeoutMs)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.maxFingers)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.minStrokeIntervalMs)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.activeGestureKeys)
     return result
   }

@@ -332,6 +332,7 @@ GestureConfig gestureNativeConfig(Ref ref) {
     strokeSize: settings.strokeSize,
     timeoutMs: settings.timeoutMs,
     maxFingers: requiredFingers,
+    minStrokeIntervalMs: settings.minStrokeIntervalMs,
     activeGestureKeys: settings.bindings.keys.toList(),
   );
 }

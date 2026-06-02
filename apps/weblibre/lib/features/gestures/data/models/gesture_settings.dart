@@ -39,6 +39,10 @@ const defaultGestureIntervalMs = 0;
 const minGestureIntervalMs = 0;
 const maxGestureIntervalMs = 2000;
 
+const defaultGestureStrokeIntervalMs = 0;
+const minGestureStrokeIntervalMs = 0;
+const maxGestureStrokeIntervalMs = 500;
+
 /// Minimum number of strokes drawn before the live overlay starts suggesting
 /// the other possible completions (mirrors the reference add-on's
 /// `toastMinStroke`).
@@ -82,6 +86,11 @@ class GestureSettings with FastEquatable {
   /// gestures are ignored. 0 disables the cooldown.
   final int intervalMs;
 
+  /// Minimum milliseconds required between two consecutive direction changes
+  /// within a single gesture. A faster direction change aborts the in-progress
+  /// gesture, guarding against accidental fast scribbles. 0 disables the check.
+  final int minStrokeIntervalMs;
+
   /// Whether to show the live feedback overlay while a stroke is being drawn
   /// (the in-progress arrows plus the matching/possible actions).
   final bool showFeedback;
@@ -108,6 +117,7 @@ class GestureSettings with FastEquatable {
     required this.timeoutMs,
     required this.maxFingers,
     required this.intervalMs,
+    required this.minStrokeIntervalMs,
     required this.showFeedback,
     required this.suggestNext,
     required this.minSuggestionStroke,
@@ -122,6 +132,7 @@ class GestureSettings with FastEquatable {
     int? timeoutMs,
     int? maxFingers,
     int? intervalMs,
+    int? minStrokeIntervalMs,
     bool? showFeedback,
     bool? suggestNext,
     int? minSuggestionStroke,
@@ -133,6 +144,8 @@ class GestureSettings with FastEquatable {
        timeoutMs = timeoutMs ?? defaultGestureTimeoutMs,
        maxFingers = maxFingers ?? defaultGestureMaxFingers,
        intervalMs = intervalMs ?? defaultGestureIntervalMs,
+       minStrokeIntervalMs =
+           minStrokeIntervalMs ?? defaultGestureStrokeIntervalMs,
        showFeedback = showFeedback ?? true,
        suggestNext = suggestNext ?? true,
        minSuggestionStroke =
@@ -156,6 +169,7 @@ class GestureSettings with FastEquatable {
     timeoutMs,
     maxFingers,
     intervalMs,
+    minStrokeIntervalMs,
     showFeedback,
     suggestNext,
     minSuggestionStroke,

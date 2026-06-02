@@ -19,6 +19,8 @@ abstract class _$GestureSettingsCWProxy {
 
   GestureSettings intervalMs(int intervalMs);
 
+  GestureSettings minStrokeIntervalMs(int minStrokeIntervalMs);
+
   GestureSettings showFeedback(bool showFeedback);
 
   GestureSettings suggestNext(bool suggestNext);
@@ -43,6 +45,7 @@ abstract class _$GestureSettingsCWProxy {
     int timeoutMs,
     int maxFingers,
     int intervalMs,
+    int minStrokeIntervalMs,
     bool showFeedback,
     bool suggestNext,
     int minSuggestionStroke,
@@ -75,6 +78,10 @@ class _$GestureSettingsCWProxyImpl implements _$GestureSettingsCWProxy {
 
   @override
   GestureSettings intervalMs(int intervalMs) => call(intervalMs: intervalMs);
+
+  @override
+  GestureSettings minStrokeIntervalMs(int minStrokeIntervalMs) =>
+      call(minStrokeIntervalMs: minStrokeIntervalMs);
 
   @override
   GestureSettings showFeedback(bool showFeedback) =>
@@ -111,6 +118,7 @@ class _$GestureSettingsCWProxyImpl implements _$GestureSettingsCWProxy {
     Object? timeoutMs = const $CopyWithPlaceholder(),
     Object? maxFingers = const $CopyWithPlaceholder(),
     Object? intervalMs = const $CopyWithPlaceholder(),
+    Object? minStrokeIntervalMs = const $CopyWithPlaceholder(),
     Object? showFeedback = const $CopyWithPlaceholder(),
     Object? suggestNext = const $CopyWithPlaceholder(),
     Object? minSuggestionStroke = const $CopyWithPlaceholder(),
@@ -145,6 +153,12 @@ class _$GestureSettingsCWProxyImpl implements _$GestureSettingsCWProxy {
           ? _value.intervalMs
           // ignore: cast_nullable_to_non_nullable
           : intervalMs as int,
+      minStrokeIntervalMs:
+          minStrokeIntervalMs == const $CopyWithPlaceholder() ||
+              minStrokeIntervalMs == null
+          ? _value.minStrokeIntervalMs
+          // ignore: cast_nullable_to_non_nullable
+          : minStrokeIntervalMs as int,
       showFeedback:
           showFeedback == const $CopyWithPlaceholder() || showFeedback == null
           ? _value.showFeedback
@@ -193,6 +207,7 @@ GestureSettings _$GestureSettingsFromJson(Map<String, dynamic> json) =>
       timeoutMs: (json['timeoutMs'] as num?)?.toInt(),
       maxFingers: (json['maxFingers'] as num?)?.toInt(),
       intervalMs: (json['intervalMs'] as num?)?.toInt(),
+      minStrokeIntervalMs: (json['minStrokeIntervalMs'] as num?)?.toInt(),
       showFeedback: json['showFeedback'] as bool?,
       suggestNext: json['suggestNext'] as bool?,
       minSuggestionStroke: (json['minSuggestionStroke'] as num?)?.toInt(),
@@ -212,6 +227,7 @@ Map<String, dynamic> _$GestureSettingsToJson(GestureSettings instance) =>
       'timeoutMs': instance.timeoutMs,
       'maxFingers': instance.maxFingers,
       'intervalMs': instance.intervalMs,
+      'minStrokeIntervalMs': instance.minStrokeIntervalMs,
       'showFeedback': instance.showFeedback,
       'suggestNext': instance.suggestNext,
       'minSuggestionStroke': instance.minSuggestionStroke,

@@ -18,7 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_stroke.dart';
+import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 
 extension GestureArrowIcon on GestureArrow {
   IconData get icon => switch (this) {
@@ -30,17 +32,27 @@ extension GestureArrowIcon on GestureArrow {
 }
 
 /// Compact visual rendering of a [GestureStroke]: the direction arrows in
-/// sequence, prefixed by start-position and finger-count qualifiers when set.
+/// sequence, prefixed by start-position and finger-count qualifiers.
 ///
 /// All glyphs share a single foreground [color] so the view blends with
 /// whatever surface it sits on; it defaults to the primary color, but callers
 /// rendering on a contrasting surface (e.g. the live overlay) should pass the
 /// matching `on…` color.
+///
+/// Set [showQualifiers] to false to render only the direction arrows, omitting
+/// the start-position and finger qualifiers (e.g. the live pattern preview in
+/// the binding editor, where those are configured separately).
 class GestureStrokeView extends StatelessWidget {
   final GestureStroke stroke;
   final Color? color;
+  final bool showQualifiers;
 
-  const GestureStrokeView({required this.stroke, this.color, super.key});
+  const GestureStrokeView({
+    required this.stroke,
+    this.color,
+    this.showQualifiers = true,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +62,7 @@ class GestureStrokeView extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (stroke.startPosition != GestureStartPosition.anywhere)
+        if (showQualifiers) ...[
           Padding(
             padding: const EdgeInsets.only(right: 6),
             child: Icon(
@@ -59,14 +71,16 @@ class GestureStrokeView extends StatelessWidget {
               color: foreground,
             ),
           ),
-        if (stroke.fingers >= 2)
           Padding(
-            padding: const EdgeInsets.only(right: 4),
-            child: Text(
-              '${stroke.fingers}×',
-              style: theme.textTheme.labelLarge?.copyWith(color: foreground),
+            padding: const EdgeInsets.only(right: 6),
+            child: InlineCountBadge(
+              count: stroke.fingers,
+              backgroundColor: foreground,
+              foregroundColor: theme.colorScheme.surface,
+              icon: MdiIcons.buttonPointer,
             ),
           ),
+        ],
         for (final arrow in stroke.arrows)
           Icon(arrow.icon, size: 18, color: foreground),
       ],

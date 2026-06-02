@@ -29,10 +29,10 @@ const List<SettingsSectionDefinition> _behaviorSections = [
     title: 'Strokes',
     entries: [
       SettingsEntryDefinition(
-        title: 'Stroke sensitivity',
+        title: 'Minimum stroke length',
         subtitle: 'Minimum swipe length recognised as a direction',
-        keywords: ['size', 'length'],
-        child: _StrokeSensitivitySection(),
+        keywords: ['size', 'length', 'sensitivity'],
+        child: _StrokeLengthSection(),
       ),
     ],
   ),
@@ -51,6 +51,12 @@ const List<SettingsSectionDefinition> _behaviorSections = [
         keywords: ['interval'],
         child: _CooldownSection(),
       ),
+      SettingsEntryDefinition(
+        title: 'Stroke interval',
+        subtitle: 'Reject a gesture when direction changes come too fast',
+        keywords: ['debounce', 'jitter', 'accidental'],
+        child: _StrokeIntervalSection(),
+      ),
     ],
   ),
 ];
@@ -63,15 +69,68 @@ class GestureBehaviorScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const SettingsDetailScaffold(
       title: 'Behavior & timing',
-      subtitle: 'Stroke sensitivity, timeout, and cooldown.',
+      subtitle: 'Stroke length, timeout, and cooldown.',
       icon: Icons.tune,
       sections: _behaviorSections,
+      actions: [_ResetBehaviorButton()],
     );
   }
 }
 
-class _StrokeSensitivitySection extends HookConsumerWidget {
-  const _StrokeSensitivitySection();
+/// App-bar action that restores the behavior & timing fields (stroke length,
+/// timeout, cooldown, stroke interval) to their defaults, leaving bindings,
+/// excluded sites and feedback untouched.
+class _ResetBehaviorButton extends ConsumerWidget {
+  const _ResetBehaviorButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return IconButton(
+      icon: const Icon(Icons.settings_backup_restore),
+      tooltip: 'Reset to defaults',
+      onPressed: () async {
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            icon: const Icon(Icons.settings_backup_restore),
+            title: const Text('Reset behavior & timing?'),
+            content: const Text(
+              'Stroke length, timeout, cooldown and stroke interval will be '
+              'restored to their defaults. Your gesture bindings and other '
+              'settings are kept.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Reset'),
+              ),
+            ],
+          ),
+        );
+
+        if (confirmed != true) return;
+
+        await ref
+            .read(gestureSettingsRepositoryProvider.notifier)
+            .updateSettings(
+              (current) => current.copyWith(
+                strokeSize: defaultGestureStrokeSize,
+                timeoutMs: defaultGestureTimeoutMs,
+                intervalMs: defaultGestureIntervalMs,
+                minStrokeIntervalMs: defaultGestureStrokeIntervalMs,
+              ),
+            );
+      },
+    );
+  }
+}
+
+class _StrokeLengthSection extends HookConsumerWidget {
+  const _StrokeLengthSection();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -79,7 +138,7 @@ class _StrokeSensitivitySection extends HookConsumerWidget {
 
     return ListTile(
       leading: const Icon(MdiIcons.gestureTap),
-      title: const Text('Stroke sensitivity'),
+      title: const Text('Minimum stroke length'),
       subtitle: Slider.adaptive(
         min: minGestureStrokeSize.toDouble(),
         max: maxGestureStrokeSize.toDouble(),
@@ -174,6 +233,53 @@ class _CooldownSection extends HookConsumerWidget {
         const Padding(
           padding: EdgeInsets.fromLTRB(72, 0, 16, 8),
           child: Text('Minimum delay between two gestures firing.'),
+        ),
+      ],
+    );
+  }
+}
+
+class _StrokeIntervalSection extends HookConsumerWidget {
+  const _StrokeIntervalSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(gestureSettingsWithDefaultsProvider);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ListTile(
+          leading: const Icon(Icons.gesture),
+          title: const Text('Stroke interval'),
+          subtitle: Slider.adaptive(
+            min: minGestureStrokeIntervalMs.toDouble(),
+            max: maxGestureStrokeIntervalMs.toDouble(),
+            divisions:
+                (maxGestureStrokeIntervalMs - minGestureStrokeIntervalMs) ~/ 25,
+            value: settings.minStrokeIntervalMs
+                .clamp(minGestureStrokeIntervalMs, maxGestureStrokeIntervalMs)
+                .toDouble(),
+            label: settings.minStrokeIntervalMs == 0
+                ? 'Off'
+                : '${settings.minStrokeIntervalMs} ms',
+            onChanged: (value) async {
+              await ref
+                  .read(gestureSettingsRepositoryProvider.notifier)
+                  .updateSettings(
+                    (current) =>
+                        current.copyWith.minStrokeIntervalMs(value.round()),
+                  );
+            },
+          ),
+        ),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(72, 0, 16, 8),
+          child: Text(
+            'Minimum time between direction changes within one gesture. '
+            'Faster changes abort the gesture, guarding against accidental '
+            'triggers.',
+          ),
         ),
       ],
     );

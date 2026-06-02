@@ -193,7 +193,7 @@ final class GestureNativeConfigProvider
 }
 
 String _$gestureNativeConfigHash() =>
-    r'57aada8631dfc3d8355f9498f6b7c6954b0cdcf1';
+    r'd7caf199a60089109cbf264ca3c4d59ccf97044e';
 
 /// The in-progress stroke shown by the live feedback overlay.
 ///

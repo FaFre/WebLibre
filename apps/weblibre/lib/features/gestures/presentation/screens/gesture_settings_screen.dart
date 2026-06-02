@@ -121,7 +121,7 @@ class GestureSettingsScreen extends HookConsumerWidget {
                           leading: const Icon(Icons.tune),
                           title: const Text('Behavior & timing'),
                           subtitle: const Text(
-                            'Sensitivity, timeout, cooldown',
+                            'Stroke length, timeout, cooldown',
                           ),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () => open(const GestureBehaviorScreen()),

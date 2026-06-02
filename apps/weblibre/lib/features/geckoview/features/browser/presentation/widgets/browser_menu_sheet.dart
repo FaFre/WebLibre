@@ -667,6 +667,10 @@ class _QuickTogglesGrid extends ConsumerWidget {
                   (s) => s.copyWith(active: !gestureSettings.active),
                 );
           },
+          onLongPress: () {
+            Navigator.pop(context);
+            unawaited(GestureSettingsRoute().push(context));
+          },
         ),
       );
     }
@@ -685,6 +689,7 @@ class _QuickToggle {
   final bool active;
   final bool enabled;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
   const _QuickToggle({
     required this.icon,
@@ -692,6 +697,7 @@ class _QuickToggle {
     required this.active,
     required this.onTap,
     this.enabled = true,
+    this.onLongPress,
   });
 }
 
@@ -772,6 +778,7 @@ class _QuickToggleSegment extends StatelessWidget {
           : Colors.transparent,
       child: InkWell(
         onTap: toggle.enabled ? toggle.onTap : null,
+        onLongPress: toggle.enabled ? toggle.onLongPress : null,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
           child: Column(
