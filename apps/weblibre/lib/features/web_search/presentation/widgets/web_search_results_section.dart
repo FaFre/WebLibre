@@ -133,7 +133,7 @@ class WebSearchResultsSection extends HookConsumerWidget {
 
     if (state.results.isNotEmpty || state.infos.isNotEmpty) {
       return SliverPadding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        padding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
         sliver: SliverMainAxisGroup(
           slivers: [
             if (state.infos.length == 1)
