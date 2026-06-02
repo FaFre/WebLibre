@@ -23,7 +23,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
@@ -844,16 +843,27 @@ class SingleGridTabPreview extends HookConsumerWidget {
           depth: depth,
           onTap: () async {
             if (tabId != activeTabId) {
+              // Offer to locate the match within the page instead of opening
+              // Find in Page unprompted (see #421). Shown before onClose so it
+              // surfaces on the root messenger and survives the tray closing.
+              final query = sourceSearchQuery;
+              if (query != null &&
+                  query.isNotEmpty &&
+                  ref.read(findInPageControllerProvider(tabId)) ==
+                      FindInPageState.hidden()) {
+                final findController = ref.read(
+                  findInPageControllerProvider(tabId).notifier,
+                );
+                ui_helper.showFindInPageSuggestion(
+                  context,
+                  query: query,
+                  onFind: () => findController.findAll(text: query),
+                );
+              }
+
               //Close first to avoid rebuilds
               onClose();
               await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
-              if (sourceSearchQuery.isNotEmpty &&
-                  ref.read(findInPageControllerProvider(tabId)) ==
-                      FindInPageState.hidden()) {
-                await ref
-                    .read(findInPageControllerProvider(tabId).notifier)
-                    .findAll(text: sourceSearchQuery!);
-              }
             } else {
               onClose();
             }
@@ -989,16 +999,27 @@ class SingleListTabPreview extends HookConsumerWidget {
           depth: depth,
           onTap: () async {
             if (tabId != activeTabId) {
+              // Offer to locate the match within the page instead of opening
+              // Find in Page unprompted (see #421). Shown before onClose so it
+              // surfaces on the root messenger and survives the tray closing.
+              final query = sourceSearchQuery;
+              if (query != null &&
+                  query.isNotEmpty &&
+                  ref.read(findInPageControllerProvider(tabId)) ==
+                      FindInPageState.hidden()) {
+                final findController = ref.read(
+                  findInPageControllerProvider(tabId).notifier,
+                );
+                ui_helper.showFindInPageSuggestion(
+                  context,
+                  query: query,
+                  onFind: () => findController.findAll(text: query),
+                );
+              }
+
               //Close first to avoid rebuilds
               onClose();
               await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
-              if (sourceSearchQuery.isNotEmpty &&
-                  ref.read(findInPageControllerProvider(tabId)) ==
-                      FindInPageState.hidden()) {
-                await ref
-                    .read(findInPageControllerProvider(tabId).notifier)
-                    .findAll(text: sourceSearchQuery!);
-              }
             } else {
               onClose();
             }

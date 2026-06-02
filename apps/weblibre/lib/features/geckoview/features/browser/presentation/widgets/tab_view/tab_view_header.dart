@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
@@ -267,6 +268,28 @@ class TabViewHeader extends HookConsumerWidget {
 
       return null;
     }, [tabsReorderable, canManualReorder]);
+
+    // Keep the in-place tab filter in lockstep with the search field. The
+    // preview query lives in a provider whose lifetime is independent of this
+    // header and of [searchMode], so it can outlive the search UI and leave the
+    // tab list filtered with no visible search box (#421). Whenever we are not
+    // searching, drop any lingering query so all tabs are shown again.
+    useEffect(() {
+      if (!searchMode.value &&
+          ref.exists(
+            tabSearchRepositoryProvider(TabSearchPartition.preview),
+          )) {
+        unawaited(
+          ref
+              .read(
+                tabSearchRepositoryProvider(TabSearchPartition.preview).notifier,
+              )
+              .addQuery(''),
+        );
+      }
+
+      return null;
+    }, [searchMode.value]);
 
     useOnListenableChange(searchTextController, () async {
       if (ref.exists(tabSearchRepositoryProvider(TabSearchPartition.preview))) {

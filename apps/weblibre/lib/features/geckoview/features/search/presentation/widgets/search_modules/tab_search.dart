@@ -45,6 +45,7 @@ import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/text_highlight.dart';
+import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class TabSearch extends HookConsumerWidget {
   static const _matchPrefix = '***';
@@ -247,14 +248,23 @@ class TabSearch extends HookConsumerWidget {
                       await ref
                           .read(tabRepositoryProvider.notifier)
                           .selectTab(result.id);
-                      if (result.sourceSearchQuery.isNotEmpty &&
+
+                      // Offer to locate the match within the page instead of
+                      // opening Find in Page unprompted (see #421).
+                      final query = result.sourceSearchQuery;
+                      if (query != null &&
+                          query.isNotEmpty &&
                           ref.read(findInPageControllerProvider(result.id)) ==
-                              FindInPageState.hidden()) {
-                        await ref
-                            .read(
-                              findInPageControllerProvider(result.id).notifier,
-                            )
-                            .findAll(text: result.sourceSearchQuery!);
+                              FindInPageState.hidden() &&
+                          context.mounted) {
+                        final findController = ref.read(
+                          findInPageControllerProvider(result.id).notifier,
+                        );
+                        ui_helper.showFindInPageSuggestion(
+                          context,
+                          query: query,
+                          onFind: () => findController.findAll(text: query),
+                        );
                       }
 
                       if (context.mounted) {

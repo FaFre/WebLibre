@@ -101,6 +101,27 @@ void showInfoMessage(
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
 
+void showFindInPageSuggestion(
+  BuildContext context, {
+  required String query,
+  required VoidCallback onFind,
+  Duration duration = const Duration(seconds: 5),
+  bool persist = false,
+}) {
+  final snackBar = _createFloatingSnackBar(
+    content: Text(
+      'Find "${_truncateForSnackBar(query)}" on this page?',
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    ),
+    action: SnackBarAction(label: 'Find', onPressed: onFind),
+    duration: duration,
+    persist: persist,
+  );
+
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
 void showOpenedTabsFromAnotherDeviceMessage(
   BuildContext context,
   int openedTabs, {
