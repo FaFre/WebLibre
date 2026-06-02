@@ -24,7 +24,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/format.dart';
 import 'package:weblibre/features/qr_scanner/presentation/dialogs/qr_scanner_dialog.dart';
@@ -146,10 +145,7 @@ class SyncSettingsScreen extends HookConsumerWidget {
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () async {
-                      final barcode = await showDialog<Barcode>(
-                        context: context,
-                        builder: (_) => const QrScannerDialog(),
-                      );
+                      final barcode = await showQrScannerDialog(context);
 
                       final code = barcode?.code;
                       if (code == null || code.isEmpty) return;

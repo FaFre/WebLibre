@@ -21,7 +21,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/features/proxy/data/models/proxy_profile_seed.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_input_consumer.dart';
@@ -69,10 +68,7 @@ class AddProxyMethodSheet extends ConsumerWidget {
     }
 
     Future<void> scanQr() async {
-      final result = await showDialog<Barcode>(
-        context: context,
-        builder: (_) => const QrScannerDialog(),
-      );
+      final result = await showQrScannerDialog(context);
       final code = result?.code?.trim();
       if (code == null || code.isEmpty) return;
       if (!context.mounted) return;

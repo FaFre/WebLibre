@@ -32,12 +32,7 @@ class QrScannerButton extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return IconButton(
       onPressed: () async {
-        final result = await showDialog<Barcode>(
-          context: context,
-          builder: (context) {
-            return const QrScannerDialog();
-          },
-        );
+        final result = await showQrScannerDialog(context);
 
         onScanResult(result);
       },
