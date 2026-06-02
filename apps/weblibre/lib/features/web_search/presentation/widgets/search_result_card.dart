@@ -147,7 +147,7 @@ class _Header extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // A single record select rebuilds this header only when the session state
-    // or the number of ready artifacts for *this* result changes.
+    // or the artifacts for *this* result change.
     final fetch = ref.watch(
       metaSearchControllerProvider.select((s) {
         var ready = 0;
@@ -155,14 +155,27 @@ class _Header extends ConsumerWidget {
           if (s.isMethodReady(result.url, choice)) ready++;
         }
         final busy = s.isFetching(result.url) || s.isAnyCapturing(result.url);
-        return (open: s.hasOpenSession, ready: ready, busy: busy);
+        // Any capture/preview artifact produced for this URL, in any state
+        // (ready, downloading, or failed) — distinct from `ready`, which only
+        // counts the openable ones.
+        final hasArtifacts =
+            s.capturesFor(result.url).isNotEmpty || s.isFetched(result.url);
+        return (
+          open: s.hasOpenSession,
+          ready: ready,
+          busy: busy,
+          hasArtifacts: hasArtifacts,
+        );
       }),
     );
 
-    // Once the WebSocket session has closed no further fetch/capture commands
-    // can be issued — keep the button only while the session is open or there
-    // are already-fetched artifacts to (re)open via the sheet.
-    final showFetch = fetch.open || fetch.ready > 0;
+    // Keep the button reachable while the session is open (new captures
+    // possible), while anything is in flight, or whenever artifacts exist for
+    // this result. After the socket closes the sheet itself greys out every
+    // capture-endpoint action (see _MethodTile.enabled) — a ready artifact
+    // still opens locally, a failed one stays visible with its error. This
+    // only governs whether that sheet is reachable, not what it permits.
+    final showFetch = fetch.open || fetch.busy || fetch.hasArtifacts;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -168,26 +168,18 @@ class WebSearchInfoboxCard extends HookConsumerWidget {
   }
 
   /// Attributes worth rendering in the factsheet: those with a non-empty value,
-  /// minus low-signal entries. In particular a lone "type"/"kind" attribute
-  /// whose value just restates the infobox category (e.g. `Type: Code`) adds
-  /// nothing the header doesn't already convey, so we drop the whole factsheet
-  /// in that case rather than show a one-line, oddly-centered tile.
+  /// minus low-signal entries. We always drop a "type"/"kind" attribute: it is
+  /// Brave's weakest classifier (emitted only as a fallback when no `category`
+  /// is available) and as a single taxonomy word (e.g. `Type: Code`) it tells
+  /// the user nothing the heading/image/links don't already convey.
   static List<InfoboxAttribute> _meaningfulAttributes(CompactInfobox info) {
-    final attributes = (info.attributes ?? const <InfoboxAttribute>[])
+    return (info.attributes ?? const <InfoboxAttribute>[])
         .where((attr) => attr.value?.trim().isNotEmpty ?? false)
+        .where((attr) {
+          final label = attr.label.replaceAll(RegExp(r':+\s*$'), '').toLowerCase();
+          return label != 'type' && label != 'kind';
+        })
         .toList();
-
-    if (attributes.length == 1) {
-      final only = attributes.single;
-      final label = only.label.replaceAll(RegExp(r':+\s*$'), '').toLowerCase();
-      final value = only.value!.trim().toLowerCase();
-      if ((label == 'type' || label == 'kind') &&
-          value == info.infobox.trim().toLowerCase()) {
-        return const [];
-      }
-    }
-
-    return attributes;
   }
 
   /// Link chips to show. These are the card's primary actionable content — the
