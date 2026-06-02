@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart'
     show MdiIcons;
@@ -66,6 +67,44 @@ _TopSitesGridLayout _resolveGridLayout(double width) {
     crossAxisCount: crossAxisCount,
     childAspectRatio: childAspectRatio,
   );
+}
+
+/// Responsive grid delegate that resolves the column count from the available
+/// cross-axis extent at the *render* layer (in [getLayout]), mirroring
+/// [_resolveGridLayout].
+///
+/// This replaces a `SliverLayoutBuilder`, whose builder re-runs (and rebuilds
+/// the entire grid subtree) on every [SliverConstraints] change — i.e. on every
+/// scroll and every keyboard-inset animation frame — which rebuilt all
+/// top-site tiles each frame. The delegate recomputes grid metrics on layout
+/// without rebuilding any widgets.
+class _TopSitesGridDelegate extends SliverGridDelegate {
+  const _TopSitesGridDelegate();
+
+  @override
+  SliverGridLayout getLayout(SliverConstraints constraints) {
+    final layout = _resolveGridLayout(constraints.crossAxisExtent);
+    final crossAxisCount = layout.crossAxisCount;
+
+    final usableCrossAxisExtent =
+        (constraints.crossAxisExtent -
+                _gridCrossAxisSpacing * (crossAxisCount - 1))
+            .clamp(0.0, double.infinity);
+    final childCrossAxisExtent = usableCrossAxisExtent / crossAxisCount;
+    final childMainAxisExtent = childCrossAxisExtent / layout.childAspectRatio;
+
+    return SliverGridRegularTileLayout(
+      crossAxisCount: crossAxisCount,
+      mainAxisStride: childMainAxisExtent + _gridMainAxisSpacing,
+      crossAxisStride: childCrossAxisExtent + _gridCrossAxisSpacing,
+      childMainAxisExtent: childMainAxisExtent,
+      childCrossAxisExtent: childCrossAxisExtent,
+      reverseCrossAxis: axisDirectionIsReversed(constraints.crossAxisDirection),
+    );
+  }
+
+  @override
+  bool shouldRelayout(_TopSitesGridDelegate oldDelegate) => false;
 }
 
 class TopSitesSection extends HookConsumerWidget {
@@ -156,27 +195,17 @@ class _TopSitesGrid extends ConsumerWidget {
 
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-      sliver: SliverLayoutBuilder(
-        builder: (context, constraints) {
-          final layout = _resolveGridLayout(constraints.crossAxisExtent);
-          return SliverGrid.builder(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: layout.crossAxisCount,
-              mainAxisSpacing: _gridMainAxisSpacing,
-              crossAxisSpacing: _gridCrossAxisSpacing,
-              childAspectRatio: layout.childAspectRatio,
-            ),
-            itemCount: displayItems.length,
-            itemBuilder: (context, index) {
-              final item = displayItems[index];
-              return _TopSiteGridTile(
-                item: item,
-                onTap: () => onUriSelected(item.url),
-                onPin: () => _pinItem(context, ref, item),
-                onEdit: () => _editItem(context, ref, item),
-                onRemove: () => _removeItem(context, ref, item),
-              );
-            },
+      sliver: SliverGrid.builder(
+        gridDelegate: const _TopSitesGridDelegate(),
+        itemCount: displayItems.length,
+        itemBuilder: (context, index) {
+          final item = displayItems[index];
+          return _TopSiteGridTile(
+            item: item,
+            onTap: () => onUriSelected(item.url),
+            onPin: () => _pinItem(context, ref, item),
+            onEdit: () => _editItem(context, ref, item),
+            onRemove: () => _removeItem(context, ref, item),
           );
         },
       ),

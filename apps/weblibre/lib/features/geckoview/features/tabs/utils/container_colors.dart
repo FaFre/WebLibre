@@ -84,6 +84,24 @@ class ContainerColors {
   static const double surfaceHighAlpha = 0.28;
   static const double outlineBorderAlpha = 0.5;
 
+  /// Cache of seed schemes keyed by `(seed color, brightness)`.
+  ///
+  /// [ColorScheme.fromSeed] runs the full HCT tonal-palette solver, which is
+  /// very expensive (the `material_color_utilities` `HctSolver`/`DynamicColor`
+  /// math dominated CPU profiles at hundreds of ms). The result is a pure
+  /// function of its seed colour and brightness, so generating it once per
+  /// distinct `(color, brightness)` and reusing it across rebuilds removes the
+  /// cost entirely — previously seed mode computed a *full* scheme up to four
+  /// times per [palette] call, for every chip, on every rebuild.
+  static final Map<(int, Brightness), ColorScheme> _seedSchemeCache = {};
+
+  static ColorScheme _seedScheme(Color seedColor, Brightness brightness) {
+    return _seedSchemeCache.putIfAbsent(
+      (seedColor.toARGB32(), brightness),
+      () => ColorScheme.fromSeed(seedColor: seedColor, brightness: brightness),
+    );
+  }
+
   static ContainerColorPalette palette(
     BuildContext context,
     Color color, {
@@ -93,30 +111,22 @@ class ContainerColors {
     final appScheme = theme.colorScheme;
     final fullColor = fullOpacity(color);
 
+    final seedScheme = useCustomColor
+        ? null
+        : _seedScheme(fullColor, theme.brightness);
+
     final containerColor = useCustomColor
         ? fullColor
-        : ColorScheme.fromSeed(
-            seedColor: fullColor,
-            brightness: theme.brightness,
-          ).primaryContainer;
+        : seedScheme!.primaryContainer;
     final accentColor = useCustomColor
         ? _shiftTone(fullColor, theme.brightness)
-        : ColorScheme.fromSeed(
-            seedColor: fullColor,
-            brightness: theme.brightness,
-          ).primary;
+        : seedScheme!.primary;
     final onContainerColor = useCustomColor
         ? _contrastingForeground(containerColor)
-        : ColorScheme.fromSeed(
-            seedColor: fullColor,
-            brightness: theme.brightness,
-          ).onPrimaryContainer;
+        : seedScheme!.onPrimaryContainer;
     final onAccentColor = useCustomColor
         ? _contrastingForeground(accentColor)
-        : ColorScheme.fromSeed(
-            seedColor: fullColor,
-            brightness: theme.brightness,
-          ).onPrimary;
+        : seedScheme!.onPrimary;
 
     final surfaceColor = Color.alphaBlend(
       containerColor.withValues(alpha: surfaceAlpha),
