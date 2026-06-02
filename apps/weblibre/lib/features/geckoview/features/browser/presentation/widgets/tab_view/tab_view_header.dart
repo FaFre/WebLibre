@@ -275,17 +275,22 @@ class TabViewHeader extends HookConsumerWidget {
     // tab list filtered with no visible search box (#421). Whenever we are not
     // searching, drop any lingering query so all tabs are shown again.
     useEffect(() {
-      if (!searchMode.value &&
-          ref.exists(
+      if (!searchMode.value) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (ref.exists(
             tabSearchRepositoryProvider(TabSearchPartition.preview),
           )) {
-        unawaited(
-          ref
-              .read(
-                tabSearchRepositoryProvider(TabSearchPartition.preview).notifier,
-              )
-              .addQuery(''),
-        );
+            unawaited(
+              ref
+                  .read(
+                    tabSearchRepositoryProvider(
+                      TabSearchPartition.preview,
+                    ).notifier,
+                  )
+                  .addQuery(''),
+            );
+          }
+        });
       }
 
       return null;
