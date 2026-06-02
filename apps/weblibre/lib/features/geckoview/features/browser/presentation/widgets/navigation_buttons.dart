@@ -52,21 +52,30 @@ class NavigateBackButtonView extends StatelessWidget {
     super.key,
     required this.canGoBack,
     required this.isLoading,
+    this.stopLoadingFallback = true,
     this.onPressed,
     this.onLongPress,
   });
 
   final bool canGoBack;
   final bool isLoading;
+
+  /// When `true` (default), the button doubles as a stop-loading control while
+  /// [isLoading] (shows a close icon, taps cancel the load). When `false` it
+  /// stays a plain back button even during loading — used when a dedicated
+  /// reload/stop button is present elsewhere in the toolbar.
+  final bool stopLoadingFallback;
   final VoidCallback? onPressed;
   final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
+    final showStop = isLoading && stopLoadingFallback;
+
     return IconButton(
-      onPressed: (canGoBack || isLoading) ? onPressed : null,
-      onLongPress: (canGoBack && !isLoading) ? onLongPress : null,
-      icon: isLoading ? const Icon(Icons.close) : const Icon(Icons.arrow_back),
+      onPressed: (canGoBack || showStop) ? onPressed : null,
+      onLongPress: (canGoBack && !showStop) ? onLongPress : null,
+      icon: showStop ? const Icon(Icons.close) : const Icon(Icons.arrow_back),
     );
   }
 }
@@ -118,18 +127,23 @@ class NavigateBackButton extends HookConsumerWidget {
     super.key,
     required this.selectedTabId,
     required this.isLoading,
+    this.stopLoadingFallback = true,
     this.menuControllerToClose,
     this.canGoBack = true,
   });
 
   final String? selectedTabId;
   final bool isLoading;
+
+  /// See [NavigateBackButtonView.stopLoadingFallback].
+  final bool stopLoadingFallback;
   final MenuController? menuControllerToClose;
   final bool canGoBack;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final historyMenuController = useMenuController();
+    final showStop = isLoading && stopLoadingFallback;
 
     return HistoryMenu(
       selectedTabId: selectedTabId,
@@ -138,6 +152,7 @@ class NavigateBackButton extends HookConsumerWidget {
       child: NavigateBackButtonView(
         canGoBack: canGoBack,
         isLoading: isLoading,
+        stopLoadingFallback: stopLoadingFallback,
         onPressed: () async {
           final controller = ref.read(
             tabSessionProvider(tabId: selectedTabId).notifier,
@@ -149,7 +164,7 @@ class NavigateBackButton extends HookConsumerWidget {
             ),
           );
 
-          if (isLoading) {
+          if (showStop) {
             await controller.stopLoading();
           } else if (isReaderActive) {
             await ref

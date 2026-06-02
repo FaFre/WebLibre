@@ -34,6 +34,8 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/utils/bookmark_tree_utils.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/font_size_constants.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_id.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_spec.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/models/contextual_toolbar_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_bar_buttons.dart';
@@ -83,14 +85,31 @@ class ToolbarButtonDefinition {
   });
 }
 
+/// Whether a reload button is currently configured visible in the contextual
+/// toolbar. Used to decide whether the back button should fall back to acting
+/// as a stop-loading control (see issue #351).
+bool _isReloadButtonVisible(WidgetRef ref) {
+  return ref
+      .read(effectiveToolbarButtonConfigsProvider)
+      .value
+      .any(
+        (config) =>
+            config.buttonId == ToolbarButtonId.reload.name && config.isVisible,
+      );
+}
+
 final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
   ToolbarButtonDefinition(
     spec: backToolbarButtonSpec,
     label: 'Back',
     icon: Icons.arrow_back,
-    isPrimaryAvailable: (scope, ref) =>
-        scope.tabState?.historyState.canGoBack == true ||
-        scope.tabState?.isLoading == true,
+    isPrimaryAvailable: (scope, ref) {
+      final canGoBack = scope.tabState?.historyState.canGoBack == true;
+      final isLoading = scope.tabState?.isLoading == true;
+      // The back button only doubles as a stop-loading control when no
+      // dedicated reload button is present to take over that role.
+      return canGoBack || (isLoading && !_isReloadButtonVisible(ref));
+    },
     longPressActions: ['History Menu (Previous pages)'],
     builder: (scope, context, ref) {
       if (scope.isPreview) {
@@ -104,6 +123,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
       return NavigateBackButton(
         selectedTabId: scope.selectedTabId,
         isLoading: scope.tabState?.isLoading ?? false,
+        stopLoadingFallback: !_isReloadButtonVisible(ref),
       );
     },
   ),
@@ -616,6 +636,7 @@ class _ReloadToolbarButton extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final menuController = useMemoized(MenuController.new);
+    final isLoading = scope.tabState?.isLoading ?? false;
 
     return MenuAnchor(
       controller: menuController,
@@ -640,12 +661,21 @@ class _ReloadToolbarButton extends HookConsumerWidget {
             : () async {
                 final tabId = scope.selectedTabId;
                 if (tabId != null) {
-                  await ref
-                      .read(tabSessionProvider(tabId: tabId).notifier)
-                      .reload();
+                  final controller = ref.read(
+                    tabSessionProvider(tabId: tabId).notifier,
+                  );
+                  // While loading the button acts as a stop control; otherwise
+                  // it reloads the page.
+                  if (isLoading) {
+                    await controller.stopLoading();
+                  } else {
+                    await controller.reload();
+                  }
                 }
               },
-        onLongPress: scope.isPreview
+        // Hard Refresh is meaningless mid-load, so disable the long-press menu
+        // while the stop action is active.
+        onLongPress: (scope.isPreview || isLoading)
             ? null
             : () {
                 if (menuController.isOpen) {
@@ -654,7 +684,7 @@ class _ReloadToolbarButton extends HookConsumerWidget {
                   menuController.open();
                 }
               },
-        icon: const Icon(Icons.refresh),
+        icon: Icon(isLoading ? Icons.close : Icons.refresh),
       ),
     );
   }
