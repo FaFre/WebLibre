@@ -26,6 +26,7 @@ import 'package:weblibre/features/bangs/data/models/bang.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
+import 'package:weblibre/utils/uri_parser.dart';
 
 @DriftAccessor()
 class BangDao extends DatabaseAccessor<BangDatabase> with $BangDaoMixin {
@@ -129,14 +130,19 @@ class BangDao extends DatabaseAccessor<BangDatabase> with $BangDaoMixin {
   }
 
   Selectable<BangData> getBangDataByTemplateHost(String host) {
-    final httpsPrefix = 'https://$host/%';
-    final httpPrefix = 'http://$host/%';
+    // Search engines redirect results between generic subdomains (e.g.
+    // bing.com → www.bing.com, www.youtube.com → m.youtube.com), so match the
+    // template against every equivalent host spelling, not just the live one.
+    final clauses = hostVariants(host)
+        .map(
+          (variant) =>
+              db.bangDataView.urlTemplate.like('https://$variant/%') |
+              db.bangDataView.urlTemplate.like('http://$variant/%'),
+        )
+        .toList();
 
     return select(db.bangDataView)
-      ..where(
-        (t) =>
-            t.urlTemplate.like(httpsPrefix) | t.urlTemplate.like(httpPrefix),
-      );
+      ..where((_) => clauses.reduce((a, b) => a | b));
   }
 
   Selectable<BangData> queryBangs(String searchString) {

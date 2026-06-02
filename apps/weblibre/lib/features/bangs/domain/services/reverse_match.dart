@@ -92,7 +92,7 @@ class BangUrlPattern {
   /// Extracts the user query from [input] if it matches this pattern. Returns
   /// null otherwise.
   String? match(Uri input) {
-    if (input.host.toLowerCase() != host) return null;
+    if (uri_parser.normalizeHost(input.host) != host) return null;
 
     final mainInput = _componentsFromUri(input);
     if (mainInput == null) return null;
@@ -178,7 +178,9 @@ class BangUrlPattern {
     if (!parsed.hasScheme || parsed.host.isEmpty) return null;
     if (parsed.host.contains(_sentinel)) return null;
 
-    final host = parsed.host.toLowerCase();
+    // Normalize so a template host and a redirected results host that differ
+    // only by a generic subdomain (www./m.) still match.
+    final host = uri_parser.normalizeHost(parsed.host);
 
     final fragmentSlot = parsed.fragment.contains(_sentinel);
     final templateMain = _componentsFromUri(parsed);

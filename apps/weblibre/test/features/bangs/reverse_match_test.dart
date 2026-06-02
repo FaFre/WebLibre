@@ -118,6 +118,48 @@ void main() {
     });
   });
 
+  group('BangUrlPattern - host normalization', () {
+    test('template without www matches www results host (Bing)', () {
+      final p = BangUrlPattern.parse('https://bing.com/search?q={{{s}}}');
+      expect(
+        p!.match(
+          Uri.parse('https://www.bing.com/search?q=test&toWww=1&redig=ABC'),
+        ),
+        'test',
+      );
+    });
+
+    test('www template matches mobile results host (YouTube)', () {
+      final p = BangUrlPattern.parse(
+        'https://www.youtube.com/results?search_query={{{s}}}',
+      );
+      expect(
+        p!.match(Uri.parse('https://m.youtube.com/results?search_query=cats')),
+        'cats',
+      );
+    });
+
+    test('template without www matches www results host (Startpage)', () {
+      final p = BangUrlPattern.parse(
+        'https://startpage.com/do/metasearch.pl?query={{{s}}}',
+      );
+      expect(
+        p!.match(
+          Uri.parse('https://www.startpage.com/do/metasearch.pl?query=foo'),
+        ),
+        'foo',
+      );
+    });
+
+    test('non-generic subdomains still must match', () {
+      final p = BangUrlPattern.parse('https://cn.bing.com/dict/search?q={{{s}}}');
+      expect(
+        p!.match(Uri.parse('https://www.bing.com/dict/search?q=foo')),
+        isNull,
+      );
+    });
+  });
+
   group('BangUrlPattern - fragment placeholder', () {
     test('hash query: 4chan-style #s={{{s}}}', () {
       final p = BangUrlPattern.parse(
