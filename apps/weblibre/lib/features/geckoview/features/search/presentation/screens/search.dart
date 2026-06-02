@@ -364,13 +364,19 @@ class SearchScreen extends HookConsumerWidget {
 
     useOnAppLifecycleStateChange((previous, current) {
       switch (current) {
-        case AppLifecycleState.detached:
-        case AppLifecycleState.inactive:
         case AppLifecycleState.hidden:
         case AppLifecycleState.paused:
           //Fixes issue with disappearing keyboard after resume (even we request focus)
           searchFocusNode.unfocus();
           pauseTime.value ??= DateTime.now();
+        case AppLifecycleState.inactive:
+        case AppLifecycleState.detached:
+          // Transient focus loss (IME input-method picker via long-press
+          // spacebar, notification shade, split-screen) reports `inactive`
+          // while the field is still visible. Unfocusing here would tear down
+          // the input connection and dismiss the keyboard/picker, so leave
+          // focus untouched and only react to genuine backgrounding above.
+          break;
         case AppLifecycleState.resumed:
           if (pauseTime.value == null ||
               DateTime.now().difference(pauseTime.value!) <
