@@ -143,6 +143,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings acceptSuggestionOnSubmit(bool acceptSuggestionOnSubmit);
 
+  GeneralSettings pureBlack(bool pureBlack);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -208,6 +210,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool enableLocalSearchIndex,
     bool indexPrivateTabs,
     bool acceptSuggestionOnSubmit,
+    bool pureBlack,
   });
 }
 
@@ -462,6 +465,9 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(acceptSuggestionOnSubmit: acceptSuggestionOnSubmit);
 
   @override
+  GeneralSettings pureBlack(bool pureBlack) => call(pureBlack: pureBlack);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -528,6 +534,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? enableLocalSearchIndex = const $CopyWithPlaceholder(),
     Object? indexPrivateTabs = const $CopyWithPlaceholder(),
     Object? acceptSuggestionOnSubmit = const $CopyWithPlaceholder(),
+    Object? pureBlack = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -866,6 +873,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.acceptSuggestionOnSubmit
           // ignore: cast_nullable_to_non_nullable
           : acceptSuggestionOnSubmit as bool,
+      pureBlack: pureBlack == const $CopyWithPlaceholder() || pureBlack == null
+          ? _value.pureBlack
+          // ignore: cast_nullable_to_non_nullable
+          : pureBlack as bool,
     );
   }
 }
@@ -992,6 +1003,7 @@ GeneralSettings _$GeneralSettingsFromJson(
   enableLocalSearchIndex: json['enableLocalSearchIndex'] as bool?,
   indexPrivateTabs: json['indexPrivateTabs'] as bool?,
   acceptSuggestionOnSubmit: json['acceptSuggestionOnSubmit'] as bool?,
+  pureBlack: json['pureBlack'] as bool?,
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -1067,6 +1079,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'enableLocalSearchIndex': instance.enableLocalSearchIndex,
   'indexPrivateTabs': instance.indexPrivateTabs,
   'acceptSuggestionOnSubmit': instance.acceptSuggestionOnSubmit,
+  'pureBlack': instance.pureBlack,
 };
 
 const _$ThemeModeEnumMap = {

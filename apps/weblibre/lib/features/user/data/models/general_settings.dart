@@ -145,6 +145,10 @@ class GeneralSettings with FastEquatable {
   /// accept and complete an inline search suggestion. Defaults to false.
   final bool acceptSuggestionOnSubmit;
 
+  /// Whether dark mode should use pure-black ("OLED"/high-contrast) surfaces.
+  /// Only takes effect when the effective brightness is dark. Defaults to false.
+  final bool pureBlack;
+
   GeneralSettings({
     required this.themeMode,
     required this.uiScaleFactor,
@@ -203,6 +207,7 @@ class GeneralSettings with FastEquatable {
     required this.enableLocalSearchIndex,
     required this.indexPrivateTabs,
     required this.acceptSuggestionOnSubmit,
+    required this.pureBlack,
   });
 
   GeneralSettings.withDefaults({
@@ -263,6 +268,7 @@ class GeneralSettings with FastEquatable {
     bool? enableLocalSearchIndex,
     bool? indexPrivateTabs,
     bool? acceptSuggestionOnSubmit,
+    bool? pureBlack,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        uiScaleFactor = uiScaleFactor ?? defaultUiScaleFactor,
        disableAnimations = disableAnimations ?? false,
@@ -331,7 +337,8 @@ class GeneralSettings with FastEquatable {
        externalAppIntentPolicies = externalAppIntentPolicies ?? const {},
        enableLocalSearchIndex = enableLocalSearchIndex ?? true,
        indexPrivateTabs = indexPrivateTabs ?? false,
-       acceptSuggestionOnSubmit = acceptSuggestionOnSubmit ?? false;
+       acceptSuggestionOnSubmit = acceptSuggestionOnSubmit ?? false,
+       pureBlack = pureBlack ?? false;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) {
     // Migrate legacy `newTabPosition` setting to direction settings.
@@ -442,5 +449,6 @@ class GeneralSettings with FastEquatable {
     enableLocalSearchIndex,
     indexPrivateTabs,
     acceptSuggestionOnSubmit,
+    pureBlack,
   ];
 }

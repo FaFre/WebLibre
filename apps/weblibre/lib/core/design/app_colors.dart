@@ -114,6 +114,35 @@ class AppColors extends ThemeExtension<AppColors> {
     brandLink: Color(0xFFFBDC6B),
   );
 
+  /// Pure-black ("OLED") variant of [dark]. Identical to [dark] except the
+  /// decorative aura tones collapse toward black so the home/new-tab backdrop
+  /// reads as black instead of charcoal. Semantic colors (private, isolated,
+  /// tor, brand, warning) are kept so they stay legible. The aura orbs are
+  /// heavily blurred, so the faint tints below still render as a subtle brand
+  /// glow on black rather than flat dead black.
+  static const darkOled = AppColors._(
+    seedColor: Color(0xFF167C80),
+    privateTabPurple: Color(0xFF8000D7),
+    privateTabBackground: Color(0xFF25003E),
+    privateTabForeground: Color(0xFFFFFFFF),
+    privateSelectionOverlay: Color(0x648000D7),
+    isolatedTabTeal: Color(0xFF00897B),
+    isolatedTabBackground: Color(0xFF003D36),
+    isolatedTabForeground: Color(0xFFFFFFFF),
+    isolatedSelectionOverlay: Color(0x6400897B),
+    torPurple: Color(0xFF7D4698),
+    torActiveGreen: Color(0xFF68B030),
+    torBackgroundGrey: Color(0xFF333A41),
+    warningAmber: Color(0xFFFFA000),
+    // Aura: collapsed toward black, keeping only a whisper of brand tint.
+    auraPurple: Color(0xFF0E0A1A),
+    auraGold: Color(0xFF17130A),
+    auraShadow: Color(0xFF050505),
+    auraShadowHighlight: Color(0xFF0C0C0E),
+    auraTint: Color(0xFF000000),
+    brandLink: Color(0xFFFBDC6B),
+  );
+
   @override
   AppColors copyWith({
     Color? seedColor,

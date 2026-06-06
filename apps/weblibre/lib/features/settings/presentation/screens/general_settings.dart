@@ -52,6 +52,13 @@ const List<SettingsSectionDefinition> generalSettingsSections = [
         child: _ThemeSection(),
       ),
       SettingsEntryDefinition(
+        title: 'Pure Black (OLED)',
+        subtitle: 'Use true-black surfaces in dark mode to save power on OLED '
+            'screens',
+        keywords: ['oled', 'amoled', 'high contrast', 'black', 'dark'],
+        child: _PureBlackTile(),
+      ),
+      SettingsEntryDefinition(
         title: 'User Interface Zoom',
         subtitle: 'Make the user interface smaller or larger',
         keywords: ['ui scale', 'zoom'],
@@ -271,6 +278,43 @@ class _ShowModalBarrierTile extends HookConsumerWidget {
                   currentSettings.copyWith.showModalBarrier(value),
             );
       },
+    );
+  }
+}
+
+class _PureBlackTile extends HookConsumerWidget {
+  const _PureBlackTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pureBlack = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.pureBlack),
+    );
+    final themeMode = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.themeMode),
+    );
+
+    // OLED surfaces only apply to dark mode; disable the toggle when the app
+    // is locked to light mode so the setting can't appear to have no effect.
+    final enabled = themeMode != ThemeMode.light;
+
+    return SwitchListTile.adaptive(
+      title: const Text('Pure Black (OLED)'),
+      subtitle: const Text(
+        'Use true-black surfaces in dark mode to save power on OLED screens',
+      ),
+      secondary: const Icon(Icons.contrast),
+      value: pureBlack,
+      onChanged: enabled
+          ? (value) async {
+              await ref
+                  .read(saveGeneralSettingsControllerProvider.notifier)
+                  .save(
+                    (currentSettings) =>
+                        currentSettings.copyWith.pureBlack(value),
+                  );
+            }
+          : null,
     );
   }
 }

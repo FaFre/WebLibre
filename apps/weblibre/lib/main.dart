@@ -84,6 +84,28 @@ ColorScheme _fixSurfaceContainerColors(
   }
 }
 
+/// Rewrites a dark [ColorScheme] to use pure-black ("OLED"/high-contrast)
+/// surfaces.
+///
+/// Only the *base* tones (the scaffold/page background and the lowest
+/// containers) become true black for the power saving. The elevated container
+/// tones keep meaningful grey steps so cards, sheets and menus stay visibly
+/// separated from the black background — Material elevation shadows are
+/// invisible on black, so the surface-tint step is the only separation cue and
+/// it must stay perceptible. Steps below ~`#12` are imperceptible near black, so
+/// the elevated tones climb in larger increments than the default dark scheme.
+ColorScheme _applyPureBlackSurfaces(ColorScheme scheme) {
+  return scheme.copyWith(
+    surface: const Color(0xFF000000),
+    surfaceDim: const Color(0xFF000000),
+    surfaceContainerLowest: const Color(0xFF000000),
+    surfaceContainerLow: const Color(0xFF121212),
+    surfaceContainer: const Color(0xFF1B1B1B),
+    surfaceContainerHigh: const Color(0xFF242424),
+    surfaceContainerHighest: const Color(0xFF2E2E2E),
+  );
+}
+
 bool _hasBrokenSurfaceContainerColors(ColorScheme scheme) {
   return scheme.surfaceContainerLowest == scheme.surface &&
       scheme.surfaceContainerLow == scheme.surface &&
@@ -186,6 +208,9 @@ class _MainWidget extends HookConsumerWidget {
       generalSettingsWithDefaultsProvider.select(
         (value) => value.showModalBarrier,
       ),
+    );
+    final pureBlack = ref.watch(
+      generalSettingsWithDefaultsProvider.select((value) => value.pureBlack),
     );
 
     useOnInitialization(() async {
@@ -361,6 +386,10 @@ class _MainWidget extends HookConsumerWidget {
           );
         }
 
+        if (pureBlack) {
+          darkColorScheme = _applyPureBlackSurfaces(darkColorScheme);
+        }
+
         return MainApp(
           key: rootKey,
           theme: ThemeData(
@@ -389,7 +418,9 @@ class _MainWidget extends HookConsumerWidget {
             bottomSheetTheme: BottomSheetThemeData(
               modalBarrierColor: showModalBarrier ? null : Colors.transparent,
             ),
-            extensions: const <ThemeExtension<dynamic>>[AppColors.dark],
+            extensions: <ThemeExtension<dynamic>>[
+              if (pureBlack) AppColors.darkOled else AppColors.dark,
+            ],
           ),
           themeMode: themeMode,
           uiScaleFactor: uiScaleFactor,
