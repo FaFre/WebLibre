@@ -52,6 +52,7 @@ import 'package:weblibre/features/user/domain/repositories/engine_settings.dart'
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/utils/exit_app.dart';
+import 'package:weblibre/utils/host_rules.dart';
 import 'package:weblibre/utils/move_to_background.dart';
 
 part 'gesture_control.g.dart';
@@ -311,7 +312,7 @@ bool gestureSiteExcluded(Ref ref) {
   final url = ref.watch(tabStateProvider(tabId).select((state) => state?.url));
   if (url == null) return false;
 
-  return isGestureSiteExcluded(url, excludedSites);
+  return hostMatchesRule(url, excludedSites);
 }
 
 /// The effective native recognizer configuration: the user's settings with the

@@ -143,7 +143,7 @@ final class GestureSiteExcludedProvider
 }
 
 String _$gestureSiteExcludedHash() =>
-    r'15dd371a176303a7c52c37df560c93bbb03c5039';
+    r'c7c9f8128a7262b858c954b7217d6a00f1d062e4';
 
 /// The effective native recognizer configuration: the user's settings with the
 /// recognizer disabled while the current site is excluded.

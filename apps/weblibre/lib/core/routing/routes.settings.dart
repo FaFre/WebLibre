@@ -117,6 +117,10 @@ part of 'routes.dart';
       name: 'ContextualToolbarSettingsRoute',
       path: 'contextual_toolbar',
     ),
+    TypedGoRoute<DesktopModeSitesRoute>(
+      name: 'DesktopModeSitesRoute',
+      path: 'desktop_mode_sites',
+    ),
     TypedGoRoute<SingboxProxyProfilesRoute>(
       name: 'SingboxProxyProfilesRoute',
       path: 'singbox_proxy_profiles',
@@ -347,6 +351,15 @@ class ContextualToolbarSettingsRoute extends GoRouteData
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const ContextualToolbarSettingsScreen();
+  }
+}
+
+class DesktopModeSitesRoute extends GoRouteData with $DesktopModeSitesRoute {
+  const DesktopModeSitesRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const DesktopModeSitesScreen();
   }
 }
 

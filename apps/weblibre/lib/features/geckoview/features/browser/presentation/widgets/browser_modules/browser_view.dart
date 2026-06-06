@@ -36,6 +36,7 @@ import 'package:weblibre/features/bangs/domain/services/search_history_cleanup.d
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/browser_extension.dart';
+import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
@@ -607,6 +608,19 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       onError: (error, stackTrace) {
         logger.e(
           'Error listening to engineSettingsReplicationServiceProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+
+    ref.listenManual(
+      fireImmediately: true,
+      desktopModeRuleApplierProvider,
+      (previous, next) {},
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to desktopModeRuleApplierProvider',
           error: error,
           stackTrace: stackTrace,
         );

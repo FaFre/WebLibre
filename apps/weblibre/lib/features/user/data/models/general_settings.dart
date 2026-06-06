@@ -159,6 +159,11 @@ class GeneralSettings with FastEquatable {
   /// still overrides this for an individual tab. Defaults to false.
   final bool globalDesktopMode;
 
+  /// Hosts that should always load in desktop mode. A tab navigating to a
+  /// matching host (or any of its subdomains) is switched to desktop mode,
+  /// overriding [globalDesktopMode] for that visit. See `hostMatchesRule`.
+  final List<String> desktopModeSites;
+
   GeneralSettings({
     required this.themeMode,
     required this.uiScaleFactor,
@@ -220,6 +225,7 @@ class GeneralSettings with FastEquatable {
     required this.acceptSuggestionOnSubmit,
     required this.pureBlack,
     required this.globalDesktopMode,
+    required this.desktopModeSites,
   });
 
   GeneralSettings.withDefaults({
@@ -283,6 +289,7 @@ class GeneralSettings with FastEquatable {
     bool? acceptSuggestionOnSubmit,
     bool? pureBlack,
     bool? globalDesktopMode,
+    List<String>? desktopModeSites,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        uiScaleFactor = uiScaleFactor ?? defaultUiScaleFactor,
        disableAnimations = disableAnimations ?? false,
@@ -354,7 +361,8 @@ class GeneralSettings with FastEquatable {
        indexPrivateTabs = indexPrivateTabs ?? false,
        acceptSuggestionOnSubmit = acceptSuggestionOnSubmit ?? false,
        pureBlack = pureBlack ?? false,
-       globalDesktopMode = globalDesktopMode ?? false;
+       globalDesktopMode = globalDesktopMode ?? false,
+       desktopModeSites = desktopModeSites ?? const [];
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) {
     // Migrate legacy `newTabPosition` setting to direction settings.
@@ -468,5 +476,6 @@ class GeneralSettings with FastEquatable {
     acceptSuggestionOnSubmit,
     pureBlack,
     globalDesktopMode,
+    desktopModeSites,
   ];
 }

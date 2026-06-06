@@ -57,7 +57,7 @@ final class DesktopModeProvider extends $NotifierProvider<DesktopMode, bool> {
   }
 }
 
-String _$desktopModeHash() => r'727c8a884de5c21499f4b3ae6835af1115f649f2';
+String _$desktopModeHash() => r'e755b0a36f7079006047896cb8f2a7be484dea90';
 
 final class DesktopModeFamily extends $Family
     with $ClassFamilyOverride<DesktopMode, bool, bool, bool, String> {
@@ -97,3 +97,65 @@ abstract class _$DesktopMode extends $Notifier<bool> {
     element.handleCreate(ref, () => build(_$args));
   }
 }
+
+/// Always-mounted helper that instantiates the selected tab's [DesktopMode]
+/// notifier so the per-site desktop-mode rule is applied on navigation even when
+/// no tab menu or site sheet is open. Mounted by the browser view. [DesktopMode]
+/// is keepAlive, so once built for a tab its navigation listener keeps running
+/// for that tab's lifetime; this just guarantees it gets built when a tab
+/// becomes selected (e.g. after opening a ruled site from the address bar).
+
+@ProviderFor(desktopModeRuleApplier)
+final desktopModeRuleApplierProvider = DesktopModeRuleApplierProvider._();
+
+/// Always-mounted helper that instantiates the selected tab's [DesktopMode]
+/// notifier so the per-site desktop-mode rule is applied on navigation even when
+/// no tab menu or site sheet is open. Mounted by the browser view. [DesktopMode]
+/// is keepAlive, so once built for a tab its navigation listener keeps running
+/// for that tab's lifetime; this just guarantees it gets built when a tab
+/// becomes selected (e.g. after opening a ruled site from the address bar).
+
+final class DesktopModeRuleApplierProvider
+    extends $FunctionalProvider<void, void, void>
+    with $Provider<void> {
+  /// Always-mounted helper that instantiates the selected tab's [DesktopMode]
+  /// notifier so the per-site desktop-mode rule is applied on navigation even when
+  /// no tab menu or site sheet is open. Mounted by the browser view. [DesktopMode]
+  /// is keepAlive, so once built for a tab its navigation listener keeps running
+  /// for that tab's lifetime; this just guarantees it gets built when a tab
+  /// becomes selected (e.g. after opening a ruled site from the address bar).
+  DesktopModeRuleApplierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'desktopModeRuleApplierProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$desktopModeRuleApplierHash();
+
+  @$internal
+  @override
+  $ProviderElement<void> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  void create(Ref ref) {
+    return desktopModeRuleApplier(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(void value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<void>(value),
+    );
+  }
+}
+
+String _$desktopModeRuleApplierHash() =>
+    r'4a99102da5dc11869bfb96d439cc88652a190b39';

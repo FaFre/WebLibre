@@ -149,6 +149,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings globalDesktopMode(bool globalDesktopMode);
 
+  GeneralSettings desktopModeSites(List<String> desktopModeSites);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -217,6 +219,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool acceptSuggestionOnSubmit,
     bool pureBlack,
     bool globalDesktopMode,
+    List<String> desktopModeSites,
   });
 }
 
@@ -482,6 +485,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(globalDesktopMode: globalDesktopMode);
 
   @override
+  GeneralSettings desktopModeSites(List<String> desktopModeSites) =>
+      call(desktopModeSites: desktopModeSites);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -551,6 +558,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? acceptSuggestionOnSubmit = const $CopyWithPlaceholder(),
     Object? pureBlack = const $CopyWithPlaceholder(),
     Object? globalDesktopMode = const $CopyWithPlaceholder(),
+    Object? desktopModeSites = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -905,6 +913,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.globalDesktopMode
           // ignore: cast_nullable_to_non_nullable
           : globalDesktopMode as bool,
+      desktopModeSites:
+          desktopModeSites == const $CopyWithPlaceholder() ||
+              desktopModeSites == null
+          ? _value.desktopModeSites
+          // ignore: cast_nullable_to_non_nullable
+          : desktopModeSites as List<String>,
     );
   }
 }
@@ -1034,6 +1048,9 @@ GeneralSettings _$GeneralSettingsFromJson(
   acceptSuggestionOnSubmit: json['acceptSuggestionOnSubmit'] as bool?,
   pureBlack: json['pureBlack'] as bool?,
   globalDesktopMode: json['globalDesktopMode'] as bool?,
+  desktopModeSites: (json['desktopModeSites'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -1112,6 +1129,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'acceptSuggestionOnSubmit': instance.acceptSuggestionOnSubmit,
   'pureBlack': instance.pureBlack,
   'globalDesktopMode': instance.globalDesktopMode,
+  'desktopModeSites': instance.desktopModeSites,
 };
 
 const _$ThemeModeEnumMap = {

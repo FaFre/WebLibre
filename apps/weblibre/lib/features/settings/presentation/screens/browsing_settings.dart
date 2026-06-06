@@ -105,11 +105,22 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
         keywords: ['app links', 'external apps'],
         child: _AppLinksModeSection(),
       ),
+    ],
+  ),
+  SettingsSectionDefinition(
+    title: 'Desktop Mode',
+    entries: [
       SettingsEntryDefinition(
         title: 'Always Request Desktop Site',
         subtitle: 'Open new tabs in desktop mode by default',
         keywords: ['desktop mode', 'user agent', 'mobile site', 'tablet'],
         child: _GlobalDesktopModeTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Desktop Mode Sites',
+        subtitle: 'Sites that always load in desktop mode',
+        keywords: ['desktop mode', 'per-site', 'user agent', 'exceptions'],
+        child: _DesktopModeSitesTile(),
       ),
     ],
   ),
@@ -759,6 +770,23 @@ class _GlobalDesktopModeTile extends HookConsumerWidget {
               (currentSettings) =>
                   currentSettings.copyWith.globalDesktopMode(value),
             );
+      },
+    );
+  }
+}
+
+class _DesktopModeSitesTile extends StatelessWidget {
+  const _DesktopModeSitesTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: const Icon(Icons.desktop_windows),
+      title: const Text('Desktop Mode Sites'),
+      subtitle: const Text('Sites that always load in desktop mode'),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () async {
+        await const DesktopModeSitesRoute().push(context);
       },
     );
   }

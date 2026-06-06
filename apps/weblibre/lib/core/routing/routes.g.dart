@@ -1675,6 +1675,11 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       factory: $ContextualToolbarSettingsRoute._fromState,
     ),
     GoRouteData.$route(
+      path: 'desktop_mode_sites',
+      name: 'DesktopModeSitesRoute',
+      factory: $DesktopModeSitesRoute._fromState,
+    ),
+    GoRouteData.$route(
       path: 'singbox_proxy_profiles',
       name: 'SingboxProxyProfilesRoute',
       factory: $SingboxProxyProfilesRoute._fromState,
@@ -2265,6 +2270,27 @@ mixin $ContextualToolbarSettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/contextual_toolbar');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $DesktopModeSitesRoute on GoRouteData {
+  static DesktopModeSitesRoute _fromState(GoRouterState state) =>
+      const DesktopModeSitesRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/desktop_mode_sites');
 
   @override
   void go(BuildContext context) => context.go(location);

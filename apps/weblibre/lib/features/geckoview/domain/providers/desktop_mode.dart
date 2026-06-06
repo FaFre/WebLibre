@@ -17,9 +17,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/utils/host_rules.dart';
 
 part 'desktop_mode.g.dart';
 
@@ -34,6 +39,16 @@ class DesktopMode extends _$DesktopMode {
     state = !state;
   }
 
+  /// Resolves the desktop-mode state a tab on [host] should have, honouring the
+  /// per-site rule list first and falling back to the browser-wide default.
+  bool _resolveForHost(Uri? url) {
+    final settings = ref.read(generalSettingsWithDefaultsProvider);
+    if (url != null && hostMatchesRule(url, settings.desktopModeSites)) {
+      return true;
+    }
+    return settings.globalDesktopMode;
+  }
+
   @override
   bool build(String tabId) {
     listenSelf((previous, next) async {
@@ -44,11 +59,62 @@ class DesktopMode extends _$DesktopMode {
       }
     });
 
-    // Seed the initial value from the browser-wide default so a newly opened
-    // tab's menu checkbox matches the desktop mode it was actually created with
-    // natively (GeckoTabsApi seeds new tabs from BrowserState.desktopMode).
-    // Read (not watch) so toggling the global default never clobbers an
-    // existing tab's per-tab override.
-    return ref.read(generalSettingsWithDefaultsProvider).globalDesktopMode;
+    // Re-apply the per-site rule whenever the tab's host changes. A manual
+    // toggle from the menu therefore lasts only for the current host-visit:
+    // landing on a ruled host forces desktop on again, and leaving it reverts
+    // to the browser-wide default. Watching only the host keeps in-page
+    // navigations (path/query changes) from clobbering a manual override.
+    ref.listen(
+      tabStateProvider(tabId),
+      (previous, next) {
+        if (previous?.url.host != next?.url.host) {
+          state = _resolveForHost(next?.url);
+        }
+      },
+    );
+
+    // Seed the initial value from the per-site rule (falling back to the
+    // browser-wide default) so a newly opened tab's menu checkbox matches the
+    // desktop mode it was actually created with natively (GeckoTabsApi seeds
+    // new tabs from BrowserState.desktopMode). Read (not watch) so toggling the
+    // global default never clobbers an existing tab's per-tab override.
+    final resolved = _resolveForHost(ref.read(tabStateProvider(tabId))?.url);
+
+    // The engine seeds a tab's desktop mode from the browser-wide default at
+    // creation, and a global-default change re-applies to every tab, so at the
+    // moment this notifier (re)builds the engine holds [globalDesktopMode]. When
+    // a per-site rule resolves to a different value, push it now: the listenSelf
+    // guard above skips the initial seed, so without this the rule would never
+    // reach Gecko unless the host later changed while this notifier was alive
+    // (which only happens when a menu/sheet kept it mounted across a navigation).
+    final globalDesktopMode = ref
+        .read(generalSettingsWithDefaultsProvider)
+        .globalDesktopMode;
+    if (resolved != globalDesktopMode) {
+      unawaited(
+        Future.microtask(() async {
+          if (!ref.mounted) return;
+          await ref
+              .read(tabSessionProvider(tabId: tabId).notifier)
+              .requestDesktopSite(resolved);
+        }),
+      );
+    }
+
+    return resolved;
+  }
+}
+
+/// Always-mounted helper that instantiates the selected tab's [DesktopMode]
+/// notifier so the per-site desktop-mode rule is applied on navigation even when
+/// no tab menu or site sheet is open. Mounted by the browser view. [DesktopMode]
+/// is keepAlive, so once built for a tab its navigation listener keeps running
+/// for that tab's lifetime; this just guarantees it gets built when a tab
+/// becomes selected (e.g. after opening a ruled site from the address bar).
+@Riverpod(keepAlive: true)
+void desktopModeRuleApplier(Ref ref) {
+  final selectedTabId = ref.watch(selectedTabProvider);
+  if (selectedTabId != null) {
+    ref.watch(desktopModeProvider(selectedTabId));
   }
 }

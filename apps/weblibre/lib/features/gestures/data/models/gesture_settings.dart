@@ -21,7 +21,6 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_action.dart';
-import 'package:weblibre/utils/uri_input_parser.dart';
 
 part 'gesture_settings.g.dart';
 
@@ -103,7 +102,7 @@ class GestureSettings with FastEquatable {
   final int minSuggestionStroke;
 
   /// Hosts on which gestures are disabled. A page is excluded when its host
-  /// equals or is a subdomain of any entry (see `isGestureSiteExcluded`).
+  /// equals or is a subdomain of any entry (see `hostMatchesRule`).
   final List<String> excludedSites;
 
   /// Canonical gesture key → action. Keys follow the grammar documented on
@@ -176,35 +175,4 @@ class GestureSettings with FastEquatable {
     excludedSites,
     bindings,
   ];
-}
-
-/// Normalises a user-entered site into a bare lowercase host, e.g.
-/// `https://News.example.com/foo` → `news.example.com`. Accepts either a full
-/// URL or a bare host, and validates the result with the same rules the address
-/// bar uses ([isValidHostCandidate]). Returns null for input without a valid
-/// host.
-String? normalizeGestureSiteHost(String input) {
-  final trimmed = input.trim().toLowerCase();
-  if (trimmed.isEmpty) return null;
-
-  final candidate = trimmed.contains('://') ? trimmed : 'https://$trimmed';
-  final host = Uri.tryParse(candidate)?.host;
-  if (host == null || host.isEmpty) return null;
-
-  return isValidHostCandidate(host) ? host : null;
-}
-
-/// Whether [url] is covered by any entry in [excludedSites]. An entry matches
-/// the URL's host exactly or as a parent domain (so `example.com` also covers
-/// `m.example.com`).
-bool isGestureSiteExcluded(Uri url, List<String> excludedSites) {
-  final host = url.host.toLowerCase();
-  if (host.isEmpty) return false;
-
-  for (final entry in excludedSites) {
-    final pattern = entry.toLowerCase();
-    if (pattern.isEmpty) continue;
-    if (host == pattern || host.endsWith('.$pattern')) return true;
-  }
-  return false;
 }

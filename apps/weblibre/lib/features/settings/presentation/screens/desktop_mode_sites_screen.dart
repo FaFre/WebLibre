@@ -19,35 +19,37 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
-import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
+import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/string_list_settings_screen.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/host_rules.dart';
 
-/// Manages the list of sites on which gestures are disabled.
-class GestureExcludedSitesScreen extends HookConsumerWidget {
-  const GestureExcludedSitesScreen({super.key});
+/// Manages the list of sites that always load in desktop mode.
+class DesktopModeSitesScreen extends HookConsumerWidget {
+  const DesktopModeSitesScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final excludedSites = ref.watch(
-      gestureSettingsWithDefaultsProvider.select((s) => s.excludedSites),
+    final desktopModeSites = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.desktopModeSites),
     );
 
     return StringListSettingsScreen(
-      title: 'Excluded sites',
+      title: 'Desktop mode sites',
       description:
-          'Gestures are disabled on these sites. Subdomains are included '
-          '(e.g. "example.com" also covers "m.example.com").',
-      values: excludedSites,
+          'These sites always load in desktop mode, overriding the default. '
+          'Subdomains are included (e.g. "example.com" also covers '
+          '"m.example.com").',
+      values: desktopModeSites,
       hintText: 'example.com',
-      itemIcon: Icons.public_off,
-      emptyLabel: 'No sites excluded.',
+      itemIcon: Icons.desktop_windows,
+      emptyLabel: 'No sites added.',
       normalize: normalizeRuleHost,
       onChanged: (next) async {
         await ref
-            .read(gestureSettingsRepositoryProvider.notifier)
-            .updateSettings((current) => current.copyWith.excludedSites(next));
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save((current) => current.copyWith.desktopModeSites(next));
       },
     );
   }
