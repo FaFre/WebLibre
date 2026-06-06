@@ -216,12 +216,11 @@ class EngineSettingsReplicationService
                 settings.globalPrivacyControlEnabled,
               );
             }
-            if (previous.value?.preferredColorScheme !=
-                settings.preferredColorScheme) {
-              await _service.preferredColorScheme(
-                settings.preferredColorScheme,
-              );
-            }
+            // Note: preferredColorScheme is intentionally NOT replicated from the
+            // engine settings here. The app theme (generalSettings.themeMode) is the
+            // sole source of truth for the color scheme; see the themeMode listener
+            // above. EngineSettings.preferredColorScheme is vestigial and always
+            // `system`, so replicating it would clobber the real theme (issue #436).
             if (previous.value?.cookieBannerHandlingMode !=
                 settings.cookieBannerHandlingMode) {
               await _service.cookieBannerHandlingMode(

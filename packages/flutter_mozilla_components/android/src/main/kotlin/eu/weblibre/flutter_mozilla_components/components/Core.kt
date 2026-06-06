@@ -11,6 +11,7 @@ import android.content.SharedPreferences
 import android.os.Environment
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
+import eu.weblibre.flutter_mozilla_components.ColorSchemePreference
 import eu.weblibre.flutter_mozilla_components.Components
 import eu.weblibre.flutter_mozilla_components.interceptor.AppRequestInterceptor
 import eu.weblibre.flutter_mozilla_components.services.DownloadService
@@ -47,7 +48,6 @@ import mozilla.components.concept.engine.Engine
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.EngineSession.TrackingProtectionPolicy
 import mozilla.components.concept.engine.fission.WebContentIsolationStrategy
-import mozilla.components.concept.engine.mediaquery.PreferredColorScheme
 import mozilla.components.concept.fetch.Client
 import mozilla.components.feature.addons.AddonManager
 import mozilla.components.feature.addons.amo.AMOAddonsProvider
@@ -122,7 +122,10 @@ class Core(
             //fingerprintingProtectionPrivateBrowsing
             httpsOnlyMode = Engine.HttpsOnlyMode.ENABLED,
             globalPrivacyControlEnabled = true,
-            preferredColorScheme = PreferredColorScheme.Dark,
+            // Resolve the last persisted choice so cold-started Custom Tab / PWA
+            // sessions report the correct `prefers-color-scheme` before Flutter
+            // (the source of truth) runs. Defaults to System. See issue #436.
+            preferredColorScheme = ColorSchemePreference.read(prefs),
             cookieBannerHandlingMode = EngineSession.CookieBannerHandlingMode.REJECT_ALL,
             cookieBannerHandlingModePrivateBrowsing = EngineSession.CookieBannerHandlingMode.REJECT_ALL,
             cookieBannerHandlingGlobalRules = true,

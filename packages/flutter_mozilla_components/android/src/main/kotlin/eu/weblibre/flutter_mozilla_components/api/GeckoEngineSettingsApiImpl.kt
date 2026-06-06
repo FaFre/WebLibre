@@ -8,6 +8,7 @@ package eu.weblibre.flutter_mozilla_components.api
 
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
+import eu.weblibre.flutter_mozilla_components.ColorSchemePreference
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.R
 import eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode
@@ -336,6 +337,13 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
         }
         if(settings.preferredColorScheme != null) {
             components.core.engine.settings.preferredColorScheme = components.core.engineSettings.preferredColorScheme
+            // Persist so cold-started Custom Tab / PWA sessions resolve the right
+            // scheme before Flutter runs. Only done here (the runtime path driven by
+            // the app theme), not in setDefaultSettings, so the vestigial engine
+            // settings payload can't clobber the real theme. See issue #436.
+            components.core.engineSettings.preferredColorScheme?.let { scheme ->
+                ColorSchemePreference.write(components.core.prefs, scheme)
+            }
             reloadSession = true
         }
         if(settings.cookieBannerHandlingMode != null) {

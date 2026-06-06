@@ -13,6 +13,7 @@ import android.util.Log
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import eu.weblibre.flutter_mozilla_components.ColorSchemePreference
 import eu.weblibre.flutter_mozilla_components.ExternalAppBrowserFragment
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.PwaConstants
@@ -76,6 +77,12 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
         get() = intent?.getStringExtra(EXTRA_WEB_APP_MANIFEST_URL)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Match the window chrome (status/nav bar + pre-paint background) to the
+        // user's WebLibre color scheme rather than just the system mode, so a
+        // cold-started Custom Tab / PWA doesn't flash dark when WebLibre is light.
+        // Set before super.onCreate so the correct mode is applied without a recreate.
+        delegate.localNightMode = ColorSchemePreference.nightMode(this)
+
         super.onCreate(savedInstanceState)
 
         onBackPressedDispatcher.addCallback(this) {
