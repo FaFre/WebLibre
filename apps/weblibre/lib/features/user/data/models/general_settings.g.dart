@@ -91,6 +91,10 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings quickTabSwitcherShowTitles(bool quickTabSwitcherShowTitles);
 
+  GeneralSettings quickTabSwitcherHierarchyGlyphs(
+    int quickTabSwitcherHierarchyGlyphs,
+  );
+
   GeneralSettings quickTabSwitcherShowHistorySuggestions(
     bool quickTabSwitcherShowHistorySuggestions,
   );
@@ -182,6 +186,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool allowClipboardAccess,
     bool tabListShowFavicons,
     bool quickTabSwitcherShowTitles,
+    int quickTabSwitcherHierarchyGlyphs,
     bool quickTabSwitcherShowHistorySuggestions,
     String syncServerOverride,
     String syncTokenServerOverride,
@@ -361,6 +366,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(quickTabSwitcherShowTitles: quickTabSwitcherShowTitles);
 
   @override
+  GeneralSettings quickTabSwitcherHierarchyGlyphs(
+    int quickTabSwitcherHierarchyGlyphs,
+  ) => call(quickTabSwitcherHierarchyGlyphs: quickTabSwitcherHierarchyGlyphs);
+
+  @override
   GeneralSettings quickTabSwitcherShowHistorySuggestions(
     bool quickTabSwitcherShowHistorySuggestions,
   ) => call(
@@ -495,6 +505,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? allowClipboardAccess = const $CopyWithPlaceholder(),
     Object? tabListShowFavicons = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherShowTitles = const $CopyWithPlaceholder(),
+    Object? quickTabSwitcherHierarchyGlyphs = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherShowHistorySuggestions =
         const $CopyWithPlaceholder(),
     Object? syncServerOverride = const $CopyWithPlaceholder(),
@@ -723,6 +734,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.quickTabSwitcherShowTitles
           // ignore: cast_nullable_to_non_nullable
           : quickTabSwitcherShowTitles as bool,
+      quickTabSwitcherHierarchyGlyphs:
+          quickTabSwitcherHierarchyGlyphs == const $CopyWithPlaceholder() ||
+              quickTabSwitcherHierarchyGlyphs == null
+          ? _value.quickTabSwitcherHierarchyGlyphs
+          // ignore: cast_nullable_to_non_nullable
+          : quickTabSwitcherHierarchyGlyphs as int,
       quickTabSwitcherShowHistorySuggestions:
           quickTabSwitcherShowHistorySuggestions ==
                   const $CopyWithPlaceholder() ||
@@ -943,6 +960,8 @@ GeneralSettings _$GeneralSettingsFromJson(
   allowClipboardAccess: json['allowClipboardAccess'] as bool?,
   tabListShowFavicons: json['tabListShowFavicons'] as bool?,
   quickTabSwitcherShowTitles: json['quickTabSwitcherShowTitles'] as bool?,
+  quickTabSwitcherHierarchyGlyphs:
+      (json['quickTabSwitcherHierarchyGlyphs'] as num?)?.toInt(),
   quickTabSwitcherShowHistorySuggestions:
       json['quickTabSwitcherShowHistorySuggestions'] as bool?,
   syncServerOverride: json['syncServerOverride'] as String?,
@@ -1023,6 +1042,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'allowClipboardAccess': instance.allowClipboardAccess,
   'tabListShowFavicons': instance.tabListShowFavicons,
   'quickTabSwitcherShowTitles': instance.quickTabSwitcherShowTitles,
+  'quickTabSwitcherHierarchyGlyphs': instance.quickTabSwitcherHierarchyGlyphs,
   'quickTabSwitcherShowHistorySuggestions':
       instance.quickTabSwitcherShowHistorySuggestions,
   'syncServerOverride': instance.syncServerOverride,

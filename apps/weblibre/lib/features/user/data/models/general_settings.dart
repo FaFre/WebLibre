@@ -40,6 +40,13 @@ const minUiScaleFactor = 0.5;
 const maxUiScaleFactor = 1.5;
 const uiScaleFactorStep = 0.05;
 
+/// Max number of inline chevron glyphs shown on a quick tab switcher chip
+/// before the depth indicator collapses into a single icon + count badge.
+/// A value of 0 hides the hierarchy indicator entirely.
+const defaultQuickTabSwitcherHierarchyGlyphs = 2;
+const minQuickTabSwitcherHierarchyGlyphs = 0;
+const maxQuickTabSwitcherHierarchyGlyphs = 4;
+
 enum TabBarSwipeAction { switchLastOpened, navigateOrderedTabs }
 
 enum QuickTabSwitcherMode { lastUsedTabs, containerTabs }
@@ -106,6 +113,7 @@ class GeneralSettings with FastEquatable {
   final bool allowClipboardAccess;
   final bool tabListShowFavicons;
   final bool quickTabSwitcherShowTitles;
+  final int quickTabSwitcherHierarchyGlyphs;
   final bool quickTabSwitcherShowHistorySuggestions;
   final String syncServerOverride;
   final String syncTokenServerOverride;
@@ -173,6 +181,7 @@ class GeneralSettings with FastEquatable {
     required this.allowClipboardAccess,
     required this.tabListShowFavicons,
     required this.quickTabSwitcherShowTitles,
+    required this.quickTabSwitcherHierarchyGlyphs,
     required this.quickTabSwitcherShowHistorySuggestions,
     required this.syncServerOverride,
     required this.syncTokenServerOverride,
@@ -232,6 +241,7 @@ class GeneralSettings with FastEquatable {
     bool? allowClipboardAccess,
     bool? tabListShowFavicons,
     bool? quickTabSwitcherShowTitles,
+    int? quickTabSwitcherHierarchyGlyphs,
     bool? quickTabSwitcherShowHistorySuggestions,
     String? syncServerOverride,
     String? syncTokenServerOverride,
@@ -293,6 +303,9 @@ class GeneralSettings with FastEquatable {
        allowClipboardAccess = allowClipboardAccess ?? true,
        tabListShowFavicons = tabListShowFavicons ?? false,
        quickTabSwitcherShowTitles = quickTabSwitcherShowTitles ?? true,
+       quickTabSwitcherHierarchyGlyphs =
+           quickTabSwitcherHierarchyGlyphs ??
+           defaultQuickTabSwitcherHierarchyGlyphs,
        quickTabSwitcherShowHistorySuggestions =
            quickTabSwitcherShowHistorySuggestions ?? true,
        syncServerOverride = syncServerOverride ?? '',
@@ -407,6 +420,7 @@ class GeneralSettings with FastEquatable {
     allowClipboardAccess,
     tabListShowFavicons,
     quickTabSwitcherShowTitles,
+    quickTabSwitcherHierarchyGlyphs,
     quickTabSwitcherShowHistorySuggestions,
     syncServerOverride,
     syncTokenServerOverride,

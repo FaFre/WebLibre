@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
@@ -99,6 +100,12 @@ const List<SettingsSectionDefinition> toolbarLayoutSettingsSections = [
         subtitle: 'Display page titles in the switcher list',
         keywords: ['page titles'],
         child: _QuickTabSwitcherShowTitlesTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Hierarchy Depth in Quick Tab Switcher',
+        subtitle: 'How many nesting chevrons to show on switcher chips',
+        keywords: ['hierarchy', 'nesting', 'depth', 'tree', 'chevrons'],
+        child: _QuickTabSwitcherHierarchyGlyphsTile(),
       ),
     ],
   ),
@@ -449,6 +456,100 @@ class _QuickTabSwitcherShowTitlesTile extends HookConsumerWidget {
                   );
             }
           : null,
+    );
+  }
+}
+
+class _QuickTabSwitcherHierarchyGlyphsTile extends HookConsumerWidget {
+  const _QuickTabSwitcherHierarchyGlyphsTile();
+
+  static String _label(int glyphs) => switch (glyphs) {
+    0 => 'Off',
+    1 => '1 level',
+    _ => '$glyphs levels',
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final hierarchyGlyphs = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.quickTabSwitcherHierarchyGlyphs,
+      ),
+    );
+    final tabBarShowQuickTabSwitcherBar = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.tabBarShowQuickTabSwitcherBar,
+      ),
+    );
+
+    final sliderValue = useState(hierarchyGlyphs.toDouble());
+    useEffect(() {
+      sliderValue.value = hierarchyGlyphs.toDouble();
+      return null;
+    }, [hierarchyGlyphs]);
+
+    final currentGlyphs = sliderValue.value.round();
+    final enabled = tabBarShowQuickTabSwitcherBar;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            title: const Text('Hierarchy Depth in Quick Tab Switcher'),
+            subtitle: const Text(
+              'How many nesting chevrons to show on switcher chips before '
+              'collapsing into a count badge (0 hides the indicator)',
+            ),
+            leading: const Icon(MdiIcons.fileTree),
+            contentPadding: EdgeInsets.zero,
+            enabled: enabled,
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: Slider(
+                  min: minQuickTabSwitcherHierarchyGlyphs.toDouble(),
+                  max: maxQuickTabSwitcherHierarchyGlyphs.toDouble(),
+                  divisions:
+                      maxQuickTabSwitcherHierarchyGlyphs -
+                      minQuickTabSwitcherHierarchyGlyphs,
+                  label: _label(currentGlyphs),
+                  value: sliderValue.value.clamp(
+                    minQuickTabSwitcherHierarchyGlyphs.toDouble(),
+                    maxQuickTabSwitcherHierarchyGlyphs.toDouble(),
+                  ),
+                  onChanged: enabled
+                      ? (value) {
+                          sliderValue.value = value;
+                        }
+                      : null,
+                  onChangeEnd: enabled
+                      ? (value) async {
+                          final normalized = value.round();
+                          sliderValue.value = normalized.toDouble();
+                          await ref
+                              .read(
+                                saveGeneralSettingsControllerProvider.notifier,
+                              )
+                              .save(
+                                (currentSettings) => currentSettings.copyWith
+                                    .quickTabSwitcherHierarchyGlyphs(normalized),
+                              );
+                        }
+                      : null,
+                ),
+              ),
+              Text(
+                _label(currentGlyphs),
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

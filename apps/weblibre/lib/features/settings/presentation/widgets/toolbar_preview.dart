@@ -160,7 +160,7 @@ class TabBarPreviewCard extends HookWidget {
           tabMode: TabMode.isolated('preview-isolated-context'),
           isHistory: false,
           isPinned: false,
-          depth: 2,
+          depth: 3,
           url: Uri.parse('https://example.com/bank'),
           color: null,
           avatar: const Icon(MdiIcons.web, size: 20),
@@ -203,6 +203,7 @@ class TabBarPreviewCard extends HookWidget {
         scrollController: quickTabsController,
         showTitles: settings.quickTabSwitcherShowTitles,
         showIsolatedTabUi: settings.showIsolatedTabUi,
+        hierarchyGlyphs: settings.quickTabSwitcherHierarchyGlyphs,
         enablePinTabInMenu: false,
         onSelected: (_) async {},
       );

@@ -608,9 +608,12 @@ class QuickTabSwitcher extends HookConsumerWidget {
     final sortPinnedFirst = ref.watch(
       tabViewFilterControllerProvider.select((v) => v.sortPinnedFirst),
     );
-    final showHierarchicalTabs = ref.watch(
-      tabViewFilterControllerProvider.select((v) => v.showHierarchicalTabs),
+    final hierarchyGlyphs = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.quickTabSwitcherHierarchyGlyphs,
+      ),
     );
+    final showHierarchicalTabs = hierarchyGlyphs > 0;
     final selectedContainerId = ref.watch(selectedContainerProvider);
     final hierarchyContainerId =
         effectiveMode == QuickTabSwitcherMode.containerTabs
@@ -761,6 +764,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
         activeItemKey: activeItemKey.value,
         showTitles: showTitles,
         showIsolatedTabUi: showIsolatedTabUi,
+        hierarchyGlyphs: hierarchyGlyphs,
         enablePinTabInMenu: effectiveMode == QuickTabSwitcherMode.containerTabs,
         onSelected: (item) async {
           if (!item.isHistory && item.isActive) {
@@ -832,6 +836,7 @@ class QuickTabSwitcherView extends StatelessWidget {
     this.activeItemKey,
     required this.showTitles,
     required this.showIsolatedTabUi,
+    this.hierarchyGlyphs = defaultQuickTabSwitcherHierarchyGlyphs,
     required this.enablePinTabInMenu,
     required this.onSelected,
     this.onReorderItem,
@@ -845,6 +850,11 @@ class QuickTabSwitcherView extends StatelessWidget {
   final GlobalKey? activeItemKey;
   final bool showTitles;
   final bool showIsolatedTabUi;
+
+  /// Max inline chevron glyphs on a chip's depth indicator before collapsing
+  /// into an icon + count badge. A value of 0 hides the indicator entirely.
+  final int hierarchyGlyphs;
+
   final bool enablePinTabInMenu;
   final Future<void> Function(QuickTabSwitcherItem item) onSelected;
 
@@ -1007,7 +1017,7 @@ class QuickTabSwitcherView extends StatelessWidget {
               !item.isHistory &&
               !item.isPinned &&
               !item.isSandbox &&
-              item.depth == 0 &&
+              (item.depth == 0 || hierarchyGlyphs == 0) &&
               item.tabMode is! PrivateTabMode &&
               item.tabMode is! IsolatedTabMode)
           ? EdgeInsets.zero
@@ -1025,7 +1035,7 @@ class QuickTabSwitcherView extends StatelessWidget {
     final row = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (item.depth > 0)
+        if (item.depth > 0 && hierarchyGlyphs > 0)
           Padding(
             padding: const EdgeInsets.only(right: 6.0),
             child: TabDepthIndicator(
@@ -1033,6 +1043,7 @@ class QuickTabSwitcherView extends StatelessWidget {
               height: 24.0,
               iconSize: 14.0,
               horizontalPadding: 4.0,
+              maxInlineGlyphs: hierarchyGlyphs,
             ),
           ),
         Padding(

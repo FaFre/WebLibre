@@ -181,6 +181,11 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
       ),
       'quickTabSwitcherShowTitles': settings['quickTabSwitcherShowTitles']
           ?.readAs(DriftSqlType.bool, db.typeMapping),
+      'quickTabSwitcherHierarchyGlyphs':
+          settings['quickTabSwitcherHierarchyGlyphs']?.readAs(
+            DriftSqlType.int,
+            db.typeMapping,
+          ),
       'quickTabSwitcherShowHistorySuggestions':
           settings['quickTabSwitcherShowHistorySuggestions']?.readAs(
             DriftSqlType.bool,

@@ -35,7 +35,7 @@ final class GestureSettingsRepositoryProvider
 }
 
 String _$gestureSettingsRepositoryHash() =>
-    r'fc898b669a484fe45f89024d8456190f08d56085';
+    r'fcd226987b9748e9da2c1dbc454b5f6853232ea1';
 
 abstract class _$GestureSettingsRepository
     extends $StreamNotifier<GestureSettings> {

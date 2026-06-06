@@ -21,8 +21,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 
-// Above this depth, collapse the chevrons into a single icon + count badge.
-const int _maxInlineGlyphs = 2;
+// Default cap on inline chevrons before collapsing into a single icon + badge.
+const int _defaultMaxInlineGlyphs = 2;
 
 class TabDepthIndicator extends StatelessWidget {
   final int depth;
@@ -30,18 +30,23 @@ class TabDepthIndicator extends StatelessWidget {
   final double iconSize;
   final double horizontalPadding;
 
+  /// Number of chevron glyphs shown inline before the indicator collapses
+  /// into a single icon + count badge.
+  final int maxInlineGlyphs;
+
   const TabDepthIndicator({
     required this.depth,
     this.height = 28.0,
     this.iconSize = 16.0,
     this.horizontalPadding = 6.0,
+    this.maxInlineGlyphs = _defaultMaxInlineGlyphs,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final showBadge = depth > _maxInlineGlyphs;
+    final showBadge = depth > maxInlineGlyphs;
     final glyphCount = showBadge ? 1 : depth;
 
     return SizedBox(
