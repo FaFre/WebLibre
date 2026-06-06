@@ -91,6 +91,11 @@ class GeneralSettings with FastEquatable {
   final bool enableLocalAiFeatures;
   final bool showContainerUi;
   final bool showIsolatedTabUi;
+
+  /// Whether the search / new-tab page shows a leading close button so it can
+  /// be dismissed without a system back button or back gesture (e.g. on e-ink
+  /// devices). Defaults to false. Only shown when the route can be popped.
+  final bool showSearchCloseButton;
   @JsonKey(name: 'defaultCreateTabType')
   final TabType storedDefaultCreateTabType;
   final TabDirection tabListDirection;
@@ -164,6 +169,7 @@ class GeneralSettings with FastEquatable {
     required this.enableLocalAiFeatures,
     required this.showContainerUi,
     required this.showIsolatedTabUi,
+    required this.showSearchCloseButton,
     required this.storedDefaultCreateTabType,
     required this.tabListDirection,
     required this.tabBarDirection,
@@ -225,6 +231,7 @@ class GeneralSettings with FastEquatable {
     bool? enableLocalAiFeatures,
     bool? showContainerUi,
     bool? showIsolatedTabUi,
+    bool? showSearchCloseButton,
     TabType? storedDefaultCreateTabType,
     TabDirection? tabListDirection,
     TabDirection? tabBarDirection,
@@ -283,6 +290,7 @@ class GeneralSettings with FastEquatable {
        enableLocalAiFeatures = enableLocalAiFeatures ?? true,
        showContainerUi = showContainerUi ?? true,
        showIsolatedTabUi = showIsolatedTabUi ?? true,
+       showSearchCloseButton = showSearchCloseButton ?? false,
        storedDefaultCreateTabType =
            storedDefaultCreateTabType ?? TabType.regular,
        tabListDirection = tabListDirection ?? TabDirection.newestFirst,
@@ -406,6 +414,7 @@ class GeneralSettings with FastEquatable {
     enableLocalAiFeatures,
     showContainerUi,
     showIsolatedTabUi,
+    showSearchCloseButton,
     storedDefaultCreateTabType,
     tabListDirection,
     tabBarDirection,

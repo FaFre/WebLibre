@@ -76,6 +76,21 @@ const List<SettingsSectionDefinition> generalSettingsSections = [
         keywords: ['dialogs', 'bottom sheets', 'overlay'],
         child: _ShowModalBarrierTile(),
       ),
+      SettingsEntryDefinition(
+        title: 'Show Close Button',
+        subtitle: 'Add a button to dismiss the search / new-tab page without '
+            'a back gesture',
+        keywords: [
+          'back',
+          'close',
+          'dismiss',
+          'e-ink',
+          'eink',
+          'accessibility',
+          'new tab',
+        ],
+        child: _ShowSearchCloseButtonTile(),
+      ),
     ],
   ),
   SettingsSectionDefinition(
@@ -276,6 +291,37 @@ class _ShowModalBarrierTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.showModalBarrier(value),
+            );
+      },
+    );
+  }
+}
+
+class _ShowSearchCloseButtonTile extends HookConsumerWidget {
+  const _ShowSearchCloseButtonTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final showSearchCloseButton = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.showSearchCloseButton,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Show Close Button'),
+      subtitle: const Text(
+        'Add a button to dismiss the search / new-tab page without a back '
+        'gesture, useful on devices without a back button',
+      ),
+      secondary: const Icon(Icons.close),
+      value: showSearchCloseButton,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.showSearchCloseButton(value),
             );
       },
     );

@@ -22,6 +22,7 @@ import 'dart:async';
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
@@ -627,6 +628,12 @@ class SearchScreen extends HookConsumerWidget {
       };
     }
 
+    // Whether to surface an in-app close button so the page can be dismissed
+    // without a system back button/gesture (opt-in, e.g. for e-ink devices).
+    // Only meaningful when there is a route to pop back to.
+    final showCloseButton =
+        context.canPop() && settings.showSearchCloseButton;
+
     return Scaffold(
       body: SafeArea(
         child: Form(
@@ -638,11 +645,22 @@ class SearchScreen extends HookConsumerWidget {
                 floating: true,
                 pinned: true,
                 automaticallyImplyLeading: false,
+                leading: showCloseButton
+                    ? IconButton(
+                        tooltip: 'Close',
+                        icon: const Icon(Icons.close),
+                        onPressed: () => context.pop(),
+                      )
+                    : null,
                 backgroundColor: colorScheme.surface,
                 scrolledUnderElevation: 0,
                 shadowColor: Colors.transparent,
                 surfaceTintColor: Colors.transparent,
-                toolbarHeight: isEditMode ? 0 : kToolbarHeight,
+                // Collapse the toolbar in edit mode (no tab-type switcher), but
+                // keep it when the close button needs somewhere to render.
+                toolbarHeight: (isEditMode && !showCloseButton)
+                    ? 0
+                    : kToolbarHeight,
                 titleSpacing: 0.0,
                 title: isEditMode
                     ? null

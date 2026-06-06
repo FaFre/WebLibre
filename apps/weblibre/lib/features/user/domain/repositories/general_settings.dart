@@ -269,6 +269,10 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
+      'showSearchCloseButton': settings['showSearchCloseButton']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
     });
   }
 

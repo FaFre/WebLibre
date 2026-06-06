@@ -39,6 +39,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings showIsolatedTabUi(bool showIsolatedTabUi);
 
+  GeneralSettings showSearchCloseButton(bool showSearchCloseButton);
+
   GeneralSettings storedDefaultCreateTabType(
     TabType storedDefaultCreateTabType,
   );
@@ -167,6 +169,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool enableLocalAiFeatures,
     bool showContainerUi,
     bool showIsolatedTabUi,
+    bool showSearchCloseButton,
     TabType storedDefaultCreateTabType,
     TabDirection tabListDirection,
     TabDirection tabBarDirection,
@@ -278,6 +281,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings showIsolatedTabUi(bool showIsolatedTabUi) =>
       call(showIsolatedTabUi: showIsolatedTabUi);
+
+  @override
+  GeneralSettings showSearchCloseButton(bool showSearchCloseButton) =>
+      call(showSearchCloseButton: showSearchCloseButton);
 
   @override
   GeneralSettings storedDefaultCreateTabType(
@@ -490,6 +497,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? enableLocalAiFeatures = const $CopyWithPlaceholder(),
     Object? showContainerUi = const $CopyWithPlaceholder(),
     Object? showIsolatedTabUi = const $CopyWithPlaceholder(),
+    Object? showSearchCloseButton = const $CopyWithPlaceholder(),
     Object? storedDefaultCreateTabType = const $CopyWithPlaceholder(),
     Object? tabListDirection = const $CopyWithPlaceholder(),
     Object? tabBarDirection = const $CopyWithPlaceholder(),
@@ -616,6 +624,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.showIsolatedTabUi
           // ignore: cast_nullable_to_non_nullable
           : showIsolatedTabUi as bool,
+      showSearchCloseButton:
+          showSearchCloseButton == const $CopyWithPlaceholder() ||
+              showSearchCloseButton == null
+          ? _value.showSearchCloseButton
+          // ignore: cast_nullable_to_non_nullable
+          : showSearchCloseButton as bool,
       storedDefaultCreateTabType:
           storedDefaultCreateTabType == const $CopyWithPlaceholder() ||
               storedDefaultCreateTabType == null
@@ -916,6 +930,7 @@ GeneralSettings _$GeneralSettingsFromJson(
   enableLocalAiFeatures: json['enableLocalAiFeatures'] as bool?,
   showContainerUi: json['showContainerUi'] as bool?,
   showIsolatedTabUi: json['showIsolatedTabUi'] as bool?,
+  showSearchCloseButton: json['showSearchCloseButton'] as bool?,
   storedDefaultCreateTabType: $enumDecodeNullable(
     _$TabTypeEnumMap,
     json['defaultCreateTabType'],
@@ -1029,6 +1044,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'enableLocalAiFeatures': instance.enableLocalAiFeatures,
   'showContainerUi': instance.showContainerUi,
   'showIsolatedTabUi': instance.showIsolatedTabUi,
+  'showSearchCloseButton': instance.showSearchCloseButton,
   'defaultCreateTabType':
       _$TabTypeEnumMap[instance.storedDefaultCreateTabType]!,
   'tabListDirection': _$TabDirectionEnumMap[instance.tabListDirection]!,
