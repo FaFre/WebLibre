@@ -105,6 +105,12 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
         keywords: ['app links', 'external apps'],
         child: _AppLinksModeSection(),
       ),
+      SettingsEntryDefinition(
+        title: 'Always Request Desktop Site',
+        subtitle: 'Open new tabs in desktop mode by default',
+        keywords: ['desktop mode', 'user agent', 'mobile site', 'tablet'],
+        child: _GlobalDesktopModeTile(),
+      ),
     ],
   ),
   SettingsSectionDefinition(
@@ -725,6 +731,35 @@ class _AppLinksModeSection extends HookConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _GlobalDesktopModeTile extends HookConsumerWidget {
+  const _GlobalDesktopModeTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final globalDesktopMode = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.globalDesktopMode),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Always Request Desktop Site'),
+      subtitle: const Text(
+        'Open new tabs in desktop mode by default. You can still toggle desktop '
+        'mode per tab from the page menu.',
+      ),
+      secondary: const Icon(MdiIcons.monitor),
+      value: globalDesktopMode,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.globalDesktopMode(value),
+            );
+      },
     );
   }
 }

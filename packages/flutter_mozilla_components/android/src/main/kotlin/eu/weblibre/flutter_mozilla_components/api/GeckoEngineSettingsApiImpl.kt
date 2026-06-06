@@ -23,6 +23,8 @@ import eu.weblibre.flutter_mozilla_components.pigeons.HttpsOnlyMode
 import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
 import eu.weblibre.flutter_mozilla_components.pigeons.TrackingScope
 import eu.weblibre.flutter_mozilla_components.pigeons.WebContentIsolationStrategy
+import mozilla.components.browser.state.action.ContentAction
+import mozilla.components.browser.state.action.DefaultDesktopModeAction
 import mozilla.components.concept.engine.Engine
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.EngineSession.TrackingProtectionPolicy
@@ -466,5 +468,37 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
 
     override fun getUseExternalDownloadManager(): Boolean {
         return GlobalComponents.useExternalDownloadManager
+    }
+
+    override fun setGlobalDesktopMode(enable: Boolean, applyToExistingTabs: Boolean) {
+        val store = components.core.store
+
+        // Updates BrowserState.desktopMode, the browser-wide default applied to
+        // newly created tabs/engine sessions.
+        store.dispatch(DefaultDesktopModeAction.DesktopModeUpdated(enable))
+
+        // Only an explicit user toggle should rewrite existing tabs. Skipping this
+        // on the initial replication fire (startup / service rebuild) avoids
+        // clobbering per-tab desktop/mobile overrides and reloading loaded tabs.
+        if (!applyToExistingTabs) {
+            return
+        }
+
+        // Apply the new value to all existing regular tabs so the change takes
+        // effect immediately instead of only on tabs opened afterwards.
+        store.state.tabs.forEach { tab ->
+            if (tab.content.desktopMode == enable) return@forEach
+
+            if (tab.engineState.engineSession != null) {
+                // Loaded tab: toggle the engine session's desktop mode and reload
+                // it so the page re-renders with the new user agent / viewport.
+                components.useCases.sessionUseCases.requestDesktopSite(enable, tab.id)
+            } else {
+                // Suspended tab (no engine session yet): only update the content
+                // state so the value is applied when the tab is next loaded,
+                // without force-creating a session and waking the tab now.
+                store.dispatch(ContentAction.UpdateTabDesktopMode(tab.id, enable))
+            }
+        }
     }
 }

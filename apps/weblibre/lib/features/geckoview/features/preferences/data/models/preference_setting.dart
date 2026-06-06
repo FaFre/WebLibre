@@ -64,6 +64,15 @@ class PreferenceSetting with FastEquatable {
   final String? description;
 
   final bool requireUserOptIn;
+
+  /// Marks this preference as an enforced hardening policy: it renders as a
+  /// locked, non-interactive row and cannot be toggled off in the UI.
+  ///
+  /// This is a *policy* flag, not a claim that [value] equals Gecko's default.
+  /// Many locked preferences intentionally deviate from the engine default
+  /// (e.g. blanking the telemetry/crash-report/OHTTP endpoints), so auditing
+  /// locked values against Gecko defaults is expected to show differences —
+  /// those are deliberate overrides, not bugs.
   final bool locked;
   final bool enforceOnStartup;
 

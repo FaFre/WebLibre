@@ -273,6 +273,10 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
+      'globalDesktopMode': settings['globalDesktopMode']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
     });
   }
 

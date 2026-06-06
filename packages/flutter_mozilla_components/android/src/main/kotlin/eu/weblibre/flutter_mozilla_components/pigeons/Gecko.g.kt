@@ -7274,6 +7274,17 @@ interface GeckoEngineSettingsApi {
    */
   fun setUseExternalDownloadManager(enabled: Boolean)
   fun getUseExternalDownloadManager(): Boolean
+  /**
+   * Sets the browser-wide default desktop mode (BrowserState.desktopMode).
+   * Newly opened tabs inherit this default; a per-tab requestDesktopSite
+   * still overrides it for that tab.
+   *
+   * When [applyToExistingTabs] is true, the new value is also applied to all
+   * currently open tabs (loaded tabs are reloaded, suspended tabs are updated
+   * in place). This should only be requested for an explicit user toggle, not
+   * during startup/replication restore, to avoid clobbering per-tab overrides.
+   */
+  fun setGlobalDesktopMode(enable: Boolean, applyToExistingTabs: Boolean)
 
   companion object {
     /** The codec used by GeckoEngineSettingsApi. */
@@ -7413,6 +7424,25 @@ interface GeckoEngineSettingsApi {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
               listOf(api.getUseExternalDownloadManager())
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setGlobalDesktopMode$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val enableArg = args[0] as Boolean
+            val applyToExistingTabsArg = args[1] as Boolean
+            val wrapped: List<Any?> = try {
+              api.setGlobalDesktopMode(enableArg, applyToExistingTabsArg)
+              listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
             }

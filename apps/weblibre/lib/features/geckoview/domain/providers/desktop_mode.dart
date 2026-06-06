@@ -19,6 +19,7 @@
  */
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'desktop_mode.g.dart';
 
@@ -43,6 +44,11 @@ class DesktopMode extends _$DesktopMode {
       }
     });
 
-    return false;
+    // Seed the initial value from the browser-wide default so a newly opened
+    // tab's menu checkbox matches the desktop mode it was actually created with
+    // natively (GeckoTabsApi seeds new tabs from BrowserState.desktopMode).
+    // Read (not watch) so toggling the global default never clobbers an
+    // existing tab's per-tab override.
+    return ref.read(generalSettingsWithDefaultsProvider).globalDesktopMode;
   }
 }

@@ -25,6 +25,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_settings.dart';
@@ -152,6 +153,37 @@ class EngineSettingsReplicationService
       onError: (error, stackTrace) {
         logger.e(
           'Error listening to useExternalDownloadManager',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+
+    ref.listen(
+      fireImmediately: true,
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.globalDesktopMode,
+      ),
+      (previous, next) async {
+        // Only an actual toggle (not the initial startup fire) should rewrite
+        // existing tabs; the initial fire just sets the default for new tabs.
+        final isUserToggle = previous != null;
+
+        await _service.setGlobalDesktopMode(
+          next,
+          applyToExistingTabs: isUserToggle,
+        );
+
+        if (isUserToggle) {
+          // The native side applied the new value to all existing tabs.
+          // Invalidate the per-tab desktop-mode notifiers so their menu
+          // checkboxes re-seed and reflect it.
+          ref.invalidate(desktopModeProvider);
+        }
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to globalDesktopMode',
           error: error,
           stackTrace: stackTrace,
         );

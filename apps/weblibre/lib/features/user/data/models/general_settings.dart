@@ -154,6 +154,11 @@ class GeneralSettings with FastEquatable {
   /// Only takes effect when the effective brightness is dark. Defaults to false.
   final bool pureBlack;
 
+  /// Browser-wide default desktop mode. When true, newly opened tabs request
+  /// the desktop version of sites by default. The per-tab desktop-mode toggle
+  /// still overrides this for an individual tab. Defaults to false.
+  final bool globalDesktopMode;
+
   GeneralSettings({
     required this.themeMode,
     required this.uiScaleFactor,
@@ -214,6 +219,7 @@ class GeneralSettings with FastEquatable {
     required this.indexPrivateTabs,
     required this.acceptSuggestionOnSubmit,
     required this.pureBlack,
+    required this.globalDesktopMode,
   });
 
   GeneralSettings.withDefaults({
@@ -276,6 +282,7 @@ class GeneralSettings with FastEquatable {
     bool? indexPrivateTabs,
     bool? acceptSuggestionOnSubmit,
     bool? pureBlack,
+    bool? globalDesktopMode,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        uiScaleFactor = uiScaleFactor ?? defaultUiScaleFactor,
        disableAnimations = disableAnimations ?? false,
@@ -346,7 +353,8 @@ class GeneralSettings with FastEquatable {
        enableLocalSearchIndex = enableLocalSearchIndex ?? true,
        indexPrivateTabs = indexPrivateTabs ?? false,
        acceptSuggestionOnSubmit = acceptSuggestionOnSubmit ?? false,
-       pureBlack = pureBlack ?? false;
+       pureBlack = pureBlack ?? false,
+       globalDesktopMode = globalDesktopMode ?? false;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) {
     // Migrate legacy `newTabPosition` setting to direction settings.
@@ -459,5 +467,6 @@ class GeneralSettings with FastEquatable {
     indexPrivateTabs,
     acceptSuggestionOnSubmit,
     pureBlack,
+    globalDesktopMode,
   ];
 }

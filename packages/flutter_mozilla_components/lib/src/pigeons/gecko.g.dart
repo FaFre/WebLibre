@@ -7360,6 +7360,32 @@ class GeckoEngineSettingsApi {
     ;
     return pigeonVar_replyValue! as bool;
   }
+
+  /// Sets the browser-wide default desktop mode (BrowserState.desktopMode).
+  /// Newly opened tabs inherit this default; a per-tab requestDesktopSite
+  /// still overrides it for that tab.
+  ///
+  /// When [applyToExistingTabs] is true, the new value is also applied to all
+  /// currently open tabs (loaded tabs are reloaded, suspended tabs are updated
+  /// in place). This should only be requested for an explicit user toggle, not
+  /// during startup/replication restore, to avoid clobbering per-tab overrides.
+  Future<void> setGlobalDesktopMode(bool enable, bool applyToExistingTabs) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setGlobalDesktopMode$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[enable, applyToExistingTabs]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
 }
 
 class GeckoSessionApi {

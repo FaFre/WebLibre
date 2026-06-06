@@ -147,6 +147,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings pureBlack(bool pureBlack);
 
+  GeneralSettings globalDesktopMode(bool globalDesktopMode);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -214,6 +216,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool indexPrivateTabs,
     bool acceptSuggestionOnSubmit,
     bool pureBlack,
+    bool globalDesktopMode,
   });
 }
 
@@ -475,6 +478,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings pureBlack(bool pureBlack) => call(pureBlack: pureBlack);
 
   @override
+  GeneralSettings globalDesktopMode(bool globalDesktopMode) =>
+      call(globalDesktopMode: globalDesktopMode);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GeneralSettings(...).copyWith.fieldName(value)`.
   ///
@@ -543,6 +550,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? indexPrivateTabs = const $CopyWithPlaceholder(),
     Object? acceptSuggestionOnSubmit = const $CopyWithPlaceholder(),
     Object? pureBlack = const $CopyWithPlaceholder(),
+    Object? globalDesktopMode = const $CopyWithPlaceholder(),
   }) {
     return GeneralSettings(
       themeMode: themeMode == const $CopyWithPlaceholder() || themeMode == null
@@ -891,6 +899,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.pureBlack
           // ignore: cast_nullable_to_non_nullable
           : pureBlack as bool,
+      globalDesktopMode:
+          globalDesktopMode == const $CopyWithPlaceholder() ||
+              globalDesktopMode == null
+          ? _value.globalDesktopMode
+          // ignore: cast_nullable_to_non_nullable
+          : globalDesktopMode as bool,
     );
   }
 }
@@ -1019,6 +1033,7 @@ GeneralSettings _$GeneralSettingsFromJson(
   indexPrivateTabs: json['indexPrivateTabs'] as bool?,
   acceptSuggestionOnSubmit: json['acceptSuggestionOnSubmit'] as bool?,
   pureBlack: json['pureBlack'] as bool?,
+  globalDesktopMode: json['globalDesktopMode'] as bool?,
 );
 
 Map<String, dynamic> _$GeneralSettingsToJson(
@@ -1096,6 +1111,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'indexPrivateTabs': instance.indexPrivateTabs,
   'acceptSuggestionOnSubmit': instance.acceptSuggestionOnSubmit,
   'pureBlack': instance.pureBlack,
+  'globalDesktopMode': instance.globalDesktopMode,
 };
 
 const _$ThemeModeEnumMap = {

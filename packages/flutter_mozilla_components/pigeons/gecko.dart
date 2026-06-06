@@ -1561,6 +1561,16 @@ abstract class GeckoEngineSettingsApi {
   void setUseExternalDownloadManager(bool enabled);
 
   bool getUseExternalDownloadManager();
+
+  /// Sets the browser-wide default desktop mode (BrowserState.desktopMode).
+  /// Newly opened tabs inherit this default; a per-tab requestDesktopSite
+  /// still overrides it for that tab.
+  ///
+  /// When [applyToExistingTabs] is true, the new value is also applied to all
+  /// currently open tabs (loaded tabs are reloaded, suspended tabs are updated
+  /// in place). This should only be requested for an explicit user toggle, not
+  /// during startup/replication restore, to avoid clobbering per-tab overrides.
+  void setGlobalDesktopMode(bool enable, bool applyToExistingTabs);
 }
 
 @HostApi()
