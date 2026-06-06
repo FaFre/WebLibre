@@ -111,9 +111,6 @@ class _BrowserMenuSheet extends HookConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final selectedTabId = ref.watch(selectedTabProvider);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final gesturesEnabled = ref.watch(
-      gestureSettingsWithDefaultsProvider.select((s) => s.enabled),
-    );
 
     return DraggableScrollableSheet(
       initialChildSize: 0.85,
@@ -148,7 +145,7 @@ class _BrowserMenuSheet extends HookConsumerWidget {
                     ),
                     children: [
                       // Quick toggles (Desktop / Reader / Gestures)
-                      if (selectedTabId != null || gesturesEnabled) ...[
+                      if (selectedTabId != null) ...[
                         _QuickTogglesGrid(selectedTabId: selectedTabId),
                         const SizedBox(height: 16),
                       ],
@@ -583,9 +580,9 @@ class _PageActionsCard extends HookConsumerWidget {
 
 // ─── Quick Toggles Grid ───
 
-/// Unified bar of quick toggles. Page-scoped toggles (Desktop / Reader) appear
-/// only when a tab is selected; the global Gestures toggle appears whenever the
-/// gesture master switch is on. They are laid out as a connected, equal-width
+/// Unified bar of quick toggles (Desktop / Reader / Gestures). These appear
+/// only when a tab is selected; the Gestures toggle additionally requires the
+/// gesture master switch to be on. They are laid out as a connected, equal-width
 /// segmented bar (icon over label) that wraps to a new row past four toggles.
 class _QuickTogglesGrid extends ConsumerWidget {
   final String? selectedTabId;
@@ -652,27 +649,27 @@ class _QuickTogglesGrid extends ConsumerWidget {
           },
         ),
       );
-    }
 
-    if (gestureSettings.enabled) {
-      toggles.add(
-        _QuickToggle(
-          icon: MdiIcons.gestureSwipe,
-          label: 'Gestures',
-          active: gestureSettings.active,
-          onTap: () async {
-            await ref
-                .read(gestureSettingsRepositoryProvider.notifier)
-                .updateSettings(
-                  (s) => s.copyWith(active: !gestureSettings.active),
-                );
-          },
-          onLongPress: () {
-            Navigator.pop(context);
-            unawaited(GestureSettingsRoute().push(context));
-          },
-        ),
-      );
+      if (gestureSettings.enabled) {
+        toggles.add(
+          _QuickToggle(
+            icon: MdiIcons.gestureSwipe,
+            label: 'Gestures',
+            active: gestureSettings.active,
+            onTap: () async {
+              await ref
+                  .read(gestureSettingsRepositoryProvider.notifier)
+                  .updateSettings(
+                    (s) => s.copyWith(active: !gestureSettings.active),
+                  );
+            },
+            onLongPress: () {
+              Navigator.pop(context);
+              unawaited(GestureSettingsRoute().push(context));
+            },
+          ),
+        );
+      }
     }
 
     if (toggles.isEmpty) return const SizedBox.shrink();
