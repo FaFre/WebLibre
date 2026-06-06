@@ -366,7 +366,8 @@
                 "toolkit.telemetry.debugSlowSql": {
                     "value": false,
                     "title": "Disable slow SQL telemetry debugging",
-                    "enforceOnStartup": true
+                    "enforceOnStartup": true,
+                    "locked": true
                 },
                 "toolkit.telemetry.eventping.maximumFrequency": {
                     "value": 2147483647,
@@ -665,12 +666,14 @@
                 "browser.send_pings": {
                     "value": false,
                     "title": "Disable hyperlink auditing (ping tracking)",
-                    "enforceOnStartup": true
+                    "enforceOnStartup": true,
+                    "locked": true
                 },
                 "network.http.network_error_logging.enabled": {
                     "value": false,
                     "title": "Disable Network Error Logging (NEL)",
-                    "description": "NEL is used for analytics by design and can be used for fingerprinting"
+                    "description": "NEL is used for analytics by design and can be used for fingerprinting",
+                    "locked": true
                 },
                 "security.csp.reporting.enabled": {
                     "value": false,
@@ -686,7 +689,8 @@
                     "value": true,
                     "title": "Enable native HTTPS DNS record lookups",
                     "description": "Allows HTTPS DNS resource-record queries used during connection setup; separate from DNS over HTTPS",
-                    "enforceOnStartup": true
+                    "enforceOnStartup": true,
+                    "locked": true
                 },
                 "network.proxy.socks_remote_dns": {
                     "value": true,
@@ -745,19 +749,23 @@
                     "description": "CRLite provides faster and more private certificate revocation checking than OCSP"
                 },
                 "security.OCSP.require": {
-                    "value": false,
-                    "title": "Disable OCSP hard-fail",
-                    "enforceOnStartup": true
+                    "value": true,
+                    "title": "Require successful OCSP (hard-fail)",
+                    "enforceOnStartup": true,
+                    "description": "Rejects connections when a certificate's revocation status can't be confirmed. More secure, but breaks browsing during OCSP outages",
+                    "requireUserOptIn": true
                 },
                 "security.pki.crlite_mode": {
                     "value": 2,
                     "title": "Enforce CRLite revocation checks",
-                    "enforceOnStartup": true
+                    "enforceOnStartup": true,
+                    "locked": true
                 },
                 "security.remote_settings.crlite_filters.enabled": {
                     "value": true,
                     "title": "Enable CRLite filters",
-                    "enforceOnStartup": true
+                    "enforceOnStartup": true,
+                    "locked": true
                 },
                 "security.pki.certificate_transparency.mode": {
                     "value": 2,
@@ -791,11 +799,13 @@
                 },
                 "security.tls.enable_kyber": {
                     "value": true,
-                    "title": "Enable Post-Quantum Kyber TLS"
+                    "title": "Enable Post-Quantum Kyber TLS",
+                    "locked": true
                 },
                 "network.http.http3.enable_kyber": {
                     "value": true,
-                    "title": "Enable HTTP3 Post-Quantum Kyber TLS"
+                    "title": "Enable HTTP3 Post-Quantum Kyber TLS",
+                    "locked": true
                 },
                 "security.ssl.treat_unsafe_negotiation_as_broken": {
                     "value": true,
@@ -808,13 +818,14 @@
                 "dom.security.https_first": {
                     "value": true,
                     "title": "Use HTTPS-First mode",
-                    "enforceOnStartup": true
+                    "enforceOnStartup": true,
+                    "locked": true
                 },
                 "security.mixed_content.upgrade_display_content": {
                     "value": true,
                     "title": "Upgrade mixed display content to HTTPS",
                     "description": "Automatically upgrades insecure HTTP content to HTTPS when possible",
-                    "requireUserOptIn": true
+                    "locked": true
                 },
                 "network.http.http3.enable_0rtt": {
                     "value": false,
@@ -843,7 +854,8 @@
                 "network.http.referer.disallowCrossSiteRelaxingDefault": {
                     "value": true,
                     "title": "Enforce strict cross-site referrer policy",
-                    "enforceOnStartup": true
+                    "enforceOnStartup": true,
+                    "locked": true
                 },
                 "network.http.referer.disallowCrossSiteRelaxingDefault.top_navigation": {
                     "value": true,
@@ -898,21 +910,22 @@
                 "privacy.restrict3rdpartystorage.heuristic.navigation": {
                     "value": false,
                     "title": "Disable navigation-based storage access heuristic",
-                    "requireUserOptIn": true
+                    "locked": true
                 },
                 "privacy.restrict3rdpartystorage.heuristic.redirect": {
                     "value": false,
                     "title": "Disable redirect-based storage access heuristic",
-                    "requireUserOptIn": true
+                    "locked": true
                 },
                 "privacy.restrict3rdpartystorage.heuristic.window_open": {
                     "value": false,
                     "title": "Disable window-open-based storage access heuristic",
-                    "requireUserOptIn": true
+                    "locked": true
                 },
                 "dom.security.framebusting_intervention.enabled": {
                     "value": true,
-                    "title": "Block third-party redirects"
+                    "title": "Block third-party redirects",
+                    "locked": true
                 }
             }
         },
@@ -927,12 +940,14 @@
                 "privacy.fingerprintingProtection.pbmode": {
                     "value": true,
                     "title": "Enable fingerprinting protection in Private Browsing",
-                    "enforceOnStartup": true
+                    "enforceOnStartup": true,
+                    "locked": true
                 },
                 "privacy.reduceTimerPrecision": {
                     "value": true,
                     "title": "Reduce timer precision",
-                    "enforceOnStartup": true
+                    "enforceOnStartup": true,
+                    "locked": true
                 },
                 "privacy.partition.network_state.ocsp_cache": {
                     "value": true,
@@ -962,7 +977,8 @@
                 "media.devices.enumerate.legacy.enabled": {
                     "value": false,
                     "title": "Disable legacy media device enumeration",
-                    "description": "Prevents enumeration of media devices which can be used for fingerprinting"
+                    "description": "Prevents enumeration of media devices which can be used for fingerprinting",
+                    "locked": true
                 }
             }
         },
@@ -995,7 +1011,8 @@
                     "value": true,
                     "title": "Ignore major-performance-caveat blocking",
                     "description": "Avoids disabling WebGL on devices Gecko marks as slow or unstable",
-                    "enforceOnStartup": true
+                    "enforceOnStartup": true,
+                    "locked": true
                 }
             }
         },
@@ -1003,13 +1020,15 @@
             "description": "Keep WebRTC available with IP-leak mitigations and stricter routing behavior",
             "preferences": {
                 "media.peerconnection.enabled": {
-                    "value": true,
-                    "title": "Enable WebRTC",
-                    "description": "Required for voice calls, video calls, and similar realtime features"
+                    "value": false,
+                    "title": "Disable WebRTC",
+                    "description": "Turns WebRTC off entirely, removing real-time voice/video calls and their IP-leak surface",
+                    "requireUserOptIn": true
                 },
                 "media.peerconnection.ice.obfuscate_host_addresses": {
                     "value": true,
-                    "title": "Obfuscate local IPs with mDNS"
+                    "title": "Obfuscate local IPs with mDNS",
+                    "locked": true
                 },
                 "media.peerconnection.ice.default_address_only": {
                     "value": true,
@@ -1078,7 +1097,8 @@
                 },
                 "javascript.options.asmjs": {
                     "value": false,
-                    "title": "Disable asm.js"
+                    "title": "Disable asm.js",
+                    "locked": true
                 },
                 "accessibility.force_disabled": {
                     "value": 1,
@@ -1147,7 +1167,8 @@
                 "extensions.quarantinedDomains.enabled": {
                     "value": true,
                     "title": "Enable quarantined domains for extensions",
-                    "enforceOnStartup": true
+                    "enforceOnStartup": true,
+                    "locked": true
                 },
                 "extensions.userContextIsolation.enabled": {
                     "value": true,

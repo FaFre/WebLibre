@@ -188,9 +188,19 @@ class _HardeningSettingTile extends ConsumerWidget {
       value = '${value.substring(0, 160)}…';
     }
 
+    // A preference whose hardened value already equals the Gecko default cannot
+    // be toggled off: resetting it just lands back on the same default, so the
+    // switch would snap straight back on. Treat such no-op preferences as
+    // enforced. This complements the explicit `locked` flag and also covers
+    // preferences whose default we can only know at runtime.
+    final isNoOpDefault =
+        settingValue.current != null &&
+        settingValue.value == settingValue.current!.defaultValue;
+    final isEnforced = settingValue.locked || isNoOpDefault;
+
     return Tooltip(
       message: '$settingKey: $value',
-      child: (!settingValue.locked || !settingValue.isActive)
+      child: (!isEnforced || !settingValue.isActive)
           ? SwitchListTile.adaptive(
               value: settingValue.isActive,
               title: Text(settingValue.title ?? settingKey),
