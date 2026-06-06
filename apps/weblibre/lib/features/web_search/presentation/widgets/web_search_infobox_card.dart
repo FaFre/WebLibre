@@ -167,6 +167,8 @@ class WebSearchInfoboxCard extends HookConsumerWidget {
     return info.infobox.trim();
   }
 
+  static final RegExp _trailingColon = RegExp(r':+\s*$');
+
   /// Attributes worth rendering in the factsheet: those with a non-empty value,
   /// minus low-signal entries. We always drop a "type"/"kind" attribute: it is
   /// Brave's weakest classifier (emitted only as a fallback when no `category`
@@ -176,7 +178,7 @@ class WebSearchInfoboxCard extends HookConsumerWidget {
     return (info.attributes ?? const <InfoboxAttribute>[])
         .where((attr) => attr.value?.trim().isNotEmpty ?? false)
         .where((attr) {
-          final label = attr.label.replaceAll(RegExp(r':+\s*$'), '').toLowerCase();
+          final label = attr.label.replaceAll(_trailingColon, '').toLowerCase();
           return label != 'type' && label != 'kind';
         })
         .toList();
