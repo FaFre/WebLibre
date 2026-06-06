@@ -73,6 +73,10 @@ class TabStates extends _$TabStates {
       _ => TabMode.regular,
     };
 
+    // `current.parentId` still holds the last engine parent we applied, so
+    // capture whether the engine link changed before overwriting it below.
+    final engineParentChanged = contentState.parentId != current.parentId;
+
     final newState = current.copyWith(
       parentId: contentState.parentId,
       contextId: contentState.contextId,
@@ -86,6 +90,21 @@ class TabStates extends _$TabStates {
     );
 
     state = {...state}..[contentState.id] = newState;
+
+    // Only reconcile DB hierarchy when the engine parent link actually changes.
+    // Content-state events also fire on every progress/title tick, and seeding
+    // opens a transaction, so re-running it on each tick would add needless DB
+    // I/O to this hot path. The debounced updateTabs pass is the backstop for
+    // anything not seeded here (e.g. a container assigned after the parent).
+    if (ref.mounted && engineParentChanged) {
+      await ref
+          .read(tabDataRepositoryProvider.notifier)
+          .seedParentFromEngineState(
+            childId: contentState.id,
+            parentId: contentState.parentId,
+            contextId: contentState.contextId,
+          );
+    }
 
     if (newState.isFinishedLoading) {
       ref

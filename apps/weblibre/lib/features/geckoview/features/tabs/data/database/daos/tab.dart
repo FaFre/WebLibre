@@ -172,29 +172,36 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     if (_pendingParentIds.isEmpty) return;
 
     final pendingChildren = selectOnly(db.tab)
-      ..addColumns([db.tab.id])
+      ..addColumns([db.tab.id, db.tab.containerId])
       ..where(
         db.tab.id.isIn(_pendingParentIds.keys) &
             db.tab.parentId.isNull() &
             db.tab.source.isNotValue(TabSource.manual.index),
       );
-    final pendingChildIds = (await pendingChildren.get())
-        .map((row) => row.read(db.tab.id)!)
-        .toSet();
+    final pendingChildContainerIds = {
+      for (final row in await pendingChildren.get())
+        row.read(db.tab.id)!: row.read(db.tab.containerId),
+    };
+    final pendingChildIds = pendingChildContainerIds.keys.toSet();
 
     if (pendingChildIds.isEmpty) {
       _pendingParentIds.clear();
       return;
     }
 
-    final resolvableParents = await getExistingTabIds(
-      pendingChildIds.map((childId) => _pendingParentIds[childId]!).toSet(),
-    ).get().then((ids) => ids.toSet());
+    final parentIds = pendingChildIds
+        .map((childId) => _pendingParentIds[childId]!)
+        .toSet();
+    final resolvableParentContainerIds = await getTabsContainerId(
+      parentIds,
+    ).get().then(Map.fromEntries);
 
     await batch((batch) {
       for (final childId in pendingChildIds) {
         final parentId = _pendingParentIds[childId];
-        if (parentId == null || !resolvableParents.contains(parentId)) {
+        if (parentId == null ||
+            resolvableParentContainerIds[parentId] !=
+                pendingChildContainerIds[childId]) {
           continue;
         }
 
@@ -212,8 +219,63 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     _pendingParentIds.removeWhere(
       (childId, parentId) =>
           !pendingChildIds.contains(childId) ||
-          resolvableParents.contains(parentId),
+          resolvableParentContainerIds.containsKey(parentId),
     );
+  }
+
+  Future<bool> seedParentFromEngineState({
+    required String childId,
+    required String? parentId,
+    required String? contextId,
+  }) {
+    return db.transaction(() async {
+      if (parentId == null || parentId == childId) {
+        // A null or self-referential engine parent can never seed a hierarchy
+        // link (the latter would create a cycle), so drop any pending retry.
+        _pendingParentIds.remove(childId);
+        return false;
+      }
+
+      final child = await getTabDataById(childId).getSingleOrNull();
+      if (child == null) {
+        _pendingParentIds[childId] = parentId;
+        return false;
+      }
+      if (child.parentId != null || child.source == TabSource.manual) {
+        _pendingParentIds.remove(childId);
+        return false;
+      }
+
+      final parent = await getTabDataById(parentId).getSingleOrNull();
+      if (parent == null) {
+        _pendingParentIds[childId] = parentId;
+        return false;
+      }
+
+      final repairedContainerId = child.containerId == null && contextId != null
+          ? (await _containerIdsByContextualIdentity({contextId}))[contextId]
+          : null;
+      final effectiveChildContainerId =
+          repairedContainerId ?? child.containerId;
+      if (effectiveChildContainerId != parent.containerId) {
+        // The parent row exists but lives in a different container. Pending is
+        // only for parents that don't exist yet; a retry can't fix a container
+        // mismatch (mirrors updateTabs), so drop it rather than spin on it.
+        _pendingParentIds.remove(childId);
+        return false;
+      }
+
+      await _updateByIdStatement(childId).write(
+        TabCompanion(
+          parentId: Value(parentId),
+          source: const Value(TabSource.manual),
+          containerId:
+              repairedContainerId.mapNotNull(Value.new) ?? const Value.absent(),
+        ),
+      );
+      _pendingParentIds.remove(childId);
+      return true;
+    });
   }
 
   Future<String> _generateOrderKey({
@@ -1129,15 +1191,15 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
       // inserts can seed the parent later without needing another parentId
       // change from Gecko.
       final parentSyncEligibleIds = next.isEmpty
-          ? const <String>{}
+          ? const <String, String?>{}
           : await (() async {
               final query = selectOnly(db.tab)
-                ..addColumns([db.tab.id, db.tab.source])
+                ..addColumns([db.tab.id, db.tab.source, db.tab.containerId])
                 ..where(db.tab.id.isIn(next.keys) & db.tab.parentId.isNull());
               return {
                 for (final row in await query.get())
                   if (row.readWithConverter(db.tab.source) != TabSource.manual)
-                    row.read(db.tab.id)!,
+                    row.read(db.tab.id)!: row.read(db.tab.containerId),
               };
             })();
 
@@ -1149,7 +1211,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
       // and aborting the whole batch.
       final parentIdsToValidate = <String>{
         for (final state in next.values)
-          if (parentSyncEligibleIds.contains(state.id) &&
+          if (parentSyncEligibleIds.containsKey(state.id) &&
               state.parentId != null)
             state.parentId!,
       };
@@ -1183,9 +1245,14 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
             if (containerIdsByContext[entry.value] case final containerId?)
               entry.key: containerId,
       };
+      final parentContainerIds = parentIdsToValidate.isEmpty
+          ? const <String, String?>{}
+          : await getTabsContainerId(
+              parentIdsToValidate,
+            ).get().then(Map.fromEntries);
 
       for (final state in next.values) {
-        if (!parentSyncEligibleIds.contains(state.id)) {
+        if (!parentSyncEligibleIds.containsKey(state.id)) {
           _pendingParentIds.remove(state.id);
           continue;
         }
@@ -1195,11 +1262,24 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
           continue;
         }
 
-        if (existingParentIds.contains(state.parentId)) {
-          validatedParentIds[state.id] = state.parentId;
+        final parentId = state.parentId!;
+        if (parentId == state.id) {
+          // A self-referential engine parent would create a hierarchy cycle.
           _pendingParentIds.remove(state.id);
+          continue;
+        }
+        final effectiveChildContainerId =
+            repairedContainerIds[state.id] ?? parentSyncEligibleIds[state.id];
+        final effectiveParentContainerId =
+            repairedContainerIds[parentId] ?? parentContainerIds[parentId];
+        if (existingParentIds.contains(parentId) &&
+            effectiveParentContainerId == effectiveChildContainerId) {
+          validatedParentIds[state.id] = parentId;
+          _pendingParentIds.remove(state.id);
+        } else if (!existingParentIds.contains(parentId)) {
+          _pendingParentIds[state.id] = parentId;
         } else {
-          _pendingParentIds[state.id] = state.parentId!;
+          _pendingParentIds.remove(state.id);
         }
       }
 

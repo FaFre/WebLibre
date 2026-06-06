@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lexo_rank/lexo_rank.dart';
 import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
@@ -7,6 +8,7 @@ import 'package:weblibre/data/database/functions/url_functions.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 
 void main() {
   late TabDatabase db;
@@ -111,6 +113,107 @@ void main() {
     expect(child!.parentId, 'gecko-parent');
     expect(child.source, TabSource.manual);
   });
+
+  test('engine parent seeding immediately claims an unclaimed row', () async {
+    await _insertTabs(db, const [
+      _TabFixture('gecko-parent', source: TabSource.addedEvent),
+      _TabFixture('child', source: TabSource.addedEvent),
+    ]);
+
+    final seeded = await db.tabDao.seedParentFromEngineState(
+      childId: 'child',
+      parentId: 'gecko-parent',
+      contextId: null,
+    );
+
+    final child = await db.tabDao.getTabDataById('child').getSingleOrNull();
+    expect(seeded, isTrue);
+    expect(child, isNotNull);
+    expect(child!.parentId, 'gecko-parent');
+    expect(child.source, TabSource.manual);
+  });
+
+  test('engine parent seeding rejects a self-referential parent', () async {
+    await _insertTabs(db, const [
+      _TabFixture('tab', source: TabSource.addedEvent),
+    ]);
+
+    final seeded = await db.tabDao.seedParentFromEngineState(
+      childId: 'tab',
+      parentId: 'tab',
+      contextId: null,
+    );
+
+    final tab = await db.tabDao.getTabDataById('tab').getSingleOrNull();
+    expect(seeded, isFalse);
+    expect(tab, isNotNull);
+    expect(tab!.parentId, isNull);
+    expect(tab.source, TabSource.addedEvent);
+  });
+
+  test('engine parent seeding rejects cross-container parents', () async {
+    await _insertContainers(db, const [
+      _ContainerFixture('parent-container', 'parent-context'),
+      _ContainerFixture('child-container', 'child-context'),
+    ]);
+    await _insertTabs(db, const [
+      _TabFixture(
+        'gecko-parent',
+        source: TabSource.addedEvent,
+        containerId: 'parent-container',
+      ),
+      _TabFixture(
+        'child',
+        source: TabSource.addedEvent,
+        containerId: 'child-container',
+      ),
+    ]);
+
+    final seeded = await db.tabDao.seedParentFromEngineState(
+      childId: 'child',
+      parentId: 'gecko-parent',
+      contextId: 'child-context',
+    );
+
+    final child = await db.tabDao.getTabDataById('child').getSingleOrNull();
+    expect(seeded, isFalse);
+    expect(child, isNotNull);
+    expect(child!.parentId, isNull);
+    expect(child.source, TabSource.addedEvent);
+  });
+
+  test(
+    'content-state sync validates parent against same-batch container repairs',
+    () async {
+      await _insertContainers(db, const [
+        _ContainerFixture('container', 'context'),
+      ]);
+      await _insertTabs(db, const [
+        _TabFixture('gecko-parent', source: TabSource.addedEvent),
+        _TabFixture('child', source: TabSource.addedEvent),
+      ]);
+
+      await db.tabDao.updateTabs(null, {
+        'gecko-parent': _tabState('gecko-parent', contextId: 'context'),
+        'child': _tabState(
+          'child',
+          parentId: 'gecko-parent',
+          contextId: 'context',
+        ),
+      });
+
+      final parent = await db.tabDao
+          .getTabDataById('gecko-parent')
+          .getSingleOrNull();
+      final child = await db.tabDao.getTabDataById('child').getSingleOrNull();
+      expect(parent, isNotNull);
+      expect(parent!.containerId, 'container');
+      expect(child, isNotNull);
+      expect(child!.containerId, 'container');
+      expect(child.parentId, 'gecko-parent');
+      expect(child.source, TabSource.manual);
+    },
+  );
 
   test(
     'content-state sync retries an unresolved engine parent when the row arrives later',
@@ -335,7 +438,27 @@ Future<void> _insertTabs(TabDatabase db, List<_TabFixture> tabs) async {
       tab.id,
       source: tab.source,
       parentId: Value(tab.parentId),
+      containerId: Value(tab.containerId),
       orderKey: Value(orderKeys[index]),
+    );
+  }
+}
+
+Future<void> _insertContainers(
+  TabDatabase db,
+  List<_ContainerFixture> containers,
+) async {
+  for (final container in containers) {
+    await db.containerDao.addContainer(
+      ContainerData(
+        id: container.id,
+        name: container.id,
+        color: Colors.blue,
+        orderKey: container.id,
+        metadata: ContainerMetadata.withDefaults(
+          contextualIdentity: container.contextId,
+        ),
+      ),
     );
   }
 }
@@ -361,14 +484,28 @@ List<String> _spacedOrderKeys(int count) {
 class _TabFixture {
   final String id;
   final String? parentId;
+  final String? containerId;
   final TabSource source;
 
-  const _TabFixture(this.id, {this.parentId, this.source = TabSource.manual});
+  const _TabFixture(
+    this.id, {
+    this.parentId,
+    this.containerId,
+    this.source = TabSource.manual,
+  });
 }
 
-TabState _tabState(String id, {String? parentId}) {
+class _ContainerFixture {
+  final String id;
+  final String contextId;
+
+  const _ContainerFixture(this.id, this.contextId);
+}
+
+TabState _tabState(String id, {String? parentId, String? contextId}) {
   return TabState.$default(id).copyWith(
     parentId: parentId,
+    contextId: contextId,
     url: Uri.parse('https://$id.example/'),
     title: id,
   );

@@ -150,17 +150,26 @@ class TabDataRepository extends _$TabDataRepository {
         .setTabParent(tabId: tabId, newParentId: newParentId);
   }
 
-  Future<bool> promoteChildToParent(String childId) {
+  Future<bool> seedParentFromEngineState({
+    required String childId,
+    required String? parentId,
+    required String? contextId,
+  }) {
     return ref
         .read(tabDatabaseProvider)
         .tabDao
-        .promoteChildToParent(childId);
+        .seedParentFromEngineState(
+          childId: childId,
+          parentId: parentId,
+          contextId: contextId,
+        );
   }
 
-  Future<bool> moveTabAmongSiblings(
-    String tabId, {
-    required bool down,
-  }) {
+  Future<bool> promoteChildToParent(String childId) {
+    return ref.read(tabDatabaseProvider).tabDao.promoteChildToParent(childId);
+  }
+
+  Future<bool> moveTabAmongSiblings(String tabId, {required bool down}) {
     return ref
         .read(tabDatabaseProvider)
         .tabDao
