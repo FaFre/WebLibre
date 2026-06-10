@@ -44,6 +44,7 @@ import 'package:weblibre/core/providers/app_state.dart';
 import 'package:weblibre/core/providers/defaults.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/domain/services/app_initialization.dart';
+import 'package:weblibre/domain/services/display_mode.dart';
 import 'package:weblibre/features/account/domain/services/account_callback_handler.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/engine_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
@@ -151,6 +152,9 @@ class _MainWidget extends HookConsumerWidget {
     // messages reach the ring buffer before the browser view (or logs
     // screen) mounts and would otherwise drop them.
     ref.watch(singboxProxyLogsProvider.select((_) => null));
+    // Apply the configured display refresh rate from app start and keep it in
+    // sync with the setting (Flutter defaults to 60Hz otherwise).
+    ref.watch(displayModeApplierProvider);
 
     final rootKey = ref.watch(appStateKeyProvider);
 

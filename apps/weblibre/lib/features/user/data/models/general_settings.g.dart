@@ -13,6 +13,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings disableAnimations(bool disableAnimations);
 
+  GeneralSettings refreshRateMode(RefreshRateMode refreshRateMode);
+
   GeneralSettings showModalBarrier(bool showModalBarrier);
 
   GeneralSettings enableReadability(bool enableReadability);
@@ -162,6 +164,7 @@ abstract class _$GeneralSettingsCWProxy {
     ThemeMode themeMode,
     double uiScaleFactor,
     bool disableAnimations,
+    RefreshRateMode refreshRateMode,
     bool showModalBarrier,
     bool enableReadability,
     bool enforceReadability,
@@ -240,6 +243,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings disableAnimations(bool disableAnimations) =>
       call(disableAnimations: disableAnimations);
+
+  @override
+  GeneralSettings refreshRateMode(RefreshRateMode refreshRateMode) =>
+      call(refreshRateMode: refreshRateMode);
 
   @override
   GeneralSettings showModalBarrier(bool showModalBarrier) =>
@@ -500,6 +507,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? themeMode = const $CopyWithPlaceholder(),
     Object? uiScaleFactor = const $CopyWithPlaceholder(),
     Object? disableAnimations = const $CopyWithPlaceholder(),
+    Object? refreshRateMode = const $CopyWithPlaceholder(),
     Object? showModalBarrier = const $CopyWithPlaceholder(),
     Object? enableReadability = const $CopyWithPlaceholder(),
     Object? enforceReadability = const $CopyWithPlaceholder(),
@@ -576,6 +584,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.disableAnimations
           // ignore: cast_nullable_to_non_nullable
           : disableAnimations as bool,
+      refreshRateMode:
+          refreshRateMode == const $CopyWithPlaceholder() ||
+              refreshRateMode == null
+          ? _value.refreshRateMode
+          // ignore: cast_nullable_to_non_nullable
+          : refreshRateMode as RefreshRateMode,
       showModalBarrier:
           showModalBarrier == const $CopyWithPlaceholder() ||
               showModalBarrier == null
@@ -940,6 +954,10 @@ GeneralSettings _$GeneralSettingsFromJson(
   themeMode: $enumDecodeNullable(_$ThemeModeEnumMap, json['themeMode']),
   uiScaleFactor: (json['uiScaleFactor'] as num?)?.toDouble(),
   disableAnimations: json['disableAnimations'] as bool?,
+  refreshRateMode: $enumDecodeNullable(
+    _$RefreshRateModeEnumMap,
+    json['refreshRateMode'],
+  ),
   showModalBarrier: json['showModalBarrier'] as bool?,
   enableReadability: json['enableReadability'] as bool?,
   enforceReadability: json['enforceReadability'] as bool?,
@@ -1059,6 +1077,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'themeMode': _$ThemeModeEnumMap[instance.themeMode]!,
   'uiScaleFactor': instance.uiScaleFactor,
   'disableAnimations': instance.disableAnimations,
+  'refreshRateMode': _$RefreshRateModeEnumMap[instance.refreshRateMode]!,
   'showModalBarrier': instance.showModalBarrier,
   'enableReadability': instance.enableReadability,
   'enforceReadability': instance.enforceReadability,
@@ -1136,6 +1155,12 @@ const _$ThemeModeEnumMap = {
   ThemeMode.system: 'system',
   ThemeMode.light: 'light',
   ThemeMode.dark: 'dark',
+};
+
+const _$RefreshRateModeEnumMap = {
+  RefreshRateMode.system: 'system',
+  RefreshRateMode.high: 'high',
+  RefreshRateMode.low: 'low',
 };
 
 const _$DeleteBrowsingDataTypeEnumMap = {

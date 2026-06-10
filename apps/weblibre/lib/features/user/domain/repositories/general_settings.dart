@@ -56,6 +56,10 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
+      'refreshRateMode': settings['refreshRateMode']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
       'showModalBarrier': settings['showModalBarrier']?.readAs(
         DriftSqlType.bool,
         db.typeMapping,

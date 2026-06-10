@@ -47,6 +47,15 @@ const defaultQuickTabSwitcherHierarchyGlyphs = 2;
 const minQuickTabSwitcherHierarchyGlyphs = 0;
 const maxQuickTabSwitcherHierarchyGlyphs = 4;
 
+/// Controls the Android display refresh rate the app requests at startup.
+///
+/// Flutter does not request a high refresh rate by default, so on many devices
+/// (Samsung, OnePlus, Xiaomi, …) the app is left at 60Hz even on a 90/120Hz
+/// panel. [high] asks the OS for the fastest available mode, [low] for the
+/// slowest (battery saving), and [system] leaves the OS-managed default in
+/// place. Android-only; ignored on other platforms.
+enum RefreshRateMode { system, high, low }
+
 enum TabBarSwipeAction { switchLastOpened, navigateOrderedTabs }
 
 enum QuickTabSwitcherMode { lastUsedTabs, containerTabs }
@@ -79,6 +88,9 @@ class GeneralSettings with FastEquatable {
   final ThemeMode themeMode;
   final double uiScaleFactor;
   final bool disableAnimations;
+
+  /// Android display refresh rate requested at startup. See [RefreshRateMode].
+  final RefreshRateMode refreshRateMode;
   final bool showModalBarrier;
   final bool enableReadability;
   final bool enforceReadability;
@@ -168,6 +180,7 @@ class GeneralSettings with FastEquatable {
     required this.themeMode,
     required this.uiScaleFactor,
     required this.disableAnimations,
+    required this.refreshRateMode,
     required this.showModalBarrier,
     required this.enableReadability,
     required this.enforceReadability,
@@ -232,6 +245,7 @@ class GeneralSettings with FastEquatable {
     ThemeMode? themeMode,
     double? uiScaleFactor,
     bool? disableAnimations,
+    RefreshRateMode? refreshRateMode,
     bool? showModalBarrier,
     bool? enableReadability,
     bool? enforceReadability,
@@ -293,6 +307,7 @@ class GeneralSettings with FastEquatable {
   }) : themeMode = themeMode ?? ThemeMode.dark,
        uiScaleFactor = uiScaleFactor ?? defaultUiScaleFactor,
        disableAnimations = disableAnimations ?? false,
+       refreshRateMode = refreshRateMode ?? RefreshRateMode.high,
        showModalBarrier = showModalBarrier ?? true,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
@@ -419,6 +434,7 @@ class GeneralSettings with FastEquatable {
     themeMode,
     uiScaleFactor,
     disableAnimations,
+    refreshRateMode,
     showModalBarrier,
     enableReadability,
     enforceReadability,

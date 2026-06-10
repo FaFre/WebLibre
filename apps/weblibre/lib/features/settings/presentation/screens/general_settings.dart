@@ -53,7 +53,8 @@ const List<SettingsSectionDefinition> generalSettingsSections = [
       ),
       SettingsEntryDefinition(
         title: 'Pure Black (OLED)',
-        subtitle: 'Use true-black surfaces in dark mode to save power on OLED '
+        subtitle:
+            'Use true-black surfaces in dark mode to save power on OLED '
             'screens',
         keywords: ['oled', 'amoled', 'high contrast', 'black', 'dark'],
         child: _PureBlackTile(),
@@ -63,6 +64,24 @@ const List<SettingsSectionDefinition> generalSettingsSections = [
         subtitle: 'Make the user interface smaller or larger',
         keywords: ['ui scale', 'zoom'],
         child: _UiZoomSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Refresh Rate',
+        subtitle: 'Request a high or low display refresh rate (Android)',
+        keywords: [
+          'fps',
+          'hz',
+          'hertz',
+          'frame rate',
+          'framerate',
+          '60hz',
+          '90hz',
+          '120hz',
+          'smooth',
+          'high refresh',
+          'display mode',
+        ],
+        child: _RefreshRateSection(),
       ),
       SettingsEntryDefinition(
         title: 'Disable Animations',
@@ -78,7 +97,8 @@ const List<SettingsSectionDefinition> generalSettingsSections = [
       ),
       SettingsEntryDefinition(
         title: 'Show Close Button',
-        subtitle: 'Add a button to dismiss the search / new-tab page without '
+        subtitle:
+            'Add a button to dismiss the search / new-tab page without '
             'a back gesture',
         keywords: [
           'back',
@@ -411,6 +431,66 @@ class _ThemeSection extends HookConsumerWidget {
                     .save(
                       (currentSettings) =>
                           currentSettings.copyWith.themeMode(value.first),
+                    );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RefreshRateSection extends HookConsumerWidget {
+  const _RefreshRateSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final refreshRateMode = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.refreshRateMode),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const ListTile(
+            title: Text('Refresh Rate'),
+            subtitle: Text(
+              'Choose "High" for the smoothest scrolling and animations on '
+              '90/120Hz screens, or "Low" to save battery.',
+            ),
+            leading: Icon(Icons.speed),
+            contentPadding: EdgeInsets.zero,
+          ),
+          Center(
+            child: SegmentedButton<RefreshRateMode>(
+              segments: const [
+                ButtonSegment(
+                  value: RefreshRateMode.system,
+                  icon: Icon(Icons.smartphone),
+                  label: Text('System'),
+                ),
+                ButtonSegment(
+                  value: RefreshRateMode.high,
+                  icon: Icon(Icons.bolt),
+                  label: Text('High'),
+                ),
+                ButtonSegment(
+                  value: RefreshRateMode.low,
+                  icon: Icon(Icons.battery_saver),
+                  label: Text('Low'),
+                ),
+              ],
+              selected: {refreshRateMode},
+              onSelectionChanged: (value) async {
+                await ref
+                    .read(saveGeneralSettingsControllerProvider.notifier)
+                    .save(
+                      (currentSettings) =>
+                          currentSettings.copyWith.refreshRateMode(value.first),
                     );
               },
             ),
