@@ -47,7 +47,7 @@ abstract class _$TabStates extends $Notifier<Map<String, TabState>> {
   Map<String, TabState> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<Map<String, TabState>, Map<String, TabState>>;
     final element =
         ref.element
@@ -57,7 +57,7 @@ abstract class _$TabStates extends $Notifier<Map<String, TabState>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 

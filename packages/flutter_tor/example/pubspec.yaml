@@ -19,7 +19,7 @@ dependencies:
     sdk: flutter
   flutter_tor:
     path: ../
-  hooks_riverpod: ^3.3.1
+  hooks_riverpod: ^3.3.2
 
   # HTTP client for testing Tor connectivity
   http: ^1.6.0

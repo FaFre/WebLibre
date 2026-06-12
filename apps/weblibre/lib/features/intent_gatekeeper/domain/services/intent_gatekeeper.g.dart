@@ -40,7 +40,7 @@ abstract class _$IntentGatekeeper
   Stream<PendingIntentDecision> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<AsyncValue<PendingIntentDecision>, PendingIntentDecision>;
@@ -55,6 +55,6 @@ abstract class _$IntentGatekeeper
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

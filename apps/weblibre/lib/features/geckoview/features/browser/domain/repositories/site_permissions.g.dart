@@ -97,7 +97,7 @@ abstract class _$SitePermissionsRepository
   });
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<SitePermissions?>, SitePermissions?>;
     final element =
@@ -108,7 +108,7 @@ abstract class _$SitePermissionsRepository
               Object?,
               Object?
             >;
-    element.handleCreate(
+    return element.handleCreate(
       ref,
       () => build(origin: _$args.origin, isPrivate: _$args.isPrivate),
     );

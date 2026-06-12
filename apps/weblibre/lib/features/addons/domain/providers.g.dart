@@ -84,7 +84,7 @@ abstract class _$AddonDetails extends $AsyncNotifier<AddonInfo?> {
   FutureOr<AddonInfo?> build(String addonId);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<AddonInfo?>, AddonInfo?>;
     final element =
         ref.element
@@ -94,7 +94,7 @@ abstract class _$AddonDetails extends $AsyncNotifier<AddonInfo?> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }
 
@@ -373,7 +373,7 @@ abstract class _$AddonStoreAppFilter extends $Notifier<AddonStoreApp> {
   AddonStoreApp build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AddonStoreApp, AddonStoreApp>;
     final element =
         ref.element
@@ -383,7 +383,7 @@ abstract class _$AddonStoreAppFilter extends $Notifier<AddonStoreApp> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -693,7 +693,7 @@ abstract class _$AddonUpdateCheck
   AsyncValue<AddonUpdateRunResult> build(String addonId);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<
@@ -711,7 +711,7 @@ abstract class _$AddonUpdateCheck
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }
 
@@ -745,7 +745,7 @@ abstract class _$AddonList extends $AsyncNotifier<List<AddonInfo>> {
   FutureOr<List<AddonInfo>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<List<AddonInfo>>, List<AddonInfo>>;
     final element =
         ref.element
@@ -755,7 +755,7 @@ abstract class _$AddonList extends $AsyncNotifier<List<AddonInfo>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -797,7 +797,7 @@ abstract class _$AddonBusyIds extends $Notifier<Set<String>> {
   Set<String> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<Set<String>, Set<String>>;
     final element =
         ref.element
@@ -807,7 +807,7 @@ abstract class _$AddonBusyIds extends $Notifier<Set<String>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -849,7 +849,7 @@ abstract class _$PinnedAddonIds extends $Notifier<Set<String>> {
   Set<String> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<Set<String>, Set<String>>;
     final element =
         ref.element
@@ -859,7 +859,7 @@ abstract class _$PinnedAddonIds extends $Notifier<Set<String>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -901,7 +901,7 @@ abstract class _$BulkAddonUpdate extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<void>, AsyncValue<void>>;
     final element =
         ref.element
@@ -911,6 +911,6 @@ abstract class _$BulkAddonUpdate extends $Notifier<AsyncValue<void>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

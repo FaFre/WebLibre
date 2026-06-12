@@ -63,7 +63,7 @@ abstract class _$TrackingProtectionRepository
   FutureOr<List<TrackingProtectionException>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<
@@ -81,6 +81,6 @@ abstract class _$TrackingProtectionRepository
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

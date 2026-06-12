@@ -40,7 +40,7 @@ abstract class _$EngineSuggestions
   Stream<List<GeckoSuggestion>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<AsyncValue<List<GeckoSuggestion>>, List<GeckoSuggestion>>;
@@ -55,7 +55,7 @@ abstract class _$EngineSuggestions
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 

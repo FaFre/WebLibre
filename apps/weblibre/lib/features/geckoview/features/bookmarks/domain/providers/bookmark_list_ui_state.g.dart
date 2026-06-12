@@ -50,7 +50,7 @@ abstract class _$BookmarkListUiStateNotifier
   BookmarkListUiState build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<BookmarkListUiState, BookmarkListUiState>;
     final element =
         ref.element
@@ -60,6 +60,6 @@ abstract class _$BookmarkListUiStateNotifier
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

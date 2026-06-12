@@ -39,7 +39,7 @@ abstract class _$BookmarksSearch extends $StreamNotifier<Set<String>> {
   Stream<Set<String>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<Set<String>>, Set<String>>;
     final element =
         ref.element
@@ -49,7 +49,7 @@ abstract class _$BookmarksSearch extends $StreamNotifier<Set<String>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -92,7 +92,7 @@ abstract class _$BookmarkSearchResults extends $Notifier<List<BookmarkEntry>> {
   List<BookmarkEntry> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<List<BookmarkEntry>, List<BookmarkEntry>>;
     final element =
         ref.element
@@ -102,7 +102,7 @@ abstract class _$BookmarkSearchResults extends $Notifier<List<BookmarkEntry>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -311,7 +311,7 @@ abstract class _$SeamlessBookmarks
   });
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<BookmarkItem?>, AsyncValue<BookmarkItem?>>;
     final element =
@@ -322,7 +322,7 @@ abstract class _$SeamlessBookmarks
               Object?,
               Object?
             >;
-    element.handleCreate(
+    return element.handleCreate(
       ref,
       () => build(_$args.$1, hideEmptyRoots: _$args.hideEmptyRoots),
     );

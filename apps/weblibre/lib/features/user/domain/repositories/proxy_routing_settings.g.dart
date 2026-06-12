@@ -46,7 +46,7 @@ abstract class _$ProxyRoutingSettingsRepository
   Stream<ProxyRoutingSettings> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<AsyncValue<ProxyRoutingSettings>, ProxyRoutingSettings>;
@@ -61,7 +61,7 @@ abstract class _$ProxyRoutingSettingsRepository
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 

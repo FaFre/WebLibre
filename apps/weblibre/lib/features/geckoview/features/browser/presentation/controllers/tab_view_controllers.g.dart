@@ -48,7 +48,7 @@ abstract class _$TabsViewModeController extends $Notifier<TabsViewMode> {
   TabsViewMode build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<TabsViewMode, TabsViewMode>;
     final element =
         ref.element
@@ -58,7 +58,7 @@ abstract class _$TabsViewModeController extends $Notifier<TabsViewMode> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -105,7 +105,7 @@ abstract class _$TabViewFilterControllerBase
   TabViewFilterOptions build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<TabViewFilterOptions, TabViewFilterOptions>;
     final element =
         ref.element
@@ -115,7 +115,7 @@ abstract class _$TabViewFilterControllerBase
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -179,7 +179,7 @@ abstract class _$CollapsedGroups extends $Notifier<Set<String>> {
   Set<String> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<Set<String>, Set<String>>;
     final element =
         ref.element
@@ -189,7 +189,7 @@ abstract class _$CollapsedGroups extends $Notifier<Set<String>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -232,7 +232,7 @@ abstract class _$TabsReorderableController extends $Notifier<bool> {
   bool build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<bool, bool>;
     final element =
         ref.element
@@ -242,7 +242,7 @@ abstract class _$TabsReorderableController extends $Notifier<bool> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 

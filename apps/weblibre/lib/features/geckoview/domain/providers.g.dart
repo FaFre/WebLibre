@@ -378,7 +378,7 @@ abstract class _$EngineReadyState extends $Notifier<bool> {
   bool build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<bool, bool>;
     final element =
         ref.element
@@ -388,7 +388,7 @@ abstract class _$EngineReadyState extends $Notifier<bool> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -483,7 +483,7 @@ abstract class _$TranslationEngineState
   TranslationEngineStateData? build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<TranslationEngineStateData?, TranslationEngineStateData?>;
@@ -498,7 +498,7 @@ abstract class _$TranslationEngineState
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -546,7 +546,7 @@ abstract class _$MlDownloadState extends $Notifier<MlProgressData?> {
   MlProgressData? build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<MlProgressData?, MlProgressData?>;
     final element =
         ref.element
@@ -556,6 +556,6 @@ abstract class _$MlDownloadState extends $Notifier<MlProgressData?> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

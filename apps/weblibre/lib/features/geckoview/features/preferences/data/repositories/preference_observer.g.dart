@@ -40,7 +40,7 @@ abstract class _$PreferenceChangeListener extends $StreamNotifier<GeckoPref> {
   Stream<GeckoPref> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<GeckoPref>, GeckoPref>;
     final element =
         ref.element
@@ -50,7 +50,7 @@ abstract class _$PreferenceChangeListener extends $StreamNotifier<GeckoPref> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -92,7 +92,7 @@ abstract class _$PreferenceFixator extends $Notifier<Map<String, Object>> {
   Map<String, Object> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<Map<String, Object>, Map<String, Object>>;
     final element =
         ref.element
@@ -102,6 +102,6 @@ abstract class _$PreferenceFixator extends $Notifier<Map<String, Object>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

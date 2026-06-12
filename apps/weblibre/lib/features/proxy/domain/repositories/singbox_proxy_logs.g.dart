@@ -52,7 +52,7 @@ abstract class _$SingboxProxyLogs extends $Notifier<List<ProxyLogMessage>> {
   List<ProxyLogMessage> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<List<ProxyLogMessage>, List<ProxyLogMessage>>;
     final element =
         ref.element
@@ -62,6 +62,6 @@ abstract class _$SingboxProxyLogs extends $Notifier<List<ProxyLogMessage>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

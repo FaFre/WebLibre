@@ -46,7 +46,7 @@ abstract class _$SingboxProxyProfilesRepository
   Stream<List<ProxyProfile>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<List<ProxyProfile>>, List<ProxyProfile>>;
     final element =
@@ -57,6 +57,6 @@ abstract class _$SingboxProxyProfilesRepository
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

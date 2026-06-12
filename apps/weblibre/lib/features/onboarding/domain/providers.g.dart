@@ -48,7 +48,7 @@ abstract class _$OnboardingModeNotifier extends $Notifier<OnboardingMode> {
   OnboardingMode build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<OnboardingMode, OnboardingMode>;
     final element =
         ref.element
@@ -58,7 +58,7 @@ abstract class _$OnboardingModeNotifier extends $Notifier<OnboardingMode> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -101,7 +101,7 @@ abstract class _$EulaAcceptedNotifier extends $Notifier<bool> {
   bool build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<bool, bool>;
     final element =
         ref.element
@@ -111,6 +111,6 @@ abstract class _$EulaAcceptedNotifier extends $Notifier<bool> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

@@ -47,7 +47,7 @@ abstract class _$TabList extends $Notifier<EquatableValue<List<String>>> {
   EquatableValue<List<String>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<EquatableValue<List<String>>, EquatableValue<List<String>>>;
@@ -62,6 +62,6 @@ abstract class _$TabList extends $Notifier<EquatableValue<List<String>>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

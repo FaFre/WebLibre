@@ -90,7 +90,7 @@ abstract class _$TabsTrayScopeController extends $Notifier<TabsTrayScope> {
   TabsTrayScope build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<TabsTrayScope, TabsTrayScope>;
     final element =
         ref.element
@@ -100,7 +100,7 @@ abstract class _$TabsTrayScopeController extends $Notifier<TabsTrayScope> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -186,7 +186,7 @@ abstract class _$SelectedSyncedTabsDeviceId extends $Notifier<String?> {
   String? build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<String?, String?>;
     final element =
         ref.element
@@ -196,7 +196,7 @@ abstract class _$SelectedSyncedTabsDeviceId extends $Notifier<String?> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -342,7 +342,7 @@ abstract class _$SyncRepository extends $AsyncNotifier<SyncRepositoryState> {
   FutureOr<SyncRepositoryState> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<SyncRepositoryState>, SyncRepositoryState>;
     final element =
@@ -353,7 +353,7 @@ abstract class _$SyncRepository extends $AsyncNotifier<SyncRepositoryState> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 

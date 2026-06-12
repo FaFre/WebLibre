@@ -81,7 +81,7 @@ abstract class _$CurrentTopRoute extends $Notifier<RouteBase?> {
   RouteBase? build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<RouteBase?, RouteBase?>;
     final element =
         ref.element
@@ -91,6 +91,6 @@ abstract class _$CurrentTopRoute extends $Notifier<RouteBase?> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

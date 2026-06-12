@@ -48,7 +48,7 @@ abstract class _$BackupDirectoryUri extends $Notifier<Uri?> {
   Uri? build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<Uri?, Uri?>;
     final element =
         ref.element
@@ -58,6 +58,6 @@ abstract class _$BackupDirectoryUri extends $Notifier<Uri?> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

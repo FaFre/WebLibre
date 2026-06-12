@@ -56,10 +56,7 @@ final class $ContainerReferences
     i0.GeneratedDatabase db,
   ) => i0.MultiTypedResultKey.fromTable(
     i9.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab'),
-    aliasName: i0.$_aliasNameGenerator(
-      i9.ReadDatabaseContainer(db).resultSet<i3.Container>('container').id,
-      i9.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab').containerId,
-    ),
+    aliasName: 'container__id__tab__container_id',
   );
 
   i3.$TabProcessedTableManager get tabRefs {
@@ -410,14 +407,7 @@ final class $TabReferences
   static i3.Container _containerIdTable(i0.GeneratedDatabase db) =>
       i9.ReadDatabaseContainer(db)
           .resultSet<i3.Container>('container')
-          .createAlias(
-            i0.$_aliasNameGenerator(
-              i9.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab').containerId,
-              i9.ReadDatabaseContainer(
-                db,
-              ).resultSet<i3.Container>('container').id,
-            ),
-          );
+          .createAlias('tab__container_id__container__id');
 
   i3.$ContainerProcessedTableManager? get containerId {
     final $_column = $_itemColumn<String>('container_id');
@@ -439,12 +429,7 @@ final class $TabReferences
   _captureTabRefsTable(i0.GeneratedDatabase db) =>
       i0.MultiTypedResultKey.fromTable(
         i9.ReadDatabaseContainer(db).resultSet<i3.CaptureTab>('capture_tab'),
-        aliasName: i0.$_aliasNameGenerator(
-          i9.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab').id,
-          i9.ReadDatabaseContainer(
-            db,
-          ).resultSet<i3.CaptureTab>('capture_tab').tabId,
-        ),
+        aliasName: 'tab__id__capture_tab__tab_id',
       );
 
   i3.$CaptureTabProcessedTableManager get captureTabRefs {
@@ -1229,16 +1214,9 @@ final class $CaptureTabReferences
   $CaptureTabReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static i3.Tab _tabIdTable(i0.GeneratedDatabase db) =>
-      i9.ReadDatabaseContainer(db)
-          .resultSet<i3.Tab>('tab')
-          .createAlias(
-            i0.$_aliasNameGenerator(
-              i9.ReadDatabaseContainer(
-                db,
-              ).resultSet<i3.CaptureTab>('capture_tab').tabId,
-              i9.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab').id,
-            ),
-          );
+      i9.ReadDatabaseContainer(
+        db,
+      ).resultSet<i3.Tab>('tab').createAlias('capture_tab__tab_id__tab__id');
 
   i3.$TabProcessedTableManager get tabId {
     final $_column = $_itemColumn<String>('tab_id')!;

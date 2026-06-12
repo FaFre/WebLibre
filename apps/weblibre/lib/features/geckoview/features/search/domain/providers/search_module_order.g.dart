@@ -127,7 +127,7 @@ abstract class _$SearchModuleOrder extends $Notifier<List<ModuleOrderEntry>> {
   List<ModuleOrderEntry> build(SearchModuleGroup group);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<List<ModuleOrderEntry>, List<ModuleOrderEntry>>;
     final element =
@@ -138,6 +138,6 @@ abstract class _$SearchModuleOrder extends $Notifier<List<ModuleOrderEntry>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }

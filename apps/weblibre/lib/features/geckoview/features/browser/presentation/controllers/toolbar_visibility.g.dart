@@ -96,7 +96,7 @@ abstract class _$ToolbarVisibilityController
   ToolbarVisibility build(String? tabId);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<ToolbarVisibility, ToolbarVisibility>;
     final element =
         ref.element
@@ -106,6 +106,6 @@ abstract class _$ToolbarVisibilityController
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }

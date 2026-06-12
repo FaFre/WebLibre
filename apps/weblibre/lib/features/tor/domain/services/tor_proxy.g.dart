@@ -39,7 +39,7 @@ abstract class _$TorProxyService extends $StreamNotifier<TorStatus> {
   Stream<TorStatus> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<TorStatus>, TorStatus>;
     final element =
         ref.element
@@ -49,6 +49,6 @@ abstract class _$TorProxyService extends $StreamNotifier<TorStatus> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

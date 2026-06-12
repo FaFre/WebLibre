@@ -47,7 +47,7 @@ abstract class _$WillAcceptDrop extends $Notifier<DropTargetData?> {
   DropTargetData? build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<DropTargetData?, DropTargetData?>;
     final element =
         ref.element
@@ -57,6 +57,6 @@ abstract class _$WillAcceptDrop extends $Notifier<DropTargetData?> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

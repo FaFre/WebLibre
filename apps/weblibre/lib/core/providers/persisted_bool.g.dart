@@ -92,7 +92,7 @@ abstract class _$PersistedBool extends $Notifier<bool> {
   bool build(PersistedBoolKey key);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<bool, bool>;
     final element =
         ref.element
@@ -102,6 +102,6 @@ abstract class _$PersistedBool extends $Notifier<bool> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }

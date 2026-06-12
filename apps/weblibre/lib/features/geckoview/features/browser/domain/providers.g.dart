@@ -135,7 +135,7 @@ abstract class _$SelectedBangTrigger extends $Notifier<BangKey?> {
   BangKey? build({String? domain});
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<BangKey?, BangKey?>;
     final element =
         ref.element
@@ -145,7 +145,7 @@ abstract class _$SelectedBangTrigger extends $Notifier<BangKey?> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(domain: _$args));
+    return element.handleCreate(ref, () => build(domain: _$args));
   }
 }
 
@@ -232,7 +232,7 @@ abstract class _$SelectedBangData extends $Notifier<BangData?> {
   BangData? build({String? domain});
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<BangData?, BangData?>;
     final element =
         ref.element
@@ -242,7 +242,7 @@ abstract class _$SelectedBangData extends $Notifier<BangData?> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(domain: _$args));
+    return element.handleCreate(ref, () => build(domain: _$args));
   }
 }
 
@@ -1285,7 +1285,7 @@ abstract class _$AppLinksModeNotifier extends $AsyncNotifier<AppLinksMode> {
   FutureOr<AppLinksMode> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<AppLinksMode>, AppLinksMode>;
     final element =
         ref.element
@@ -1295,6 +1295,6 @@ abstract class _$AppLinksModeNotifier extends $AsyncNotifier<AppLinksMode> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

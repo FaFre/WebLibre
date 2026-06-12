@@ -42,7 +42,7 @@ abstract class _$SearchCreditsRepository
   FutureOr<SearchCreditsStatus> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<SearchCreditsStatus>, SearchCreditsStatus>;
     final element =
@@ -53,6 +53,6 @@ abstract class _$SearchCreditsRepository
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

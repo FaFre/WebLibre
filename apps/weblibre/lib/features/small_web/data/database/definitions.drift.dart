@@ -56,14 +56,7 @@ final class $SmallWebItemsReferences
         i6.ReadDatabaseContainer(
           db,
         ).resultSet<i1.SmallWebMemberships>('small_web_memberships'),
-        aliasName: i0.$_aliasNameGenerator(
-          i6.ReadDatabaseContainer(
-            db,
-          ).resultSet<i1.SmallWebItems>('small_web_items').id,
-          i6.ReadDatabaseContainer(
-            db,
-          ).resultSet<i1.SmallWebMemberships>('small_web_memberships').itemId,
-        ),
+        aliasName: 'small_web_items__id__small_web_memberships__item_id',
       );
 
   i1.$SmallWebMembershipsProcessedTableManager get smallWebMembershipsRefs {
@@ -90,14 +83,7 @@ final class $SmallWebItemsReferences
         i6.ReadDatabaseContainer(
           db,
         ).resultSet<i1.SmallWebVisits>('small_web_visits'),
-        aliasName: i0.$_aliasNameGenerator(
-          i6.ReadDatabaseContainer(
-            db,
-          ).resultSet<i1.SmallWebItems>('small_web_items').id,
-          i6.ReadDatabaseContainer(
-            db,
-          ).resultSet<i1.SmallWebVisits>('small_web_visits').itemId,
-        ),
+        aliasName: 'small_web_items__id__small_web_visits__item_id',
       );
 
   i1.$SmallWebVisitsProcessedTableManager get smallWebVisitsRefs {
@@ -587,16 +573,7 @@ final class $SmallWebMembershipsReferences
   static i1.SmallWebItems _itemIdTable(i0.GeneratedDatabase db) =>
       i6.ReadDatabaseContainer(db)
           .resultSet<i1.SmallWebItems>('small_web_items')
-          .createAlias(
-            i0.$_aliasNameGenerator(
-              i6.ReadDatabaseContainer(db)
-                  .resultSet<i1.SmallWebMemberships>('small_web_memberships')
-                  .itemId,
-              i6.ReadDatabaseContainer(
-                db,
-              ).resultSet<i1.SmallWebItems>('small_web_items').id,
-            ),
-          );
+          .createAlias('small_web_memberships__item_id__small_web_items__id');
 
   i1.$SmallWebItemsProcessedTableManager get itemId {
     final $_column = $_itemColumn<String>('item_id')!;
@@ -1424,16 +1401,7 @@ final class $SmallWebVisitsReferences
   static i1.SmallWebItems _itemIdTable(i0.GeneratedDatabase db) =>
       i6.ReadDatabaseContainer(db)
           .resultSet<i1.SmallWebItems>('small_web_items')
-          .createAlias(
-            i0.$_aliasNameGenerator(
-              i6.ReadDatabaseContainer(
-                db,
-              ).resultSet<i1.SmallWebVisits>('small_web_visits').itemId,
-              i6.ReadDatabaseContainer(
-                db,
-              ).resultSet<i1.SmallWebItems>('small_web_items').id,
-            ),
-          );
+          .createAlias('small_web_visits__item_id__small_web_items__id');
 
   i1.$SmallWebItemsProcessedTableManager get itemId {
     final $_column = $_itemColumn<String>('item_id')!;

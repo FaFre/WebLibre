@@ -100,7 +100,7 @@ abstract class _$PwaManifestState extends $Notifier<Map<String, PwaManifest?>> {
   Map<String, PwaManifest?> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<Map<String, PwaManifest?>, Map<String, PwaManifest?>>;
     final element =
@@ -111,7 +111,7 @@ abstract class _$PwaManifestState extends $Notifier<Map<String, PwaManifest?>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 

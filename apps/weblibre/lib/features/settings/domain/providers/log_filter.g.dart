@@ -46,7 +46,7 @@ abstract class _$LogFilter extends $Notifier<Level> {
   Level build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<Level, Level>;
     final element =
         ref.element
@@ -56,6 +56,6 @@ abstract class _$LogFilter extends $Notifier<Level> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

@@ -41,7 +41,7 @@ abstract class _$EngineSettingsRepository
   Stream<EngineSettings> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<EngineSettings>, EngineSettings>;
     final element =
         ref.element
@@ -51,7 +51,7 @@ abstract class _$EngineSettingsRepository
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 

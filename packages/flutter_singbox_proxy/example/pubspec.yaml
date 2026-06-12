@@ -26,7 +26,7 @@ dependencies:
     # The example app is bundled with the plugin so we use a path dependency on
     # the parent directory to use the current plugin's version.
     path: ../
-  hooks_riverpod: ^3.3.1
+  hooks_riverpod: ^3.3.2
 
 dev_dependencies:
   flutter_lints: ^6.0.0

@@ -84,7 +84,7 @@ abstract class _$DesktopMode extends $Notifier<bool> {
   bool build(String tabId);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<bool, bool>;
     final element =
         ref.element
@@ -94,7 +94,7 @@ abstract class _$DesktopMode extends $Notifier<bool> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }
 

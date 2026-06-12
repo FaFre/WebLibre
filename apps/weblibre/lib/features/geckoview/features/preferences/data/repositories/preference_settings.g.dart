@@ -51,7 +51,7 @@ abstract class _$StartupPreferenceEnforcementService extends $Notifier<void> {
   void build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -61,7 +61,7 @@ abstract class _$StartupPreferenceEnforcementService extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -369,7 +369,7 @@ abstract class _$PreferenceRepository
   Raw<Stream<Map<String, GeckoPref>>> build(PreferencePartition partition);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<
@@ -387,7 +387,7 @@ abstract class _$PreferenceRepository
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }
 
@@ -482,7 +482,7 @@ abstract class _$UnifiedPreferenceSettingsRepository
   );
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<
@@ -500,7 +500,7 @@ abstract class _$UnifiedPreferenceSettingsRepository
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }
 
@@ -598,7 +598,7 @@ abstract class _$PreferenceSettingsGroupRepository
   );
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<AsyncValue<PreferenceSettingGroup>, PreferenceSettingGroup>;
@@ -613,6 +613,6 @@ abstract class _$PreferenceSettingsGroupRepository
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args.$1, _$args.$2));
+    return element.handleCreate(ref, () => build(_$args.$1, _$args.$2));
   }
 }

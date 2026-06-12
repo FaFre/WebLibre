@@ -84,7 +84,7 @@ abstract class _$ArticleSearch extends $StreamNotifier<List<FeedArticle>> {
   Stream<List<FeedArticle>> build(Uri? feedId);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<List<FeedArticle>>, List<FeedArticle>>;
     final element =
@@ -95,7 +95,7 @@ abstract class _$ArticleSearch extends $StreamNotifier<List<FeedArticle>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }
 
@@ -373,7 +373,7 @@ abstract class _$FilteredArticleList
   AsyncValue<List<FeedArticle>> build(Uri? feedId);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<
@@ -391,7 +391,7 @@ abstract class _$FilteredArticleList
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }
 

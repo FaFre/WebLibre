@@ -40,7 +40,7 @@ abstract class _$AndroidDeviceInfo
   FutureOr<AndroidDeviceInfoData?> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<AsyncValue<AndroidDeviceInfoData?>, AndroidDeviceInfoData?>;
@@ -55,6 +55,6 @@ abstract class _$AndroidDeviceInfo
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

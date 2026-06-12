@@ -277,7 +277,7 @@ abstract class _$ProxyProfileDraft extends $Notifier<ProxyProfileDraftState> {
   ProxyProfileDraftState build({String? profileId, ProxyProfileSeed? seed});
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<ProxyProfileDraftState, ProxyProfileDraftState>;
     final element =
@@ -288,7 +288,7 @@ abstract class _$ProxyProfileDraft extends $Notifier<ProxyProfileDraftState> {
               Object?,
               Object?
             >;
-    element.handleCreate(
+    return element.handleCreate(
       ref,
       () => build(profileId: _$args.profileId, seed: _$args.seed),
     );

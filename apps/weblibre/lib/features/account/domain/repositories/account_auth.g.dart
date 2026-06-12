@@ -41,7 +41,7 @@ abstract class _$AccountAuthRepository
   FutureOr<AccountAuthState> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<AccountAuthState>, AccountAuthState>;
     final element =
@@ -52,6 +52,6 @@ abstract class _$AccountAuthRepository
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

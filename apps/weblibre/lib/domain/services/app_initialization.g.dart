@@ -65,7 +65,7 @@ abstract class _$AppInitializationService
   build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<
@@ -93,6 +93,6 @@ abstract class _$AppInitializationService
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

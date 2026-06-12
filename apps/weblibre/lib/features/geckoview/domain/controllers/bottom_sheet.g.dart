@@ -48,7 +48,7 @@ abstract class _$BottomSheetController extends $Notifier<Sheet?> {
   Sheet? build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<Sheet?, Sheet?>;
     final element =
         ref.element
@@ -58,6 +58,6 @@ abstract class _$BottomSheetController extends $Notifier<Sheet?> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

@@ -48,7 +48,7 @@ abstract class _$BrowserViewLifecycle extends $Notifier<AppLifecycleState?> {
   AppLifecycleState? build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AppLifecycleState?, AppLifecycleState?>;
     final element =
         ref.element
@@ -58,6 +58,6 @@ abstract class _$BrowserViewLifecycle extends $Notifier<AppLifecycleState?> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

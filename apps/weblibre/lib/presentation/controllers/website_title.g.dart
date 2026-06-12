@@ -92,7 +92,7 @@ abstract class _$CompletePageInfo extends $Notifier<AsyncValue<WebPageInfo>> {
   AsyncValue<WebPageInfo> build(TabState cached);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<WebPageInfo>, AsyncValue<WebPageInfo>>;
     final element =
@@ -103,7 +103,7 @@ abstract class _$CompletePageInfo extends $Notifier<AsyncValue<WebPageInfo>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }
 

@@ -40,7 +40,7 @@ abstract class _$TorSettingsRepository extends $StreamNotifier<TorSettings> {
   Stream<TorSettings> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<TorSettings>, TorSettings>;
     final element =
         ref.element
@@ -50,7 +50,7 @@ abstract class _$TorSettingsRepository extends $StreamNotifier<TorSettings> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 

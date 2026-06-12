@@ -52,7 +52,7 @@ abstract class _$HistoryVisitsFilterBase
   HistoryFilterOptions build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<HistoryFilterOptions, HistoryFilterOptions>;
     final element =
         ref.element
@@ -62,7 +62,7 @@ abstract class _$HistoryVisitsFilterBase
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -109,7 +109,7 @@ abstract class _$HistoryDownloadsFilterBase
   HistoryFilterOptions build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<HistoryFilterOptions, HistoryFilterOptions>;
     final element =
         ref.element
@@ -119,7 +119,7 @@ abstract class _$HistoryDownloadsFilterBase
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 

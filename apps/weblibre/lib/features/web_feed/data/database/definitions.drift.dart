@@ -52,10 +52,7 @@ final class $FeedReferences
   _articleRefsTable(i0.GeneratedDatabase db) =>
       i0.MultiTypedResultKey.fromTable(
         i10.ReadDatabaseContainer(db).resultSet<i1.Article>('article'),
-        aliasName: i0.$_aliasNameGenerator(
-          i10.ReadDatabaseContainer(db).resultSet<i1.Feed>('feed').url,
-          i10.ReadDatabaseContainer(db).resultSet<i1.Article>('article').feedId,
-        ),
+        aliasName: 'feed__url__article__feed_id',
       );
 
   i1.$ArticleProcessedTableManager get articleRefs {
@@ -454,16 +451,9 @@ final class $ArticleReferences
   $ArticleReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static i1.Feed _feedIdTable(i0.GeneratedDatabase db) =>
-      i10.ReadDatabaseContainer(db)
-          .resultSet<i1.Feed>('feed')
-          .createAlias(
-            i0.$_aliasNameGenerator(
-              i10.ReadDatabaseContainer(
-                db,
-              ).resultSet<i1.Article>('article').feedId,
-              i10.ReadDatabaseContainer(db).resultSet<i1.Feed>('feed').url,
-            ),
-          );
+      i10.ReadDatabaseContainer(
+        db,
+      ).resultSet<i1.Feed>('feed').createAlias('article__feed_id__feed__url');
 
   i1.$FeedProcessedTableManager get feedId {
     final $_column = $_itemColumn<String>('feed_id')!;

@@ -105,7 +105,7 @@ abstract class _$SearchModuleDisplayStateController
   SearchModuleDisplayState build(SearchModuleType module);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<SearchModuleDisplayState, SearchModuleDisplayState>;
     final element =
@@ -116,7 +116,7 @@ abstract class _$SearchModuleDisplayStateController
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }
 
@@ -158,7 +158,7 @@ abstract class _$SearchReorderMode extends $Notifier<SearchModuleGroup?> {
   SearchModuleGroup? build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<SearchModuleGroup?, SearchModuleGroup?>;
     final element =
         ref.element
@@ -168,6 +168,6 @@ abstract class _$SearchReorderMode extends $Notifier<SearchModuleGroup?> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

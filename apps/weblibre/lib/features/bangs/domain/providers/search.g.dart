@@ -39,7 +39,7 @@ abstract class _$BangSearch extends $StreamNotifier<List<BangData>> {
   Stream<List<BangData>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<List<BangData>>, List<BangData>>;
     final element =
         ref.element
@@ -49,7 +49,7 @@ abstract class _$BangSearch extends $StreamNotifier<List<BangData>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -91,7 +91,7 @@ abstract class _$SeamlessBang extends $Notifier<AsyncValue<List<BangData>>> {
   AsyncValue<List<BangData>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<AsyncValue<List<BangData>>, AsyncValue<List<BangData>>>;
@@ -106,6 +106,6 @@ abstract class _$SeamlessBang extends $Notifier<AsyncValue<List<BangData>>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

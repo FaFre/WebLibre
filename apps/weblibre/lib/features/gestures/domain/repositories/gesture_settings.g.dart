@@ -42,7 +42,7 @@ abstract class _$GestureSettingsRepository
   Stream<GestureSettings> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<GestureSettings>, GestureSettings>;
     final element =
         ref.element
@@ -52,7 +52,7 @@ abstract class _$GestureSettingsRepository
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 

@@ -56,7 +56,7 @@ abstract class _$OpenSharedContentUnshortenController
   AsyncValue<UnshortenResult>? build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<AsyncValue<UnshortenResult>?, AsyncValue<UnshortenResult>?>;
@@ -71,6 +71,6 @@ abstract class _$OpenSharedContentUnshortenController
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

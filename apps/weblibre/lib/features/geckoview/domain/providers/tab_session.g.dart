@@ -84,7 +84,7 @@ abstract class _$TabSession extends $Notifier<void> {
   void build({required String? tabId});
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -94,7 +94,7 @@ abstract class _$TabSession extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(tabId: _$args));
+    return element.handleCreate(ref, () => build(tabId: _$args));
   }
 }
 
