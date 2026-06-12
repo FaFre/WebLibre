@@ -24,6 +24,10 @@ It is a community-driven project and every voice is heard with rapid iteration a
 >
 > WebLibre is under active development with frequent updates and new features. The current focus is on feature development, so don't be surprised if you experience some janks here and there. Although many people already use it as a daily driver, be aware of breaking changes!
 
+> **AI Usage Disclaimer**
+>
+> This code was made with the help of LLMs.
+
 <p align="center">
   <a href="https://liberapay.com/FaFre/donate">
     <img alt="Donate using Liberapay" src="https://docs.weblibre.eu/weblibre/_images/badges/liberapay.svg">
