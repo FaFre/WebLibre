@@ -7740,14 +7740,14 @@ class GeckoTabsApi {
 
   final String pigeonVar_messageChannelSuffix;
 
-  Future<void> syncEvents({required bool onSelectedTabChange, required bool onTabListChange, required bool onTabContentStateChange, required bool onIconChange, required bool onSecurityInfoStateChange, required bool onReaderableStateChange, required bool onHistoryStateChange, required bool onFindResults, required bool onThumbnailChange, required bool onBrowserExtensionsChange, required bool onPageExtensionsChange, required bool onBrowserExtensionIcons, required bool onPageExtensionIcons, required bool onTranslationStateChange, }) async {
+  Future<void> syncEvents({required bool onSelectedTabChange, required bool onTabListChange, required bool onRestoreComplete, required bool onTabContentStateChange, required bool onIconChange, required bool onSecurityInfoStateChange, required bool onReaderableStateChange, required bool onHistoryStateChange, required bool onFindResults, required bool onThumbnailChange, required bool onBrowserExtensionsChange, required bool onPageExtensionsChange, required bool onBrowserExtensionIcons, required bool onPageExtensionIcons, required bool onTranslationStateChange, }) async {
     final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.syncEvents$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[onSelectedTabChange, onTabListChange, onTabContentStateChange, onIconChange, onSecurityInfoStateChange, onReaderableStateChange, onHistoryStateChange, onFindResults, onThumbnailChange, onBrowserExtensionsChange, onPageExtensionsChange, onBrowserExtensionIcons, onPageExtensionIcons, onTranslationStateChange]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[onSelectedTabChange, onTabListChange, onRestoreComplete, onTabContentStateChange, onIconChange, onSecurityInfoStateChange, onReaderableStateChange, onHistoryStateChange, onFindResults, onThumbnailChange, onBrowserExtensionsChange, onPageExtensionsChange, onBrowserExtensionIcons, onPageExtensionIcons, onTranslationStateChange]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
@@ -8700,6 +8700,10 @@ abstract class GeckoStateEvents {
 
   void onSelectedTabChange(int sequence, String? id);
 
+  /// Mirrors `BrowserState.restoreComplete`: false until the native session
+  /// restore has dispatched all persisted tabs into the store.
+  void onRestoreCompleteChange(int sequence, bool restoreComplete);
+
   void onTabContentStateChange(int sequence, TabContentState state);
 
   void onHistoryStateChange(int sequence, String id, HistoryState state);
@@ -8858,6 +8862,28 @@ abstract class GeckoStateEvents {
           final String? arg_id = args[1] as String?;
           try {
             api.onSelectedTabChange(arg_sequence, arg_id);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onRestoreCompleteChange$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          final List<Object?> args = message! as List<Object?>;
+          final int arg_sequence = args[0]! as int;
+          final bool arg_restoreComplete = args[1]! as bool;
+          try {
+            api.onRestoreCompleteChange(arg_sequence, arg_restoreComplete);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

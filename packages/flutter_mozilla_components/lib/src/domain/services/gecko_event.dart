@@ -31,6 +31,7 @@ class GeckoEventService extends GeckoStateEvents {
   final _engineStateSubject = BehaviorSubject.seeded(false);
   final _tabListSubject = BehaviorSubject<List<String>>();
   final _selectedTabSubject = BehaviorSubject<String?>();
+  final _restoreCompleteSubject = BehaviorSubject.seeded(false);
 
   final _tabContentSubject = ReplaySubject<TabContentState>();
   final _historySubject = ReplaySubject<HistoryEvent>();
@@ -59,6 +60,8 @@ class GeckoEventService extends GeckoStateEvents {
   ValueStream<bool> get engineReadyStateEvents => _engineStateSubject.stream;
   ValueStream<List<String>> get tabListEvents => _tabListSubject.stream;
   ValueStream<String?> get selectedTabEvents => _selectedTabSubject.stream;
+  ValueStream<bool> get restoreCompleteEvents =>
+      _restoreCompleteSubject.stream;
 
   Stream<TabContentState> get tabContentEvents => _tabContentSubject.stream;
   Stream<HistoryEvent> get historyEvents => _historySubject.stream;
@@ -107,6 +110,11 @@ class GeckoEventService extends GeckoStateEvents {
   @override
   void onSelectedTabChange(int sequence, String? id) {
     _selectedTabSubject.addWhenMoreRecent(sequence, id, id);
+  }
+
+  @override
+  void onRestoreCompleteChange(int sequence, bool restoreComplete) {
+    _restoreCompleteSubject.addWhenMoreRecent(sequence, null, restoreComplete);
   }
 
   @override

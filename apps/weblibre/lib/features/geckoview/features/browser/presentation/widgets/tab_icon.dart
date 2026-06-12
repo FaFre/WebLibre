@@ -60,23 +60,33 @@ class TabIcon extends HookConsumerWidget {
       return UrlIcon([sandboxSourceUri], iconSize: iconSize, cacheOnly: true);
     }
 
-    return Skeletonizer(
-      enabled: icon.connectionState != ConnectionState.done,
-      child: Skeleton.replace(
-        replacement: Bone.icon(size: iconSize),
-        child: RepaintBoundary(
-          child:
-              icon.data.mapNotNull(
-                (image) => SafeRawImage(
-                  image: image,
-                  height: iconSize,
-                  width: iconSize,
-                  fallback: Icon(MdiIcons.web, size: iconSize),
-                ),
-              ) ??
-              Icon(MdiIcons.web, size: iconSize),
+    // While the icon future is still resolving, show the skeleton bone. This is
+    // the only state that needs the (comparatively expensive) Skeletonizer +
+    // Skeleton.replace machinery.
+    if (icon.connectionState != ConnectionState.done) {
+      return Skeletonizer(
+        enabled: true,
+        child: Skeleton.replace(
+          replacement: Bone.icon(size: iconSize),
+          child: SizedBox.square(dimension: iconSize),
         ),
-      ),
+      );
+    }
+
+    // Resolved case (hit on virtually every rebuild once the favicon is known):
+    // render the image directly without wrapping it in Skeletonizer, which the
+    // rebuild profiler flagged as the most-rebuilt widget in the tab bar.
+    return RepaintBoundary(
+      child:
+          icon.data.mapNotNull(
+            (image) => SafeRawImage(
+              image: image,
+              height: iconSize,
+              width: iconSize,
+              fallback: Icon(MdiIcons.web, size: iconSize),
+            ),
+          ) ??
+          Icon(MdiIcons.web, size: iconSize),
     );
   }
 }

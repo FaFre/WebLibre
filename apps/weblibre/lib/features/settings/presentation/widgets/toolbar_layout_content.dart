@@ -78,16 +78,25 @@ const List<SettingsSectionDefinition> toolbarLayoutSettingsSections = [
     title: 'Quick Tab Switcher',
     entries: [
       SettingsEntryDefinition(
-        title: 'Show Quick Tab Switcher Bar',
-        subtitle: 'Show a bar for switching to recent tabs',
-        keywords: ['recent tabs'],
-        child: _ShowQuickTabSwitcherBarTile(),
+        title: 'Tab Stacking',
+        subtitle: 'Choose how the quick tab switcher bar arranges tabs',
+        keywords: [
+          'recent tabs',
+          'recently used',
+          'container tabs',
+          'accordion',
+          'two level',
+          'rows',
+          'stacking',
+          'disabled',
+        ],
+        child: _TabBarStackingModeSection(),
       ),
       SettingsEntryDefinition(
-        title: 'Quick Tab Switcher Mode',
-        subtitle: 'Choose how the switcher orders and groups tabs',
-        keywords: ['recently used', 'container tabs'],
-        child: _QuickTabSwitcherModeSection(),
+        title: 'Close Buttons on All Tabs',
+        subtitle: 'Show a close button on every switcher chip',
+        keywords: ['close', 'x button'],
+        child: _QuickTabSwitcherCloseButtonsTile(),
       ),
       SettingsEntryDefinition(
         title: 'History Fallback in Quick Tab Switcher',
@@ -100,6 +109,12 @@ const List<SettingsSectionDefinition> toolbarLayoutSettingsSections = [
         subtitle: 'Display page titles in the switcher list',
         keywords: ['page titles'],
         child: _QuickTabSwitcherShowTitlesTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Title Width in Quick Tab Switcher',
+        subtitle: 'Maximum width of tab titles on switcher chips',
+        keywords: ['width', 'title', 'chip', 'length'],
+        child: _QuickTabSwitcherTitleWidthTile(),
       ),
       SettingsEntryDefinition(
         title: 'Hierarchy Depth in Quick Tab Switcher',
@@ -303,43 +318,13 @@ class _CustomizeToolbarButtonsTile extends HookConsumerWidget {
   }
 }
 
-class _ShowQuickTabSwitcherBarTile extends HookConsumerWidget {
-  const _ShowQuickTabSwitcherBarTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tabBarShowQuickTabSwitcherBar = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.tabBarShowQuickTabSwitcherBar,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: const Text('Show Quick Tab Switcher Bar'),
-      subtitle: const Text(
-        'Show additional toolbar to quickly switch to recently used tabs',
-      ),
-      secondary: const Icon(MdiIcons.dockBottom),
-      value: tabBarShowQuickTabSwitcherBar,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.tabBarShowQuickTabSwitcherBar(value),
-            );
-      },
-    );
-  }
-}
-
-class _QuickTabSwitcherModeSection extends HookConsumerWidget {
-  const _QuickTabSwitcherModeSection();
+class _TabBarStackingModeSection extends HookConsumerWidget {
+  const _TabBarStackingModeSection();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final quickTabSwitcherMode = settings.effectiveUiQuickTabSwitcherMode();
+    final stackingMode = settings.effectiveTabBarStackingMode();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -348,37 +333,199 @@ class _QuickTabSwitcherModeSection extends HookConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const ListTile(
-            title: Text('Quick Tab Switcher Mode'),
+            title: Text('Tab Stacking'),
+            subtitle: Text(
+              'How the quick tab switcher bar arranges its tabs',
+            ),
             leading: Icon(MdiIcons.folderSettings),
             contentPadding: EdgeInsets.zero,
           ),
           RadioGroup(
-            groupValue: quickTabSwitcherMode,
+            groupValue: stackingMode,
             onChanged: (value) async {
               if (value != null) {
                 await ref
                     .read(saveGeneralSettingsControllerProvider.notifier)
                     .save(
                       (currentSettings) =>
-                          currentSettings.copyWith.quickTabSwitcherMode(value),
+                          currentSettings.copyWith.tabBarStackingMode(value),
                     );
               }
             },
             child: Column(
               children: [
                 const RadioListTile.adaptive(
-                  value: QuickTabSwitcherMode.lastUsedTabs,
+                  value: TabBarStackingMode.lastUsedTabs,
                   title: Text('Recently Used Tabs'),
                   subtitle: Text('Recently used tabs across all containers'),
                 ),
-                if (settings.showContainerUi)
-                  const RadioListTile.adaptive(
-                    value: QuickTabSwitcherMode.containerTabs,
+                if (settings.showContainerUi) ...const [
+                  RadioListTile.adaptive(
+                    value: TabBarStackingMode.containerTabs,
                     title: Text('Container Tabs'),
                     subtitle: Text('Ordered tabs of the selected container'),
                   ),
+                  RadioListTile.adaptive(
+                    value: TabBarStackingMode.accordion,
+                    title: Text('Accordion'),
+                    subtitle: Text(
+                      "All containers as chips, with the selected "
+                      "container's tabs expanded inline",
+                    ),
+                  ),
+                  RadioListTile.adaptive(
+                    value: TabBarStackingMode.twoLevel,
+                    title: Text('Two Rows'),
+                    subtitle: Text(
+                      'Tabs of the selected container on top, recently used '
+                      'tabs below',
+                    ),
+                  ),
+                ],
+                const RadioListTile.adaptive(
+                  value: TabBarStackingMode.disabled,
+                  title: Text('Disabled'),
+                  subtitle: Text('Hide the quick tab switcher bar'),
+                ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickTabSwitcherCloseButtonsTile extends HookConsumerWidget {
+  const _QuickTabSwitcherCloseButtonsTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final showCloseButtonOnAllTabs = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.quickTabSwitcherShowCloseButtonOnAllTabs,
+      ),
+    );
+    final switcherEnabled = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.effectiveTabBarStackingMode() != TabBarStackingMode.disabled,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Close Buttons on All Tabs'),
+      subtitle: const Text(
+        "Show a close button on every switcher chip; the active tab's chip "
+        "always has one",
+      ),
+      secondary: const Icon(MdiIcons.closeCircleOutline),
+      value: showCloseButtonOnAllTabs,
+      onChanged: switcherEnabled
+          ? (value) async {
+              await ref
+                  .read(saveGeneralSettingsControllerProvider.notifier)
+                  .save(
+                    (currentSettings) => currentSettings.copyWith
+                        .quickTabSwitcherShowCloseButtonOnAllTabs(value),
+                  );
+            }
+          : null,
+    );
+  }
+}
+
+class _QuickTabSwitcherTitleWidthTile extends HookConsumerWidget {
+  const _QuickTabSwitcherTitleWidthTile();
+
+  static final _divisions =
+      ((maxQuickTabSwitcherTitleWidth - minQuickTabSwitcherTitleWidth) /
+              quickTabSwitcherTitleWidthStep)
+          .round();
+
+  static String _label(double width) => '${width.round()} px';
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final titleWidth = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.quickTabSwitcherTitleWidth,
+      ),
+    );
+    final showTitles = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.quickTabSwitcherShowTitles,
+      ),
+    );
+    final switcherEnabled = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.effectiveTabBarStackingMode() != TabBarStackingMode.disabled,
+      ),
+    );
+
+    final sliderValue = useState(titleWidth);
+    useEffect(() {
+      sliderValue.value = titleWidth;
+      return null;
+    }, [titleWidth]);
+
+    final enabled = switcherEnabled && showTitles;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            title: const Text('Title Width in Quick Tab Switcher'),
+            subtitle: const Text(
+              'Maximum width of tab titles on switcher chips',
+            ),
+            leading: const Icon(MdiIcons.arrowExpandHorizontal),
+            contentPadding: EdgeInsets.zero,
+            enabled: enabled,
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: Slider(
+                  min: minQuickTabSwitcherTitleWidth,
+                  max: maxQuickTabSwitcherTitleWidth,
+                  divisions: _divisions,
+                  label: _label(sliderValue.value),
+                  value: sliderValue.value.clamp(
+                    minQuickTabSwitcherTitleWidth,
+                    maxQuickTabSwitcherTitleWidth,
+                  ),
+                  onChanged: enabled
+                      ? (value) {
+                          sliderValue.value = value;
+                        }
+                      : null,
+                  onChangeEnd: enabled
+                      ? (value) async {
+                          final normalized =
+                              (value / quickTabSwitcherTitleWidthStep)
+                                  .round() *
+                              quickTabSwitcherTitleWidthStep;
+                          sliderValue.value = normalized;
+                          await ref
+                              .read(
+                                saveGeneralSettingsControllerProvider.notifier,
+                              )
+                              .save(
+                                (currentSettings) => currentSettings.copyWith
+                                    .quickTabSwitcherTitleWidth(normalized),
+                              );
+                        }
+                      : null,
+                ),
+              ),
+              Text(
+                _label(sliderValue.value),
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ],
           ),
         ],
       ),
@@ -396,9 +543,9 @@ class _QuickTabSwitcherHistorySuggestionsTile extends HookConsumerWidget {
         (s) => s.quickTabSwitcherShowHistorySuggestions,
       ),
     );
-    final tabBarShowQuickTabSwitcherBar = ref.watch(
+    final switcherEnabled = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (s) => s.tabBarShowQuickTabSwitcherBar,
+        (s) => s.effectiveTabBarStackingMode() != TabBarStackingMode.disabled,
       ),
     );
 
@@ -409,7 +556,7 @@ class _QuickTabSwitcherHistorySuggestionsTile extends HookConsumerWidget {
       ),
       secondary: const Icon(MdiIcons.history),
       value: showHistorySuggestions,
-      onChanged: tabBarShowQuickTabSwitcherBar
+      onChanged: switcherEnabled
           ? (value) async {
               await ref
                   .read(saveGeneralSettingsControllerProvider.notifier)
@@ -433,9 +580,9 @@ class _QuickTabSwitcherShowTitlesTile extends HookConsumerWidget {
         (s) => s.quickTabSwitcherShowTitles,
       ),
     );
-    final tabBarShowQuickTabSwitcherBar = ref.watch(
+    final switcherEnabled = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (s) => s.tabBarShowQuickTabSwitcherBar,
+        (s) => s.effectiveTabBarStackingMode() != TabBarStackingMode.disabled,
       ),
     );
 
@@ -446,7 +593,7 @@ class _QuickTabSwitcherShowTitlesTile extends HookConsumerWidget {
       ),
       secondary: const Icon(MdiIcons.textRecognition),
       value: quickTabSwitcherShowTitles,
-      onChanged: tabBarShowQuickTabSwitcherBar
+      onChanged: switcherEnabled
           ? (value) async {
               await ref
                   .read(saveGeneralSettingsControllerProvider.notifier)
@@ -476,9 +623,9 @@ class _QuickTabSwitcherHierarchyGlyphsTile extends HookConsumerWidget {
         (s) => s.quickTabSwitcherHierarchyGlyphs,
       ),
     );
-    final tabBarShowQuickTabSwitcherBar = ref.watch(
+    final switcherEnabled = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (s) => s.tabBarShowQuickTabSwitcherBar,
+        (s) => s.effectiveTabBarStackingMode() != TabBarStackingMode.disabled,
       ),
     );
 
@@ -489,7 +636,7 @@ class _QuickTabSwitcherHierarchyGlyphsTile extends HookConsumerWidget {
     }, [hierarchyGlyphs]);
 
     final currentGlyphs = sliderValue.value.round();
-    final enabled = tabBarShowQuickTabSwitcherBar;
+    final enabled = switcherEnabled;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),

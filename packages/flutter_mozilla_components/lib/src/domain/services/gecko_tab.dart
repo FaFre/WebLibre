@@ -19,6 +19,7 @@ class GeckoTabService {
   Future<void> syncEvents({
     bool onSelectedTabChange = false,
     bool onTabListChange = false,
+    bool onRestoreComplete = false,
     bool onTabContentStateChange = false,
     bool onIconChange = false,
     bool onSecurityInfoStateChange = false,
@@ -34,6 +35,7 @@ class GeckoTabService {
     return _api.syncEvents(
       onSelectedTabChange: onSelectedTabChange,
       onTabListChange: onTabListChange,
+      onRestoreComplete: onRestoreComplete,
       onTabContentStateChange: onTabContentStateChange,
       onIconChange: onIconChange,
       onSecurityInfoStateChange: onSecurityInfoStateChange,

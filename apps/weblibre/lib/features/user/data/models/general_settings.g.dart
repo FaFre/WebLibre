@@ -65,17 +65,11 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings tabBarShowContextualBar(bool tabBarShowContextualBar);
 
-  GeneralSettings tabBarShowQuickTabSwitcherBar(
-    bool tabBarShowQuickTabSwitcherBar,
-  );
-
   GeneralSettings tabBarPosition(TabBarPosition tabBarPosition);
 
   GeneralSettings tabBarLayout(TabBarLayout tabBarLayout);
 
-  GeneralSettings quickTabSwitcherMode(
-    QuickTabSwitcherMode quickTabSwitcherMode,
-  );
+  GeneralSettings tabBarStackingMode(TabBarStackingMode tabBarStackingMode);
 
   GeneralSettings pullToRefreshEnabled(bool pullToRefreshEnabled);
 
@@ -101,6 +95,12 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings quickTabSwitcherShowHistorySuggestions(
     bool quickTabSwitcherShowHistorySuggestions,
+  );
+
+  GeneralSettings quickTabSwitcherTitleWidth(double quickTabSwitcherTitleWidth);
+
+  GeneralSettings quickTabSwitcherShowCloseButtonOnAllTabs(
+    bool quickTabSwitcherShowCloseButtonOnAllTabs,
   );
 
   GeneralSettings syncServerOverride(String syncServerOverride);
@@ -186,10 +186,9 @@ abstract class _$GeneralSettingsCWProxy {
     Duration historyAutoCleanInterval,
     bool tabViewBottomSheet,
     bool tabBarShowContextualBar,
-    bool tabBarShowQuickTabSwitcherBar,
     TabBarPosition tabBarPosition,
     TabBarLayout tabBarLayout,
-    QuickTabSwitcherMode quickTabSwitcherMode,
+    TabBarStackingMode tabBarStackingMode,
     bool pullToRefreshEnabled,
     bool useExternalDownloadManager,
     bool doubleBackCloseTab,
@@ -200,6 +199,8 @@ abstract class _$GeneralSettingsCWProxy {
     bool quickTabSwitcherShowTitles,
     int quickTabSwitcherHierarchyGlyphs,
     bool quickTabSwitcherShowHistorySuggestions,
+    double quickTabSwitcherTitleWidth,
+    bool quickTabSwitcherShowCloseButtonOnAllTabs,
     String syncServerOverride,
     String syncTokenServerOverride,
     bool urlCleanerEnabled,
@@ -338,11 +339,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(tabBarShowContextualBar: tabBarShowContextualBar);
 
   @override
-  GeneralSettings tabBarShowQuickTabSwitcherBar(
-    bool tabBarShowQuickTabSwitcherBar,
-  ) => call(tabBarShowQuickTabSwitcherBar: tabBarShowQuickTabSwitcherBar);
-
-  @override
   GeneralSettings tabBarPosition(TabBarPosition tabBarPosition) =>
       call(tabBarPosition: tabBarPosition);
 
@@ -351,9 +347,8 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(tabBarLayout: tabBarLayout);
 
   @override
-  GeneralSettings quickTabSwitcherMode(
-    QuickTabSwitcherMode quickTabSwitcherMode,
-  ) => call(quickTabSwitcherMode: quickTabSwitcherMode);
+  GeneralSettings tabBarStackingMode(TabBarStackingMode tabBarStackingMode) =>
+      call(tabBarStackingMode: tabBarStackingMode);
 
   @override
   GeneralSettings pullToRefreshEnabled(bool pullToRefreshEnabled) =>
@@ -399,6 +394,19 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   ) => call(
     quickTabSwitcherShowHistorySuggestions:
         quickTabSwitcherShowHistorySuggestions,
+  );
+
+  @override
+  GeneralSettings quickTabSwitcherTitleWidth(
+    double quickTabSwitcherTitleWidth,
+  ) => call(quickTabSwitcherTitleWidth: quickTabSwitcherTitleWidth);
+
+  @override
+  GeneralSettings quickTabSwitcherShowCloseButtonOnAllTabs(
+    bool quickTabSwitcherShowCloseButtonOnAllTabs,
+  ) => call(
+    quickTabSwitcherShowCloseButtonOnAllTabs:
+        quickTabSwitcherShowCloseButtonOnAllTabs,
   );
 
   @override
@@ -529,10 +537,9 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? historyAutoCleanInterval = const $CopyWithPlaceholder(),
     Object? tabViewBottomSheet = const $CopyWithPlaceholder(),
     Object? tabBarShowContextualBar = const $CopyWithPlaceholder(),
-    Object? tabBarShowQuickTabSwitcherBar = const $CopyWithPlaceholder(),
     Object? tabBarPosition = const $CopyWithPlaceholder(),
     Object? tabBarLayout = const $CopyWithPlaceholder(),
-    Object? quickTabSwitcherMode = const $CopyWithPlaceholder(),
+    Object? tabBarStackingMode = const $CopyWithPlaceholder(),
     Object? pullToRefreshEnabled = const $CopyWithPlaceholder(),
     Object? useExternalDownloadManager = const $CopyWithPlaceholder(),
     Object? doubleBackCloseTab = const $CopyWithPlaceholder(),
@@ -543,6 +550,9 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? quickTabSwitcherShowTitles = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherHierarchyGlyphs = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherShowHistorySuggestions =
+        const $CopyWithPlaceholder(),
+    Object? quickTabSwitcherTitleWidth = const $CopyWithPlaceholder(),
+    Object? quickTabSwitcherShowCloseButtonOnAllTabs =
         const $CopyWithPlaceholder(),
     Object? syncServerOverride = const $CopyWithPlaceholder(),
     Object? syncTokenServerOverride = const $CopyWithPlaceholder(),
@@ -714,12 +724,6 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.tabBarShowContextualBar
           // ignore: cast_nullable_to_non_nullable
           : tabBarShowContextualBar as bool,
-      tabBarShowQuickTabSwitcherBar:
-          tabBarShowQuickTabSwitcherBar == const $CopyWithPlaceholder() ||
-              tabBarShowQuickTabSwitcherBar == null
-          ? _value.tabBarShowQuickTabSwitcherBar
-          // ignore: cast_nullable_to_non_nullable
-          : tabBarShowQuickTabSwitcherBar as bool,
       tabBarPosition:
           tabBarPosition == const $CopyWithPlaceholder() ||
               tabBarPosition == null
@@ -731,12 +735,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.tabBarLayout
           // ignore: cast_nullable_to_non_nullable
           : tabBarLayout as TabBarLayout,
-      quickTabSwitcherMode:
-          quickTabSwitcherMode == const $CopyWithPlaceholder() ||
-              quickTabSwitcherMode == null
-          ? _value.quickTabSwitcherMode
+      tabBarStackingMode:
+          tabBarStackingMode == const $CopyWithPlaceholder() ||
+              tabBarStackingMode == null
+          ? _value.tabBarStackingMode
           // ignore: cast_nullable_to_non_nullable
-          : quickTabSwitcherMode as QuickTabSwitcherMode,
+          : tabBarStackingMode as TabBarStackingMode,
       pullToRefreshEnabled:
           pullToRefreshEnabled == const $CopyWithPlaceholder() ||
               pullToRefreshEnabled == null
@@ -798,6 +802,19 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.quickTabSwitcherShowHistorySuggestions
           // ignore: cast_nullable_to_non_nullable
           : quickTabSwitcherShowHistorySuggestions as bool,
+      quickTabSwitcherTitleWidth:
+          quickTabSwitcherTitleWidth == const $CopyWithPlaceholder() ||
+              quickTabSwitcherTitleWidth == null
+          ? _value.quickTabSwitcherTitleWidth
+          // ignore: cast_nullable_to_non_nullable
+          : quickTabSwitcherTitleWidth as double,
+      quickTabSwitcherShowCloseButtonOnAllTabs:
+          quickTabSwitcherShowCloseButtonOnAllTabs ==
+                  const $CopyWithPlaceholder() ||
+              quickTabSwitcherShowCloseButtonOnAllTabs == null
+          ? _value.quickTabSwitcherShowCloseButtonOnAllTabs
+          // ignore: cast_nullable_to_non_nullable
+          : quickTabSwitcherShowCloseButtonOnAllTabs as bool,
       syncServerOverride:
           syncServerOverride == const $CopyWithPlaceholder() ||
               syncServerOverride == null
@@ -1005,7 +1022,6 @@ GeneralSettings _$GeneralSettingsFromJson(
         ),
   tabViewBottomSheet: json['tabViewBottomSheet'] as bool?,
   tabBarShowContextualBar: json['tabBarShowContextualBar'] as bool?,
-  tabBarShowQuickTabSwitcherBar: json['tabBarShowQuickTabSwitcherBar'] as bool?,
   tabBarPosition: $enumDecodeNullable(
     _$TabBarPositionEnumMap,
     json['tabBarPosition'],
@@ -1014,9 +1030,9 @@ GeneralSettings _$GeneralSettingsFromJson(
     _$TabBarLayoutEnumMap,
     json['tabBarLayout'],
   ),
-  quickTabSwitcherMode: $enumDecodeNullable(
-    _$QuickTabSwitcherModeEnumMap,
-    json['quickTabSwitcherMode'],
+  tabBarStackingMode: $enumDecodeNullable(
+    _$TabBarStackingModeEnumMap,
+    json['tabBarStackingMode'],
   ),
   pullToRefreshEnabled: json['pullToRefreshEnabled'] as bool?,
   useExternalDownloadManager: json['useExternalDownloadManager'] as bool?,
@@ -1036,6 +1052,10 @@ GeneralSettings _$GeneralSettingsFromJson(
       (json['quickTabSwitcherHierarchyGlyphs'] as num?)?.toInt(),
   quickTabSwitcherShowHistorySuggestions:
       json['quickTabSwitcherShowHistorySuggestions'] as bool?,
+  quickTabSwitcherTitleWidth: (json['quickTabSwitcherTitleWidth'] as num?)
+      ?.toDouble(),
+  quickTabSwitcherShowCloseButtonOnAllTabs:
+      json['quickTabSwitcherShowCloseButtonOnAllTabs'] as bool?,
   syncServerOverride: json['syncServerOverride'] as String?,
   syncTokenServerOverride: json['syncTokenServerOverride'] as String?,
   urlCleanerEnabled: json['urlCleanerEnabled'] as bool?,
@@ -1107,11 +1127,10 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'historyAutoCleanInterval': instance.historyAutoCleanInterval.inMicroseconds,
   'tabViewBottomSheet': instance.tabViewBottomSheet,
   'tabBarShowContextualBar': instance.tabBarShowContextualBar,
-  'tabBarShowQuickTabSwitcherBar': instance.tabBarShowQuickTabSwitcherBar,
   'tabBarPosition': _$TabBarPositionEnumMap[instance.tabBarPosition]!,
   'tabBarLayout': _$TabBarLayoutEnumMap[instance.tabBarLayout]!,
-  'quickTabSwitcherMode':
-      _$QuickTabSwitcherModeEnumMap[instance.quickTabSwitcherMode]!,
+  'tabBarStackingMode':
+      _$TabBarStackingModeEnumMap[instance.tabBarStackingMode]!,
   'pullToRefreshEnabled': instance.pullToRefreshEnabled,
   'useExternalDownloadManager': instance.useExternalDownloadManager,
   'doubleBackCloseTab': instance.doubleBackCloseTab,
@@ -1124,6 +1143,9 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'quickTabSwitcherHierarchyGlyphs': instance.quickTabSwitcherHierarchyGlyphs,
   'quickTabSwitcherShowHistorySuggestions':
       instance.quickTabSwitcherShowHistorySuggestions,
+  'quickTabSwitcherTitleWidth': instance.quickTabSwitcherTitleWidth,
+  'quickTabSwitcherShowCloseButtonOnAllTabs':
+      instance.quickTabSwitcherShowCloseButtonOnAllTabs,
   'syncServerOverride': instance.syncServerOverride,
   'syncTokenServerOverride': instance.syncTokenServerOverride,
   'urlCleanerEnabled': instance.urlCleanerEnabled,
@@ -1214,9 +1236,12 @@ const _$TabBarLayoutEnumMap = {
   TabBarLayout.compact: 'compact',
 };
 
-const _$QuickTabSwitcherModeEnumMap = {
-  QuickTabSwitcherMode.lastUsedTabs: 'lastUsedTabs',
-  QuickTabSwitcherMode.containerTabs: 'containerTabs',
+const _$TabBarStackingModeEnumMap = {
+  TabBarStackingMode.lastUsedTabs: 'lastUsedTabs',
+  TabBarStackingMode.containerTabs: 'containerTabs',
+  TabBarStackingMode.accordion: 'accordion',
+  TabBarStackingMode.twoLevel: 'twoLevel',
+  TabBarStackingMode.disabled: 'disabled',
 };
 
 const _$IntentSourcePolicyEnumMap = {

@@ -65,6 +65,17 @@ class Events(
         }
 
         stateFlow.flowScoped(dispatcher = Dispatchers.Main) { flow ->
+            flow.map { state -> state.restoreComplete }
+                .distinctUntilChanged()
+                .collect { restoreComplete ->
+                    flutterEvents.onRestoreCompleteChange(
+                        EventSequence.next(),
+                        restoreComplete
+                    ) { _ -> }
+                }
+        }
+
+        stateFlow.flowScoped(dispatcher = Dispatchers.Main) { flow ->
             var previousTabs = emptySet<String>()
             flow.mapNotNull { state -> state.tabs.map { tab -> tab.id } }
                 .distinctUntilChanged()

@@ -28,6 +28,7 @@ import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
+import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
@@ -38,6 +39,7 @@ import 'package:weblibre/features/geckoview/features/search/domain/entities/tab_
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
@@ -176,6 +178,51 @@ EquatableValue<Map<String, TabState>> containerTabStates(
   });
 }
 
+/// Synthesizes a placeholder [TabState] from a cached DB row for tabs the
+/// native session restore hasn't delivered yet. `TabIcon` falls back to the
+/// URL-cached favicon when [TabState.icon] is null, so placeholder chips
+/// still render with proper icons and titles.
+TabState _placeholderTabState(TabData tab) {
+  return TabState.$default(tab.id).copyWith(
+    url: tab.url ?? TabState.defaultUrl,
+    title: tab.title ?? '',
+    parentId: tab.parentId,
+    tabMode: TabMode.fromDbValue(
+      tab.tabMode,
+      isolationContextId: tab.isolationContextId,
+    ),
+  );
+}
+
+/// Whether [tab] may be shown as a pre-restore placeholder. Private tabs are
+/// never session-restored, so their rows must not produce dangling chips.
+bool _canShowAsPlaceholder(TabData tab) =>
+    tab.tabMode != TabModeDbValue.private;
+
+/// Ids of DB-cached tabs whose native state hasn't arrived yet. Empty once
+/// the session restore completed (afterwards a missing native state means
+/// the tab is gone, not pending).
+@Riverpod()
+EquatableValue<Set<String>> pendingRestoreTabIds(Ref ref) {
+  final restoreComplete = ref.watch(browserRestoreCompleteProvider);
+  if (restoreComplete) {
+    return EquatableValue(const {});
+  }
+
+  final nativeTabIds = ref.watch(
+    tabStatesProvider.select((states) => EquatableValue(states.keys.toSet())),
+  );
+  final dbTabs =
+      ref.watch(watchTabsFifoProvider.select((value) => value.value)) ??
+      const <TabData>[];
+
+  return EquatableValue({
+    for (final tab in dbTabs)
+      if (_canShowAsPlaceholder(tab) && !nativeTabIds.value.contains(tab.id))
+        tab.id,
+  });
+}
+
 @Riverpod(keepAlive: true)
 EquatableValue<List<TabStateWithContainer>> fifoTabStates(Ref ref) {
   final containerData = ref
@@ -189,13 +236,20 @@ EquatableValue<List<TabStateWithContainer>> fifoTabStates(Ref ref) {
   );
 
   final tabStates = ref.watch(tabStatesProvider);
+  final placeholdersActive = !ref.watch(browserRestoreCompleteProvider);
+
+  TabState? stateFor(TabData tab) =>
+      tabStates[tab.id] ??
+      (placeholdersActive && _canShowAsPlaceholder(tab)
+          ? _placeholderTabState(tab)
+          : null);
 
   return EquatableValue([
     if (sortedTabs != null)
       for (final tab in sortedTabs)
-        if (tabStates.containsKey(tab.id))
+        if (stateFor(tab) case final state?)
           (
-            tabStates[tab.id]!,
+            state,
             tab.containerId.mapNotNull(
               (containerId) => containerData?[containerId],
             ),
@@ -218,11 +272,43 @@ selectedContainerTabStatesWithContainer(Ref ref) {
         (value) => Map.fromEntries(value.map((c) => MapEntry(c.id, c))),
       );
 
-  final sortedTabs = ref.watch(
-    containerTabEntitiesProvider(filter).select((value) => value.value),
-  );
-
   final tabStates = ref.watch(tabStatesProvider);
+  final placeholdersActive = !ref.watch(browserRestoreCompleteProvider);
+  final selectedContainerTabsData = placeholdersActive
+      ? ref.watch(
+              watchContainerTabsDataProvider(
+                filter.containerId,
+              ).select((value) => value.value),
+            ) ??
+            const <TabData>[]
+      : const <TabData>[];
+  final sortedTabs = placeholdersActive
+      ? [
+          for (final tab in selectedContainerTabsData)
+            DefaultTabEntity(
+              tabId: tab.id,
+              orderKey: tab.orderKey,
+              containerId: tab.containerId,
+            ),
+        ]
+      : ref.watch(
+          containerTabEntitiesProvider(filter).select((value) => value.value),
+        );
+  final tabDataById = placeholdersActive
+      ? {for (final tab in selectedContainerTabsData) tab.id: tab}
+      : const <String, TabData>{};
+
+  TabState? stateForEntity(String tabId) {
+    final state = tabStates[tabId];
+    if (state != null) {
+      return state;
+    }
+    final tabData = tabDataById[tabId];
+    if (tabData != null && _canShowAsPlaceholder(tabData)) {
+      return _placeholderTabState(tabData);
+    }
+    return null;
+  }
 
   final groupedItems = ref
       .watch(groupedTabListItemsProvider(containerId: filter.containerId))
@@ -294,12 +380,15 @@ selectedContainerTabStatesWithContainer(Ref ref) {
   final groupedOrder = {
     for (var i = 0; i < orderedItems.length; i++) orderedItems[i].tabId: i,
   };
+  final orderKeyById = {
+    for (final tabEntity in sortedTabs) tabEntity.tabId: tabEntity.orderKey,
+  };
 
   var items = [
     for (final tabEntity in sortedTabs)
-      if (tabStates.containsKey(tabEntity.tabId))
+      if (stateForEntity(tabEntity.tabId) case final state?)
         (
-          tabStates[tabEntity.tabId]!,
+          state,
           tabEntity.containerId.mapNotNull(
             (containerId) => containerData?[containerId],
           ),
@@ -307,9 +396,15 @@ selectedContainerTabStatesWithContainer(Ref ref) {
   ];
 
   items.sort((a, b) {
-    final aIndex = groupedOrder[a.$1.id] ?? orderedItems.length;
-    final bIndex = groupedOrder[b.$1.id] ?? orderedItems.length;
-    return aIndex.compareTo(bIndex);
+    final aIndex = groupedOrder[a.$1.id];
+    final bIndex = groupedOrder[b.$1.id];
+    if (aIndex != null && bIndex != null) {
+      return aIndex.compareTo(bIndex);
+    }
+    if (aIndex != null) return -1;
+    if (bIndex != null) return 1;
+
+    return (orderKeyById[a.$1.id] ?? '').compareTo(orderKeyById[b.$1.id] ?? '');
   });
 
   // Flat pinned-first: move all pinned tabs before unpinned regardless of
@@ -330,14 +425,9 @@ EquatableValue<List<TabStateWithContainer>> quickTabSwitcherTabStates(
   Ref ref,
   QuickTabSwitcherMode mode,
 ) {
-  final effectiveMode = ref.watch(
-    generalSettingsWithDefaultsProvider.select(
-      (settings) => settings.effectiveUiQuickTabSwitcherMode(),
-    ),
-  );
   final selectedTabId = ref.watch(selectedTabProvider);
 
-  final tabStates = switch (effectiveMode) {
+  final tabStates = switch (mode) {
     QuickTabSwitcherMode.lastUsedTabs => ref.watch(fifoTabStatesProvider).value,
     QuickTabSwitcherMode.containerTabs =>
       ref.watch(selectedContainerTabStatesWithContainerProvider).value,
@@ -352,7 +442,7 @@ EquatableValue<List<TabStateWithContainer>> quickTabSwitcherTabStates(
     tabViewFilterControllerProvider.select((v) => v.sortPinnedFirst),
   );
 
-  return EquatableValue(switch (effectiveMode) {
+  return EquatableValue(switch (mode) {
     QuickTabSwitcherMode.lastUsedTabs => () {
       final filtered = tabStates
           .where((state) => state.$1.id != selectedTabId)
@@ -378,11 +468,6 @@ Future<List<VisitInfo>> quickTabSwitcherHistorySuggestions(
   Ref ref,
   QuickTabSwitcherMode mode,
 ) async {
-  final effectiveMode = ref.watch(
-    generalSettingsWithDefaultsProvider.select(
-      (settings) => settings.effectiveUiQuickTabSwitcherMode(),
-    ),
-  );
   final showHistorySuggestions = ref.watch(
     generalSettingsWithDefaultsProvider.select(
       (settings) => settings.quickTabSwitcherShowHistorySuggestions,
@@ -395,7 +480,7 @@ Future<List<VisitInfo>> quickTabSwitcherHistorySuggestions(
 
   final hasTabStates = ref.watch(
     quickTabSwitcherTabStatesProvider(
-      effectiveMode,
+      mode,
     ).select((value) => value.value.isNotEmpty),
   );
   if (hasTabStates) {
@@ -407,28 +492,15 @@ Future<List<VisitInfo>> quickTabSwitcherHistorySuggestions(
       .getVisitsPaginated(count: 25);
 }
 
-@Riverpod()
-AsyncValue<bool> quickTabSwitcherHasResults(
+/// Whether a single switcher row of [mode] has anything to render
+/// (open tabs, or history suggestions as fallback).
+AsyncValue<bool> _quickTabSwitcherRowHasResults(
   Ref ref,
   QuickTabSwitcherMode mode,
 ) {
-  final effectiveMode = ref.watch(
-    generalSettingsWithDefaultsProvider.select(
-      (settings) => settings.effectiveUiQuickTabSwitcherMode(),
-    ),
-  );
-  final showQuickTabSwitcherBar = ref.watch(
-    generalSettingsWithDefaultsProvider.select(
-      (settings) => settings.tabBarShowQuickTabSwitcherBar,
-    ),
-  );
-  if (!showQuickTabSwitcherBar) {
-    return const AsyncValue.data(false);
-  }
-
   final hasResults = ref.watch(
     quickTabSwitcherTabStatesProvider(
-      effectiveMode,
+      mode,
     ).select((value) => value.value.isNotEmpty),
   );
 
@@ -437,8 +509,62 @@ AsyncValue<bool> quickTabSwitcherHasResults(
   }
 
   return ref
-      .watch(quickTabSwitcherHistorySuggestionsProvider(effectiveMode))
+      .watch(quickTabSwitcherHistorySuggestionsProvider(mode))
       .whenData((visits) => visits.isNotEmpty);
+}
+
+/// Number of 48px rows the quick tab switcher bar currently occupies.
+/// 0 hides the bar; feeds the toolbar height / GeckoView viewport math.
+@Riverpod()
+AsyncValue<int> quickTabSwitcherRowCount(Ref ref) {
+  final stackingMode = ref.watch(
+    generalSettingsWithDefaultsProvider.select(
+      (settings) => settings.effectiveTabBarStackingMode(),
+    ),
+  );
+
+  switch (stackingMode) {
+    case TabBarStackingMode.disabled:
+      return const AsyncValue.data(0);
+    case TabBarStackingMode.lastUsedTabs:
+      return _quickTabSwitcherRowHasResults(
+        ref,
+        QuickTabSwitcherMode.lastUsedTabs,
+      ).whenData((hasResults) => hasResults ? 1 : 0);
+    case TabBarStackingMode.containerTabs:
+      return _quickTabSwitcherRowHasResults(
+        ref,
+        QuickTabSwitcherMode.containerTabs,
+      ).whenData((hasResults) => hasResults ? 1 : 0);
+    case TabBarStackingMode.accordion:
+      final hasContainers = ref.watch(
+        watchContainersWithCountProvider.select(
+          (value) => value.value?.isNotEmpty ?? false,
+        ),
+      );
+      if (hasContainers) {
+        return const AsyncValue.data(1);
+      }
+      return _quickTabSwitcherRowHasResults(
+        ref,
+        QuickTabSwitcherMode.containerTabs,
+      ).whenData((hasResults) => hasResults ? 1 : 0);
+    case TabBarStackingMode.twoLevel:
+      final containerRow = _quickTabSwitcherRowHasResults(
+        ref,
+        QuickTabSwitcherMode.containerTabs,
+      );
+      final mruRow = _quickTabSwitcherRowHasResults(
+        ref,
+        QuickTabSwitcherMode.lastUsedTabs,
+      );
+      // The bar shows both rows whenever either has content; an empty row
+      // renders blank within its slot.
+      return containerRow.whenData(
+        (hasContainerTabs) =>
+            (hasContainerTabs || (mruRow.value ?? false)) ? 2 : 0,
+      );
+  }
 }
 
 @Riverpod()

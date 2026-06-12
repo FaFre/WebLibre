@@ -57,11 +57,15 @@ class TabBarPreviewHeaderDelegate extends SliverPersistentHeaderDelegate {
       height += BrowserTabBar.contextualToolabarHeight;
     }
 
-    if (settings.tabBarShowQuickTabSwitcherBar) {
-      height += BrowserTabBar.quickTabSwitcherHeight;
-    }
+    final quickTabSwitcherRows = switch (settings
+        .effectiveTabBarStackingMode()) {
+      TabBarStackingMode.disabled => 0,
+      TabBarStackingMode.twoLevel => 2,
+      _ => 1,
+    };
 
-    return height;
+    return height +
+        BrowserTabBar.quickTabSwitcherHeight * quickTabSwitcherRows;
   }
 
   double get _baseHeight =>
@@ -114,6 +118,7 @@ class TabBarPreviewCard extends HookWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final quickTabsController = useScrollController();
+    final quickTabsSecondRowController = useScrollController();
     final showMainToolbarActionButtons = !settings.tabBarShowContextualBar;
 
     final previewTabState = TabState.$default('preview-tab').copyWith(
@@ -134,8 +139,8 @@ class TabBarPreviewCard extends HookWidget {
         tabMode: TabMode.regular,
         isHistory: false,
         isPinned:
-            settings.effectiveUiQuickTabSwitcherMode() ==
-            QuickTabSwitcherMode.containerTabs,
+            settings.effectiveTabBarStackingMode() ==
+            TabBarStackingMode.containerTabs,
         url: Uri.parse('https://example.com/news'),
         color: settings.showContainerUi ? colorScheme.primary : null,
         avatar: const Icon(MdiIcons.web, size: 20),
@@ -196,17 +201,37 @@ class TabBarPreviewCard extends HookWidget {
       },
     );
 
-    Widget buildQuickTabSwitcher() {
+    Widget buildQuickTabSwitcherRow(ScrollController scrollController) {
       return QuickTabSwitcherView(
         availableItems: previewQuickItems,
         activeItem: previewQuickItems.firstWhere((item) => item.isActive),
-        scrollController: quickTabsController,
+        scrollController: scrollController,
         showTitles: settings.quickTabSwitcherShowTitles,
         showIsolatedTabUi: settings.showIsolatedTabUi,
         hierarchyGlyphs: settings.quickTabSwitcherHierarchyGlyphs,
+        titleMaxWidth: settings.quickTabSwitcherTitleWidth,
+        showCloseButtonOnAllTabs:
+            settings.quickTabSwitcherShowCloseButtonOnAllTabs,
         enablePinTabInMenu: false,
         onSelected: (_) async {},
+        onCloseItem: (_) async {},
       );
+    }
+
+    Widget buildQuickTabSwitcher() {
+      // The accordion preview reuses the single-row layout; container header
+      // chips need live container data that the static preview doesn't have.
+      if (settings.effectiveTabBarStackingMode() ==
+          TabBarStackingMode.twoLevel) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            buildQuickTabSwitcherRow(quickTabsController),
+            buildQuickTabSwitcherRow(quickTabsSecondRowController),
+          ],
+        );
+      }
+      return buildQuickTabSwitcherRow(quickTabsController);
     }
 
     Widget buildContextualToolbar() {
@@ -235,10 +260,13 @@ class TabBarPreviewCard extends HookWidget {
       if (showMainToolbarActionButtons) NavigationMenuButtonView(onTap: () {}),
     ];
 
+    final showQuickTabSwitcherBar =
+        settings.effectiveTabBarStackingMode() != TabBarStackingMode.disabled;
+
     final bottomCombinedToolbar = BrowserTabBarView(
       showMainToolbar: true,
       showContextualToolbar: settings.tabBarShowContextualBar,
-      showQuickTabSwitcherBar: settings.tabBarShowQuickTabSwitcherBar,
+      showQuickTabSwitcherBar: showQuickTabSwitcherBar,
       displayAppBar: true,
       displayQuickTabSwitcher: true,
       backgroundColor:
@@ -270,7 +298,7 @@ class TabBarPreviewCard extends HookWidget {
     final topBottomToolbar = BrowserTabBarView(
       showMainToolbar: false,
       showContextualToolbar: settings.tabBarShowContextualBar,
-      showQuickTabSwitcherBar: settings.tabBarShowQuickTabSwitcherBar,
+      showQuickTabSwitcherBar: showQuickTabSwitcherBar,
       displayAppBar: false,
       displayQuickTabSwitcher: true,
       backgroundColor: colorScheme.surfaceContainer,

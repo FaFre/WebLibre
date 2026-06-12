@@ -47,6 +47,13 @@ const defaultQuickTabSwitcherHierarchyGlyphs = 2;
 const minQuickTabSwitcherHierarchyGlyphs = 0;
 const maxQuickTabSwitcherHierarchyGlyphs = 4;
 
+/// Max width (logical px) of the title text on a quick tab switcher chip.
+/// The default of 64 sits at the 1/3 position of the slider scale.
+const defaultQuickTabSwitcherTitleWidth = 64.0;
+const minQuickTabSwitcherTitleWidth = 32.0;
+const maxQuickTabSwitcherTitleWidth = 128.0;
+const quickTabSwitcherTitleWidthStep = 8.0;
+
 /// Controls the Android display refresh rate the app requests at startup.
 ///
 /// Flutter does not request a high refresh rate by default, so on many devices
@@ -58,7 +65,23 @@ enum RefreshRateMode { system, high, low }
 
 enum TabBarSwipeAction { switchLastOpened, navigateOrderedTabs }
 
+/// Row kind rendered inside the quick tab switcher bar. [TabBarStackingMode]
+/// decides which row(s) are shown; this enum identifies a single row.
 enum QuickTabSwitcherMode { lastUsedTabs, containerTabs }
+
+/// Layout of the quick tab switcher bar. Merges the former
+/// "show tab switcher bar" toggle and [QuickTabSwitcherMode] selection.
+///
+/// [accordion] renders all containers as header chips with the selected
+/// container's tabs expanded inline. [twoLevel] stacks a container-tabs row
+/// on top of a recently-used row. [disabled] hides the bar entirely.
+enum TabBarStackingMode {
+  lastUsedTabs,
+  containerTabs,
+  accordion,
+  twoLevel,
+  disabled,
+}
 
 enum TabIntentOpenSetting { regular, private, isolated, ask }
 
@@ -118,10 +141,9 @@ class GeneralSettings with FastEquatable {
   final Duration historyAutoCleanInterval;
   final bool tabViewBottomSheet;
   final bool tabBarShowContextualBar;
-  final bool tabBarShowQuickTabSwitcherBar;
   final TabBarPosition tabBarPosition;
   final TabBarLayout tabBarLayout;
-  final QuickTabSwitcherMode quickTabSwitcherMode;
+  final TabBarStackingMode tabBarStackingMode;
   final bool pullToRefreshEnabled;
   final bool useExternalDownloadManager;
   final bool doubleBackCloseTab;
@@ -132,6 +154,13 @@ class GeneralSettings with FastEquatable {
   final bool quickTabSwitcherShowTitles;
   final int quickTabSwitcherHierarchyGlyphs;
   final bool quickTabSwitcherShowHistorySuggestions;
+
+  /// Max width (logical px) for chip titles in the quick tab switcher.
+  final double quickTabSwitcherTitleWidth;
+
+  /// Whether every tab chip in the quick tab switcher shows a close button.
+  /// The selected tab's chip always shows one regardless of this setting.
+  final bool quickTabSwitcherShowCloseButtonOnAllTabs;
   final String syncServerOverride;
   final String syncTokenServerOverride;
   final bool urlCleanerEnabled;
@@ -202,10 +231,9 @@ class GeneralSettings with FastEquatable {
     required this.historyAutoCleanInterval,
     required this.tabViewBottomSheet,
     required this.tabBarShowContextualBar,
-    required this.tabBarShowQuickTabSwitcherBar,
     required this.tabBarPosition,
     required this.tabBarLayout,
-    required this.quickTabSwitcherMode,
+    required this.tabBarStackingMode,
     required this.pullToRefreshEnabled,
     required this.useExternalDownloadManager,
     required this.doubleBackCloseTab,
@@ -216,6 +244,8 @@ class GeneralSettings with FastEquatable {
     required this.quickTabSwitcherShowTitles,
     required this.quickTabSwitcherHierarchyGlyphs,
     required this.quickTabSwitcherShowHistorySuggestions,
+    required this.quickTabSwitcherTitleWidth,
+    required this.quickTabSwitcherShowCloseButtonOnAllTabs,
     required this.syncServerOverride,
     required this.syncTokenServerOverride,
     required this.urlCleanerEnabled,
@@ -267,10 +297,9 @@ class GeneralSettings with FastEquatable {
     Duration? historyAutoCleanInterval,
     bool? tabViewBottomSheet,
     bool? tabBarShowContextualBar,
-    bool? tabBarShowQuickTabSwitcherBar,
     TabBarPosition? tabBarPosition,
     TabBarLayout? tabBarLayout,
-    QuickTabSwitcherMode? quickTabSwitcherMode,
+    TabBarStackingMode? tabBarStackingMode,
     bool? pullToRefreshEnabled,
     bool? useExternalDownloadManager,
     bool? doubleBackCloseTab,
@@ -281,6 +310,8 @@ class GeneralSettings with FastEquatable {
     bool? quickTabSwitcherShowTitles,
     int? quickTabSwitcherHierarchyGlyphs,
     bool? quickTabSwitcherShowHistorySuggestions,
+    double? quickTabSwitcherTitleWidth,
+    bool? quickTabSwitcherShowCloseButtonOnAllTabs,
     String? syncServerOverride,
     String? syncTokenServerOverride,
     bool? urlCleanerEnabled,
@@ -332,11 +363,9 @@ class GeneralSettings with FastEquatable {
            historyAutoCleanInterval ?? const Duration(days: 90),
        tabViewBottomSheet = tabViewBottomSheet ?? false,
        tabBarShowContextualBar = tabBarShowContextualBar ?? true,
-       tabBarShowQuickTabSwitcherBar = tabBarShowQuickTabSwitcherBar ?? true,
        tabBarPosition = tabBarPosition ?? TabBarPosition.bottom,
        tabBarLayout = tabBarLayout ?? TabBarLayout.compact,
-       quickTabSwitcherMode =
-           quickTabSwitcherMode ?? QuickTabSwitcherMode.lastUsedTabs,
+       tabBarStackingMode = tabBarStackingMode ?? TabBarStackingMode.accordion,
        pullToRefreshEnabled = pullToRefreshEnabled ?? true,
        useExternalDownloadManager = useExternalDownloadManager ?? false,
        doubleBackCloseTab = doubleBackCloseTab ?? true,
@@ -351,6 +380,10 @@ class GeneralSettings with FastEquatable {
            defaultQuickTabSwitcherHierarchyGlyphs,
        quickTabSwitcherShowHistorySuggestions =
            quickTabSwitcherShowHistorySuggestions ?? true,
+       quickTabSwitcherTitleWidth =
+           quickTabSwitcherTitleWidth ?? defaultQuickTabSwitcherTitleWidth,
+       quickTabSwitcherShowCloseButtonOnAllTabs =
+           quickTabSwitcherShowCloseButtonOnAllTabs ?? false,
        syncServerOverride = syncServerOverride ?? '',
        syncTokenServerOverride = syncTokenServerOverride ?? '',
        urlCleanerEnabled = urlCleanerEnabled ?? true,
@@ -394,6 +427,24 @@ class GeneralSettings with FastEquatable {
       json.putIfAbsent('tabListDirection', () => mapped);
       json.putIfAbsent('tabBarDirection', () => mapped);
     }
+
+    // Migrate the legacy `tabBarShowQuickTabSwitcherBar` toggle and
+    // `quickTabSwitcherMode` selection to the merged `tabBarStackingMode`.
+    // The legacy mode names are a subset of the new enum's, so values map
+    // verbatim.
+    // TODO: Drop this fallback (and the legacy rows in the user settings DB)
+    // once enough releases have shipped that rolling back to a version
+    // without `tabBarStackingMode` is no longer a concern.
+    final legacyShowSwitcherBar = json['tabBarShowQuickTabSwitcherBar'];
+    final legacySwitcherMode = json['quickTabSwitcherMode'];
+    if (json['tabBarStackingMode'] == null) {
+      if (legacyShowSwitcherBar == false) {
+        json['tabBarStackingMode'] = 'disabled';
+      } else if (legacySwitcherMode != null) {
+        json['tabBarStackingMode'] = legacySwitcherMode;
+      }
+    }
+
     return _$GeneralSettingsFromJson(json);
   }
 
@@ -421,12 +472,18 @@ class GeneralSettings with FastEquatable {
     return tabIntentOpenSetting;
   }
 
-  QuickTabSwitcherMode effectiveUiQuickTabSwitcherMode() {
+  /// Container-dependent stacking modes degrade to a single recently-used
+  /// row when the container UI is disabled.
+  TabBarStackingMode effectiveTabBarStackingMode() {
     if (!showContainerUi &&
-        quickTabSwitcherMode == QuickTabSwitcherMode.containerTabs) {
-      return QuickTabSwitcherMode.lastUsedTabs;
+        const {
+          TabBarStackingMode.containerTabs,
+          TabBarStackingMode.accordion,
+          TabBarStackingMode.twoLevel,
+        }.contains(tabBarStackingMode)) {
+      return TabBarStackingMode.lastUsedTabs;
     }
-    return quickTabSwitcherMode;
+    return tabBarStackingMode;
   }
 
   @override
@@ -456,10 +513,9 @@ class GeneralSettings with FastEquatable {
     historyAutoCleanInterval,
     tabViewBottomSheet,
     tabBarShowContextualBar,
-    tabBarShowQuickTabSwitcherBar,
     tabBarPosition,
     tabBarLayout,
-    quickTabSwitcherMode,
+    tabBarStackingMode,
     pullToRefreshEnabled,
     useExternalDownloadManager,
     doubleBackCloseTab,
@@ -470,6 +526,8 @@ class GeneralSettings with FastEquatable {
     quickTabSwitcherShowTitles,
     quickTabSwitcherHierarchyGlyphs,
     quickTabSwitcherShowHistorySuggestions,
+    quickTabSwitcherTitleWidth,
+    quickTabSwitcherShowCloseButtonOnAllTabs,
     syncServerOverride,
     syncTokenServerOverride,
     urlCleanerEnabled,

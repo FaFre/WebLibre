@@ -25,13 +25,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:nullability/nullability.dart';
-import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/addons/presentation/widgets/pinned_addon_bar.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
+import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
@@ -41,12 +40,12 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_view_reorder.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_accordion.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_chip.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_context_menu_draggable.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_depth_indicator.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
@@ -60,14 +59,17 @@ import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
+import 'package:weblibre/presentation/hooks/scroll_to_active_chip.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
-import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
+
+export 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_chip.dart'
+    show QuickTabSwitcherItem;
 
 class BrowserTopAppBar extends StatelessWidget {
   final bool showMainToolbar;
   final bool showContextualToolbar;
-  final bool showQuickTabSwitcherBar;
+  final int quickTabSwitcherRowCount;
   final bool isSmallWebMode;
   final bool enableGestures;
 
@@ -78,7 +80,7 @@ class BrowserTopAppBar extends StatelessWidget {
     super.key,
     required this.showMainToolbar,
     required this.showContextualToolbar,
-    required this.showQuickTabSwitcherBar,
+    required this.quickTabSwitcherRowCount,
     required this.isSmallWebMode,
     this.enableGestures = true,
   }) {
@@ -86,7 +88,7 @@ class BrowserTopAppBar extends StatelessWidget {
       showMainToolbar: showMainToolbar,
       displayedSheet: null,
       showContextualToolbar: false,
-      showQuickTabSwitcherBar: false,
+      quickTabSwitcherRowCount: 0,
       isSmallWebMode: isSmallWebMode,
       enableGestures: enableGestures,
       hideMainToolbarButtonsDuplicatedInContextualToolbar:
@@ -107,7 +109,7 @@ class BrowserTopAppBar extends StatelessWidget {
 class BrowserBottomAppBar extends StatelessWidget {
   final bool showMainToolbar;
   final bool showContextualToolbar;
-  final bool showQuickTabSwitcherBar;
+  final int quickTabSwitcherRowCount;
   final bool isSmallWebMode;
   final Sheet? displayedSheet;
   final bool enableGestures;
@@ -120,7 +122,7 @@ class BrowserBottomAppBar extends StatelessWidget {
     required this.showMainToolbar,
     required this.displayedSheet,
     required this.showContextualToolbar,
-    required this.showQuickTabSwitcherBar,
+    required this.quickTabSwitcherRowCount,
     required this.isSmallWebMode,
     this.enableGestures = true,
   }) {
@@ -128,7 +130,7 @@ class BrowserBottomAppBar extends StatelessWidget {
       displayedSheet: displayedSheet,
       showMainToolbar: showMainToolbar,
       showContextualToolbar: showContextualToolbar,
-      showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+      quickTabSwitcherRowCount: quickTabSwitcherRowCount,
       isSmallWebMode: isSmallWebMode,
       enableGestures: enableGestures,
       hideMainToolbarButtonsDuplicatedInContextualToolbar:
@@ -139,12 +141,14 @@ class BrowserBottomAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    final colorScheme = Theme.of(context).colorScheme;
 
     return Material(
       shadowColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
-      color: colorScheme.surfaceContainer,
+      // Transparent so the navigation-bar inset region behind this padding is
+      // filled by the BrowserSystemBars tint strip (matching the active
+      // container color), instead of a fixed surfaceContainer fill.
+      color: Colors.transparent,
       child: Padding(
         padding: EdgeInsets.only(bottom: bottomPadding),
         child: SizedBox(height: _size.height, child: _tabBar),
@@ -158,7 +162,7 @@ class BrowserBottomAppBar extends StatelessWidget {
 class BrowserTabBar extends HookConsumerWidget {
   final bool showMainToolbar;
   final bool showContextualToolbar;
-  final bool showQuickTabSwitcherBar;
+  final int quickTabSwitcherRowCount;
   final Sheet? displayedSheet;
   final bool hideMainToolbarButtonsDuplicatedInContextualToolbar;
   final bool isSmallWebMode;
@@ -169,7 +173,7 @@ class BrowserTabBar extends HookConsumerWidget {
     required this.showMainToolbar,
     required this.displayedSheet,
     required this.showContextualToolbar,
-    required this.showQuickTabSwitcherBar,
+    required this.quickTabSwitcherRowCount,
     required this.isSmallWebMode,
     required this.enableGestures,
     this.hideMainToolbarButtonsDuplicatedInContextualToolbar = false,
@@ -183,7 +187,7 @@ class BrowserTabBar extends HookConsumerWidget {
       (!showContextualToolbar || displayedSheet is! ViewTabsSheet);
 
   bool get displayQuickTabSwitcher =>
-      showQuickTabSwitcherBar && displayedSheet is! ViewTabsSheet;
+      quickTabSwitcherRowCount > 0 && displayedSheet is! ViewTabsSheet;
 
   double getToolbarHeight() {
     var height = 0.0;
@@ -197,7 +201,7 @@ class BrowserTabBar extends HookConsumerWidget {
     }
 
     if (displayQuickTabSwitcher) {
-      height += quickTabSwitcherHeight;
+      height += quickTabSwitcherHeight * quickTabSwitcherRowCount;
     }
 
     return height;
@@ -242,7 +246,7 @@ class BrowserTabBar extends HookConsumerWidget {
       ).select((data) => data.value?.metadata.useCustomColor ?? false),
     );
 
-    final quickTabSwitcherMode = settings.effectiveUiQuickTabSwitcherMode();
+    final stackingMode = settings.effectiveTabBarStackingMode();
 
     final tabBarPosition = settings.tabBarPosition;
 
@@ -269,7 +273,7 @@ class BrowserTabBar extends HookConsumerWidget {
     return BrowserTabBarView(
       showMainToolbar: showMainToolbar,
       showContextualToolbar: showContextualToolbar,
-      showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+      showQuickTabSwitcherBar: quickTabSwitcherRowCount > 0,
       displayAppBar: displayAppBar,
       displayQuickTabSwitcher: displayQuickTabSwitcher,
       backgroundColor: effectiveContainerPalette?.surfaceColor,
@@ -308,9 +312,30 @@ class BrowserTabBar extends HookConsumerWidget {
         if (showMainToolbarNavigationButton)
           NavigationMenuButton(selectedTabId: selectedTabId),
       ],
-      quickTabSwitcher: QuickTabSwitcher(
-        quickTabSwitcherMode: quickTabSwitcherMode,
-      ),
+      quickTabSwitcher: switch (stackingMode) {
+        TabBarStackingMode.disabled => const SizedBox.shrink(),
+        TabBarStackingMode.lastUsedTabs => const QuickTabSwitcher(
+          quickTabSwitcherMode: QuickTabSwitcherMode.lastUsedTabs,
+        ),
+        TabBarStackingMode.containerTabs => const QuickTabSwitcher(
+          quickTabSwitcherMode: QuickTabSwitcherMode.containerTabs,
+        ),
+        TabBarStackingMode.accordion => const AccordionQuickTabSwitcher(),
+        // History fallback only on the MRU row, so empty-state history
+        // chips don't show twice.
+        TabBarStackingMode.twoLevel => const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            QuickTabSwitcher(
+              quickTabSwitcherMode: QuickTabSwitcherMode.containerTabs,
+              enableHistoryFallback: false,
+            ),
+            QuickTabSwitcher(
+              quickTabSwitcherMode: QuickTabSwitcherMode.lastUsedTabs,
+            ),
+          ],
+        ),
+      },
       contextualToolbar: ContextualToolbar(
         selectedTabId: selectedTabId,
         displayedSheet: displayedSheet,
@@ -472,107 +497,19 @@ class BrowserTabBarView extends StatelessWidget {
   }
 }
 
-class QuickTabSwitcherItem with FastEquatable {
-  final Color? color;
-  final bool useCustomColor;
-  final String id;
-  final bool isActive;
-  final TabMode tabMode;
-  final bool isHistory;
-  final bool isPinned;
-  final bool isSandbox;
-  final int depth;
-  final String title;
-  final Uri url;
-  final Widget avatar;
-
-  QuickTabSwitcherItem({
-    required this.color,
-    required this.id,
-    required this.isActive,
-    required this.tabMode,
-    required this.isHistory,
-    required this.isPinned,
-    required this.title,
-    required this.url,
-    required this.avatar,
-    this.useCustomColor = false,
-    this.isSandbox = false,
-    this.depth = 0,
-  });
-
-  /// Builds a switcher entry for an open tab. [sandboxSourceUri] is the
-  /// canonical source URL when the tab is a sandbox capture (otherwise null),
-  /// so the bar shows the real site instead of the loopback capture URL.
-  factory QuickTabSwitcherItem.tab(
-    TabStateWithContainer state, {
-    required String? selectedTabId,
-    required Set<String> pinnedTabIds,
-    required Map<String, int> tabDepthById,
-    required Uri? sandboxSourceUri,
-  }) {
-    final (tab, container) = state;
-
-    return QuickTabSwitcherItem(
-      color: container?.color,
-      useCustomColor: container?.metadata.useCustomColor ?? false,
-      id: tab.id,
-      isActive: tab.id == selectedTabId,
-      title: sandboxSourceUri != null && tab.title.isEmpty
-          ? sandboxSourceUri.authority
-          : tab.titleOrAuthority,
-      tabMode: tab.tabMode,
-      isHistory: false,
-      isPinned: pinnedTabIds.contains(tab.id),
-      isSandbox: sandboxSourceUri != null,
-      depth: tabDepthById[tab.id] ?? 0,
-      url: sandboxSourceUri ?? tab.url,
-      avatar: TabIcon(tabState: tab, iconSize: 20),
-    );
-  }
-
-  /// Builds a switcher entry for a history suggestion (shown only when there
-  /// are no open tabs in the active mode).
-  factory QuickTabSwitcherItem.history({
-    required String url,
-    required String? title,
-  }) {
-    final parsedUrl = Uri.parse(url);
-
-    return QuickTabSwitcherItem(
-      color: null,
-      id: url,
-      isActive: false,
-      title: title ?? parsedUrl.authority,
-      tabMode: TabMode.regular,
-      isHistory: true,
-      isPinned: false,
-      url: parsedUrl,
-      avatar: UrlIcon([parsedUrl], iconSize: 20),
-    );
-  }
-
-  @override
-  List<Object?> get hashParameters => [
-    color,
-    useCustomColor,
-    id,
-    isActive,
-    tabMode,
-    isHistory,
-    isPinned,
-    isSandbox,
-    depth,
-    title,
-    url,
-    avatar,
-  ];
-}
-
 class QuickTabSwitcher extends HookConsumerWidget {
   final QuickTabSwitcherMode quickTabSwitcherMode;
 
-  const QuickTabSwitcher({super.key, required this.quickTabSwitcherMode});
+  /// Whether the row falls back to history suggestion chips when it has no
+  /// open tabs. Disabled for the top row in two-level stacking so history
+  /// chips don't show twice.
+  final bool enableHistoryFallback;
+
+  const QuickTabSwitcher({
+    super.key,
+    required this.quickTabSwitcherMode,
+    this.enableHistoryFallback = true,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -584,9 +521,14 @@ class QuickTabSwitcher extends HookConsumerWidget {
         (s) => s.quickTabSwitcherShowTitles,
       ),
     );
-    final effectiveMode = ref.watch(
+    final titleMaxWidth = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.effectiveUiQuickTabSwitcherMode(),
+        (s) => s.quickTabSwitcherTitleWidth,
+      ),
+    );
+    final showCloseButtonOnAllTabs = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.quickTabSwitcherShowCloseButtonOnAllTabs,
       ),
     );
     final tabBarDirection = ref.watch(
@@ -596,9 +538,15 @@ class QuickTabSwitcher extends HookConsumerWidget {
       quickTabSwitcherTabStatesProvider(quickTabSwitcherMode),
     );
     final selectedTabId = ref.watch(selectedTabProvider);
-    final historySuggestions = ref
-        .watch(quickTabSwitcherHistorySuggestionsProvider(quickTabSwitcherMode))
-        .value;
+    final historySuggestions = enableHistoryFallback
+        ? ref
+              .watch(
+                quickTabSwitcherHistorySuggestionsProvider(
+                  quickTabSwitcherMode,
+                ),
+              )
+              .value
+        : null;
     final sandboxCaptureMap =
         ref.watch(sandboxCaptureMapProvider).value ?? const {};
     // Reorder is only meaningful when the bar renders the user's actual tab
@@ -616,7 +564,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
     final showHierarchicalTabs = hierarchyGlyphs > 0;
     final selectedContainerId = ref.watch(selectedContainerProvider);
     final hierarchyContainerId =
-        effectiveMode == QuickTabSwitcherMode.containerTabs
+        quickTabSwitcherMode == QuickTabSwitcherMode.containerTabs
         ? selectedContainerId
         : null;
 
@@ -639,8 +587,14 @@ class QuickTabSwitcher extends HookConsumerWidget {
         (value) => value.value ?? const <String>{},
       ),
     );
-    final reorderEnabled =
-        effectiveMode == QuickTabSwitcherMode.containerTabs && canManualReorder;
+    final restoreComplete = ref.watch(browserRestoreCompleteProvider);
+    final nativeTabIds = ref
+        .watch(
+          tabStatesProvider.select(
+            (states) => EquatableValue(states.keys.toSet()),
+          ),
+        )
+        .value;
     final tabItems = tabStates.value
         .map(
           (state) => QuickTabSwitcherItem.tab(
@@ -651,9 +605,17 @@ class QuickTabSwitcher extends HookConsumerWidget {
             sandboxSourceUri: parseSandboxSource(
               sandboxCaptureMap[state.$1.id],
             ),
+            isPlaceholder:
+                !restoreComplete && !nativeTabIds.contains(state.$1.id),
           ),
         )
         .toList();
+    // Reorder is disabled while placeholders are present: the engine doesn't
+    // know those tabs yet, so a reorder couldn't be applied consistently.
+    final reorderEnabled =
+        quickTabSwitcherMode == QuickTabSwitcherMode.containerTabs &&
+        canManualReorder &&
+        !tabItems.any((item) => item.isPlaceholder);
     final historyItems = (historySuggestions ?? [])
         .map(
           (visit) =>
@@ -673,7 +635,6 @@ class QuickTabSwitcher extends HookConsumerWidget {
     final activeItemKey = useRef(GlobalKey());
     final isUserScrolling = useRef(false);
     final userScrollTimer = useRef<Timer?>(null);
-    final didRunInitialAutoScroll = useRef(false);
     final scrollKey = PageStorageKey(
       'quick_tab_switcher_${quickTabSwitcherMode.name}',
     );
@@ -682,61 +643,15 @@ class QuickTabSwitcher extends HookConsumerWidget {
       return userScrollTimer.value?.cancel;
     }, []);
 
-    useEffect(() {
-      if (isUserScrolling.value) return null;
-
-      final isInitialAutoScroll = !didRunInitialAutoScroll.value;
-      didRunInitialAutoScroll.value = true;
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (isInitialAutoScroll &&
-            chipScrollController.hasClients &&
-            chipScrollController.offset != 0) {
-          return;
-        }
-
-        final context = activeItemKey.value.currentContext;
-        if (context != null) {
-          unawaited(
-            Scrollable.ensureVisible(
-              context,
-              alignment: 0.5,
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeInOut,
-            ),
-          );
-        } else if (chipScrollController.hasClients) {
-          final activeIndex = availableItems.indexWhere(
-            (item) => item.id == selectedTabId,
-          );
-          if (activeIndex < 0) return;
-
-          final totalItems = availableItems.length;
-          final maxExtent = chipScrollController.position.maxScrollExtent;
-          if (totalItems > 0 && maxExtent > 0) {
-            chipScrollController.jumpTo(
-              (activeIndex / totalItems * maxExtent).clamp(0.0, maxExtent),
-            );
-
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              final retryContext = activeItemKey.value.currentContext;
-              if (retryContext != null) {
-                unawaited(
-                  Scrollable.ensureVisible(
-                    retryContext,
-                    alignment: 0.5,
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeInOut,
-                  ),
-                );
-              }
-            });
-          }
-        }
-      });
-
-      return null;
-    }, [selectedTabId]);
+    // Keep the active chip centered when the selection or ordering changes,
+    // even if it is far outside the lazily-built range.
+    useScrollToActiveChip<String>(
+      controller: chipScrollController,
+      activeChipKey: activeItemKey.value,
+      activeId: (activeItem?.isActive ?? false) ? activeItem?.id : null,
+      orderedIds: [for (final item in availableItems) item.id],
+      isUserScrolling: () => isUserScrolling.value,
+    );
 
     return NotificationListener<UserScrollNotification>(
       onNotification: (notification) {
@@ -765,7 +680,12 @@ class QuickTabSwitcher extends HookConsumerWidget {
         showTitles: showTitles,
         showIsolatedTabUi: showIsolatedTabUi,
         hierarchyGlyphs: hierarchyGlyphs,
-        enablePinTabInMenu: effectiveMode == QuickTabSwitcherMode.containerTabs,
+        titleMaxWidth: titleMaxWidth,
+        showCloseButtonOnAllTabs: showCloseButtonOnAllTabs,
+        enablePinTabInMenu:
+            quickTabSwitcherMode == QuickTabSwitcherMode.containerTabs,
+        onCloseItem: (item) =>
+            closeTabWithConfirmationAndUndo(context, ref, item.id),
         onSelected: (item) async {
           if (!item.isHistory && item.isActive) {
             return;
@@ -837,8 +757,11 @@ class QuickTabSwitcherView extends StatelessWidget {
     required this.showTitles,
     required this.showIsolatedTabUi,
     this.hierarchyGlyphs = defaultQuickTabSwitcherHierarchyGlyphs,
+    this.titleMaxWidth = defaultQuickTabSwitcherTitleWidth,
+    this.showCloseButtonOnAllTabs = false,
     required this.enablePinTabInMenu,
     required this.onSelected,
+    this.onCloseItem,
     this.onReorderItem,
     this.reorderableItemCount = 0,
   });
@@ -855,8 +778,19 @@ class QuickTabSwitcherView extends StatelessWidget {
   /// into an icon + count badge. A value of 0 hides the indicator entirely.
   final int hierarchyGlyphs;
 
+  /// Max width of a chip's title text.
+  final double titleMaxWidth;
+
+  /// Whether every tab chip shows a close button. The active tab's chip
+  /// always shows one when [onCloseItem] is set.
+  final bool showCloseButtonOnAllTabs;
+
   final bool enablePinTabInMenu;
   final Future<void> Function(QuickTabSwitcherItem item) onSelected;
+
+  /// Close handler backing the chips' close buttons. When null no close
+  /// buttons are shown at all.
+  final Future<void> Function(QuickTabSwitcherItem item)? onCloseItem;
 
   /// When non-null, the first [reorderableItemCount] items are rendered as a
   /// horizontal `ReorderableListView` driven by this callback. Otherwise the
@@ -869,10 +803,19 @@ class QuickTabSwitcherView extends StatelessWidget {
 
   bool get _reorderEnabled => onReorderItem != null && reorderableItemCount > 0;
 
+  /// Whether [item]'s chip shows a close button.
+  bool _canShowCloseButton(QuickTabSwitcherItem item) =>
+      onCloseItem != null &&
+      !item.isHistory &&
+      !item.isPlaceholder &&
+      (showCloseButtonOnAllTabs || item.isActive);
+
   @override
   Widget build(BuildContext context) {
     if (availableItems.isEmpty) {
-      return const SizedBox.shrink();
+      // Hold the 48px row slot: in two-level stacking an empty row must not
+      // collapse, since the toolbar height already accounts for both rows.
+      return const SizedBox(height: 48);
     }
 
     return Padding(
@@ -889,7 +832,7 @@ class QuickTabSwitcherView extends StatelessWidget {
 
   Widget _buildSelectableChips(BuildContext context) {
     return SelectableChips<QuickTabSwitcherItem, QuickTabSwitcherItem, String>(
-      enableDelete: false,
+      enableDelete: onCloseItem != null,
       sortSelectedFirst: false,
       maxCount: null,
       scrollController: scrollController,
@@ -902,8 +845,11 @@ class QuickTabSwitcherView extends StatelessWidget {
       decoration: _chipDecoration(context),
       itemLabel: (item) => _chipLabel(context, item, activeItem?.id == item.id),
       onSelected: onSelected,
+      onDeleted: (item) {
+        unawaited(onCloseItem?.call(item));
+      },
       itemWrap: (child, item) =>
-          item.isHistory ? child : _wrapWithMenu(itemId: item.id, child: child),
+          item.isHistory ? child : _wrapWithMenu(item: item, child: child),
       availableItems: availableItems,
     );
   }
@@ -928,15 +874,14 @@ class QuickTabSwitcherView extends StatelessWidget {
       itemBuilder: (context, index) {
         final item = availableItems[index];
         final isSelected = activeItem?.id == item.id;
-        final chip = _ReorderableSwitcherChip(
+        final chip = QuickTabSwitcherChip(
           item: item,
           isSelected: isSelected,
-          showTitles: showTitles,
-          showIsolatedTabUi: showIsolatedTabUi,
           selectedBorderColor: Theme.of(context).colorScheme.primary,
           decoration: _chipDecoration(context),
           label: _chipLabel(context, item, isSelected),
           onTap: () => onSelected(item),
+          onDelete: _canShowCloseButton(item) ? () => onCloseItem!(item) : null,
         );
         final keyedForActive = isSelected && activeItemKey != null
             ? KeyedSubtree(key: activeItemKey, child: chip)
@@ -956,72 +901,26 @@ class QuickTabSwitcherView extends StatelessWidget {
     );
   }
 
-  Widget _wrapWithMenu({required String itemId, required Widget child}) {
-    return TabMenu(
-      selectedTabId: itemId,
-      enableFindInPage: false,
-      enableFetchFeeds: false,
-      enableDesktopMode: false,
-      enableReaderMode: false,
-      enableReloadButton: false,
-      enableNavigationButtons: false,
-      enableAddToHomeScreen: false,
+  Widget _wrapWithMenu({
+    required QuickTabSwitcherItem item,
+    required Widget child,
+  }) {
+    return wrapQuickTabSwitcherChipWithMenu(
+      itemId: item.id,
+      enabled: !item.isPlaceholder,
       enablePinTab: enablePinTabInMenu,
-      builder: (context, controller, _) {
-        return InkWell(
-          onLongPress: () {
-            if (controller.isOpen) {
-              controller.close();
-            } else {
-              controller.open();
-            }
-          },
-          child: child,
-        );
-      },
+      child: child,
     );
   }
 
   SelectableChipDecoration<QuickTabSwitcherItem> _chipDecoration(
     BuildContext context,
   ) {
-    return SelectableChipDecoration(
-      color: (item, isSelected) => switch (item.color) {
-        final color? when isSelected => ContainerColors.palette(
-          context,
-          color,
-          useCustomColor: item.useCustomColor,
-        ).selectedBackgroundColor,
-        final color? => ContainerColors.palette(
-          context,
-          color,
-          useCustomColor: item.useCustomColor,
-        ).backgroundColor,
-        null => null,
-      },
-      side: (item, isSelected) => switch (item.color) {
-        final color? when isSelected => ContainerColors.palette(
-          context,
-          color,
-          useCustomColor: item.useCustomColor,
-        ).selectedBorderSide,
-        final color? => ContainerColors.palette(
-          context,
-          color,
-          useCustomColor: item.useCustomColor,
-        ).borderSide,
-        null => null,
-      },
-      labelPadding: (item) =>
-          (!showTitles &&
-              !item.isHistory &&
-              !item.isPinned &&
-              !item.isSandbox &&
-              (item.depth == 0 || hierarchyGlyphs == 0) &&
-              item.tabMode is! PrivateTabMode &&
-              item.tabMode is! IsolatedTabMode)
-          ? EdgeInsets.zero
-          : null,
+    return buildQuickTabSwitcherChipDecoration(
+      context,
+      showTitles: showTitles,
+      hierarchyGlyphs: hierarchyGlyphs,
+      canDelete: _canShowCloseButton,
     );
   }
 
@@ -1030,145 +929,14 @@ class QuickTabSwitcherView extends StatelessWidget {
     QuickTabSwitcherItem item,
     bool isSelected,
   ) {
-    final appColors = AppColors.of(context);
-    final hasTitle = item.isHistory || showTitles;
-    final row = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (item.depth > 0 && hierarchyGlyphs > 0)
-          Padding(
-            padding: const EdgeInsets.only(right: 6.0),
-            child: TabDepthIndicator(
-              depth: item.depth,
-              height: 24.0,
-              iconSize: 14.0,
-              horizontalPadding: 4.0,
-              maxInlineGlyphs: hierarchyGlyphs,
-            ),
-          ),
-        Padding(
-          padding: EdgeInsets.only(right: hasTitle ? 6.0 : 0.0),
-          child: item.avatar,
-        ),
-        if (hasTitle)
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 64),
-            child: Text(item.title),
-          ),
-        if (showIsolatedTabUi && item.tabMode is IsolatedTabMode)
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Icon(
-              MdiIcons.snowflake,
-              color: appColors.isolatedTabTeal,
-              size: 20,
-            ),
-          )
-        else if (item.tabMode is PrivateTabMode)
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Icon(
-              MdiIcons.dominoMask,
-              color: appColors.privateTabPurple,
-              size: 20,
-            ),
-          ),
-        if (item.isSandbox)
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Icon(
-              MdiIcons.archiveLockOutline,
-              color: Theme.of(context).colorScheme.tertiary,
-              size: 20,
-            ),
-          ),
-        if (item.isPinned)
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Icon(
-              MdiIcons.pin,
-              color: Theme.of(context).colorScheme.primary,
-              size: 20,
-            ),
-          ),
-        if (item.isHistory)
-          const Padding(
-            padding: EdgeInsets.only(left: 8.0),
-            child: Icon(MdiIcons.history, size: 20),
-          ),
-      ],
-    );
-
-    return item.color.mapNotNull(
-          (color) => DefaultTextStyle.merge(
-            style: TextStyle(
-              color: isSelected
-                  ? ContainerColors.palette(
-                      context,
-                      color,
-                      useCustomColor: item.useCustomColor,
-                    ).selectedForegroundColor
-                  : ContainerColors.palette(
-                      context,
-                      color,
-                      useCustomColor: item.useCustomColor,
-                    ).foregroundColor,
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            ),
-            child: row,
-          ),
-        ) ??
-        row;
-  }
-}
-
-/// FilterChip matching `SelectableChips`' visual contract, used in the
-/// reorderable render path. Stateless wrapper so the parent
-/// `ReorderableListView` can attach its drag-handle gesture recognizer.
-class _ReorderableSwitcherChip extends StatelessWidget {
-  final QuickTabSwitcherItem item;
-  final bool isSelected;
-  final bool showTitles;
-  final bool showIsolatedTabUi;
-  final Color selectedBorderColor;
-  final SelectableChipDecoration<QuickTabSwitcherItem> decoration;
-  final Widget label;
-  final Future<void> Function() onTap;
-
-  const _ReorderableSwitcherChip({
-    required this.item,
-    required this.isSelected,
-    required this.showTitles,
-    required this.showIsolatedTabUi,
-    required this.selectedBorderColor,
-    required this.decoration,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final itemColor = decoration.color?.call(item, isSelected);
-    final side =
-        decoration.side?.call(item, isSelected) ??
-        (isSelected
-            ? BorderSide(color: selectedBorderColor, width: 2.0)
-            : null);
-    final labelPadding = decoration.labelPadding?.call(item);
-
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0, top: 4.0),
-      child: FilterChip(
-        color: itemColor != null ? WidgetStatePropertyAll(itemColor) : null,
-        selected: false,
-        showCheckmark: false,
-        labelPadding: labelPadding,
-        onSelected: (_) {
-          unawaited(onTap());
-        },
-        label: label,
-        side: side,
-      ),
+    return buildQuickTabSwitcherChipLabel(
+      context,
+      item,
+      isSelected: isSelected,
+      showTitles: showTitles,
+      showIsolatedTabUi: showIsolatedTabUi,
+      hierarchyGlyphs: hierarchyGlyphs,
+      titleMaxWidth: titleMaxWidth,
     );
   }
 }

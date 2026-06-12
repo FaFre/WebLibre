@@ -47,6 +47,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/provid
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/addon_popup_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_fab.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_system_bars.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/draggable_fab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/view_tab.dart';
@@ -115,7 +116,13 @@ class _AnimatedToolbar extends HookWidget {
       );
     }, [position]);
 
-    return SlideTransition(position: slideAnimation, child: child);
+    // RepaintBoundary so the (heavy) toolbar content is rasterized once and
+    // merely re-composited at a new offset for each frame of the slide, instead
+    // of repainting the whole chip row + favicons + menus every animation tick.
+    return SlideTransition(
+      position: slideAnimation,
+      child: RepaintBoundary(child: child),
+    );
   }
 }
 
@@ -124,7 +131,7 @@ class _AnimatedToolbar extends HookWidget {
 class _TabBar extends HookConsumerWidget {
   final bool showMainToolbar;
   final bool showContextualToolbar;
-  final bool showQuickTabSwitcherBar;
+  final int quickTabSwitcherRowCount;
   final Stream<Offset>? pointerMoveEvents;
   final TabBarPosition tabBarPosition;
   final bool isSmallWebMode;
@@ -133,7 +140,7 @@ class _TabBar extends HookConsumerWidget {
   const _TabBar({
     required this.showMainToolbar,
     required this.showContextualToolbar,
-    required this.showQuickTabSwitcherBar,
+    required this.quickTabSwitcherRowCount,
     required this.tabBarPosition,
     required this.pointerMoveEvents,
     required this.isSmallWebMode,
@@ -220,7 +227,7 @@ class _TabBar extends HookConsumerWidget {
       TabBarPosition.top => BrowserTopAppBar(
         showMainToolbar: showMainToolbar,
         showContextualToolbar: showContextualToolbar,
-        showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+        quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         isSmallWebMode: isSmallWebMode,
         enableGestures: enableGestures,
       ),
@@ -228,7 +235,7 @@ class _TabBar extends HookConsumerWidget {
         displayedSheet: displayedSheet,
         showMainToolbar: showMainToolbar,
         showContextualToolbar: showContextualToolbar,
-        showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+        quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         isSmallWebMode: isSmallWebMode,
       ),
     };
@@ -527,23 +534,9 @@ class BrowserScreen extends HookConsumerWidget {
           ),
         );
 
-    final showQuickTabSwitcherBar =
-        !isSmallWebActive &&
-        ref.watch(
-          generalSettingsWithDefaultsProvider.select(
-            (value) => value.tabBarShowQuickTabSwitcherBar,
-          ),
-        );
-    final quickTabSwitcherMode = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (value) => value.effectiveUiQuickTabSwitcherMode(),
-      ),
-    );
-    final quickTabSwitcherHasResults = ref.watch(
-      quickTabSwitcherHasResultsProvider(quickTabSwitcherMode),
-    );
-    final displayQuickTabSwitcherBar =
-        showQuickTabSwitcherBar && (quickTabSwitcherHasResults.value ?? false);
+    final quickTabSwitcherRowCount = isSmallWebActive
+        ? 0
+        : ref.watch(quickTabSwitcherRowCountProvider).value ?? 0;
 
     final autoHideTabBar =
         !isSmallWebActive &&
@@ -652,7 +645,7 @@ class BrowserScreen extends HookConsumerWidget {
       bottomAppBarContentSize = BrowserBottomAppBar(
         showMainToolbar: tabBarPosition == TabBarPosition.bottom,
         showContextualToolbar: showContextualToolbar,
-        showQuickTabSwitcherBar: displayQuickTabSwitcherBar,
+        quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         isSmallWebMode: false,
         displayedSheet: displayedSheet,
       ).preferredSize;
@@ -666,7 +659,7 @@ class BrowserScreen extends HookConsumerWidget {
     final topAppBarContentSize = BrowserTopAppBar(
       showMainToolbar: tabBarPosition == TabBarPosition.top,
       showContextualToolbar: showContextualToolbar,
-      showQuickTabSwitcherBar: displayQuickTabSwitcherBar,
+      quickTabSwitcherRowCount: quickTabSwitcherRowCount,
       isSmallWebMode: isSmallWebActive,
       enableGestures: !isSmallWebActive,
     ).preferredSize;
@@ -919,6 +912,20 @@ class BrowserScreen extends HookConsumerWidget {
                 },
               ),
 
+              // Layer 0.5: System bar tint — fills the status-bar/nav-bar
+              // inset regions with the active container color (or the tab bar
+              // surface fallback) and drives the system bar icon brightness.
+              // Sits above the browser content but below the toolbars, so the
+              // tab bar's transparent safe-area padding reveals the bottom
+              // strip and the top toolbar's SafeArea reveals the top strip.
+              if (!tabInFullScreen)
+                Positioned.fill(
+                  child: BrowserSystemBars(
+                    topInset: topSafeArea,
+                    bottomInset: bottomSafeArea,
+                  ),
+                ),
+
               // Layer 1: Sheet (when displayed) - positioned above toolbar
               if (sheetDisplayed)
                 Positioned(
@@ -973,7 +980,7 @@ class BrowserScreen extends HookConsumerWidget {
                           showMainToolbar:
                               tabBarPosition == TabBarPosition.bottom,
                           showContextualToolbar: showContextualToolbar,
-                          showQuickTabSwitcherBar: displayQuickTabSwitcherBar,
+                          quickTabSwitcherRowCount: quickTabSwitcherRowCount,
                           isSmallWebMode: false,
                           pointerMoveEvents:
                               tabBarPosition == TabBarPosition.bottom
@@ -1012,7 +1019,7 @@ class BrowserScreen extends HookConsumerWidget {
                       tabBarPosition: TabBarPosition.top,
                       showMainToolbar: true,
                       showContextualToolbar: showContextualToolbar,
-                      showQuickTabSwitcherBar: displayQuickTabSwitcherBar,
+                      quickTabSwitcherRowCount: quickTabSwitcherRowCount,
                       isSmallWebMode: isSmallWebActive,
                       enableGestures: !isSmallWebActive,
                       pointerMoveEvents: isSmallWebActive

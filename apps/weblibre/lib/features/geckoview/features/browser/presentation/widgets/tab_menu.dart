@@ -36,6 +36,7 @@ import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/menu_item_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/tab_parent_picker.dart';
@@ -764,36 +765,8 @@ class TabMenu extends HookConsumerWidget {
           ),
         if (enableCloseTab)
           MenuItemButton(
-            onPressed: () async {
-              // Confirm before closing the last tab in an isolation group
-              final tabState = ref.read(tabStateProvider(selectedTabId));
-              if (tabState != null && tabState.tabMode is IsolatedTabMode) {
-                final allStates = ref.read(tabStatesProvider);
-                final groupCount = allStates.values
-                    .where(
-                      (s) =>
-                          s.isolationContextId == tabState.isolationContextId,
-                    )
-                    .length;
-                if (groupCount <= 1 && context.mounted) {
-                  final confirmed = await ui_helper.confirmIsolatedTabClose(
-                    context,
-                  );
-                  if (!confirmed) return;
-                }
-              }
-
-              await ref
-                  .read(tabRepositoryProvider.notifier)
-                  .closeTab(selectedTabId);
-
-              if (context.mounted) {
-                ui_helper.showTabUndoClose(
-                  context,
-                  ref.read(tabRepositoryProvider.notifier).undoClose,
-                );
-              }
-            },
+            onPressed: () =>
+                closeTabWithConfirmationAndUndo(context, ref, selectedTabId),
             leadingIcon: const Icon(MdiIcons.tabMinus),
             child: const Text('Close Tab'),
           ),

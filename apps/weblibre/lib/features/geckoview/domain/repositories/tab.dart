@@ -32,6 +32,8 @@ import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
+import 'package:weblibre/features/geckoview/domain/providers/pending_tab_selection.dart';
+import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
@@ -456,6 +458,14 @@ class TabRepository extends _$TabRepository {
   }
 
   Future<bool> selectTab(String tabId) async {
+    // The tab is still a pre-restore placeholder (known to the DB but not to
+    // the engine yet): queue the selection until the native state arrives.
+    if (!ref.read(browserRestoreCompleteProvider) &&
+        !ref.read(tabStatesProvider).containsKey(tabId)) {
+      ref.read(pendingTabSelectionProvider.notifier).queue(tabId);
+      return true;
+    }
+
     final containerData = await ref
         .read(tabDataRepositoryProvider.notifier)
         .getTabContainerData(tabId);
@@ -768,6 +778,18 @@ class TabRepository extends _$TabRepository {
     }
   }
 
+  Future<void> _drainPendingIsolationCleanup() async {
+    if (_pendingIsolationCleanup.isEmpty) return;
+
+    final pending = Set<String>.of(_pendingIsolationCleanup);
+    _pendingIsolationCleanup.clear();
+
+    for (final contextId in pending) {
+      if (!ref.mounted) break;
+      await _cleanupIsolationContextIfEmpty(contextId);
+    }
+  }
+
   Future<void> undoClose() {
     // Suppress the next reclose pass: undo can resurrect a tab whose
     // tombstone is still on disk (from a previous session); without this
@@ -1037,9 +1059,14 @@ class TabRepository extends _$TabRepository {
           return;
         }
 
-        //Only sync tabs if there has been a previous value or is not empty
+        //Only sync tabs if there has been a previous value or is not empty.
+        //Additionally require the native session restore to have completed:
+        //a partial pre-restore list (e.g. a share-intent tab arriving first)
+        //must not delete the cached rows of tabs that are still being
+        //restored.
         final shouldSyncTabs =
-            next.value.isNotEmpty || (previous?.value.isNotEmpty ?? false);
+            ref.read(browserRestoreCompleteProvider) &&
+            (next.value.isNotEmpty || (previous?.value.isNotEmpty ?? false));
 
         if (shouldSyncTabs) {
           final syncTabsResult = await db.tabDao.syncTabs(
@@ -1054,14 +1081,7 @@ class TabRepository extends _$TabRepository {
 
         // Process pending isolation context cleanups after syncTabs
         // has deleted the rows, so the count check is accurate.
-        if (_pendingIsolationCleanup.isNotEmpty) {
-          final pending = Set<String>.of(_pendingIsolationCleanup);
-          _pendingIsolationCleanup.clear();
-          for (final contextId in pending) {
-            if (!ref.mounted) break;
-            await _cleanupIsolationContextIfEmpty(contextId);
-          }
-        }
+        await _drainPendingIsolationCleanup();
 
         // One-shot orphan cleanup after tab list stabilizes (5s debounce).
         // Also runs for DB-only contexts whose rows were already deleted
@@ -1083,6 +1103,26 @@ class TabRepository extends _$TabRepository {
         );
       },
     );
+
+    // Catch up on the tab list emissions skipped while the restore-complete
+    // gate above was closed: reconcile the DB once against the current list.
+    ref.listen(browserRestoreCompleteProvider, (
+      previous,
+      restoreComplete,
+    ) async {
+      if (restoreComplete && !(previous ?? false)) {
+        final currentTabs = ref.read(tabListProvider).value;
+        if (currentTabs.isNotEmpty) {
+          final syncTabsResult = await db.tabDao.syncTabs(
+            retainTabIds: currentTabs,
+          );
+          _pendingIsolationCleanup.addAll(
+            syncTabsResult.deletedIsolationContextIds,
+          );
+          await _drainPendingIsolationCleanup();
+        }
+      }
+    });
 
     final tabStateDebouncer = Debouncer(const Duration(seconds: 1));
     Map<String, TabState>? debounceStartValue;

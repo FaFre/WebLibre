@@ -7829,7 +7829,7 @@ interface GeckoSessionApi {
 }
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoTabsApi {
-  fun syncEvents(onSelectedTabChange: Boolean, onTabListChange: Boolean, onTabContentStateChange: Boolean, onIconChange: Boolean, onSecurityInfoStateChange: Boolean, onReaderableStateChange: Boolean, onHistoryStateChange: Boolean, onFindResults: Boolean, onThumbnailChange: Boolean, onBrowserExtensionsChange: Boolean, onPageExtensionsChange: Boolean, onBrowserExtensionIcons: Boolean, onPageExtensionIcons: Boolean, onTranslationStateChange: Boolean)
+  fun syncEvents(onSelectedTabChange: Boolean, onTabListChange: Boolean, onRestoreComplete: Boolean, onTabContentStateChange: Boolean, onIconChange: Boolean, onSecurityInfoStateChange: Boolean, onReaderableStateChange: Boolean, onHistoryStateChange: Boolean, onFindResults: Boolean, onThumbnailChange: Boolean, onBrowserExtensionsChange: Boolean, onPageExtensionsChange: Boolean, onBrowserExtensionIcons: Boolean, onPageExtensionIcons: Boolean, onTranslationStateChange: Boolean)
   fun selectTab(tabId: String)
   fun removeTab(tabId: String)
   fun addTab(url: String, selectTab: Boolean, startLoading: Boolean, parentId: String?, flags: LoadUrlFlagsValue, contextId: String?, source: SourceValue, private: Boolean, historyMetadata: HistoryMetadataKey?, additionalHeaders: Map<String, String>?): String
@@ -7867,20 +7867,21 @@ interface GeckoTabsApi {
             val args = message as List<Any?>
             val onSelectedTabChangeArg = args[0] as Boolean
             val onTabListChangeArg = args[1] as Boolean
-            val onTabContentStateChangeArg = args[2] as Boolean
-            val onIconChangeArg = args[3] as Boolean
-            val onSecurityInfoStateChangeArg = args[4] as Boolean
-            val onReaderableStateChangeArg = args[5] as Boolean
-            val onHistoryStateChangeArg = args[6] as Boolean
-            val onFindResultsArg = args[7] as Boolean
-            val onThumbnailChangeArg = args[8] as Boolean
-            val onBrowserExtensionsChangeArg = args[9] as Boolean
-            val onPageExtensionsChangeArg = args[10] as Boolean
-            val onBrowserExtensionIconsArg = args[11] as Boolean
-            val onPageExtensionIconsArg = args[12] as Boolean
-            val onTranslationStateChangeArg = args[13] as Boolean
+            val onRestoreCompleteArg = args[2] as Boolean
+            val onTabContentStateChangeArg = args[3] as Boolean
+            val onIconChangeArg = args[4] as Boolean
+            val onSecurityInfoStateChangeArg = args[5] as Boolean
+            val onReaderableStateChangeArg = args[6] as Boolean
+            val onHistoryStateChangeArg = args[7] as Boolean
+            val onFindResultsArg = args[8] as Boolean
+            val onThumbnailChangeArg = args[9] as Boolean
+            val onBrowserExtensionsChangeArg = args[10] as Boolean
+            val onPageExtensionsChangeArg = args[11] as Boolean
+            val onBrowserExtensionIconsArg = args[12] as Boolean
+            val onPageExtensionIconsArg = args[13] as Boolean
+            val onTranslationStateChangeArg = args[14] as Boolean
             val wrapped: List<Any?> = try {
-              api.syncEvents(onSelectedTabChangeArg, onTabListChangeArg, onTabContentStateChangeArg, onIconChangeArg, onSecurityInfoStateChangeArg, onReaderableStateChangeArg, onHistoryStateChangeArg, onFindResultsArg, onThumbnailChangeArg, onBrowserExtensionsChangeArg, onPageExtensionsChangeArg, onBrowserExtensionIconsArg, onPageExtensionIconsArg, onTranslationStateChangeArg)
+              api.syncEvents(onSelectedTabChangeArg, onTabListChangeArg, onRestoreCompleteArg, onTabContentStateChangeArg, onIconChangeArg, onSecurityInfoStateChangeArg, onReaderableStateChangeArg, onHistoryStateChangeArg, onFindResultsArg, onThumbnailChangeArg, onBrowserExtensionsChangeArg, onPageExtensionsChangeArg, onBrowserExtensionIconsArg, onPageExtensionIconsArg, onTranslationStateChangeArg)
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
@@ -8993,6 +8994,27 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onSelectedTabChange$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
     channel.send(listOf(sequenceArg, idArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  /**
+   * Mirrors `BrowserState.restoreComplete`: false until the native session
+   * restore has dispatched all persisted tabs into the store.
+   */
+  fun onRestoreCompleteChange(sequenceArg: Long, restoreCompleteArg: Boolean, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onRestoreCompleteChange$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg, restoreCompleteArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))

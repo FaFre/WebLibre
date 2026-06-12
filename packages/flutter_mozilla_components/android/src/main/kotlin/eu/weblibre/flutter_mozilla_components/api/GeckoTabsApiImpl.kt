@@ -178,6 +178,7 @@ class GeckoTabsApiImpl : GeckoTabsApi {
     override fun syncEvents(
         onSelectedTabChange: Boolean,
         onTabListChange: Boolean,
+        onRestoreComplete: Boolean,
         onTabContentStateChange: Boolean,
         onIconChange: Boolean,
         onSecurityInfoStateChange: Boolean,
@@ -206,6 +207,13 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                 components.flutterEvents.onTabListChange(
                     EventSequence.next(),
                     tabs.map { it.id }) { }
+            }
+
+            if (onRestoreComplete) {
+                components.flutterEvents.onRestoreCompleteChange(
+                    EventSequence.next(),
+                    components.core.store.state.restoreComplete
+                ) { }
             }
 
             tabs.forEach { tab ->

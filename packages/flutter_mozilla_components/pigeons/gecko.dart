@@ -1661,6 +1661,7 @@ abstract class GeckoTabsApi {
   void syncEvents({
     required bool onSelectedTabChange,
     required bool onTabListChange,
+    required bool onRestoreComplete,
     required bool onTabContentStateChange,
     required bool onIconChange,
     required bool onSecurityInfoStateChange,
@@ -1996,6 +1997,10 @@ abstract class GeckoStateEvents {
 
   void onTabListChange(int sequence, List<String> tabIds);
   void onSelectedTabChange(int sequence, String? id);
+
+  /// Mirrors `BrowserState.restoreComplete`: false until the native session
+  /// restore has dispatched all persisted tabs into the store.
+  void onRestoreCompleteChange(int sequence, bool restoreComplete);
 
   void onTabContentStateChange(int sequence, TabContentState state);
   void onHistoryStateChange(int sequence, String id, HistoryState state);

@@ -568,10 +568,13 @@ class _ShowContainerUiTile extends HookConsumerWidget {
         ) {
           var updated = currentSettings.copyWith.showContainerUi(value);
           if (!value &&
-              updated.quickTabSwitcherMode ==
-                  QuickTabSwitcherMode.containerTabs) {
-            updated = updated.copyWith.quickTabSwitcherMode(
-              QuickTabSwitcherMode.lastUsedTabs,
+              const {
+                TabBarStackingMode.containerTabs,
+                TabBarStackingMode.accordion,
+                TabBarStackingMode.twoLevel,
+              }.contains(updated.tabBarStackingMode)) {
+            updated = updated.copyWith.tabBarStackingMode(
+              TabBarStackingMode.lastUsedTabs,
             );
           }
           return updated;

@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
@@ -28,6 +29,7 @@ class UrlListTile extends StatelessWidget {
   final Widget? leading;
   final Widget? trailing;
   final Color? containerColor;
+  final IconData? containerIcon;
   final bool useCustomColor;
   final bool showHttpScheme;
   final VoidCallback? onTap;
@@ -39,12 +41,14 @@ class UrlListTile extends StatelessWidget {
     this.leading,
     this.trailing,
     this.containerColor,
+    this.containerIcon,
     this.useCustomColor = false,
     this.showHttpScheme = true,
     this.onTap,
   });
 
   static const iconSize = 32.0;
+  static const _badgeWidth = 56.0;
   static const _borderRadius = BorderRadius.all(Radius.circular(12.0));
 
   @override
@@ -75,51 +79,91 @@ class UrlListTile extends StatelessWidget {
         child: InkWell(
           borderRadius: _borderRadius,
           onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.only(
-              left: 12.0,
-              top: 10.0,
-              bottom: 10.0,
-              right: 12.0,
-            ),
-            child: Row(
-              children: [
-                leading ??
-                    RepaintBoundary(child: UrlIcon([uri], iconSize: iconSize)),
-                const SizedBox(width: 14.0),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+          child: Stack(
+            children: [
+              Padding(
+                padding: EdgeInsets.only(
+                  left: 12.0,
+                  top: 10.0,
+                  bottom: 10.0,
+                  // Reserve room for the trailing badge so content never
+                  // slides underneath it.
+                  right: containerPalette != null ? _badgeWidth + 12.0 : 12.0,
+                ),
+                child: Row(
+                  children: [
+                    leading ??
+                        RepaintBoundary(
+                          child: UrlIcon([uri], iconSize: iconSize),
                         ),
+                    const SizedBox(width: 14.0),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 3.0),
+                          UriBreadcrumb(
+                            uri: uri,
+                            showHttpScheme: showHttpScheme,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 3.0),
-                      UriBreadcrumb(
-                        uri: uri,
-                        showHttpScheme: showHttpScheme,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
+                    ),
+                    if (trailing != null) ...[
+                      const SizedBox(width: 8.0),
+                      trailing!,
                     ],
+                  ],
+                ),
+              ),
+              // Stretches to the card height set by the content above without
+              // the extra layout pass an IntrinsicHeight Row would cost.
+              if (containerPalette != null)
+                Positioned(
+                  top: 0.0,
+                  bottom: 0.0,
+                  right: 0.0,
+                  width: _badgeWidth,
+                  child: _ContainerBadge(
+                    palette: containerPalette,
+                    icon: resolveContainerIcon(containerIcon),
                   ),
                 ),
-                if (trailing != null) ...[
-                  const SizedBox(width: 8.0),
-                  trailing!,
-                ],
-              ],
-            ),
+            ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Trailing accent-coloured strip flush against the card's right edge that
+/// surfaces the owning container's identity (its colour and icon).
+class _ContainerBadge extends StatelessWidget {
+  final ContainerColorPalette palette;
+  final IconData icon;
+
+  const _ContainerBadge({required this.palette, required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: UrlListTile._badgeWidth,
+      alignment: Alignment.center,
+      color: palette.accentColor,
+      child: Icon(icon, size: 22.0, color: palette.onAccentColor),
     );
   }
 }

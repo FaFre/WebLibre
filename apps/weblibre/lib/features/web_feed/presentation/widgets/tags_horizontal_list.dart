@@ -19,6 +19,7 @@
  */
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_category.dart';
 
@@ -61,10 +62,9 @@ class TagsHorizontalList extends StatelessWidget {
         fadingSize: 15,
         builder: (context, controller) {
           return ListView.builder(
+            scrollCacheExtent: const ScrollCacheExtent.pixels(0),
             itemCount: _tags.length,
             controller: controller,
-            //Improve list performance by not rendering outside screen at all
-            cacheExtent: 0,
             scrollDirection: Axis.horizontal,
             itemBuilder: (context, index) => _tags[index],
           );

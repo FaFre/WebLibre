@@ -424,6 +424,65 @@ final class ContainerTabStatesFamily extends $Family
   String toString() => r'containerTabStatesProvider';
 }
 
+/// Ids of DB-cached tabs whose native state hasn't arrived yet. Empty once
+/// the session restore completed (afterwards a missing native state means
+/// the tab is gone, not pending).
+
+@ProviderFor(pendingRestoreTabIds)
+final pendingRestoreTabIdsProvider = PendingRestoreTabIdsProvider._();
+
+/// Ids of DB-cached tabs whose native state hasn't arrived yet. Empty once
+/// the session restore completed (afterwards a missing native state means
+/// the tab is gone, not pending).
+
+final class PendingRestoreTabIdsProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<Set<String>>,
+          EquatableValue<Set<String>>,
+          EquatableValue<Set<String>>
+        >
+    with $Provider<EquatableValue<Set<String>>> {
+  /// Ids of DB-cached tabs whose native state hasn't arrived yet. Empty once
+  /// the session restore completed (afterwards a missing native state means
+  /// the tab is gone, not pending).
+  PendingRestoreTabIdsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'pendingRestoreTabIdsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$pendingRestoreTabIdsHash();
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<Set<String>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<Set<String>> create(Ref ref) {
+    return pendingRestoreTabIds(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EquatableValue<Set<String>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<EquatableValue<Set<String>>>(value),
+    );
+  }
+}
+
+String _$pendingRestoreTabIdsHash() =>
+    r'a7c1639478ebed7d887d9b1d1296757d829dcc6b';
+
 @ProviderFor(fifoTabStates)
 final fifoTabStatesProvider = FifoTabStatesProvider._();
 
@@ -474,7 +533,7 @@ final class FifoTabStatesProvider
   }
 }
 
-String _$fifoTabStatesHash() => r'f8dc69382d307bc83193a3b839a16313e9c1ab69';
+String _$fifoTabStatesHash() => r'a512f96119561096b9cc7d6920e82da6d460ce68';
 
 @ProviderFor(selectedContainerTabStatesWithContainer)
 final selectedContainerTabStatesWithContainerProvider =
@@ -529,7 +588,7 @@ final class SelectedContainerTabStatesWithContainerProvider
 }
 
 String _$selectedContainerTabStatesWithContainerHash() =>
-    r'e6fd0e1e0ca4cfb0a0a46e8ff4e63d41032bfad9';
+    r'6e215f983140f7980d84e3f3d05a8afe95e6f1e7';
 
 @ProviderFor(quickTabSwitcherTabStates)
 final quickTabSwitcherTabStatesProvider = QuickTabSwitcherTabStatesFamily._();
@@ -601,7 +660,7 @@ final class QuickTabSwitcherTabStatesProvider
 }
 
 String _$quickTabSwitcherTabStatesHash() =>
-    r'213c9c492055175de8fc684e0c9fb9a3530fbb6f';
+    r'f61847bd68385e799384adfa5bfe735544fedbf5';
 
 final class QuickTabSwitcherTabStatesFamily extends $Family
     with
@@ -684,7 +743,7 @@ final class QuickTabSwitcherHistorySuggestionsProvider
 }
 
 String _$quickTabSwitcherHistorySuggestionsHash() =>
-    r'2e689ce72aac6b5b5b41e0390b168b3fdf5d4251';
+    r'3446741dfedf6fda9ab61421c1b74370c7f43f5b';
 
 final class QuickTabSwitcherHistorySuggestionsFamily extends $Family
     with
@@ -708,89 +767,56 @@ final class QuickTabSwitcherHistorySuggestionsFamily extends $Family
   String toString() => r'quickTabSwitcherHistorySuggestionsProvider';
 }
 
-@ProviderFor(quickTabSwitcherHasResults)
-final quickTabSwitcherHasResultsProvider = QuickTabSwitcherHasResultsFamily._();
+/// Number of 48px rows the quick tab switcher bar currently occupies.
+/// 0 hides the bar; feeds the toolbar height / GeckoView viewport math.
 
-final class QuickTabSwitcherHasResultsProvider
+@ProviderFor(quickTabSwitcherRowCount)
+final quickTabSwitcherRowCountProvider = QuickTabSwitcherRowCountProvider._();
+
+/// Number of 48px rows the quick tab switcher bar currently occupies.
+/// 0 hides the bar; feeds the toolbar height / GeckoView viewport math.
+
+final class QuickTabSwitcherRowCountProvider
     extends
-        $FunctionalProvider<
-          AsyncValue<bool>,
-          AsyncValue<bool>,
-          AsyncValue<bool>
-        >
-    with $Provider<AsyncValue<bool>> {
-  QuickTabSwitcherHasResultsProvider._({
-    required QuickTabSwitcherHasResultsFamily super.from,
-    required QuickTabSwitcherMode super.argument,
-  }) : super(
-         retry: null,
-         name: r'quickTabSwitcherHasResultsProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
+        $FunctionalProvider<AsyncValue<int>, AsyncValue<int>, AsyncValue<int>>
+    with $Provider<AsyncValue<int>> {
+  /// Number of 48px rows the quick tab switcher bar currently occupies.
+  /// 0 hides the bar; feeds the toolbar height / GeckoView viewport math.
+  QuickTabSwitcherRowCountProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'quickTabSwitcherRowCountProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
   @override
-  String debugGetCreateSourceHash() => _$quickTabSwitcherHasResultsHash();
-
-  @override
-  String toString() {
-    return r'quickTabSwitcherHasResultsProvider'
-        ''
-        '($argument)';
-  }
+  String debugGetCreateSourceHash() => _$quickTabSwitcherRowCountHash();
 
   @$internal
   @override
-  $ProviderElement<AsyncValue<bool>> $createElement($ProviderPointer pointer) =>
+  $ProviderElement<AsyncValue<int>> $createElement($ProviderPointer pointer) =>
       $ProviderElement(pointer);
 
   @override
-  AsyncValue<bool> create(Ref ref) {
-    final argument = this.argument as QuickTabSwitcherMode;
-    return quickTabSwitcherHasResults(ref, argument);
+  AsyncValue<int> create(Ref ref) {
+    return quickTabSwitcherRowCount(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(AsyncValue<bool> value) {
+  Override overrideWithValue(AsyncValue<int> value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<AsyncValue<bool>>(value),
+      providerOverride: $SyncValueProvider<AsyncValue<int>>(value),
     );
   }
-
-  @override
-  bool operator ==(Object other) {
-    return other is QuickTabSwitcherHasResultsProvider &&
-        other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
-  }
 }
 
-String _$quickTabSwitcherHasResultsHash() =>
-    r'5c488c9933372350c9e87ca1b83145176823dc88';
-
-final class QuickTabSwitcherHasResultsFamily extends $Family
-    with $FunctionalFamilyOverride<AsyncValue<bool>, QuickTabSwitcherMode> {
-  QuickTabSwitcherHasResultsFamily._()
-    : super(
-        retry: null,
-        name: r'quickTabSwitcherHasResultsProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
-
-  QuickTabSwitcherHasResultsProvider call(QuickTabSwitcherMode mode) =>
-      QuickTabSwitcherHasResultsProvider._(argument: mode, from: this);
-
-  @override
-  String toString() => r'quickTabSwitcherHasResultsProvider';
-}
+String _$quickTabSwitcherRowCountHash() =>
+    r'81a2bfbdc4dc88fdf2c66dd9f5bfd6d1ce73a073';
 
 @ProviderFor(suggestedTabEntities)
 final suggestedTabEntitiesProvider = SuggestedTabEntitiesFamily._();

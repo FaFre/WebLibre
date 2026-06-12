@@ -92,12 +92,12 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: MaterialApp(
+        child: const MaterialApp(
           home: SettingsDetailScaffold(
             title: 'Appearance',
             subtitle: 'Configure app appearance',
             icon: Icons.palette,
-            sections: const [
+            sections: [
               SettingsSectionDefinition(
                 title: 'Display',
                 entries: [

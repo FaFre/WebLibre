@@ -156,6 +156,10 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.string,
         db.typeMapping,
       ),
+      'tabBarStackingMode': settings['tabBarStackingMode']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
       'pullToRefreshEnabled': settings['pullToRefreshEnabled']?.readAs(
         DriftSqlType.bool,
         db.typeMapping,
@@ -192,6 +196,13 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
           ),
       'quickTabSwitcherShowHistorySuggestions':
           settings['quickTabSwitcherShowHistorySuggestions']?.readAs(
+            DriftSqlType.bool,
+            db.typeMapping,
+          ),
+      'quickTabSwitcherTitleWidth': settings['quickTabSwitcherTitleWidth']
+          ?.readAs(DriftSqlType.double, db.typeMapping),
+      'quickTabSwitcherShowCloseButtonOnAllTabs':
+          settings['quickTabSwitcherShowCloseButtonOnAllTabs']?.readAs(
             DriftSqlType.bool,
             db.typeMapping,
           ),
