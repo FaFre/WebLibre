@@ -136,9 +136,7 @@ class _TabParentPickerSheet extends HookConsumerWidget {
                           child: ListTile(
                             leading: const Icon(MdiIcons.fileTreeOutline),
                             title: const Text('Make standalone'),
-                            subtitle: const Text(
-                              'Detach from current parent',
-                            ),
+                            subtitle: const Text('Detach from current parent'),
                             enabled: movingTab.parentId != null,
                             onTap: () => Navigator.of(
                               context,
@@ -173,8 +171,7 @@ class _TabParentPickerSheet extends HookConsumerWidget {
                               // the one you're currently nested under".
                               return ListTabPreview(
                                 tabId: candidate.id,
-                                isActive:
-                                    candidate.id == movingTab.parentId,
+                                isActive: candidate.id == movingTab.parentId,
                                 onTap: () => Navigator.of(
                                   context,
                                 ).pop(_ParentPickerSelected(candidate.id)),

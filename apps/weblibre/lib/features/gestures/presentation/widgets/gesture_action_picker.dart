@@ -78,10 +78,7 @@ class _GestureActionPicker extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text(
-                  'Choose action',
-                  style: theme.textTheme.titleLarge,
-                ),
+                child: Text('Choose action', style: theme.textTheme.titleLarge),
               ),
             ),
             Expanded(

@@ -141,8 +141,9 @@ class _SuggestAfterSection extends HookConsumerWidget {
                     await ref
                         .read(gestureSettingsRepositoryProvider.notifier)
                         .updateSettings(
-                          (current) =>
-                              current.copyWith.minSuggestionStroke(value.round()),
+                          (current) => current.copyWith.minSuggestionStroke(
+                            value.round(),
+                          ),
                         );
                   }
                 : null,

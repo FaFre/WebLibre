@@ -58,7 +58,9 @@ class WebSearchInfoboxCard extends HookConsumerWidget {
 
     void toggle() {
       ref
-          .read(persistedBoolProvider(PersistedBoolKey.infoboxExpanded).notifier)
+          .read(
+            persistedBoolProvider(PersistedBoolKey.infoboxExpanded).notifier,
+          )
           .toggle();
     }
 
@@ -347,7 +349,10 @@ class _InfoboxLinks extends StatelessWidget {
               ),
               style: TextButton.styleFrom(
                 foregroundColor: colorScheme.primary,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
               ),
             ),
           ),

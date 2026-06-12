@@ -59,9 +59,7 @@ void main() {
     });
 
     test('path segment: captures search term', () {
-      final p = BangUrlPattern.parse(
-        'https://en.wikipedia.org/wiki/{{{s}}}',
-      );
+      final p = BangUrlPattern.parse('https://en.wikipedia.org/wiki/{{{s}}}');
       expect(
         p!.match(Uri.parse('https://en.wikipedia.org/wiki/Flutter')),
         'Flutter',
@@ -69,9 +67,7 @@ void main() {
     });
 
     test('path segment: enforces non-placeholder segments', () {
-      final p = BangUrlPattern.parse(
-        'https://www.ebay.com/sch/{{{s}}}/m.html',
-      );
+      final p = BangUrlPattern.parse('https://www.ebay.com/sch/{{{s}}}/m.html');
       expect(
         p!.match(Uri.parse('https://www.ebay.com/sch/toys/m.html')),
         'toys',
@@ -90,26 +86,17 @@ void main() {
         p!.match(Uri.parse('https://site.com/find/prefix-Foo-end')),
         'Foo',
       );
-      expect(
-        p.match(Uri.parse('https://site.com/find/Foo-end')),
-        isNull,
-      );
+      expect(p.match(Uri.parse('https://site.com/find/Foo-end')), isNull);
     });
 
     test('host mismatch rejects', () {
       final p = BangUrlPattern.parse('https://google.com/search?q={{{s}}}');
-      expect(
-        p!.match(Uri.parse('https://bing.com/search?q=foo')),
-        isNull,
-      );
+      expect(p!.match(Uri.parse('https://bing.com/search?q=foo')), isNull);
     });
 
     test('path length mismatch rejects', () {
       final p = BangUrlPattern.parse('https://x.com/a?q={{{s}}}');
-      expect(
-        p!.match(Uri.parse('https://x.com/a/b?q=foo')),
-        isNull,
-      );
+      expect(p!.match(Uri.parse('https://x.com/a/b?q=foo')), isNull);
     });
 
     test('empty captured query is rejected', () {
@@ -152,7 +139,9 @@ void main() {
     });
 
     test('non-generic subdomains still must match', () {
-      final p = BangUrlPattern.parse('https://cn.bing.com/dict/search?q={{{s}}}');
+      final p = BangUrlPattern.parse(
+        'https://cn.bing.com/dict/search?q={{{s}}}',
+      );
       expect(
         p!.match(Uri.parse('https://www.bing.com/dict/search?q=foo')),
         isNull,
@@ -178,9 +167,7 @@ void main() {
       );
       expect(p, isNotNull);
       expect(
-        p!.match(
-          Uri.parse('https://research.lensai.eu/#/s/search/quantum'),
-        ),
+        p!.match(Uri.parse('https://research.lensai.eu/#/s/search/quantum')),
         'quantum',
       );
     });
@@ -190,31 +177,21 @@ void main() {
         'https://research.lensai.eu/#/s/search/{{{s}}}',
       );
       expect(
-        p!.match(
-          Uri.parse('https://research.lensai.eu/#/s/answer/quantum'),
-        ),
+        p!.match(Uri.parse('https://research.lensai.eu/#/s/answer/quantum')),
         isNull,
       );
     });
 
     test('hash query: tolerates extra fragment params', () {
-      final p = BangUrlPattern.parse(
-        'https://site.example/#s={{{s}}}',
-      );
-      expect(
-        p!.match(Uri.parse('https://site.example/#s=foo&page=2')),
-        'foo',
-      );
+      final p = BangUrlPattern.parse('https://site.example/#s={{{s}}}');
+      expect(p!.match(Uri.parse('https://site.example/#s=foo&page=2')), 'foo');
     });
 
     test('fragment-required template rejects URLs without fragment', () {
       final p = BangUrlPattern.parse(
         'https://boards.4chan.org/g/catalog#s={{{s}}}',
       );
-      expect(
-        p!.match(Uri.parse('https://boards.4chan.org/g/catalog')),
-        isNull,
-      );
+      expect(p!.match(Uri.parse('https://boards.4chan.org/g/catalog')), isNull);
     });
   });
 
@@ -238,9 +215,7 @@ void main() {
   group('BangUrlPattern - tie-break helpers', () {
     test('more required constants score higher', () {
       final plain = BangUrlPattern.parse('https://x.com/?q={{{s}}}')!;
-      final imgs = BangUrlPattern.parse(
-        'https://x.com/?q={{{s}}}&tbm=isch',
-      )!;
+      final imgs = BangUrlPattern.parse('https://x.com/?q={{{s}}}&tbm=isch')!;
       expect(imgs.constraintCount, greaterThan(plain.constraintCount));
     });
   });

@@ -145,8 +145,10 @@ class BangUrlPattern {
     if (value == null) return null;
     if (!value.startsWith(prefix)) return null;
     if (!value.endsWith(suffix)) return null;
-    final captured =
-        value.substring(prefix.length, value.length - suffix.length);
+    final captured = value.substring(
+      prefix.length,
+      value.length - suffix.length,
+    );
     return captured.isEmpty ? null : captured;
   }
 
@@ -155,8 +157,10 @@ class BangUrlPattern {
     final segment = segments[pathIndex!];
     if (!segment.startsWith(prefix)) return null;
     if (!segment.endsWith(suffix)) return null;
-    final captured =
-        segment.substring(prefix.length, segment.length - suffix.length);
+    final captured = segment.substring(
+      prefix.length,
+      segment.length - suffix.length,
+    );
     return captured.isEmpty ? null : captured;
   }
 
@@ -238,8 +242,9 @@ class BangUrlPattern {
       final placeholderValue = scopeComponents.queryParams[sentinelParam]!;
       final sentinelStart = placeholderValue.indexOf(_sentinel);
       final prefix = placeholderValue.substring(0, sentinelStart);
-      final suffix =
-          placeholderValue.substring(sentinelStart + _sentinel.length);
+      final suffix = placeholderValue.substring(
+        sentinelStart + _sentinel.length,
+      );
 
       // The other params in the same scope become required constants.
       final required = <String, String>{
@@ -327,8 +332,9 @@ bool _requiredQueryParamsMatch(
 /// duplicate-keyed query params (multi-map semantics aren't worth the
 /// complexity for our use case).
 _Components? _componentsFromUri(Uri uri) {
-  final segments =
-      uri.pathSegments.where((s) => s.isNotEmpty).toList(growable: false);
+  final segments = uri.pathSegments
+      .where((s) => s.isNotEmpty)
+      .toList(growable: false);
   final all = uri.queryParametersAll;
   final params = <String, String>{};
   for (final entry in all.entries) {

@@ -334,9 +334,7 @@ class _TabBarStackingModeSection extends HookConsumerWidget {
         children: [
           const ListTile(
             title: Text('Tab Stacking'),
-            subtitle: Text(
-              'How the quick tab switcher bar arranges its tabs',
-            ),
+            subtitle: Text('How the quick tab switcher bar arranges its tabs'),
             leading: Icon(MdiIcons.folderSettings),
             contentPadding: EdgeInsets.zero,
           ),
@@ -505,8 +503,7 @@ class _QuickTabSwitcherTitleWidthTile extends HookConsumerWidget {
                   onChangeEnd: enabled
                       ? (value) async {
                           final normalized =
-                              (value / quickTabSwitcherTitleWidthStep)
-                                  .round() *
+                              (value / quickTabSwitcherTitleWidthStep).round() *
                               quickTabSwitcherTitleWidthStep;
                           sliderValue.value = normalized;
                           await ref
@@ -683,7 +680,9 @@ class _QuickTabSwitcherHierarchyGlyphsTile extends HookConsumerWidget {
                               )
                               .save(
                                 (currentSettings) => currentSettings.copyWith
-                                    .quickTabSwitcherHierarchyGlyphs(normalized),
+                                    .quickTabSwitcherHierarchyGlyphs(
+                                      normalized,
+                                    ),
                               );
                         }
                       : null,

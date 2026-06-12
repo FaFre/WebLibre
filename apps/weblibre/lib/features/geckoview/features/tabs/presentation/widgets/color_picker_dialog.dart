@@ -77,10 +77,10 @@ class ColorPickerDialog extends HookWidget {
           child: const Text('Cancel'),
         ),
         TextButton(
-          onPressed: () => Navigator.pop<ColorPickerResult?>(
-            context,
-            (color: selectedColor.value, useCustomColor: useCustom.value),
-          ),
+          onPressed: () => Navigator.pop<ColorPickerResult?>(context, (
+            color: selectedColor.value,
+            useCustomColor: useCustom.value,
+          )),
           child: const Text('Select'),
         ),
       ],
@@ -191,11 +191,7 @@ class _CustomSwatch extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final palette = isSelected
-        ? ContainerColors.palette(
-            context,
-            selectedColor,
-            useCustomColor: true,
-          )
+        ? ContainerColors.palette(context, selectedColor, useCustomColor: true)
         : null;
     return InkResponse(
       onTap: onTap,

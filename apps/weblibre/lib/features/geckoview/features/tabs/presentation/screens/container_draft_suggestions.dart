@@ -62,10 +62,7 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
       );
 
       return math.max(
-        math.min(
-          calculatedCount,
-          selectedContainer.value?.tabIds.length ?? 0,
-        ),
+        math.min(calculatedCount, selectedContainer.value?.tabIds.length ?? 0),
         2,
       );
     }, [screenWidth, selectedContainer.value?.tabIds.length]);

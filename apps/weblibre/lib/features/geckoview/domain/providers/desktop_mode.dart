@@ -64,14 +64,11 @@ class DesktopMode extends _$DesktopMode {
     // landing on a ruled host forces desktop on again, and leaving it reverts
     // to the browser-wide default. Watching only the host keeps in-page
     // navigations (path/query changes) from clobbering a manual override.
-    ref.listen(
-      tabStateProvider(tabId),
-      (previous, next) {
-        if (previous?.url.host != next?.url.host) {
-          state = _resolveForHost(next?.url);
-        }
-      },
-    );
+    ref.listen(tabStateProvider(tabId), (previous, next) {
+      if (previous?.url.host != next?.url.host) {
+        state = _resolveForHost(next?.url);
+      }
+    });
 
     // Seed the initial value from the per-site rule (falling back to the
     // browser-wide default) so a newly opened tab's menu checkbox matches the

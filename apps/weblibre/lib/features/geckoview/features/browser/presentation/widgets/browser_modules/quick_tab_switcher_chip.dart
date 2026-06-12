@@ -168,20 +168,21 @@ buildQuickTabSwitcherChipDecoration(
       null => null,
     },
     side: (item, isSelected) => switch (item.color) {
-      final color? when isSelected => thickContainerSelectedBorder
-          ? BorderSide(
-              color: ContainerColors.palette(
+      final color? when isSelected =>
+        thickContainerSelectedBorder
+            ? BorderSide(
+                color: ContainerColors.palette(
+                  context,
+                  color,
+                  useCustomColor: item.useCustomColor,
+                ).outlineColor,
+                width: 2.0,
+              )
+            : ContainerColors.palette(
                 context,
                 color,
                 useCustomColor: item.useCustomColor,
-              ).outlineColor,
-              width: 2.0,
-            )
-          : ContainerColors.palette(
-              context,
-              color,
-              useCustomColor: item.useCustomColor,
-            ).selectedBorderSide,
+              ).selectedBorderSide,
       final color? => ContainerColors.palette(
         context,
         color,

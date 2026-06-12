@@ -65,11 +65,7 @@ class GestureStrokeView extends StatelessWidget {
         if (showQualifiers) ...[
           Padding(
             padding: const EdgeInsets.only(right: 6),
-            child: Icon(
-              stroke.startPosition.icon,
-              size: 18,
-              color: foreground,
-            ),
+            child: Icon(stroke.startPosition.icon, size: 18, color: foreground),
           ),
           Padding(
             padding: const EdgeInsets.only(right: 6),

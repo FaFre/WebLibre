@@ -143,9 +143,7 @@ class OpenSharedContent extends HookConsumerWidget {
       unawaited(
         Future(() async {
           ContainerData? resolved;
-          final containerRepo = ref.read(
-            containerRepositoryProvider.notifier,
-          );
+          final containerRepo = ref.read(containerRepositoryProvider.notifier);
 
           // Priority: explicit intent container (PWA shortcut) > site
           // assignment for the URL > mode default.
@@ -160,9 +158,7 @@ class OpenSharedContent extends HookConsumerWidget {
               final siteAssignedId = await containerRepo
                   .siteAssignedContainerId(Uri.parse(selectionUrlKey));
               if (siteAssignedId != null) {
-                resolved = await containerRepo.getContainerData(
-                  siteAssignedId,
-                );
+                resolved = await containerRepo.getContainerData(siteAssignedId);
               }
             }
 

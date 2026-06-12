@@ -631,8 +631,7 @@ class SearchScreen extends HookConsumerWidget {
     // Whether to surface an in-app close button so the page can be dismissed
     // without a system back button/gesture (opt-in, e.g. for e-ink devices).
     // Only meaningful when there is a route to pop back to.
-    final showCloseButton =
-        context.canPop() && settings.showSearchCloseButton;
+    final showCloseButton = context.canPop() && settings.showSearchCloseButton;
 
     return Scaffold(
       body: SafeArea(

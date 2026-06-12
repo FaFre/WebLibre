@@ -60,8 +60,7 @@ class GeckoEventService extends GeckoStateEvents {
   ValueStream<bool> get engineReadyStateEvents => _engineStateSubject.stream;
   ValueStream<List<String>> get tabListEvents => _tabListSubject.stream;
   ValueStream<String?> get selectedTabEvents => _selectedTabSubject.stream;
-  ValueStream<bool> get restoreCompleteEvents =>
-      _restoreCompleteSubject.stream;
+  ValueStream<bool> get restoreCompleteEvents => _restoreCompleteSubject.stream;
 
   Stream<TabContentState> get tabContentEvents => _tabContentSubject.stream;
   Stream<HistoryEvent> get historyEvents => _historySubject.stream;

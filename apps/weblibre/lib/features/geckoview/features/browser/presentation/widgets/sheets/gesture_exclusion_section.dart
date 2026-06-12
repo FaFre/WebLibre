@@ -90,19 +90,19 @@ class GestureExclusionSection extends HookConsumerWidget {
     bool enabled,
   ) async {
     try {
-      await ref.read(gestureSettingsRepositoryProvider.notifier).updateSettings(
-        (current) {
-          final next = current.excludedSites.toList();
-          if (enabled) {
-            // Enabling gestures here => remove the host from the exclusion list.
-            next.remove(host);
-          } else if (!next.contains(host)) {
-            // Disabling gestures here => add the host to the exclusion list.
-            next.add(host);
-          }
-          return current.copyWith.excludedSites(next);
-        },
-      );
+      await ref.read(gestureSettingsRepositoryProvider.notifier).updateSettings((
+        current,
+      ) {
+        final next = current.excludedSites.toList();
+        if (enabled) {
+          // Enabling gestures here => remove the host from the exclusion list.
+          next.remove(host);
+        } else if (!next.contains(host)) {
+          // Disabling gestures here => add the host to the exclusion list.
+          next.add(host);
+        }
+        return current.copyWith.excludedSites(next);
+      });
     } catch (e, s) {
       logger.e('Failed to toggle gesture exclusion', error: e, stackTrace: s);
       if (context.mounted) {

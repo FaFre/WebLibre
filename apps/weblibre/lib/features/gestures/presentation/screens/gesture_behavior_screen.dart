@@ -220,7 +220,9 @@ class _CooldownSection extends HookConsumerWidget {
             value: settings.intervalMs
                 .clamp(minGestureIntervalMs, maxGestureIntervalMs)
                 .toDouble(),
-            label: settings.intervalMs == 0 ? 'Off' : '${settings.intervalMs} ms',
+            label: settings.intervalMs == 0
+                ? 'Off'
+                : '${settings.intervalMs} ms',
             onChanged: (value) async {
               await ref
                   .read(gestureSettingsRepositoryProvider.notifier)

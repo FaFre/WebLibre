@@ -296,8 +296,7 @@ class _TabTreesGrid extends HookConsumerWidget {
 
         final row = index ~/ 2;
         final tabStart = row * itemSize.height;
-        final viewportDimension =
-            scrollController.position.viewportDimension;
+        final viewportDimension = scrollController.position.viewportDimension;
 
         final targetOffset =
             (tabStart - viewportDimension / 2 + itemSize.height / 2).clamp(
@@ -324,17 +323,14 @@ class _TabTreesGrid extends HookConsumerWidget {
     }, [filteredTabEntities, activeTab]);
 
     final tabs = useMemoized(() {
-      return filteredTabEntities.value
-          .whereType<TabTreeEntity>()
-          .map((entity) {
-            return _TabTreePreview(
-              entity: entity,
-              activeTabId: activeTab,
-              onClose: onClose,
-              stackPadding: const Offset(8, 8),
-            );
-          })
-          .toList();
+      return filteredTabEntities.value.whereType<TabTreeEntity>().map((entity) {
+        return _TabTreePreview(
+          entity: entity,
+          activeTabId: activeTab,
+          onClose: onClose,
+          stackPadding: const Offset(8, 8),
+        );
+      }).toList();
     }, [filteredTabEntities, activeTab]);
 
     return Padding(

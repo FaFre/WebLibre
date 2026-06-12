@@ -64,8 +64,7 @@ class TabBarPreviewHeaderDelegate extends SliverPersistentHeaderDelegate {
       _ => 1,
     };
 
-    return height +
-        BrowserTabBar.quickTabSwitcherHeight * quickTabSwitcherRows;
+    return height + BrowserTabBar.quickTabSwitcherHeight * quickTabSwitcherRows;
   }
 
   double get _baseHeight =>
