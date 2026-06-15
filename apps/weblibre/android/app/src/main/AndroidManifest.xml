@@ -270,7 +270,7 @@
 
         <meta-data
             android:name="io.flutter.embedding.android.EnableImpeller"
-            android:value="false" />
+            android:value="true" />
 
         <!-- HCPP (Hybrid Composition++) is still experimental and mis-maps
              platform-view touch coordinates when the activity runs in a resized
@@ -279,7 +279,7 @@
              back to standard hybrid composition until HCPP handles multi-window. -->
         <meta-data
             android:name="io.flutter.embedding.android.EnableHcpp"
-            android:value="false" />
+            android:value="true" />
 
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
