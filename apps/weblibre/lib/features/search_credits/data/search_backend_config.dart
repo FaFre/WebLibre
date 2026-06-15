@@ -32,7 +32,7 @@ const searchBackendOrigin = String.fromEnvironment(
 const searchBackendOriginTor = String.fromEnvironment(
   'SEARCH_BACKEND_ORIGIN_TOR',
   defaultValue:
-      'http://eyipgwt32zaejr2xwblaswp2ur4qikapofunbqus5dklvf7jxkncirad.onion',
+      'http://cfaidty24sakqjqlpqncl2nhq2c6kpdyhseg5vg76yz44hbpzqugk2id.onion',
 );
 
 Uri get searchBackendOriginUri => Uri.parse(searchBackendOrigin);

@@ -27,13 +27,13 @@
 abstract final class SupabaseConfig {
   static const supabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',
-    defaultValue: 'https://wqpnmlqacxijdmbvcxun.supabase.co',
+    defaultValue: 'https://erddtdugipagetkjojjr.supabase.co',
   );
 
   static const supabaseAnonKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
     defaultValue:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxcG5tbHFhY3hpamRtYnZjeHVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0NjQ1MjUsImV4cCI6MjA5MTA0MDUyNX0.5iifJWjp6bYZhfko-oGPPMuwMLAiFdfUXHQqk8W3wxA',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVyZGR0ZHVnaXBhZ2V0a2pvampyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzOTMxMzEsImV4cCI6MjA5Njk2OTEzMX0.GGrXn_rbd5TPPYRyPd_GvkZuuCRObIOhz4M87kuIsL0',
   );
 
   static const accountWebUrl = String.fromEnvironment(
