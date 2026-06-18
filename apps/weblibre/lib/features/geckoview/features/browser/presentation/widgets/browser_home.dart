@@ -23,6 +23,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/account/presentation/widgets/supporter_home_banner.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/providers/browser_viewport_toolbar_insets.dart';
@@ -141,6 +142,38 @@ class BrowserHome extends ConsumerWidget {
               ),
               const SizedBox(height: 28),
             ],
+            const SupporterHomeBanner(),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                if (hasTabs)
+                  OutlinedButton.icon(
+                    onPressed: viewTabs,
+                    icon: const Icon(Icons.tab_rounded),
+                    label: const Text('View tabs'),
+                  ),
+                FilledButton.icon(
+                  onPressed: openNewTab,
+                  icon: const Icon(Icons.add_rounded),
+                  label: const Text('New tab'),
+                ),
+                if (hasContainerTabs)
+                  FilledButton.tonalIcon(
+                    onPressed: resumeLatestContainerTab,
+                    icon: const Icon(Icons.history_rounded),
+                    label: const Text('Resume last tab'),
+                  )
+                else if (hasTabs && containerData == null)
+                  FilledButton.tonalIcon(
+                    onPressed: resumeLatestTab,
+                    icon: const Icon(Icons.history_rounded),
+                    label: const Text('Resume last tab'),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 24),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
@@ -200,37 +233,6 @@ class BrowserHome extends ConsumerWidget {
                   },
                 ],
               ),
-            ),
-            const SizedBox(height: 24),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                if (hasTabs)
-                  OutlinedButton.icon(
-                    onPressed: viewTabs,
-                    icon: const Icon(Icons.tab_rounded),
-                    label: const Text('View tabs'),
-                  ),
-                FilledButton.icon(
-                  onPressed: openNewTab,
-                  icon: const Icon(Icons.add_rounded),
-                  label: const Text('New tab'),
-                ),
-                if (hasContainerTabs)
-                  FilledButton.tonalIcon(
-                    onPressed: resumeLatestContainerTab,
-                    icon: const Icon(Icons.history_rounded),
-                    label: const Text('Resume last tab'),
-                  )
-                else if (hasTabs && containerData == null)
-                  FilledButton.tonalIcon(
-                    onPressed: resumeLatestTab,
-                    icon: const Icon(Icons.history_rounded),
-                    label: const Text('Resume last tab'),
-                  ),
-              ],
             ),
           ],
         ),

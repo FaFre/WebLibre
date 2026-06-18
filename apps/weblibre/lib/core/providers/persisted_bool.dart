@@ -33,7 +33,11 @@ enum PersistedBoolKey {
     defaultValue: true,
   ),
   infoboxExpanded(key: 'InfoboxExpanded', defaultValue: true),
-  tabSuggestions(key: 'TabSuggestions', defaultValue: false);
+  tabSuggestions(key: 'TabSuggestions', defaultValue: false),
+  supporterBannerDismissed(
+    key: 'SupporterBannerDismissed',
+    defaultValue: false,
+  );
 
   const PersistedBoolKey({required this.key, required this.defaultValue});
 
