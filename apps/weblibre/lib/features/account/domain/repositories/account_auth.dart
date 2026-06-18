@@ -63,6 +63,17 @@ class AccountAuthRepository extends _$AccountAuthRepository {
   Timer? _signingInTimeout;
   Timer? _restoreRetryTimer;
 
+  /// Handoff code currently being redeemed, or `null` when idle. The OS can
+  /// deliver the `weblibre://account/callback` deep link more than once in
+  /// quick succession (observed ~12ms apart on some devices, see issue #460).
+  /// Without this guard each delivery starts a concurrent redeem of the same
+  /// single-use code; the server burns the code for the first request and
+  /// returns "already redeemed" for the rest, whose error then clobbers the
+  /// winner's signed-in state. Tracking the in-flight code lets us drop the
+  /// duplicate while still allowing a genuine retry once the first attempt
+  /// has settled (cleared in the `finally` below).
+  String? _redeemingCode;
+
   AccountSecureStore get _store => ref.read(accountSecureStoreProvider);
   HandoffRedeemClient get _redeemClient =>
       ref.read(handoffRedeemClientProvider);
@@ -268,6 +279,12 @@ class AccountAuthRepository extends _$AccountAuthRepository {
   }
 
   Future<void> handleHandoffCode(String code) async {
+    if (_redeemingCode == code) {
+      logger.i('Ignoring duplicate handoff callback for in-flight code');
+      return;
+    }
+    _redeemingCode = code;
+
     _signingInTimeout?.cancel();
     _signingInTimeout = null;
     state = AsyncData(
@@ -339,6 +356,12 @@ class AccountAuthRepository extends _$AccountAuthRepository {
           lastError: _sanitizeAuthError(e, 'Sign-in failed. Please try again.'),
         ),
       );
+    } finally {
+      // Only clear if we still own the flag — a later, distinct redeem could
+      // have taken over while this one was awaiting.
+      if (_redeemingCode == code) {
+        _redeemingCode = null;
+      }
     }
   }
 
