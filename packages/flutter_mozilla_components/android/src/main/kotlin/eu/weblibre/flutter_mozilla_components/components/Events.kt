@@ -9,6 +9,7 @@ package eu.weblibre.flutter_mozilla_components.components
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.api.ReaderViewEventsImpl
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
+import eu.weblibre.flutter_mozilla_components.feature.ReaderViewAppearanceFeature
 import eu.weblibre.flutter_mozilla_components.ext.toWebPBytes
 import eu.weblibre.flutter_mozilla_components.pigeons.ExternalApplicationResource
 import eu.weblibre.flutter_mozilla_components.pigeons.FindResultState
@@ -156,6 +157,42 @@ class Events(
                             tab.readerState.readerable,
                             tab.readerState.active,
                         )
+                    ) { _ -> }
+                }
+        }
+
+        // Register the WebLibre "pure black" appearance content port whenever a
+        // tab's reader view becomes active. Store-driven (rather than the user's
+        // reader toggle) so it also covers reader views restored on app start.
+        //
+        // Keyed on both readerState.active AND the engine session: a restored
+        // reader tab can already be active before its engine session is linked,
+        // and the active flag never changes afterwards — so we must also react to
+        // the session becoming available to register on the right session.
+        stateFlow.flowScoped(dispatcher = Dispatchers.Main) { flow ->
+            flow.mapNotNull { state -> state.tabs }
+                .filterChanged { it.readerState.active to it.engineState.engineSession }
+                .collect { tab ->
+                    if (tab.readerState.active) {
+                        tab.engineState.engineSession?.let { session ->
+                            ReaderViewAppearanceFeature.registerSession(session)
+                        }
+                    }
+                }
+        }
+
+        // Keep the reader appearance (font/settings) button in sync with the
+        // selected tab's actual reader-active state. Driven by the store rather
+        // than the user's reader toggle (ReaderViewIntegration) so the button
+        // also appears for reader views restored on app start ("resume last tab"),
+        // which never go through an explicit toggle.
+        stateFlow.flowScoped(dispatcher = Dispatchers.Main) { flow ->
+            flow.map { state -> state.selectedTab?.readerState?.active ?: false }
+                .distinctUntilChanged()
+                .collect { active ->
+                    GlobalComponents.components?.readerViewController?.appearanceButtonVisibility(
+                        EventSequence.next(),
+                        active,
                     ) { _ -> }
                 }
         }

@@ -48,9 +48,38 @@ class BrowserFab extends HookConsumerWidget {
       ),
     );
 
-    final Widget child;
-    if (readerabilityState.active && appearanceButtonVisible) {
-      child = FloatingActionButton(
+    final showAppearance = readerabilityState.active && appearanceButtonVisible;
+    final showDock = toolbarState == ToolbarVisibility.dismissed;
+
+    void forceShowToolbar() {
+      ref
+          .read(toolbarVisibilityControllerProvider(selectedTabId).notifier)
+          .forceShow();
+    }
+
+    // Re-show the hidden tab bar / toolbar. Kept available even while reading,
+    // where the reader appearance button would otherwise take the FAB's slot
+    // and leave no way to bring the toolbar back. Rendered smaller when paired
+    // with the appearance button to mark it as the secondary action.
+    Widget buildDockFab({required bool small}) {
+      const icon = Icon(MdiIcons.dockBottom);
+      return small
+          ? FloatingActionButton.small(
+              key: const ValueKey('dock_fab'),
+              heroTag: 'dock_fab',
+              onPressed: forceShowToolbar,
+              child: icon,
+            )
+          : FloatingActionButton(
+              key: const ValueKey('dock_fab'),
+              heroTag: 'dock_fab',
+              onPressed: forceShowToolbar,
+              child: icon,
+            );
+    }
+
+    Widget buildAppearanceFab() {
+      return FloatingActionButton(
         key: const ValueKey('appearance_fab'),
         heroTag: 'appearance_fab',
         onPressed: () async {
@@ -58,21 +87,24 @@ class BrowserFab extends HookConsumerWidget {
         },
         child: const Icon(MdiIcons.formatFont),
       );
-    } else if (toolbarState == ToolbarVisibility.dismissed) {
-      child = FloatingActionButton(
-        key: const ValueKey('dock_fab'),
-        heroTag: 'dock_fab',
-        onPressed: () {
-          ref
-              .read(toolbarVisibilityControllerProvider(selectedTabId).notifier)
-              .forceShow();
-        },
-        child: const Icon(MdiIcons.dockBottom),
-      );
-    } else {
-      child = const SizedBox.shrink(key: ValueKey('no_fab'));
     }
 
-    return child;
+    if (showAppearance && showDock) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          buildDockFab(small: true),
+          const SizedBox(height: 12),
+          buildAppearanceFab(),
+        ],
+      );
+    } else if (showAppearance) {
+      return buildAppearanceFab();
+    } else if (showDock) {
+      return buildDockFab(small: false);
+    } else {
+      return const SizedBox.shrink(key: ValueKey('no_fab'));
+    }
   }
 }

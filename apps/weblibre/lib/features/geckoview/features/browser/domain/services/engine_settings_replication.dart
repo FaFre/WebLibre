@@ -111,6 +111,23 @@ class EngineSettingsReplicationService
     ref.listen(
       fireImmediately: true,
       generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.pureBlack,
+      ),
+      (previous, next) async {
+        await _service.setReaderViewPureBlack(next);
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to pureBlack',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+
+    ref.listen(
+      fireImmediately: true,
+      generalSettingsWithDefaultsProvider.select(
         (settings) => settings.screenshotProtectionEnabled,
       ),
       (previous, next) async {

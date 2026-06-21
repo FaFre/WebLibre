@@ -7285,6 +7285,13 @@ interface GeckoEngineSettingsApi {
    * during startup/replication restore, to avoid clobbering per-tab overrides.
    */
   fun setGlobalDesktopMode(enable: Boolean, applyToExistingTabs: Boolean)
+  /**
+   * Sets whether the reader view dark color scheme should be rendered as pure
+   * black (AMOLED). Mirrors WebLibre's "pure black" theme setting into
+   * Mozilla's reader view extension. Persisted in SharedPreferences so a
+   * cold-started reader view resolves the right value before Flutter runs.
+   */
+  fun setReaderViewPureBlack(enabled: Boolean)
 
   companion object {
     /** The codec used by GeckoEngineSettingsApi. */
@@ -7442,6 +7449,24 @@ interface GeckoEngineSettingsApi {
             val applyToExistingTabsArg = args[1] as Boolean
             val wrapped: List<Any?> = try {
               api.setGlobalDesktopMode(enableArg, applyToExistingTabsArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setReaderViewPureBlack$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val enabledArg = args[0] as Boolean
+            val wrapped: List<Any?> = try {
+              api.setReaderViewPureBlack(enabledArg)
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)

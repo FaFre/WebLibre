@@ -1571,6 +1571,12 @@ abstract class GeckoEngineSettingsApi {
   /// in place). This should only be requested for an explicit user toggle, not
   /// during startup/replication restore, to avoid clobbering per-tab overrides.
   void setGlobalDesktopMode(bool enable, bool applyToExistingTabs);
+
+  /// Sets whether the reader view dark color scheme should be rendered as pure
+  /// black (AMOLED). Mirrors WebLibre's "pure black" theme setting into
+  /// Mozilla's reader view extension. Persisted in SharedPreferences so a
+  /// cold-started reader view resolves the right value before Flutter runs.
+  void setReaderViewPureBlack(bool enabled);
 }
 
 @HostApi()

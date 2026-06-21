@@ -29,6 +29,9 @@
             <!-- Inject engine here -->
         </mozilla.components.ui.widgets.VerticalSwipeRefreshLayout>
 
+        <!-- paddingBottom is applied dynamically in ReaderViewIntegration to
+             clear the Flutter bottom app bar + system navigation inset under
+             edge-to-edge; do not hardcode it here. -->
         <mozilla.components.feature.readerview.view.ReaderViewControlsBar
             android:id="@+id/readerViewBar"
             android:layout_width="match_parent"
@@ -36,7 +39,6 @@
             android:layout_gravity="bottom"
             android:background="#FFFFFFFF"
             android:elevation="10dp"
-            android:paddingBottom="55dp"
             android:visibility="gone" />
     </FrameLayout>
 

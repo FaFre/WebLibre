@@ -132,6 +132,26 @@ object GlobalComponents {
     val bottomViewportInsetPx: Int
         get() = (dynamicToolbarMaxHeightPx + verticalClippingPx).coerceAtLeast(0)
 
+    // Listeners notified when [bottomViewportInsetPx] may have changed (i.e. when
+    // the dynamic toolbar height or vertical clipping is updated). Lets native
+    // views that align to the bottom chrome (e.g. the reader view controls bar)
+    // re-apply their inset while visible, not only when first shown.
+    private val bottomViewportInsetListeners =
+        java.util.concurrent.CopyOnWriteArraySet<(Int) -> Unit>()
+
+    fun addBottomViewportInsetListener(listener: (Int) -> Unit) {
+        bottomViewportInsetListeners.add(listener)
+    }
+
+    fun removeBottomViewportInsetListener(listener: (Int) -> Unit) {
+        bottomViewportInsetListeners.remove(listener)
+    }
+
+    fun notifyBottomViewportInsetChanged() {
+        val inset = bottomViewportInsetPx
+        bottomViewportInsetListeners.forEach { it(inset) }
+    }
+
     // External download manager setting
     var useExternalDownloadManager: Boolean = false
 

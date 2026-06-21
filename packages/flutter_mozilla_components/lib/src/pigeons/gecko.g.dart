@@ -7386,6 +7386,28 @@ class GeckoEngineSettingsApi {
     )
     ;
   }
+
+  /// Sets whether the reader view dark color scheme should be rendered as pure
+  /// black (AMOLED). Mirrors WebLibre's "pure black" theme setting into
+  /// Mozilla's reader view extension. Persisted in SharedPreferences so a
+  /// cold-started reader view resolves the right value before Flutter runs.
+  Future<void> setReaderViewPureBlack(bool enabled) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setReaderViewPureBlack$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[enabled]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
 }
 
 class GeckoSessionApi {

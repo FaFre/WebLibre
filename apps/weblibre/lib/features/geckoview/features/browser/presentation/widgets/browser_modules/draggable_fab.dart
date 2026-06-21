@@ -50,30 +50,52 @@ class DraggableFab extends HookConsumerWidget {
     final disableAnimations = mediaQuery.disableAnimations;
 
     final isDragging = useState(false);
+    // Stored as distances from the bottom-right corner (dx = from right edge,
+    // dy = from bottom edge) rather than a top-left position, so the FAB is
+    // anchored by its bottom-right corner. This keeps the primary (bottom) FAB
+    // in a stable slot when extra FABs are stacked above it (e.g. the re-dock
+    // button while reading), independent of the child's height.
     final customOffset = useState<Offset?>(null);
     final dragStartOffset = useRef<Offset?>(null);
     final dragStartPosition = useRef<Offset?>(null);
+
+    // Actual rendered size of the (possibly stacked) FAB child. Used for drag
+    // clamping so a taller stacked column (e.g. dock + appearance FABs) can't be
+    // dragged off-screen. Falls back to [fabSize] until first measured.
+    final fabKey = useMemoized(GlobalKey.new);
+    final fabRenderSize = useState<Size?>(null);
+
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final size = fabKey.currentContext?.size;
+        if (size != null && size != fabRenderSize.value) {
+          fabRenderSize.value = size;
+        }
+      });
+      return null;
+    });
+
+    final fabWidth = fabRenderSize.value?.width ?? fabSize;
+    final fabHeight = fabRenderSize.value?.height ?? fabSize;
 
     // Calculate default position (bottom-right, respecting toolbar)
     final defaultBottom = bottomToolbarVisible
         ? bottomAppBarHeight + _edgePadding
         : _edgePadding + bottomSafeArea;
     const defaultRight = _edgePadding;
-    final defaultLeft = screenSize.width - fabSize - defaultRight;
-    final defaultTop = screenSize.height - fabSize - defaultBottom;
 
     // Current position: custom if set, otherwise default
-    final currentLeft = customOffset.value?.dx ?? defaultLeft;
-    final currentTop = customOffset.value?.dy ?? defaultTop;
+    final currentRight = customOffset.value?.dx ?? defaultRight;
+    final currentBottom = customOffset.value?.dy ?? defaultBottom;
 
     return Positioned(
-      left: currentLeft,
-      top: currentTop,
+      right: currentRight,
+      bottom: currentBottom,
       child: GestureDetector(
         onLongPressStart: (details) {
           isDragging.value = true;
           unawaited(HapticFeedback.mediumImpact());
-          dragStartOffset.value = Offset(currentLeft, currentTop);
+          dragStartOffset.value = Offset(currentRight, currentBottom);
           dragStartPosition.value = details.globalPosition;
         },
         onLongPressMoveUpdate: (details) {
@@ -84,13 +106,19 @@ class DraggableFab extends HookConsumerWidget {
           }
 
           final delta = details.globalPosition - dragStartPosition.value!;
-          final newOffset = dragStartOffset.value! + delta;
+          // Dragging right/down reduces the distance from the right/bottom edge.
+          final newOffset = Offset(
+            dragStartOffset.value!.dx - delta.dx,
+            dragStartOffset.value!.dy - delta.dy,
+          );
 
           // Clamp to screen bounds
           customOffset.value = _clampToBounds(
             newOffset,
             screenSize: screenSize,
             padding: padding,
+            fabWidth: fabWidth,
+            fabHeight: fabHeight,
           );
         },
         onLongPressEnd: (details) {
@@ -103,7 +131,7 @@ class DraggableFab extends HookConsumerWidget {
               ? Duration.zero
               : const Duration(milliseconds: 150),
           scale: isDragging.value ? 1.1 : 1.0,
-          child: child,
+          child: KeyedSubtree(key: fabKey, child: child),
         ),
       ),
     );
@@ -113,17 +141,22 @@ class DraggableFab extends HookConsumerWidget {
     Offset offset, {
     required Size screenSize,
     required EdgeInsets padding,
+    required double fabWidth,
+    required double fabHeight,
   }) {
     const minEdgePadding = 8.0;
 
+    // Distances from the bottom-right corner: keep at least the safe-area inset
+    // plus a margin on the near edge, and leave room for the (possibly stacked)
+    // FAB on the far edge so it can't be dragged off-screen.
     return Offset(
       offset.dx.clamp(
-        padding.left + minEdgePadding,
-        screenSize.width - fabSize - padding.right - minEdgePadding,
+        padding.right + minEdgePadding,
+        screenSize.width - fabWidth - padding.left - minEdgePadding,
       ),
       offset.dy.clamp(
-        padding.top + minEdgePadding,
-        screenSize.height - fabSize - padding.bottom - minEdgePadding,
+        padding.bottom + minEdgePadding,
+        screenSize.height - fabHeight - padding.top - minEdgePadding,
       ),
     );
   }

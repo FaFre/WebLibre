@@ -8,7 +8,11 @@ package eu.weblibre.flutter_mozilla_components.integration
 
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.api.ReaderViewEventsImpl
@@ -27,11 +31,17 @@ class ReaderViewIntegration(
     context: Context,
     engine: Engine,
     store: BrowserStore,
-    view: ReaderViewControlsView,
+    private val view: ReaderViewControlsView,
     private val readerViewEvents: ReaderViewEventsImpl,
     readerViewController: ReaderViewController
 ) : LifecycleAwareFeature, UserInteractionHandler {
     private var listenerRegistered = false
+
+    // Re-applies the controls bar inset whenever the bottom chrome changes (tab
+    // bar shown/hidden, stacking mode, etc.) while the controls are on screen.
+    private val bottomInsetListener: (Int) -> Unit = {
+        applyControlsBarBottomInset(onlyIfVisible = true)
+    }
 
     private val controllerListener = object : ReaderViewControllerListener {
         override fun onReaderViewToggled(enabled: Boolean) {
@@ -48,8 +58,36 @@ class ReaderViewIntegration(
         }
 
         override fun onAppearanceButtonTap() {
-            feature.showControls()
+            // Toggle: tapping the appearance button while the controls are open
+            // closes them again, as the user expects.
+            if ((view as? View)?.visibility == View.VISIBLE) {
+                feature.hideControls()
+            } else {
+                applyControlsBarBottomInset(onlyIfVisible = false)
+                feature.showControls()
+            }
         }
+    }
+
+    /**
+     * Lifts the reader controls bar above the current bottom chrome (Flutter
+     * bottom app bar + system navigation inset) instead of a hardcoded padding,
+     * which under edge-to-edge left the bar overlapped by the bottom app bar.
+     * [GlobalComponents.bottomViewportInsetPx] already includes the nav inset
+     * when the toolbar is visible; fall back to the nav inset alone otherwise.
+     *
+     * @param onlyIfVisible when true, skips bars that aren't currently shown
+     * (used by the live inset listener; the bar is re-padded when next shown).
+     */
+    private fun applyControlsBarBottomInset(onlyIfVisible: Boolean) {
+        val barView = view as? View ?: return
+        if (onlyIfVisible && barView.visibility != View.VISIBLE) return
+
+        val navInset = ViewCompat.getRootWindowInsets(barView)
+            ?.getInsets(WindowInsetsCompat.Type.navigationBars())?.bottom ?: 0
+        barView.updatePadding(
+            bottom = maxOf(GlobalComponents.bottomViewportInsetPx, navInset),
+        )
     }
 
     private val feature = ReaderViewFeature(context, engine, store, view)
@@ -65,6 +103,7 @@ class ReaderViewIntegration(
     override fun start() {
         if (!listenerRegistered) {
             readerViewEvents.addListener(controllerListener)
+            GlobalComponents.addBottomViewportInsetListener(bottomInsetListener)
             listenerRegistered = true
         }
         feature.start()
@@ -73,6 +112,7 @@ class ReaderViewIntegration(
     override fun stop() {
         if (listenerRegistered) {
             readerViewEvents.removeListener(controllerListener)
+            GlobalComponents.removeBottomViewportInsetListener(bottomInsetListener)
             listenerRegistered = false
         }
         feature.stop()
