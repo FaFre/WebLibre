@@ -11,17 +11,17 @@
   "description": "",
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
-    "remove-markdown": "^0.6.3",
+    "remove-markdown": "^0.6.4",
     "turndown": "^7.2.4"
   },
   "devDependencies": {
-    "@babel/core": "^7.29.0",
-    "@babel/preset-env": "^7.29.3",
+    "@babel/core": "^8.0.1",
+    "@babel/preset-env": "^8.0.2",
     "babel-loader": "^10.1.1",
     "clean-webpack-plugin": "^4.0.0",
-    "terser-webpack-plugin": "^5.5.0",
-    "webpack": "^5.106.2",
+    "terser-webpack-plugin": "^5.6.1",
+    "webpack": "^5.107.2",
     "webpack-bundle-analyzer": "^5.3.0",
-    "webpack-cli": "^6.0.1"
+    "webpack-cli": "^7.0.3"
   }
 }

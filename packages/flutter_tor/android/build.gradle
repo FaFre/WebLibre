@@ -69,8 +69,8 @@ android {
         compileOnly(files(weblibreGoMobileAar))
 
         // Coroutines for async operations
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0")
 
         // Testing
         testImplementation("org.jetbrains.kotlin:kotlin-test")
