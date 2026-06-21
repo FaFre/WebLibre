@@ -489,7 +489,7 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
         }
 
         val responseBody = response.body.useStream { stream ->
-            String(stream.readAllBytes(), Charsets.UTF_8)
+            String(stream.readBytes(), Charsets.UTF_8)
         }
         val json = JSONObject(responseBody)
         val currentVersion = json.optJSONObject("current_version") ?: return null
@@ -564,7 +564,7 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
         }
 
         val body = response.body.useStream { stream ->
-            String(stream.readAllBytes(), Charsets.UTF_8)
+            String(stream.readBytes(), Charsets.UTF_8)
         }
         val json = JSONObject(body)
         val results = json.optJSONArray("results") ?: return emptyList()

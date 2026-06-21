@@ -83,7 +83,7 @@ class GeckoFetchApiImpl : GeckoFetchApi {
                     GeckoFetchResponse(
                     url = response.url,
                     status = response.status.toLong(),
-                    body = response.body.useStream { stream -> stream.readAllBytes() },
+                    body = response.body.useStream { stream -> stream.readBytes() },
                     headers = response.headers.map { it -> GeckoHeader(it.name, it.value) }
                 )))
             }
