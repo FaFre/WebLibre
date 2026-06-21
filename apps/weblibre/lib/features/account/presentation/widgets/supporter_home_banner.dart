@@ -18,7 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
@@ -26,6 +28,7 @@ import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/account/domain/repositories/account_auth.dart';
 import 'package:weblibre/features/account/domain/repositories/subscription_repository.dart';
+import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/utils/open_in_custom_tab.dart';
 
 /// Promotional banner shown above the quote card on the browser home page,
 /// inviting non-subscribers to become a WebLibre Supporter.
@@ -33,11 +36,20 @@ import 'package:weblibre/features/account/domain/repositories/subscription_repos
 /// It hides itself when the user already has an active subscription or has
 /// dismissed it. Includes its own bottom spacing so the host layout doesn't
 /// leave a gap when the banner is absent.
-class SupporterHomeBanner extends ConsumerWidget {
+class SupporterHomeBanner extends HookConsumerWidget {
   const SupporterHomeBanner({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final learnMoreRecognizer = useMemoized(
+      () => TapGestureRecognizer()
+        ..onTap = () => openInPrivateCustomTab(
+          context,
+          'https://docs.weblibre.eu/weblibre/supporter-subscription.html',
+        ),
+    );
+    useEffect(() => learnMoreRecognizer.dispose, [learnMoreRecognizer]);
+
     final dismissed = ref.watch(
       persistedBoolProvider(PersistedBoolKey.supporterBannerDismissed),
     );
@@ -134,7 +146,7 @@ class SupporterHomeBanner extends ConsumerWidget {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 2),
                     child: Text(
-                      'Support WebLibre, unlock premium features',
+                      'Support WebLibre',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         height: 1.25,
@@ -147,27 +159,49 @@ class SupporterHomeBanner extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 14),
-            Text(
-              'Help fund our independent browser by becoming a Supporter and '
-              'unlock:',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                height: 1.45,
+            Text.rich(
+              TextSpan(
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  height: 1.45,
+                ),
+                children: [
+                  const TextSpan(
+                    text:
+                        'Supporter is an optional subscription that funds '
+                        "WebLibre's development and provides the features that "
+                        'need a hosted service to work. The browser and its '
+                        'privacy features need no subscription. ',
+                  ),
+                  TextSpan(
+                    text: 'Learn more',
+                    style: const TextStyle(
+                      color: AppColors.brandPurple,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    recognizer: learnMoreRecognizer,
+                  ),
+                  const TextSpan(text: '.'),
+                ],
               ),
             ),
             const SizedBox(height: 12),
             const _FeatureBullet(
-              label: 'Anonymous Premium Search',
+              label: 'WebLibre Search',
               description:
-                  'Cryptographically blinded tokens — with optional Tor '
-                  'routing — keep your queries unlinkable to your account.',
+                  'A private, ad-free search built into the browser. It blends '
+                  'results from several independent sources, offers tunable '
+                  'search modes, can route over Tor, and lets you preview '
+                  'pages safely — while keeping your searches unlinkable to '
+                  'your account by design.',
             ),
             const SizedBox(height: 8),
             const _FeatureBullet(
-              label: 'Encrypted Sync',
+              label: 'Encrypted account sync',
               description:
-                  'Securely sync your settings and preferences across profiles '
-                  'and devices.',
+                  'Store and restore your WebLibre settings and preferences '
+                  'across profiles and devices. Everything is encrypted on '
+                  'your device before upload, so only you can read it.',
             ),
             const SizedBox(height: 18),
             SizedBox(

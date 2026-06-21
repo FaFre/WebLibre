@@ -142,7 +142,6 @@ class BrowserHome extends ConsumerWidget {
               ),
               const SizedBox(height: 28),
             ],
-            const SupporterHomeBanner(),
             Wrap(
               alignment: WrapAlignment.center,
               spacing: 12,
@@ -174,6 +173,7 @@ class BrowserHome extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 24),
+            const SupporterHomeBanner(),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
