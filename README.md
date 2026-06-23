@@ -23,6 +23,16 @@ It is a community-driven project and every voice is heard with rapid iteration a
 > **Early Access**
 >
 > WebLibre is under active development with frequent updates and new features. The current focus is on feature development, so don't be surprised if you experience some janks here and there. Although many people already use it as a daily driver, be aware of breaking changes!
+>
+> **AI Usage Disclaimer**
+>
+> This code was made with the help of these LLM providers' models:
+>
+> - Anthropic
+> - OpenAI
+> - Z.AI
+> - DeepSeek
+> - MoonshotAI
 
 <p align="center">
   <a href="https://liberapay.com/FaFre/donate">
