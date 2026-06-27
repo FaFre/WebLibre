@@ -27,6 +27,7 @@ enum NavigationReason {
   explicitScheme,
   schemelessHost,
   localhost,
+  onionHost,
   ipLiteral,
   aboutLike,
 }
@@ -142,6 +143,13 @@ InputClassification classifyAddressBarInput(
       return InputClassification.navigate(
         schemelessUri,
         NavigationReason.localhost,
+      );
+    }
+
+    if (isOnionHost(schemelessUri.host)) {
+      return InputClassification.navigate(
+        schemelessUri,
+        NavigationReason.onionHost,
       );
     }
 

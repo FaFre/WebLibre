@@ -821,6 +821,13 @@
                     "enforceOnStartup": true,
                     "locked": true
                 },
+                "dom.security.https_only_mode.upgrade_onion": {
+                    "value": false,
+                    "title": "Keep .onion sites on HTTP",
+                    "description": "Exempts .onion hosts from HTTPS-Only/HTTPS-First upgrades. Onion services are reached over an encrypted, self-authenticating Tor circuit, so HTTP carries no clearnet exposure and most onion sites are HTTP-only.",
+                    "enforceOnStartup": true,
+                    "locked": true
+                },
                 "security.mixed_content.upgrade_display_content": {
                     "value": true,
                     "title": "Upgrade mixed display content to HTTPS",

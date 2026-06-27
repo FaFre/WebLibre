@@ -41,6 +41,49 @@ void main() {
       expect(navigation.uri.toString(), 'https://weblibre.eu');
     });
 
+    test('navigates onion host over http', () {
+      final result = classifyAddressBarInput(
+        'duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/path',
+      );
+
+      expect(result, isA<NavigateInputClassification>());
+      final navigation = result as NavigateInputClassification;
+      expect(navigation.reason, NavigationReason.onionHost);
+      expect(
+        navigation.uri.toString(),
+        'http://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/path',
+      );
+    });
+
+    test('keeps explicit https on onion host', () {
+      final result = classifyAddressBarInput(
+        'https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion',
+      );
+
+      expect(result, isA<NavigateInputClassification>());
+      final navigation = result as NavigateInputClassification;
+      expect(navigation.reason, NavigationReason.explicitScheme);
+      expect(navigation.uri.scheme, 'https');
+    });
+
+    test('does not http-default a non-onion lookalike host', () {
+      final result = classifyAddressBarInput('notonion.com');
+
+      expect(result, isA<NavigateInputClassification>());
+      final navigation = result as NavigateInputClassification;
+      expect(navigation.reason, NavigationReason.schemelessHost);
+      expect(navigation.uri.toString(), 'https://notonion.com');
+    });
+
+    test('does not http-default onion as a non-final label', () {
+      final result = classifyAddressBarInput('onion.example.com');
+
+      expect(result, isA<NavigateInputClassification>());
+      final navigation = result as NavigateInputClassification;
+      expect(navigation.reason, NavigationReason.schemelessHost);
+      expect(navigation.uri.toString(), 'https://onion.example.com');
+    });
+
     test('navigates localhost over http', () {
       final result = classifyAddressBarInput('localhost:8080');
 

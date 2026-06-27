@@ -114,6 +114,12 @@ bool isValidHostCandidate(String hostCandidate) {
   return true;
 }
 
+bool isOnionHost(String host) {
+  // RFC 7686: ".onion" must be the final label, never a substring. The leading
+  // dot requirement rejects bare "onion", "notonion.com" and "onion.evil.com".
+  return host.toLowerCase().endsWith('.onion');
+}
+
 bool looksLikeHostExpression(String input) {
   return input.contains('.') ||
       input.contains(':') ||
@@ -183,7 +189,13 @@ Uri? parseSchemelessWebHost(
     return null;
   }
 
-  final scheme = probeUri.host.toLowerCase() == 'localhost' ? 'http' : 'https';
+  // Onion services are self-authenticating and reached over an encrypted Tor
+  // circuit, so http carries no clearnet exposure; default them to http like
+  // localhost (see Tor Browser's HTTPS-Only exemption for .onion).
+  final lowerHost = probeUri.host.toLowerCase();
+  final scheme = (lowerHost == 'localhost' || isOnionHost(lowerHost))
+      ? 'http'
+      : 'https';
   if (allowedSchemes != null && !allowedSchemes.contains(scheme)) {
     return null;
   }
