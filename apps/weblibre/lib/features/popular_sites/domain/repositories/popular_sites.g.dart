@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'engine_settings_replication.dart';
+part of 'popular_sites.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,30 +9,28 @@ part of 'engine_settings_replication.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(EngineSettingsReplicationService)
-final engineSettingsReplicationServiceProvider =
-    EngineSettingsReplicationServiceProvider._();
+@ProviderFor(PopularSitesRepository)
+final popularSitesRepositoryProvider = PopularSitesRepositoryProvider._();
 
-final class EngineSettingsReplicationServiceProvider
-    extends $NotifierProvider<EngineSettingsReplicationService, void> {
-  EngineSettingsReplicationServiceProvider._()
+final class PopularSitesRepositoryProvider
+    extends $NotifierProvider<PopularSitesRepository, void> {
+  PopularSitesRepositoryProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'engineSettingsReplicationServiceProvider',
+        name: r'popularSitesRepositoryProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$engineSettingsReplicationServiceHash();
+  String debugGetCreateSourceHash() => _$popularSitesRepositoryHash();
 
   @$internal
   @override
-  EngineSettingsReplicationService create() =>
-      EngineSettingsReplicationService();
+  PopularSitesRepository create() => PopularSitesRepository();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(void value) {
@@ -43,10 +41,10 @@ final class EngineSettingsReplicationServiceProvider
   }
 }
 
-String _$engineSettingsReplicationServiceHash() =>
-    r'a3d7628b7662ca8b828586e3fcf4e8925adbe062';
+String _$popularSitesRepositoryHash() =>
+    r'9825dc634b2ae9ea48a33eac8387a3e138c17b9f';
 
-abstract class _$EngineSettingsReplicationService extends $Notifier<void> {
+abstract class _$PopularSitesRepository extends $Notifier<void> {
   void build();
   @$mustCallSuper
   @override

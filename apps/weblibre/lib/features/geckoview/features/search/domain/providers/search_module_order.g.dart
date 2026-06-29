@@ -28,6 +28,7 @@ const _$SearchModuleTypeEnumMap = {
   SearchModuleType.history: 'history',
   SearchModuleType.localHistory: 'localHistory',
   SearchModuleType.combinedHistory: 'combinedHistory',
+  SearchModuleType.popularSites: 'popularSites',
   SearchModuleType.historyHighlights: 'historyHighlights',
   SearchModuleType.topSites: 'topSites',
   SearchModuleType.recentHistory: 'recentHistory',

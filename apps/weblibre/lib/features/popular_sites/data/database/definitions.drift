@@ -1,0 +1,13 @@
+CREATE TABLE sites (
+  domain TEXT NOT NULL PRIMARY KEY,
+  rank INTEGER NOT NULL
+);
+
+-- Prefix completion ordered by popularity. The caller escapes LIKE
+-- metacharacters in the user input and appends '%', so `ESCAPE '\'` makes any
+-- literal % / _ the user typed match literally instead of as wildcards.
+searchSitesByPrefix:
+  SELECT * FROM sites
+  WHERE domain LIKE :pattern ESCAPE '\'
+  ORDER BY rank ASC
+  LIMIT :limit;

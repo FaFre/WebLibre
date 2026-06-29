@@ -73,12 +73,13 @@ melos:
       description: Download external assets (bangs, bridges, URL lists)
       run: bash scripts/update-assets.sh
     build-components:
-      description: Build JS components and generate quotes DB
+      description: Build JS components and generate quotes/sites DBs
       run: |
         set -e
         sh scripts/build-container-proxy.sh
         sh scripts/build-readability.sh
         python3 scripts/build_quotes_db.py
+        python3 scripts/build_sites_db.py
     build-singbox-libbox:
       description: Build official sing-box Android libbox AAR for flutter_singbox_proxy
       run: packages/flutter_singbox_proxy/scripts/build-libbox-android.sh

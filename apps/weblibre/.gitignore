@@ -4,6 +4,9 @@
 *.pyc
 *.swp
 .DS_Store
+
+# Build-time raw inputs for the popular-sites DB (only sites.db is committed)
+assets/sites/raw/
 .atom/
 .buildlog/
 .history
@@ -31,6 +34,7 @@ migrate_working_dir/
 .pub/
 /build/
 assets/quotes/quotes.db
+assets/sites/sites.db
 assets/bangs/*
 !assets/bangs/
 !assets/bangs/weblibre_bangs.json

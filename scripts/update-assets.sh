@@ -104,9 +104,36 @@ update_ublock() {
   log "uBlock assets sync completed at $(cat "$dir/last_sync.txt")"
 }
 
+# Raw inputs for the popular-sites database. These are build-time only and are
+# consumed by scripts/build_sites_db.py to produce assets/sites/sites.db. The
+# raw/ directory is gitignored; only the compiled sites.db is committed.
+update_popular_sites() {
+  local dir="$REPO_ROOT/apps/weblibre/assets/sites/raw"
+  log "Updating popular-sites source lists..."
+
+  # Tranco top-1M (manipulation-resistant aggregate ranking). The download
+  # endpoint 307-redirects to the latest list; fetch() follows redirects.
+  fetch "https://tranco-list.eu/top-1m.csv.zip" \
+        "$dir/tranco-top-1m.csv.zip"
+
+  # StevenBlack "gambling-porn-only": the porn + gambling category domains
+  # WITHOUT the unified malware/ad base list mixed in.
+  fetch "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/gambling-porn-only/hosts" \
+        "$dir/stevenblack-gambling-porn.txt"
+
+  # Disconnect tracker list (basis of Firefox ETP). build_sites_db.py pulls
+  # only the Advertising/Analytics/FingerprintingInvasive/Cryptomining
+  # categories so first-party Social/Content sites are preserved.
+  fetch "https://raw.githubusercontent.com/disconnectme/disconnect-tracking-protection/master/services.json" \
+        "$dir/disconnect-services.json"
+
+  date -u --iso-8601=seconds > "$dir/last_sync.txt"
+  log "Popular-sites sources sync completed at $(cat "$dir/last_sync.txt")"
+}
+
 # ── main ─────────────────────────────────────────────────────────────────────
 
-ALL_GROUPS=(bangs bridges url-cleaner url-shorteners ublock)
+ALL_GROUPS=(bangs bridges url-cleaner url-shorteners ublock popular-sites)
 SELECTED_GROUPS=()
 
 while [[ $# -gt 0 ]]; do
@@ -129,6 +156,7 @@ for group in "${SELECTED_GROUPS[@]}"; do
     url-cleaner)    update_url_cleaner    || ((FAILURES++)) ;;
     url-shorteners) update_url_shorteners || ((FAILURES++)) ;;
     ublock)         update_ublock         || ((FAILURES++)) ;;
+    popular-sites)  update_popular_sites  || ((FAILURES++)) ;;
     *) err "Unknown group: $group"; ((FAILURES++)) ;;
   esac
 done
