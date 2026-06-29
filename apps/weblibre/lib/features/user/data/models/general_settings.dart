@@ -94,6 +94,7 @@ enum TabBarLayout { withTitle, compact }
 enum DeleteBrowsingDataType {
   tabs('Open tabs'),
   history('Browsing history'),
+  recentSearches('Recent searches', 'Queries shown on the search page'),
   cookies('Cookies and site data', 'You’ll be logged out of most sites'),
   cache('Cached images and files', 'Frees up storage space'),
   permissions('Site permissions'),

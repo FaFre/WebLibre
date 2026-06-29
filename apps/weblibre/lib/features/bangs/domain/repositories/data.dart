@@ -142,6 +142,10 @@ class BangDataRepository extends _$BangDataRepository {
         .removeSearchEntry(searchQuery);
   }
 
+  Future<int> clearSearchHistory() {
+    return ref.read(bangDatabaseProvider).bangHistory.deleteAll();
+  }
+
   Future<int> resetFrequencies() {
     return ref.read(bangDatabaseProvider).bangFrequency.deleteAll();
   }

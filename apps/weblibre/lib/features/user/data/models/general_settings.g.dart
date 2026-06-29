@@ -1204,6 +1204,7 @@ const _$RefreshRateModeEnumMap = {
 const _$DeleteBrowsingDataTypeEnumMap = {
   DeleteBrowsingDataType.tabs: 'tabs',
   DeleteBrowsingDataType.history: 'history',
+  DeleteBrowsingDataType.recentSearches: 'recentSearches',
   DeleteBrowsingDataType.cookies: 'cookies',
   DeleteBrowsingDataType.cache: 'cache',
   DeleteBrowsingDataType.permissions: 'permissions',

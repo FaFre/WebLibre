@@ -19,6 +19,7 @@
  */
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 
@@ -48,6 +49,10 @@ class BrowserDataService extends _$BrowserDataService {
           case DeleteBrowsingDataType.history:
             await _service.deleteBrowsingHistory();
             await ref.read(tabDatabaseProvider).historyDao.clear();
+          case DeleteBrowsingDataType.recentSearches:
+            await ref
+                .read(bangDataRepositoryProvider.notifier)
+                .clearSearchHistory();
           case DeleteBrowsingDataType.cookies:
             await _service.deleteCookiesAndSiteData();
           case DeleteBrowsingDataType.cache:
