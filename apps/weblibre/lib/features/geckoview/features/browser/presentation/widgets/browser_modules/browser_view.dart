@@ -109,6 +109,17 @@ class _BrowserViewState extends ConsumerState<BrowserView>
   Offset _accumulatedDelta = Offset.zero;
 
   Future<void> _timerTick(Timer timer) async {
+    // Skip the (expensive) Gecko render-to-bitmap while a full-cover route
+    // (settings, tab tray, search, …) occludes the browser. The screenshot
+    // would force an off-screen render the user can't see and competes for the
+    // GPU with the overlay's transition animation. The timer is kept alive so
+    // capture resumes automatically once the browser is foregrounded again.
+    // See https://github.com/FaFre/WebLibre/issues/492.
+    final topRoute = ref.read(currentTopRouteProvider);
+    if (topRoute is! GoRoute || topRoute.name != BrowserRoute.name) {
+      return;
+    }
+
     await ref
         .read(selectedTabSessionProvider)
         .requestScreenshot(requireImageResult: false)
