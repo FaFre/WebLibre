@@ -180,16 +180,27 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
     final topRoute = ref.watch(currentTopRouteProvider);
     final androidInfoAsync = ref.watch(androidDeviceInfoProvider);
+    final unmountGeckoViewOffRoute = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.unmountGeckoViewOffRoute,
+      ),
+    );
 
     final isGeckoViewVisible = androidInfoAsync.when(
       data: (androidInfo) {
+        final isOnBrowserRoute =
+            topRoute is GoRoute && topRoute.name == BrowserRoute.name;
+
         if (androidInfo == null) {
           // Not Android, always show GeckoView based on route
-          return topRoute is GoRoute && topRoute.name == BrowserRoute.name;
+          return isOnBrowserRoute;
         }
-        // Android: only apply visibility fix on Android 12 and lower (API <= 31)
-        if (androidInfo.sdkInt <= 31) {
-          return topRoute is GoRoute && topRoute.name == BrowserRoute.name;
+        // Android 12 and lower (API <= 31): always unmount off-route to work
+        // around the native visibility bug. On Android 13+ the engine normally
+        // stays mounted to avoid reload/flicker, unless the developer setting
+        // opts into the same off-route unmounting.
+        if (androidInfo.sdkInt <= 31 || unmountGeckoViewOffRoute) {
+          return isOnBrowserRoute;
         }
         // Android 13+: always show GeckoView
         return true;

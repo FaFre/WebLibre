@@ -295,6 +295,10 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
       'desktopModeSites': settings['desktopModeSites']
           ?.readAs(DriftSqlType.string, db.typeMapping)
           .mapNotNull(jsonDecode),
+      'unmountGeckoViewOffRoute': settings['unmountGeckoViewOffRoute']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
     });
   }
 

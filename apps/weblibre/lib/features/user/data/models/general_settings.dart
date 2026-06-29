@@ -205,6 +205,15 @@ class GeneralSettings with FastEquatable {
   /// overriding [globalDesktopMode] for that visit. See `hostMatchesRule`.
   final List<String> desktopModeSites;
 
+  /// Developer setting: when true, the GeckoView is unmounted whenever a
+  /// full-cover route (settings, tab tray, search, …) is on top, freeing the
+  /// engine's resources while it is occluded. On Android 12 and lower (API
+  /// <= 31) this behavior is always applied to work around a native
+  /// visibility bug; on Android 13+ the engine normally stays mounted to
+  /// avoid reload/flicker, and this flag opts into the off-route unmounting
+  /// there too. Defaults to false.
+  final bool unmountGeckoViewOffRoute;
+
   GeneralSettings({
     required this.themeMode,
     required this.uiScaleFactor,
@@ -269,6 +278,7 @@ class GeneralSettings with FastEquatable {
     required this.pureBlack,
     required this.globalDesktopMode,
     required this.desktopModeSites,
+    required this.unmountGeckoViewOffRoute,
   });
 
   GeneralSettings.withDefaults({
@@ -335,6 +345,7 @@ class GeneralSettings with FastEquatable {
     bool? pureBlack,
     bool? globalDesktopMode,
     List<String>? desktopModeSites,
+    bool? unmountGeckoViewOffRoute,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        uiScaleFactor = uiScaleFactor ?? defaultUiScaleFactor,
        disableAnimations = disableAnimations ?? false,
@@ -410,7 +421,8 @@ class GeneralSettings with FastEquatable {
        acceptSuggestionOnSubmit = acceptSuggestionOnSubmit ?? false,
        pureBlack = pureBlack ?? false,
        globalDesktopMode = globalDesktopMode ?? false,
-       desktopModeSites = desktopModeSites ?? const [];
+       desktopModeSites = desktopModeSites ?? const [],
+       unmountGeckoViewOffRoute = unmountGeckoViewOffRoute ?? false;
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) {
     // Migrate legacy `newTabPosition` setting to direction settings.
@@ -551,5 +563,6 @@ class GeneralSettings with FastEquatable {
     pureBlack,
     globalDesktopMode,
     desktopModeSites,
+    unmountGeckoViewOffRoute,
   ];
 }

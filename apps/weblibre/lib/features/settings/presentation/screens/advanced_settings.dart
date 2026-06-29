@@ -34,9 +34,11 @@ import 'package:weblibre/features/settings/presentation/dialogs/user_agent_resta
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -80,6 +82,12 @@ const List<SettingsSectionDefinition> advancedSettingsSections = [
     title: 'Developer Tools',
     keywords: ['debug'],
     entries: [
+      SettingsEntryDefinition(
+        title: 'Unmount Engine Off-Screen',
+        subtitle: 'Free the web engine when an overlay is on top',
+        keywords: ['geckoview', 'memory', 'performance', 'suspend'],
+        child: _UnmountGeckoViewOffRouteTile(),
+      ),
       SettingsEntryDefinition(
         title: 'Icon Cache',
         subtitle: 'Stored favicons',
@@ -246,6 +254,39 @@ class _ExperimentalSettingsTile extends StatelessWidget {
       trailing: const Icon(Icons.chevron_right),
       onTap: () async {
         await ExperimentalSettingsRoute().push(context);
+      },
+    );
+  }
+}
+
+class _UnmountGeckoViewOffRouteTile extends HookConsumerWidget {
+  const _UnmountGeckoViewOffRouteTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unmountGeckoViewOffRoute = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.unmountGeckoViewOffRoute,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Unmount Engine Off-Screen'),
+      subtitle: const Text(
+        'Unmount the web engine while a full-screen overlay (settings, tabs, '
+        'search) is on top, freeing its resources. On Android 12 and lower '
+        'this is always done; enabling it applies the same behavior on '
+        'Android 13+, which may cause the page to reload when returning.',
+      ),
+      secondary: const Icon(Icons.memory),
+      value: unmountGeckoViewOffRoute,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.unmountGeckoViewOffRoute(value),
+            );
       },
     );
   }
