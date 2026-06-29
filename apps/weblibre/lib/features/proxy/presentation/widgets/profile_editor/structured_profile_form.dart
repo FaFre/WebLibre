@@ -117,6 +117,12 @@ class _SectionFields extends StatelessWidget {
               controller: controllers[field.key]!,
               onChanged: (value) => onChanged(field.key, value),
             )
+          else if (field.isChoice)
+            _ChoiceField(
+              field: field,
+              controller: controllers[field.key]!,
+              onChanged: (value) => onChanged(field.key, value),
+            )
           else if (field.isSecret)
             ObscurableTextField(
               controller: controllers[field.key],
@@ -292,6 +298,47 @@ class _BooleanField extends HookWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ChoiceField extends HookWidget {
+  final SingboxProxyFormField field;
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+
+  const _ChoiceField({
+    required this.field,
+    required this.controller,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final allowedValues = field.allowedValues ?? const <String>[];
+    final value = useListenableSelector(
+      controller,
+      () => allowedValues.contains(controller.text) ? controller.text : null,
+    );
+
+    return DropdownButtonFormField<String>(
+      initialValue: value,
+      decoration: InputDecoration(
+        labelText: field.required ? '${field.label} *' : field.label,
+        helperText: field.helperText,
+        helperMaxLines: 3,
+        border: const OutlineInputBorder(),
+      ),
+      items: [
+        for (final option in allowedValues)
+          DropdownMenuItem(value: option, child: Text(option)),
+      ],
+      onChanged: (selected) {
+        if (selected != null) {
+          controller.text = selected;
+          onChanged(selected);
+        }
+      },
     );
   }
 }

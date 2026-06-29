@@ -139,7 +139,9 @@ const singboxProxyFormSpecs = <SingboxProxyProfileType, SingboxProxyFormSpec>{
         key: 'version',
         label: 'SOCKS Version',
         defaultValue: '5',
-        kind: SingboxFieldKind.integer,
+        // sing-box expects this as a JSON string enum, not a number.
+        kind: SingboxFieldKind.choice,
+        allowedValues: ['5', '4a', '4'],
       ),
       _usernameField,
       _optionalPasswordField,

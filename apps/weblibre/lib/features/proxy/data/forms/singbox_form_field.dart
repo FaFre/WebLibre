@@ -26,6 +26,12 @@ enum SingboxFieldKind {
   port,
   boolean,
   stringList,
+
+  /// A value constrained to [SingboxProxyFormField.allowedValues] and always
+  /// serialized as a JSON string. Use for sing-box string enums such as the
+  /// SOCKS `version` field, whose accepted values ("4", "4a", "5") are
+  /// string-typed even when numeric-looking.
+  choice,
 }
 
 class SingboxProxyFormField {
@@ -39,6 +45,10 @@ class SingboxProxyFormField {
   final int? minValue;
   final int? maxValue;
 
+  /// Permitted values for a [SingboxFieldKind.choice] field, rendered as a
+  /// dropdown and enforced during validation.
+  final List<String>? allowedValues;
+
   const SingboxProxyFormField({
     required this.key,
     required this.label,
@@ -49,6 +59,7 @@ class SingboxProxyFormField {
     this.exactListLength,
     this.minValue,
     this.maxValue,
+    this.allowedValues,
   });
 
   bool get isSecret => kind == SingboxFieldKind.secret;
@@ -58,6 +69,7 @@ class SingboxProxyFormField {
   bool get isPort => kind == SingboxFieldKind.port;
   bool get isBoolean => kind == SingboxFieldKind.boolean;
   bool get isStringList => kind == SingboxFieldKind.stringList;
+  bool get isChoice => kind == SingboxFieldKind.choice;
 }
 
 /// Shared parsing of boolean form values. Returns null when the text doesn't

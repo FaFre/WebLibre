@@ -72,6 +72,12 @@ class SingboxProxyFormSpec {
       if (field.isBoolean && value.isNotEmpty && parseFormBool(value) == null) {
         return '${field.label} must be true or false.';
       }
+      if (field.isChoice && value.isNotEmpty) {
+        final allowedValues = field.allowedValues;
+        if (allowedValues != null && !allowedValues.contains(value)) {
+          return '${field.label} must be one of: ${allowedValues.join(', ')}.';
+        }
+      }
     }
 
     return null;

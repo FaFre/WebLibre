@@ -30,6 +30,34 @@ void main() {
       expect(secrets, {'password': 'secret'});
     });
 
+    test('serializes SOCKS version as a JSON string', () {
+      final spec = singboxProxyFormSpecs[SingboxProxyProfileType.socks]!;
+      final values = {
+        'server': '127.0.0.1',
+        'server_port': '9050',
+        'version': '5',
+      };
+
+      expect(spec.validate(values), isNull);
+
+      final config = jsonDecode(spec.toConfigJson(values));
+
+      // sing-box rejects a numeric version; it must be the string "5".
+      expect(config['version'], '5');
+      expect(config['version'], isA<String>());
+    });
+
+    test('rejects an out-of-range SOCKS version', () {
+      final spec = singboxProxyFormSpecs[SingboxProxyProfileType.socks]!;
+      final values = {
+        'server': '127.0.0.1',
+        'server_port': '9050',
+        'version': '6',
+      };
+
+      expect(spec.validate(values), isNotNull);
+    });
+
     test('hydrates structured values from public and secret JSON', () {
       final spec = singboxProxyFormSpecs[SingboxProxyProfileType.vless]!;
 
