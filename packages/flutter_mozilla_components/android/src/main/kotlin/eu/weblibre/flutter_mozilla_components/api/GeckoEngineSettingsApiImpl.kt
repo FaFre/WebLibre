@@ -127,17 +127,16 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
 
     /**
      * Creates a custom tracking protection policy based on user settings.
-     * Matches Fenix's implementation where AD, ANALYTICS, SOCIAL, and MOZILLA_SOCIAL
-     * are always blocked, while other categories are configurable.
      */
     private fun createCustomTrackingProtectionPolicy(settings: GeckoEngineSettings): TrackingProtectionPolicy {
-        // Always include these categories (not user-configurable, matches Fenix)
-        val categories = mutableListOf(
-            TrackingCategory.AD,
-            TrackingCategory.ANALYTICS,
-            TrackingCategory.SOCIAL,
-            TrackingCategory.MOZILLA_SOCIAL,
-        )
+        val categories = mutableListOf<TrackingCategory>()
+
+        if (settings.blockAdsAnalyticsSocialTrackers != false) {
+            categories.add(TrackingCategory.AD)
+            categories.add(TrackingCategory.ANALYTICS)
+            categories.add(TrackingCategory.SOCIAL)
+            categories.add(TrackingCategory.MOZILLA_SOCIAL)
+        }
 
         // Add configurable categories
         if (settings.blockTrackingContent == true) {

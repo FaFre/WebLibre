@@ -3455,6 +3455,7 @@ class GeckoEngineSettings {
     this.dohSettings,
     this.fingerprintingProtectionOverrides,
     this.locales,
+    this.useContentBlockingDatabase,
     this.blockCookies,
     this.customCookiePolicy,
     this.blockTrackingContent,
@@ -3466,6 +3467,7 @@ class GeckoEngineSettings {
     this.suspectedFingerprintersScope,
     this.allowListBaseline,
     this.allowListConvenience,
+    this.blockAdsAnalyticsSocialTrackers,
     this.webFontsEnabled,
     this.automaticFontSizeAdjustment,
     this.fontSizeFactor,
@@ -3515,6 +3517,10 @@ class GeckoEngineSettings {
 
   List<String>? locales;
 
+  /// Use GeckoView's content-blocking database for tracking protection.
+  /// This is applied when the engine is created and requires app restart.
+  bool? useContentBlockingDatabase;
+
   /// Master toggle for cookie blocking in Custom mode
   bool? blockCookies;
 
@@ -3548,6 +3554,9 @@ class GeckoEngineSettings {
 
   /// Allow convenience tracking protection exceptions (fixes minor issues)
   bool? allowListConvenience;
+
+  /// Block advertising, analytics, social, and Mozilla social trackers
+  bool? blockAdsAnalyticsSocialTrackers;
 
   bool? webFontsEnabled;
 
@@ -3597,6 +3606,7 @@ class GeckoEngineSettings {
       dohSettings,
       fingerprintingProtectionOverrides,
       locales,
+      useContentBlockingDatabase,
       blockCookies,
       customCookiePolicy,
       blockTrackingContent,
@@ -3608,6 +3618,7 @@ class GeckoEngineSettings {
       suspectedFingerprintersScope,
       allowListBaseline,
       allowListConvenience,
+      blockAdsAnalyticsSocialTrackers,
       webFontsEnabled,
       automaticFontSizeAdjustment,
       fontSizeFactor,
@@ -3648,32 +3659,34 @@ class GeckoEngineSettings {
       dohSettings: result[13] as DohSettings?,
       fingerprintingProtectionOverrides: result[14] as String?,
       locales: (result[15] as List<Object?>?)?.cast<String>(),
-      blockCookies: result[16] as bool?,
-      customCookiePolicy: result[17] as CustomCookiePolicy?,
-      blockTrackingContent: result[18] as bool?,
-      trackingContentScope: result[19] as TrackingScope?,
-      blockCryptominers: result[20] as bool?,
-      blockFingerprinters: result[21] as bool?,
-      blockRedirectTrackers: result[22] as bool?,
-      blockSuspectedFingerprinters: result[23] as bool?,
-      suspectedFingerprintersScope: result[24] as TrackingScope?,
-      allowListBaseline: result[25] as bool?,
-      allowListConvenience: result[26] as bool?,
-      webFontsEnabled: result[27] as bool?,
-      automaticFontSizeAdjustment: result[28] as bool?,
-      fontSizeFactor: result[29] as double?,
-      fontInflationEnabled: result[30] as bool?,
-      displayDensityOverride: result[31] as double?,
-      screenWidthOverride: result[32] as int?,
-      screenHeightOverride: result[33] as int?,
-      inputAutoZoomEnabled: result[34] as bool?,
-      fissionEnabled: result[35] as bool?,
-      isolatedProcessEnabled: result[36] as bool?,
-      appZygoteProcessEnabled: result[37] as bool?,
-      extensionsWebAPIEnabled: result[38] as bool?,
-      lnaBlocking: result[39] as bool?,
-      lnaBlockTrackers: result[40] as bool?,
-      lnaEnabled: result[41] as bool?,
+      useContentBlockingDatabase: result[16] as bool?,
+      blockCookies: result[17] as bool?,
+      customCookiePolicy: result[18] as CustomCookiePolicy?,
+      blockTrackingContent: result[19] as bool?,
+      trackingContentScope: result[20] as TrackingScope?,
+      blockCryptominers: result[21] as bool?,
+      blockFingerprinters: result[22] as bool?,
+      blockRedirectTrackers: result[23] as bool?,
+      blockSuspectedFingerprinters: result[24] as bool?,
+      suspectedFingerprintersScope: result[25] as TrackingScope?,
+      allowListBaseline: result[26] as bool?,
+      allowListConvenience: result[27] as bool?,
+      blockAdsAnalyticsSocialTrackers: result[28] as bool?,
+      webFontsEnabled: result[29] as bool?,
+      automaticFontSizeAdjustment: result[30] as bool?,
+      fontSizeFactor: result[31] as double?,
+      fontInflationEnabled: result[32] as bool?,
+      displayDensityOverride: result[33] as double?,
+      screenWidthOverride: result[34] as int?,
+      screenHeightOverride: result[35] as int?,
+      inputAutoZoomEnabled: result[36] as bool?,
+      fissionEnabled: result[37] as bool?,
+      isolatedProcessEnabled: result[38] as bool?,
+      appZygoteProcessEnabled: result[39] as bool?,
+      extensionsWebAPIEnabled: result[40] as bool?,
+      lnaBlocking: result[41] as bool?,
+      lnaBlockTrackers: result[42] as bool?,
+      lnaEnabled: result[43] as bool?,
     );
   }
 
@@ -3686,7 +3699,7 @@ class GeckoEngineSettings {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(javascriptEnabled, other.javascriptEnabled) && _deepEquals(trackingProtectionPolicy, other.trackingProtectionPolicy) && _deepEquals(httpsOnlyMode, other.httpsOnlyMode) && _deepEquals(globalPrivacyControlEnabled, other.globalPrivacyControlEnabled) && _deepEquals(preferredColorScheme, other.preferredColorScheme) && _deepEquals(cookieBannerHandlingMode, other.cookieBannerHandlingMode) && _deepEquals(cookieBannerHandlingModePrivateBrowsing, other.cookieBannerHandlingModePrivateBrowsing) && _deepEquals(cookieBannerHandlingGlobalRules, other.cookieBannerHandlingGlobalRules) && _deepEquals(cookieBannerHandlingGlobalRulesSubFrames, other.cookieBannerHandlingGlobalRulesSubFrames) && _deepEquals(webContentIsolationStrategy, other.webContentIsolationStrategy) && _deepEquals(userAgent, other.userAgent) && _deepEquals(contentBlocking, other.contentBlocking) && _deepEquals(enterpriseRootsEnabled, other.enterpriseRootsEnabled) && _deepEquals(dohSettings, other.dohSettings) && _deepEquals(fingerprintingProtectionOverrides, other.fingerprintingProtectionOverrides) && _deepEquals(locales, other.locales) && _deepEquals(blockCookies, other.blockCookies) && _deepEquals(customCookiePolicy, other.customCookiePolicy) && _deepEquals(blockTrackingContent, other.blockTrackingContent) && _deepEquals(trackingContentScope, other.trackingContentScope) && _deepEquals(blockCryptominers, other.blockCryptominers) && _deepEquals(blockFingerprinters, other.blockFingerprinters) && _deepEquals(blockRedirectTrackers, other.blockRedirectTrackers) && _deepEquals(blockSuspectedFingerprinters, other.blockSuspectedFingerprinters) && _deepEquals(suspectedFingerprintersScope, other.suspectedFingerprintersScope) && _deepEquals(allowListBaseline, other.allowListBaseline) && _deepEquals(allowListConvenience, other.allowListConvenience) && _deepEquals(webFontsEnabled, other.webFontsEnabled) && _deepEquals(automaticFontSizeAdjustment, other.automaticFontSizeAdjustment) && _deepEquals(fontSizeFactor, other.fontSizeFactor) && _deepEquals(fontInflationEnabled, other.fontInflationEnabled) && _deepEquals(displayDensityOverride, other.displayDensityOverride) && _deepEquals(screenWidthOverride, other.screenWidthOverride) && _deepEquals(screenHeightOverride, other.screenHeightOverride) && _deepEquals(inputAutoZoomEnabled, other.inputAutoZoomEnabled) && _deepEquals(fissionEnabled, other.fissionEnabled) && _deepEquals(isolatedProcessEnabled, other.isolatedProcessEnabled) && _deepEquals(appZygoteProcessEnabled, other.appZygoteProcessEnabled) && _deepEquals(extensionsWebAPIEnabled, other.extensionsWebAPIEnabled) && _deepEquals(lnaBlocking, other.lnaBlocking) && _deepEquals(lnaBlockTrackers, other.lnaBlockTrackers) && _deepEquals(lnaEnabled, other.lnaEnabled);
+    return _deepEquals(javascriptEnabled, other.javascriptEnabled) && _deepEquals(trackingProtectionPolicy, other.trackingProtectionPolicy) && _deepEquals(httpsOnlyMode, other.httpsOnlyMode) && _deepEquals(globalPrivacyControlEnabled, other.globalPrivacyControlEnabled) && _deepEquals(preferredColorScheme, other.preferredColorScheme) && _deepEquals(cookieBannerHandlingMode, other.cookieBannerHandlingMode) && _deepEquals(cookieBannerHandlingModePrivateBrowsing, other.cookieBannerHandlingModePrivateBrowsing) && _deepEquals(cookieBannerHandlingGlobalRules, other.cookieBannerHandlingGlobalRules) && _deepEquals(cookieBannerHandlingGlobalRulesSubFrames, other.cookieBannerHandlingGlobalRulesSubFrames) && _deepEquals(webContentIsolationStrategy, other.webContentIsolationStrategy) && _deepEquals(userAgent, other.userAgent) && _deepEquals(contentBlocking, other.contentBlocking) && _deepEquals(enterpriseRootsEnabled, other.enterpriseRootsEnabled) && _deepEquals(dohSettings, other.dohSettings) && _deepEquals(fingerprintingProtectionOverrides, other.fingerprintingProtectionOverrides) && _deepEquals(locales, other.locales) && _deepEquals(useContentBlockingDatabase, other.useContentBlockingDatabase) && _deepEquals(blockCookies, other.blockCookies) && _deepEquals(customCookiePolicy, other.customCookiePolicy) && _deepEquals(blockTrackingContent, other.blockTrackingContent) && _deepEquals(trackingContentScope, other.trackingContentScope) && _deepEquals(blockCryptominers, other.blockCryptominers) && _deepEquals(blockFingerprinters, other.blockFingerprinters) && _deepEquals(blockRedirectTrackers, other.blockRedirectTrackers) && _deepEquals(blockSuspectedFingerprinters, other.blockSuspectedFingerprinters) && _deepEquals(suspectedFingerprintersScope, other.suspectedFingerprintersScope) && _deepEquals(allowListBaseline, other.allowListBaseline) && _deepEquals(allowListConvenience, other.allowListConvenience) && _deepEquals(blockAdsAnalyticsSocialTrackers, other.blockAdsAnalyticsSocialTrackers) && _deepEquals(webFontsEnabled, other.webFontsEnabled) && _deepEquals(automaticFontSizeAdjustment, other.automaticFontSizeAdjustment) && _deepEquals(fontSizeFactor, other.fontSizeFactor) && _deepEquals(fontInflationEnabled, other.fontInflationEnabled) && _deepEquals(displayDensityOverride, other.displayDensityOverride) && _deepEquals(screenWidthOverride, other.screenWidthOverride) && _deepEquals(screenHeightOverride, other.screenHeightOverride) && _deepEquals(inputAutoZoomEnabled, other.inputAutoZoomEnabled) && _deepEquals(fissionEnabled, other.fissionEnabled) && _deepEquals(isolatedProcessEnabled, other.isolatedProcessEnabled) && _deepEquals(appZygoteProcessEnabled, other.appZygoteProcessEnabled) && _deepEquals(extensionsWebAPIEnabled, other.extensionsWebAPIEnabled) && _deepEquals(lnaBlocking, other.lnaBlocking) && _deepEquals(lnaBlockTrackers, other.lnaBlockTrackers) && _deepEquals(lnaEnabled, other.lnaEnabled);
   }
 
   @override

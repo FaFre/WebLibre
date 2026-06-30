@@ -48,6 +48,12 @@ const List<SettingsSectionDefinition> privacySecuritySettingsSections = [
         child: _EnhancedTrackingProtectionSection(),
       ),
       SettingsEntryDefinition(
+        title: 'Content Blocking Database',
+        subtitle: 'Use GeckoView blocker lists for ETP categories',
+        keywords: ['ads', 'trackers', 'content blocking'],
+        child: _ContentBlockingDatabaseTile(),
+      ),
+      SettingsEntryDefinition(
         title: 'Bounce Tracking Protection',
         subtitle: 'Remove tracking state left by redirect-based trackers',
         keywords: ['redirect trackers'],
@@ -680,14 +686,14 @@ class _EnhancedTrackingProtectionSection extends HookConsumerWidget {
                   value: TrackingProtectionPolicy.recommended,
                   title: Text('Standard'),
                   subtitle: Text(
-                    'Pages will load normally, but block fewer trackers.',
+                    'Balances protection and compatibility by blocking fewer tracker categories.',
                   ),
                 ),
                 RadioListTile<TrackingProtectionPolicy>.adaptive(
                   value: TrackingProtectionPolicy.strict,
                   title: Text('Strict'),
                   subtitle: Text(
-                    'Stronger tracking protection and faster performance, but some sites may not work properly.',
+                    'Blocks more tracker categories, including tracking content, but may break some sites.',
                   ),
                 ),
                 RadioListTile<TrackingProtectionPolicy>.adaptive(
@@ -702,6 +708,39 @@ class _EnhancedTrackingProtectionSection extends HookConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ContentBlockingDatabaseTile extends HookConsumerWidget {
+  const _ContentBlockingDatabaseTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final useContentBlockingDatabase = ref.watch(
+      engineSettingsWithDefaultsProvider.select(
+        (s) => s.useContentBlockingDatabase,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Content Blocking Database'),
+      subtitle: const Text(
+        'Use GeckoView blocker lists for ETP categories such as ads, analytics, and social trackers. Requires app restart.',
+      ),
+      secondary: const Icon(Icons.storage),
+      value: useContentBlockingDatabase,
+      onChanged: (value) async {
+        await ref
+            .read(saveEngineSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.useContentBlockingDatabase(value),
+            );
+        if (context.mounted) {
+          await _showRestartDialog(context, ref);
+        }
+      },
     );
   }
 }

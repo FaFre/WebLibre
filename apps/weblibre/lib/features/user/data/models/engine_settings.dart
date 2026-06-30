@@ -80,6 +80,9 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   @override
   List<String> get locales => super.locales!;
 
+  @override
+  bool get useContentBlockingDatabase => super.useContentBlockingDatabase!;
+
   // Custom Tracking Protection overrides
   @override
   bool get blockCookies => super.blockCookies!;
@@ -104,6 +107,9 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   bool get allowListBaseline => super.allowListBaseline!;
   @override
   bool get allowListConvenience => super.allowListConvenience!;
+  @override
+  bool get blockAdsAnalyticsSocialTrackers =>
+      super.blockAdsAnalyticsSocialTrackers!;
 
   // Web Content Settings
   @override
@@ -196,6 +202,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required this.safeBrowsingMalwareEnabled,
     required this.safeBrowsingPhishingEnabled,
     required super.locales,
+    required super.useContentBlockingDatabase,
     required super.blockCookies,
     required super.customCookiePolicy,
     required super.blockTrackingContent,
@@ -207,6 +214,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required super.suspectedFingerprintersScope,
     required super.allowListBaseline,
     required super.allowListConvenience,
+    required super.blockAdsAnalyticsSocialTrackers,
     required super.webFontsEnabled,
     required super.automaticFontSizeAdjustment,
     required super.fontSizeFactor,
@@ -250,6 +258,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     bool? safeBrowsingMalwareEnabled,
     bool? safeBrowsingPhishingEnabled,
     List<String>? locales,
+    bool? useContentBlockingDatabase,
     bool? blockCookies,
     CustomCookiePolicy? customCookiePolicy,
     bool? blockTrackingContent,
@@ -261,6 +270,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     TrackingScope? suspectedFingerprintersScope,
     bool? allowListBaseline,
     bool? allowListConvenience,
+    bool? blockAdsAnalyticsSocialTrackers,
     bool? webFontsEnabled,
     bool? automaticFontSizeAdjustment,
     double? fontSizeFactor,
@@ -318,6 +328,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
              WidgetsBinding.instance.platformDispatcher.locales
                  .map((x) => x.toLanguageTag())
                  .toList(),
+         useContentBlockingDatabase: useContentBlockingDatabase ?? true,
          blockCookies: blockCookies ?? true,
          customCookiePolicy:
              customCookiePolicy ?? CustomCookiePolicy.totalProtection,
@@ -331,6 +342,8 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
              suspectedFingerprintersScope ?? TrackingScope.all,
          allowListBaseline: allowListBaseline ?? true,
          allowListConvenience: allowListConvenience ?? false,
+         blockAdsAnalyticsSocialTrackers:
+             blockAdsAnalyticsSocialTrackers ?? true,
          webFontsEnabled: webFontsEnabled ?? true,
          automaticFontSizeAdjustment: automaticFontSizeAdjustment ?? true,
          fontSizeFactor: fontSizeFactor ?? 1.0,
@@ -398,6 +411,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     safeBrowsingMalwareEnabled,
     safeBrowsingPhishingEnabled,
     locales,
+    useContentBlockingDatabase,
     blockCookies,
     customCookiePolicy,
     blockTrackingContent,
@@ -409,6 +423,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     suspectedFingerprintersScope,
     allowListBaseline,
     allowListConvenience,
+    blockAdsAnalyticsSocialTrackers,
     webFontsEnabled,
     automaticFontSizeAdjustment,
     fontSizeFactor,

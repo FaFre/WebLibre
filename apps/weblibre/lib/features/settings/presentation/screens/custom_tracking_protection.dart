@@ -301,15 +301,26 @@ class _TrackersSection extends HookConsumerWidget {
     final blockRedirectTrackers = ref.watch(
       engineSettingsWithDefaultsProvider.select((s) => s.blockRedirectTrackers),
     );
+    final blockAdsAnalyticsSocialTrackers = ref.watch(
+      engineSettingsWithDefaultsProvider.select(
+        (s) => s.blockAdsAnalyticsSocialTrackers,
+      ),
+    );
 
     return Column(
       children: [
-        const ListTile(
-          title: Text('Always Blocked'),
-          subtitle: Text(
-            'Ads, analytics, social trackers, and Mozilla social trackers are always blocked in Custom mode.',
+        SwitchListTile.adaptive(
+          title: const Text('Ads, Analytics, and Social Trackers'),
+          subtitle: const Text(
+            'Block advertising, analytics, social, and Mozilla social tracker categories',
           ),
-          leading: Icon(MdiIcons.shieldLock),
+          secondary: const Icon(Icons.block),
+          value: blockAdsAnalyticsSocialTrackers,
+          onChanged: (value) async {
+            await ref
+                .read(saveEngineSettingsControllerProvider.notifier)
+                .save((s) => s.copyWith.blockAdsAnalyticsSocialTrackers(value));
+          },
         ),
         SwitchListTile.adaptive(
           title: const Text('Cryptominers'),

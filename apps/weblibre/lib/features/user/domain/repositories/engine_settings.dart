@@ -135,6 +135,8 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
       'locales': settings['locales']
           ?.readAs(DriftSqlType.string, db.typeMapping)
           .mapNotNull(jsonDecode),
+      'useContentBlockingDatabase': settings['useContentBlockingDatabase']
+          ?.readAs(DriftSqlType.bool, db.typeMapping),
       // Custom Tracking Protection
       'blockCookies': settings['blockCookies']?.readAs(
         DriftSqlType.bool,
@@ -176,6 +178,11 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
+      'blockAdsAnalyticsSocialTrackers':
+          settings['blockAdsAnalyticsSocialTrackers']?.readAs(
+            DriftSqlType.bool,
+            db.typeMapping,
+          ),
       // Web Content Settings
       'webFontsEnabled': settings['webFontsEnabled']?.readAs(
         DriftSqlType.bool,

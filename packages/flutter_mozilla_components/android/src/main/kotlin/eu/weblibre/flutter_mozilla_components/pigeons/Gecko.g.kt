@@ -3397,6 +3397,11 @@ data class GeckoEngineSettings (
   val dohSettings: DohSettings? = null,
   val fingerprintingProtectionOverrides: String? = null,
   val locales: List<String>? = null,
+  /**
+   * Use GeckoView's content-blocking database for tracking protection.
+   * This is applied when the engine is created and requires app restart.
+   */
+  val useContentBlockingDatabase: Boolean? = null,
   /** Master toggle for cookie blocking in Custom mode */
   val blockCookies: Boolean? = null,
   /** Cookie policy selection (only applies when blockCookies is true) */
@@ -3422,6 +3427,8 @@ data class GeckoEngineSettings (
   val allowListBaseline: Boolean? = null,
   /** Allow convenience tracking protection exceptions (fixes minor issues) */
   val allowListConvenience: Boolean? = null,
+  /** Block advertising, analytics, social, and Mozilla social trackers */
+  val blockAdsAnalyticsSocialTrackers: Boolean? = null,
   val webFontsEnabled: Boolean? = null,
   val automaticFontSizeAdjustment: Boolean? = null,
   val fontSizeFactor: Double? = null,
@@ -3457,33 +3464,35 @@ data class GeckoEngineSettings (
       val dohSettings = pigeonVar_list[13] as DohSettings?
       val fingerprintingProtectionOverrides = pigeonVar_list[14] as String?
       val locales = pigeonVar_list[15] as List<String>?
-      val blockCookies = pigeonVar_list[16] as Boolean?
-      val customCookiePolicy = pigeonVar_list[17] as CustomCookiePolicy?
-      val blockTrackingContent = pigeonVar_list[18] as Boolean?
-      val trackingContentScope = pigeonVar_list[19] as TrackingScope?
-      val blockCryptominers = pigeonVar_list[20] as Boolean?
-      val blockFingerprinters = pigeonVar_list[21] as Boolean?
-      val blockRedirectTrackers = pigeonVar_list[22] as Boolean?
-      val blockSuspectedFingerprinters = pigeonVar_list[23] as Boolean?
-      val suspectedFingerprintersScope = pigeonVar_list[24] as TrackingScope?
-      val allowListBaseline = pigeonVar_list[25] as Boolean?
-      val allowListConvenience = pigeonVar_list[26] as Boolean?
-      val webFontsEnabled = pigeonVar_list[27] as Boolean?
-      val automaticFontSizeAdjustment = pigeonVar_list[28] as Boolean?
-      val fontSizeFactor = pigeonVar_list[29] as Double?
-      val fontInflationEnabled = pigeonVar_list[30] as Boolean?
-      val displayDensityOverride = pigeonVar_list[31] as Double?
-      val screenWidthOverride = pigeonVar_list[32] as Long?
-      val screenHeightOverride = pigeonVar_list[33] as Long?
-      val inputAutoZoomEnabled = pigeonVar_list[34] as Boolean?
-      val fissionEnabled = pigeonVar_list[35] as Boolean?
-      val isolatedProcessEnabled = pigeonVar_list[36] as Boolean?
-      val appZygoteProcessEnabled = pigeonVar_list[37] as Boolean?
-      val extensionsWebAPIEnabled = pigeonVar_list[38] as Boolean?
-      val lnaBlocking = pigeonVar_list[39] as Boolean?
-      val lnaBlockTrackers = pigeonVar_list[40] as Boolean?
-      val lnaEnabled = pigeonVar_list[41] as Boolean?
-      return GeckoEngineSettings(javascriptEnabled, trackingProtectionPolicy, httpsOnlyMode, globalPrivacyControlEnabled, preferredColorScheme, cookieBannerHandlingMode, cookieBannerHandlingModePrivateBrowsing, cookieBannerHandlingGlobalRules, cookieBannerHandlingGlobalRulesSubFrames, webContentIsolationStrategy, userAgent, contentBlocking, enterpriseRootsEnabled, dohSettings, fingerprintingProtectionOverrides, locales, blockCookies, customCookiePolicy, blockTrackingContent, trackingContentScope, blockCryptominers, blockFingerprinters, blockRedirectTrackers, blockSuspectedFingerprinters, suspectedFingerprintersScope, allowListBaseline, allowListConvenience, webFontsEnabled, automaticFontSizeAdjustment, fontSizeFactor, fontInflationEnabled, displayDensityOverride, screenWidthOverride, screenHeightOverride, inputAutoZoomEnabled, fissionEnabled, isolatedProcessEnabled, appZygoteProcessEnabled, extensionsWebAPIEnabled, lnaBlocking, lnaBlockTrackers, lnaEnabled)
+      val useContentBlockingDatabase = pigeonVar_list[16] as Boolean?
+      val blockCookies = pigeonVar_list[17] as Boolean?
+      val customCookiePolicy = pigeonVar_list[18] as CustomCookiePolicy?
+      val blockTrackingContent = pigeonVar_list[19] as Boolean?
+      val trackingContentScope = pigeonVar_list[20] as TrackingScope?
+      val blockCryptominers = pigeonVar_list[21] as Boolean?
+      val blockFingerprinters = pigeonVar_list[22] as Boolean?
+      val blockRedirectTrackers = pigeonVar_list[23] as Boolean?
+      val blockSuspectedFingerprinters = pigeonVar_list[24] as Boolean?
+      val suspectedFingerprintersScope = pigeonVar_list[25] as TrackingScope?
+      val allowListBaseline = pigeonVar_list[26] as Boolean?
+      val allowListConvenience = pigeonVar_list[27] as Boolean?
+      val blockAdsAnalyticsSocialTrackers = pigeonVar_list[28] as Boolean?
+      val webFontsEnabled = pigeonVar_list[29] as Boolean?
+      val automaticFontSizeAdjustment = pigeonVar_list[30] as Boolean?
+      val fontSizeFactor = pigeonVar_list[31] as Double?
+      val fontInflationEnabled = pigeonVar_list[32] as Boolean?
+      val displayDensityOverride = pigeonVar_list[33] as Double?
+      val screenWidthOverride = pigeonVar_list[34] as Long?
+      val screenHeightOverride = pigeonVar_list[35] as Long?
+      val inputAutoZoomEnabled = pigeonVar_list[36] as Boolean?
+      val fissionEnabled = pigeonVar_list[37] as Boolean?
+      val isolatedProcessEnabled = pigeonVar_list[38] as Boolean?
+      val appZygoteProcessEnabled = pigeonVar_list[39] as Boolean?
+      val extensionsWebAPIEnabled = pigeonVar_list[40] as Boolean?
+      val lnaBlocking = pigeonVar_list[41] as Boolean?
+      val lnaBlockTrackers = pigeonVar_list[42] as Boolean?
+      val lnaEnabled = pigeonVar_list[43] as Boolean?
+      return GeckoEngineSettings(javascriptEnabled, trackingProtectionPolicy, httpsOnlyMode, globalPrivacyControlEnabled, preferredColorScheme, cookieBannerHandlingMode, cookieBannerHandlingModePrivateBrowsing, cookieBannerHandlingGlobalRules, cookieBannerHandlingGlobalRulesSubFrames, webContentIsolationStrategy, userAgent, contentBlocking, enterpriseRootsEnabled, dohSettings, fingerprintingProtectionOverrides, locales, useContentBlockingDatabase, blockCookies, customCookiePolicy, blockTrackingContent, trackingContentScope, blockCryptominers, blockFingerprinters, blockRedirectTrackers, blockSuspectedFingerprinters, suspectedFingerprintersScope, allowListBaseline, allowListConvenience, blockAdsAnalyticsSocialTrackers, webFontsEnabled, automaticFontSizeAdjustment, fontSizeFactor, fontInflationEnabled, displayDensityOverride, screenWidthOverride, screenHeightOverride, inputAutoZoomEnabled, fissionEnabled, isolatedProcessEnabled, appZygoteProcessEnabled, extensionsWebAPIEnabled, lnaBlocking, lnaBlockTrackers, lnaEnabled)
     }
   }
   fun toList(): List<Any?> {
@@ -3504,6 +3513,7 @@ data class GeckoEngineSettings (
       dohSettings,
       fingerprintingProtectionOverrides,
       locales,
+      useContentBlockingDatabase,
       blockCookies,
       customCookiePolicy,
       blockTrackingContent,
@@ -3515,6 +3525,7 @@ data class GeckoEngineSettings (
       suspectedFingerprintersScope,
       allowListBaseline,
       allowListConvenience,
+      blockAdsAnalyticsSocialTrackers,
       webFontsEnabled,
       automaticFontSizeAdjustment,
       fontSizeFactor,
@@ -3540,7 +3551,7 @@ data class GeckoEngineSettings (
       return true
     }
     val other = other as GeckoEngineSettings
-    return GeckoPigeonUtils.deepEquals(this.javascriptEnabled, other.javascriptEnabled) && GeckoPigeonUtils.deepEquals(this.trackingProtectionPolicy, other.trackingProtectionPolicy) && GeckoPigeonUtils.deepEquals(this.httpsOnlyMode, other.httpsOnlyMode) && GeckoPigeonUtils.deepEquals(this.globalPrivacyControlEnabled, other.globalPrivacyControlEnabled) && GeckoPigeonUtils.deepEquals(this.preferredColorScheme, other.preferredColorScheme) && GeckoPigeonUtils.deepEquals(this.cookieBannerHandlingMode, other.cookieBannerHandlingMode) && GeckoPigeonUtils.deepEquals(this.cookieBannerHandlingModePrivateBrowsing, other.cookieBannerHandlingModePrivateBrowsing) && GeckoPigeonUtils.deepEquals(this.cookieBannerHandlingGlobalRules, other.cookieBannerHandlingGlobalRules) && GeckoPigeonUtils.deepEquals(this.cookieBannerHandlingGlobalRulesSubFrames, other.cookieBannerHandlingGlobalRulesSubFrames) && GeckoPigeonUtils.deepEquals(this.webContentIsolationStrategy, other.webContentIsolationStrategy) && GeckoPigeonUtils.deepEquals(this.userAgent, other.userAgent) && GeckoPigeonUtils.deepEquals(this.contentBlocking, other.contentBlocking) && GeckoPigeonUtils.deepEquals(this.enterpriseRootsEnabled, other.enterpriseRootsEnabled) && GeckoPigeonUtils.deepEquals(this.dohSettings, other.dohSettings) && GeckoPigeonUtils.deepEquals(this.fingerprintingProtectionOverrides, other.fingerprintingProtectionOverrides) && GeckoPigeonUtils.deepEquals(this.locales, other.locales) && GeckoPigeonUtils.deepEquals(this.blockCookies, other.blockCookies) && GeckoPigeonUtils.deepEquals(this.customCookiePolicy, other.customCookiePolicy) && GeckoPigeonUtils.deepEquals(this.blockTrackingContent, other.blockTrackingContent) && GeckoPigeonUtils.deepEquals(this.trackingContentScope, other.trackingContentScope) && GeckoPigeonUtils.deepEquals(this.blockCryptominers, other.blockCryptominers) && GeckoPigeonUtils.deepEquals(this.blockFingerprinters, other.blockFingerprinters) && GeckoPigeonUtils.deepEquals(this.blockRedirectTrackers, other.blockRedirectTrackers) && GeckoPigeonUtils.deepEquals(this.blockSuspectedFingerprinters, other.blockSuspectedFingerprinters) && GeckoPigeonUtils.deepEquals(this.suspectedFingerprintersScope, other.suspectedFingerprintersScope) && GeckoPigeonUtils.deepEquals(this.allowListBaseline, other.allowListBaseline) && GeckoPigeonUtils.deepEquals(this.allowListConvenience, other.allowListConvenience) && GeckoPigeonUtils.deepEquals(this.webFontsEnabled, other.webFontsEnabled) && GeckoPigeonUtils.deepEquals(this.automaticFontSizeAdjustment, other.automaticFontSizeAdjustment) && GeckoPigeonUtils.deepEquals(this.fontSizeFactor, other.fontSizeFactor) && GeckoPigeonUtils.deepEquals(this.fontInflationEnabled, other.fontInflationEnabled) && GeckoPigeonUtils.deepEquals(this.displayDensityOverride, other.displayDensityOverride) && GeckoPigeonUtils.deepEquals(this.screenWidthOverride, other.screenWidthOverride) && GeckoPigeonUtils.deepEquals(this.screenHeightOverride, other.screenHeightOverride) && GeckoPigeonUtils.deepEquals(this.inputAutoZoomEnabled, other.inputAutoZoomEnabled) && GeckoPigeonUtils.deepEquals(this.fissionEnabled, other.fissionEnabled) && GeckoPigeonUtils.deepEquals(this.isolatedProcessEnabled, other.isolatedProcessEnabled) && GeckoPigeonUtils.deepEquals(this.appZygoteProcessEnabled, other.appZygoteProcessEnabled) && GeckoPigeonUtils.deepEquals(this.extensionsWebAPIEnabled, other.extensionsWebAPIEnabled) && GeckoPigeonUtils.deepEquals(this.lnaBlocking, other.lnaBlocking) && GeckoPigeonUtils.deepEquals(this.lnaBlockTrackers, other.lnaBlockTrackers) && GeckoPigeonUtils.deepEquals(this.lnaEnabled, other.lnaEnabled)
+    return GeckoPigeonUtils.deepEquals(this.javascriptEnabled, other.javascriptEnabled) && GeckoPigeonUtils.deepEquals(this.trackingProtectionPolicy, other.trackingProtectionPolicy) && GeckoPigeonUtils.deepEquals(this.httpsOnlyMode, other.httpsOnlyMode) && GeckoPigeonUtils.deepEquals(this.globalPrivacyControlEnabled, other.globalPrivacyControlEnabled) && GeckoPigeonUtils.deepEquals(this.preferredColorScheme, other.preferredColorScheme) && GeckoPigeonUtils.deepEquals(this.cookieBannerHandlingMode, other.cookieBannerHandlingMode) && GeckoPigeonUtils.deepEquals(this.cookieBannerHandlingModePrivateBrowsing, other.cookieBannerHandlingModePrivateBrowsing) && GeckoPigeonUtils.deepEquals(this.cookieBannerHandlingGlobalRules, other.cookieBannerHandlingGlobalRules) && GeckoPigeonUtils.deepEquals(this.cookieBannerHandlingGlobalRulesSubFrames, other.cookieBannerHandlingGlobalRulesSubFrames) && GeckoPigeonUtils.deepEquals(this.webContentIsolationStrategy, other.webContentIsolationStrategy) && GeckoPigeonUtils.deepEquals(this.userAgent, other.userAgent) && GeckoPigeonUtils.deepEquals(this.contentBlocking, other.contentBlocking) && GeckoPigeonUtils.deepEquals(this.enterpriseRootsEnabled, other.enterpriseRootsEnabled) && GeckoPigeonUtils.deepEquals(this.dohSettings, other.dohSettings) && GeckoPigeonUtils.deepEquals(this.fingerprintingProtectionOverrides, other.fingerprintingProtectionOverrides) && GeckoPigeonUtils.deepEquals(this.locales, other.locales) && GeckoPigeonUtils.deepEquals(this.useContentBlockingDatabase, other.useContentBlockingDatabase) && GeckoPigeonUtils.deepEquals(this.blockCookies, other.blockCookies) && GeckoPigeonUtils.deepEquals(this.customCookiePolicy, other.customCookiePolicy) && GeckoPigeonUtils.deepEquals(this.blockTrackingContent, other.blockTrackingContent) && GeckoPigeonUtils.deepEquals(this.trackingContentScope, other.trackingContentScope) && GeckoPigeonUtils.deepEquals(this.blockCryptominers, other.blockCryptominers) && GeckoPigeonUtils.deepEquals(this.blockFingerprinters, other.blockFingerprinters) && GeckoPigeonUtils.deepEquals(this.blockRedirectTrackers, other.blockRedirectTrackers) && GeckoPigeonUtils.deepEquals(this.blockSuspectedFingerprinters, other.blockSuspectedFingerprinters) && GeckoPigeonUtils.deepEquals(this.suspectedFingerprintersScope, other.suspectedFingerprintersScope) && GeckoPigeonUtils.deepEquals(this.allowListBaseline, other.allowListBaseline) && GeckoPigeonUtils.deepEquals(this.allowListConvenience, other.allowListConvenience) && GeckoPigeonUtils.deepEquals(this.blockAdsAnalyticsSocialTrackers, other.blockAdsAnalyticsSocialTrackers) && GeckoPigeonUtils.deepEquals(this.webFontsEnabled, other.webFontsEnabled) && GeckoPigeonUtils.deepEquals(this.automaticFontSizeAdjustment, other.automaticFontSizeAdjustment) && GeckoPigeonUtils.deepEquals(this.fontSizeFactor, other.fontSizeFactor) && GeckoPigeonUtils.deepEquals(this.fontInflationEnabled, other.fontInflationEnabled) && GeckoPigeonUtils.deepEquals(this.displayDensityOverride, other.displayDensityOverride) && GeckoPigeonUtils.deepEquals(this.screenWidthOverride, other.screenWidthOverride) && GeckoPigeonUtils.deepEquals(this.screenHeightOverride, other.screenHeightOverride) && GeckoPigeonUtils.deepEquals(this.inputAutoZoomEnabled, other.inputAutoZoomEnabled) && GeckoPigeonUtils.deepEquals(this.fissionEnabled, other.fissionEnabled) && GeckoPigeonUtils.deepEquals(this.isolatedProcessEnabled, other.isolatedProcessEnabled) && GeckoPigeonUtils.deepEquals(this.appZygoteProcessEnabled, other.appZygoteProcessEnabled) && GeckoPigeonUtils.deepEquals(this.extensionsWebAPIEnabled, other.extensionsWebAPIEnabled) && GeckoPigeonUtils.deepEquals(this.lnaBlocking, other.lnaBlocking) && GeckoPigeonUtils.deepEquals(this.lnaBlockTrackers, other.lnaBlockTrackers) && GeckoPigeonUtils.deepEquals(this.lnaEnabled, other.lnaEnabled)
   }
 
   override fun hashCode(): Int {
@@ -3561,6 +3572,7 @@ data class GeckoEngineSettings (
     result = 31 * result + GeckoPigeonUtils.deepHash(this.dohSettings)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.fingerprintingProtectionOverrides)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.locales)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.useContentBlockingDatabase)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.blockCookies)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.customCookiePolicy)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.blockTrackingContent)
@@ -3572,6 +3584,7 @@ data class GeckoEngineSettings (
     result = 31 * result + GeckoPigeonUtils.deepHash(this.suspectedFingerprintersScope)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.allowListBaseline)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.allowListConvenience)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.blockAdsAnalyticsSocialTrackers)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.webFontsEnabled)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.automaticFontSizeAdjustment)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.fontSizeFactor)

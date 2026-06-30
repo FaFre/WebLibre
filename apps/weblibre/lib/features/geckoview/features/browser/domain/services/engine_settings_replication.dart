@@ -57,7 +57,9 @@ bool _customEtpSettingsChanged(
       previous.suspectedFingerprintersScope !=
           current.suspectedFingerprintersScope ||
       previous.allowListBaseline != current.allowListBaseline ||
-      previous.allowListConvenience != current.allowListConvenience;
+      previous.allowListConvenience != current.allowListConvenience ||
+      previous.blockAdsAnalyticsSocialTrackers !=
+          current.blockAdsAnalyticsSocialTrackers;
 }
 
 Future<void> syncUBlockFilterLists(
@@ -248,6 +250,8 @@ class EngineSettingsReplicationService
                       settings.suspectedFingerprintersScope,
                   allowListBaseline: settings.allowListBaseline,
                   allowListConvenience: settings.allowListConvenience,
+                  blockAdsAnalyticsSocialTrackers:
+                      settings.blockAdsAnalyticsSocialTrackers,
                 );
               } else {
                 await _service.trackingProtectionPolicy(

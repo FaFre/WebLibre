@@ -77,6 +77,8 @@ abstract class _$EngineSettingsCWProxy {
 
   EngineSettings locales(List<String>? locales);
 
+  EngineSettings useContentBlockingDatabase(bool? useContentBlockingDatabase);
+
   EngineSettings blockCookies(bool? blockCookies);
 
   EngineSettings customCookiePolicy(CustomCookiePolicy? customCookiePolicy);
@@ -102,6 +104,10 @@ abstract class _$EngineSettingsCWProxy {
   EngineSettings allowListBaseline(bool? allowListBaseline);
 
   EngineSettings allowListConvenience(bool? allowListConvenience);
+
+  EngineSettings blockAdsAnalyticsSocialTrackers(
+    bool? blockAdsAnalyticsSocialTrackers,
+  );
 
   EngineSettings webFontsEnabled(bool? webFontsEnabled);
 
@@ -166,6 +172,7 @@ abstract class _$EngineSettingsCWProxy {
     bool safeBrowsingMalwareEnabled,
     bool safeBrowsingPhishingEnabled,
     List<String>? locales,
+    bool? useContentBlockingDatabase,
     bool? blockCookies,
     CustomCookiePolicy? customCookiePolicy,
     bool? blockTrackingContent,
@@ -177,6 +184,7 @@ abstract class _$EngineSettingsCWProxy {
     TrackingScope? suspectedFingerprintersScope,
     bool? allowListBaseline,
     bool? allowListConvenience,
+    bool? blockAdsAnalyticsSocialTrackers,
     bool? webFontsEnabled,
     bool? automaticFontSizeAdjustment,
     double? fontSizeFactor,
@@ -321,6 +329,10 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
   EngineSettings locales(List<String>? locales) => call(locales: locales);
 
   @override
+  EngineSettings useContentBlockingDatabase(bool? useContentBlockingDatabase) =>
+      call(useContentBlockingDatabase: useContentBlockingDatabase);
+
+  @override
   EngineSettings blockCookies(bool? blockCookies) =>
       call(blockCookies: blockCookies);
 
@@ -365,6 +377,11 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
   @override
   EngineSettings allowListConvenience(bool? allowListConvenience) =>
       call(allowListConvenience: allowListConvenience);
+
+  @override
+  EngineSettings blockAdsAnalyticsSocialTrackers(
+    bool? blockAdsAnalyticsSocialTrackers,
+  ) => call(blockAdsAnalyticsSocialTrackers: blockAdsAnalyticsSocialTrackers);
 
   @override
   EngineSettings webFontsEnabled(bool? webFontsEnabled) =>
@@ -462,6 +479,7 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? safeBrowsingMalwareEnabled = const $CopyWithPlaceholder(),
     Object? safeBrowsingPhishingEnabled = const $CopyWithPlaceholder(),
     Object? locales = const $CopyWithPlaceholder(),
+    Object? useContentBlockingDatabase = const $CopyWithPlaceholder(),
     Object? blockCookies = const $CopyWithPlaceholder(),
     Object? customCookiePolicy = const $CopyWithPlaceholder(),
     Object? blockTrackingContent = const $CopyWithPlaceholder(),
@@ -473,6 +491,7 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? suspectedFingerprintersScope = const $CopyWithPlaceholder(),
     Object? allowListBaseline = const $CopyWithPlaceholder(),
     Object? allowListConvenience = const $CopyWithPlaceholder(),
+    Object? blockAdsAnalyticsSocialTrackers = const $CopyWithPlaceholder(),
     Object? webFontsEnabled = const $CopyWithPlaceholder(),
     Object? automaticFontSizeAdjustment = const $CopyWithPlaceholder(),
     Object? fontSizeFactor = const $CopyWithPlaceholder(),
@@ -621,6 +640,11 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.locales
           // ignore: cast_nullable_to_non_nullable
           : locales as List<String>?,
+      useContentBlockingDatabase:
+          useContentBlockingDatabase == const $CopyWithPlaceholder()
+          ? _value.useContentBlockingDatabase
+          // ignore: cast_nullable_to_non_nullable
+          : useContentBlockingDatabase as bool?,
       blockCookies: blockCookies == const $CopyWithPlaceholder()
           ? _value.blockCookies
           // ignore: cast_nullable_to_non_nullable
@@ -668,6 +692,11 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.allowListConvenience
           // ignore: cast_nullable_to_non_nullable
           : allowListConvenience as bool?,
+      blockAdsAnalyticsSocialTrackers:
+          blockAdsAnalyticsSocialTrackers == const $CopyWithPlaceholder()
+          ? _value.blockAdsAnalyticsSocialTrackers
+          // ignore: cast_nullable_to_non_nullable
+          : blockAdsAnalyticsSocialTrackers as bool?,
       webFontsEnabled: webFontsEnabled == const $CopyWithPlaceholder()
           ? _value.webFontsEnabled
           // ignore: cast_nullable_to_non_nullable
@@ -814,6 +843,7 @@ EngineSettings _$EngineSettingsFromJson(
   locales: (json['locales'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
+  useContentBlockingDatabase: json['useContentBlockingDatabase'] as bool?,
   blockCookies: json['blockCookies'] as bool?,
   customCookiePolicy: $enumDecodeNullable(
     _$CustomCookiePolicyEnumMap,
@@ -834,6 +864,8 @@ EngineSettings _$EngineSettingsFromJson(
   ),
   allowListBaseline: json['allowListBaseline'] as bool?,
   allowListConvenience: json['allowListConvenience'] as bool?,
+  blockAdsAnalyticsSocialTrackers:
+      json['blockAdsAnalyticsSocialTrackers'] as bool?,
   webFontsEnabled: json['webFontsEnabled'] as bool?,
   automaticFontSizeAdjustment: json['automaticFontSizeAdjustment'] as bool?,
   fontSizeFactor: (json['fontSizeFactor'] as num?)?.toDouble(),
@@ -882,6 +914,7 @@ Map<String, dynamic> _$EngineSettingsToJson(
           .webContentIsolationStrategy]!,
   'enterpriseRootsEnabled': instance.enterpriseRootsEnabled,
   'locales': instance.locales,
+  'useContentBlockingDatabase': instance.useContentBlockingDatabase,
   'blockCookies': instance.blockCookies,
   'customCookiePolicy':
       _$CustomCookiePolicyEnumMap[instance.customCookiePolicy]!,
@@ -896,6 +929,7 @@ Map<String, dynamic> _$EngineSettingsToJson(
       _$TrackingScopeEnumMap[instance.suspectedFingerprintersScope]!,
   'allowListBaseline': instance.allowListBaseline,
   'allowListConvenience': instance.allowListConvenience,
+  'blockAdsAnalyticsSocialTrackers': instance.blockAdsAnalyticsSocialTrackers,
   'webFontsEnabled': instance.webFontsEnabled,
   'automaticFontSizeAdjustment': instance.automaticFontSizeAdjustment,
   'fontSizeFactor': instance.fontSizeFactor,

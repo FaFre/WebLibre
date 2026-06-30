@@ -57,6 +57,7 @@ class GeckoEngineSettingsService {
     TrackingScope? suspectedFingerprintersScope,
     bool? allowListBaseline,
     bool? allowListConvenience,
+    bool? blockAdsAnalyticsSocialTrackers,
   }) {
     return _api.updateRuntimeSettings(
       GeckoEngineSettings(
@@ -73,6 +74,7 @@ class GeckoEngineSettingsService {
         suspectedFingerprintersScope: suspectedFingerprintersScope,
         allowListBaseline: allowListBaseline,
         allowListConvenience: allowListConvenience,
+        blockAdsAnalyticsSocialTrackers: blockAdsAnalyticsSocialTrackers,
       ),
     );
   }

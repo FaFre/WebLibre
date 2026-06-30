@@ -1091,6 +1091,10 @@ class GeckoEngineSettings {
   final String? fingerprintingProtectionOverrides;
   final List<String>? locales;
 
+  /// Use GeckoView's content-blocking database for tracking protection.
+  /// This is applied when the engine is created and requires app restart.
+  final bool? useContentBlockingDatabase;
+
   // Custom Tracking Protection Settings
   /// Master toggle for cookie blocking in Custom mode
   final bool? blockCookies;
@@ -1125,6 +1129,9 @@ class GeckoEngineSettings {
 
   /// Allow convenience tracking protection exceptions (fixes minor issues)
   final bool? allowListConvenience;
+
+  /// Block advertising, analytics, social, and Mozilla social trackers
+  final bool? blockAdsAnalyticsSocialTrackers;
 
   // Web Content Settings
   final bool? webFontsEnabled;
@@ -1164,6 +1171,7 @@ class GeckoEngineSettings {
     this.dohSettings,
     this.fingerprintingProtectionOverrides,
     this.locales,
+    this.useContentBlockingDatabase,
     this.blockCookies,
     this.customCookiePolicy,
     this.blockTrackingContent,
@@ -1175,6 +1183,7 @@ class GeckoEngineSettings {
     this.suspectedFingerprintersScope,
     this.allowListBaseline,
     this.allowListConvenience,
+    this.blockAdsAnalyticsSocialTrackers,
     this.webFontsEnabled,
     this.automaticFontSizeAdjustment,
     this.fontSizeFactor,
