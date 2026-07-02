@@ -32,6 +32,7 @@ import 'package:weblibre/features/geckoview/features/top_sites/domain/entities/t
 import 'package:weblibre/features/geckoview/features/top_sites/domain/entities/top_site_source.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/domain/repositories/top_site_repository.dart';
+import 'package:weblibre/presentation/hooks/keyed_state.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -228,12 +229,7 @@ class _ReorderableTopSitesGrid extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final localItems = useState(persistedItems);
-
-    useEffect(() {
-      localItems.value = persistedItems;
-      return null;
-    }, [persistedItems]);
+    final localItems = useKeyedState(persistedItems, [persistedItems]);
 
     return SliverToBoxAdapter(
       child: Padding(

@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
@@ -26,6 +25,7 @@ import 'package:weblibre/features/settings/presentation/controllers/save_setting
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/presentation/hooks/keyed_state.dart';
 
 const List<SettingsSectionDefinition> toolbarLayoutSettingsSections = [
   SettingsSectionDefinition(
@@ -460,11 +460,7 @@ class _QuickTabSwitcherTitleWidthTile extends HookConsumerWidget {
       ),
     );
 
-    final sliderValue = useState(titleWidth);
-    useEffect(() {
-      sliderValue.value = titleWidth;
-      return null;
-    }, [titleWidth]);
+    final sliderValue = useKeyedState(titleWidth, [titleWidth]);
 
     final enabled = switcherEnabled && showTitles;
 
@@ -626,11 +622,9 @@ class _QuickTabSwitcherHierarchyGlyphsTile extends HookConsumerWidget {
       ),
     );
 
-    final sliderValue = useState(hierarchyGlyphs.toDouble());
-    useEffect(() {
-      sliderValue.value = hierarchyGlyphs.toDouble();
-      return null;
-    }, [hierarchyGlyphs]);
+    final sliderValue = useKeyedState(hierarchyGlyphs.toDouble(), [
+      hierarchyGlyphs,
+    ]);
 
     final currentGlyphs = sliderValue.value.round();
     final enabled = switcherEnabled;

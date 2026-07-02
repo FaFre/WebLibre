@@ -28,6 +28,7 @@ import 'package:weblibre/features/settings/presentation/widgets/settings_detail.
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
+import 'package:weblibre/presentation/hooks/keyed_state.dart';
 
 const List<SettingsSectionDefinition> generalSettingsSections = [
   SettingsSectionDefinition(
@@ -198,12 +199,7 @@ class _UiZoomSection extends HookConsumerWidget {
     final uiScaleFactor = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.uiScaleFactor),
     );
-    final sliderValue = useState(uiScaleFactor);
-
-    useEffect(() {
-      sliderValue.value = uiScaleFactor;
-      return null;
-    }, [uiScaleFactor]);
+    final sliderValue = useKeyedState(uiScaleFactor, [uiScaleFactor]);
 
     final sliderLabel = '${(sliderValue.value * 100).round()}%';
 

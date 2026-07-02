@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
@@ -27,6 +26,7 @@ import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/presentation/hooks/keyed_state.dart';
 
 const List<SettingsSectionDefinition> webContentSettingsSections = [
   SettingsSectionDefinition(
@@ -178,12 +178,7 @@ class _FontSizeFactorSlider extends HookConsumerWidget {
     final fontSizeFactor = ref.watch(
       engineSettingsWithDefaultsProvider.select((s) => s.fontSizeFactor),
     );
-    final sliderValue = useState(fontSizeFactor);
-
-    useEffect(() {
-      sliderValue.value = fontSizeFactor;
-      return null;
-    }, [fontSizeFactor]);
+    final sliderValue = useKeyedState(fontSizeFactor, [fontSizeFactor]);
 
     final sliderLabel = '${(sliderValue.value * 100).round()}%';
 

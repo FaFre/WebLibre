@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:search_protocol/search_protocol.dart';
 import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/features/web_search/domain/controllers/search_controller.dart';
+import 'package:weblibre/presentation/hooks/keyed_state.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
@@ -541,15 +542,10 @@ class WebSearchInfoboxCarousel extends HookConsumerWidget {
 
     // Natural (content) height of each page, measured off-stage. `null` until
     // a page has been laid out at least once.
-    final heights = useState<List<double?>>(
+    final heights = useKeyedState<List<double?>>(
       List<double?>.filled(infos.length, null),
+      [infos.length],
     );
-
-    // Reset the measurement cache when the page set changes.
-    useEffect(() {
-      heights.value = List<double?>.filled(infos.length, null);
-      return null;
-    }, [infos.length]);
 
     useEffect(() {
       void listener() {

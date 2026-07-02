@@ -72,6 +72,7 @@ import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/models/proxy_routing_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/proxy_routing_settings.dart';
+import 'package:weblibre/presentation/hooks/keyed_state.dart';
 import 'package:weblibre/utils/move_to_background.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -687,15 +688,11 @@ class BrowserScreen extends HookConsumerWidget {
 
     // Track dismissed state without triggering full rebuild on every
     // hide/show. Updated via ref.listen below and synced on tab switch.
-    final toolbarDismissed = useState(false);
-
-    // Sync dismissed state when selected tab changes
-    useEffect(() {
-      toolbarDismissed.value =
-          ref.read(toolbarVisibilityControllerProvider(selectedTabId)) ==
-          ToolbarVisibility.dismissed;
-      return null;
-    }, [selectedTabId]);
+    final toolbarDismissed = useKeyedState(
+      ref.read(toolbarVisibilityControllerProvider(selectedTabId)) ==
+          ToolbarVisibility.dismissed,
+      [selectedTabId],
+    );
 
     final stableToolbarHeight =
         autoHideTabBar && !toolbarDismissed.value && !tabInFullScreen
