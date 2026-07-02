@@ -10,8 +10,10 @@ part of 'bookmark_list_ui_state.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(BookmarkListUiStateNotifier)
+@JsonPersist()
 final bookmarkListUiStateProvider = BookmarkListUiStateNotifierProvider._();
 
+@JsonPersist()
 final class BookmarkListUiStateNotifierProvider
     extends
         $NotifierProvider<BookmarkListUiStateNotifier, BookmarkListUiState> {
@@ -43,9 +45,10 @@ final class BookmarkListUiStateNotifierProvider
 }
 
 String _$bookmarkListUiStateNotifierHash() =>
-    r'7c764fc2f1deb178063ca95764775ca237471f9f';
+    r'13f01daba9d1591c700e956428f0e0e8cb2bfe92';
 
-abstract class _$BookmarkListUiStateNotifier
+@JsonPersist()
+abstract class _$BookmarkListUiStateNotifierBase
     extends $Notifier<BookmarkListUiState> {
   BookmarkListUiState build();
   @$mustCallSuper
@@ -61,5 +64,43 @@ abstract class _$BookmarkListUiStateNotifier
               Object?
             >;
     return element.handleCreate(ref, build);
+  }
+}
+
+// **************************************************************************
+// JsonGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+abstract class _$BookmarkListUiStateNotifier
+    extends _$BookmarkListUiStateNotifierBase {
+  /// The default key used by [persist].
+  String get key {
+    const resolvedKey = "BookmarkListUiStateNotifier";
+    return resolvedKey;
+  }
+
+  /// A variant of [persist], for JSON-specific encoding.
+  ///
+  /// You can override [key] to customize the key used for storage.
+  PersistResult persist(
+    FutureOr<Storage<String, String>> storage, {
+    String? key,
+    String Function(BookmarkListUiState state)? encode,
+    BookmarkListUiState Function(String encoded)? decode,
+    StorageOptions options = const StorageOptions(),
+  }) {
+    return NotifierPersistX(this).persist<String, String>(
+      storage,
+      key: key ?? this.key,
+      encode: encode ?? $jsonCodex.encode,
+      decode:
+          decode ??
+          (encoded) {
+            final e = $jsonCodex.decode(encoded);
+            return BookmarkListUiState.fromJson(e as Map<String, Object?>);
+          },
+      options: options,
+    );
   }
 }

@@ -98,3 +98,32 @@ extension $BookmarkListUiStateCopyWith on BookmarkListUiState {
   _$BookmarkListUiStateCWProxy get copyWith =>
       _$BookmarkListUiStateCWProxyImpl(this);
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+BookmarkListUiState _$BookmarkListUiStateFromJson(Map<String, dynamic> json) =>
+    BookmarkListUiState(
+      sortType:
+          $enumDecodeNullable(_$BookmarkSortTypeEnumMap, json['sortType']) ??
+          BookmarkSortType.manual,
+      foldersOnly: json['foldersOnly'] as bool? ?? false,
+    );
+
+Map<String, dynamic> _$BookmarkListUiStateToJson(
+  BookmarkListUiState instance,
+) => <String, dynamic>{
+  'sortType': _$BookmarkSortTypeEnumMap[instance.sortType]!,
+  'foldersOnly': instance.foldersOnly,
+};
+
+const _$BookmarkSortTypeEnumMap = {
+  BookmarkSortType.manual: 'manual',
+  BookmarkSortType.titleAsc: 'titleAsc',
+  BookmarkSortType.titleDesc: 'titleDesc',
+  BookmarkSortType.urlAsc: 'urlAsc',
+  BookmarkSortType.urlDesc: 'urlDesc',
+  BookmarkSortType.dateAddedDesc: 'dateAddedDesc',
+  BookmarkSortType.dateAddedAsc: 'dateAddedAsc',
+};

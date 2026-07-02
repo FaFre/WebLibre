@@ -19,15 +19,21 @@
  */
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_sort_type.dart';
 
 part 'bookmark_list_ui_state.g.dart';
 
+@JsonSerializable()
 @CopyWith()
 class BookmarkListUiState with FastEquatable {
+  @JsonKey(includeFromJson: false, includeToJson: false)
   final bool selectionMode;
+  @JsonKey(includeFromJson: false, includeToJson: false)
   final Set<String> selectedGuids;
+  @JsonKey(defaultValue: BookmarkSortType.manual)
   final BookmarkSortType sortType;
+  @JsonKey(defaultValue: false)
   final bool foldersOnly;
 
   BookmarkListUiState({
@@ -36,6 +42,11 @@ class BookmarkListUiState with FastEquatable {
     this.sortType = BookmarkSortType.manual,
     this.foldersOnly = false,
   });
+
+  factory BookmarkListUiState.fromJson(Map<String, dynamic> json) =>
+      _$BookmarkListUiStateFromJson(json);
+
+  Map<String, dynamic> toJson() => _$BookmarkListUiStateToJson(this);
 
   @override
   List<Object?> get hashParameters => [
