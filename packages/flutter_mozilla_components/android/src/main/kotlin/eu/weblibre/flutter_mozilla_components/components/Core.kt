@@ -17,6 +17,7 @@ import eu.weblibre.flutter_mozilla_components.interceptor.AppRequestInterceptor
 import eu.weblibre.flutter_mozilla_components.services.DownloadService
 import eu.weblibre.flutter_mozilla_components.EngineProvider
 import eu.weblibre.flutter_mozilla_components.EngineProvider.getOrCreateRuntime
+import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.PermissionStorage
 import eu.weblibre.flutter_mozilla_components.services.MediaSessionService
 import eu.weblibre.flutter_mozilla_components.activities.NotificationActivity
