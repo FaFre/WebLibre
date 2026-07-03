@@ -7421,6 +7421,28 @@ class GeckoEngineSettingsApi {
     )
     ;
   }
+
+  /// The set of Gecko contextual-identity ids ("container" contextIds) whose
+  /// browsing history must NOT be written to Mozilla Places (hard
+  /// exclude-from-history / "incognito container"). WebLibreHistoryDelegate
+  /// skips the Places write for a visit resolved to one of these containers.
+  Future<void> setExcludedHistoryContextIds(List<String> contextIds) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setExcludedHistoryContextIds$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[contextIds]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
 }
 
 class GeckoSessionApi {
@@ -10307,6 +10329,48 @@ class GeckoDeleteBrowsingDataController {
         isNullValid: true,
     )
     ;
+  }
+}
+
+/// Native -> Dart history visit notifications. Fired from WebLibreHistoryDelegate
+/// on each recorded Mozilla Places visit so WebLibre can persist the one thing
+/// Places can't store: which container the visit belonged to. The visit itself
+/// (title, visit type, exact time) stays owned by Places.
+abstract class GeckoHistoryEvents {
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  /// [contextId] is the Gecko contextual identity of the tab that produced the
+  /// visit, resolved via the URL→contextId correlation cache (null when it
+  /// couldn't be resolved / the tab was uncontained). Dart maps it to a
+  /// WebLibre container and writes the visit→container relation, keyed on
+  /// ([url], [visitTime]) to join back to the Places visit.
+  void onVisitRecorded(String url, int visitTime, String? contextId);
+
+  static void setUp(GeckoHistoryEvents? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryEvents.onVisitRecorded$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          final List<Object?> args = message! as List<Object?>;
+          final String arg_url = args[0]! as String;
+          final int arg_visitTime = args[1]! as int;
+          final String? arg_contextId = args[2] as String?;
+          try {
+            api.onVisitRecorded(arg_url, arg_visitTime, arg_contextId);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
   }
 }
 

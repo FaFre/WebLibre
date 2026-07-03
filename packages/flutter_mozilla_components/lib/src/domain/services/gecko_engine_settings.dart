@@ -236,4 +236,8 @@ class GeckoEngineSettingsService {
   Future<void> setReaderViewPureBlack(bool enabled) {
     return _api.setReaderViewPureBlack(enabled);
   }
+
+  Future<void> setExcludedHistoryContextIds(List<String> contextIds) {
+    return _api.setExcludedHistoryContextIds(contextIds);
+  }
 }

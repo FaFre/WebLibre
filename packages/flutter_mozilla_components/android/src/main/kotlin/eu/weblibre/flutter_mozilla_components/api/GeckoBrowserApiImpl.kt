@@ -49,6 +49,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoMlApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPrefApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPwaApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionController
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoHistoryEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSessionApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
@@ -265,6 +266,12 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
 
         val syncStateEvents = GeckoSyncStateEvents(_flutterPluginBinding.binaryMessenger)
 
+        // Set before GlobalComponents.setUp (which lazily builds the engine and
+        // its history delegate) so Core can wrap the delegate to forward the
+        // visit's WebLibre container to Dart.
+        GlobalComponents.historyEvents =
+            GeckoHistoryEvents(_flutterPluginBinding.binaryMessenger)
+
         GlobalComponents.setUp(
             profileApplicationContext,
             _flutterEvents,
@@ -281,12 +288,20 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
             syncTokenServerOverride,
         )
 
-        val engineSettingsApiImpl = GeckoEngineSettingsApiImpl()
-        GeckoEngineSettingsApi.setUp(
-            _flutterPluginBinding.binaryMessenger,
-            engineSettingsApiImpl
-        )
-        GlobalComponents.engineSettingsApi = engineSettingsApiImpl
+        // GeckoEngineSettingsApi was already registered at plugin-attach time
+        // (FlutterMozillaComponentsPlugin.onAttachedToEngine) so the startup
+        // history-exclusion push lands before the engine starts. Reuse that
+        // instance; only register a fresh one if attach somehow did not run.
+        if (GlobalComponents.engineSettingsApi == null) {
+            val engineSettingsApiImpl = GeckoEngineSettingsApiImpl(
+                _flutterPluginBinding.applicationContext,
+            )
+            GeckoEngineSettingsApi.setUp(
+                _flutterPluginBinding.binaryMessenger,
+                engineSettingsApiImpl
+            )
+            GlobalComponents.engineSettingsApi = engineSettingsApiImpl
+        }
         GeckoAddonsApi.setUp(
             _flutterPluginBinding.binaryMessenger,
             GeckoAddonsApiImpl(profileApplicationContext)

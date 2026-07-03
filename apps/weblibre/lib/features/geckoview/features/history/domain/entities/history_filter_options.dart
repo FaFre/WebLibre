@@ -33,13 +33,22 @@ class HistoryFilterOptions with FastEquatable {
   final DateTimeRange<DateTime>? dateRange;
   final Set<VisitType> visitTypes;
 
-  HistoryFilterOptions({required this.dateRange, required this.visitTypes});
+  /// When non-null, restrict the timeline to visits that belonged to this
+  /// WebLibre container (resolved via the visit→container relation). Null shows
+  /// all visits, each still annotated with its own container tag.
+  final String? containerId;
+
+  HistoryFilterOptions({
+    required this.dateRange,
+    required this.visitTypes,
+    this.containerId,
+  });
 
   HistoryFilterOptions.withDefaults()
     : this(dateRange: null, visitTypes: {VisitType.link});
 
   @override
-  List<Object?> get hashParameters => [dateRange, visitTypes];
+  List<Object?> get hashParameters => [dateRange, visitTypes, containerId];
 
   factory HistoryFilterOptions.fromJson(Map<String, dynamic> json) =>
       _$HistoryFilterOptionsFromJson(json);

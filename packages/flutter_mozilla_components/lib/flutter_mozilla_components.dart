@@ -72,6 +72,7 @@ export 'src/pigeons/gecko.g.dart'
         GeckoDeleteBrowsingDataController,
         GeckoEngineSettings,
         GeckoFetchResponse,
+        GeckoHistoryEvents,
         GeckoPref,
         GeckoProxySettings,
         GeckoPublicSuffixListApi,

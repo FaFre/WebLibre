@@ -1586,6 +1586,12 @@ abstract class GeckoEngineSettingsApi {
   /// Mozilla's reader view extension. Persisted in SharedPreferences so a
   /// cold-started reader view resolves the right value before Flutter runs.
   void setReaderViewPureBlack(bool enabled);
+
+  /// The set of Gecko contextual-identity ids ("container" contextIds) whose
+  /// browsing history must NOT be written to Mozilla Places (hard
+  /// exclude-from-history / "incognito container"). WebLibreHistoryDelegate
+  /// skips the Places write for a visit resolved to one of these containers.
+  void setExcludedHistoryContextIds(List<String> contextIds);
 }
 
 @HostApi()
@@ -2228,6 +2234,20 @@ enum ClearDataType {
 
   /// Cache only
   onlyCaches,
+}
+
+/// Native -> Dart history visit notifications. Fired from WebLibreHistoryDelegate
+/// on each recorded Mozilla Places visit so WebLibre can persist the one thing
+/// Places can't store: which container the visit belonged to. The visit itself
+/// (title, visit type, exact time) stays owned by Places.
+@FlutterApi()
+abstract class GeckoHistoryEvents {
+  /// [contextId] is the Gecko contextual identity of the tab that produced the
+  /// visit, resolved via the URL→contextId correlation cache (null when it
+  /// couldn't be resolved / the tab was uncontained). Dart maps it to a
+  /// WebLibre container and writes the visit→container relation, keyed on
+  /// ([url], [visitTime]) to join back to the Places visit.
+  void onVisitRecorded(String url, int visitTime, String? contextId);
 }
 
 @HostApi()

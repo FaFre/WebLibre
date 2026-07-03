@@ -563,9 +563,42 @@ BEGIN
     observed_count              = history.observed_count + 1;
 END;
 
+-- ===========================================================================
+-- Visit → container relation. Mozilla Places remains the source of truth for
+-- browsing history (url, title, visit type, visit time, sync); this table only
+-- carries the one thing Places can't store: which WebLibre container a visit
+-- belonged to. One row per contained visit, written by the Dart
+-- VisitContainerRecorder from native history-delegate events. Uncontained
+-- visits produce no row.
+--
+-- Joined back to a Places `VisitInfo` on (url_canonical, nearest visit_time):
+-- `visit_time` is captured near — not exactly at — the Places record time, so
+-- consumers match the closest visit within a small tolerance window.
+--
+-- `container_id` is ON DELETE CASCADE: deleting a container dissolves its
+-- relations (the Places visits survive, untagged). Optionally deleting the
+-- visits themselves is a separate, explicit Places mirror step in the repo.
+-- ===========================================================================
+CREATE TABLE visit_container (
+  id             INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  -- Original visited URL; used to open the page and as the key for the Places
+  -- delete mirror (Places keys visits by URL + time).
+  raw_url        TEXT NOT NULL,
+  -- Structural canonical form; the join key to Places visits (computed in Dart
+  -- via canonicalizeUrl so it matches the local index's canonicalization).
+  url_canonical  TEXT NOT NULL,
+  -- Epoch MILLISECONDS (plain INTEGER, not a drift DATETIME which stores
+  -- seconds). Matches Places `VisitInfo.visitTime`.
+  visit_time     INTEGER NOT NULL,
+  container_id   TEXT NOT NULL REFERENCES container(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_vc_canonical ON visit_container(url_canonical, visit_time);
+CREATE INDEX idx_vc_container ON visit_container(container_id, visit_time DESC);
+
 containersWithCount WITH ContainerDataWithCount:
-  SELECT 
-    container.*, 
+  SELECT
+    container.*,
     tab_agg.tab_count
   FROM container
   LEFT JOIN (

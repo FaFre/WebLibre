@@ -50,6 +50,18 @@ class ContainerMetadata with FastEquatable {
   @JsonKey(defaultValue: false)
   final bool excludeFromIndex;
 
+  // When true, this container's browsing history is not recorded at all: the
+  // native WebLibreHistoryDelegate skips the Mozilla Places write for its
+  // visits (hard exclude / "incognito container"), and no visit→container
+  // relation row is written. Gates history recording independently of
+  // `excludeFromIndex` (which only gates the local FTS search index).
+  //
+  // Invariant: requires a Gecko contextId — without one the native delegate
+  // can't distinguish the container's visits to skip them. Enforced by
+  // [sanitized] on write and normalized on read below.
+  @JsonKey(defaultValue: false)
+  final bool excludeFromHistory;
+
   @JsonKey(defaultValue: false)
   final bool bypassGlobalProxy;
 
@@ -67,6 +79,7 @@ class ContainerMetadata with FastEquatable {
     required this.proxyConnectionId,
     required this.clearDataOnExit,
     required this.excludeFromIndex,
+    required this.excludeFromHistory,
     required this.bypassGlobalProxy,
     required this.useCustomColor,
     required this.assignedSites,
@@ -78,6 +91,7 @@ class ContainerMetadata with FastEquatable {
     ProxyConnectionId? proxyConnectionId,
     bool? clearDataOnExit,
     bool? excludeFromIndex,
+    bool? excludeFromHistory,
     bool? bypassGlobalProxy,
     bool? useCustomColor,
     List<Uri>? assignedSites,
@@ -87,10 +101,30 @@ class ContainerMetadata with FastEquatable {
          proxyConnectionId: proxyConnectionId,
          clearDataOnExit: clearDataOnExit ?? false,
          excludeFromIndex: excludeFromIndex ?? false,
+         // Invariant: exclude-from-history requires a Gecko contextId (cookie
+         // isolation). Without one there is no way to hard-exclude the
+         // container from Places — the native delegate can't tell its visits
+         // apart. This is the deserialization path, so a legacy/foreign record
+         // with the bad combination is normalized on read; writers re-apply it
+         // via [sanitized].
+         excludeFromHistory:
+             (excludeFromHistory ?? false) && contextualIdentity != null,
          bypassGlobalProxy: bypassGlobalProxy ?? false,
          useCustomColor: useCustomColor ?? false,
          assignedSites: assignedSites,
        );
+
+  /// Enforce the [excludeFromHistory] invariant before persistence: it can only
+  /// be true for a cookie-isolated (contextId-bearing) container, since the
+  /// native delegate needs the contextId to hard-exclude visits from Places.
+  /// The primary constructor can't normalize (copy_with_extension_gen requires
+  /// params to map 1:1 to fields), so writers route through this.
+  ContainerMetadata sanitized() {
+    if (excludeFromHistory && contextualIdentity == null) {
+      return copyWith(excludeFromHistory: false);
+    }
+    return this;
+  }
 
   bool get usesTorProxy => proxyConnectionId is TorProxyConnectionId;
 
@@ -106,6 +140,7 @@ class ContainerMetadata with FastEquatable {
     proxyConnectionId,
     clearDataOnExit,
     excludeFromIndex,
+    excludeFromHistory,
     bypassGlobalProxy,
     useCustomColor,
     assignedSites,

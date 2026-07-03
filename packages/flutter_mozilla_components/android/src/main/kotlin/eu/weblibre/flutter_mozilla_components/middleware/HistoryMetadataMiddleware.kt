@@ -6,6 +6,7 @@
 
 package eu.weblibre.flutter_mozilla_components.middleware
 
+import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import mozilla.components.browser.state.action.BrowserAction
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.action.HistoryMetadataAction
@@ -102,13 +103,30 @@ class HistoryMetadataMiddleware(
         store: Store<BrowserState, BrowserAction>,
         tab: TabSessionState,
     ) {
+        // Hard exclude-from-history: a tab in an excluded ("incognito") container
+        // must not persist anywhere in Places. WebLibreHistoryDelegate already
+        // skips the visit write; metadata is a separate persistent Places path
+        // (highlights / suggestions), so it must be gated on the same set.
+        if (isHistoryExcluded(tab)) {
+            return
+        }
+
         val key = historyMetadataService.createMetadata(tab)
         store.dispatch(HistoryMetadataAction.SetHistoryMetadataKeyAction(tab.id, key))
     }
 
     private fun updateHistoryMetadata(tab: TabSessionState) {
+        if (isHistoryExcluded(tab)) {
+            return
+        }
+
         tab.historyMetadata?.let {
             historyMetadataService.updateMetadata(it, tab)
         }
+    }
+
+    private fun isHistoryExcluded(tab: TabSessionState): Boolean {
+        val contextId = tab.contextId ?: return false
+        return contextId in GlobalComponents.excludedHistoryContextIds
     }
 }

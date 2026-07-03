@@ -19,34 +19,79 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
-/// Dialog to confirm container deletion.
-/// Returns true if user confirms deletion, false if cancelled, null if dismissed.
-Future<bool?> showDeleteContainerDialog(BuildContext context) {
-  return showDialog<bool?>(
+/// Result of the delete-container confirmation.
+class DeleteContainerDecision {
+  /// Whether the container's browsing history should also be deleted from
+  /// Mozilla Places. When false, the visit→container relation dissolves and the
+  /// visits are kept (shown as uncontained).
+  final bool wipeHistory;
+
+  const DeleteContainerDecision({required this.wipeHistory});
+}
+
+/// Confirm container deletion. Returns the decision on confirm, or `null` if
+/// cancelled/dismissed.
+Future<DeleteContainerDecision?> showDeleteContainerDialog(
+  BuildContext context,
+) {
+  return showDialog<DeleteContainerDecision?>(
     context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        icon: const Icon(Icons.warning),
-        title: const Text('Delete Container'),
-        content: const Text(
-          'Are you sure you want to delete this container and close all attached tabs?',
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context, false);
-            },
-            child: const Text('Cancel'),
+    builder: (context) => const _DeleteContainerDialog(),
+  );
+}
+
+class _DeleteContainerDialog extends HookWidget {
+  const _DeleteContainerDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    final wipeHistory = useState(false);
+
+    return AlertDialog(
+      icon: const Icon(Icons.warning),
+      title: const Text('Delete Container'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Are you sure you want to delete this container and close all '
+            'attached tabs?',
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context, true);
+          const SizedBox(height: 8),
+          CheckboxListTile(
+            contentPadding: EdgeInsets.zero,
+            controlAffinity: ListTileControlAffinity.leading,
+            value: wipeHistory.value,
+            onChanged: (value) {
+              wipeHistory.value = value ?? false;
             },
-            child: const Text('Delete'),
+            title: const Text("Also delete this container's history"),
+            subtitle: const Text(
+              'Otherwise it is kept and shown as uncontained',
+            ),
           ),
         ],
-      );
-    },
-  );
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context, null);
+          },
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(
+              context,
+              DeleteContainerDecision(wipeHistory: wipeHistory.value),
+            );
+          },
+          child: const Text('Delete'),
+        ),
+      ],
+    );
+  }
 }

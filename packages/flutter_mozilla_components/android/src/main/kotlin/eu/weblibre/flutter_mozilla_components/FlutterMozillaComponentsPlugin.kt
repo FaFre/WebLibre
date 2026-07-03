@@ -7,8 +7,10 @@
 package eu.weblibre.flutter_mozilla_components
 
 import eu.weblibre.flutter_mozilla_components.api.GeckoBrowserApiImpl
+import eu.weblibre.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
 import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureFeature
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -23,10 +25,25 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     browserApi.attachBinding(flutterPluginBinding)
     GeckoBrowserApi.setUp(flutterPluginBinding.binaryMessenger, browserApi)
     SandboxCaptureFeature.wireFlutterEvents(flutterPluginBinding.binaryMessenger)
+
+    // Register the engine-settings API at attach time (before GeckoBrowserService
+    // .initialize) so Dart can push the history-exclusion contextId set to native
+    // *before* the engine starts recording restored-tab visits, closing the
+    // startup window where an excluded container could leak to Places.
+    // setExcludedHistoryContextIds only writes GlobalComponents state and needs
+    // no initialized components; the remaining settings methods resolve
+    // components lazily and are not invoked until after initialize. The same
+    // instance is reused by GeckoBrowserApiImpl.initialize.
+    val engineSettingsApiImpl = GeckoEngineSettingsApiImpl(
+      flutterPluginBinding.applicationContext,
+    )
+    GeckoEngineSettingsApi.setUp(flutterPluginBinding.binaryMessenger, engineSettingsApiImpl)
+    GlobalComponents.engineSettingsApi = engineSettingsApiImpl
   }
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
     SandboxCaptureFeature.detachFlutterEvents(binding.binaryMessenger)
+    GlobalComponents.historyEvents = null
   }
 
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {

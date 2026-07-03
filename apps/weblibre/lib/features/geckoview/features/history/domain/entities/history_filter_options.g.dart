@@ -11,6 +11,8 @@ abstract class _$HistoryFilterOptionsCWProxy {
 
   HistoryFilterOptions visitTypes(Set<VisitType> visitTypes);
 
+  HistoryFilterOptions containerId(String? containerId);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `HistoryFilterOptions(...).copyWith.fieldName(value)`.
   ///
@@ -21,6 +23,7 @@ abstract class _$HistoryFilterOptionsCWProxy {
   HistoryFilterOptions call({
     DateTimeRange<DateTime>? dateRange,
     Set<VisitType> visitTypes,
+    String? containerId,
   });
 }
 
@@ -41,6 +44,10 @@ class _$HistoryFilterOptionsCWProxyImpl
       call(visitTypes: visitTypes);
 
   @override
+  HistoryFilterOptions containerId(String? containerId) =>
+      call(containerId: containerId);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `HistoryFilterOptions(...).copyWith.fieldName(value)`.
   ///
@@ -51,6 +58,7 @@ class _$HistoryFilterOptionsCWProxyImpl
   HistoryFilterOptions call({
     Object? dateRange = const $CopyWithPlaceholder(),
     Object? visitTypes = const $CopyWithPlaceholder(),
+    Object? containerId = const $CopyWithPlaceholder(),
   }) {
     return HistoryFilterOptions(
       dateRange: dateRange == const $CopyWithPlaceholder()
@@ -62,6 +70,10 @@ class _$HistoryFilterOptionsCWProxyImpl
           ? _value.visitTypes
           // ignore: cast_nullable_to_non_nullable
           : visitTypes as Set<VisitType>,
+      containerId: containerId == const $CopyWithPlaceholder()
+          ? _value.containerId
+          // ignore: cast_nullable_to_non_nullable
+          : containerId as String?,
     );
   }
 }
@@ -87,6 +99,7 @@ HistoryFilterOptions _$HistoryFilterOptionsFromJson(
   visitTypes: (json['visitTypes'] as List<dynamic>)
       .map((e) => $enumDecode(_$VisitTypeEnumMap, e))
       .toSet(),
+  containerId: json['containerId'] as String?,
 );
 
 Map<String, dynamic> _$HistoryFilterOptionsToJson(
@@ -94,6 +107,7 @@ Map<String, dynamic> _$HistoryFilterOptionsToJson(
 ) => <String, dynamic>{
   'dateRange': const DateTimeRangeConverter().toJson(instance.dateRange),
   'visitTypes': instance.visitTypes.map((e) => _$VisitTypeEnumMap[e]!).toList(),
+  'containerId': instance.containerId,
 };
 
 const _$VisitTypeEnumMap = {

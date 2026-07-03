@@ -28,6 +28,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/cap
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/history.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/visit_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.steps.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
@@ -36,11 +37,11 @@ import 'package:weblibre/features/search/domain/fts_tokenizer.dart';
 
 @DriftDatabase(
   include: {'definitions.drift'},
-  daos: [ContainerDao, TabDao, CaptureTabDao, HistoryDao],
+  daos: [ContainerDao, TabDao, CaptureTabDao, HistoryDao, VisitContainerDao],
 )
 class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
   @override
-  final int schemaVersion = 14;
+  final int schemaVersion = 15;
 
   @override
   final int ftsTokenLimit = 10;
@@ -246,6 +247,14 @@ class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
       await m.create(schema.tabToHistoryOnUpdate);
       await m.create(schema.tabToHistoryOnContainerUpdate);
       await m.create(schema.containerToHistoryOnMetadataUpdate);
+    },
+    from14To15: (m, schema) async {
+      // Visit → container relation. Mozilla Places stays the source of truth
+      // for history; this table only records which container each contained
+      // visit belonged to. See definitions.drift.
+      await m.create(schema.visitContainer);
+      await m.create(schema.idxVcCanonical);
+      await m.create(schema.idxVcContainer);
     },
   );
 }

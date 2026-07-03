@@ -7305,6 +7305,13 @@ interface GeckoEngineSettingsApi {
    * cold-started reader view resolves the right value before Flutter runs.
    */
   fun setReaderViewPureBlack(enabled: Boolean)
+  /**
+   * The set of Gecko contextual-identity ids ("container" contextIds) whose
+   * browsing history must NOT be written to Mozilla Places (hard
+   * exclude-from-history / "incognito container"). WebLibreHistoryDelegate
+   * skips the Places write for a visit resolved to one of these containers.
+   */
+  fun setExcludedHistoryContextIds(contextIds: List<String>)
 
   companion object {
     /** The codec used by GeckoEngineSettingsApi. */
@@ -7480,6 +7487,24 @@ interface GeckoEngineSettingsApi {
             val enabledArg = args[0] as Boolean
             val wrapped: List<Any?> = try {
               api.setReaderViewPureBlack(enabledArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setExcludedHistoryContextIds$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val contextIdsArg = args[0] as List<String>
+            val wrapped: List<Any?> = try {
+              api.setExcludedHistoryContextIds(contextIdsArg)
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
@@ -8955,7 +8980,7 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
         }
       } else {
         callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
-      } 
+      }
     }
   }
   fun onEngineReadyStateChange(sequenceArg: Long, stateArg: Boolean, callback: (Result<Unit>) -> Unit)
@@ -10310,6 +10335,46 @@ interface GeckoDeleteBrowsingDataController {
         } else {
           channel.setMessageHandler(null)
         }
+      }
+    }
+  }
+}
+/**
+ * Native -> Dart history visit notifications. Fired from WebLibreHistoryDelegate
+ * on each recorded Mozilla Places visit so WebLibre can persist the one thing
+ * Places can't store: which container the visit belonged to. The visit itself
+ * (title, visit type, exact time) stays owned by Places.
+ *
+ * Generated class from Pigeon that represents Flutter messages that can be called from Kotlin.
+ */
+class GeckoHistoryEvents(private val binaryMessenger: BinaryMessenger, private val messageChannelSuffix: String = "") {
+  companion object {
+    /** The codec used by GeckoHistoryEvents. */
+    val codec: MessageCodec<Any?> by lazy {
+      GeckoPigeonCodec()
+    }
+  }
+  /**
+   * [contextId] is the Gecko contextual identity of the tab that produced the
+   * visit, resolved via the URL→contextId correlation cache (null when it
+   * couldn't be resolved / the tab was uncontained). Dart maps it to a
+   * WebLibre container and writes the visit→container relation, keyed on
+   * ([url], [visitTime]) to join back to the Places visit.
+   */
+  fun onVisitRecorded(urlArg: String, visitTimeArg: Long, contextIdArg: String?, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryEvents.onVisitRecorded$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(urlArg, visitTimeArg, contextIdArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
       }
     }
   }

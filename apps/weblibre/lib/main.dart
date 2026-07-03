@@ -29,7 +29,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
-    show GeckoBrowserService, GeckoLoggingService, LogLevel;
+    show
+        GeckoBrowserService,
+        GeckoEngineSettingsService,
+        GeckoLoggingService,
+        LogLevel;
 import 'package:home_widget/home_widget.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logger/logger.dart';
@@ -47,8 +51,11 @@ import 'package:weblibre/domain/services/app_initialization.dart';
 import 'package:weblibre/domain/services/display_mode.dart';
 import 'package:weblibre/features/account/domain/services/account_callback_handler.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/engine_settings_replication.dart';
+import 'package:weblibre/features/geckoview/features/history/domain/services/history_exclusion_replication.dart';
+import 'package:weblibre/features/geckoview/features/history/domain/services/visit_container_recorder.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_pruner.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_settings_sync.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_logs.dart';
@@ -234,6 +241,35 @@ class _MainWidget extends HookConsumerWidget {
           : null;
       final clearStartupUBlockFilterListsPref =
           !engineSettings.ublockFilterListSettings.enabled;
+
+      // Push the hard exclude-from-history contextId set to native BEFORE the
+      // engine starts — it records visits as soon as restored tabs load, so an
+      // excluded ("incognito") container could otherwise leak to Places during
+      // the startup window. Best-effort: on failure the keepAlive provider still
+      // pushes once containers are available.
+      try {
+        final availableContainers = await ref
+            .read(containerRepositoryProvider.notifier)
+            .getAllContainersWithCount();
+
+        await GeckoEngineSettingsService().setExcludedHistoryContextIds(
+          excludedHistoryContextIds(availableContainers),
+        );
+      } catch (e, s) {
+        logger.w(
+          'Failed initial history-exclusion push at startup',
+          error: e,
+          stackTrace: s,
+        );
+      }
+
+      // Register the visit→container recorder BEFORE the engine starts. It only
+      // installs a Dart-side GeckoHistoryEvents handler (no native dependency),
+      // while native visit events can already fire as restored tabs load during
+      // initialize — Pigeon FlutterApi messages aren't buffered, so a recorder
+      // registered afterwards would silently drop those early visits' container
+      // relations.
+      ref.read(visitContainerRecorderProvider);
 
       try {
         await GeckoBrowserService().initialize(

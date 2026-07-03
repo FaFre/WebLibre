@@ -49,6 +49,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/services/eng
 import 'package:weblibre/features/geckoview/features/browser/domain/services/proxy_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_home.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
+import 'package:weblibre/features/geckoview/features/history/domain/services/history_exclusion_replication.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
@@ -669,6 +670,19 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       onError: (error, stackTrace) {
         logger.e(
           'Error listening to proxySettingsReplicationProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+
+    ref.listenManual(
+      fireImmediately: true,
+      historyExclusionReplicationProvider,
+      (previous, next) {},
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to historyExclusionReplicationProvider',
           error: error,
           stackTrace: stackTrace,
         );

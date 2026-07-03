@@ -72,6 +72,31 @@ final class $ContainerReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static i0.MultiTypedResultKey<i3.VisitContainer, List<i3.VisitContainerData>>
+  _visitContainerRefsTable(i0.GeneratedDatabase db) =>
+      i0.MultiTypedResultKey.fromTable(
+        i9.ReadDatabaseContainer(
+          db,
+        ).resultSet<i3.VisitContainer>('visit_container'),
+        aliasName: 'container__id__visit_container__container_id',
+      );
+
+  i3.$VisitContainerProcessedTableManager get visitContainerRefs {
+    final manager = i3
+        .$VisitContainerTableManager(
+          $_db,
+          i9.ReadDatabaseContainer(
+            $_db,
+          ).resultSet<i3.VisitContainer>('visit_container'),
+        )
+        .filter((f) => f.containerId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_visitContainerRefsTable($_db));
+    return i0.ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $ContainerFilterComposer
@@ -135,6 +160,35 @@ class $ContainerFilterComposer
           }) => i3.$TabFilterComposer(
             $db: $db,
             $table: i9.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  i0.Expression<bool> visitContainerRefs(
+    i0.Expression<bool> Function(i3.$VisitContainerFilterComposer f) f,
+  ) {
+    final i3.$VisitContainerFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: i9.ReadDatabaseContainer(
+        $db,
+      ).resultSet<i3.VisitContainer>('visit_container'),
+      getReferencedColumn: (t) => t.containerId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => i3.$VisitContainerFilterComposer(
+            $db: $db,
+            $table: i9.ReadDatabaseContainer(
+              $db,
+            ).resultSet<i3.VisitContainer>('visit_container'),
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -237,6 +291,35 @@ class $ContainerAnnotationComposer
     );
     return f(composer);
   }
+
+  i0.Expression<T> visitContainerRefs<T extends Object>(
+    i0.Expression<T> Function(i3.$VisitContainerAnnotationComposer a) f,
+  ) {
+    final i3.$VisitContainerAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: i9.ReadDatabaseContainer(
+        $db,
+      ).resultSet<i3.VisitContainer>('visit_container'),
+      getReferencedColumn: (t) => t.containerId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => i3.$VisitContainerAnnotationComposer(
+            $db: $db,
+            $table: i9.ReadDatabaseContainer(
+              $db,
+            ).resultSet<i3.VisitContainer>('visit_container'),
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $ContainerTableManager
@@ -252,7 +335,7 @@ class $ContainerTableManager
           $ContainerUpdateCompanionBuilder,
           (i1.ContainerData, i3.$ContainerReferences),
           i1.ContainerData,
-          i0.PrefetchHooks Function({bool tabRefs})
+          i0.PrefetchHooks Function({bool tabRefs, bool visitContainerRefs})
         > {
   $ContainerTableManager(i0.GeneratedDatabase db, i3.Container table)
     : super(
@@ -309,38 +392,60 @@ class $ContainerTableManager
                     (e.readTable(table), i3.$ContainerReferences(db, table, e)),
               )
               .toList(),
-          prefetchHooksCallback: ({tabRefs = false}) {
-            return i0.PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [
-                if (tabRefs)
-                  i9.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab'),
-              ],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (tabRefs)
-                    await i0.$_getPrefetchedData<
-                      i1.ContainerData,
-                      i3.Container,
-                      i3.TabData
-                    >(
-                      currentTable: table,
-                      referencedTable: i3.$ContainerReferences._tabRefsTable(
+          prefetchHooksCallback:
+              ({tabRefs = false, visitContainerRefs = false}) {
+                return i0.PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (tabRefs)
+                      i9.ReadDatabaseContainer(db).resultSet<i3.Tab>('tab'),
+                    if (visitContainerRefs)
+                      i9.ReadDatabaseContainer(
                         db,
-                      ),
-                      managerFromTypedResult: (p0) =>
-                          i3.$ContainerReferences(db, table, p0).tabRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where(
-                            (e) => e.containerId == item.id,
-                          ),
-                      typedResults: items,
-                    ),
-                ];
+                      ).resultSet<i3.VisitContainer>('visit_container'),
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (tabRefs)
+                        await i0.$_getPrefetchedData<
+                          i1.ContainerData,
+                          i3.Container,
+                          i3.TabData
+                        >(
+                          currentTable: table,
+                          referencedTable: i3.$ContainerReferences
+                              ._tabRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              i3.$ContainerReferences(db, table, p0).tabRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.containerId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (visitContainerRefs)
+                        await i0.$_getPrefetchedData<
+                          i1.ContainerData,
+                          i3.Container,
+                          i3.VisitContainerData
+                        >(
+                          currentTable: table,
+                          referencedTable: i3.$ContainerReferences
+                              ._visitContainerRefsTable(db),
+                          managerFromTypedResult: (p0) => i3
+                              .$ContainerReferences(db, table, p0)
+                              .visitContainerRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.containerId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -357,7 +462,7 @@ typedef $ContainerProcessedTableManager =
       $ContainerUpdateCompanionBuilder,
       (i1.ContainerData, i3.$ContainerReferences),
       i1.ContainerData,
-      i0.PrefetchHooks Function({bool tabRefs})
+      i0.PrefetchHooks Function({bool tabRefs, bool visitContainerRefs})
     >;
 typedef $TabCreateCompanionBuilder =
     i3.TabCompanion Function({
@@ -2410,6 +2515,340 @@ typedef $HistoryFtsProcessedTableManager =
       ),
       i3.HistoryFt,
       i0.PrefetchHooks Function()
+    >;
+typedef $VisitContainerCreateCompanionBuilder =
+    i3.VisitContainerCompanion Function({
+      i0.Value<int> id,
+      required String rawUrl,
+      required String urlCanonical,
+      required int visitTime,
+      required String containerId,
+    });
+typedef $VisitContainerUpdateCompanionBuilder =
+    i3.VisitContainerCompanion Function({
+      i0.Value<int> id,
+      i0.Value<String> rawUrl,
+      i0.Value<String> urlCanonical,
+      i0.Value<int> visitTime,
+      i0.Value<String> containerId,
+    });
+
+final class $VisitContainerReferences
+    extends
+        i0.BaseReferences<
+          i0.GeneratedDatabase,
+          i3.VisitContainer,
+          i3.VisitContainerData
+        > {
+  $VisitContainerReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static i3.Container _containerIdTable(i0.GeneratedDatabase db) =>
+      i9.ReadDatabaseContainer(db)
+          .resultSet<i3.Container>('container')
+          .createAlias('visit_container__container_id__container__id');
+
+  i3.$ContainerProcessedTableManager get containerId {
+    final $_column = $_itemColumn<String>('container_id')!;
+
+    final manager = i3
+        .$ContainerTableManager(
+          $_db,
+          i9.ReadDatabaseContainer($_db).resultSet<i3.Container>('container'),
+        )
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_containerIdTable($_db));
+    if (item == null) return manager;
+    return i0.ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $VisitContainerFilterComposer
+    extends i0.Composer<i0.GeneratedDatabase, i3.VisitContainer> {
+  $VisitContainerFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<String> get rawUrl => $composableBuilder(
+    column: $table.rawUrl,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<String> get urlCanonical => $composableBuilder(
+    column: $table.urlCanonical,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<int> get visitTime => $composableBuilder(
+    column: $table.visitTime,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i3.$ContainerFilterComposer get containerId {
+    final i3.$ContainerFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.containerId,
+      referencedTable: i9.ReadDatabaseContainer(
+        $db,
+      ).resultSet<i3.Container>('container'),
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => i3.$ContainerFilterComposer(
+            $db: $db,
+            $table: i9.ReadDatabaseContainer(
+              $db,
+            ).resultSet<i3.Container>('container'),
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $VisitContainerOrderingComposer
+    extends i0.Composer<i0.GeneratedDatabase, i3.VisitContainer> {
+  $VisitContainerOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<String> get rawUrl => $composableBuilder(
+    column: $table.rawUrl,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<String> get urlCanonical => $composableBuilder(
+    column: $table.urlCanonical,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<int> get visitTime => $composableBuilder(
+    column: $table.visitTime,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i3.$ContainerOrderingComposer get containerId {
+    final i3.$ContainerOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.containerId,
+      referencedTable: i9.ReadDatabaseContainer(
+        $db,
+      ).resultSet<i3.Container>('container'),
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => i3.$ContainerOrderingComposer(
+            $db: $db,
+            $table: i9.ReadDatabaseContainer(
+              $db,
+            ).resultSet<i3.Container>('container'),
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $VisitContainerAnnotationComposer
+    extends i0.Composer<i0.GeneratedDatabase, i3.VisitContainer> {
+  $VisitContainerAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  i0.GeneratedColumn<String> get rawUrl =>
+      $composableBuilder(column: $table.rawUrl, builder: (column) => column);
+
+  i0.GeneratedColumn<String> get urlCanonical => $composableBuilder(
+    column: $table.urlCanonical,
+    builder: (column) => column,
+  );
+
+  i0.GeneratedColumn<int> get visitTime =>
+      $composableBuilder(column: $table.visitTime, builder: (column) => column);
+
+  i3.$ContainerAnnotationComposer get containerId {
+    final i3.$ContainerAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.containerId,
+      referencedTable: i9.ReadDatabaseContainer(
+        $db,
+      ).resultSet<i3.Container>('container'),
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => i3.$ContainerAnnotationComposer(
+            $db: $db,
+            $table: i9.ReadDatabaseContainer(
+              $db,
+            ).resultSet<i3.Container>('container'),
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $VisitContainerTableManager
+    extends
+        i0.RootTableManager<
+          i0.GeneratedDatabase,
+          i3.VisitContainer,
+          i3.VisitContainerData,
+          i3.$VisitContainerFilterComposer,
+          i3.$VisitContainerOrderingComposer,
+          i3.$VisitContainerAnnotationComposer,
+          $VisitContainerCreateCompanionBuilder,
+          $VisitContainerUpdateCompanionBuilder,
+          (i3.VisitContainerData, i3.$VisitContainerReferences),
+          i3.VisitContainerData,
+          i0.PrefetchHooks Function({bool containerId})
+        > {
+  $VisitContainerTableManager(i0.GeneratedDatabase db, i3.VisitContainer table)
+    : super(
+        i0.TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              i3.$VisitContainerFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              i3.$VisitContainerOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              i3.$VisitContainerAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                i0.Value<int> id = const i0.Value.absent(),
+                i0.Value<String> rawUrl = const i0.Value.absent(),
+                i0.Value<String> urlCanonical = const i0.Value.absent(),
+                i0.Value<int> visitTime = const i0.Value.absent(),
+                i0.Value<String> containerId = const i0.Value.absent(),
+              }) => i3.VisitContainerCompanion(
+                id: id,
+                rawUrl: rawUrl,
+                urlCanonical: urlCanonical,
+                visitTime: visitTime,
+                containerId: containerId,
+              ),
+          createCompanionCallback:
+              ({
+                i0.Value<int> id = const i0.Value.absent(),
+                required String rawUrl,
+                required String urlCanonical,
+                required int visitTime,
+                required String containerId,
+              }) => i3.VisitContainerCompanion.insert(
+                id: id,
+                rawUrl: rawUrl,
+                urlCanonical: urlCanonical,
+                visitTime: visitTime,
+                containerId: containerId,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  i3.$VisitContainerReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({containerId = false}) {
+            return i0.PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends i0.TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (containerId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.containerId,
+                                referencedTable: i3.$VisitContainerReferences
+                                    ._containerIdTable(db),
+                                referencedColumn: i3.$VisitContainerReferences
+                                    ._containerIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $VisitContainerProcessedTableManager =
+    i0.ProcessedTableManager<
+      i0.GeneratedDatabase,
+      i3.VisitContainer,
+      i3.VisitContainerData,
+      i3.$VisitContainerFilterComposer,
+      i3.$VisitContainerOrderingComposer,
+      i3.$VisitContainerAnnotationComposer,
+      $VisitContainerCreateCompanionBuilder,
+      $VisitContainerUpdateCompanionBuilder,
+      (i3.VisitContainerData, i3.$VisitContainerReferences),
+      i3.VisitContainerData,
+      i0.PrefetchHooks Function({bool containerId})
     >;
 
 class Container extends i0.Table
@@ -5428,6 +5867,318 @@ i0.Trigger get tabToHistoryOnContainerUpdate => i0.Trigger(
 i0.Trigger get containerToHistoryOnMetadataUpdate => i0.Trigger(
   'CREATE TRIGGER container_to_history_on_metadata_update AFTER UPDATE OF metadata ON container WHEN COALESCE(json_extract(OLD.metadata, \'\$.excludeFromIndex\') = 1, 0) != COALESCE(json_extract(NEW.metadata, \'\$.excludeFromIndex\') = 1, 0) AND (SELECT value FROM local_index_setting WHERE "key" = \'enabled\') = 1 BEGIN DELETE FROM history WHERE url_canonical IN (SELECT DISTINCT url_canonical(CAST(affected.url AS TEXT)) FROM tab AS affected WHERE affected.container_id = NEW.id AND affected.url IS NOT NULL AND url_indexable(CAST(affected.url AS TEXT)) = 1) AND NOT EXISTS (SELECT 1 FROM tab AS candidate WHERE candidate.url IS NOT NULL AND url_indexable(CAST(candidate.url AS TEXT)) = 1 AND url_canonical(CAST(candidate.url AS TEXT)) = history.url_canonical AND(candidate.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE "key" = \'index_private\') = 1)AND NOT EXISTS (SELECT 1 FROM container WHERE container.id = candidate.container_id AND json_extract(container.metadata, \'\$.excludeFromIndex\') = 1));INSERT INTO history (url_canonical, url_host, url_path, title, is_probably_readerable, extracted_content_markdown, extracted_content_plain, full_content_markdown, full_content_plain, content_hash, observed_at, observed_count) SELECT url_canonical(CAST(candidate.url AS TEXT)), url_host(CAST(candidate.url AS TEXT)), url_path(CAST(candidate.url AS TEXT)), candidate.title, candidate.is_probably_readerable, candidate.extracted_content_markdown, candidate.extracted_content_plain, candidate.full_content_markdown, candidate.full_content_plain, candidate.content_hash, strftime(\'%s\', \'now\') * 1000, 1 FROM tab AS candidate WHERE candidate.url IS NOT NULL AND url_indexable(CAST(candidate.url AS TEXT)) = 1 AND url_canonical(CAST(candidate.url AS TEXT)) IN (SELECT DISTINCT url_canonical(CAST(affected.url AS TEXT)) FROM tab AS affected WHERE affected.container_id = NEW.id AND affected.url IS NOT NULL AND url_indexable(CAST(affected.url AS TEXT)) = 1) AND(candidate.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE "key" = \'index_private\') = 1)AND NOT EXISTS (SELECT 1 FROM container WHERE container.id = candidate.container_id AND json_extract(container.metadata, \'\$.excludeFromIndex\') = 1) AND NOT EXISTS (SELECT 1 FROM tab AS newer WHERE newer.url IS NOT NULL AND url_indexable(CAST(newer.url AS TEXT)) = 1 AND url_canonical(CAST(newer.url AS TEXT)) = url_canonical(CAST(candidate.url AS TEXT)) AND(newer.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE "key" = \'index_private\') = 1)AND NOT EXISTS (SELECT 1 FROM container WHERE container.id = newer.container_id AND json_extract(container.metadata, \'\$.excludeFromIndex\') = 1) AND(newer.timestamp > candidate.timestamp OR(newer.timestamp = candidate.timestamp AND newer."rowid" > candidate."rowid"))) ON CONFLICT (url_canonical) DO UPDATE SET title = COALESCE(excluded.title, history.title), is_probably_readerable = excluded.is_probably_readerable, extracted_content_markdown = excluded.extracted_content_markdown, extracted_content_plain = excluded.extracted_content_plain, full_content_markdown = excluded.full_content_markdown, full_content_plain = excluded.full_content_plain, content_hash = excluded.content_hash, observed_at = excluded.observed_at, observed_count = history.observed_count + 1;END',
   'container_to_history_on_metadata_update',
+);
+
+class VisitContainer extends i0.Table
+    with i0.TableInfo<VisitContainer, i3.VisitContainerData> {
+  @override
+  final i0.GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  VisitContainer(this.attachedDatabase, [this._alias]);
+  late final i0.GeneratedColumn<int> id = i0.GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: i0.DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL PRIMARY KEY AUTOINCREMENT',
+  );
+  late final i0.GeneratedColumn<String> rawUrl = i0.GeneratedColumn<String>(
+    'raw_url',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final i0.GeneratedColumn<String> urlCanonical =
+      i0.GeneratedColumn<String>(
+        'url_canonical',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.string,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      );
+  late final i0.GeneratedColumn<int> visitTime = i0.GeneratedColumn<int>(
+    'visit_time',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final i0.GeneratedColumn<String> containerId =
+      i0.GeneratedColumn<String>(
+        'container_id',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.string,
+        requiredDuringInsert: true,
+        $customConstraints:
+            'NOT NULL REFERENCES container(id)ON DELETE CASCADE',
+      );
+  @override
+  List<i0.GeneratedColumn> get $columns => [
+    id,
+    rawUrl,
+    urlCanonical,
+    visitTime,
+    containerId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'visit_container';
+  @override
+  Set<i0.GeneratedColumn> get $primaryKey => {id};
+  @override
+  i3.VisitContainerData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return i3.VisitContainerData(
+      id: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      rawUrl: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}raw_url'],
+      )!,
+      urlCanonical: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}url_canonical'],
+      )!,
+      visitTime: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.int,
+        data['${effectivePrefix}visit_time'],
+      )!,
+      containerId: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}container_id'],
+      )!,
+    );
+  }
+
+  @override
+  VisitContainer createAlias(String alias) {
+    return VisitContainer(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class VisitContainerData extends i0.DataClass
+    implements i0.Insertable<i3.VisitContainerData> {
+  final int id;
+
+  /// Original visited URL; used to open the page and as the key for the Places
+  /// delete mirror (Places keys visits by URL + time).
+  final String rawUrl;
+
+  /// Structural canonical form; the join key to Places visits (computed in Dart
+  /// via canonicalizeUrl so it matches the local index's canonicalization).
+  final String urlCanonical;
+
+  /// Epoch MILLISECONDS (plain INTEGER, not a drift DATETIME which stores
+  /// seconds). Matches Places `VisitInfo.visitTime`.
+  final int visitTime;
+  final String containerId;
+  const VisitContainerData({
+    required this.id,
+    required this.rawUrl,
+    required this.urlCanonical,
+    required this.visitTime,
+    required this.containerId,
+  });
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    map['id'] = i0.Variable<int>(id);
+    map['raw_url'] = i0.Variable<String>(rawUrl);
+    map['url_canonical'] = i0.Variable<String>(urlCanonical);
+    map['visit_time'] = i0.Variable<int>(visitTime);
+    map['container_id'] = i0.Variable<String>(containerId);
+    return map;
+  }
+
+  factory VisitContainerData.fromJson(
+    Map<String, dynamic> json, {
+    i0.ValueSerializer? serializer,
+  }) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return VisitContainerData(
+      id: serializer.fromJson<int>(json['id']),
+      rawUrl: serializer.fromJson<String>(json['raw_url']),
+      urlCanonical: serializer.fromJson<String>(json['url_canonical']),
+      visitTime: serializer.fromJson<int>(json['visit_time']),
+      containerId: serializer.fromJson<String>(json['container_id']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({i0.ValueSerializer? serializer}) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'raw_url': serializer.toJson<String>(rawUrl),
+      'url_canonical': serializer.toJson<String>(urlCanonical),
+      'visit_time': serializer.toJson<int>(visitTime),
+      'container_id': serializer.toJson<String>(containerId),
+    };
+  }
+
+  i3.VisitContainerData copyWith({
+    int? id,
+    String? rawUrl,
+    String? urlCanonical,
+    int? visitTime,
+    String? containerId,
+  }) => i3.VisitContainerData(
+    id: id ?? this.id,
+    rawUrl: rawUrl ?? this.rawUrl,
+    urlCanonical: urlCanonical ?? this.urlCanonical,
+    visitTime: visitTime ?? this.visitTime,
+    containerId: containerId ?? this.containerId,
+  );
+  VisitContainerData copyWithCompanion(i3.VisitContainerCompanion data) {
+    return VisitContainerData(
+      id: data.id.present ? data.id.value : this.id,
+      rawUrl: data.rawUrl.present ? data.rawUrl.value : this.rawUrl,
+      urlCanonical: data.urlCanonical.present
+          ? data.urlCanonical.value
+          : this.urlCanonical,
+      visitTime: data.visitTime.present ? data.visitTime.value : this.visitTime,
+      containerId: data.containerId.present
+          ? data.containerId.value
+          : this.containerId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('VisitContainerData(')
+          ..write('id: $id, ')
+          ..write('rawUrl: $rawUrl, ')
+          ..write('urlCanonical: $urlCanonical, ')
+          ..write('visitTime: $visitTime, ')
+          ..write('containerId: $containerId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, rawUrl, urlCanonical, visitTime, containerId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is i3.VisitContainerData &&
+          other.id == this.id &&
+          other.rawUrl == this.rawUrl &&
+          other.urlCanonical == this.urlCanonical &&
+          other.visitTime == this.visitTime &&
+          other.containerId == this.containerId);
+}
+
+class VisitContainerCompanion
+    extends i0.UpdateCompanion<i3.VisitContainerData> {
+  final i0.Value<int> id;
+  final i0.Value<String> rawUrl;
+  final i0.Value<String> urlCanonical;
+  final i0.Value<int> visitTime;
+  final i0.Value<String> containerId;
+  const VisitContainerCompanion({
+    this.id = const i0.Value.absent(),
+    this.rawUrl = const i0.Value.absent(),
+    this.urlCanonical = const i0.Value.absent(),
+    this.visitTime = const i0.Value.absent(),
+    this.containerId = const i0.Value.absent(),
+  });
+  VisitContainerCompanion.insert({
+    this.id = const i0.Value.absent(),
+    required String rawUrl,
+    required String urlCanonical,
+    required int visitTime,
+    required String containerId,
+  }) : rawUrl = i0.Value(rawUrl),
+       urlCanonical = i0.Value(urlCanonical),
+       visitTime = i0.Value(visitTime),
+       containerId = i0.Value(containerId);
+  static i0.Insertable<i3.VisitContainerData> custom({
+    i0.Expression<int>? id,
+    i0.Expression<String>? rawUrl,
+    i0.Expression<String>? urlCanonical,
+    i0.Expression<int>? visitTime,
+    i0.Expression<String>? containerId,
+  }) {
+    return i0.RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (rawUrl != null) 'raw_url': rawUrl,
+      if (urlCanonical != null) 'url_canonical': urlCanonical,
+      if (visitTime != null) 'visit_time': visitTime,
+      if (containerId != null) 'container_id': containerId,
+    });
+  }
+
+  i3.VisitContainerCompanion copyWith({
+    i0.Value<int>? id,
+    i0.Value<String>? rawUrl,
+    i0.Value<String>? urlCanonical,
+    i0.Value<int>? visitTime,
+    i0.Value<String>? containerId,
+  }) {
+    return i3.VisitContainerCompanion(
+      id: id ?? this.id,
+      rawUrl: rawUrl ?? this.rawUrl,
+      urlCanonical: urlCanonical ?? this.urlCanonical,
+      visitTime: visitTime ?? this.visitTime,
+      containerId: containerId ?? this.containerId,
+    );
+  }
+
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    if (id.present) {
+      map['id'] = i0.Variable<int>(id.value);
+    }
+    if (rawUrl.present) {
+      map['raw_url'] = i0.Variable<String>(rawUrl.value);
+    }
+    if (urlCanonical.present) {
+      map['url_canonical'] = i0.Variable<String>(urlCanonical.value);
+    }
+    if (visitTime.present) {
+      map['visit_time'] = i0.Variable<int>(visitTime.value);
+    }
+    if (containerId.present) {
+      map['container_id'] = i0.Variable<String>(containerId.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('VisitContainerCompanion(')
+          ..write('id: $id, ')
+          ..write('rawUrl: $rawUrl, ')
+          ..write('urlCanonical: $urlCanonical, ')
+          ..write('visitTime: $visitTime, ')
+          ..write('containerId: $containerId')
+          ..write(')'))
+        .toString();
+  }
+}
+
+i0.Index get idxVcCanonical => i0.Index(
+  'idx_vc_canonical',
+  'CREATE INDEX idx_vc_canonical ON visit_container (url_canonical, visit_time)',
+);
+i0.Index get idxVcContainer => i0.Index(
+  'idx_vc_container',
+  'CREATE INDEX idx_vc_container ON visit_container (container_id, visit_time DESC)',
 );
 
 class DefinitionsDrift extends i9.ModularAccessor {

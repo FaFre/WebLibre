@@ -2039,6 +2039,299 @@ final class Schema14 extends i0.VersionedSchema {
   );
 }
 
+final class Schema15 extends i0.VersionedSchema {
+  Schema15({required super.database}) : super(version: 15);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    container,
+    tab,
+    closedTabTombstone,
+    idxTabParentContainer,
+    captureTab,
+    idxCaptureTabCaptureId,
+    tabFts,
+    tabMaintainParentChainOnDelete,
+    tabAfterInsert,
+    tabAfterDelete,
+    tabAfterUpdate,
+    localIndexSetting,
+    history,
+    idxHistoryHost,
+    idxHistoryObserved,
+    historyFts,
+    historyAfterInsert,
+    historyAfterDelete,
+    historyAfterUpdate,
+    tabToHistoryOnInsert,
+    tabToHistoryOnUpdate,
+    tabToHistoryOnContainerUpdate,
+    containerToHistoryOnMetadataUpdate,
+    visitContainer,
+    idxVcCanonical,
+    idxVcContainer,
+  ];
+  late final Shape12 container = Shape12(
+    source: i0.VersionedTable(
+      entityName: 'container',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_6,
+        _column_19,
+        _column_3,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape8 tab = Shape8(
+    source: i0.VersionedTable(
+      entityName: 'tab',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'CHECK((tab_mode = 2 AND isolation_context_id IS NOT NULL)OR(tab_mode != 2 AND isolation_context_id IS NULL))',
+      ],
+      columns: [
+        _column_0,
+        _column_16,
+        _column_4,
+        _column_5,
+        _column_6,
+        _column_7,
+        _column_8,
+        _column_17,
+        _column_18,
+        _column_19,
+        _column_10,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_14,
+        _column_15,
+        _column_27,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape6 closedTabTombstone = Shape6(
+    source: i0.VersionedTable(
+      entityName: 'closed_tab_tombstone',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_20, _column_21],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxTabParentContainer = i1.Index(
+    'idx_tab_parent_container',
+    'CREATE INDEX idx_tab_parent_container ON tab (parent_id, container_id)',
+  );
+  late final Shape7 captureTab = Shape7(
+    source: i0.VersionedTable(
+      entityName: 'capture_tab',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_22, _column_23, _column_24, _column_25, _column_26],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxCaptureTabCaptureId = i1.Index(
+    'idx_capture_tab_capture_id',
+    'CREATE INDEX idx_capture_tab_capture_id ON capture_tab (capture_id)',
+  );
+  late final Shape2 tabFts = Shape2(
+    source: i0.VersionedVirtualTable(
+      entityName: 'tab_fts',
+      moduleAndArgs:
+          'fts5(title, url, extracted_content_plain, full_content_plain, content=tab, tokenize="trigram")',
+      columns: [_column_8, _column_7, _column_12, _column_14],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Trigger tabMaintainParentChainOnDelete = i1.Trigger(
+    'CREATE TRIGGER tab_maintain_parent_chain_on_delete BEFORE DELETE ON tab BEGIN UPDATE tab SET parent_id = CASE WHEN OLD.parent_id IS NOT NULL AND EXISTS (SELECT 1 FROM tab WHERE id = OLD.parent_id) THEN OLD.parent_id ELSE NULL END WHERE parent_id = OLD.id;END',
+    'tab_maintain_parent_chain_on_delete',
+  );
+  final i1.Trigger tabAfterInsert = i1.Trigger(
+    'CREATE TRIGGER tab_after_insert AFTER INSERT ON tab BEGIN INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
+    'tab_after_insert',
+  );
+  final i1.Trigger tabAfterDelete = i1.Trigger(
+    'CREATE TRIGGER tab_after_delete AFTER DELETE ON tab BEGIN INSERT INTO tab_fts (tab_fts, "rowid", title, url, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url, old.extracted_content_plain, old.full_content_plain);END',
+    'tab_after_delete',
+  );
+  final i1.Trigger tabAfterUpdate = i1.Trigger(
+    'CREATE TRIGGER tab_after_update AFTER UPDATE OF title, url, extracted_content_plain, full_content_plain ON tab WHEN OLD.content_hash IS NOT NEW.content_hash OR OLD.url IS NOT NEW.url BEGIN INSERT INTO tab_fts (tab_fts, "rowid", title, url, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url, old.extracted_content_plain, old.full_content_plain);INSERT INTO tab_fts ("rowid", title, url, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url, new.extracted_content_plain, new.full_content_plain);END',
+    'tab_after_update',
+  );
+  late final Shape9 localIndexSetting = Shape9(
+    source: i0.VersionedTable(
+      entityName: 'local_index_setting',
+      withoutRowId: false,
+      isStrict: true,
+      tableConstraints: [],
+      columns: [_column_28, _column_29],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape10 history = Shape10(
+    source: i0.VersionedTable(
+      entityName: 'history',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_30,
+        _column_31,
+        _column_32,
+        _column_8,
+        _column_10,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_14,
+        _column_33,
+        _column_34,
+        _column_35,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxHistoryHost = i1.Index(
+    'idx_history_host',
+    'CREATE INDEX idx_history_host ON history (url_host)',
+  );
+  final i1.Index idxHistoryObserved = i1.Index(
+    'idx_history_observed',
+    'CREATE INDEX idx_history_observed ON history (observed_at DESC)',
+  );
+  late final Shape11 historyFts = Shape11(
+    source: i0.VersionedVirtualTable(
+      entityName: 'history_fts',
+      moduleAndArgs:
+          'fts5(title, url_host, url_path, extracted_content_plain, full_content_plain, content=history, tokenize="trigram")',
+      columns: [_column_8, _column_36, _column_32, _column_12, _column_14],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Trigger historyAfterInsert = i1.Trigger(
+    'CREATE TRIGGER history_after_insert AFTER INSERT ON history BEGIN INSERT INTO history_fts ("rowid", title, url_host, url_path, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url_host, new.url_path, new.extracted_content_plain, new.full_content_plain);END',
+    'history_after_insert',
+  );
+  final i1.Trigger historyAfterDelete = i1.Trigger(
+    'CREATE TRIGGER history_after_delete AFTER DELETE ON history BEGIN INSERT INTO history_fts (history_fts, "rowid", title, url_host, url_path, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url_host, old.url_path, old.extracted_content_plain, old.full_content_plain);END',
+    'history_after_delete',
+  );
+  final i1.Trigger historyAfterUpdate = i1.Trigger(
+    'CREATE TRIGGER history_after_update AFTER UPDATE OF title, url_host, url_path, extracted_content_plain, full_content_plain ON history BEGIN INSERT INTO history_fts (history_fts, "rowid", title, url_host, url_path, extracted_content_plain, full_content_plain) VALUES (\'delete\', old."rowid", old.title, old.url_host, old.url_path, old.extracted_content_plain, old.full_content_plain);INSERT INTO history_fts ("rowid", title, url_host, url_path, extracted_content_plain, full_content_plain) VALUES (new."rowid", new.title, new.url_host, new.url_path, new.extracted_content_plain, new.full_content_plain);END',
+    'history_after_update',
+  );
+  final i1.Trigger tabToHistoryOnInsert = i1.Trigger(
+    'CREATE TRIGGER tab_to_history_on_insert AFTER INSERT ON tab WHEN NEW.url IS NOT NULL AND url_indexable(CAST(NEW.url AS TEXT)) = 1 AND (SELECT value FROM local_index_setting WHERE "key" = \'enabled\') = 1 AND(NEW.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE "key" = \'index_private\') = 1)AND NOT EXISTS (SELECT 1 FROM container WHERE container.id = NEW.container_id AND json_extract(container.metadata, \'\$.excludeFromIndex\') = 1) BEGIN INSERT INTO history (url_canonical, url_host, url_path, title, is_probably_readerable, extracted_content_markdown, extracted_content_plain, full_content_markdown, full_content_plain, content_hash, observed_at, observed_count) VALUES (url_canonical(CAST(NEW.url AS TEXT)), url_host(CAST(NEW.url AS TEXT)), url_path(CAST(NEW.url AS TEXT)), NEW.title, NEW.is_probably_readerable, NEW.extracted_content_markdown, NEW.extracted_content_plain, NEW.full_content_markdown, NEW.full_content_plain, NEW.content_hash, strftime(\'%s\', \'now\') * 1000, 1) ON CONFLICT (url_canonical) DO UPDATE SET title = COALESCE(excluded.title, history.title), is_probably_readerable = excluded.is_probably_readerable, extracted_content_markdown = excluded.extracted_content_markdown, extracted_content_plain = excluded.extracted_content_plain, full_content_markdown = excluded.full_content_markdown, full_content_plain = excluded.full_content_plain, content_hash = excluded.content_hash, observed_at = excluded.observed_at, observed_count = history.observed_count + 1 WHERE history.content_hash IS NOT excluded.content_hash;END',
+    'tab_to_history_on_insert',
+  );
+  final i1.Trigger tabToHistoryOnUpdate = i1.Trigger(
+    'CREATE TRIGGER tab_to_history_on_update AFTER UPDATE OF title, url, extracted_content_plain, extracted_content_markdown, full_content_plain, full_content_markdown, is_probably_readerable ON tab WHEN NEW.url IS NOT NULL AND url_indexable(CAST(NEW.url AS TEXT)) = 1 AND(OLD.content_hash IS NOT NEW.content_hash OR OLD.url IS NOT NEW.url)AND (SELECT value FROM local_index_setting WHERE "key" = \'enabled\') = 1 AND(NEW.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE "key" = \'index_private\') = 1)AND NOT EXISTS (SELECT 1 FROM container WHERE container.id = NEW.container_id AND json_extract(container.metadata, \'\$.excludeFromIndex\') = 1) BEGIN INSERT INTO history (url_canonical, url_host, url_path, title, is_probably_readerable, extracted_content_markdown, extracted_content_plain, full_content_markdown, full_content_plain, content_hash, observed_at, observed_count) VALUES (url_canonical(CAST(NEW.url AS TEXT)), url_host(CAST(NEW.url AS TEXT)), url_path(CAST(NEW.url AS TEXT)), NEW.title, NEW.is_probably_readerable, NEW.extracted_content_markdown, NEW.extracted_content_plain, NEW.full_content_markdown, NEW.full_content_plain, NEW.content_hash, strftime(\'%s\', \'now\') * 1000, 1) ON CONFLICT (url_canonical) DO UPDATE SET title = COALESCE(excluded.title, history.title), is_probably_readerable = excluded.is_probably_readerable, extracted_content_markdown = excluded.extracted_content_markdown, extracted_content_plain = excluded.extracted_content_plain, full_content_markdown = excluded.full_content_markdown, full_content_plain = excluded.full_content_plain, content_hash = excluded.content_hash, observed_at = excluded.observed_at, observed_count = history.observed_count + 1 WHERE history.content_hash IS NOT excluded.content_hash;END',
+    'tab_to_history_on_update',
+  );
+  final i1.Trigger tabToHistoryOnContainerUpdate = i1.Trigger(
+    'CREATE TRIGGER tab_to_history_on_container_update AFTER UPDATE OF container_id ON tab WHEN NEW.url IS NOT NULL AND url_indexable(CAST(NEW.url AS TEXT)) = 1 AND (SELECT value FROM local_index_setting WHERE "key" = \'enabled\') = 1 BEGIN DELETE FROM history WHERE url_canonical = url_canonical(CAST(NEW.url AS TEXT)) AND NOT EXISTS (SELECT 1 FROM tab AS candidate WHERE candidate.url IS NOT NULL AND url_indexable(CAST(candidate.url AS TEXT)) = 1 AND url_canonical(CAST(candidate.url AS TEXT)) = history.url_canonical AND(candidate.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE "key" = \'index_private\') = 1)AND NOT EXISTS (SELECT 1 FROM container WHERE container.id = candidate.container_id AND json_extract(container.metadata, \'\$.excludeFromIndex\') = 1));INSERT INTO history (url_canonical, url_host, url_path, title, is_probably_readerable, extracted_content_markdown, extracted_content_plain, full_content_markdown, full_content_plain, content_hash, observed_at, observed_count) SELECT url_canonical(CAST(candidate.url AS TEXT)), url_host(CAST(candidate.url AS TEXT)), url_path(CAST(candidate.url AS TEXT)), candidate.title, candidate.is_probably_readerable, candidate.extracted_content_markdown, candidate.extracted_content_plain, candidate.full_content_markdown, candidate.full_content_plain, candidate.content_hash, strftime(\'%s\', \'now\') * 1000, 1 FROM tab AS candidate WHERE candidate.url IS NOT NULL AND url_indexable(CAST(candidate.url AS TEXT)) = 1 AND url_canonical(CAST(candidate.url AS TEXT)) = url_canonical(CAST(NEW.url AS TEXT)) AND(candidate.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE "key" = \'index_private\') = 1)AND NOT EXISTS (SELECT 1 FROM container WHERE container.id = candidate.container_id AND json_extract(container.metadata, \'\$.excludeFromIndex\') = 1) ORDER BY candidate.timestamp DESC, candidate."rowid" DESC LIMIT 1 ON CONFLICT (url_canonical) DO UPDATE SET title = COALESCE(excluded.title, history.title), is_probably_readerable = excluded.is_probably_readerable, extracted_content_markdown = excluded.extracted_content_markdown, extracted_content_plain = excluded.extracted_content_plain, full_content_markdown = excluded.full_content_markdown, full_content_plain = excluded.full_content_plain, content_hash = excluded.content_hash, observed_at = excluded.observed_at, observed_count = history.observed_count + 1;END',
+    'tab_to_history_on_container_update',
+  );
+  final i1.Trigger containerToHistoryOnMetadataUpdate = i1.Trigger(
+    'CREATE TRIGGER container_to_history_on_metadata_update AFTER UPDATE OF metadata ON container WHEN COALESCE(json_extract(OLD.metadata, \'\$.excludeFromIndex\') = 1, 0) != COALESCE(json_extract(NEW.metadata, \'\$.excludeFromIndex\') = 1, 0) AND (SELECT value FROM local_index_setting WHERE "key" = \'enabled\') = 1 BEGIN DELETE FROM history WHERE url_canonical IN (SELECT DISTINCT url_canonical(CAST(affected.url AS TEXT)) FROM tab AS affected WHERE affected.container_id = NEW.id AND affected.url IS NOT NULL AND url_indexable(CAST(affected.url AS TEXT)) = 1) AND NOT EXISTS (SELECT 1 FROM tab AS candidate WHERE candidate.url IS NOT NULL AND url_indexable(CAST(candidate.url AS TEXT)) = 1 AND url_canonical(CAST(candidate.url AS TEXT)) = history.url_canonical AND(candidate.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE "key" = \'index_private\') = 1)AND NOT EXISTS (SELECT 1 FROM container WHERE container.id = candidate.container_id AND json_extract(container.metadata, \'\$.excludeFromIndex\') = 1));INSERT INTO history (url_canonical, url_host, url_path, title, is_probably_readerable, extracted_content_markdown, extracted_content_plain, full_content_markdown, full_content_plain, content_hash, observed_at, observed_count) SELECT url_canonical(CAST(candidate.url AS TEXT)), url_host(CAST(candidate.url AS TEXT)), url_path(CAST(candidate.url AS TEXT)), candidate.title, candidate.is_probably_readerable, candidate.extracted_content_markdown, candidate.extracted_content_plain, candidate.full_content_markdown, candidate.full_content_plain, candidate.content_hash, strftime(\'%s\', \'now\') * 1000, 1 FROM tab AS candidate WHERE candidate.url IS NOT NULL AND url_indexable(CAST(candidate.url AS TEXT)) = 1 AND url_canonical(CAST(candidate.url AS TEXT)) IN (SELECT DISTINCT url_canonical(CAST(affected.url AS TEXT)) FROM tab AS affected WHERE affected.container_id = NEW.id AND affected.url IS NOT NULL AND url_indexable(CAST(affected.url AS TEXT)) = 1) AND(candidate.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE "key" = \'index_private\') = 1)AND NOT EXISTS (SELECT 1 FROM container WHERE container.id = candidate.container_id AND json_extract(container.metadata, \'\$.excludeFromIndex\') = 1) AND NOT EXISTS (SELECT 1 FROM tab AS newer WHERE newer.url IS NOT NULL AND url_indexable(CAST(newer.url AS TEXT)) = 1 AND url_canonical(CAST(newer.url AS TEXT)) = url_canonical(CAST(candidate.url AS TEXT)) AND(newer.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE "key" = \'index_private\') = 1)AND NOT EXISTS (SELECT 1 FROM container WHERE container.id = newer.container_id AND json_extract(container.metadata, \'\$.excludeFromIndex\') = 1) AND(newer.timestamp > candidate.timestamp OR(newer.timestamp = candidate.timestamp AND newer."rowid" > candidate."rowid"))) ON CONFLICT (url_canonical) DO UPDATE SET title = COALESCE(excluded.title, history.title), is_probably_readerable = excluded.is_probably_readerable, extracted_content_markdown = excluded.extracted_content_markdown, extracted_content_plain = excluded.extracted_content_plain, full_content_markdown = excluded.full_content_markdown, full_content_plain = excluded.full_content_plain, content_hash = excluded.content_hash, observed_at = excluded.observed_at, observed_count = history.observed_count + 1;END',
+    'container_to_history_on_metadata_update',
+  );
+  late final Shape13 visitContainer = Shape13(
+    source: i0.VersionedTable(
+      entityName: 'visit_container',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_37, _column_38, _column_39, _column_40, _column_41],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxVcCanonical = i1.Index(
+    'idx_vc_canonical',
+    'CREATE INDEX idx_vc_canonical ON visit_container (url_canonical, visit_time)',
+  );
+  final i1.Index idxVcContainer = i1.Index(
+    'idx_vc_container',
+    'CREATE INDEX idx_vc_container ON visit_container (container_id, visit_time DESC)',
+  );
+}
+
+class Shape13 extends i0.VersionedTable {
+  Shape13({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<int> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get rawUrl =>
+      columnsByName['raw_url']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get urlCanonical =>
+      columnsByName['url_canonical']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get visitTime =>
+      columnsByName['visit_time']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get containerId =>
+      columnsByName['container_id']! as i1.GeneratedColumn<String>;
+}
+
+i1.GeneratedColumn<int> _column_37(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'id',
+      aliasedName,
+      false,
+      hasAutoIncrement: true,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NOT NULL PRIMARY KEY AUTOINCREMENT',
+    );
+i1.GeneratedColumn<String> _column_38(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'raw_url',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NOT NULL',
+    );
+i1.GeneratedColumn<String> _column_39(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'url_canonical',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NOT NULL',
+    );
+i1.GeneratedColumn<int> _column_40(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'visit_time',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NOT NULL',
+    );
+i1.GeneratedColumn<String> _column_41(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'container_id',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NOT NULL REFERENCES container(id)ON DELETE CASCADE',
+    );
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
   required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
@@ -2052,6 +2345,7 @@ i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema12 schema) from11To12,
   required Future<void> Function(i1.Migrator m, Schema13 schema) from12To13,
   required Future<void> Function(i1.Migrator m, Schema14 schema) from13To14,
+  required Future<void> Function(i1.Migrator m, Schema15 schema) from14To15,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -2115,6 +2409,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from13To14(migrator, schema);
         return 14;
+      case 14:
+        final schema = Schema15(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from14To15(migrator, schema);
+        return 15;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -2134,6 +2433,7 @@ i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema12 schema) from11To12,
   required Future<void> Function(i1.Migrator m, Schema13 schema) from12To13,
   required Future<void> Function(i1.Migrator m, Schema14 schema) from13To14,
+  required Future<void> Function(i1.Migrator m, Schema15 schema) from14To15,
 }) => i0.VersionedSchema.stepByStepHelper(
   step: migrationSteps(
     from2To3: from2To3,
@@ -2148,5 +2448,6 @@ i1.OnUpgrade stepByStep({
     from11To12: from11To12,
     from12To13: from12To13,
     from13To14: from13To14,
+    from14To15: from14To15,
   ),
 );

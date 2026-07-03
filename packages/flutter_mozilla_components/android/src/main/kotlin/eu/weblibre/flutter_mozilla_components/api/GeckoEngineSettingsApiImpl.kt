@@ -6,6 +6,7 @@
 
 package eu.weblibre.flutter_mozilla_components.api
 
+import android.content.Context
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import eu.weblibre.flutter_mozilla_components.ColorSchemePreference
@@ -74,7 +75,9 @@ internal fun TrackingProtectionPolicy.withBounceTrackingProtectionMode(
 /**
  * Implementation of GeckoEngineSettingsApi that manages engine-specific settings
  */
-class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
+class GeckoEngineSettingsApiImpl(
+    private val applicationContext: Context? = null,
+) : GeckoEngineSettingsApi {
     companion object {
         private const val TAG = "GeckoEngineSettingsApi"
     }
@@ -514,5 +517,9 @@ class GeckoEngineSettingsApiImpl : GeckoEngineSettingsApi {
             components.core.prefs,
             activeReaderSessions,
         )
+    }
+
+    override fun setExcludedHistoryContextIds(contextIds: List<String>) {
+        GlobalComponents.setExcludedHistoryContextIds(applicationContext, contextIds)
     }
 }

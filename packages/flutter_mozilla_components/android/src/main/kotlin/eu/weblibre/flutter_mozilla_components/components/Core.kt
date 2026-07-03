@@ -18,6 +18,7 @@ import eu.weblibre.flutter_mozilla_components.services.DownloadService
 import eu.weblibre.flutter_mozilla_components.EngineProvider
 import eu.weblibre.flutter_mozilla_components.EngineProvider.getOrCreateRuntime
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.history.WebLibreHistoryDelegate
 import eu.weblibre.flutter_mozilla_components.PermissionStorage
 import eu.weblibre.flutter_mozilla_components.services.MediaSessionService
 import eu.weblibre.flutter_mozilla_components.activities.NotificationActivity
@@ -26,6 +27,7 @@ import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
 import eu.weblibre.flutter_mozilla_components.middleware.FlutterEventMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataService
+import eu.weblibre.flutter_mozilla_components.middleware.HistoryVisitCorrelationMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.SandboxCaptureMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.SaveToPDFMiddleware
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
@@ -99,9 +101,14 @@ class Core(
 
     val engineSettings by lazy {
         DefaultSettings(
-            //historyTrackingDelegate = HistoryDelegate(lazyHistoryStorage)
             requestInterceptor = requestInterceptor,
-            historyTrackingDelegate = HistoryDelegate(lazyHistoryStorage),
+            // Wrap the Places-feeding delegate so WebLibre can hard-exclude
+            // container visits even on the headless external path. When Flutter
+            // is available, the wrapper also emits visit→container relations.
+            historyTrackingDelegate = WebLibreHistoryDelegate(
+                HistoryDelegate(lazyHistoryStorage),
+                GlobalComponents.historyEvents,
+            ),
             testingModeEnabled = false,
             remoteDebuggingEnabled = false,
             automaticFontSizeAdjustment = true,
@@ -225,6 +232,9 @@ class Core(
                 // sandbox new-tab URLs before Gecko issues a request.
                 SandboxCaptureMiddleware,
                 HistoryMetadataMiddleware(historyMetadataService),
+                // Correlates url -> contextId so WebLibreHistoryDelegate can
+                // resolve a visit's container at record time.
+                HistoryVisitCorrelationMiddleware(),
                 FlutterEventMiddleware(flutterEvents),
                 DownloadMiddleware(
                     applicationContext = context,

@@ -8,6 +8,8 @@ package eu.weblibre.flutter_mozilla_components
 
 import android.content.Context
 import android.content.Intent
+import androidx.core.content.edit
+import androidx.preference.PreferenceManager
 import eu.weblibre.flutter_mozilla_components.pigeons.AddonCollection
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMode
@@ -15,6 +17,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.ContentBlocking
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettings
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoGestureEvents
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoHistoryEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
@@ -59,7 +62,9 @@ private const val HISTORY_METADATA_MAX_AGE_IN_MS = 14L * 24 * 60 * 60 * 1000 // 
 private const val DEFAULT_QUERY_PARAMETER_STRIPPING_STRIP_LIST =
     "__hsfp __hssc __hstc __s _bhlid _branch_match_id _branch_referrer _gl _hsenc _kx _openstat at_recipient_id at_recipient_list bbeml bsft_clkid bsft_uid dclid et_rid fb_action_ids fb_comment_id fbclid gbraid gclid guce_referrer guce_referrer_sig hsCtaTracking igshid irclickid mc_eid mkt_tok ml_subscriber ml_subscriber_hash msclkid mtm_cid oft_c oft_ck oft_d oft_id oft_ids oft_k oft_lk oft_sk oly_anon_id oly_enc_id pk_cid rb_clickid s_cid sc_customer sc_eh sc_uid sms_click sms_source sms_uph srsltid ss_email_id syclid ttclid twclid unicorn_click_id vero_conv vero_id vgo_ee wbraid wickedid yclid ymclid ysclid"
 private const val UBLOCK_FILTER_LISTS_PREF = "browser.weblibre.uBO.filterLists"
-    
+private const val EXCLUDED_HISTORY_CONTEXT_IDS_PREF =
+    "browser.weblibre.excludedHistoryContextIds"
+
 object GlobalComponents {
     private var _components: Components? = null
     private var currentMode: ComponentsMode? = null
@@ -104,6 +109,36 @@ object GlobalComponents {
     // configuration pushed from Dart. Read by the browser container's
     // GestureRecognizer on the UI thread.
     var gestureEvents: GeckoGestureEvents? = null
+
+    // Native -> Dart history visit notifications, consumed by Core's history
+    // delegate to forward the visit's WebLibre container. Null on the headless
+    // path (no Flutter engine); the delegate still hard-excludes persisted
+    // container contextIds but skips Dart relation emits.
+    var historyEvents: GeckoHistoryEvents? = null
+
+    // Gecko contextIds of containers with hard exclude-from-history enabled.
+    // Pushed from Dart; read by WebLibreHistoryDelegate to skip the Places
+    // write for visits resolved to one of these containers.
+    @Volatile
+    var excludedHistoryContextIds: Set<String> = emptySet()
+
+    fun setExcludedHistoryContextIds(context: Context?, contextIds: Collection<String>) {
+        val contextIdSet = contextIds.toSet()
+        excludedHistoryContextIds = contextIdSet
+
+        if (context != null) {
+            PreferenceManager.getDefaultSharedPreferences(context).edit {
+                putStringSet(EXCLUDED_HISTORY_CONTEXT_IDS_PREF, contextIdSet)
+            }
+        }
+    }
+
+    fun loadExcludedHistoryContextIds(context: Context) {
+        excludedHistoryContextIds = PreferenceManager.getDefaultSharedPreferences(context)
+            .getStringSet(EXCLUDED_HISTORY_CONTEXT_IDS_PREF, emptySet())
+            .orEmpty()
+            .toSet()
+    }
 
     @Volatile
     var gestureConfig: GestureConfig? = null
@@ -461,6 +496,9 @@ object GlobalComponents {
         val profileContext = ProfileContext(baseContext.applicationContext, profileFolder)
         val messenger = NoopBinaryMessenger()
 
+        loadExcludedHistoryContextIds(baseContext.applicationContext)
+        historyEvents = null
+
         val selectionActionEvents = GeckoSelectionActionEvents(messenger)
         val selectionActionDelegate = DefaultSelectionActionDelegate(selectionActionEvents) { actions ->
             val processTextAction = "android.intent.action.PROCESS_TEXT"
@@ -493,7 +531,7 @@ object GlobalComponents {
             mode = ComponentsMode.EXTERNAL,
         )
 
-        engineSettingsApi = GeckoEngineSettingsApiImpl()
+        engineSettingsApi = GeckoEngineSettingsApiImpl(baseContext.applicationContext)
         return true
     }
 

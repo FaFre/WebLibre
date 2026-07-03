@@ -46,11 +46,14 @@ class GeckoHistoryService {
       case VisitType.redirectTemporary:
       case VisitType.framedLink:
       case VisitType.reload:
+      // A bookmark-type visit is an ordinary Places visit (the user navigated
+      // via a bookmark); deleting it by (url, time) removes only that visit
+      // record and leaves the bookmark itself intact — same path as any page
+      // visit.
+      case VisitType.bookmark:
         return _api.deleteVisit(info.url, info.visitTime);
       case VisitType.download:
         return _api.deleteDownload(info.contentId!);
-      case VisitType.bookmark:
-        throw UnimplementedError('VisitType.bookmark deletion not implemented');
     }
   }
 

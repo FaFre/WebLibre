@@ -49,6 +49,9 @@ class BrowserDataService extends _$BrowserDataService {
           case DeleteBrowsingDataType.history:
             await _service.deleteBrowsingHistory();
             await ref.read(tabDatabaseProvider).historyDao.clear();
+            // Places visits are gone; drop their container tags too so they
+            // don't dangle (and can't re-attach to a future same-URL visit).
+            await ref.read(tabDatabaseProvider).visitContainerDao.clearAll();
           case DeleteBrowsingDataType.recentSearches:
             await ref
                 .read(bangDataRepositoryProvider.notifier)

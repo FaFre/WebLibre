@@ -35,11 +35,14 @@ import 'package:sliver_tools/sliver_tools.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/delete_data.dart';
+import 'package:weblibre/features/geckoview/features/history/domain/entities/history_entry.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/entities/history_filter_options.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
+import 'package:weblibre/features/geckoview/features/history/domain/repositories/container_history.dart';
 import 'package:weblibre/features/geckoview/features/history/presentation/dialogs/delete_file.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
@@ -54,11 +57,12 @@ class Section extends MultiSliver {
     super.key,
     required BuildContext context,
     required String title,
-    required List<VisitInfo> items,
-    required Set<VisitInfo> selectedItems,
-    required void Function(VisitInfo) onTap,
-    required void Function(VisitInfo) onLongPress,
-    required Future<void> Function(VisitInfo) onDelete,
+    required List<HistoryEntry> items,
+    required Set<HistoryEntry> selectedItems,
+    required Map<String, ContainerData> containersById,
+    required void Function(HistoryEntry) onTap,
+    required void Function(HistoryEntry) onLongPress,
+    required Future<void> Function(HistoryEntry) onDelete,
   }) : super(
          pushPinnedChildren: true,
          children: [
@@ -122,6 +126,7 @@ class Section extends MultiSliver {
                      padding: const EdgeInsets.only(left: 54, right: 16),
                      child: Wrap(
                        spacing: 8.0,
+                       runSpacing: 4.0,
                        children: [
                          Chip(
                            avatar: switch (item.visitType) {
@@ -147,9 +152,7 @@ class Section extends MultiSliver {
                              VisitType.download => const Text('Download'),
                              VisitType.framedLink => const Text('Frame'),
                              VisitType.reload => const Text('Page Reload'),
-                             VisitType.bookmark => throw UnimplementedError(
-                               'VisitType.bookmark chip display not implemented',
-                             ),
+                             VisitType.bookmark => const Text('Bookmark'),
                            },
                          ),
                          Chip(
@@ -161,6 +164,16 @@ class Section extends MultiSliver {
                              ),
                            ),
                          ),
+                         for (final containerId in item.containerIds)
+                           if (containersById[containerId]
+                               case final container?)
+                             Chip(
+                               avatar: CircleAvatar(
+                                 backgroundColor: container.color,
+                                 radius: 8,
+                               ),
+                               label: Text(container.name ?? 'Container'),
+                             ),
                        ],
                      ),
                    ),
@@ -195,7 +208,18 @@ class HistoryScreen extends HookConsumerWidget {
         ? ref.watch(browsingDownloadsProvider)
         : ref.watch(browsingHistoryProvider);
 
-    final selectedItems = useState(<VisitInfo>{});
+    final containers = ref.watch(
+      watchContainersWithCountProvider.select((value) => value.value),
+    );
+    final containersById = <String, ContainerData>{
+      for (final container in containers ?? const <ContainerData>[])
+        container.id: container,
+    };
+    final filterContainer = historyFilter.containerId.mapNotNull(
+      (id) => containersById[id],
+    );
+
+    final selectedItems = useState(<HistoryEntry>{});
     final defaultDownloadsFilter = HistoryFilterOptions(
       dateRange: null,
       visitTypes: const {VisitType.download},
@@ -222,8 +246,10 @@ class HistoryScreen extends HookConsumerWidget {
       }
     }
 
-    Future<void> deleteHistoryItem(VisitInfo item) async {
-      await ref.read(historyRepositoryProvider.notifier).deleteVisit(item);
+    Future<void> deleteHistoryItem(HistoryEntry item) async {
+      await ref
+          .read(containerHistoryRepositoryProvider.notifier)
+          .deleteVisit(item);
 
       final downloadedFile = item.title.mapNotNull((title) => File(title));
 
@@ -239,6 +265,38 @@ class HistoryScreen extends HookConsumerWidget {
       }
 
       await refreshHistoryEntries();
+    }
+
+    Future<void> clearContainerHistory(ContainerData container) async {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          icon: const Icon(Icons.warning),
+          title: const Text('Clear Container History'),
+          content: Text(
+            'Delete all browsing history recorded for '
+            '"${container.name ?? 'Container'}"? The visits are removed from '
+            'history.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Clear'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed == true) {
+        await ref
+            .read(containerHistoryRepositoryProvider.notifier)
+            .deleteContainerHistory(container.id);
+        await refreshHistoryEntries();
+      }
     }
 
     return Scaffold(
@@ -276,7 +334,7 @@ class HistoryScreen extends HookConsumerWidget {
 
                 for (final item in selectedItems.value) {
                   await ref
-                      .read(historyRepositoryProvider.notifier)
+                      .read(containerHistoryRepositoryProvider.notifier)
                       .deleteVisit(item);
 
                   final downloadedFile = item.title.mapNotNull(
@@ -309,7 +367,18 @@ class HistoryScreen extends HookConsumerWidget {
             )
           else
             IconButton(
+              // Mirror what the list currently shows: with a container filter
+              // active, clear only that container's history; otherwise fall
+              // back to the full delete-browsing-data sheet.
+              tooltip: filterContainer != null
+                  ? 'Clear "${filterContainer.name ?? 'Container'}" history'
+                  : null,
               onPressed: () async {
+                if (filterContainer != null) {
+                  await clearContainerHistory(filterContainer);
+                  return;
+                }
+
                 await showDeleteDataDialog(
                   context,
                   initialSettings: {
@@ -403,12 +472,51 @@ class HistoryScreen extends HookConsumerWidget {
                       VisitType.download => const Text('Downloads'),
                       VisitType.framedLink => const Text('Frames'),
                       VisitType.reload => const Text('Page Reloads'),
-                      VisitType.bookmark => throw UnimplementedError(
-                        'VisitType.bookmark filter not implemented',
-                      ),
+                      VisitType.bookmark => const Text('Bookmarks'),
                     },
                   ),
                 ),
+              if (!isDownloadsMode && (containers?.isNotEmpty ?? false)) ...[
+                const Divider(),
+                SubmenuButton(
+                  leadingIcon: const Icon(MdiIcons.folderMultipleOutline),
+                  menuChildren: [
+                    MenuItemButton(
+                      leadingIcon: Icon(
+                        historyFilter.containerId == null
+                            ? Icons.radio_button_checked
+                            : Icons.radio_button_unchecked,
+                      ),
+                      onPressed: () {
+                        ref
+                            .read(historyVisitsFilterProvider.notifier)
+                            .setContainer(null);
+                      },
+                      child: const Text('All Containers'),
+                    ),
+                    for (final container in containers!)
+                      MenuItemButton(
+                        leadingIcon: Icon(
+                          historyFilter.containerId == container.id
+                              ? Icons.radio_button_checked
+                              : Icons.radio_button_unchecked,
+                          color: container.color,
+                        ),
+                        onPressed: () {
+                          ref
+                              .read(historyVisitsFilterProvider.notifier)
+                              .setContainer(container.id);
+                        },
+                        child: Text(container.name ?? 'Container'),
+                      ),
+                  ],
+                  child: Text(
+                    filterContainer != null
+                        ? 'Container: ${filterContainer.name ?? 'Container'}'
+                        : 'Filter Container',
+                  ),
+                ),
+              ],
               const Divider(),
               MenuItemButton(
                 leadingIcon: const Icon(MdiIcons.restore),
@@ -458,11 +566,11 @@ class HistoryScreen extends HookConsumerWidget {
                   final groups = useMemoized(
                     () => data
                         .where(
-                          (visit) =>
+                          (entry) =>
                               textFilter.isEmpty ||
-                              visit.title?.toLowerCase().contains(textFilter) ==
+                              entry.title?.toLowerCase().contains(textFilter) ==
                                   true ||
-                              visit.url.toLowerCase().contains(textFilter),
+                              entry.url.toLowerCase().contains(textFilter),
                         )
                         .groupListsBy(
                           (element) => timeago.format(
@@ -474,7 +582,7 @@ class HistoryScreen extends HookConsumerWidget {
                     [EquatableValue(data), textFilter],
                   );
 
-                  void toggleSelected(VisitInfo item) {
+                  void toggleSelected(HistoryEntry item) {
                     if (selectedItems.value.contains(item)) {
                       selectedItems.value = {...selectedItems.value}
                         ..remove(item);
@@ -495,6 +603,7 @@ class HistoryScreen extends HookConsumerWidget {
                               title: key,
                               items: value,
                               selectedItems: selectedItems.value,
+                              containersById: containersById,
                               onLongPress: toggleSelected,
                               onDelete: deleteHistoryItem,
                               onTap: (item) async {

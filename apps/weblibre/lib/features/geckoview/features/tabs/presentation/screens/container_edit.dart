@@ -26,6 +26,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/uuid.dart';
+import 'package:weblibre/features/geckoview/features/history/domain/repositories/container_history.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/controllers/container_topic.dart';
@@ -100,6 +101,9 @@ class ContainerEditScreen extends HookConsumerWidget {
     final excludeFromIndex = useState(
       initialContainer.metadata.excludeFromIndex,
     );
+    final excludeFromHistory = useState(
+      initialContainer.metadata.excludeFromHistory,
+    );
     final bypassGlobalProxy = useState(
       initialContainer.metadata.bypassGlobalProxy,
     );
@@ -126,13 +130,18 @@ class ContainerEditScreen extends HookConsumerWidget {
           clearDataOnExit:
               clearDataOnExit.value && contextualIdentity.value != null,
           excludeFromIndex: excludeFromIndex.value,
+          // Requires a Gecko contextId: the native delegate can't hard-exclude
+          // a container's visits without one. sanitized() enforces the same
+          // invariant defensively on write.
+          excludeFromHistory:
+              excludeFromHistory.value && contextualIdentity.value != null,
           bypassGlobalProxy:
               contextualIdentity.value != null &&
               proxyConnectionId.value == null &&
               bypassGlobalProxy.value,
           useCustomColor: useCustomColor.value,
           assignedSites: assignedSites.value,
-        ),
+        ).sanitized(),
       );
     }
 
@@ -234,7 +243,16 @@ class ContainerEditScreen extends HookConsumerWidget {
     Future<void> deleteContainer() async {
       final result = await showDeleteContainerDialog(context);
 
-      if (result == true) {
+      if (result != null) {
+        // Delete the container's Places visits BEFORE the container itself so
+        // the relation rows still exist to find them; deleting the container
+        // then dissolves the relations via ON DELETE CASCADE.
+        if (result.wipeHistory) {
+          await ref
+              .read(containerHistoryRepositoryProvider.notifier)
+              .deletePlacesVisitsForContainer(initialContainer.id);
+        }
+
         await ref
             .read(containerRepositoryProvider.notifier)
             .deleteContainer(initialContainer.id);
@@ -540,6 +558,24 @@ class ContainerEditScreen extends HookConsumerWidget {
                           onChanged: (value) {
                             excludeFromIndex.value = value;
                           },
+                        ),
+                        const Divider(height: 1, indent: 56),
+                        SwitchListTile.adaptive(
+                          value:
+                              contextualIdentity.value != null &&
+                              excludeFromHistory.value,
+                          title: const Text('Exclude from History'),
+                          subtitle: Text(
+                            contextualIdentity.value != null
+                                ? "Don't record this container's browsing history"
+                                : 'Requires cookie isolation to be enabled',
+                          ),
+                          secondary: const Icon(MdiIcons.incognito),
+                          onChanged: (contextualIdentity.value != null)
+                              ? (value) {
+                                  excludeFromHistory.value = value;
+                                }
+                              : null,
                         ),
                       ],
                     ),

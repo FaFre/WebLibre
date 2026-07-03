@@ -17,6 +17,8 @@ abstract class _$ContainerMetadataCWProxy {
 
   ContainerMetadata excludeFromIndex(bool excludeFromIndex);
 
+  ContainerMetadata excludeFromHistory(bool excludeFromHistory);
+
   ContainerMetadata bypassGlobalProxy(bool bypassGlobalProxy);
 
   ContainerMetadata useCustomColor(bool useCustomColor);
@@ -36,6 +38,7 @@ abstract class _$ContainerMetadataCWProxy {
     ProxyConnectionId? proxyConnectionId,
     bool clearDataOnExit,
     bool excludeFromIndex,
+    bool excludeFromHistory,
     bool bypassGlobalProxy,
     bool useCustomColor,
     List<Uri>? assignedSites,
@@ -69,6 +72,10 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
       call(excludeFromIndex: excludeFromIndex);
 
   @override
+  ContainerMetadata excludeFromHistory(bool excludeFromHistory) =>
+      call(excludeFromHistory: excludeFromHistory);
+
+  @override
   ContainerMetadata bypassGlobalProxy(bool bypassGlobalProxy) =>
       call(bypassGlobalProxy: bypassGlobalProxy);
 
@@ -94,6 +101,7 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
     Object? proxyConnectionId = const $CopyWithPlaceholder(),
     Object? clearDataOnExit = const $CopyWithPlaceholder(),
     Object? excludeFromIndex = const $CopyWithPlaceholder(),
+    Object? excludeFromHistory = const $CopyWithPlaceholder(),
     Object? bypassGlobalProxy = const $CopyWithPlaceholder(),
     Object? useCustomColor = const $CopyWithPlaceholder(),
     Object? assignedSites = const $CopyWithPlaceholder(),
@@ -123,6 +131,12 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
           ? _value.excludeFromIndex
           // ignore: cast_nullable_to_non_nullable
           : excludeFromIndex as bool,
+      excludeFromHistory:
+          excludeFromHistory == const $CopyWithPlaceholder() ||
+              excludeFromHistory == null
+          ? _value.excludeFromHistory
+          // ignore: cast_nullable_to_non_nullable
+          : excludeFromHistory as bool,
       bypassGlobalProxy:
           bypassGlobalProxy == const $CopyWithPlaceholder() ||
               bypassGlobalProxy == null
@@ -275,6 +289,7 @@ ContainerMetadata _$ContainerMetadataFromJson(Map<String, dynamic> json) =>
       ),
       clearDataOnExit: json['clearDataOnExit'] as bool? ?? false,
       excludeFromIndex: json['excludeFromIndex'] as bool? ?? false,
+      excludeFromHistory: json['excludeFromHistory'] as bool? ?? false,
       bypassGlobalProxy: json['bypassGlobalProxy'] as bool? ?? false,
       useCustomColor: json['useCustomColor'] as bool? ?? false,
       assignedSites: (json['assignedSites'] as List<dynamic>?)
@@ -293,6 +308,7 @@ Map<String, dynamic> _$ContainerMetadataToJson(
   'proxyConnectionId': _proxyConnectionIdToJson(instance.proxyConnectionId),
   'clearDataOnExit': instance.clearDataOnExit,
   'excludeFromIndex': instance.excludeFromIndex,
+  'excludeFromHistory': instance.excludeFromHistory,
   'bypassGlobalProxy': instance.bypassGlobalProxy,
   'useCustomColor': instance.useCustomColor,
   'assignedSites': instance.assignedSites?.map((e) => e.toString()).toList(),

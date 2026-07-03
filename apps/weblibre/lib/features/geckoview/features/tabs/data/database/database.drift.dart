@@ -13,8 +13,10 @@ import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/cap
     as i5;
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/history.dart'
     as i6;
-import 'package:drift/internal/modular.dart' as i7;
-import 'package:sqlite3/common.dart' as i8;
+import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/visit_container.dart'
+    as i7;
+import 'package:drift/internal/modular.dart' as i8;
+import 'package:sqlite3/common.dart' as i9;
 
 abstract class $TabDatabase extends i0.GeneratedDatabase {
   $TabDatabase(i0.QueryExecutor e) : super(e);
@@ -31,6 +33,7 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
   );
   late final i1.History history = i1.History(this);
   late final i1.HistoryFts historyFts = i1.HistoryFts(this);
+  late final i1.VisitContainer visitContainer = i1.VisitContainer(this);
   late final i2.ContainerDao containerDao = i2.ContainerDao(
     this as i3.TabDatabase,
   );
@@ -39,7 +42,10 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
     this as i3.TabDatabase,
   );
   late final i6.HistoryDao historyDao = i6.HistoryDao(this as i3.TabDatabase);
-  i1.DefinitionsDrift get definitionsDrift => i7.ReadDatabaseContainer(
+  late final i7.VisitContainerDao visitContainerDao = i7.VisitContainerDao(
+    this as i3.TabDatabase,
+  );
+  i1.DefinitionsDrift get definitionsDrift => i8.ReadDatabaseContainer(
     this,
   ).accessor<i1.DefinitionsDrift>(i1.DefinitionsDrift.new);
   @override
@@ -70,6 +76,9 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
     i1.tabToHistoryOnUpdate,
     i1.tabToHistoryOnContainerUpdate,
     i1.containerToHistoryOnMetadataUpdate,
+    visitContainer,
+    i1.idxVcCanonical,
+    i1.idxVcContainer,
   ];
   @override
   i0.StreamQueryUpdateRules get streamUpdateRules =>
@@ -171,6 +180,15 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
             i0.TableUpdate('history', kind: i0.UpdateKind.insert),
           ],
         ),
+        i0.WritePropagation(
+          on: i0.TableUpdateQuery.onTableName(
+            'container',
+            limitUpdateKind: i0.UpdateKind.delete,
+          ),
+          result: [
+            i0.TableUpdate('visit_container', kind: i0.UpdateKind.delete),
+          ],
+        ),
       ]);
 }
 
@@ -191,9 +209,11 @@ class $TabDatabaseManager {
       i1.$HistoryTableManager(_db, _db.history);
   i1.$HistoryFtsTableManager get historyFts =>
       i1.$HistoryFtsTableManager(_db, _db.historyFts);
+  i1.$VisitContainerTableManager get visitContainer =>
+      i1.$VisitContainerTableManager(_db, _db.visitContainer);
 }
 
-extension DefineFunctions on i8.CommonDatabase {
+extension DefineFunctions on i9.CommonDatabase {
   void defineFunctions({
     required String Function(int, String?) lexoRankNext,
     required String Function(int, String?) lexoRankPrevious,
@@ -207,7 +227,7 @@ extension DefineFunctions on i8.CommonDatabase {
   }) {
     createFunction(
       functionName: 'lexo_rank_next',
-      argumentCount: const i8.AllowedArgumentCount(2),
+      argumentCount: const i9.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as int;
         final arg1 = args[1] as String?;
@@ -216,7 +236,7 @@ extension DefineFunctions on i8.CommonDatabase {
     );
     createFunction(
       functionName: 'lexo_rank_previous',
-      argumentCount: const i8.AllowedArgumentCount(2),
+      argumentCount: const i9.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as int;
         final arg1 = args[1] as String?;
@@ -225,7 +245,7 @@ extension DefineFunctions on i8.CommonDatabase {
     );
     createFunction(
       functionName: 'lexo_rank_reorder_after',
-      argumentCount: const i8.AllowedArgumentCount(2),
+      argumentCount: const i9.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as String?;
         final arg1 = args[1] as String?;
@@ -234,7 +254,7 @@ extension DefineFunctions on i8.CommonDatabase {
     );
     createFunction(
       functionName: 'lexo_rank_reorder_before',
-      argumentCount: const i8.AllowedArgumentCount(2),
+      argumentCount: const i9.AllowedArgumentCount(2),
       function: (args) {
         final arg0 = args[0] as String?;
         final arg1 = args[1] as String?;
@@ -243,14 +263,14 @@ extension DefineFunctions on i8.CommonDatabase {
     );
     createFunction(
       functionName: 'generate_content_hash',
-      argumentCount: const i8.AllowedArgumentCount(0),
+      argumentCount: const i9.AllowedArgumentCount(0),
       function: (args) {
         return generateContentHash();
       },
     );
     createFunction(
       functionName: 'url_indexable',
-      argumentCount: const i8.AllowedArgumentCount(1),
+      argumentCount: const i9.AllowedArgumentCount(1),
       function: (args) {
         final arg0 = args[0] as String?;
         return urlIndexable(arg0);
@@ -258,7 +278,7 @@ extension DefineFunctions on i8.CommonDatabase {
     );
     createFunction(
       functionName: 'url_canonical',
-      argumentCount: const i8.AllowedArgumentCount(1),
+      argumentCount: const i9.AllowedArgumentCount(1),
       function: (args) {
         final arg0 = args[0] as String?;
         return urlCanonical(arg0);
@@ -266,7 +286,7 @@ extension DefineFunctions on i8.CommonDatabase {
     );
     createFunction(
       functionName: 'url_host',
-      argumentCount: const i8.AllowedArgumentCount(1),
+      argumentCount: const i9.AllowedArgumentCount(1),
       function: (args) {
         final arg0 = args[0] as String?;
         return urlHost(arg0);
@@ -274,7 +294,7 @@ extension DefineFunctions on i8.CommonDatabase {
     );
     createFunction(
       functionName: 'url_path',
-      argumentCount: const i8.AllowedArgumentCount(1),
+      argumentCount: const i9.AllowedArgumentCount(1),
       function: (args) {
         final arg0 = args[0] as String?;
         return urlPath(arg0);

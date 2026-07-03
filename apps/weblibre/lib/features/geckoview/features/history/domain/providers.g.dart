@@ -44,7 +44,7 @@ final class HistoryVisitsFilterProvider
 }
 
 String _$historyVisitsFilterHash() =>
-    r'a4bf6c41c9180166365084cb7c7981558ac7ad36';
+    r'4c1530cfd2d94b1cdbb04fbe2df8037cb211a668';
 
 @JsonPersist()
 abstract class _$HistoryVisitsFilterBase
@@ -129,11 +129,13 @@ final browsingHistoryProvider = BrowsingHistoryProvider._();
 final class BrowsingHistoryProvider
     extends
         $FunctionalProvider<
-          AsyncValue<List<VisitInfo>>,
-          List<VisitInfo>,
-          FutureOr<List<VisitInfo>>
+          AsyncValue<List<HistoryEntry>>,
+          List<HistoryEntry>,
+          FutureOr<List<HistoryEntry>>
         >
-    with $FutureModifier<List<VisitInfo>>, $FutureProvider<List<VisitInfo>> {
+    with
+        $FutureModifier<List<HistoryEntry>>,
+        $FutureProvider<List<HistoryEntry>> {
   BrowsingHistoryProvider._()
     : super(
         from: null,
@@ -150,17 +152,17 @@ final class BrowsingHistoryProvider
 
   @$internal
   @override
-  $FutureProviderElement<List<VisitInfo>> $createElement(
+  $FutureProviderElement<List<HistoryEntry>> $createElement(
     $ProviderPointer pointer,
   ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<List<VisitInfo>> create(Ref ref) {
+  FutureOr<List<HistoryEntry>> create(Ref ref) {
     return browsingHistory(ref);
   }
 }
 
-String _$browsingHistoryHash() => r'6f26228da28f6f67844551bf430025b161731bb2';
+String _$browsingHistoryHash() => r'0ed9a3d1f10091eb1a20f1c388c1ace80c1f75da';
 
 @ProviderFor(browsingDownloads)
 final browsingDownloadsProvider = BrowsingDownloadsProvider._();
@@ -168,11 +170,13 @@ final browsingDownloadsProvider = BrowsingDownloadsProvider._();
 final class BrowsingDownloadsProvider
     extends
         $FunctionalProvider<
-          AsyncValue<List<VisitInfo>>,
-          List<VisitInfo>,
-          FutureOr<List<VisitInfo>>
+          AsyncValue<List<HistoryEntry>>,
+          List<HistoryEntry>,
+          FutureOr<List<HistoryEntry>>
         >
-    with $FutureModifier<List<VisitInfo>>, $FutureProvider<List<VisitInfo>> {
+    with
+        $FutureModifier<List<HistoryEntry>>,
+        $FutureProvider<List<HistoryEntry>> {
   BrowsingDownloadsProvider._()
     : super(
         from: null,
@@ -189,17 +193,17 @@ final class BrowsingDownloadsProvider
 
   @$internal
   @override
-  $FutureProviderElement<List<VisitInfo>> $createElement(
+  $FutureProviderElement<List<HistoryEntry>> $createElement(
     $ProviderPointer pointer,
   ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<List<VisitInfo>> create(Ref ref) {
+  FutureOr<List<HistoryEntry>> create(Ref ref) {
     return browsingDownloads(ref);
   }
 }
 
-String _$browsingDownloadsHash() => r'd05e3c079c6de349ff9e910ca597ad7c78f87a16';
+String _$browsingDownloadsHash() => r'938ae4d26b4e0a3f428d3d530a71cb5d8720f317';
 
 // **************************************************************************
 // JsonGenerator
