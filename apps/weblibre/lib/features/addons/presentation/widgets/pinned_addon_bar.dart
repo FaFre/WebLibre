@@ -27,7 +27,11 @@ import 'package:weblibre/features/geckoview/domain/providers/web_extensions_stat
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
 
 class PinnedAddonBar extends ConsumerWidget {
-  const PinnedAddonBar({super.key});
+  const PinnedAddonBar({super.key, this.axis = Axis.horizontal});
+
+  /// Layout direction. Vertical stacks the pinned add-on icons for the side
+  /// rail; horizontal is the standard top/bottom bar layout.
+  final Axis axis;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -45,37 +49,43 @@ class PinnedAddonBar extends ConsumerWidget {
         .toList();
     if (pinned.isEmpty) return const SizedBox.shrink();
 
+    final isVertical = axis == Axis.vertical;
+
+    final items = [
+      for (final extension in pinned)
+        InkResponse(
+          radius: 22,
+          onTap: () async {
+            await ref
+                .read(addonServiceProvider)
+                .invokeAddonAction(
+                  extension.extensionId,
+                  WebExtensionActionType.browser,
+                );
+          },
+          onLongPress: () async {
+            await AddonDetailsRoute(
+              addonId: extension.extensionId,
+            ).push<void>(context);
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 8.0),
+            child: ExtensionBadgeIcon(extension),
+          ),
+        ),
+    ];
+
+    if (isVertical) {
+      // On the narrow rail, stack the pinned icons and let them scroll if they
+      // exceed the available height.
+      return SingleChildScrollView(
+        child: Column(mainAxisSize: MainAxisSize.min, children: items),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.only(right: 6.0),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (final extension in pinned)
-            InkResponse(
-              radius: 22,
-              onTap: () async {
-                await ref
-                    .read(addonServiceProvider)
-                    .invokeAddonAction(
-                      extension.extensionId,
-                      WebExtensionActionType.browser,
-                    );
-              },
-              onLongPress: () async {
-                await AddonDetailsRoute(
-                  addonId: extension.extensionId,
-                ).push<void>(context);
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6.0,
-                  vertical: 8.0,
-                ),
-                child: ExtensionBadgeIcon(extension),
-              ),
-            ),
-        ],
-      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: items),
     );
   }
 }

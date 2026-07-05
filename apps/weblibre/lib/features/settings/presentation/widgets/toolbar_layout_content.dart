@@ -203,6 +203,16 @@ class _TabBarPositionSection extends HookConsumerWidget {
                   title: Text('Bottom'),
                   subtitle: Text('Tab bar with auto-hide support'),
                 ),
+                RadioListTile.adaptive(
+                  value: TabBarPosition.left,
+                  title: Text('Left'),
+                  subtitle: Text('Vertical side rail, swipe to hide'),
+                ),
+                RadioListTile.adaptive(
+                  value: TabBarPosition.right,
+                  title: Text('Right'),
+                  subtitle: Text('Vertical side rail, swipe to hide'),
+                ),
               ],
             ),
           ),

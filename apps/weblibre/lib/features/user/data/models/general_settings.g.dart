@@ -1246,6 +1246,8 @@ const _$TabBarSwipeActionEnumMap = {
 const _$TabBarPositionEnumMap = {
   TabBarPosition.top: 'top',
   TabBarPosition.bottom: 'bottom',
+  TabBarPosition.left: 'left',
+  TabBarPosition.right: 'right',
 };
 
 const _$TabBarLayoutEnumMap = {

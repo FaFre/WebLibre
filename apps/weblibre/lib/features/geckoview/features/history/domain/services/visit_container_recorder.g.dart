@@ -69,7 +69,7 @@ final class VisitContainerRecorderProvider
 }
 
 String _$visitContainerRecorderHash() =>
-    r'2d5742816ec08bc37edf2b56a933b6a324e8b038';
+    r'13ed2d5a188efd2a4419585f4989e782263884aa';
 
 /// Records the visit→container relation. Mozilla Places owns the visit itself;
 /// on each Places visit the native [WebLibreHistoryDelegate] forwards the

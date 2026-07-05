@@ -159,6 +159,86 @@ class BrowserBottomAppBar extends StatelessWidget {
   Size get preferredSize => _size;
 }
 
+/// Vertical side-rail wrapper (left/right positions). Exposes a fixed content
+/// [preferredSize] width; the caller adds the horizontal safe-area inset on the
+/// rail's outer edge to compute the browser content offset.
+class BrowserSideRail extends ConsumerWidget {
+  final bool showContextualToolbar;
+  final int quickTabSwitcherRowCount;
+  final bool isSmallWebMode;
+
+  /// Which edge the rail is docked to ([TabBarPosition.left] or
+  /// [TabBarPosition.right]).
+  final TabBarPosition position;
+
+  late final BrowserTabBar _tabBar;
+  late final _size = Size.fromWidth(_tabBar.getToolbarWidth());
+
+  BrowserSideRail({
+    super.key,
+    required this.showContextualToolbar,
+    required this.quickTabSwitcherRowCount,
+    required this.isSmallWebMode,
+    required this.position,
+  }) {
+    _tabBar = BrowserTabBar(
+      displayedSheet: null,
+      showMainToolbar: true,
+      showContextualToolbar: showContextualToolbar,
+      quickTabSwitcherRowCount: quickTabSwitcherRowCount,
+      isSmallWebMode: isSmallWebMode,
+      enableGestures: true,
+      hideMainToolbarButtonsDuplicatedInContextualToolbar: showContextualToolbar,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isLeft = position == TabBarPosition.left;
+
+    // Tint the outer fill with the active container's surface color (same tint
+    // the content and BrowserSystemBars use) so the rail's system safe-area
+    // strips (status/nav bar, docked-edge notch) blend with the rail instead
+    // of showing a neutral surfaceContainer gap. Falls back to surfaceContainer
+    // when no container is active.
+    final selectedTabId = ref.watch(selectedTabProvider);
+    final showContainerUi = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.showContainerUi),
+    );
+    final containerColor = ref.watch(
+      watchTabContainerDataProvider(
+        selectedTabId,
+      ).select((data) => data.value?.color),
+    );
+    final useCustomColor = ref.watch(
+      watchTabContainerDataProvider(
+        selectedTabId,
+      ).select((data) => data.value?.metadata.useCustomColor ?? false),
+    );
+    final effectiveContainerColor = (showContainerUi && containerColor != null)
+        ? containerColor
+        : null;
+    final tintColor = effectiveContainerColor != null
+        ? ContainerColors.palette(
+            context,
+            effectiveContainerColor,
+            useCustomColor: useCustomColor,
+          ).surfaceColor
+        : Theme.of(context).colorScheme.surfaceContainer;
+
+    return ColoredBox(
+      color: tintColor,
+      child: SafeArea(
+        left: isLeft,
+        right: !isLeft,
+        child: SizedBox(width: _size.width, child: _tabBar),
+      ),
+    );
+  }
+
+  Size get preferredSize => _size;
+}
+
 class BrowserTabBar extends HookConsumerWidget {
   final bool showMainToolbar;
   final bool showContextualToolbar;
@@ -181,6 +261,14 @@ class BrowserTabBar extends HookConsumerWidget {
 
   static const contextualToolabarHeight = 54.0;
   static const quickTabSwitcherHeight = 48.0;
+
+  /// Content width of the vertical side rail (excludes the system safe-area
+  /// inset on the rail's outer edge, which is added by the caller). Kept equal
+  /// to [kToolbarHeight] so the rail reuses the same base sizing as the
+  /// horizontal bar.
+  static const sideRailWidth = kToolbarHeight;
+
+  double getToolbarWidth() => sideRailWidth;
 
   bool get displayAppBar =>
       showMainToolbar &&
@@ -249,8 +337,49 @@ class BrowserTabBar extends HookConsumerWidget {
     final stackingMode = settings.effectiveTabBarStackingMode();
 
     final tabBarPosition = settings.tabBarPosition;
+    final isVertical = tabBarPosition.isVertical;
+    final switcherAxis = tabBarPosition.axis;
+    // Left rail reads bottom-to-top, right rail top-to-bottom.
+    final railQuarterTurns = tabBarPosition == TabBarPosition.left ? 3 : 1;
 
     final dragStartPosition = useRef(Offset.zero);
+
+    // Swipe along the primary switch axis moves between tabs. [delta] is
+    // (dragStart - dragEnd) along that axis; its sign chooses prev/next.
+    Future<void> switchTabsBy(double delta) async {
+      final selectedTab = ref.read(selectedTabProvider);
+      final setting = await ref
+          .read(generalSettingsRepositoryProvider.notifier)
+          .fetchSettings();
+
+      if (selectedTab == null) return;
+
+      switch (setting.tabBarSwipeAction) {
+        case TabBarSwipeAction.switchLastOpened:
+          await ref
+              .read(tabRepositoryProvider.notifier)
+              .selectPreviouslyOpenedTab(selectedTab);
+        case TabBarSwipeAction.navigateOrderedTabs:
+          if (delta < 0) {
+            await ref
+                .read(tabRepositoryProvider.notifier)
+                .selectPreviousTab(selectedTab);
+          } else {
+            await ref
+                .read(tabRepositoryProvider.notifier)
+                .selectNextTab(selectedTab);
+          }
+      }
+    }
+
+    void dismissToolbar() {
+      if (ref.read(bottomSheetControllerProvider) == null) {
+        unawaited(HapticFeedback.lightImpact());
+        ref
+            .read(toolbarVisibilityControllerProvider(selectedTabId).notifier)
+            .dismiss();
+      }
+    }
 
     final showTabTitle = displayedSheet is! ViewTabsSheet;
 
@@ -271,6 +400,8 @@ class BrowserTabBar extends HookConsumerWidget {
         : null;
 
     return BrowserTabBarView(
+      axis: switcherAxis,
+      railOnLeft: tabBarPosition == TabBarPosition.left,
       showMainToolbar: showMainToolbar,
       showContextualToolbar: showContextualToolbar,
       showQuickTabSwitcherBar: quickTabSwitcherRowCount > 0,
@@ -278,7 +409,13 @@ class BrowserTabBar extends HookConsumerWidget {
       displayQuickTabSwitcher: displayQuickTabSwitcher,
       backgroundColor: effectiveContainerPalette?.surfaceColor,
       title: showTabTitle
-          ? settings.tabBarLayout == TabBarLayout.compact
+          ? isVertical
+                ? RailAppBarTitle(
+                    quarterTurns: railQuarterTurns,
+                    containerColor: effectiveContainerColor,
+                    useCustomColor: effectiveUseCustomColor,
+                  )
+                : settings.tabBarLayout == TabBarLayout.compact
                 ? CompactAppBarTitle(
                     containerColor: effectiveContainerColor,
                     useCustomColor: effectiveUseCustomColor,
@@ -289,7 +426,7 @@ class BrowserTabBar extends HookConsumerWidget {
                   )
           : null,
       actions: [
-        const PinnedAddonBar(),
+        PinnedAddonBar(axis: switcherAxis),
         if (isSmallWebMode)
           ReaderButton(
             buttonBuilder: (isLoading, readerActive, icon) => ToolbarButton(
@@ -314,31 +451,57 @@ class BrowserTabBar extends HookConsumerWidget {
       ],
       quickTabSwitcher: switch (stackingMode) {
         TabBarStackingMode.disabled => const SizedBox.shrink(),
-        TabBarStackingMode.lastUsedTabs => const QuickTabSwitcher(
+        TabBarStackingMode.lastUsedTabs => QuickTabSwitcher(
           quickTabSwitcherMode: QuickTabSwitcherMode.lastUsedTabs,
+          axis: switcherAxis,
         ),
-        TabBarStackingMode.containerTabs => const QuickTabSwitcher(
+        TabBarStackingMode.containerTabs => QuickTabSwitcher(
           quickTabSwitcherMode: QuickTabSwitcherMode.containerTabs,
+          axis: switcherAxis,
         ),
-        TabBarStackingMode.accordion => const AccordionQuickTabSwitcher(),
+        TabBarStackingMode.accordion => AccordionQuickTabSwitcher(
+          axis: switcherAxis,
+        ),
         // History fallback only on the MRU row, so empty-state history
-        // chips don't show twice.
-        TabBarStackingMode.twoLevel => const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            QuickTabSwitcher(
-              quickTabSwitcherMode: QuickTabSwitcherMode.containerTabs,
-              enableHistoryFallback: false,
-            ),
-            QuickTabSwitcher(
-              quickTabSwitcherMode: QuickTabSwitcherMode.lastUsedTabs,
-            ),
-          ],
-        ),
+        // chips don't show twice. On the rail the two rows stack as two
+        // equal-height vertical lists.
+        TabBarStackingMode.twoLevel =>
+          isVertical
+              ? Column(
+                  children: [
+                    Expanded(
+                      child: QuickTabSwitcher(
+                        quickTabSwitcherMode:
+                            QuickTabSwitcherMode.containerTabs,
+                        enableHistoryFallback: false,
+                        axis: switcherAxis,
+                      ),
+                    ),
+                    Expanded(
+                      child: QuickTabSwitcher(
+                        quickTabSwitcherMode: QuickTabSwitcherMode.lastUsedTabs,
+                        axis: switcherAxis,
+                      ),
+                    ),
+                  ],
+                )
+              : const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    QuickTabSwitcher(
+                      quickTabSwitcherMode: QuickTabSwitcherMode.containerTabs,
+                      enableHistoryFallback: false,
+                    ),
+                    QuickTabSwitcher(
+                      quickTabSwitcherMode: QuickTabSwitcherMode.lastUsedTabs,
+                    ),
+                  ],
+                ),
       },
       contextualToolbar: ContextualToolbar(
         selectedTabId: selectedTabId,
         displayedSheet: displayedSheet,
+        axis: switcherAxis,
       ),
       onHorizontalDragStart: !enableGestures
           ? null
@@ -349,30 +512,21 @@ class BrowserTabBar extends HookConsumerWidget {
           ? null
           : (details) async {
               final distance = dragStartPosition.value - details.globalPosition;
+              const dismissThreshold = kToolbarHeight * 0.5;
 
-              if (distance.dx.abs() > 50 && distance.dy.abs() < 20) {
-                final selectedTab = ref.read(selectedTabProvider);
-                final setting = await ref
-                    .read(generalSettingsRepositoryProvider.notifier)
-                    .fetchSettings();
-
-                if (selectedTab != null) {
-                  switch (setting.tabBarSwipeAction) {
-                    case TabBarSwipeAction.switchLastOpened:
-                      await ref
-                          .read(tabRepositoryProvider.notifier)
-                          .selectPreviouslyOpenedTab(selectedTab);
-                    case TabBarSwipeAction.navigateOrderedTabs:
-                      if (distance.dx < 0) {
-                        await ref
-                            .read(tabRepositoryProvider.notifier)
-                            .selectPreviousTab(selectedTab);
-                      } else {
-                        await ref
-                            .read(tabRepositoryProvider.notifier)
-                            .selectNextTab(selectedTab);
-                      }
-                  }
+              if (isVertical) {
+                // Rail: horizontal swipe dismisses toward the docked edge.
+                // distance = start - end, so a leftward swipe is positive dx.
+                final shouldDismiss = switch (tabBarPosition) {
+                  TabBarPosition.left => distance.dx > dismissThreshold,
+                  TabBarPosition.right => distance.dx < -dismissThreshold,
+                  _ => false,
+                };
+                if (shouldDismiss) dismissToolbar();
+              } else {
+                // Horizontal bar: horizontal swipe switches tabs.
+                if (distance.dx.abs() > 50 && distance.dy.abs() < 20) {
+                  await switchTabsBy(distance.dx);
                 }
               }
             },
@@ -383,10 +537,18 @@ class BrowserTabBar extends HookConsumerWidget {
             },
       onVerticalDragEnd: !enableGestures
           ? null
-          : (details) {
+          : (details) async {
               final distance = dragStartPosition.value - details.globalPosition;
 
-              // Swipe direction for dismiss depends on toolbar position:
+              if (isVertical) {
+                // Rail: vertical swipe switches tabs.
+                if (distance.dy.abs() > 50 && distance.dx.abs() < 20) {
+                  await switchTabsBy(distance.dy);
+                }
+                return;
+              }
+
+              // Horizontal bar dismiss direction depends on position:
               // - Bottom bar: swipe down to dismiss (positive distance.dy)
               // - Top bar: swipe up to dismiss (negative distance.dy)
               const dismissThreshold = kToolbarHeight * 0.5;
@@ -397,18 +559,9 @@ class BrowserTabBar extends HookConsumerWidget {
                 TabBarPosition.top =>
                   !distance.dy.isNegative &&
                       distance.dy.abs() > dismissThreshold,
+                _ => false,
               };
-              if (shouldDismiss &&
-                  ref.read(bottomSheetControllerProvider) == null) {
-                unawaited(HapticFeedback.lightImpact());
-                ref
-                    .read(
-                      toolbarVisibilityControllerProvider(
-                        selectedTabId,
-                      ).notifier,
-                    )
-                    .dismiss();
-              }
+              if (shouldDismiss) dismissToolbar();
             },
     );
   }
@@ -427,11 +580,20 @@ class BrowserTabBarView extends StatelessWidget {
     required this.actions,
     required this.quickTabSwitcher,
     required this.contextualToolbar,
+    this.axis = Axis.horizontal,
+    this.railOnLeft = true,
     this.onHorizontalDragStart,
     this.onHorizontalDragEnd,
     this.onVerticalDragStart,
     this.onVerticalDragEnd,
   });
+
+  /// Layout orientation. Vertical renders the side-rail form.
+  final Axis axis;
+
+  /// For the vertical rail, whether it is docked to the left edge (affects
+  /// nothing structural here yet; reserved for edge-specific tweaks).
+  final bool railOnLeft;
 
   final bool showMainToolbar;
   final bool showContextualToolbar;
@@ -453,6 +615,54 @@ class BrowserTabBarView extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final effectiveBackgroundColor =
         backgroundColor ?? colorScheme.surfaceContainer;
+
+    if (axis == Axis.vertical) {
+      return GestureDetector(
+        onHorizontalDragStart: onHorizontalDragStart,
+        onHorizontalDragEnd: onHorizontalDragEnd,
+        onVerticalDragStart: onVerticalDragStart,
+        onVerticalDragEnd: onVerticalDragEnd,
+        child: ColoredBox(
+          color: effectiveBackgroundColor,
+          child: Column(
+            children: [
+              // Literal section order (switcher → URL+actions → contextual);
+              // the switcher is the flexible scroll region.
+              if (showQuickTabSwitcherBar)
+                Expanded(
+                  flex: 3,
+                  child: Visibility(
+                    visible: displayQuickTabSwitcher,
+                    maintainState: true,
+                    child: quickTabSwitcher,
+                  ),
+                ),
+              if (showMainToolbar)
+                Expanded(
+                  flex: 2,
+                  child: Visibility(
+                    visible: displayAppBar,
+                    maintainState: true,
+                    // Horizontal inset so the URL pile and action buttons don't
+                    // sit flush against the rail edges, matching the breathing
+                    // room the horizontal bar's title/actions get.
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Column(
+                        children: [
+                          Expanded(child: title ?? const SizedBox.shrink()),
+                          ...actions,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              if (showContextualToolbar) contextualToolbar,
+            ],
+          ),
+        ),
+      );
+    }
 
     return GestureDetector(
       // Tap handling moved to AppBarTitle for split icon/title behavior
@@ -505,10 +715,14 @@ class QuickTabSwitcher extends HookConsumerWidget {
   /// chips don't show twice.
   final bool enableHistoryFallback;
 
+  /// Direction the chips list flows. Vertical for the side rail.
+  final Axis axis;
+
   const QuickTabSwitcher({
     super.key,
     required this.quickTabSwitcherMode,
     this.enableHistoryFallback = true,
+    this.axis = Axis.horizontal,
   });
 
   @override
@@ -516,11 +730,13 @@ class QuickTabSwitcher extends HookConsumerWidget {
     final showIsolatedTabUi = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.showIsolatedTabUi),
     );
-    final showTitles = ref.watch(
+    final showTitlesSetting = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (s) => s.quickTabSwitcherShowTitles,
       ),
     );
+    // Titles can't fit the narrow vertical rail; force icon-only chips there.
+    final showTitles = axis != Axis.vertical && showTitlesSetting;
     final titleMaxWidth = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (s) => s.quickTabSwitcherTitleWidth,
@@ -677,6 +893,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
         scrollController: chipScrollController,
         scrollKey: scrollKey,
         activeItemKey: activeItemKey.value,
+        axis: axis,
         showTitles: showTitles,
         showIsolatedTabUi: showIsolatedTabUi,
         hierarchyGlyphs: hierarchyGlyphs,
@@ -764,7 +981,11 @@ class QuickTabSwitcherView extends StatelessWidget {
     this.onCloseItem,
     this.onReorderItem,
     this.reorderableItemCount = 0,
+    this.axis = Axis.horizontal,
   });
+
+  /// Direction the chips flow. Vertical for the side rail.
+  final Axis axis;
 
   final List<QuickTabSwitcherItem> availableItems;
   final QuickTabSwitcherItem? activeItem;
@@ -803,25 +1024,36 @@ class QuickTabSwitcherView extends StatelessWidget {
 
   bool get _reorderEnabled => onReorderItem != null && reorderableItemCount > 0;
 
-  /// Whether [item]'s chip shows a close button.
+  /// Whether [item]'s chip shows a close button. Never on the narrow vertical
+  /// rail: an icon-only chip has no room for a close button beside it (it
+  /// overflows). Closing stays available via the long-press menu.
   bool _canShowCloseButton(QuickTabSwitcherItem item) =>
+      !_isVertical &&
       onCloseItem != null &&
       !item.isHistory &&
       !item.isPlaceholder &&
       (showCloseButtonOnAllTabs || item.isActive);
 
+  bool get _isVertical => axis == Axis.vertical;
+
   @override
   Widget build(BuildContext context) {
     if (availableItems.isEmpty) {
-      // Hold the 48px row slot: in two-level stacking an empty row must not
+      // Hold the 48px slot: in two-level stacking an empty row must not
       // collapse, since the toolbar height already accounts for both rows.
-      return const SizedBox(height: 48);
+      // On the rail the cross-axis width is fixed and the (vertical) list
+      // fills the available height.
+      return _isVertical ? const SizedBox(width: 48) : const SizedBox(height: 48);
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      padding: _isVertical
+          ? const EdgeInsets.symmetric(vertical: 4.0)
+          : const EdgeInsets.symmetric(horizontal: 4.0),
       child: SizedBox(
-        height: 48,
+        // Vertical fills both axes of the rail content column; horizontal keeps
+        // the fixed 48px row height.
+        height: _isVertical ? double.maxFinite : 48,
         width: double.maxFinite,
         child: _reorderEnabled
             ? _buildReorderableList(context)
@@ -838,6 +1070,7 @@ class QuickTabSwitcherView extends StatelessWidget {
       scrollController: scrollController,
       scrollKey: scrollKey,
       activeItemKey: activeItemKey,
+      scrollDirection: axis,
       cacheExtent: 500,
       itemId: (item) => item.id,
       selectedItem: activeItem,
@@ -867,7 +1100,7 @@ class QuickTabSwitcherView extends StatelessWidget {
     return ReorderableListView.builder(
       key: scrollKey,
       scrollController: scrollController,
-      scrollDirection: Axis.horizontal,
+      scrollDirection: axis,
       buildDefaultDragHandles: true,
       scrollCacheExtent: const ScrollCacheExtent.pixels(500),
       itemCount: reorderableCount,

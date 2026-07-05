@@ -203,7 +203,7 @@ final class BrowsingDownloadsProvider
   }
 }
 
-String _$browsingDownloadsHash() => r'938ae4d26b4e0a3f428d3d530a71cb5d8720f317';
+String _$browsingDownloadsHash() => r'a526dab6915085e6fb47a33d5acc892c3f8e17b2';
 
 // **************************************************************************
 // JsonGenerator

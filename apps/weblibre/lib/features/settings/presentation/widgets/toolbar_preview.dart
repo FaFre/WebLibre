@@ -72,13 +72,20 @@ class TabBarPreviewHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   double get _headerHeight => compact ? 0.0 : _kHeaderHeight;
 
-  @override
-  double get minExtent =>
-      _baseHeight + _toolbarHeight + _headerHeight + padding.vertical;
+  /// Fixed preview height for the vertical rail (the rail flows along the
+  /// height, so it can't be derived from stacked section heights).
+  static const _kRailPreviewHeight = 220.0;
+  static const _kCompactRailPreviewHeight = 140.0;
+
+  double get _contentHeight => settings.tabBarPosition.isVertical
+      ? (compact ? _kCompactRailPreviewHeight : _kRailPreviewHeight)
+      : _baseHeight + _toolbarHeight;
 
   @override
-  double get maxExtent =>
-      _baseHeight + _toolbarHeight + _headerHeight + padding.vertical;
+  double get minExtent => _contentHeight + _headerHeight + padding.vertical;
+
+  @override
+  double get maxExtent => _contentHeight + _headerHeight + padding.vertical;
 
   @override
   Widget build(
@@ -200,12 +207,17 @@ class TabBarPreviewCard extends HookWidget {
       },
     );
 
-    Widget buildQuickTabSwitcherRow(ScrollController scrollController) {
+    Widget buildQuickTabSwitcherRow(
+      ScrollController scrollController, {
+      Axis axis = Axis.horizontal,
+    }) {
       return QuickTabSwitcherView(
         availableItems: previewQuickItems,
         activeItem: previewQuickItems.firstWhere((item) => item.isActive),
         scrollController: scrollController,
-        showTitles: settings.quickTabSwitcherShowTitles,
+        axis: axis,
+        showTitles:
+            axis != Axis.vertical && settings.quickTabSwitcherShowTitles,
         showIsolatedTabUi: settings.showIsolatedTabUi,
         hierarchyGlyphs: settings.quickTabSwitcherHierarchyGlyphs,
         titleMaxWidth: settings.quickTabSwitcherTitleWidth,
@@ -217,24 +229,25 @@ class TabBarPreviewCard extends HookWidget {
       );
     }
 
-    Widget buildQuickTabSwitcher() {
+    Widget buildQuickTabSwitcher({Axis axis = Axis.horizontal}) {
       // The accordion preview reuses the single-row layout; container header
       // chips need live container data that the static preview doesn't have.
       if (settings.effectiveTabBarStackingMode() ==
           TabBarStackingMode.twoLevel) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            buildQuickTabSwitcherRow(quickTabsController),
-            buildQuickTabSwitcherRow(quickTabsSecondRowController),
-          ],
-        );
+        final rows = [
+          buildQuickTabSwitcherRow(quickTabsController, axis: axis),
+          buildQuickTabSwitcherRow(quickTabsSecondRowController, axis: axis),
+        ];
+        return axis == Axis.vertical
+            ? Column(children: [for (final row in rows) Expanded(child: row)])
+            : Column(mainAxisSize: MainAxisSize.min, children: rows);
       }
-      return buildQuickTabSwitcherRow(quickTabsController);
+      return buildQuickTabSwitcherRow(quickTabsController, axis: axis);
     }
 
-    Widget buildContextualToolbar() {
+    Widget buildContextualToolbar({Axis axis = Axis.horizontal}) {
       return ContextualToolbarView(
+        axis: axis,
         buttons: [
           NavigateBackButtonView(
             canGoBack: true,
@@ -307,42 +320,90 @@ class TabBarPreviewCard extends HookWidget {
       contextualToolbar: buildContextualToolbar(),
     );
 
-    final previewContent = Container(
-      clipBehavior: Clip.antiAlias,
+    final isRailPreview = settings.tabBarPosition.isVertical;
+
+    final railToolbar = BrowserTabBarView(
+      axis: Axis.vertical,
+      railOnLeft: settings.tabBarPosition == TabBarPosition.left,
+      showMainToolbar: true,
+      showContextualToolbar: settings.tabBarShowContextualBar,
+      showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+      displayAppBar: true,
+      displayQuickTabSwitcher: true,
+      backgroundColor:
+          previewContainerPalette?.surfaceColor ?? colorScheme.surfaceContainer,
+      title: _RailPreviewTitle(
+        tabState: previewTabState,
+        quarterTurns: settings.tabBarPosition == TabBarPosition.left ? 3 : 1,
+      ),
+      actions: mainToolbarActions,
+      quickTabSwitcher: buildQuickTabSwitcher(axis: Axis.vertical),
+      contextualToolbar: buildContextualToolbar(axis: Axis.vertical),
+    );
+
+    final pageContentBox = Container(
+      width: double.infinity,
+      height: double.infinity,
+      alignment: Alignment.center,
       decoration: BoxDecoration(
         color: compact
-            ? colorScheme.surface.withValues(alpha: 0.7)
-            : colorScheme.surface,
-        border: Border.all(color: colorScheme.outlineVariant),
-        borderRadius: BorderRadius.circular(4),
+            ? colorScheme.surfaceContainerLowest.withValues(alpha: 0.7)
+            : colorScheme.surfaceContainerLowest,
+        border: Border.symmetric(
+          horizontal: BorderSide(color: colorScheme.outlineVariant),
+        ),
       ),
-      child: Column(
-        children: [
-          if (settings.tabBarPosition == TabBarPosition.top) topMainToolbar,
-          Container(
-            height: compact ? 40 : 72,
-            width: double.infinity,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: compact
-                  ? colorScheme.surfaceContainerLowest.withValues(alpha: 0.7)
-                  : colorScheme.surfaceContainerLowest,
-              border: Border.symmetric(
-                horizontal: BorderSide(color: colorScheme.outlineVariant),
-              ),
-            ),
-            child: Text(
-              'Page Content',
-              style: Theme.of(context).textTheme.labelMedium,
-            ),
-          ),
-          if (settings.tabBarPosition == TabBarPosition.top)
-            topBottomToolbar
-          else
-            bottomCombinedToolbar,
-        ],
+      child: Text(
+        'Page Content',
+        style: Theme.of(context).textTheme.labelMedium,
       ),
     );
+
+    final Widget previewContent;
+    if (isRailPreview) {
+      final rail = SizedBox(
+        width: BrowserTabBar.sideRailWidth,
+        child: railToolbar,
+      );
+      final railOnLeft = settings.tabBarPosition == TabBarPosition.left;
+      previewContent = Container(
+        clipBehavior: Clip.antiAlias,
+        height: compact ? 140 : 220,
+        decoration: BoxDecoration(
+          color: compact
+              ? colorScheme.surface.withValues(alpha: 0.7)
+              : colorScheme.surface,
+          border: Border.all(color: colorScheme.outlineVariant),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Row(
+          children: railOnLeft
+              ? [rail, Expanded(child: pageContentBox)]
+              : [Expanded(child: pageContentBox), rail],
+        ),
+      );
+    } else {
+      previewContent = Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: compact
+              ? colorScheme.surface.withValues(alpha: 0.7)
+              : colorScheme.surface,
+          border: Border.all(color: colorScheme.outlineVariant),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Column(
+          children: [
+            if (settings.tabBarPosition == TabBarPosition.top) topMainToolbar,
+            SizedBox(height: compact ? 40 : 72, child: pageContentBox),
+            if (settings.tabBarPosition == TabBarPosition.top)
+              topBottomToolbar
+            else
+              bottomCombinedToolbar,
+          ],
+        ),
+      );
+    }
 
     if (compact) {
       return previewContent;
@@ -405,6 +466,27 @@ class _CompactPreviewTitle extends StatelessWidget {
       onSiteSettingsTap: _noop,
       onTitleTap: _noop,
       tabIcon: const Icon(MdiIcons.web, size: 24),
+    );
+  }
+}
+
+class _RailPreviewTitle extends StatelessWidget {
+  const _RailPreviewTitle({required this.tabState, required this.quarterTurns});
+
+  final TabState tabState;
+  final int quarterTurns;
+
+  @override
+  Widget build(BuildContext context) {
+    return RailAppBarTitleView(
+      tabState: tabState,
+      quarterTurns: quarterTurns,
+      isTabTunneled: false,
+      siteSettingsBadgeState: SiteSettingsBadgeState.hidden,
+      onSiteSettingsTap: _noop,
+      onTitleTap: _noop,
+      tabIcon: const Icon(MdiIcons.web, size: 24),
+      longPressUrlCopy: false,
     );
   }
 }

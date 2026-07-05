@@ -145,6 +145,10 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
   final GlobalKey? activeItemKey;
   final double? cacheExtent;
 
+  /// Direction the chip list scrolls / lays out. Horizontal for the standard
+  /// top/bottom tab bar; vertical for the side rail.
+  final Axis scrollDirection;
+
   /// Key applied to the underlying scroll view. Supply a [PageStorageKey] to
   /// preserve the scroll offset across rebuilds/remounts (e.g. when a host
   /// widget is torn down and recreated by a bottom sheet open/close).
@@ -193,6 +197,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
     this.activeItemKey,
     this.cacheExtent = 0,
     this.scrollKey,
+    this.scrollDirection = Axis.horizontal,
     super.key,
   });
 
@@ -221,10 +226,14 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
     final prefixCount = prefixListItems.length;
     final totalCount = prefixCount + items.length;
 
+    final isVertical = scrollDirection == Axis.vertical;
+
     Widget buildPrefix(int index) {
       return Padding(
         key: ValueKey('__selectable_chips_prefix_$index'),
-        padding: const EdgeInsets.only(top: 4.0, right: 4),
+        padding: isVertical
+            ? const EdgeInsets.only(bottom: 4.0)
+            : const EdgeInsets.only(top: 4.0, right: 4),
         child: prefixListItems[index],
       );
     }
@@ -238,7 +247,9 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
       final canDeleteItem =
           enableDelete && (deco?.canDelete?.call(item) ?? true);
       final child = Padding(
-        padding: const EdgeInsets.only(right: 8.0, top: 4.0),
+        padding: isVertical
+            ? const EdgeInsets.only(bottom: 8.0)
+            : const EdgeInsets.only(right: 8.0, top: 4.0),
         child: _BadgeWrapper(
           count: itemBadgeCount?.call(item),
           child: _GestureWrapper(
@@ -307,7 +318,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
             scrollCacheExtent: cacheExtent.mapNotNull(
               (extent) => ScrollCacheExtent.pixels(extent),
             ),
-            scrollDirection: Axis.horizontal,
+            scrollDirection: scrollDirection,
             itemCount: totalCount,
             itemBuilder: (context, index) => index < prefixCount
                 ? buildPrefix(index)
@@ -320,7 +331,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
           scrollCacheExtent: cacheExtent.mapNotNull(
             (extent) => ScrollCacheExtent.pixels(extent),
           ),
-          scrollDirection: Axis.horizontal,
+          scrollDirection: scrollDirection,
           buildDefaultDragHandles: false,
           itemCount: totalCount,
           itemBuilder: (context, index) => index < prefixCount

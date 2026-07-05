@@ -108,9 +108,12 @@ class _AnimatedToolbar extends HookWidget {
     }, [visible]);
 
     final slideAnimation = useMemoized(() {
-      final begin = position == TabBarPosition.top
-          ? const Offset(0, -1)
-          : const Offset(0, 1);
+      final begin = switch (position) {
+        TabBarPosition.top => const Offset(0, -1),
+        TabBarPosition.bottom => const Offset(0, 1),
+        TabBarPosition.left => const Offset(-1, 0),
+        TabBarPosition.right => const Offset(1, 0),
+      };
 
       return Tween<Offset>(begin: begin, end: Offset.zero).animate(
         CurvedAnimation(parent: controller, curve: Curves.easeInOutQuart),
@@ -223,7 +226,9 @@ class _TabBar extends HookConsumerWidget {
       },
     );
 
-    // Return the toolbar widget - parent handles animation
+    // Return the toolbar widget - parent handles animation.
+    // Rail positions are rendered by a dedicated Stack layer, not _TabBar, but
+    // are handled here for exhaustiveness/correctness.
     return switch (tabBarPosition) {
       TabBarPosition.top => BrowserTopAppBar(
         showMainToolbar: showMainToolbar,
@@ -235,6 +240,12 @@ class _TabBar extends HookConsumerWidget {
       TabBarPosition.bottom => BrowserBottomAppBar(
         displayedSheet: displayedSheet,
         showMainToolbar: showMainToolbar,
+        showContextualToolbar: showContextualToolbar,
+        quickTabSwitcherRowCount: quickTabSwitcherRowCount,
+        isSmallWebMode: isSmallWebMode,
+      ),
+      TabBarPosition.left || TabBarPosition.right => BrowserSideRail(
+        position: tabBarPosition,
         showContextualToolbar: showContextualToolbar,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         isSmallWebMode: isSmallWebMode,
@@ -539,8 +550,13 @@ class BrowserScreen extends HookConsumerWidget {
         ? 0
         : ref.watch(quickTabSwitcherRowCountProvider).value ?? 0;
 
+    // Vertical side rail (left/right). Auto-hide is not supported on the rail;
+    // it is reserved via a plain content offset and dismissed only by gesture.
+    final isRail = tabBarPosition.isVertical;
+
     final autoHideTabBar =
         !isSmallWebActive &&
+        tabBarPosition.isHorizontal &&
         ref.watch(
           generalSettingsWithDefaultsProvider.select(
             (value) => value.autoHideTabBar,
@@ -641,6 +657,9 @@ class BrowserScreen extends HookConsumerWidget {
       bottomAppBarContentSize = const Size.fromHeight(
         SmallWebBrowserOverlay.barHeight,
       );
+    } else if (isRail) {
+      // The rail occupies a side, not the bottom; no bottom bar is rendered.
+      bottomAppBarContentSize = Size.zero;
     } else {
       // Pass actual displayedSheet to get correct height when ViewTabsSheet hides main toolbar
       bottomAppBarContentSize = BrowserBottomAppBar(
@@ -654,6 +673,25 @@ class BrowserScreen extends HookConsumerWidget {
     // Total height includes safe area padding
     final bottomAppBarTotalHeight =
         bottomAppBarContentSize.height + bottomSafeArea;
+
+    // Side rail width reservation (vertical positions only): the fixed content
+    // width plus the system safe-area inset on the rail's outer edge.
+    final horizontalSafeArea = switch (tabBarPosition) {
+      TabBarPosition.left => MediaQuery.of(context).padding.left,
+      TabBarPosition.right => MediaQuery.of(context).padding.right,
+      _ => 0.0,
+    };
+    final sideRailTotalWidth = isRail
+        ? BrowserTabBar.sideRailWidth + horizontalSafeArea
+        : 0.0;
+    // Horizontal insets used to keep overlays (progress, find-in-page) clear of
+    // the rail on its docked edge.
+    final railLeftInset = tabBarPosition == TabBarPosition.left
+        ? sideRailTotalWidth
+        : 0.0;
+    final railRightInset = tabBarPosition == TabBarPosition.right
+        ? sideRailTotalWidth
+        : 0.0;
 
     // Calculate top toolbar size for browser offset and progress indicator
     final topSafeArea = MediaQuery.of(context).padding.top;
@@ -867,8 +905,13 @@ class BrowserScreen extends HookConsumerWidget {
                           toolbarState == ToolbarVisibility.visible);
 
                   // When auto-hide is disabled, constrain browser above toolbar
-                  // (unless toolbar is manually dismissed via swipe gesture)
-                  final bottomOffset = (!autoHideTabBar && toolbarVisible)
+                  // (unless toolbar is manually dismissed via swipe gesture).
+                  // Gated to horizontal positions so the rail (which forces
+                  // auto-hide off) doesn't reserve a phantom bottom inset.
+                  final bottomOffset =
+                      (tabBarPosition.isHorizontal &&
+                          !autoHideTabBar &&
+                          toolbarVisible)
                       ? bottomAppBarTotalHeight
                       : 0.0;
 
@@ -879,20 +922,36 @@ class BrowserScreen extends HookConsumerWidget {
                       ? topAppBarTotalHeight
                       : 0.0;
 
+                  // Side rail: inset the browser by the rail width on the docked
+                  // edge whenever the rail is visible (no auto-hide, so this is
+                  // a plain content offset — the rail slides out on dismiss).
+                  final leftOffset =
+                      (tabBarPosition == TabBarPosition.left && toolbarVisible)
+                      ? sideRailTotalWidth
+                      : 0.0;
+                  final rightOffset =
+                      (tabBarPosition == TabBarPosition.right && toolbarVisible)
+                      ? sideRailTotalWidth
+                      : 0.0;
+
                   // Only fall back to the system bottom inset when the bottom
                   // toolbar was explicitly dismissed. The normal auto-hide
                   // hidden state is still handled by GeckoView's dynamic
-                  // toolbar/clipping logic.
-                  final applyBottomSafeArea =
-                      !tabInFullScreen &&
-                      !isSmallWebActive &&
-                      !sheetDisplayed &&
-                      bottomOffset == 0 &&
-                      toolbarState == ToolbarVisibility.dismissed;
+                  // toolbar/clipping logic. On the rail there is never a bottom
+                  // bar, so the browser always needs the bottom safe inset.
+                  final applyBottomSafeArea = isRail
+                      ? (!tabInFullScreen &&
+                            !isSmallWebActive &&
+                            !sheetDisplayed)
+                      : (!tabInFullScreen &&
+                            !isSmallWebActive &&
+                            !sheetDisplayed &&
+                            bottomOffset == 0 &&
+                            toolbarState == ToolbarVisibility.dismissed);
 
                   return Positioned(
-                    left: 0,
-                    right: 0,
+                    left: leftOffset,
+                    right: rightOffset,
                     top: topOffset,
                     bottom: bottomOffset,
                     child: _Browser(
@@ -903,6 +962,8 @@ class BrowserScreen extends HookConsumerWidget {
                           : null,
                       sheetDisplayed: sheetDisplayed,
                       hasTopBarOffset: topOffset > 0,
+                      hasLeftBarOffset: leftOffset > 0,
+                      hasRightBarOffset: rightOffset > 0,
                       applyBottomSafeArea: applyBottomSafeArea,
                     ),
                   );
@@ -923,11 +984,12 @@ class BrowserScreen extends HookConsumerWidget {
                   ),
                 ),
 
-              // Layer 1: Sheet (when displayed) - positioned above toolbar
+              // Layer 1: Sheet (when displayed) - positioned above toolbar,
+              // inset past the rail on its docked edge.
               if (sheetDisplayed)
                 Positioned(
-                  left: 0,
-                  right: 0,
+                  left: railLeftInset,
+                  right: railRightInset,
                   top: 0,
                   bottom: bottomAppBarTotalHeight,
                   child: _SheetContainer(
@@ -938,54 +1000,60 @@ class BrowserScreen extends HookConsumerWidget {
                 ),
 
               // Layer 2: Bottom Toolbar (overlay, slides in/out)
-              // In small web mode, show the discovery overlay instead
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: isSmallWebActive
-                    ? _AnimatedToolbar(
-                        position: TabBarPosition.bottom,
-                        visible: !tabInFullScreen,
-                        child: Material(
-                          color: Theme.of(context).colorScheme.surfaceContainer,
-                          elevation: 3,
-                          child: const SmallWebBrowserOverlay(),
+              // In small web mode, show the discovery overlay instead.
+              // Skipped entirely for the side rail (Layer 3b below).
+              if (!isRail)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: isSmallWebActive
+                      ? _AnimatedToolbar(
+                          position: TabBarPosition.bottom,
+                          visible: !tabInFullScreen,
+                          child: Material(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainer,
+                            elevation: 3,
+                            child: const SmallWebBrowserOverlay(),
+                          ),
+                        )
+                      : Consumer(
+                          // _TabBar is passed via `child` so it is built once and
+                          // reused across toolbar show/hide toggles; only the
+                          // `visible` flag fed to _AnimatedToolbar depends on the
+                          // watched provider.
+                          builder: (context, ref, child) {
+                            final toolbarState = ref.watch(
+                              toolbarVisibilityControllerProvider(
+                                selectedTabId,
+                              ),
+                            );
+                            final visible =
+                                sheetDisplayed ||
+                                (!tabInFullScreen &&
+                                    toolbarState == ToolbarVisibility.visible);
+                            return _AnimatedToolbar(
+                              position: TabBarPosition.bottom,
+                              visible: visible,
+                              child: child!,
+                            );
+                          },
+                          child: _TabBar(
+                            tabBarPosition: TabBarPosition.bottom,
+                            showMainToolbar:
+                                tabBarPosition == TabBarPosition.bottom,
+                            showContextualToolbar: showContextualToolbar,
+                            quickTabSwitcherRowCount: quickTabSwitcherRowCount,
+                            isSmallWebMode: false,
+                            pointerMoveEvents:
+                                tabBarPosition == TabBarPosition.bottom
+                                ? pointerMoveEventsController.stream
+                                : null,
+                          ),
                         ),
-                      )
-                    : Consumer(
-                        // _TabBar is passed via `child` so it is built once and
-                        // reused across toolbar show/hide toggles; only the
-                        // `visible` flag fed to _AnimatedToolbar depends on the
-                        // watched provider.
-                        builder: (context, ref, child) {
-                          final toolbarState = ref.watch(
-                            toolbarVisibilityControllerProvider(selectedTabId),
-                          );
-                          final visible =
-                              sheetDisplayed ||
-                              (!tabInFullScreen &&
-                                  toolbarState == ToolbarVisibility.visible);
-                          return _AnimatedToolbar(
-                            position: TabBarPosition.bottom,
-                            visible: visible,
-                            child: child!,
-                          );
-                        },
-                        child: _TabBar(
-                          tabBarPosition: TabBarPosition.bottom,
-                          showMainToolbar:
-                              tabBarPosition == TabBarPosition.bottom,
-                          showContextualToolbar: showContextualToolbar,
-                          quickTabSwitcherRowCount: quickTabSwitcherRowCount,
-                          isSmallWebMode: false,
-                          pointerMoveEvents:
-                              tabBarPosition == TabBarPosition.bottom
-                              ? pointerMoveEventsController.stream
-                              : null,
-                        ),
-                      ),
-              ),
+                ),
 
               // Layer 3: Top Toolbar (overlay, slides in/out) - only when position is top
               if (tabBarPosition == TabBarPosition.top)
@@ -1026,6 +1094,38 @@ class BrowserScreen extends HookConsumerWidget {
                   ),
                 ),
 
+              // Layer 3b: Side rail (vertical, left/right). No auto-hide; it
+              // slides horizontally out of view only on manual dismiss.
+              if (isRail)
+                Positioned(
+                  top: 0,
+                  bottom: 0,
+                  left: tabBarPosition == TabBarPosition.left ? 0 : null,
+                  right: tabBarPosition == TabBarPosition.right ? 0 : null,
+                  child: Consumer(
+                    builder: (context, ref, child) {
+                      final toolbarState = ref.watch(
+                        toolbarVisibilityControllerProvider(selectedTabId),
+                      );
+                      final visible =
+                          sheetDisplayed ||
+                          (!tabInFullScreen &&
+                              toolbarState == ToolbarVisibility.visible);
+                      return _AnimatedToolbar(
+                        position: tabBarPosition,
+                        visible: visible,
+                        child: child!,
+                      );
+                    },
+                    child: BrowserSideRail(
+                      position: tabBarPosition,
+                      showContextualToolbar: showContextualToolbar,
+                      quickTabSwitcherRowCount: quickTabSwitcherRowCount,
+                      isSmallWebMode: false,
+                    ),
+                  ),
+                ),
+
               // Layer 4: FAB (draggable via long press)
               Consumer(
                 builder: (context, ref, child) {
@@ -1040,6 +1140,14 @@ class BrowserScreen extends HookConsumerWidget {
                     bottomToolbarVisible: visible,
                     bottomAppBarHeight: bottomAppBarTotalHeight,
                     bottomSafeArea: bottomSafeArea,
+                    leftReservedWidth:
+                        (tabBarPosition == TabBarPosition.left && visible)
+                        ? sideRailTotalWidth
+                        : 0.0,
+                    rightReservedWidth:
+                        (tabBarPosition == TabBarPosition.right && visible)
+                        ? sideRailTotalWidth
+                        : 0.0,
                     child: child!,
                   );
                 },
@@ -1064,12 +1172,24 @@ class BrowserScreen extends HookConsumerWidget {
                         ? Duration.zero
                         : _AnimatedToolbar._kAnimationDuration,
                     curve: Curves.easeInOutQuart,
-                    left: 0,
-                    right: 0,
-                    top: tabBarPosition == TabBarPosition.top && visible
+                    // Rail insets track the rail's visibility so overlays
+                    // reclaim the space when it is swiped away.
+                    left: (tabBarPosition == TabBarPosition.left && visible)
+                        ? sideRailTotalWidth
+                        : 0.0,
+                    right: (tabBarPosition == TabBarPosition.right && visible)
+                        ? sideRailTotalWidth
+                        : 0.0,
+                    // On the rail there is no top/bottom bar; pin the progress
+                    // line to the top of the content area.
+                    top: isRail
+                        ? topSafeArea
+                        : tabBarPosition == TabBarPosition.top && visible
                         ? topAppBarTotalHeight
                         : null,
-                    bottom: tabBarPosition == TabBarPosition.bottom && visible
+                    bottom: isRail
+                        ? null
+                        : tabBarPosition == TabBarPosition.bottom && visible
                         ? bottomAppBarTotalHeight
                         : tabBarPosition == TabBarPosition.bottom
                         ? 0
@@ -1116,10 +1236,18 @@ class BrowserScreen extends HookConsumerWidget {
                         ? Duration.zero
                         : _AnimatedToolbar._kAnimationDuration,
                     curve: Curves.easeInOutQuart,
-                    left: 0,
-                    right: 0,
+                    left: (tabBarPosition == TabBarPosition.left && visible)
+                        ? sideRailTotalWidth
+                        : 0.0,
+                    right: (tabBarPosition == TabBarPosition.right && visible)
+                        ? sideRailTotalWidth
+                        : 0.0,
                     bottom: math.max(
-                      visible ? bottomAppBarTotalHeight : bottomSafeArea,
+                      isRail
+                          ? bottomSafeArea
+                          : (visible
+                                ? bottomAppBarTotalHeight
+                                : bottomSafeArea),
                       MediaQuery.viewInsetsOf(context).bottom,
                     ),
                     child: child!,
@@ -1213,6 +1341,8 @@ class _Browser extends HookConsumerWidget {
   final bool tabInFullScreen;
   final bool sheetDisplayed;
   final bool hasTopBarOffset;
+  final bool hasLeftBarOffset;
+  final bool hasRightBarOffset;
   final bool applyBottomSafeArea;
 
   const _Browser({
@@ -1221,6 +1351,8 @@ class _Browser extends HookConsumerWidget {
     required this.pointerMoveEventSink,
     required this.sheetDisplayed,
     required this.hasTopBarOffset,
+    required this.hasLeftBarOffset,
+    required this.hasRightBarOffset,
     required this.applyBottomSafeArea,
   });
 
@@ -1460,6 +1592,8 @@ class _Browser extends HookConsumerWidget {
                 isFullscreen: tabInFullScreen,
                 pointerMoveEventSink: pointerMoveEventSink,
                 hasTopBarOffset: hasTopBarOffset,
+                hasLeftBarOffset: hasLeftBarOffset,
+                hasRightBarOffset: hasRightBarOffset,
                 applyBottomSafeArea: applyBottomSafeArea,
               ),
             ),
@@ -1474,11 +1608,15 @@ class _BrowserView extends StatelessWidget {
   final bool isFullscreen;
   final StreamSink<Offset>? pointerMoveEventSink;
   final bool hasTopBarOffset;
+  final bool hasLeftBarOffset;
+  final bool hasRightBarOffset;
   final bool applyBottomSafeArea;
 
   const _BrowserView({
     required this.isFullscreen,
     required this.hasTopBarOffset,
+    required this.hasLeftBarOffset,
+    required this.hasRightBarOffset,
     required this.applyBottomSafeArea,
     this.pointerMoveEventSink,
   });
@@ -1488,12 +1626,14 @@ class _BrowserView extends StatelessWidget {
     return SafeArea(
       // Disable top SafeArea when top bar handles it (has offset applied)
       top: !isFullscreen && !hasTopBarOffset,
-      right: !isFullscreen,
+      // Disable a side's SafeArea when the rail on that edge already consumed
+      // the inset via the content offset.
+      right: !isFullscreen && !hasRightBarOffset,
       // Apply bottom SafeArea only when no toolbar/overlay is rendered at the
       // bottom (and not in fullscreen). Otherwise the toolbar handles its own
       // safe-area inset and the platform view extends behind it.
       bottom: applyBottomSafeArea,
-      left: !isFullscreen,
+      left: !isFullscreen && !hasLeftBarOffset,
       child: Stack(
         children: [BrowserView(pointerMoveEventSink: pointerMoveEventSink)],
       ),

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,6 +31,8 @@ class DraggableFab extends HookConsumerWidget {
   final bool bottomToolbarVisible;
   final double bottomAppBarHeight;
   final double bottomSafeArea;
+  final double leftReservedWidth;
+  final double rightReservedWidth;
 
   const DraggableFab({
     super.key,
@@ -38,6 +41,8 @@ class DraggableFab extends HookConsumerWidget {
     required this.bottomToolbarVisible,
     required this.bottomAppBarHeight,
     required this.bottomSafeArea,
+    this.leftReservedWidth = 0.0,
+    this.rightReservedWidth = 0.0,
   });
 
   static const _edgePadding = 16.0;
@@ -82,11 +87,20 @@ class DraggableFab extends HookConsumerWidget {
     final defaultBottom = bottomToolbarVisible
         ? bottomAppBarHeight + _edgePadding
         : _edgePadding + bottomSafeArea;
-    const defaultRight = _edgePadding;
+    final defaultRight = _edgePadding + rightReservedWidth;
 
     // Current position: custom if set, otherwise default
-    final currentRight = customOffset.value?.dx ?? defaultRight;
-    final currentBottom = customOffset.value?.dy ?? defaultBottom;
+    final rawRight = customOffset.value?.dx ?? defaultRight;
+    final rawBottom = customOffset.value?.dy ?? defaultBottom;
+    final currentOffset = _clampToBounds(
+      Offset(rawRight, rawBottom),
+      screenSize: screenSize,
+      padding: padding,
+      fabWidth: fabWidth,
+      fabHeight: fabHeight,
+    );
+    final currentRight = currentOffset.dx;
+    final currentBottom = currentOffset.dy;
 
     return Positioned(
       right: currentRight,
@@ -145,19 +159,27 @@ class DraggableFab extends HookConsumerWidget {
     required double fabHeight,
   }) {
     const minEdgePadding = 8.0;
+    final minRight =
+        math.max(padding.right, rightReservedWidth) + minEdgePadding;
+    final maxRight = math.max(
+      minRight,
+      screenSize.width -
+          fabWidth -
+          math.max(padding.left, leftReservedWidth) -
+          minEdgePadding,
+    );
+    final minBottom = padding.bottom + minEdgePadding;
+    final maxBottom = math.max(
+      minBottom,
+      screenSize.height - fabHeight - padding.top - minEdgePadding,
+    );
 
     // Distances from the bottom-right corner: keep at least the safe-area inset
     // plus a margin on the near edge, and leave room for the (possibly stacked)
     // FAB on the far edge so it can't be dragged off-screen.
     return Offset(
-      offset.dx.clamp(
-        padding.right + minEdgePadding,
-        screenSize.width - fabWidth - padding.left - minEdgePadding,
-      ),
-      offset.dy.clamp(
-        padding.bottom + minEdgePadding,
-        screenSize.height - fabHeight - padding.top - minEdgePadding,
-      ),
+      offset.dx.clamp(minRight, maxRight),
+      offset.dy.clamp(minBottom, maxBottom),
     );
   }
 }

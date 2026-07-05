@@ -34,10 +34,15 @@ class ContextualToolbar extends HookConsumerWidget {
     super.key,
     required this.selectedTabId,
     required this.displayedSheet,
+    this.axis = Axis.horizontal,
   });
 
   final String? selectedTabId;
   final Sheet? displayedSheet;
+
+  /// Layout direction, forwarded to [ContextualToolbarView]. Vertical for the
+  /// side rail.
+  final Axis axis;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -67,7 +72,7 @@ class ContextualToolbar extends HookConsumerWidget {
         .map((button) => _buildButton(scope, context, ref, button))
         .toList();
 
-    return ContextualToolbarView(buttons: buttons);
+    return ContextualToolbarView(buttons: buttons, axis: axis);
   }
 
   Widget _buildButton(
@@ -90,15 +95,63 @@ class ContextualToolbar extends HookConsumerWidget {
 }
 
 class ContextualToolbarView extends StatelessWidget {
-  const ContextualToolbarView({super.key, required this.buttons});
+  const ContextualToolbarView({
+    super.key,
+    required this.buttons,
+    this.axis = Axis.horizontal,
+  });
 
   final List<Widget> buttons;
+
+  /// Layout direction of the contextual button strip. Horizontal for the
+  /// top/bottom tab bar, vertical for the side rail.
+  final Axis axis;
 
   static const _minButtonWidth = 48.0;
 
   @override
   Widget build(BuildContext context) {
     if (buttons.isEmpty) return const SizedBox.shrink();
+
+    if (axis == Axis.vertical) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          // spaceEvenly needs a bounded height; in the rail the contextual
+          // strip usually sits in an intrinsic (unbounded) slot, so fall back
+          // to a min-sized fixed-height column there.
+          final fitsEvenly =
+              constraints.maxHeight.isFinite &&
+              constraints.maxHeight >= _minButtonWidth * buttons.length;
+
+          if (fitsEvenly) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: buttons,
+            );
+          }
+
+          // Let buttons size to their natural height instead of clamping them
+          // into fixed _minButtonWidth-tall slots: some buttons (e.g. the
+          // tab-count box, which carries its own ToolbarButton padding) are
+          // taller than that, and a short SizedBox + Center would clip them.
+          //
+          // UnconstrainedBox frees the horizontal axis so each button
+          // shrink-wraps its content instead of stretching to the rail width
+          // (the tab-count box's inner Center would otherwise fill it); the
+          // Column then centers each on the cross axis.
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final button in buttons)
+                UnconstrainedBox(
+                  constrainedAxis: Axis.vertical,
+                  child: button,
+                ),
+            ],
+          );
+        },
+      );
+    }
 
     return LayoutBuilder(
       builder: (context, constraints) {

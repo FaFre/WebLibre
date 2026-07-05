@@ -87,7 +87,23 @@ enum TabIntentOpenSetting { regular, private, isolated, ask }
 
 enum TabDirection { newestFirst, oldestFirst }
 
-enum TabBarPosition { top, bottom }
+enum TabBarPosition {
+  top,
+  bottom,
+  left,
+  right;
+
+  /// Whether the tab bar is rendered as a vertical side rail (left/right)
+  /// rather than a horizontal bar (top/bottom).
+  bool get isVertical =>
+      this == TabBarPosition.left || this == TabBarPosition.right;
+
+  /// Whether the tab bar is rendered as a horizontal bar (top/bottom).
+  bool get isHorizontal => !isVertical;
+
+  /// Main axis along which the bar's content flows.
+  Axis get axis => isVertical ? Axis.vertical : Axis.horizontal;
+}
 
 enum TabBarLayout { withTitle, compact }
 

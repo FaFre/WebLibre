@@ -50,10 +50,14 @@ import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 /// "expanded" — its tabs appear inline right after its header. Tapping
 /// another header selects that container, collapsing the previous group.
 class AccordionQuickTabSwitcher extends HookConsumerWidget {
-  const AccordionQuickTabSwitcher({super.key});
+  const AccordionQuickTabSwitcher({super.key, this.axis = Axis.horizontal});
+
+  /// Direction the accordion flows. Vertical for the side rail.
+  final Axis axis;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isVertical = axis == Axis.vertical;
     final scrollController = useScrollController();
     final activeChipKey = useRef(GlobalKey());
     final isUserScrolling = useRef(false);
@@ -63,11 +67,13 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
       return userScrollTimer.value?.cancel;
     }, []);
 
-    final showTitles = ref.watch(
+    final showTitlesSetting = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (s) => s.quickTabSwitcherShowTitles,
       ),
     );
+    // Titles can't fit the narrow vertical rail; force icon-only chips there.
+    final showTitles = !isVertical && showTitlesSetting;
     final showIsolatedTabUi = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.showIsolatedTabUi),
     );
@@ -172,8 +178,13 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
 
     Widget buildTabChip(QuickTabSwitcherItem item) {
       final isSelected = item.isActive;
+      // The narrow rail can't fit a close button beside the icon-only chip; it
+      // overflows (and the active tab's thick border makes it worse). Closing
+      // stays available via the long-press menu.
       final canClose =
-          !item.isPlaceholder && (showCloseButtonOnAllTabs || item.isActive);
+          !isVertical &&
+          !item.isPlaceholder &&
+          (showCloseButtonOnAllTabs || item.isActive);
 
       final chip = QuickTabSwitcherChip(
         item: item,
@@ -300,9 +311,9 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
     );
 
     if (entries.isEmpty) {
-      // Hold the 48px row slot; the bar visibility is decided upstream by
+      // Hold the 48px slot; the bar visibility is decided upstream by
       // quickTabSwitcherRowCountProvider.
-      return const SizedBox(height: 48);
+      return isVertical ? const SizedBox(width: 48) : const SizedBox(height: 48);
     }
 
     return NotificationListener<UserScrollNotification>(
@@ -315,10 +326,12 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
         return false;
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        padding: isVertical
+            ? const EdgeInsets.symmetric(vertical: 4.0)
+            : const EdgeInsets.symmetric(horizontal: 4.0),
         child: SizedBox(
-          height: 48,
-          width: double.maxFinite,
+          height: isVertical ? double.maxFinite : 48,
+          width: isVertical ? 48 : double.maxFinite,
           child: FadingScroll(
             controller: scrollController,
             fadingSize: 15,
@@ -326,7 +339,7 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
               return ListView.builder(
                 key: const PageStorageKey('quick_tab_switcher_accordion'),
                 controller: controller,
-                scrollDirection: Axis.horizontal,
+                scrollDirection: axis,
                 scrollCacheExtent: const ScrollCacheExtent.pixels(500),
                 itemCount: entries.length,
                 itemBuilder: (context, index) {
@@ -334,6 +347,9 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
                   final child = switch (entry) {
                     _AccordionHeaderEntry() => _AccordionHeaderChip(
                       entry: entry,
+                      // The narrow rail can't fit the container title; show the
+                      // container icon avatar + count badge only.
+                      showTitle: !isVertical,
                       onSelected: () => selectContainer(entry.container?.id),
                     ),
                     _AccordionTabEntry(:final item) => buildTabChip(item),
@@ -346,6 +362,7 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
                     child: _TraySlice(
                       position: trayPositions[index],
                       fill: trayFill,
+                      axis: axis,
                       child: child,
                     ),
                   );
@@ -407,7 +424,15 @@ class _AccordionHeaderChip extends StatelessWidget {
   final _AccordionHeaderEntry entry;
   final VoidCallback onSelected;
 
-  const _AccordionHeaderChip({required this.entry, required this.onSelected});
+  /// When false (e.g. the narrow vertical rail) the container title is hidden
+  /// and only the icon avatar + count badge are shown, so the chip fits.
+  final bool showTitle;
+
+  const _AccordionHeaderChip({
+    required this.entry,
+    required this.onSelected,
+    this.showTitle = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -446,10 +471,49 @@ class _AccordionHeaderChip extends StatelessWidget {
           )
         : null;
 
+    final iconAvatar = container != null
+        ? buildContainerChipAvatar(context, container, true)
+        : Icon(MdiIcons.folderHidden, color: nullForeground);
+
+    // Same fill regardless of selection — the tray (added when expanded)
+    // is what signals the active container, not a header recolor.
+    final side = BorderSide(width: 2, color: fill);
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8.0),
+      side: side,
+    );
+
+    if (!showTitle) {
+      // Narrow rail: no room for the avatar slot + title + trailing badge side
+      // by side (the badge gets clipped). Stack the container icon over the
+      // count badge inside the label instead, dropping the avatar slot.
+      return FilterChip(
+        labelPadding: EdgeInsets.zero,
+        label: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (iconAvatar != null) iconAvatar,
+            if (countBadge != null) ...[
+              if (iconAvatar != null) const SizedBox(height: 4),
+              countBadge,
+            ],
+          ],
+        ),
+        color: WidgetStatePropertyAll(fill),
+        selected: false,
+        showCheckmark: false,
+        onSelected: (value) {
+          if (value) {
+            onSelected();
+          }
+        },
+        side: side,
+        shape: shape,
+      );
+    }
+
     return FilterChip(
-      avatar: container != null
-          ? buildContainerChipAvatar(context, container, true)
-          : Icon(MdiIcons.folderHidden, color: nullForeground),
+      avatar: iconAvatar,
       label: container != null
           ? buildContainerChipLabel(
               context,
@@ -468,8 +532,6 @@ class _AccordionHeaderChip extends StatelessWidget {
                     ),
               ),
             ),
-      // Same fill regardless of selection — the tray (added when expanded)
-      // is what signals the active container, not a header recolor.
       color: WidgetStatePropertyAll(fill),
       selected: false,
       showCheckmark: false,
@@ -478,11 +540,8 @@ class _AccordionHeaderChip extends StatelessWidget {
           onSelected();
         }
       },
-      side: BorderSide(width: 2, color: fill),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        side: BorderSide(width: 2, color: fill),
-      ),
+      side: side,
+      shape: shape,
     );
   }
 }
@@ -500,11 +559,13 @@ class _TraySlice extends StatelessWidget {
   final _TrayPosition position;
   final Color fill;
   final Widget child;
+  final Axis axis;
 
   const _TraySlice({
     required this.position,
     required this.fill,
     required this.child,
+    this.axis = Axis.horizontal,
   });
 
   /// Corner radius of the chips, matched by the tray so it hugs the first and
@@ -513,40 +574,59 @@ class _TraySlice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isVertical = axis == Axis.vertical;
+
     if (position == _TrayPosition.none) {
-      // Standalone container header: regular inter-chip spacing, vertically
-      // centered to line up with the tray slices.
+      // Standalone container header: regular inter-chip spacing, centered
+      // on the cross axis to line up with the tray slices.
       return Padding(
-        padding: const EdgeInsets.fromLTRB(0.0, 2.0, 8.0, 2.0),
+        padding: isVertical
+            ? const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 8.0)
+            : const EdgeInsets.fromLTRB(0.0, 2.0, 8.0, 2.0),
         child: child,
       );
     }
 
-    final borderRadius = switch (position) {
-      _TrayPosition.solo => const BorderRadius.all(_radius),
-      _TrayPosition.start => const BorderRadius.horizontal(left: _radius),
-      _TrayPosition.end => const BorderRadius.horizontal(right: _radius),
-      _TrayPosition.middle || _TrayPosition.none => BorderRadius.zero,
+    final borderRadius = switch ((position, isVertical)) {
+      (_TrayPosition.solo, _) => const BorderRadius.all(_radius),
+      (_TrayPosition.start, false) => const BorderRadius.horizontal(
+        left: _radius,
+      ),
+      (_TrayPosition.end, false) => const BorderRadius.horizontal(
+        right: _radius,
+      ),
+      (_TrayPosition.start, true) => const BorderRadius.vertical(top: _radius),
+      (_TrayPosition.end, true) => const BorderRadius.vertical(bottom: _radius),
+      (_TrayPosition.middle, _) || (_TrayPosition.none, _) => BorderRadius.zero,
     };
 
-    final isRightEdge =
+    final isTrailingEdge =
         position == _TrayPosition.end || position == _TrayPosition.solo;
 
     return Padding(
-      padding: EdgeInsets.only(
-        top: 2.0,
-        bottom: 2.0,
-        // Transparent gap after the tray so a following standalone header
-        // doesn't butt up against the rounded right edge.
-        right: isRightEdge ? 8.0 : 0.0,
-      ),
+      // Transparent gap after the tray so a following standalone header
+      // doesn't butt up against the rounded trailing edge.
+      padding: isVertical
+          ? EdgeInsets.only(
+              left: 2.0,
+              right: 2.0,
+              bottom: isTrailingEdge ? 8.0 : 0.0,
+            )
+          : EdgeInsets.only(
+              top: 2.0,
+              bottom: 2.0,
+              right: isTrailingEdge ? 8.0 : 0.0,
+            ),
       child: SizedBox(
-        height: 44.0,
+        height: isVertical ? null : 44.0,
+        width: isVertical ? 44.0 : null,
         child: Container(
           decoration: BoxDecoration(color: fill, borderRadius: borderRadius),
-          // A small inset on every side so the first/last chip get the same
-          // breathing room from the tray edge as the inter-chip seam gaps.
-          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          // A small inset so the first/last chip get the same breathing room
+          // from the tray edge as the inter-chip seam gaps.
+          padding: isVertical
+              ? const EdgeInsets.symmetric(vertical: 4.0)
+              : const EdgeInsets.symmetric(horizontal: 4.0),
           child: Center(child: child),
         ),
       ),

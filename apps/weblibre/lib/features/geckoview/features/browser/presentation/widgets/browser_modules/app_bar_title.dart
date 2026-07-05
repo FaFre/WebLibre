@@ -494,6 +494,269 @@ class AppBarTitleView extends StatelessWidget {
   }
 }
 
+/// Side-rail variant of the address field: an upright site-settings favicon
+/// button stacked above the URL, which is rendered as rotated ("vertical")
+/// text like a bookshelf spine. Reuses all the same content/behaviour as
+/// [AppBarTitle] — only the layout is rotated.
+class RailAppBarTitle extends ConsumerWidget {
+  const RailAppBarTitle({
+    super.key,
+    required this.quarterTurns,
+    this.containerColor,
+    this.useCustomColor = false,
+  });
+
+  /// Rotation applied to the URL text. 3 (bottom-to-top) reads best on a left
+  /// rail; 1 (top-to-bottom) on a right rail.
+  final int quarterTurns;
+  final Color? containerColor;
+  final bool useCustomColor;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tabState = ref.watch(selectedTabStateProvider);
+    final selectedTabType = ref.watch(selectedTabTypeProvider);
+    final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final isTabTuneledAsync = ref.watch(isTabTunneledProvider(tabState?.id));
+    final siteSettingsBadgeState = ref.watch(
+      showSiteSettingsBadgeProvider.select(
+        (value) => value.value ?? SiteSettingsBadgeState.hidden,
+      ),
+    );
+
+    if (tabState == null) {
+      return _EmptyRailAddressField(
+        quarterTurns: quarterTurns,
+        onTap: () async {
+          await SearchRoute(
+            tabType: selectedTabType ?? settings.effectiveDefaultCreateTabType,
+          ).push(context);
+        },
+      );
+    }
+
+    final sandboxSourceUri = ref.watch(
+      sandboxSourceUriForTabProvider(tabId: tabState.id),
+    );
+
+    return RailAppBarTitleView(
+      tabState: tabState,
+      quarterTurns: quarterTurns,
+      isTabTunneled:
+          isTabTuneledAsync.hasValue && isTabTuneledAsync.value == true,
+      siteSettingsBadgeState: siteSettingsBadgeState,
+      longPressUrlCopy: settings.tabBarLongPressUrlCopy,
+      containerColor: containerColor,
+      useCustomColor: useCustomColor,
+      sandboxSourceUri: sandboxSourceUri,
+      onSiteSettingsTap: () {
+        ref
+            .read(bottomSheetControllerProvider.notifier)
+            .show(SiteSettingsSheet(tabState: tabState));
+      },
+      onTitleTap: () async {
+        await SearchRoute(
+          tabId: tabState.id,
+          searchText: searchTextForTab(tabState, sandboxSourceUri),
+          tabType: tabState.tabMode.toTabType(),
+        ).push(context);
+      },
+    );
+  }
+}
+
+class RailAppBarTitleView extends StatelessWidget {
+  const RailAppBarTitleView({
+    super.key,
+    required this.tabState,
+    required this.quarterTurns,
+    required this.isTabTunneled,
+    required this.siteSettingsBadgeState,
+    required this.onSiteSettingsTap,
+    required this.onTitleTap,
+    this.tabIcon,
+    this.longPressUrlCopy = true,
+    this.containerColor,
+    this.useCustomColor = false,
+    this.sandboxSourceUri,
+  });
+
+  final TabState tabState;
+  final int quarterTurns;
+  final bool isTabTunneled;
+  final SiteSettingsBadgeState siteSettingsBadgeState;
+  final VoidCallback onSiteSettingsTap;
+  final VoidCallback onTitleTap;
+  final Widget? tabIcon;
+  final bool longPressUrlCopy;
+  final Color? containerColor;
+  final bool useCustomColor;
+  final Uri? sandboxSourceUri;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final appColors = AppColors.of(context);
+    final containerColor = this.containerColor;
+    final containerPalette = containerColor != null
+        ? ContainerColors.palette(
+            context,
+            containerColor,
+            useCustomColor: useCustomColor,
+          )
+        : null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        ToolbarButton(
+          onTap: onSiteSettingsTap,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              tabIcon ?? TabIcon(tabState: tabState, iconSize: 24),
+              if (siteSettingsBadgeState != SiteSettingsBadgeState.hidden)
+                Positioned(
+                  top: -4,
+                  right: -4,
+                  child: Icon(
+                    siteSettingsBadgeState == SiteSettingsBadgeState.improved
+                        ? MdiIcons.shield
+                        : MdiIcons.shieldAlert,
+                    size: 10,
+                    color:
+                        siteSettingsBadgeState == SiteSettingsBadgeState.improved
+                        ? Colors.green
+                        : appColors.warningAmber,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: GestureDetector(
+            onTap: onTitleTap,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOut,
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+              decoration: BoxDecoration(
+                color: containerColor != null
+                    ? containerPalette!.surfaceColor
+                    : theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(24),
+                border: containerPalette != null
+                    ? Border.all(color: containerPalette.outlineColor)
+                    : null,
+              ),
+              child: RotatedBox(
+                quarterTurns: quarterTurns,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (tabState.tabMode is PrivateTabMode) ...[
+                      Icon(
+                        MdiIcons.dominoMask,
+                        color: appColors.privateTabPurple,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 4),
+                    ] else if (tabState.tabMode is IsolatedTabMode) ...[
+                      Icon(
+                        MdiIcons.snowflake,
+                        color: appColors.isolatedTabTeal,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 4),
+                    ],
+                    if (isTabTunneled) ...[
+                      const Icon(MdiIcons.tunnelOutline, size: 16),
+                      const SizedBox(width: 4),
+                    ],
+                    if (sandboxSourceUri != null) ...[
+                      Icon(
+                        MdiIcons.archiveLockOutline,
+                        color: theme.colorScheme.tertiary,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 4),
+                    ] else
+                      _SecurityStatusIcon(
+                        tabState: tabState,
+                        size: 16,
+                        containerColor: containerPalette?.accentColor,
+                      ),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: UriBreadcrumb(
+                        uri: sandboxSourceUri ?? tabState.url,
+                        showHttpScheme: false,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
+                        onTooltipTriggered: longPressUrlCopy
+                            ? () async {
+                                await Clipboard.setData(
+                                  ClipboardData(
+                                    text: (sandboxSourceUri ?? tabState.url)
+                                        .toString(),
+                                  ),
+                                );
+                              }
+                            : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _EmptyRailAddressField extends StatelessWidget {
+  const _EmptyRailAddressField({
+    required this.onTap,
+    required this.quarterTurns,
+  });
+
+  final VoidCallback onTap;
+  final int quarterTurns;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        alignment: Alignment.center,
+        child: RotatedBox(
+          quarterTurns: quarterTurns,
+          child: Text(
+            'Search or enter URL',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _SecurityStatusIcon extends StatelessWidget {
   const _SecurityStatusIcon({
     required this.tabState,
