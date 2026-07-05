@@ -24,7 +24,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
+import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/clear_site_data_dialog.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -43,6 +45,7 @@ class ClearSiteDataSection extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isExpanded = useState(false);
     final isClearing = useState(false);
+    final closeTabAfterClear = useState(false);
     final selectedTypes = useState<Set<ClearDataType>>({
       ClearDataType.allSiteData,
       ClearDataType.authSessions,
@@ -131,6 +134,15 @@ class ClearSiteDataSection extends HookConsumerWidget {
                   : (selected) => toggleType(ClearDataType.onlyCaches),
             ),
           ),
+          CheckboxListTile(
+            title: const Text('Close tab after clearing'),
+            subtitle: const Text('Close this tab once data is cleared'),
+            value: closeTabAfterClear.value,
+            onChanged: isClearing.value
+                ? null
+                : (value) => closeTabAfterClear.value = value ?? false,
+            controlAffinity: ListTileControlAffinity.trailing,
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 16.0,
@@ -146,6 +158,7 @@ class ClearSiteDataSection extends HookConsumerWidget {
                         ref,
                         isClearing,
                         selectedTypes.value,
+                        closeTabAfterClear.value,
                       ),
                 icon: isClearing.value
                     ? const SizedBox(
@@ -168,6 +181,7 @@ class ClearSiteDataSection extends HookConsumerWidget {
     WidgetRef ref,
     ValueNotifier<bool> isClearing,
     Set<ClearDataType> selectedTypes,
+    bool closeTabAfterClear,
   ) async {
     if (selectedTypes.isEmpty) {
       showErrorMessage(context, 'Select at least one data type');
@@ -183,7 +197,7 @@ class ClearSiteDataSection extends HookConsumerWidget {
     if (confirmed == true && context.mounted) {
       isClearing.value = true;
       try {
-        await _clearData(ref, selectedTypes);
+        await _clearData(ref, selectedTypes, closeTabAfterClear);
         if (context.mounted) {
           showInfoMessage(context, 'Site data cleared');
           ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
@@ -221,6 +235,7 @@ class ClearSiteDataSection extends HookConsumerWidget {
   Future<void> _clearData(
     WidgetRef ref,
     Set<ClearDataType> selectedTypes,
+    bool closeTabAfterClear,
   ) async {
     final host = url.host;
 
@@ -232,8 +247,16 @@ class ClearSiteDataSection extends HookConsumerWidget {
     final clearApi = GeckoDeleteBrowsingDataController();
     await clearApi.clearDataForHost(baseDomain, selectedTypes.toList());
 
-    // Reload tab
-    await ref.read(selectedTabSessionProvider).reload();
+    if (closeTabAfterClear) {
+      // Close the tab instead of reloading it into the just-cleared state
+      final tabId = ref.read(selectedTabProvider);
+      if (tabId != null) {
+        await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
+      }
+    } else {
+      // Reload tab
+      await ref.read(selectedTabSessionProvider).reload();
+    }
   }
 }
 
