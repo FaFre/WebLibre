@@ -851,7 +851,8 @@
             "preferences": {
                 "network.http.referer.XOriginPolicy": {
                     "value": 2,
-                    "title": "Only send cross-origin referer if host matches"
+                    "title": "Only send cross-origin referer if host matches",
+                    "requireUserOptIn": true
                 },
                 "network.http.referer.XOriginTrimmingPolicy": {
                     "value": 2,
