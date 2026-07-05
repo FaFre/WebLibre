@@ -320,6 +320,17 @@ class _BangChipsList extends HookConsumerWidget {
     ref
         .read(selectedBangTriggerProvider(domain: domain).notifier)
         .setTrigger(bang.toKey());
+
+    // Highlight the full query so the user can immediately type over it to
+    // replace the search term, or run it against the newly selected provider
+    // as-is. Skipped when the text was cleared above (URL case).
+    final text = searchTextController.text;
+    if (text.isNotEmpty) {
+      searchTextController.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: text.length,
+      );
+    }
   }
 
   Future<void> _handleDeletion(
