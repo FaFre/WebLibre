@@ -1927,6 +1927,15 @@ abstract class GeckoContainerProxyApi {
   void removeContainerProxyRelation(String contextId, String proxyId);
   void setSiteAssignments(Map<String, String> assignments);
 
+  /// Strict-mode enforcement map. Keys are Gecko cookie-store contexts to
+  /// enforce (a strict container's base context plus its isolated tabs'
+  /// isolation contexts); each value contains the container base contexts that
+  /// site assignments are keyed on. Tabs in these contexts may only load
+  /// origins assigned to one of the mapped base contexts (exact match, no proxy
+  /// equivalence); any other top-level navigation is cancelled and reported
+  /// back with `strict = true`.
+  void setStrictContexts(Map<String, List<String>> contexts);
+
   @async
   bool healthcheck();
 }
@@ -1985,12 +1994,19 @@ class ContainerSiteAssignment {
   final String url;
   final bool blocked;
 
+  /// True when the navigation was cancelled because the tab's container is in
+  /// strict mode and the target origin is not assigned to it (as opposed to an
+  /// ordinary re-open-in-assigned-container block). Strict blocks have no
+  /// destination container; the app just surfaces a message.
+  final bool strict;
+
   ContainerSiteAssignment({
     required this.requestId,
     required this.tabId,
     required this.originUrl,
     required this.url,
     required this.blocked,
+    required this.strict,
   });
 }
 

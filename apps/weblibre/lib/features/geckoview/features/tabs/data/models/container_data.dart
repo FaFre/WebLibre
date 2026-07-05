@@ -73,6 +73,16 @@ class ContainerMetadata with FastEquatable {
 
   final List<Uri>? assignedSites;
 
+  // When true, tabs in this container may only load origins listed in
+  // [assignedSites]; any other top-level navigation is blocked. Read on the
+  // native side via `json_extract(metadata, '$.strictMode')` (see the
+  // `strictContextAssignments` query in definitions.drift) and pushed to the
+  // container-proxy web extension. Requires a Gecko contextId — the extension
+  // keys strictness on the tab's cookieStoreId — so it is normalized to false
+  // when [contextualIdentity] is null (mirrors [excludeFromHistory]).
+  @JsonKey(defaultValue: false)
+  final bool strictMode;
+
   ContainerMetadata({
     required this.iconData,
     required this.contextualIdentity,
@@ -83,6 +93,7 @@ class ContainerMetadata with FastEquatable {
     required this.bypassGlobalProxy,
     required this.useCustomColor,
     required this.assignedSites,
+    required this.strictMode,
   });
 
   ContainerMetadata.withDefaults({
@@ -95,6 +106,7 @@ class ContainerMetadata with FastEquatable {
     bool? bypassGlobalProxy,
     bool? useCustomColor,
     List<Uri>? assignedSites,
+    bool? strictMode,
   }) : this(
          iconData: iconData,
          contextualIdentity: contextualIdentity,
@@ -112,6 +124,10 @@ class ContainerMetadata with FastEquatable {
          bypassGlobalProxy: bypassGlobalProxy ?? false,
          useCustomColor: useCustomColor ?? false,
          assignedSites: assignedSites,
+         // Strict mode needs a contextId (the extension keys on cookieStoreId);
+         // normalize away the invalid combination on read, and writers re-apply
+         // it via [sanitized].
+         strictMode: (strictMode ?? false) && contextualIdentity != null,
        );
 
   /// Enforce the [excludeFromHistory] invariant before persistence: it can only
@@ -120,10 +136,16 @@ class ContainerMetadata with FastEquatable {
   /// The primary constructor can't normalize (copy_with_extension_gen requires
   /// params to map 1:1 to fields), so writers route through this.
   ContainerMetadata sanitized() {
-    if (excludeFromHistory && contextualIdentity == null) {
-      return copyWith(excludeFromHistory: false);
+    var result = this;
+    if (result.excludeFromHistory && result.contextualIdentity == null) {
+      result = result.copyWith(excludeFromHistory: false);
     }
-    return this;
+    // Strict mode is meaningless without a contextId: the extension keys
+    // strictness on the tab's cookieStoreId.
+    if (result.strictMode && result.contextualIdentity == null) {
+      result = result.copyWith(strictMode: false);
+    }
+    return result;
   }
 
   bool get usesTorProxy => proxyConnectionId is TorProxyConnectionId;
@@ -144,6 +166,7 @@ class ContainerMetadata with FastEquatable {
     bypassGlobalProxy,
     useCustomColor,
     assignedSites,
+    strictMode,
   ];
 }
 

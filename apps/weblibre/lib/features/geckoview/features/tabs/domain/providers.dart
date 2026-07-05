@@ -190,6 +190,33 @@ Stream<List<SiteAssignment>> watchAllAssignedSites(Ref ref) {
   return db.containerDao.allAssignedSites().watch();
 }
 
+/// Strict-mode enforcement map: each Gecko cookie-store context that must be
+/// enforced (a strict container's base context, plus the isolation contexts of
+/// its isolated tabs) mapped to the base contextualIdentities its site
+/// assignments are keyed on. Replicated to the container-proxy extension by
+/// ProxySettingsReplication.
+@Riverpod(keepAlive: true)
+Stream<Map<String, List<String>>> watchStrictContextAssignments(Ref ref) {
+  final db = ref.watch(tabDatabaseProvider);
+  return db.containerDao.strictContextAssignments().watch().map((rows) {
+    final assignments = <String, Set<String>>{};
+    for (final row in rows) {
+      final contextId = row.contextId;
+      final assignmentContextId = row.assignmentContextId;
+      if (contextId == null || assignmentContextId == null) continue;
+
+      assignments
+          .putIfAbsent(contextId, () => <String>{})
+          .add(assignmentContextId);
+    }
+
+    return {
+      for (final entry in assignments.entries)
+        entry.key: entry.value.toList()..sort(),
+    };
+  });
+}
+
 /// Watches distinct (isolationContextId, containerId) pairs for isolated tabs
 /// assigned to containers. Used by ProxySettingsReplication to manage proxy
 /// aliases for isolated contexts.

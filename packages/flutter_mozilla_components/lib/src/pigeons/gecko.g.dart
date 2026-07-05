@@ -4928,6 +4928,7 @@ class ContainerSiteAssignment {
     this.originUrl,
     required this.url,
     required this.blocked,
+    required this.strict,
   });
 
   String requestId;
@@ -4940,6 +4941,12 @@ class ContainerSiteAssignment {
 
   bool blocked;
 
+  /// True when the navigation was cancelled because the tab's container is in
+  /// strict mode and the target origin is not assigned to it (as opposed to an
+  /// ordinary re-open-in-assigned-container block). Strict blocks have no
+  /// destination container; the app just surfaces a message.
+  bool strict;
+
   List<Object?> _toList() {
     return <Object?>[
       requestId,
@@ -4947,6 +4954,7 @@ class ContainerSiteAssignment {
       originUrl,
       url,
       blocked,
+      strict,
     ];
   }
 
@@ -4961,6 +4969,7 @@ class ContainerSiteAssignment {
       originUrl: result[2] as String?,
       url: result[3]! as String,
       blocked: result[4]! as bool,
+      strict: result[5]! as bool,
     );
   }
 
@@ -4973,7 +4982,7 @@ class ContainerSiteAssignment {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(requestId, other.requestId) && _deepEquals(tabId, other.tabId) && _deepEquals(originUrl, other.originUrl) && _deepEquals(url, other.url) && _deepEquals(blocked, other.blocked);
+    return _deepEquals(requestId, other.requestId) && _deepEquals(tabId, other.tabId) && _deepEquals(originUrl, other.originUrl) && _deepEquals(url, other.url) && _deepEquals(blocked, other.blocked) && _deepEquals(strict, other.strict);
   }
 
   @override
@@ -8624,6 +8633,31 @@ class GeckoContainerProxyApi {
       binaryMessenger: pigeonVar_binaryMessenger,
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[assignments]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  /// Strict-mode enforcement map. Keys are Gecko cookie-store contexts to
+  /// enforce (a strict container's base context plus its isolated tabs'
+  /// isolation contexts); each value contains the container base contexts that
+  /// site assignments are keyed on. Tabs in these contexts may only load
+  /// origins assigned to one of the mapped base contexts (exact match, no proxy
+  /// equivalence); any other top-level navigation is cancelled and reported
+  /// back with `strict = true`.
+  Future<void> setStrictContexts(Map<String, List<String>> contexts) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.setStrictContexts$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[contexts]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(

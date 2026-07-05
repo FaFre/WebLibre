@@ -25,6 +25,8 @@ abstract class _$ContainerMetadataCWProxy {
 
   ContainerMetadata assignedSites(List<Uri>? assignedSites);
 
+  ContainerMetadata strictMode(bool strictMode);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContainerMetadata(...).copyWith.fieldName(value)`.
   ///
@@ -42,6 +44,7 @@ abstract class _$ContainerMetadataCWProxy {
     bool bypassGlobalProxy,
     bool useCustomColor,
     List<Uri>? assignedSites,
+    bool strictMode,
   });
 }
 
@@ -88,6 +91,9 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
       call(assignedSites: assignedSites);
 
   @override
+  ContainerMetadata strictMode(bool strictMode) => call(strictMode: strictMode);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContainerMetadata(...).copyWith.fieldName(value)`.
   ///
@@ -105,6 +111,7 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
     Object? bypassGlobalProxy = const $CopyWithPlaceholder(),
     Object? useCustomColor = const $CopyWithPlaceholder(),
     Object? assignedSites = const $CopyWithPlaceholder(),
+    Object? strictMode = const $CopyWithPlaceholder(),
   }) {
     return ContainerMetadata(
       iconData: iconData == const $CopyWithPlaceholder()
@@ -153,6 +160,11 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
           ? _value.assignedSites
           // ignore: cast_nullable_to_non_nullable
           : assignedSites as List<Uri>?,
+      strictMode:
+          strictMode == const $CopyWithPlaceholder() || strictMode == null
+          ? _value.strictMode
+          // ignore: cast_nullable_to_non_nullable
+          : strictMode as bool,
     );
   }
 }
@@ -295,6 +307,7 @@ ContainerMetadata _$ContainerMetadataFromJson(Map<String, dynamic> json) =>
       assignedSites: (json['assignedSites'] as List<dynamic>?)
           ?.map((e) => Uri.parse(e as String))
           .toList(),
+      strictMode: json['strictMode'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$ContainerMetadataToJson(
@@ -312,6 +325,7 @@ Map<String, dynamic> _$ContainerMetadataToJson(
   'bypassGlobalProxy': instance.bypassGlobalProxy,
   'useCustomColor': instance.useCustomColor,
   'assignedSites': instance.assignedSites?.map((e) => e.toString()).toList(),
+  'strictMode': instance.strictMode,
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(

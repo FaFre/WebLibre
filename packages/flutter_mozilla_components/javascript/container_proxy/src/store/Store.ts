@@ -89,6 +89,39 @@ export class Store {
   private siteAssignments: Map<string, string> = new Map<string, string>()
   private wildcardAssignments: WildcardAssignment[] = []
 
+  // Maps an enforced cookie-store context (a strict container's base context,
+  // or an isolation context of one of its isolated tabs) to the base contexts
+  // its site assignments are keyed on.
+  private strictContexts: Map<string, Set<string>> = new Map<string, Set<string>>()
+
+  setStrictContexts(contexts: Map<string, string[]>): void {
+    const next = new Map<string, Set<string>>()
+    for (const [contextId, assignmentContexts] of contexts) {
+      next.set(contextId, new Set(assignmentContexts))
+    }
+    this.strictContexts = next
+  }
+
+  isContextStrict(contextId: string): boolean {
+    return this.strictContexts.has(contextId)
+  }
+
+  /**
+   * True when [uri]'s origin is assigned to a base context that [contextId]
+   * enforces. Strict mode requires an exact assignment match (via
+   * [lookupAssignment], which handles exact + wildcard entries) against the
+   * container's base contexts — proxy/direct equivalence is deliberately NOT
+   * consulted, so a site assigned only to a different (even proxy-equivalent)
+   * container does not load here.
+   */
+  isSiteOriginStrictlyAllowed(uri: URL, contextId: string): boolean {
+    const assignmentContexts = this.strictContexts.get(contextId)
+    const assignedContext = this.lookupAssignment(uri)
+    return assignedContext !== undefined &&
+      assignmentContexts !== undefined &&
+      assignmentContexts.has(assignedContext)
+  }
+
   setSiteAssignments(sites: Map<string, unknown>): void {
     const exact = new Map<string, string>()
     const wildcard: WildcardAssignment[] = []

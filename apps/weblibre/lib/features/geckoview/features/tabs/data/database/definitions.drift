@@ -969,6 +969,40 @@ containersToClearOnExit:
     json_extract(container.metadata, '$.clearDataOnExit') = 1
     AND container.metadata ->> '$.contextualIdentity' IS NOT NULL;
 
+-- Strict-mode enforcement map for the container-proxy extension. Each row maps
+-- a Gecko cookie-store context (`context_id`) that must be enforced to the
+-- container's base contextualIdentity (`assignment_context_id`) that its site
+-- assignments are keyed on. In strict mode a navigation is only allowed when
+-- the target origin is assigned to `assignment_context_id` exactly (no proxy
+-- equivalence).
+--
+-- Two sources, unioned:
+--   1. The strict container's own base context (context_id == assignment).
+--   2. Every isolation context in use by an isolated tab (tab_mode = 2) whose
+--      container is strict: those tabs load under `isolation_context_id` as
+--      their cookie store, but their assignments live on the container's base
+--      context, so they map isolation_context_id -> base context.
+-- Null contextualIdentity is excluded: strictness needs a Gecko contextId.
+strictContextAssignments:
+  SELECT
+    container.metadata ->> '$.contextualIdentity' AS context_id,
+    container.metadata ->> '$.contextualIdentity' AS assignment_context_id
+  FROM container
+  WHERE
+    json_extract(container.metadata, '$.strictMode') = 1
+    AND container.metadata ->> '$.contextualIdentity' IS NOT NULL
+  UNION
+  SELECT DISTINCT
+    t.isolation_context_id AS context_id,
+    c.metadata ->> '$.contextualIdentity' AS assignment_context_id
+  FROM tab t
+  INNER JOIN container c ON c.id = t.container_id
+  WHERE
+    t.tab_mode = 2
+    AND t.isolation_context_id IS NOT NULL
+    AND json_extract(c.metadata, '$.strictMode') = 1
+    AND c.metadata ->> '$.contextualIdentity' IS NOT NULL;
+
 tabsInIsolationGroup:
   SELECT COUNT(*) AS count FROM tab WHERE isolation_context_id = :contextId;
 

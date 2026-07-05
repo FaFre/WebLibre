@@ -289,6 +289,14 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
       }
     });
 
+    ref.listen(watchStrictContextAssignmentsProvider, (previous, next) async {
+      if (next.hasValue) {
+        await ref
+            .read(containerProxyRepositoryProvider.notifier)
+            .setStrictContexts(next.requireValue);
+      }
+    });
+
     ref.listen(
       fireImmediately: true,
       watchIsolatedContextContainerMapProvider.select(

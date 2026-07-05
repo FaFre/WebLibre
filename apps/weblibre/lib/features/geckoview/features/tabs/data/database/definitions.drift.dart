@@ -6695,6 +6695,19 @@ class DefinitionsDrift extends i9.ModularAccessor {
     ).map((i0.QueryRow row) => row.readNullable<String>('contextual_identity'));
   }
 
+  i0.Selectable<StrictContextAssignmentsResult> strictContextAssignments() {
+    return customSelect(
+      'SELECT container.metadata ->> \'\$.contextualIdentity\' AS context_id, container.metadata ->> \'\$.contextualIdentity\' AS assignment_context_id FROM container WHERE json_extract(container.metadata, \'\$.strictMode\') = 1 AND container.metadata ->> \'\$.contextualIdentity\' IS NOT NULL UNION SELECT DISTINCT t.isolation_context_id AS context_id, c.metadata ->> \'\$.contextualIdentity\' AS assignment_context_id FROM tab AS t INNER JOIN container AS c ON c.id = t.container_id WHERE t.tab_mode = 2 AND t.isolation_context_id IS NOT NULL AND json_extract(c.metadata, \'\$.strictMode\') = 1 AND c.metadata ->> \'\$.contextualIdentity\' IS NOT NULL',
+      variables: [],
+      readsFrom: {container, tab},
+    ).map(
+      (i0.QueryRow row) => StrictContextAssignmentsResult(
+        contextId: row.readNullable<String>('context_id'),
+        assignmentContextId: row.readNullable<String>('assignment_context_id'),
+      ),
+    );
+  }
+
   i0.Selectable<int> tabsInIsolationGroup({String? contextId}) {
     return customSelect(
       'SELECT COUNT(*) AS count FROM tab WHERE isolation_context_id = ?1',
@@ -6787,6 +6800,12 @@ class ContainerIdsByContextualIdentitiesResult {
     required this.id,
     required this.contextualIdentity,
   });
+}
+
+class StrictContextAssignmentsResult {
+  final String? contextId;
+  final String? assignmentContextId;
+  StrictContextAssignmentsResult({this.contextId, this.assignmentContextId});
 }
 
 class IsolatedContextContainerPairsResult {

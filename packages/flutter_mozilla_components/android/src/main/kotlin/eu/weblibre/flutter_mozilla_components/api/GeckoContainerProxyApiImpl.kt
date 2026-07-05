@@ -72,6 +72,10 @@ class GeckoContainerProxyApiImpl : GeckoContainerProxyApi {
         ContainerProxyFeature.scheduleRequest("setSiteAssignments", JSONObject(assignments))
     }
 
+    override fun setStrictContexts(contexts: Map<String, List<String>>) {
+        ContainerProxyFeature.scheduleRequest("setStrictContexts", JSONObject(contexts))
+    }
+
     override fun healthcheck(callback: (Result<Boolean>) -> Unit) {
         ContainerProxyFeature.scheduleRequestWithResponse("healthcheck", Unit, object :
             ResultConsumer<JSONObject> {

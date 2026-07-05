@@ -1146,6 +1146,66 @@ final class WatchAllAssignedSitesProvider
 String _$watchAllAssignedSitesHash() =>
     r'5f658b5733ee20192eb86d3aeb79aa9678dafba8';
 
+/// Strict-mode enforcement map: each Gecko cookie-store context that must be
+/// enforced (a strict container's base context, plus the isolation contexts of
+/// its isolated tabs) mapped to the base contextualIdentities its site
+/// assignments are keyed on. Replicated to the container-proxy extension by
+/// ProxySettingsReplication.
+
+@ProviderFor(watchStrictContextAssignments)
+final watchStrictContextAssignmentsProvider =
+    WatchStrictContextAssignmentsProvider._();
+
+/// Strict-mode enforcement map: each Gecko cookie-store context that must be
+/// enforced (a strict container's base context, plus the isolation contexts of
+/// its isolated tabs) mapped to the base contextualIdentities its site
+/// assignments are keyed on. Replicated to the container-proxy extension by
+/// ProxySettingsReplication.
+
+final class WatchStrictContextAssignmentsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Map<String, List<String>>>,
+          Map<String, List<String>>,
+          Stream<Map<String, List<String>>>
+        >
+    with
+        $FutureModifier<Map<String, List<String>>>,
+        $StreamProvider<Map<String, List<String>>> {
+  /// Strict-mode enforcement map: each Gecko cookie-store context that must be
+  /// enforced (a strict container's base context, plus the isolation contexts of
+  /// its isolated tabs) mapped to the base contextualIdentities its site
+  /// assignments are keyed on. Replicated to the container-proxy extension by
+  /// ProxySettingsReplication.
+  WatchStrictContextAssignmentsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'watchStrictContextAssignmentsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchStrictContextAssignmentsHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<Map<String, List<String>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<Map<String, List<String>>> create(Ref ref) {
+    return watchStrictContextAssignments(ref);
+  }
+}
+
+String _$watchStrictContextAssignmentsHash() =>
+    r'01a92529a90baf955c96c35180a50ec21ff913a8';
+
 /// Watches distinct (isolationContextId, containerId) pairs for isolated tabs
 /// assigned to containers. Used by ProxySettingsReplication to manage proxy
 /// aliases for isolated contexts.

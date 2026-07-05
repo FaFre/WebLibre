@@ -108,6 +108,7 @@ class ContainerEditScreen extends HookConsumerWidget {
       initialContainer.metadata.bypassGlobalProxy,
     );
     final assignedSites = useState(initialContainer.metadata.assignedSites);
+    final strictMode = useState(initialContainer.metadata.strictMode);
     final isPinned = useState(initialContainer.isPinned);
 
     final textController = useTextEditingController(
@@ -141,6 +142,10 @@ class ContainerEditScreen extends HookConsumerWidget {
               bypassGlobalProxy.value,
           useCustomColor: useCustomColor.value,
           assignedSites: assignedSites.value,
+          // Strict mode requires a Gecko contextId (the extension keys
+          // strictness on the tab's cookieStoreId). sanitized() enforces the
+          // same invariant defensively on write.
+          strictMode: strictMode.value && contextualIdentity.value != null,
         ).sanitized(),
       );
     }
@@ -593,31 +598,54 @@ class ContainerEditScreen extends HookConsumerWidget {
                     margin: EdgeInsets.zero,
                     color: colorScheme.surfaceContainer,
                     clipBehavior: Clip.antiAlias,
-                    child: ListTile(
-                      leading: const Icon(Icons.web),
-                      title: const Text('Assigned Sites'),
-                      subtitle: assignedSiteCount > 0
-                          ? Text(
-                              '$assignedSiteCount ${assignedSiteCount == 1 ? 'rule' : 'rules'} configured',
-                            )
-                          : const Text(
-                              'Route matching origins into this container',
-                            ),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () async {
-                        final result = await showDialog<Set<Uri>>(
-                          context: context,
-                          builder: (context) => ContainerSitesScreen(
-                            initialSites: assignedSites.value?.toSet() ?? {},
-                          ),
-                        );
+                    child: Column(
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.web),
+                          title: const Text('Assigned Sites'),
+                          subtitle: assignedSiteCount > 0
+                              ? Text(
+                                  '$assignedSiteCount ${assignedSiteCount == 1 ? 'rule' : 'rules'} configured',
+                                )
+                              : const Text(
+                                  'Route matching origins into this container',
+                                ),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () async {
+                            final result = await showDialog<Set<Uri>>(
+                              context: context,
+                              builder: (context) => ContainerSitesScreen(
+                                initialSites:
+                                    assignedSites.value?.toSet() ?? {},
+                              ),
+                            );
 
-                        if (result == null || result.isEmpty) {
-                          assignedSites.value = null;
-                        } else {
-                          assignedSites.value = result.toList();
-                        }
-                      },
+                            if (result == null || result.isEmpty) {
+                              assignedSites.value = null;
+                            } else {
+                              assignedSites.value = result.toList();
+                            }
+                          },
+                        ),
+                        const Divider(height: 1, indent: 56),
+                        SwitchListTile.adaptive(
+                          value:
+                              contextualIdentity.value != null &&
+                              strictMode.value,
+                          title: const Text('Strict Mode'),
+                          subtitle: Text(
+                            contextualIdentity.value != null
+                                ? 'Only allow assigned sites to load; block everything else'
+                                : 'Requires cookie isolation to be enabled',
+                          ),
+                          secondary: const Icon(MdiIcons.shieldLockOutline),
+                          onChanged: (contextualIdentity.value != null)
+                              ? (value) {
+                                  strictMode.value = value;
+                                }
+                              : null,
+                        ),
+                      ],
                     ),
                   ),
                 ],

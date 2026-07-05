@@ -122,7 +122,8 @@ object ContainerProxyFeature {
                                             tabId = components.core.store.state.selectedTabId,
                                             originUrl = details.tryGetString("originUrl"),
                                             url = details.getString("url"),
-                                            blocked = details.getBoolean("blocked")
+                                            blocked = details.getBoolean("blocked"),
+                                            strict = details.optBoolean("strict", false)
                                         )
                                     ) { _ -> }
                                 }

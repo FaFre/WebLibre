@@ -18,7 +18,8 @@ interface Message {
     'clearContainerProxy' |
     'removeContainerProxyRelation' |
     'healthcheck' |
-    'setSiteAssignments';
+    'setSiteAssignments' |
+    'setStrictContexts';
     args: any;
 }
 
@@ -91,6 +92,10 @@ port.onMessage.addListener((raw: unknown): void => {
             const entries = new Map(Object.entries(message.args))
             console.log('set site assignments ' + JSON.stringify(message.args))
             store.setSiteAssignments(entries);
+            break
+        case "setStrictContexts":
+            console.log('set strict contexts ' + JSON.stringify(message.args))
+            store.setStrictContexts(new Map(Object.entries(message.args)) as Map<string, string[]>);
             break
         case "healthcheck":
             port.postMessage({

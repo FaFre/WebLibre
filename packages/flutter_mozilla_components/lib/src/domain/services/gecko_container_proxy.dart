@@ -55,6 +55,10 @@ class GeckoContainerProxyService {
     return _apiInstance.setSiteAssignments(assignments);
   }
 
+  Future<void> setStrictContexts(Map<String, List<String>> contexts) {
+    return _apiInstance.setStrictContexts(contexts);
+  }
+
   Future<bool> healthcheck() async {
     try {
       return await _apiInstance.healthcheck().timeout(

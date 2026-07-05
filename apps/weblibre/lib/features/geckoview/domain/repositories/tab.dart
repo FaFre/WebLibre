@@ -900,6 +900,14 @@ class TabRepository extends _$TabRepository {
 
     final containerSiteAssignementSub = eventSerivce.siteAssignementEvent.listen(
       (event) async {
+        // Strict-mode blocks have no destination container to re-open into; the
+        // navigation was already cancelled natively and the user is notified via
+        // a snackbar (see the strict-block listener in the app shell). Nothing
+        // to reconcile here.
+        if (event.strict) {
+          return;
+        }
+
         final tabId = event.tabId;
         if (tabId != null) {
           final tabState = ref.read(tabStatesProvider)[tabId];

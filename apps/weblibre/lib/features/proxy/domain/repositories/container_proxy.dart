@@ -119,6 +119,10 @@ class ContainerProxyRepository extends _$ContainerProxyRepository {
     );
   }
 
+  Future<void> setStrictContexts(Map<String, List<String>> contexts) {
+    return _runLocked(body: () => _service.setStrictContexts(contexts));
+  }
+
   /// Serialises [body] behind the service lock after the underlying Gecko
   /// proxy service reports healthy. Replaces the per-method boilerplate that
   /// each public mutator used to repeat.

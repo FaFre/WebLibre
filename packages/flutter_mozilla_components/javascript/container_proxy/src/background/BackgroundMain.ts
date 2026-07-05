@@ -149,19 +149,36 @@ export default class BackgroundMain {
     }
 
     const url = URL.parse(options.url);
-    if (url !== null && this.store.isSiteOriginAssigned(url)) {
-      let cookieStoreId: string
+    if (url === null) {
+      return {};
+    }
 
-      if (tab.cookieStoreId?.startsWith(containerIdentifier) === true) {
-        cookieStoreId = tab.cookieStoreId.substring(containerIdentifier.length)
-      } else if (tab.cookieStoreId === privateIdentifier) {
-        // Handle private tabs - use 'private' as identifier
-        cookieStoreId = 'private'
-      } else {
-        cookieStoreId = 'general'
-      }
+    let cookieStoreId: string
 
-      if (cookieStoreId == 'private' || this.store.isSiteOriginInSameContext(url, cookieStoreId)) {
+    if (tab.cookieStoreId?.startsWith(containerIdentifier) === true) {
+      cookieStoreId = tab.cookieStoreId.substring(containerIdentifier.length)
+    } else if (tab.cookieStoreId === privateIdentifier) {
+      // Handle private tabs - use 'private' as identifier
+      cookieStoreId = 'private'
+    } else {
+      cookieStoreId = 'general'
+    }
+
+    // Private tabs are never strict. For other tabs, strict enforcement is
+    // keyed on the tab's cookie-store context (base container context, or an
+    // isolation context of a strict container's isolated tab).
+    const isStrict = cookieStoreId !== 'private' &&
+      this.store.isContextStrict(cookieStoreId)
+
+    if (this.store.isSiteOriginAssigned(url)) {
+      // In a strict context the site must be assigned to *this* container's own
+      // base context (exact match, no proxy equivalence). Non-strict contexts
+      // keep the looser proxy/direct-equivalence matching used for routing.
+      const allowed = isStrict
+        ? this.store.isSiteOriginStrictlyAllowed(url, cookieStoreId)
+        : (cookieStoreId == 'private' || this.store.isSiteOriginInSameContext(url, cookieStoreId))
+
+      if (allowed) {
         if (tab.highlighted) {
           port.postMessage({
             "type": "assignedSiteRequested",
@@ -171,7 +188,8 @@ export default class BackgroundMain {
               "originUrl": options.originUrl,
               "url": options.url,
               "tabId": options.tabId,
-              "blocked": false
+              "blocked": false,
+              "strict": false
             }
           });
         }
@@ -180,6 +198,9 @@ export default class BackgroundMain {
         // even if the tab is not highlighted.
         return {};
       } else {
+        // Assigned to a different container: cancel here and let the app re-open
+        // it in its assigned container. This applies to strict contexts too —
+        // the site still doesn't load here, it just routes to where it belongs.
         //Only send events when tab is selected
         if (tab.highlighted) {
           port.postMessage({
@@ -190,7 +211,8 @@ export default class BackgroundMain {
               "originUrl": options.originUrl,
               "url": options.url,
               "tabId": options.tabId,
-              "blocked": true
+              "blocked": true,
+              "strict": false
             }
           });
         }
@@ -199,6 +221,28 @@ export default class BackgroundMain {
           cancel: true,
         };
       }
+    } else if (isStrict) {
+      // Strict mode: this container may only load origins assigned to it. The
+      // origin is not assigned to any container, so cancel the navigation and
+      // report it as a strict block (no destination container).
+      if (tab.highlighted) {
+        port.postMessage({
+          "type": "assignedSiteRequested",
+          "id": options.requestId,
+          "status": "success",
+          "result": {
+            "originUrl": options.originUrl,
+            "url": options.url,
+            "tabId": options.tabId,
+            "blocked": true,
+            "strict": true
+          }
+        });
+      }
+
+      return {
+        cancel: true,
+      };
     }
 
     return {};

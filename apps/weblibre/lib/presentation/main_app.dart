@@ -103,7 +103,9 @@ class MainApp extends HookConsumerWidget {
               child: _SyncEventListener(
                 child: _SandboxCaptureErrorListener(
                   child: _DownloadStoppedListener(
-                    child: child ?? const SizedBox.shrink(),
+                    child: _StrictContainerBlockListener(
+                      child: child ?? const SizedBox.shrink(),
+                    ),
                   ),
                 ),
               ),
@@ -199,6 +201,42 @@ class _DownloadStoppedListener extends HookConsumerWidget {
           case null:
             break;
         }
+      },
+    );
+
+    return child;
+  }
+}
+
+/// Surfaces a snackbar when the container-proxy extension cancels a navigation
+/// because the active tab's container is in strict mode (only assigned sites
+/// may load). Strict blocks carry no destination container — the load was
+/// already cancelled natively — so this listener only notifies the user.
+class _StrictContainerBlockListener extends HookConsumerWidget {
+  final Widget child;
+
+  const _StrictContainerBlockListener({required this.child});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final siteAssignmentEvents = ref.watch(
+      eventServiceProvider.select((service) => service.siteAssignementEvent),
+    );
+
+    useOnStreamChange(
+      siteAssignmentEvents,
+      onData: (event) {
+        if (!event.strict) {
+          return;
+        }
+
+        final host = Uri.tryParse(event.url)?.host;
+        ui_helper.showInfoMessage(
+          context,
+          host != null && host.isNotEmpty
+              ? '$host is not assigned to this container'
+              : 'This site is not assigned to this container',
+        );
       },
     );
 

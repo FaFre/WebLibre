@@ -4658,7 +4658,14 @@ data class ContainerSiteAssignment (
   val tabId: String? = null,
   val originUrl: String? = null,
   val url: String,
-  val blocked: Boolean
+  val blocked: Boolean,
+  /**
+   * True when the navigation was cancelled because the tab's container is in
+   * strict mode and the target origin is not assigned to it (as opposed to an
+   * ordinary re-open-in-assigned-container block). Strict blocks have no
+   * destination container; the app just surfaces a message.
+   */
+  val strict: Boolean
 )
  {
   companion object {
@@ -4668,7 +4675,8 @@ data class ContainerSiteAssignment (
       val originUrl = pigeonVar_list[2] as String?
       val url = pigeonVar_list[3] as String
       val blocked = pigeonVar_list[4] as Boolean
-      return ContainerSiteAssignment(requestId, tabId, originUrl, url, blocked)
+      val strict = pigeonVar_list[5] as Boolean
+      return ContainerSiteAssignment(requestId, tabId, originUrl, url, blocked, strict)
     }
   }
   fun toList(): List<Any?> {
@@ -4678,6 +4686,7 @@ data class ContainerSiteAssignment (
       originUrl,
       url,
       blocked,
+      strict,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -4688,7 +4697,7 @@ data class ContainerSiteAssignment (
       return true
     }
     val other = other as ContainerSiteAssignment
-    return GeckoPigeonUtils.deepEquals(this.requestId, other.requestId) && GeckoPigeonUtils.deepEquals(this.tabId, other.tabId) && GeckoPigeonUtils.deepEquals(this.originUrl, other.originUrl) && GeckoPigeonUtils.deepEquals(this.url, other.url) && GeckoPigeonUtils.deepEquals(this.blocked, other.blocked)
+    return GeckoPigeonUtils.deepEquals(this.requestId, other.requestId) && GeckoPigeonUtils.deepEquals(this.tabId, other.tabId) && GeckoPigeonUtils.deepEquals(this.originUrl, other.originUrl) && GeckoPigeonUtils.deepEquals(this.url, other.url) && GeckoPigeonUtils.deepEquals(this.blocked, other.blocked) && GeckoPigeonUtils.deepEquals(this.strict, other.strict)
   }
 
   override fun hashCode(): Int {
@@ -4698,6 +4707,7 @@ data class ContainerSiteAssignment (
     result = 31 * result + GeckoPigeonUtils.deepHash(this.originUrl)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.url)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.blocked)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.strict)
     return result
   }
 }
@@ -8622,6 +8632,16 @@ interface GeckoContainerProxyApi {
   fun clearContainerProxy(contextId: String)
   fun removeContainerProxyRelation(contextId: String, proxyId: String)
   fun setSiteAssignments(assignments: Map<String, String>)
+  /**
+   * Strict-mode enforcement map. Keys are Gecko cookie-store contexts to
+   * enforce (a strict container's base context plus its isolated tabs'
+   * isolation contexts); each value contains the container base contexts that
+   * site assignments are keyed on. Tabs in these contexts may only load
+   * origins assigned to one of the mapped base contexts (exact match, no proxy
+   * equivalence); any other top-level navigation is cancelled and reported
+   * back with `strict = true`.
+   */
+  fun setStrictContexts(contexts: Map<String, List<String>>)
   fun healthcheck(callback: (Result<Boolean>) -> Unit)
 
   companion object {
@@ -8817,6 +8837,24 @@ interface GeckoContainerProxyApi {
         }
       }
       run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.setStrictContexts$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val contextsArg = args[0] as Map<String, List<String>>
+            val wrapped: List<Any?> = try {
+              api.setStrictContexts(contextsArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.healthcheck$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
@@ -8980,7 +9018,7 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
         }
       } else {
         callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
-      }
+      } 
     }
   }
   fun onEngineReadyStateChange(sequenceArg: Long, stateArg: Boolean, callback: (Result<Unit>) -> Unit)
@@ -10375,7 +10413,7 @@ class GeckoHistoryEvents(private val binaryMessenger: BinaryMessenger, private v
         }
       } else {
         callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
-      }
+      } 
     }
   }
 }

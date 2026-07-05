@@ -42,7 +42,7 @@ final class ContainerProxyRepositoryProvider
 }
 
 String _$containerProxyRepositoryHash() =>
-    r'9201bb0cdda570d38adc5fc16d1c7719f3d719a2';
+    r'9d9190edcb06eb1335318172183e354a66626f57';
 
 abstract class _$ContainerProxyRepository extends $Notifier<void> {
   void build();
