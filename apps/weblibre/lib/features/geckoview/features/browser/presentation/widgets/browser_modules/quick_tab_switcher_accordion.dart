@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:fast_equatable/fast_equatable.dart';
@@ -26,6 +27,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
@@ -351,6 +353,17 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
                       // container icon avatar + count badge only.
                       showTitle: !isVertical,
                       onSelected: () => selectContainer(entry.container?.id),
+                      // Long-pressing a real container header opens its settings,
+                      // matching the container chip in the tab view. The
+                      // unassigned pseudo-group has no settings to edit.
+                      onLongPress: switch (entry.container) {
+                        final container? => () async {
+                          await ContainerEditRoute(
+                            containerData: jsonEncode(container.toJson()),
+                          ).push(context);
+                        },
+                        null => null,
+                      },
                     ),
                     _AccordionTabEntry(:final item) => buildTabChip(item),
                   };
@@ -424,6 +437,10 @@ class _AccordionHeaderChip extends StatelessWidget {
   final _AccordionHeaderEntry entry;
   final VoidCallback onSelected;
 
+  /// Opens the container's settings; null for the unassigned pseudo-group,
+  /// which has no settings to edit.
+  final VoidCallback? onLongPress;
+
   /// When false (e.g. the narrow vertical rail) the container title is hidden
   /// and only the icon avatar + count badge are shown, so the chip fits.
   final bool showTitle;
@@ -431,6 +448,7 @@ class _AccordionHeaderChip extends StatelessWidget {
   const _AccordionHeaderChip({
     required this.entry,
     required this.onSelected,
+    this.onLongPress,
     this.showTitle = true,
   });
 
@@ -483,11 +501,25 @@ class _AccordionHeaderChip extends StatelessWidget {
       side: side,
     );
 
+    // FilterChip has no long-press of its own, so an outer InkWell claims the
+    // gesture without interfering with the tap-to-select FilterChip beneath.
+    Widget wrapLongPress(Widget chip) {
+      if (onLongPress == null) {
+        return chip;
+      }
+      return InkWell(
+        onLongPress: onLongPress,
+        borderRadius: BorderRadius.circular(8.0),
+        child: chip,
+      );
+    }
+
     if (!showTitle) {
       // Narrow rail: no room for the avatar slot + title + trailing badge side
       // by side (the badge gets clipped). Stack the container icon over the
       // count badge inside the label instead, dropping the avatar slot.
-      return FilterChip(
+      return wrapLongPress(
+        FilterChip(
         labelPadding: EdgeInsets.zero,
         label: Column(
           mainAxisSize: MainAxisSize.min,
@@ -509,10 +541,12 @@ class _AccordionHeaderChip extends StatelessWidget {
         },
         side: side,
         shape: shape,
+        ),
       );
     }
 
-    return FilterChip(
+    return wrapLongPress(
+      FilterChip(
       avatar: iconAvatar,
       label: container != null
           ? buildContainerChipLabel(
@@ -542,6 +576,7 @@ class _AccordionHeaderChip extends StatelessWidget {
       },
       side: side,
       shape: shape,
+      ),
     );
   }
 }
