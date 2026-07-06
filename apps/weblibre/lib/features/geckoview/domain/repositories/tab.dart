@@ -940,6 +940,23 @@ class TabRepository extends _$TabRepository {
                 return;
               }
 
+              // The tab is already in the target container, so there is nothing
+              // to reconcile. This notably fires when reassigning a tab into a
+              // container that shares the default Gecko context: assignContainer
+              // recreates the tab in the target container, and that new tab's
+              // load re-triggers this event. Without this guard the transiently
+              // empty new tab would be treated as an empty tab and churn yet
+              // another tab (re-prompting app-links).
+              final currentTabContainerId = await ref
+                  .read(tabDataRepositoryProvider.notifier)
+                  .getTabContainerId(currentTabState.id);
+              if (!ref.mounted) {
+                return;
+              }
+              if (currentTabContainerId == targetContainerId) {
+                return;
+              }
+
               final tabIsEmpty =
                   currentTabState.url == TabState.defaultUrl &&
                   currentTabState.historyState.items.isEmpty;
@@ -985,7 +1002,11 @@ class TabRepository extends _$TabRepository {
                   if (originUri == null) {
                     await ref
                         .read(tabDataRepositoryProvider.notifier)
-                        .assignContainer(latestTabState.id, containerData);
+                        .assignContainer(
+                          latestTabState.id,
+                          containerData,
+                          replacementUrl: uri,
+                        );
                   } else if (latestTabState.url == originUri) {
                     await ref
                         .read(tabDataRepositoryProvider.notifier)
@@ -993,6 +1014,7 @@ class TabRepository extends _$TabRepository {
                           latestTabState.id,
                           containerData,
                           closeOldTab: false,
+                          replacementUrl: uri,
                         );
                   } else {
                     logger.w(

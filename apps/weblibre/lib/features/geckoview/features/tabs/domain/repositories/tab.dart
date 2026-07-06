@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
@@ -37,6 +38,14 @@ class TabDataRepository extends _$TabDataRepository {
     String tabId,
     ContainerData targetContainer, {
     bool closeOldTab = true,
+    // When the reassignment is driven by a navigation to a site assigned to
+    // [targetContainer] (see the site-assignment listener), the recreated tab
+    // must load that requested URL rather than the tab's current URL. The
+    // current URL can be a stale origin page (e.g. the search result the link
+    // was opened from) when the assignment fires before the navigation
+    // commits. Left null for manual moves (drag/drop, menu), which keep the
+    // tab on its current page.
+    Uri? replacementUrl,
   }) async {
     final selectedTabId = ref.read(selectedTabProvider);
     final tabState = ref.read(tabStatesProvider)[tabId];
@@ -52,8 +61,20 @@ class TabDataRepository extends _$TabDataRepository {
 
     final currentContainerData = await getTabContainerData(tabId);
 
-    if (targetContainer.metadata.contextualIdentity ==
-        currentContainerData?.metadata.contextualIdentity) {
+    final sameContext =
+        targetContainer.metadata.contextualIdentity ==
+        currentContainerData?.metadata.contextualIdentity;
+
+    // A pure regrouping (no navigation) can stay in place when the Gecko
+    // context is unchanged — this is the manual-move case (drag/drop, menu),
+    // which passes no [replacementUrl] and keeps the tab on its current page.
+    //
+    // An assignment-driven move ([replacementUrl] set) must send the tab to the
+    // requested site. Reloading in place on the origin tab is unreliable after
+    // an app-link "open in app" cancel (the engine session is left in a state
+    // where the load never commits), so we recreate the tab in that case even
+    // when the context is unchanged. The fresh session loads the URL reliably.
+    if (sameContext && replacementUrl == null) {
       await ref
           .read(tabDatabaseProvider)
           .tabDao
@@ -67,13 +88,19 @@ class TabDataRepository extends _$TabDataRepository {
         await ref
             .read(tabRepositoryProvider.notifier)
             .addTab(
-              url: tabState.url,
+              url: replacementUrl ?? tabState.url,
               tabMode: tabState.tabMode,
               containerSelection: TabContainerSelection.specific(
                 targetContainer,
               ),
               // parentId defaults to null - breaks parent chain when changing contextual identity
               selectTab: selectedTabId == tabState.id,
+              // Assignment-driven navigation to an assigned site: bypass the
+              // app-links delegate so cancelling an "open in app" prompt does
+              // not re-trigger it on the recreated tab's load.
+              flags: replacementUrl != null
+                  ? LoadUrlFlags.LOAD_FLAGS_BYPASS_LOAD_URI_DELEGATE
+                  : LoadUrlFlags.NONE,
             );
       }
     }
