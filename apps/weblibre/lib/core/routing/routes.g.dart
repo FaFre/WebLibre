@@ -1675,6 +1675,11 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       factory: $ContextualToolbarSettingsRoute._fromState,
     ),
     GoRouteData.$route(
+      path: 'quick_switcher_toolbar',
+      name: 'QuickSwitcherToolbarSettingsRoute',
+      factory: $QuickSwitcherToolbarSettingsRoute._fromState,
+    ),
+    GoRouteData.$route(
       path: 'desktop_mode_sites',
       name: 'DesktopModeSitesRoute',
       factory: $DesktopModeSitesRoute._fromState,
@@ -2270,6 +2275,28 @@ mixin $ContextualToolbarSettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/contextual_toolbar');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $QuickSwitcherToolbarSettingsRoute on GoRouteData {
+  static QuickSwitcherToolbarSettingsRoute _fromState(GoRouterState state) =>
+      const QuickSwitcherToolbarSettingsRoute();
+
+  @override
+  String get location =>
+      GoRouteData.$location('/settings/quick_switcher_toolbar');
 
   @override
   void go(BuildContext context) => context.go(location);

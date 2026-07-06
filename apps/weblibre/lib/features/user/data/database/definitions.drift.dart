@@ -1123,6 +1123,208 @@ typedef $ToolbarButtonConfigsProcessedTableManager =
       i1.ToolbarButtonConfig,
       i0.PrefetchHooks Function()
     >;
+typedef $QuickSwitcherButtonConfigsCreateCompanionBuilder =
+    i1.QuickSwitcherButtonConfigsCompanion Function({
+      required String buttonId,
+      required String orderKey,
+      i0.Value<bool> isVisible,
+      i0.Value<String?> fallbackId,
+      i0.Value<int> rowid,
+    });
+typedef $QuickSwitcherButtonConfigsUpdateCompanionBuilder =
+    i1.QuickSwitcherButtonConfigsCompanion Function({
+      i0.Value<String> buttonId,
+      i0.Value<String> orderKey,
+      i0.Value<bool> isVisible,
+      i0.Value<String?> fallbackId,
+      i0.Value<int> rowid,
+    });
+
+class $QuickSwitcherButtonConfigsFilterComposer
+    extends i0.Composer<i0.GeneratedDatabase, i1.QuickSwitcherButtonConfigs> {
+  $QuickSwitcherButtonConfigsFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnFilters<String> get buttonId => $composableBuilder(
+    column: $table.buttonId,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<String> get orderKey => $composableBuilder(
+    column: $table.orderKey,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<bool> get isVisible => $composableBuilder(
+    column: $table.isVisible,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<String> get fallbackId => $composableBuilder(
+    column: $table.fallbackId,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+}
+
+class $QuickSwitcherButtonConfigsOrderingComposer
+    extends i0.Composer<i0.GeneratedDatabase, i1.QuickSwitcherButtonConfigs> {
+  $QuickSwitcherButtonConfigsOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnOrderings<String> get buttonId => $composableBuilder(
+    column: $table.buttonId,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<String> get orderKey => $composableBuilder(
+    column: $table.orderKey,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<bool> get isVisible => $composableBuilder(
+    column: $table.isVisible,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<String> get fallbackId => $composableBuilder(
+    column: $table.fallbackId,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+}
+
+class $QuickSwitcherButtonConfigsAnnotationComposer
+    extends i0.Composer<i0.GeneratedDatabase, i1.QuickSwitcherButtonConfigs> {
+  $QuickSwitcherButtonConfigsAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.GeneratedColumn<String> get buttonId =>
+      $composableBuilder(column: $table.buttonId, builder: (column) => column);
+
+  i0.GeneratedColumn<String> get orderKey =>
+      $composableBuilder(column: $table.orderKey, builder: (column) => column);
+
+  i0.GeneratedColumn<bool> get isVisible =>
+      $composableBuilder(column: $table.isVisible, builder: (column) => column);
+
+  i0.GeneratedColumn<String> get fallbackId => $composableBuilder(
+    column: $table.fallbackId,
+    builder: (column) => column,
+  );
+}
+
+class $QuickSwitcherButtonConfigsTableManager
+    extends
+        i0.RootTableManager<
+          i0.GeneratedDatabase,
+          i1.QuickSwitcherButtonConfigs,
+          i1.QuickSwitcherButtonConfig,
+          i1.$QuickSwitcherButtonConfigsFilterComposer,
+          i1.$QuickSwitcherButtonConfigsOrderingComposer,
+          i1.$QuickSwitcherButtonConfigsAnnotationComposer,
+          $QuickSwitcherButtonConfigsCreateCompanionBuilder,
+          $QuickSwitcherButtonConfigsUpdateCompanionBuilder,
+          (
+            i1.QuickSwitcherButtonConfig,
+            i0.BaseReferences<
+              i0.GeneratedDatabase,
+              i1.QuickSwitcherButtonConfigs,
+              i1.QuickSwitcherButtonConfig
+            >,
+          ),
+          i1.QuickSwitcherButtonConfig,
+          i0.PrefetchHooks Function()
+        > {
+  $QuickSwitcherButtonConfigsTableManager(
+    i0.GeneratedDatabase db,
+    i1.QuickSwitcherButtonConfigs table,
+  ) : super(
+        i0.TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              i1.$QuickSwitcherButtonConfigsFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              i1.$QuickSwitcherButtonConfigsOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              i1.$QuickSwitcherButtonConfigsAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                i0.Value<String> buttonId = const i0.Value.absent(),
+                i0.Value<String> orderKey = const i0.Value.absent(),
+                i0.Value<bool> isVisible = const i0.Value.absent(),
+                i0.Value<String?> fallbackId = const i0.Value.absent(),
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i1.QuickSwitcherButtonConfigsCompanion(
+                buttonId: buttonId,
+                orderKey: orderKey,
+                isVisible: isVisible,
+                fallbackId: fallbackId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String buttonId,
+                required String orderKey,
+                i0.Value<bool> isVisible = const i0.Value.absent(),
+                i0.Value<String?> fallbackId = const i0.Value.absent(),
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i1.QuickSwitcherButtonConfigsCompanion.insert(
+                buttonId: buttonId,
+                orderKey: orderKey,
+                isVisible: isVisible,
+                fallbackId: fallbackId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $QuickSwitcherButtonConfigsProcessedTableManager =
+    i0.ProcessedTableManager<
+      i0.GeneratedDatabase,
+      i1.QuickSwitcherButtonConfigs,
+      i1.QuickSwitcherButtonConfig,
+      i1.$QuickSwitcherButtonConfigsFilterComposer,
+      i1.$QuickSwitcherButtonConfigsOrderingComposer,
+      i1.$QuickSwitcherButtonConfigsAnnotationComposer,
+      $QuickSwitcherButtonConfigsCreateCompanionBuilder,
+      $QuickSwitcherButtonConfigsUpdateCompanionBuilder,
+      (
+        i1.QuickSwitcherButtonConfig,
+        i0.BaseReferences<
+          i0.GeneratedDatabase,
+          i1.QuickSwitcherButtonConfigs,
+          i1.QuickSwitcherButtonConfig
+        >,
+      ),
+      i1.QuickSwitcherButtonConfig,
+      i0.PrefetchHooks Function()
+    >;
 typedef $SearchTokensCreateCompanionBuilder =
     i1.SearchTokensCompanion Function({
       i0.Value<int> id,
@@ -2902,6 +3104,283 @@ i0.Index get idxToolbarOrderKey => i0.Index(
   'CREATE INDEX idx_toolbar_order_key ON toolbar_button_configs (order_key)',
 );
 
+class QuickSwitcherButtonConfigs extends i0.Table
+    with
+        i0.TableInfo<QuickSwitcherButtonConfigs, i1.QuickSwitcherButtonConfig> {
+  @override
+  final i0.GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  QuickSwitcherButtonConfigs(this.attachedDatabase, [this._alias]);
+  late final i0.GeneratedColumn<String> buttonId = i0.GeneratedColumn<String>(
+    'button_id',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL PRIMARY KEY',
+  );
+  late final i0.GeneratedColumn<String> orderKey = i0.GeneratedColumn<String>(
+    'order_key',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  late final i0.GeneratedColumn<bool> isVisible = i0.GeneratedColumn<bool>(
+    'is_visible',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.bool,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT FALSE',
+    defaultValue: const i0.CustomExpression('FALSE'),
+  );
+  late final i0.GeneratedColumn<String> fallbackId = i0.GeneratedColumn<String>(
+    'fallback_id',
+    aliasedName,
+    true,
+    type: i0.DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints:
+        'REFERENCES quick_switcher_button_configs(button_id)ON DELETE SET NULL',
+  );
+  @override
+  List<i0.GeneratedColumn> get $columns => [
+    buttonId,
+    orderKey,
+    isVisible,
+    fallbackId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'quick_switcher_button_configs';
+  @override
+  Set<i0.GeneratedColumn> get $primaryKey => {buttonId};
+  @override
+  i1.QuickSwitcherButtonConfig map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return i1.QuickSwitcherButtonConfig(
+      buttonId: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}button_id'],
+      )!,
+      orderKey: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}order_key'],
+      )!,
+      isVisible: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.bool,
+        data['${effectivePrefix}is_visible'],
+      )!,
+      fallbackId: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}fallback_id'],
+      ),
+    );
+  }
+
+  @override
+  QuickSwitcherButtonConfigs createAlias(String alias) {
+    return QuickSwitcherButtonConfigs(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class QuickSwitcherButtonConfig extends i0.DataClass
+    implements i0.Insertable<i1.QuickSwitcherButtonConfig> {
+  final String buttonId;
+  final String orderKey;
+  final bool isVisible;
+  final String? fallbackId;
+  const QuickSwitcherButtonConfig({
+    required this.buttonId,
+    required this.orderKey,
+    required this.isVisible,
+    this.fallbackId,
+  });
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    map['button_id'] = i0.Variable<String>(buttonId);
+    map['order_key'] = i0.Variable<String>(orderKey);
+    map['is_visible'] = i0.Variable<bool>(isVisible);
+    if (!nullToAbsent || fallbackId != null) {
+      map['fallback_id'] = i0.Variable<String>(fallbackId);
+    }
+    return map;
+  }
+
+  factory QuickSwitcherButtonConfig.fromJson(
+    Map<String, dynamic> json, {
+    i0.ValueSerializer? serializer,
+  }) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return QuickSwitcherButtonConfig(
+      buttonId: serializer.fromJson<String>(json['button_id']),
+      orderKey: serializer.fromJson<String>(json['order_key']),
+      isVisible: serializer.fromJson<bool>(json['is_visible']),
+      fallbackId: serializer.fromJson<String?>(json['fallback_id']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({i0.ValueSerializer? serializer}) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'button_id': serializer.toJson<String>(buttonId),
+      'order_key': serializer.toJson<String>(orderKey),
+      'is_visible': serializer.toJson<bool>(isVisible),
+      'fallback_id': serializer.toJson<String?>(fallbackId),
+    };
+  }
+
+  i1.QuickSwitcherButtonConfig copyWith({
+    String? buttonId,
+    String? orderKey,
+    bool? isVisible,
+    i0.Value<String?> fallbackId = const i0.Value.absent(),
+  }) => i1.QuickSwitcherButtonConfig(
+    buttonId: buttonId ?? this.buttonId,
+    orderKey: orderKey ?? this.orderKey,
+    isVisible: isVisible ?? this.isVisible,
+    fallbackId: fallbackId.present ? fallbackId.value : this.fallbackId,
+  );
+  QuickSwitcherButtonConfig copyWithCompanion(
+    i1.QuickSwitcherButtonConfigsCompanion data,
+  ) {
+    return QuickSwitcherButtonConfig(
+      buttonId: data.buttonId.present ? data.buttonId.value : this.buttonId,
+      orderKey: data.orderKey.present ? data.orderKey.value : this.orderKey,
+      isVisible: data.isVisible.present ? data.isVisible.value : this.isVisible,
+      fallbackId: data.fallbackId.present
+          ? data.fallbackId.value
+          : this.fallbackId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuickSwitcherButtonConfig(')
+          ..write('buttonId: $buttonId, ')
+          ..write('orderKey: $orderKey, ')
+          ..write('isVisible: $isVisible, ')
+          ..write('fallbackId: $fallbackId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(buttonId, orderKey, isVisible, fallbackId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is i1.QuickSwitcherButtonConfig &&
+          other.buttonId == this.buttonId &&
+          other.orderKey == this.orderKey &&
+          other.isVisible == this.isVisible &&
+          other.fallbackId == this.fallbackId);
+}
+
+class QuickSwitcherButtonConfigsCompanion
+    extends i0.UpdateCompanion<i1.QuickSwitcherButtonConfig> {
+  final i0.Value<String> buttonId;
+  final i0.Value<String> orderKey;
+  final i0.Value<bool> isVisible;
+  final i0.Value<String?> fallbackId;
+  final i0.Value<int> rowid;
+  const QuickSwitcherButtonConfigsCompanion({
+    this.buttonId = const i0.Value.absent(),
+    this.orderKey = const i0.Value.absent(),
+    this.isVisible = const i0.Value.absent(),
+    this.fallbackId = const i0.Value.absent(),
+    this.rowid = const i0.Value.absent(),
+  });
+  QuickSwitcherButtonConfigsCompanion.insert({
+    required String buttonId,
+    required String orderKey,
+    this.isVisible = const i0.Value.absent(),
+    this.fallbackId = const i0.Value.absent(),
+    this.rowid = const i0.Value.absent(),
+  }) : buttonId = i0.Value(buttonId),
+       orderKey = i0.Value(orderKey);
+  static i0.Insertable<i1.QuickSwitcherButtonConfig> custom({
+    i0.Expression<String>? buttonId,
+    i0.Expression<String>? orderKey,
+    i0.Expression<bool>? isVisible,
+    i0.Expression<String>? fallbackId,
+    i0.Expression<int>? rowid,
+  }) {
+    return i0.RawValuesInsertable({
+      if (buttonId != null) 'button_id': buttonId,
+      if (orderKey != null) 'order_key': orderKey,
+      if (isVisible != null) 'is_visible': isVisible,
+      if (fallbackId != null) 'fallback_id': fallbackId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  i1.QuickSwitcherButtonConfigsCompanion copyWith({
+    i0.Value<String>? buttonId,
+    i0.Value<String>? orderKey,
+    i0.Value<bool>? isVisible,
+    i0.Value<String?>? fallbackId,
+    i0.Value<int>? rowid,
+  }) {
+    return i1.QuickSwitcherButtonConfigsCompanion(
+      buttonId: buttonId ?? this.buttonId,
+      orderKey: orderKey ?? this.orderKey,
+      isVisible: isVisible ?? this.isVisible,
+      fallbackId: fallbackId ?? this.fallbackId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    if (buttonId.present) {
+      map['button_id'] = i0.Variable<String>(buttonId.value);
+    }
+    if (orderKey.present) {
+      map['order_key'] = i0.Variable<String>(orderKey.value);
+    }
+    if (isVisible.present) {
+      map['is_visible'] = i0.Variable<bool>(isVisible.value);
+    }
+    if (fallbackId.present) {
+      map['fallback_id'] = i0.Variable<String>(fallbackId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = i0.Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuickSwitcherButtonConfigsCompanion(')
+          ..write('buttonId: $buttonId, ')
+          ..write('orderKey: $orderKey, ')
+          ..write('isVisible: $isVisible, ')
+          ..write('fallbackId: $fallbackId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+i0.Index get idxQuickSwitcherOrderKey => i0.Index(
+  'idx_quick_switcher_order_key',
+  'CREATE INDEX idx_quick_switcher_order_key ON quick_switcher_button_configs (order_key)',
+);
+
 class SearchTokens extends i0.Table
     with i0.TableInfo<SearchTokens, i1.SearchToken> {
   @override
@@ -3259,6 +3738,50 @@ class DefinitionsDrift extends i4.ModularAccessor {
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
+  i0.Selectable<String> quickSwitcherLeadingOrderKey({
+    required int bucket,
+    required bool isVisible,
+  }) {
+    return customSelect(
+      'SELECT lexo_rank_previous(?1, (SELECT order_key FROM quick_switcher_button_configs WHERE is_visible = ?2 ORDER BY order_key LIMIT 1)) AS _c0',
+      variables: [i0.Variable<int>(bucket), i0.Variable<bool>(isVisible)],
+      readsFrom: {quickSwitcherButtonConfigs},
+    ).map((i0.QueryRow row) => row.read<String>('_c0'));
+  }
+
+  i0.Selectable<String> quickSwitcherTrailingOrderKey({
+    required int bucket,
+    required bool isVisible,
+  }) {
+    return customSelect(
+      'SELECT lexo_rank_next(?1, (SELECT order_key FROM quick_switcher_button_configs WHERE is_visible = ?2 ORDER BY order_key DESC LIMIT 1)) AS _c0',
+      variables: [i0.Variable<int>(bucket), i0.Variable<bool>(isVisible)],
+      readsFrom: {quickSwitcherButtonConfigs},
+    ).map((i0.QueryRow row) => row.read<String>('_c0'));
+  }
+
+  i0.Selectable<String> quickSwitcherOrderKeyAfterButton({
+    required bool isVisible,
+    required String buttonId,
+  }) {
+    return customSelect(
+      'WITH ordered_table AS (SELECT button_id, order_key, LEAD(order_key)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS next_order_key FROM quick_switcher_button_configs WHERE is_visible = ?1) SELECT lexo_rank_reorder_after(order_key, next_order_key) AS _c0 FROM ordered_table WHERE button_id = ?2',
+      variables: [i0.Variable<bool>(isVisible), i0.Variable<String>(buttonId)],
+      readsFrom: {quickSwitcherButtonConfigs},
+    ).map((i0.QueryRow row) => row.read<String>('_c0'));
+  }
+
+  i0.Selectable<String> quickSwitcherOrderKeyBeforeButton({
+    required bool isVisible,
+    required String buttonId,
+  }) {
+    return customSelect(
+      'WITH ordered_table AS (SELECT button_id, order_key, LAG(order_key)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS prev_order_key FROM quick_switcher_button_configs WHERE is_visible = ?1) SELECT lexo_rank_reorder_before(order_key, prev_order_key) AS _c0 FROM ordered_table WHERE button_id = ?2',
+      variables: [i0.Variable<bool>(isVisible), i0.Variable<String>(buttonId)],
+      readsFrom: {quickSwitcherButtonConfigs},
+    ).map((i0.QueryRow row) => row.read<String>('_c0'));
+  }
+
   Future<int> evictCacheEntries({required int limit}) {
     return customUpdate(
       'DELETE FROM icon_cache WHERE "rowid" IN (SELECT "rowid" FROM icon_cache ORDER BY fetch_date DESC LIMIT -1 OFFSET ?1)',
@@ -3271,6 +3794,12 @@ class DefinitionsDrift extends i4.ModularAccessor {
   i1.ToolbarButtonConfigs get toolbarButtonConfigs => i4.ReadDatabaseContainer(
     attachedDatabase,
   ).resultSet<i1.ToolbarButtonConfigs>('toolbar_button_configs');
+  i1.QuickSwitcherButtonConfigs get quickSwitcherButtonConfigs =>
+      i4.ReadDatabaseContainer(
+        attachedDatabase,
+      ).resultSet<i1.QuickSwitcherButtonConfigs>(
+        'quick_switcher_button_configs',
+      );
   i1.IconCache get iconCache => i4.ReadDatabaseContainer(
     attachedDatabase,
   ).resultSet<i1.IconCache>('icon_cache');

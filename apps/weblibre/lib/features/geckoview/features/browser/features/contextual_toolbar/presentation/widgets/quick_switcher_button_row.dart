@@ -30,8 +30,23 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/models/contextual_toolbar_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/toolbar_button_registry.dart';
 
-class ContextualToolbar extends HookConsumerWidget {
-  const ContextualToolbar({
+/// The switcher bar's cross-axis extent (height when horizontal, width on the
+/// side rail). Mirrors `BrowserTabBar.quickTabSwitcherHeight`; kept as a local
+/// const to avoid a circular import with the bar widget that hosts this row.
+const double _switcherExtent = 48.0;
+
+/// Trailing fixed button cluster for the quick tab switcher bar. Reuses the
+/// contextual toolbar's button registry and resolution logic against the
+/// independently-persisted [ToolbarConfigLocation.quickSwitcher] configuration.
+///
+/// Pins to the trailing end of the bar while the tab chips keep the remaining
+/// scrollable space. Each button is scaled to fit the bar's cross-axis extent
+/// (reused [ToolbarButton]s are taller than the 48px bar), and the cluster
+/// scrolls along the bar axis so enabling many buttons can never overflow — the
+/// hosting bar additionally caps how much room the cluster may claim. Renders
+/// nothing when no buttons are enabled.
+class QuickSwitcherButtonRow extends HookConsumerWidget {
+  const QuickSwitcherButtonRow({
     super.key,
     required this.selectedTabId,
     required this.displayedSheet,
@@ -41,15 +56,16 @@ class ContextualToolbar extends HookConsumerWidget {
   final String? selectedTabId;
   final Sheet? displayedSheet;
 
-  /// Layout direction, forwarded to [ContextualToolbarView]. Vertical for the
-  /// side rail.
+  /// Layout direction of the switcher bar; vertical for the side rail.
   final Axis axis;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tabState = ref.watch(tabStateProvider(selectedTabId));
     final configs = ref.watch(
-      effectiveToolbarButtonConfigsProvider(ToolbarConfigLocation.contextual),
+      effectiveToolbarButtonConfigsProvider(
+        ToolbarConfigLocation.quickSwitcher,
+      ),
     );
 
     final scope = ContextualToolbarScope(
@@ -57,6 +73,7 @@ class ContextualToolbar extends HookConsumerWidget {
       displayedSheet: displayedSheet,
       tabState: tabState,
       isPreview: false,
+      location: ToolbarConfigLocation.quickSwitcher,
     );
 
     final resolvedButtons = useMemoized(
@@ -71,11 +88,39 @@ class ContextualToolbar extends HookConsumerWidget {
       [configs, scope],
     );
 
+    if (resolvedButtons.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final isVertical = axis == Axis.vertical;
+
     final buttons = resolvedButtons
         .map((button) => _buildButton(scope, context, ref, button))
         .toList();
 
-    return ContextualToolbarView(buttons: buttons, axis: axis);
+    // Bound each button to the bar's cross-axis extent and scale down (never
+    // clip) so a taller [ToolbarButton] can't overflow the switcher bar.
+    final fittedButtons = [
+      for (final button in buttons)
+        SizedBox(
+          height: isVertical ? null : _switcherExtent,
+          width: isVertical ? _switcherExtent : null,
+          child: FittedBox(fit: BoxFit.scaleDown, child: button),
+        ),
+    ];
+
+    // Scroll along the bar axis: the host caps the cluster's main-axis extent,
+    // and anything beyond that scrolls instead of stealing the chips' space.
+    return SizedBox(
+      height: isVertical ? null : _switcherExtent,
+      width: isVertical ? _switcherExtent : null,
+      child: SingleChildScrollView(
+        scrollDirection: axis,
+        child: isVertical
+            ? Column(mainAxisSize: MainAxisSize.min, children: fittedButtons)
+            : Row(mainAxisSize: MainAxisSize.min, children: fittedButtons),
+      ),
+    );
   }
 
   Widget _buildButton(
@@ -94,91 +139,5 @@ class ContextualToolbar extends HookConsumerWidget {
     }
 
     return Opacity(opacity: 0.38, child: IgnorePointer(child: child));
-  }
-}
-
-class ContextualToolbarView extends StatelessWidget {
-  const ContextualToolbarView({
-    super.key,
-    required this.buttons,
-    this.axis = Axis.horizontal,
-  });
-
-  final List<Widget> buttons;
-
-  /// Layout direction of the contextual button strip. Horizontal for the
-  /// top/bottom tab bar, vertical for the side rail.
-  final Axis axis;
-
-  static const _minButtonWidth = 48.0;
-
-  @override
-  Widget build(BuildContext context) {
-    if (buttons.isEmpty) return const SizedBox.shrink();
-
-    if (axis == Axis.vertical) {
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          // spaceEvenly needs a bounded height; in the rail the contextual
-          // strip usually sits in an intrinsic (unbounded) slot, so fall back
-          // to a min-sized fixed-height column there.
-          final fitsEvenly =
-              constraints.maxHeight.isFinite &&
-              constraints.maxHeight >= _minButtonWidth * buttons.length;
-
-          if (fitsEvenly) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: buttons,
-            );
-          }
-
-          // Let buttons size to their natural height instead of clamping them
-          // into fixed _minButtonWidth-tall slots: some buttons (e.g. the
-          // tab-count box, which carries its own ToolbarButton padding) are
-          // taller than that, and a short SizedBox + Center would clip them.
-          //
-          // UnconstrainedBox frees the horizontal axis so each button
-          // shrink-wraps its content instead of stretching to the rail width
-          // (the tab-count box's inner Center would otherwise fill it); the
-          // Column then centers each on the cross axis.
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final button in buttons)
-                UnconstrainedBox(constrainedAxis: Axis.vertical, child: button),
-            ],
-          );
-        },
-      );
-    }
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final fitsEvenly =
-            constraints.maxWidth >= _minButtonWidth * buttons.length;
-
-        if (fitsEvenly) {
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: buttons,
-          );
-        }
-
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: buttons
-                .map(
-                  (button) => SizedBox(
-                    width: _minButtonWidth,
-                    child: Center(child: button),
-                  ),
-                )
-                .toList(),
-          ),
-        );
-      },
-    );
   }
 }

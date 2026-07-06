@@ -21,25 +21,45 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/toolbar_button_config_repository.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_spec.dart';
-import 'package:weblibre/features/user/data/database/daos/toolbar_button_config.dart';
+import 'package:weblibre/features/user/data/database/daos/quick_switcher_button_config.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
-    show ToolbarButtonConfig;
+    show QuickSwitcherButtonConfig, ToolbarButtonConfig;
 import 'package:weblibre/features/user/data/providers.dart';
 
-part 'contextual_toolbar_config_repository.g.dart';
+part 'quick_switcher_toolbar_config_repository.g.dart';
 
-class ContextualToolbarConfigRepository
+/// Quick tab switcher counterpart to [ContextualToolbarConfigRepository]. Backed
+/// by the separate `quick_switcher_button_configs` table and mapping its row
+/// type to the shared [ToolbarButtonConfig] transport type.
+class QuickSwitcherToolbarConfigRepository
     implements ToolbarButtonConfigRepository {
-  ContextualToolbarConfigRepository(this._dao);
+  QuickSwitcherToolbarConfigRepository(this._dao);
 
-  final ToolbarButtonConfigDao _dao;
+  final QuickSwitcherButtonConfigDao _dao;
+
+  ToolbarButtonConfig _toShared(QuickSwitcherButtonConfig config) =>
+      ToolbarButtonConfig(
+        buttonId: config.buttonId,
+        orderKey: config.orderKey,
+        isVisible: config.isVisible,
+        fallbackId: config.fallbackId,
+      );
+
+  QuickSwitcherButtonConfig _fromShared(ToolbarButtonConfig config) =>
+      QuickSwitcherButtonConfig(
+        buttonId: config.buttonId,
+        orderKey: config.orderKey,
+        isVisible: config.isVisible,
+        fallbackId: config.fallbackId,
+      );
 
   @override
-  Stream<List<ToolbarButtonConfig>> watchAll() => _dao.watchAll();
+  Stream<List<ToolbarButtonConfig>> watchAll() =>
+      _dao.watchAll().map((rows) => rows.map(_toShared).toList());
 
   @override
   Future<void> replaceAll(List<ToolbarButtonConfig> configs) {
-    return _dao.replaceAll(configs);
+    return _dao.replaceAll(configs.map(_fromShared).toList());
   }
 
   @override
@@ -89,13 +109,15 @@ class ContextualToolbarConfigRepository
 
   @override
   Future<void> seedMissingDefaults() {
+    // The quick switcher cluster starts empty: every known button is seeded
+    // hidden with no fallback, so nothing renders until the user enables it.
     return _dao.seedMissing(
       toolbarButtonSpecs
           .map(
             (spec) => (
               buttonId: spec.id.name,
-              defaultVisible: spec.defaultVisible,
-              defaultFallback: spec.defaultFallback?.name,
+              defaultVisible: false,
+              defaultFallback: null,
             ),
           )
           .toList(),
@@ -104,8 +126,10 @@ class ContextualToolbarConfigRepository
 }
 
 @Riverpod(keepAlive: true)
-ContextualToolbarConfigRepository contextualToolbarConfigRepository(Ref ref) {
-  return ContextualToolbarConfigRepository(
-    ref.watch(userDatabaseProvider).toolbarButtonConfigDao,
+QuickSwitcherToolbarConfigRepository quickSwitcherToolbarConfigRepository(
+  Ref ref,
+) {
+  return QuickSwitcherToolbarConfigRepository(
+    ref.watch(userDatabaseProvider).quickSwitcherButtonConfigDao,
   );
 }

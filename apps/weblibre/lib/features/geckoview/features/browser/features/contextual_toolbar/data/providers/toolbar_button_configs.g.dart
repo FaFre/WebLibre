@@ -10,7 +10,7 @@ part of 'toolbar_button_configs.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(toolbarButtonConfigs)
-final toolbarButtonConfigsProvider = ToolbarButtonConfigsProvider._();
+final toolbarButtonConfigsProvider = ToolbarButtonConfigsFamily._();
 
 final class ToolbarButtonConfigsProvider
     extends
@@ -22,19 +22,26 @@ final class ToolbarButtonConfigsProvider
     with
         $FutureModifier<List<ToolbarButtonConfig>>,
         $StreamProvider<List<ToolbarButtonConfig>> {
-  ToolbarButtonConfigsProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'toolbarButtonConfigsProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  ToolbarButtonConfigsProvider._({
+    required ToolbarButtonConfigsFamily super.from,
+    required ToolbarConfigLocation super.argument,
+  }) : super(
+         retry: null,
+         name: r'toolbarButtonConfigsProvider',
+         isAutoDispose: false,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
   @override
   String debugGetCreateSourceHash() => _$toolbarButtonConfigsHash();
+
+  @override
+  String toString() {
+    return r'toolbarButtonConfigsProvider'
+        ''
+        '($argument)';
+  }
 
   @$internal
   @override
@@ -44,16 +51,49 @@ final class ToolbarButtonConfigsProvider
 
   @override
   Stream<List<ToolbarButtonConfig>> create(Ref ref) {
-    return toolbarButtonConfigs(ref);
+    final argument = this.argument as ToolbarConfigLocation;
+    return toolbarButtonConfigs(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ToolbarButtonConfigsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
   }
 }
 
 String _$toolbarButtonConfigsHash() =>
-    r'02f79c2087a3a5413fe879405c05f4a4d1eaffeb';
+    r'913d2c8ca3b8b3f39f2247cafac068dc26abc566';
+
+final class ToolbarButtonConfigsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          Stream<List<ToolbarButtonConfig>>,
+          ToolbarConfigLocation
+        > {
+  ToolbarButtonConfigsFamily._()
+    : super(
+        retry: null,
+        name: r'toolbarButtonConfigsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: false,
+      );
+
+  ToolbarButtonConfigsProvider call(ToolbarConfigLocation location) =>
+      ToolbarButtonConfigsProvider._(argument: location, from: this);
+
+  @override
+  String toString() => r'toolbarButtonConfigsProvider';
+}
 
 @ProviderFor(effectiveToolbarButtonConfigs)
 final effectiveToolbarButtonConfigsProvider =
-    EffectiveToolbarButtonConfigsProvider._();
+    EffectiveToolbarButtonConfigsFamily._();
 
 final class EffectiveToolbarButtonConfigsProvider
     extends
@@ -63,19 +103,26 @@ final class EffectiveToolbarButtonConfigsProvider
           EquatableValue<List<ToolbarButtonConfig>>
         >
     with $Provider<EquatableValue<List<ToolbarButtonConfig>>> {
-  EffectiveToolbarButtonConfigsProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'effectiveToolbarButtonConfigsProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  EffectiveToolbarButtonConfigsProvider._({
+    required EffectiveToolbarButtonConfigsFamily super.from,
+    required ToolbarConfigLocation super.argument,
+  }) : super(
+         retry: null,
+         name: r'effectiveToolbarButtonConfigsProvider',
+         isAutoDispose: false,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
   @override
   String debugGetCreateSourceHash() => _$effectiveToolbarButtonConfigsHash();
+
+  @override
+  String toString() {
+    return r'effectiveToolbarButtonConfigsProvider'
+        ''
+        '($argument)';
+  }
 
   @$internal
   @override
@@ -85,7 +132,8 @@ final class EffectiveToolbarButtonConfigsProvider
 
   @override
   EquatableValue<List<ToolbarButtonConfig>> create(Ref ref) {
-    return effectiveToolbarButtonConfigs(ref);
+    final argument = this.argument as ToolbarConfigLocation;
+    return effectiveToolbarButtonConfigs(ref, argument);
   }
 
   /// {@macro riverpod.override_with_value}
@@ -96,7 +144,40 @@ final class EffectiveToolbarButtonConfigsProvider
           $SyncValueProvider<EquatableValue<List<ToolbarButtonConfig>>>(value),
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is EffectiveToolbarButtonConfigsProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
 }
 
 String _$effectiveToolbarButtonConfigsHash() =>
-    r'dd876160f586c64237a42a29eb63cb119f962b02';
+    r'6cd77c8af6df8943db6778b5222bb6ae9fb40025';
+
+final class EffectiveToolbarButtonConfigsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          EquatableValue<List<ToolbarButtonConfig>>,
+          ToolbarConfigLocation
+        > {
+  EffectiveToolbarButtonConfigsFamily._()
+    : super(
+        retry: null,
+        name: r'effectiveToolbarButtonConfigsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: false,
+      );
+
+  EffectiveToolbarButtonConfigsProvider call(ToolbarConfigLocation location) =>
+      EffectiveToolbarButtonConfigsProvider._(argument: location, from: this);
+
+  @override
+  String toString() => r'effectiveToolbarButtonConfigsProvider';
+}

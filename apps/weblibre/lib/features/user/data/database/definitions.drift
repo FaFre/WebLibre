@@ -45,6 +45,18 @@ CREATE TABLE toolbar_button_configs (
 
 CREATE INDEX idx_toolbar_order_key ON toolbar_button_configs(order_key);
 
+-- Independently-configured button set for the quick tab switcher's trailing
+-- cluster. Same shape as toolbar_button_configs but a separate table so the two
+-- toolbars keep fully isolated ordering/visibility/fallbacks.
+CREATE TABLE quick_switcher_button_configs (
+  button_id   TEXT NOT NULL PRIMARY KEY,
+  order_key   TEXT NOT NULL,
+  is_visible  BOOLEAN NOT NULL DEFAULT FALSE,
+  fallback_id TEXT REFERENCES quick_switcher_button_configs(button_id) ON DELETE SET NULL
+);
+
+CREATE INDEX idx_quick_switcher_order_key ON quick_switcher_button_configs(order_key);
+
 CREATE TABLE search_tokens (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   token BLOB NOT NULL,
@@ -105,6 +117,58 @@ toolbarOrderKeyBeforeButton(:button_id AS TEXT, :is_visible AS BOOL):
       order_key,
       LAG(order_key) OVER (ORDER BY order_key) AS prev_order_key
     FROM toolbar_button_configs
+    WHERE is_visible = :is_visible
+  )
+  SELECT lexo_rank_reorder_before(order_key, prev_order_key)
+  FROM ordered_table
+  WHERE button_id = :button_id;
+
+-- Quick-switcher variants of the order-key helpers above, scoped to the
+-- quick_switcher_button_configs table (see the toolbar* queries for rationale).
+quickSwitcherLeadingOrderKey(:bucket AS INTEGER, :is_visible AS BOOL):
+  SELECT lexo_rank_previous(
+    :bucket,
+    (
+      SELECT order_key
+      FROM quick_switcher_button_configs
+      WHERE is_visible = :is_visible
+      ORDER BY order_key
+      LIMIT 1
+    )
+  );
+
+quickSwitcherTrailingOrderKey(:bucket AS INTEGER, :is_visible AS BOOL):
+  SELECT lexo_rank_next(
+    :bucket,
+    (
+      SELECT order_key
+      FROM quick_switcher_button_configs
+      WHERE is_visible = :is_visible
+      ORDER BY order_key DESC
+      LIMIT 1
+    )
+  );
+
+quickSwitcherOrderKeyAfterButton(:button_id AS TEXT, :is_visible AS BOOL):
+  WITH ordered_table AS (
+    SELECT
+      button_id,
+      order_key,
+      LEAD(order_key) OVER (ORDER BY order_key) AS next_order_key
+    FROM quick_switcher_button_configs
+    WHERE is_visible = :is_visible
+  )
+  SELECT lexo_rank_reorder_after(order_key, next_order_key)
+  FROM ordered_table
+  WHERE button_id = :button_id;
+
+quickSwitcherOrderKeyBeforeButton(:button_id AS TEXT, :is_visible AS BOOL):
+  WITH ordered_table AS (
+    SELECT
+      button_id,
+      order_key,
+      LAG(order_key) OVER (ORDER BY order_key) AS prev_order_key
+    FROM quick_switcher_button_configs
     WHERE is_visible = :is_visible
   )
   SELECT lexo_rank_reorder_before(order_key, prev_order_key)

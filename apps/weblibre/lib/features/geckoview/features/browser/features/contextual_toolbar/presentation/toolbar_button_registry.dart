@@ -37,6 +37,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/entities/fon
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_id.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_spec.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/models/contextual_toolbar_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_bar_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
@@ -85,12 +86,12 @@ class ToolbarButtonDefinition {
   });
 }
 
-/// Whether a reload button is currently configured visible in the contextual
+/// Whether a reload button is currently configured visible in [location]'s
 /// toolbar. Used to decide whether the back button should fall back to acting
 /// as a stop-loading control (see issue #351).
-bool _isReloadButtonVisible(WidgetRef ref) {
+bool _isReloadButtonVisible(WidgetRef ref, ToolbarConfigLocation location) {
   return ref
-      .read(effectiveToolbarButtonConfigsProvider)
+      .read(effectiveToolbarButtonConfigsProvider(location))
       .value
       .any(
         (config) =>
@@ -108,7 +109,8 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
       final isLoading = scope.tabState?.isLoading == true;
       // The back button only doubles as a stop-loading control when no
       // dedicated reload button is present to take over that role.
-      return canGoBack || (isLoading && !_isReloadButtonVisible(ref));
+      return canGoBack ||
+          (isLoading && !_isReloadButtonVisible(ref, scope.location));
     },
     longPressActions: ['History Menu (Previous pages)'],
     builder: (scope, context, ref) {
@@ -123,7 +125,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
       return NavigateBackButton(
         selectedTabId: scope.selectedTabId,
         isLoading: scope.tabState?.isLoading ?? false,
-        stopLoadingFallback: !_isReloadButtonVisible(ref),
+        stopLoadingFallback: !_isReloadButtonVisible(ref, scope.location),
       );
     },
   ),

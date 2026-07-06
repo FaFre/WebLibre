@@ -21,14 +21,17 @@
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:lexo_rank/lexo_rank.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/contextual_toolbar_config_repository.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/toolbar_button_config_repository.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_spec.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ToolbarButtonConfig;
 
 part 'toolbar_button_configs.g.dart';
 
-List<ToolbarButtonConfig> _buildDefaultToolbarButtonConfigs() {
+List<ToolbarButtonConfig> _buildDefaultToolbarButtonConfigs({
+  required bool allHidden,
+}) {
   String? lastKey;
 
   return toolbarButtonSpecs.map((spec) {
@@ -41,19 +44,38 @@ List<ToolbarButtonConfig> _buildDefaultToolbarButtonConfigs() {
     return ToolbarButtonConfig(
       buttonId: spec.id.name,
       orderKey: key,
-      isVisible: spec.defaultVisible,
-      fallbackId: spec.defaultFallback?.name,
+      isVisible: allHidden ? false : spec.defaultVisible,
+      fallbackId: allHidden ? null : spec.defaultFallback?.name,
     );
   }).toList();
 }
 
-final defaultToolbarButtonConfigs = EquatableValue(
-  _buildDefaultToolbarButtonConfigs(),
+final _contextualDefaultConfigs = EquatableValue(
+  _buildDefaultToolbarButtonConfigs(allHidden: false),
 );
 
+final _quickSwitcherDefaultConfigs = EquatableValue(
+  _buildDefaultToolbarButtonConfigs(allHidden: true),
+);
+
+/// Default configuration set for [location], used as the reset target and as the
+/// fallback while the persisted set is still loading. The quick switcher starts
+/// with every button hidden.
+EquatableValue<List<ToolbarButtonConfig>> defaultToolbarButtonConfigsFor(
+  ToolbarConfigLocation location,
+) {
+  return switch (location) {
+    ToolbarConfigLocation.contextual => _contextualDefaultConfigs,
+    ToolbarConfigLocation.quickSwitcher => _quickSwitcherDefaultConfigs,
+  };
+}
+
 @Riverpod(keepAlive: true)
-Stream<List<ToolbarButtonConfig>> toolbarButtonConfigs(Ref ref) async* {
-  final repository = ref.watch(contextualToolbarConfigRepositoryProvider);
+Stream<List<ToolbarButtonConfig>> toolbarButtonConfigs(
+  Ref ref,
+  ToolbarConfigLocation location,
+) async* {
+  final repository = ref.watch(toolbarConfigRepositoryProvider(location));
   await repository.seedMissingDefaults();
   yield* repository.watchAll();
 }
@@ -61,8 +83,9 @@ Stream<List<ToolbarButtonConfig>> toolbarButtonConfigs(Ref ref) async* {
 @Riverpod(keepAlive: true)
 EquatableValue<List<ToolbarButtonConfig>> effectiveToolbarButtonConfigs(
   Ref ref,
+  ToolbarConfigLocation location,
 ) {
-  final configsAsync = ref.watch(toolbarButtonConfigsProvider);
+  final configsAsync = ref.watch(toolbarButtonConfigsProvider(location));
 
   return configsAsync.when(
     data: (configs) {
@@ -71,12 +94,12 @@ EquatableValue<List<ToolbarButtonConfig>> effectiveToolbarButtonConfigs(
           .toList();
 
       if (filtered.isEmpty) {
-        return defaultToolbarButtonConfigs;
+        return defaultToolbarButtonConfigsFor(location);
       }
 
       return EquatableValue(filtered);
     },
-    loading: () => defaultToolbarButtonConfigs,
-    error: (_, _) => defaultToolbarButtonConfigs,
+    loading: () => defaultToolbarButtonConfigsFor(location),
+    error: (_, _) => defaultToolbarButtonConfigsFor(location),
   );
 }

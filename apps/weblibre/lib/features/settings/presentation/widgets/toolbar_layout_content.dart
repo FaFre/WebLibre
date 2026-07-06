@@ -93,6 +93,12 @@ const List<SettingsSectionDefinition> toolbarLayoutSettingsSections = [
         child: _TabBarStackingModeSection(),
       ),
       SettingsEntryDefinition(
+        title: 'Customize Switcher Buttons',
+        subtitle: 'Choose which action buttons appear at the end of the bar',
+        keywords: ['buttons', 'new tab', 'actions', 'trailing'],
+        child: _CustomizeQuickSwitcherButtonsTile(),
+      ),
+      SettingsEntryDefinition(
         title: 'Close Buttons on All Tabs',
         subtitle: 'Show a close button on every switcher chip',
         keywords: ['close', 'x button'],
@@ -323,6 +329,33 @@ class _CustomizeToolbarButtonsTile extends HookConsumerWidget {
       enabled: tabBarShowContextualBar,
       onTap: () async {
         await const ContextualToolbarSettingsRoute().push(context);
+      },
+    );
+  }
+}
+
+class _CustomizeQuickSwitcherButtonsTile extends HookConsumerWidget {
+  const _CustomizeQuickSwitcherButtonsTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final switcherEnabled = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.effectiveTabBarStackingMode() != TabBarStackingMode.disabled,
+      ),
+    );
+
+    return ListTile(
+      leading: const Icon(Icons.tune),
+      title: const Text('Customize Switcher Buttons'),
+      subtitle: const Text(
+        'Action buttons pinned at the end of the switcher bar (independent of '
+        'the contextual toolbar)',
+      ),
+      trailing: const Icon(Icons.chevron_right),
+      enabled: switcherEnabled,
+      onTap: () async {
+        await const QuickSwitcherToolbarSettingsRoute().push(context);
       },
     );
   }

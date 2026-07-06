@@ -36,8 +36,10 @@ import 'package:weblibre/features/geckoview/features/browser/domain/entities/she
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_id.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_bar_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/quick_switcher_button_row.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
@@ -188,7 +190,8 @@ class BrowserSideRail extends ConsumerWidget {
       quickTabSwitcherRowCount: quickTabSwitcherRowCount,
       isSmallWebMode: isSmallWebMode,
       enableGestures: true,
-      hideMainToolbarButtonsDuplicatedInContextualToolbar: showContextualToolbar,
+      hideMainToolbarButtonsDuplicatedInContextualToolbar:
+          showContextualToolbar,
     );
   }
 
@@ -303,7 +306,11 @@ class BrowserTabBar extends HookConsumerWidget {
     // Determine which buttons are actually visible in the contextual toolbar
     // so we only hide them from the main toolbar when they're genuinely present there.
     final contextualConfigs = ref
-        .watch(effectiveToolbarButtonConfigsProvider)
+        .watch(
+          effectiveToolbarButtonConfigsProvider(
+            ToolbarConfigLocation.contextual,
+          ),
+        )
         .value;
 
     final tabsCountInContextual =
@@ -449,55 +456,69 @@ class BrowserTabBar extends HookConsumerWidget {
         if (showMainToolbarNavigationButton)
           NavigationMenuButton(selectedTabId: selectedTabId),
       ],
-      quickTabSwitcher: switch (stackingMode) {
-        TabBarStackingMode.disabled => const SizedBox.shrink(),
-        TabBarStackingMode.lastUsedTabs => QuickTabSwitcher(
-          quickTabSwitcherMode: QuickTabSwitcherMode.lastUsedTabs,
-          axis: switcherAxis,
-        ),
-        TabBarStackingMode.containerTabs => QuickTabSwitcher(
-          quickTabSwitcherMode: QuickTabSwitcherMode.containerTabs,
-          axis: switcherAxis,
-        ),
-        TabBarStackingMode.accordion => AccordionQuickTabSwitcher(
-          axis: switcherAxis,
-        ),
-        // History fallback only on the MRU row, so empty-state history
-        // chips don't show twice. On the rail the two rows stack as two
-        // equal-height vertical lists.
-        TabBarStackingMode.twoLevel =>
-          isVertical
-              ? Column(
-                  children: [
-                    Expanded(
-                      child: QuickTabSwitcher(
+      quickTabSwitcher: _wrapQuickTabSwitcherWithButtonRow(
+        axis: switcherAxis,
+        // The button row lives on the switcher bar; when stacking is disabled
+        // the whole bar is hidden anyway, but skip building it for clarity.
+        buttonRow: stackingMode == TabBarStackingMode.disabled
+            ? null
+            : QuickSwitcherButtonRow(
+                selectedTabId: selectedTabId,
+                displayedSheet: displayedSheet,
+                axis: switcherAxis,
+              ),
+        child: switch (stackingMode) {
+          TabBarStackingMode.disabled => const SizedBox.shrink(),
+          TabBarStackingMode.lastUsedTabs => QuickTabSwitcher(
+            quickTabSwitcherMode: QuickTabSwitcherMode.lastUsedTabs,
+            axis: switcherAxis,
+          ),
+          TabBarStackingMode.containerTabs => QuickTabSwitcher(
+            quickTabSwitcherMode: QuickTabSwitcherMode.containerTabs,
+            axis: switcherAxis,
+          ),
+          TabBarStackingMode.accordion => AccordionQuickTabSwitcher(
+            axis: switcherAxis,
+          ),
+          // History fallback only on the MRU row, so empty-state history
+          // chips don't show twice. On the rail the two rows stack as two
+          // equal-height vertical lists.
+          TabBarStackingMode.twoLevel =>
+            isVertical
+                ? Column(
+                    children: [
+                      Expanded(
+                        child: QuickTabSwitcher(
+                          quickTabSwitcherMode:
+                              QuickTabSwitcherMode.containerTabs,
+                          enableHistoryFallback: false,
+                          axis: switcherAxis,
+                        ),
+                      ),
+                      Expanded(
+                        child: QuickTabSwitcher(
+                          quickTabSwitcherMode:
+                              QuickTabSwitcherMode.lastUsedTabs,
+                          axis: switcherAxis,
+                        ),
+                      ),
+                    ],
+                  )
+                : const Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      QuickTabSwitcher(
                         quickTabSwitcherMode:
                             QuickTabSwitcherMode.containerTabs,
                         enableHistoryFallback: false,
-                        axis: switcherAxis,
                       ),
-                    ),
-                    Expanded(
-                      child: QuickTabSwitcher(
+                      QuickTabSwitcher(
                         quickTabSwitcherMode: QuickTabSwitcherMode.lastUsedTabs,
-                        axis: switcherAxis,
                       ),
-                    ),
-                  ],
-                )
-              : const Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    QuickTabSwitcher(
-                      quickTabSwitcherMode: QuickTabSwitcherMode.containerTabs,
-                      enableHistoryFallback: false,
-                    ),
-                    QuickTabSwitcher(
-                      quickTabSwitcherMode: QuickTabSwitcherMode.lastUsedTabs,
-                    ),
-                  ],
-                ),
-      },
+                    ],
+                  ),
+        },
+      ),
       contextualToolbar: ContextualToolbar(
         selectedTabId: selectedTabId,
         displayedSheet: displayedSheet,
@@ -705,6 +726,58 @@ class BrowserTabBarView extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Pins [buttonRow] to the trailing end of the quick tab switcher bar (right of
+/// the horizontal bar / bottom of the side rail) while [child] (the scrollable
+/// chips) fills the remaining space. The cluster is capped to a fraction of the
+/// bar so it can never starve the chips; [QuickSwitcherButtonRow] scrolls any
+/// overflow beyond that cap. [buttonRow] collapses to nothing when no buttons
+/// are enabled, so the default state is unchanged.
+Widget _wrapQuickTabSwitcherWithButtonRow({
+  required Axis axis,
+  required Widget? buttonRow,
+  required Widget child,
+}) {
+  if (buttonRow == null) {
+    return child;
+  }
+
+  // Never let the button cluster take more than this share of the bar; the tab
+  // chips keep the rest.
+  const maxClusterFraction = 0.6;
+
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      if (axis == Axis.vertical) {
+        final maxExtent = constraints.maxHeight.isFinite
+            ? constraints.maxHeight * maxClusterFraction
+            : double.infinity;
+        return Column(
+          children: [
+            Expanded(child: child),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: maxExtent),
+              child: buttonRow,
+            ),
+          ],
+        );
+      }
+
+      final maxExtent = constraints.maxWidth.isFinite
+          ? constraints.maxWidth * maxClusterFraction
+          : double.infinity;
+      return Row(
+        children: [
+          Expanded(child: child),
+          ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxExtent),
+            child: buttonRow,
+          ),
+        ],
+      );
+    },
+  );
 }
 
 class QuickTabSwitcher extends HookConsumerWidget {
@@ -1043,7 +1116,9 @@ class QuickTabSwitcherView extends StatelessWidget {
       // collapse, since the toolbar height already accounts for both rows.
       // On the rail the cross-axis width is fixed and the (vertical) list
       // fills the available height.
-      return _isVertical ? const SizedBox(width: 48) : const SizedBox(height: 48);
+      return _isVertical
+          ? const SizedBox(width: 48)
+          : const SizedBox(height: 48);
     }
 
     return Padding(
