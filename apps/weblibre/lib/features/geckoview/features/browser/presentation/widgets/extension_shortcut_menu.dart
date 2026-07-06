@@ -46,7 +46,10 @@ class ExtensionShortcutMenu extends HookConsumerWidget {
       ).select((value) => value.values.toList()),
     );
     final unpinnedBrowserExtensions = browserExtensions
-        .where((extension) => !pinnedIds.contains(extension.extensionId))
+        .where(
+          (extension) =>
+              extension.enabled && !pinnedIds.contains(extension.extensionId),
+        )
         .toList();
 
     return MenuAnchor(
@@ -82,7 +85,10 @@ class ExtensionShortcutMenu extends HookConsumerWidget {
           child: const Text('Manage extensions'),
         ),
       ],
-      child: Visibility(visible: browserExtensions.isNotEmpty, child: child),
+      child: Visibility(
+        visible: browserExtensions.any((extension) => extension.enabled),
+        child: child,
+      ),
     );
   }
 }

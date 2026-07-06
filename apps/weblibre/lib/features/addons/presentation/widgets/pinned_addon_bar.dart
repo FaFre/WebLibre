@@ -45,7 +45,7 @@ class PinnedAddonBar extends ConsumerWidget {
     );
 
     final pinned = extensions
-        .where((e) => pinnedIds.contains(e.extensionId))
+        .where((e) => e.enabled && pinnedIds.contains(e.extensionId))
         .toList();
     if (pinned.isEmpty) return const SizedBox.shrink();
 

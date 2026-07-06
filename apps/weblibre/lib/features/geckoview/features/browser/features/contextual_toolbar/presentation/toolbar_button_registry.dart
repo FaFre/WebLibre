@@ -534,13 +534,11 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     label: 'Extensions',
     icon: MdiIcons.puzzle,
     longPressActions: ['Extensions Menu'],
-    isPrimaryAvailable: (scope, ref) => ref
-        .read(
-          webExtensionsStateProvider(
-            WebExtensionActionType.browser,
-          ).select((value) => value.values),
-        )
-        .isNotEmpty,
+    isPrimaryAvailable: (scope, ref) => ref.read(
+      webExtensionsStateProvider(
+        WebExtensionActionType.browser,
+      ).select((value) => value.values.any((extension) => extension.enabled)),
+    ),
     builder: (scope, context, ref) {
       if (scope.isPreview) {
         return IconButton(onPressed: () {}, icon: const Icon(MdiIcons.puzzle));
