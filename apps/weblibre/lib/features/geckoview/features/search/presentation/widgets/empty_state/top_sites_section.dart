@@ -132,7 +132,7 @@ class TopSitesSection extends HookConsumerWidget {
     final historyItems = topSites.where((s) => !s.isPersisted).toList();
 
     return SearchModuleSection(
-      title: 'Top Sites',
+      title: 'Shortcuts',
       moduleType: SearchModuleType.topSites,
       totalCount: topSites.length,
       previewLimit: _topSitesPreviewLimit,
@@ -152,7 +152,7 @@ class TopSitesSection extends HookConsumerWidget {
                 if (!wasEnabled && context.mounted) {
                   ui_helper.showInfoMessage(
                     context,
-                    'Drag and drop top sites to reorder',
+                    'Drag and drop shortcuts to reorder',
                   );
                 }
               },
@@ -325,7 +325,7 @@ class _ReorderableTopSitesGrid extends HookConsumerWidget {
                   if (context.mounted) {
                     ui_helper.showErrorMessage(
                       context,
-                      'Failed to reorder top site',
+                      'Failed to reorder shortcut',
                     );
                   }
                 } finally {
@@ -641,11 +641,11 @@ Future<void> _editItem(
 
     await repo.updateSite(id: id, title: result.title, url: result.url);
     if (context.mounted) {
-      ui_helper.showInfoMessage(context, 'Top site updated');
+      ui_helper.showInfoMessage(context, 'Shortcut updated');
     }
   } catch (e) {
     if (context.mounted) {
-      ui_helper.showErrorMessage(context, 'Failed to update top site');
+      ui_helper.showErrorMessage(context, 'Failed to update shortcut');
     }
   }
 }
@@ -680,7 +680,7 @@ Future<void> _removeItem(
     }
   } catch (e) {
     if (context.mounted) {
-      ui_helper.showErrorMessage(context, 'Failed to remove top site');
+      ui_helper.showErrorMessage(context, 'Failed to remove shortcut');
     }
   }
 }

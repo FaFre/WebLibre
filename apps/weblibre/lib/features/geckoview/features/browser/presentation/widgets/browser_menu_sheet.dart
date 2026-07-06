@@ -860,7 +860,7 @@ class _PinTopSiteTile extends HookConsumerWidget {
 
     return ListTile(
       leading: Icon(pinned ? MdiIcons.pinOff : MdiIcons.pin),
-      title: Text(pinned ? 'Unpin from Top Sites' : 'Pin to Top Sites'),
+      title: Text(pinned ? 'Unpin from Shortcuts' : 'Pin to Shortcuts'),
       onTap: () async {
         if (tabState == null || url == null) return;
         Navigator.pop(context);
@@ -870,19 +870,19 @@ class _PinTopSiteTile extends HookConsumerWidget {
                 .read(topSiteRepositoryProvider.notifier)
                 .unpinSiteByUrl(url);
             if (context.mounted) {
-              ui_helper.showInfoMessage(context, 'Unpinned from Top Sites');
+              ui_helper.showInfoMessage(context, 'Unpinned from Shortcuts');
             }
           } else {
             await ref
                 .read(topSiteRepositoryProvider.notifier)
                 .addPinnedSite(title: tabState.titleOrAuthority, url: url);
             if (context.mounted) {
-              ui_helper.showInfoMessage(context, 'Pinned to Top Sites');
+              ui_helper.showInfoMessage(context, 'Pinned to Shortcuts');
             }
           }
         } catch (e) {
           if (context.mounted) {
-            ui_helper.showErrorMessage(context, 'Failed to update Top Sites');
+            ui_helper.showErrorMessage(context, 'Failed to update Shortcuts');
           }
         }
       },
@@ -1051,7 +1051,7 @@ class _TabActionsCard extends HookConsumerWidget {
             leading: const Icon(Icons.more_horiz),
             title: const Text('More'),
             subtitle: const Text(
-              'Clone Tab, Export, Pin Top Site, Fetch Feeds',
+              'Clone Tab, Export, Pin Shortcut, Fetch Feeds',
             ),
             trailing: const Icon(Icons.expand_more),
             onTap: () => showMore.value = true,

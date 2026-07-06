@@ -76,7 +76,7 @@ enum SearchModuleType {
     combinedHistory => 'History',
     popularSites => 'Popular Sites',
     historyHighlights => 'History Highlights',
-    topSites => 'Top Sites',
+    topSites => 'Shortcuts',
     recentHistory => 'Recent History',
     recentArticles => 'Recent Articles',
     recentTabs => 'Recent Tabs',

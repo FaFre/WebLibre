@@ -67,7 +67,7 @@ class _EditTopSiteDialogState extends State<_EditTopSiteDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Edit Top Site'),
+      title: const Text('Edit Shortcut'),
       content: Form(
         key: _formKey,
         child: Column(
