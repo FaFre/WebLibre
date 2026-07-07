@@ -23,17 +23,35 @@ import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
+import 'package:weblibre/features/popular_sites/domain/repositories/popular_sites.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'engine_suggestions.g.dart';
 
 @Riverpod()
 class EngineSuggestions extends _$EngineSuggestions {
-  Future<String?> getAutocompleteSuggestion(String query) {
-    return ref
+  /// Inline ghost-text completion for the omnibar. Prefers the engine's own
+  /// autocomplete (history/top-domains); when that yields nothing, falls back
+  /// to a popular-domain prefix match from the bundled Tranco-derived
+  /// `sites.db` so typing "git" still completes to "github.com" without any
+  /// local history.
+  Future<String?> getAutocompleteSuggestion(String query) async {
+    final engineResult = await ref
         .read(engineSuggestionsServiceProvider)
         .getAutocompleteSuggestion(query)
         .then((result) => result?.text);
+
+    if (engineResult != null) {
+      return engineResult;
+    }
+
+    if (!ref.mounted) return null;
+
+    final popularSites = await ref
+        .read(popularSitesRepositoryProvider.notifier)
+        .searchByPrefix(query, limit: 1);
+
+    return popularSites.isEmpty ? null : popularSites.first.domain;
   }
 
   Future<void> addQuery(
