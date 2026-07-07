@@ -61,6 +61,14 @@ class TabDataRepository extends _$TabDataRepository {
 
     final currentContainerData = await getTabContainerData(tabId);
 
+    // The tab is already in the target container, so there is nothing to
+    // reconcile. This guards against churn when an async assignment races a
+    // move that already landed the tab in [targetContainer] (recreating it
+    // here would spawn a redundant tab and re-trigger its load).
+    if (currentContainerData?.id == targetContainer.id) {
+      return;
+    }
+
     final sameContext =
         targetContainer.metadata.contextualIdentity ==
         currentContainerData?.metadata.contextualIdentity;

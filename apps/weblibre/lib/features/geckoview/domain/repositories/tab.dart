@@ -984,43 +984,33 @@ class TabRepository extends _$TabRepository {
                   await selectTab(newTabId);
                 }
               } else {
-                final tabContainerId = await ref
-                    .read(tabDataRepositoryProvider.notifier)
-                    .getTabContainerId(currentTabState.id);
-
-                if (!ref.mounted) {
-                  return;
-                }
-
                 final latestTabState = ref.read(tabStatesProvider)[tabId];
                 if (latestTabState == null) {
                   logger.w('Could not get tab for assignement ${event.url}');
                   return;
                 }
 
-                if (targetContainerId != tabContainerId) {
-                  if (originUri == null) {
-                    await ref
-                        .read(tabDataRepositoryProvider.notifier)
-                        .assignContainer(
-                          latestTabState.id,
-                          containerData,
-                          replacementUrl: uri,
-                        );
-                  } else if (latestTabState.url == originUri) {
-                    await ref
-                        .read(tabDataRepositoryProvider.notifier)
-                        .assignContainer(
-                          latestTabState.id,
-                          containerData,
-                          closeOldTab: false,
-                          replacementUrl: uri,
-                        );
-                  } else {
-                    logger.w(
-                      'Could not match origin url for assignment ${latestTabState.url} to request ${event.originUrl}',
-                    );
-                  }
+                if (originUri == null) {
+                  await ref
+                      .read(tabDataRepositoryProvider.notifier)
+                      .assignContainer(
+                        latestTabState.id,
+                        containerData,
+                        replacementUrl: uri,
+                      );
+                } else if (latestTabState.url == originUri) {
+                  await ref
+                      .read(tabDataRepositoryProvider.notifier)
+                      .assignContainer(
+                        latestTabState.id,
+                        containerData,
+                        closeOldTab: false,
+                        replacementUrl: uri,
+                      );
+                } else {
+                  logger.w(
+                    'Could not match origin url for assignment ${latestTabState.url} to request ${event.originUrl}',
+                  );
                 }
               }
             }
