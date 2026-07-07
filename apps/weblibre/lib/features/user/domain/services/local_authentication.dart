@@ -46,6 +46,8 @@ class LocalAuthenticationService extends _$LocalAuthenticationService {
     }
 
     // Background mode cache stays valid until app background eviction.
+    // Startup mode cache is never evicted, so it stays valid for the whole
+    // process lifetime.
     return true;
   }
 

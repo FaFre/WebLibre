@@ -105,4 +105,5 @@ Map<String, dynamic> _$AuthSettingsToJson(AuthSettings instance) =>
 const _$AutoLockModeEnumMap = {
   AutoLockMode.background: 'background',
   AutoLockMode.timeout: 'timeout',
+  AutoLockMode.startup: 'startup',
 };

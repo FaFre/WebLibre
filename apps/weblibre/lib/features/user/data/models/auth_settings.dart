@@ -23,7 +23,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'auth_settings.g.dart';
 
-enum AutoLockMode { background, timeout }
+enum AutoLockMode { background, timeout, startup }
 
 @CopyWith()
 @JsonSerializable()
@@ -54,6 +54,10 @@ class AuthSettings with FastEquatable {
 
   AuthSettings withTimeoutLock(Duration value) {
     return copyWith(autoLockMode: AutoLockMode.timeout, timeout: value);
+  }
+
+  AuthSettings withStartupLock() {
+    return copyWith(autoLockMode: AutoLockMode.startup);
   }
 
   factory AuthSettings.fromJson(Map<String, dynamic> json) =>

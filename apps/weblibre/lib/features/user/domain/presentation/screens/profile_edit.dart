@@ -68,6 +68,7 @@ class ProfileEditScreen extends HookConsumerWidget {
           .authenticate(
             authKey: profileAccessAuthKey(profile!.id),
             localizedReason: 'Require authentication for profile',
+            settings: authSettings,
           );
 
       if (!authResult) {
@@ -221,6 +222,14 @@ class _AuthSection extends StatelessWidget {
                         value: AutoLockMode.timeout,
                         title: Text('Lock After Timeout'),
                         subtitle: Text('Lock after a period of inactivity'),
+                      ),
+                      RadioListTile.adaptive(
+                        value: AutoLockMode.startup,
+                        title: Text('Lock on Startup Only'),
+                        subtitle: Text(
+                          'Unlock once when the app starts; stay unlocked '
+                          'until the app is fully closed',
+                        ),
                       ),
                     ],
                   ),
