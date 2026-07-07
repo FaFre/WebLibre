@@ -141,6 +141,8 @@ abstract class _$GeneralSettingsCWProxy {
     Map<String, IntentSourcePolicy> externalAppIntentPolicies,
   );
 
+  GeneralSettings customTabsEnabled(bool customTabsEnabled);
+
   GeneralSettings enableLocalSearchIndex(bool enableLocalSearchIndex);
 
   GeneralSettings indexPrivateTabs(bool indexPrivateTabs);
@@ -220,6 +222,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool allowNonManifestPwaInstall,
     bool blockExternalAppsEnabled,
     Map<String, IntentSourcePolicy> externalAppIntentPolicies,
+    bool customTabsEnabled,
     bool enableLocalSearchIndex,
     bool indexPrivateTabs,
     bool acceptSuggestionOnSubmit,
@@ -484,6 +487,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   ) => call(externalAppIntentPolicies: externalAppIntentPolicies);
 
   @override
+  GeneralSettings customTabsEnabled(bool customTabsEnabled) =>
+      call(customTabsEnabled: customTabsEnabled);
+
+  @override
   GeneralSettings enableLocalSearchIndex(bool enableLocalSearchIndex) =>
       call(enableLocalSearchIndex: enableLocalSearchIndex);
 
@@ -578,6 +585,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? allowNonManifestPwaInstall = const $CopyWithPlaceholder(),
     Object? blockExternalAppsEnabled = const $CopyWithPlaceholder(),
     Object? externalAppIntentPolicies = const $CopyWithPlaceholder(),
+    Object? customTabsEnabled = const $CopyWithPlaceholder(),
     Object? enableLocalSearchIndex = const $CopyWithPlaceholder(),
     Object? indexPrivateTabs = const $CopyWithPlaceholder(),
     Object? acceptSuggestionOnSubmit = const $CopyWithPlaceholder(),
@@ -924,6 +932,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.externalAppIntentPolicies
           // ignore: cast_nullable_to_non_nullable
           : externalAppIntentPolicies as Map<String, IntentSourcePolicy>,
+      customTabsEnabled:
+          customTabsEnabled == const $CopyWithPlaceholder() ||
+              customTabsEnabled == null
+          ? _value.customTabsEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : customTabsEnabled as bool,
       enableLocalSearchIndex:
           enableLocalSearchIndex == const $CopyWithPlaceholder() ||
               enableLocalSearchIndex == null
@@ -1095,6 +1109,7 @@ GeneralSettings _$GeneralSettingsFromJson(
       (json['externalAppIntentPolicies'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, $enumDecode(_$IntentSourcePolicyEnumMap, e)),
       ),
+  customTabsEnabled: json['customTabsEnabled'] as bool?,
   enableLocalSearchIndex: json['enableLocalSearchIndex'] as bool?,
   indexPrivateTabs: json['indexPrivateTabs'] as bool?,
   acceptSuggestionOnSubmit: json['acceptSuggestionOnSubmit'] as bool?,
@@ -1180,6 +1195,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'externalAppIntentPolicies': instance.externalAppIntentPolicies.map(
     (k, e) => MapEntry(k, _$IntentSourcePolicyEnumMap[e]!),
   ),
+  'customTabsEnabled': instance.customTabsEnabled,
   'enableLocalSearchIndex': instance.enableLocalSearchIndex,
   'indexPrivateTabs': instance.indexPrivateTabs,
   'acceptSuggestionOnSubmit': instance.acceptSuggestionOnSubmit,

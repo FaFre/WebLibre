@@ -21,6 +21,7 @@ import java.util.UUID
 object IntentGatekeeperPreferences {
     const val PREFS_NAME = "weblibre_intent_gatekeeper"
     const val KEY_ENABLED = "enabled"
+    const val KEY_CUSTOM_TABS_ENABLED = "custom_tabs_enabled"
     const val KEY_BLOCKED_PACKAGES = "blocked_packages"
     const val KEY_PENDING_ALWAYS_ALLOW = "pending_always_allow"
     private const val KEY_NOTIFICATION_APPROVAL_TOKENS = "notification_approval_tokens"
@@ -31,6 +32,15 @@ object IntentGatekeeperPreferences {
 
     fun isEnabled(context: Context): Boolean =
         get(context).getBoolean(KEY_ENABLED, false)
+
+    /**
+     * Whether external Custom Tab (and share-with-URL) intents should be
+     * handled as lightweight custom-tab activities. When false,
+     * [IntentReceiverActivity] routes them to the main browser instead.
+     * Defaults to true so the feature is active until the user opts out.
+     */
+    fun isCustomTabsEnabled(context: Context): Boolean =
+        get(context).getBoolean(KEY_CUSTOM_TABS_ENABLED, true)
 
     fun isBlocked(context: Context, packageName: String): Boolean {
         val prefs = get(context)

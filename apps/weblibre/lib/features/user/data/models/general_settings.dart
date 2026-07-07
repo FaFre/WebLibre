@@ -196,6 +196,12 @@ class GeneralSettings with FastEquatable {
   final bool blockExternalAppsEnabled;
   final Map<String, IntentSourcePolicy> externalAppIntentPolicies;
 
+  /// Whether external Custom Tab intents (and URLs shared into WebLibre) open
+  /// in a lightweight custom-tab activity. When false, they open as normal
+  /// tabs in the main browser instead. Read natively by `IntentReceiverActivity`
+  /// via the intent gatekeeper prefs bridge. Defaults to true.
+  final bool customTabsEnabled;
+
   /// Whether the local search index (`history` table populated via tab→
   /// history triggers) is active. When false, the SQL trigger guard returns
   /// without writing; existing rows stay until the user clears them.
@@ -289,6 +295,7 @@ class GeneralSettings with FastEquatable {
     required this.allowNonManifestPwaInstall,
     required this.blockExternalAppsEnabled,
     required this.externalAppIntentPolicies,
+    required this.customTabsEnabled,
     required this.enableLocalSearchIndex,
     required this.indexPrivateTabs,
     required this.acceptSuggestionOnSubmit,
@@ -356,6 +363,7 @@ class GeneralSettings with FastEquatable {
     bool? allowNonManifestPwaInstall,
     bool? blockExternalAppsEnabled,
     Map<String, IntentSourcePolicy>? externalAppIntentPolicies,
+    bool? customTabsEnabled,
     bool? enableLocalSearchIndex,
     bool? indexPrivateTabs,
     bool? acceptSuggestionOnSubmit,
@@ -433,6 +441,7 @@ class GeneralSettings with FastEquatable {
        allowNonManifestPwaInstall = allowNonManifestPwaInstall ?? false,
        blockExternalAppsEnabled = blockExternalAppsEnabled ?? false,
        externalAppIntentPolicies = externalAppIntentPolicies ?? const {},
+       customTabsEnabled = customTabsEnabled ?? true,
        enableLocalSearchIndex = enableLocalSearchIndex ?? true,
        indexPrivateTabs = indexPrivateTabs ?? false,
        acceptSuggestionOnSubmit = acceptSuggestionOnSubmit ?? false,
@@ -574,6 +583,7 @@ class GeneralSettings with FastEquatable {
     allowNonManifestPwaInstall,
     blockExternalAppsEnabled,
     externalAppIntentPolicies,
+    customTabsEnabled,
     enableLocalSearchIndex,
     indexPrivateTabs,
     acceptSuggestionOnSubmit,

@@ -69,6 +69,12 @@ abstract class IntentGatekeeperHostApi {
   /// [IntentReceiverActivity] can reject intents without launching Flutter.
   void setConfig(bool enabled, List<String> blockedPackages);
 
+  /// Replicates whether the Custom Tabs feature is enabled to the native side.
+  /// When disabled, [IntentReceiverActivity] routes external Custom Tab and
+  /// share-with-URL intents to the main browser instead of launching the
+  /// stripped-down custom-tab activity. Defaults to enabled on the native side.
+  void setCustomTabsEnabled(bool enabled);
+
   /// Resolves a package name to its user-visible application label via
   /// [PackageManager]. Returns `null` if the package is not installed or the
   /// label cannot be resolved.

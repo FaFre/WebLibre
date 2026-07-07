@@ -301,6 +301,28 @@ class IntentGatekeeperHostApi {
     ;
   }
 
+  /// Replicates whether the Custom Tabs feature is enabled to the native side.
+  /// When disabled, [IntentReceiverActivity] routes external Custom Tab and
+  /// share-with-URL intents to the main browser instead of launching the
+  /// stripped-down custom-tab activity. Defaults to enabled on the native side.
+  Future<void> setCustomTabsEnabled(bool enabled) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.simple_intent_receiver.IntentGatekeeperHostApi.setCustomTabsEnabled$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[enabled]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
   /// Resolves a package name to its user-visible application label via
   /// [PackageManager]. Returns `null` if the package is not installed or the
   /// label cannot be resolved.

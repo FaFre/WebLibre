@@ -153,12 +153,14 @@ class IntentReceiverActivity : Activity() {
         // Flutter-side to handle (search, PDF display, etc.).
         if (intent.action == Intent.ACTION_SEND) {
             val shareUrl = extractShareUrl(intent)
-            if (shareUrl != null) {
+            if (shareUrl != null &&
+                IntentGatekeeperPreferences.isCustomTabsEnabled(applicationContext)
+            ) {
                 Log.d(TAG, "SHARE intent with URL, routing to custom tab: $shareUrl")
                 handleShareUrlAsCustomTab(intent, shareUrl, privateBrowsingMode)
                 return
             }
-            Log.d(TAG, "SHARE intent without URL, routing to MainActivity")
+            Log.d(TAG, "SHARE intent without URL (or custom tabs disabled), routing to MainActivity")
             handleRegularIntent(intent)
             return
         }
@@ -193,19 +195,30 @@ class IntentReceiverActivity : Activity() {
                 return
             }
 
-        val processors = listOf(
-            "CustomTab" to CustomTabIntentProcessor(
-                components.useCases.customTabsUseCases.add,
-                resources,
-                isPrivate = privateBrowsingMode,
-            ),
-            "PWA" to WebAppIntentProcessor(
-                components.core.store,
-                components.useCases.customTabsUseCases.addWebApp,
-                components.useCases.sessionUseCases.loadUrl,
-                components.core.webAppManifestStorage,
-            ),
-        )
+        // When the user disables the Custom Tabs feature, external Custom Tab
+        // intents are not handled here; they fall through to the main browser
+        // via handleRegularIntent(). PWA processing is unaffected.
+        val customTabsEnabled = IntentGatekeeperPreferences.isCustomTabsEnabled(applicationContext)
+
+        val processors = buildList {
+            if (customTabsEnabled) {
+                add(
+                    "CustomTab" to CustomTabIntentProcessor(
+                        components.useCases.customTabsUseCases.add,
+                        resources,
+                        isPrivate = privateBrowsingMode,
+                    ),
+                )
+            }
+            add(
+                "PWA" to WebAppIntentProcessor(
+                    components.core.store,
+                    components.useCases.customTabsUseCases.addWebApp,
+                    components.useCases.sessionUseCases.loadUrl,
+                    components.core.webAppManifestStorage,
+                ),
+            )
+        }
 
         for ((name, processor) in processors) {
             Log.d(TAG, "Trying $name processor...")

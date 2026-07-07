@@ -145,6 +145,20 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
         child: _ExternalLinkHandlingSection(),
       ),
       SettingsEntryDefinition(
+        title: 'Custom Tabs',
+        subtitle:
+            'Let other apps open links in a lightweight in-app tab, instead '
+            'of the main browser',
+        keywords: [
+          'custom tabs',
+          'in-app browser',
+          'chrome custom tabs',
+          'external app',
+          'share',
+        ],
+        child: _CustomTabsTile(),
+      ),
+      SettingsEntryDefinition(
         title: 'URL Cleaner',
         subtitle: 'Tracking removal rules and catalog updates',
         keywords: ['utm', 'tracking parameters'],
@@ -815,6 +829,35 @@ class _PullToRefreshTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.pullToRefreshEnabled(value),
+            );
+      },
+    );
+  }
+}
+
+class _CustomTabsTile extends HookConsumerWidget {
+  const _CustomTabsTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final customTabsEnabled = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.customTabsEnabled),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Custom Tabs'),
+      subtitle: const Text(
+        'Let other apps open links in a lightweight in-app tab. When off, '
+        'these links and shared URLs open as normal tabs in the main browser.',
+      ),
+      secondary: const Icon(Icons.web_asset),
+      value: customTabsEnabled,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.customTabsEnabled(value),
             );
       },
     );

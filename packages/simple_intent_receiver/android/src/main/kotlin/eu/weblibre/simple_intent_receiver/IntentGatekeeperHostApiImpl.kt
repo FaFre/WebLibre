@@ -23,6 +23,7 @@ class IntentGatekeeperHostApiImpl(private val context: Context) : IntentGatekeep
     companion object {
         private const val PREFS_NAME = "weblibre_intent_gatekeeper"
         private const val KEY_ENABLED = "enabled"
+        private const val KEY_CUSTOM_TABS_ENABLED = "custom_tabs_enabled"
         private const val KEY_BLOCKED_PACKAGES = "blocked_packages"
         private const val KEY_PENDING_ALWAYS_ALLOW = "pending_always_allow"
     }
@@ -32,6 +33,13 @@ class IntentGatekeeperHostApiImpl(private val context: Context) : IntentGatekeep
         prefs.edit()
             .putBoolean(KEY_ENABLED, enabled)
             .putStringSet(KEY_BLOCKED_PACKAGES, blockedPackages.toSet())
+            .apply()
+    }
+
+    override fun setCustomTabsEnabled(enabled: Boolean) {
+        val prefs = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit()
+            .putBoolean(KEY_CUSTOM_TABS_ENABLED, enabled)
             .apply()
     }
 

@@ -341,6 +341,13 @@ interface IntentGatekeeperHostApi {
    */
   fun setConfig(enabled: Boolean, blockedPackages: List<String>)
   /**
+   * Replicates whether the Custom Tabs feature is enabled to the native side.
+   * When disabled, [IntentReceiverActivity] routes external Custom Tab and
+   * share-with-URL intents to the main browser instead of launching the
+   * stripped-down custom-tab activity. Defaults to enabled on the native side.
+   */
+  fun setCustomTabsEnabled(enabled: Boolean)
+  /**
    * Resolves a package name to its user-visible application label via
    * [PackageManager]. Returns `null` if the package is not installed or the
    * label cannot be resolved.
@@ -378,6 +385,24 @@ interface IntentGatekeeperHostApi {
             val blockedPackagesArg = args[1] as List<String>
             val wrapped: List<Any?> = try {
               api.setConfig(enabledArg, blockedPackagesArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              IntentPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.simple_intent_receiver.IntentGatekeeperHostApi.setCustomTabsEnabled$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val enabledArg = args[0] as Boolean
+            val wrapped: List<Any?> = try {
+              api.setCustomTabsEnabled(enabledArg)
               listOf(null)
             } catch (exception: Throwable) {
               IntentPigeonUtils.wrapError(exception)
