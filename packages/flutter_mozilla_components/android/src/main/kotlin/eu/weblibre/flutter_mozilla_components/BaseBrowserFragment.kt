@@ -579,6 +579,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
             GlobalComponents.viewportEvents?.let { viewportEvents ->
                 keyboardVisibilityFeature = KeyboardVisibilityFeature(viewportEvents).also {
                     it.start(binding.root)
+                    binding.root.post { it.checkKeyboardState() }
                 }
 
                 if (shouldStartBrowserHandlingScrollFeature) {
@@ -687,6 +688,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         fragmentEngineView?.let {
             components.activeEngineView = it
         }
+        keyboardVisibilityFeature?.checkKeyboardState()
     }
 
     override fun onDestroyView() {

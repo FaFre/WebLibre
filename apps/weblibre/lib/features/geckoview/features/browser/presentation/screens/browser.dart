@@ -732,9 +732,16 @@ class BrowserScreen extends HookConsumerWidget {
       [selectedTabId],
     );
 
+    final autoHideToolbarHeight = switch (tabBarPosition) {
+      // Gecko's dynamic toolbar value is consumed as a bottom inset by Dart and
+      // native UI. The top toolbar itself is positioned with Flutter's topOffset.
+      TabBarPosition.top || TabBarPosition.bottom => bottomAppBarTotalHeight,
+      TabBarPosition.left || TabBarPosition.right => 0.0,
+    };
+
     final stableToolbarHeight =
         autoHideTabBar && !toolbarDismissed.value && !tabInFullScreen
-        ? bottomAppBarTotalHeight
+        ? autoHideToolbarHeight
         : 0.0;
     final stableToolbarHeightPx = (stableToolbarHeight * pixelRatio).round();
 
@@ -814,9 +821,14 @@ class BrowserScreen extends HookConsumerWidget {
       final effectiveVisible = toolbarState == ToolbarVisibility.visible;
       final dismissed = toolbarState == ToolbarVisibility.dismissed;
 
-      // When hidden: clip from bottom by toolbar height so GeckoView
-      // can compute its layout while Flutter animates.
+      // Dynamic toolbar clipping is bottom-inset-only; top toolbar layout is
+      // handled by Flutter's topOffset instead of Gecko's bottom inset channel.
       // When visible/dismissed or overridden by keyboard/loading: no clipping.
+      final hiddenToolbarClippingPx = switch (tabBarPosition) {
+        TabBarPosition.top || TabBarPosition.bottom =>
+          -(bottomAppBarTotalHeight * pixelRatio).round(),
+        TabBarPosition.left || TabBarPosition.right => 0,
+      };
       final targetClippingPx =
           autoHideTabBar &&
               !dismissed &&
@@ -824,7 +836,7 @@ class BrowserScreen extends HookConsumerWidget {
               !keyboardVisible &&
               !tabIsLoading &&
               !tabInFullScreen
-          ? -(bottomAppBarTotalHeight * pixelRatio).round()
+          ? hiddenToolbarClippingPx
           : 0;
 
       if (targetClippingPx != lastClippingPx.value) {
@@ -871,6 +883,7 @@ class BrowserScreen extends HookConsumerWidget {
         bottomAppBarTotalHeight,
         pixelRatio,
         selectedTabId,
+        tabBarPosition,
       ],
     );
 
