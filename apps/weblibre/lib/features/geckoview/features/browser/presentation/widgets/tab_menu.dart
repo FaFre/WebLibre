@@ -78,6 +78,7 @@ class TabMenu extends HookConsumerWidget {
   final bool enableReloadButton;
   final bool enableNavigationButtons;
   final bool enableHierarchy;
+  final bool enableReorder;
 
   const TabMenu({
     super.key,
@@ -99,6 +100,7 @@ class TabMenu extends HookConsumerWidget {
     this.enableReloadButton = true,
     this.enableNavigationButtons = true,
     this.enableHierarchy = true,
+    this.enableReorder = true,
   });
 
   @override
@@ -613,35 +615,45 @@ class TabMenu extends HookConsumerWidget {
                         : null,
                     child: const Text('Detach from parent'),
                   ),
-                  const Divider(),
-                  MenuItemButton(
-                    leadingIcon: const Icon(MdiIcons.chevronUp),
-                    onPressed: () async {
-                      await repo.moveTabAmongSiblings(
+                ],
+                child: const Text('Hierarchy'),
+              );
+            },
+          ),
+        if (enableReorder)
+          SubmenuButton(
+            leadingIcon: const Icon(MdiIcons.swapVertical),
+            menuChildren: [
+              MenuItemButton(
+                leadingIcon: const Icon(MdiIcons.chevronUp),
+                onPressed: () async {
+                  await ref
+                      .read(tabDataRepositoryProvider.notifier)
+                      .moveTabAmongSiblings(
                         selectedTabId,
                         down:
                             settings.tabListDirection ==
                             TabDirection.newestFirst,
                       );
-                    },
-                    child: const Text('Move up'),
-                  ),
-                  MenuItemButton(
-                    leadingIcon: const Icon(MdiIcons.chevronDown),
-                    onPressed: () async {
-                      await repo.moveTabAmongSiblings(
+                },
+                child: const Text('Move up'),
+              ),
+              MenuItemButton(
+                leadingIcon: const Icon(MdiIcons.chevronDown),
+                onPressed: () async {
+                  await ref
+                      .read(tabDataRepositoryProvider.notifier)
+                      .moveTabAmongSiblings(
                         selectedTabId,
                         down:
                             settings.tabListDirection !=
                             TabDirection.newestFirst,
                       );
-                    },
-                    child: const Text('Move down'),
-                  ),
-                ],
-                child: const Text('Hierarchy'),
-              );
-            },
+                },
+                child: const Text('Move down'),
+              ),
+            ],
+            child: const Text('Reorder'),
           ),
         if (enableShare)
           SubmenuButton(
