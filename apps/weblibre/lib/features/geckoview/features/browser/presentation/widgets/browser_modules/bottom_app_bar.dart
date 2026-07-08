@@ -481,42 +481,21 @@ class BrowserTabBar extends HookConsumerWidget {
             axis: switcherAxis,
           ),
           // History fallback only on the MRU row, so empty-state history
-          // chips don't show twice. On the rail the two rows stack as two
-          // equal-height vertical lists.
-          TabBarStackingMode.twoLevel =>
-            isVertical
-                ? Column(
-                    children: [
-                      Expanded(
-                        child: QuickTabSwitcher(
-                          quickTabSwitcherMode:
-                              QuickTabSwitcherMode.containerTabs,
-                          enableHistoryFallback: false,
-                          axis: switcherAxis,
-                        ),
-                      ),
-                      Expanded(
-                        child: QuickTabSwitcher(
-                          quickTabSwitcherMode:
-                              QuickTabSwitcherMode.lastUsedTabs,
-                          axis: switcherAxis,
-                        ),
-                      ),
-                    ],
-                  )
-                : const Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      QuickTabSwitcher(
-                        quickTabSwitcherMode:
-                            QuickTabSwitcherMode.containerTabs,
-                        enableHistoryFallback: false,
-                      ),
-                      QuickTabSwitcher(
-                        quickTabSwitcherMode: QuickTabSwitcherMode.lastUsedTabs,
-                      ),
-                    ],
-                  ),
+          // chips don't show twice. Only reached on the horizontal bar:
+          // effectiveTabBarStackingMode() degrades twoLevel to containerTabs
+          // on the narrow vertical rail, where two stacked rows don't fit.
+          TabBarStackingMode.twoLevel => const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              QuickTabSwitcher(
+                quickTabSwitcherMode: QuickTabSwitcherMode.containerTabs,
+                enableHistoryFallback: false,
+              ),
+              QuickTabSwitcher(
+                quickTabSwitcherMode: QuickTabSwitcherMode.lastUsedTabs,
+              ),
+            ],
+          ),
         },
       ),
       contextualToolbar: ContextualToolbar(
@@ -1228,6 +1207,7 @@ class QuickTabSwitcherView extends StatelessWidget {
       context,
       showTitles: showTitles,
       hierarchyGlyphs: hierarchyGlyphs,
+      isVertical: _isVertical,
       canDelete: _canShowCloseButton,
     );
   }
@@ -1245,6 +1225,7 @@ class QuickTabSwitcherView extends StatelessWidget {
       showIsolatedTabUi: showIsolatedTabUi,
       hierarchyGlyphs: hierarchyGlyphs,
       titleMaxWidth: titleMaxWidth,
+      isVertical: _isVertical,
     );
   }
 }

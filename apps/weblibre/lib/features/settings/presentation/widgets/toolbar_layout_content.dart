@@ -400,13 +400,13 @@ class _TabBarStackingModeSection extends HookConsumerWidget {
                   title: Text('Recently Used Tabs'),
                   subtitle: Text('Recently used tabs across all containers'),
                 ),
-                if (settings.showContainerUi) ...const [
-                  RadioListTile.adaptive(
+                if (settings.showContainerUi) ...[
+                  const RadioListTile.adaptive(
                     value: TabBarStackingMode.containerTabs,
                     title: Text('Container Tabs'),
                     subtitle: Text('Ordered tabs of the selected container'),
                   ),
-                  RadioListTile.adaptive(
+                  const RadioListTile.adaptive(
                     value: TabBarStackingMode.accordion,
                     title: Text('Accordion'),
                     subtitle: Text(
@@ -414,14 +414,18 @@ class _TabBarStackingModeSection extends HookConsumerWidget {
                       "container's tabs expanded inline",
                     ),
                   ),
-                  RadioListTile.adaptive(
-                    value: TabBarStackingMode.twoLevel,
-                    title: Text('Two Rows'),
-                    subtitle: Text(
-                      'Tabs of the selected container on top, recently used '
-                      'tabs below',
+                  // Two stacked rows don't fit the narrow vertical side rail,
+                  // where the mode degrades to Container Tabs; hide the option
+                  // for left/right positions to avoid a no-op choice.
+                  if (!settings.tabBarPosition.isVertical)
+                    const RadioListTile.adaptive(
+                      value: TabBarStackingMode.twoLevel,
+                      title: Text('Two Rows'),
+                      subtitle: Text(
+                        'Tabs of the selected container on top, recently used '
+                        'tabs below',
+                      ),
                     ),
-                  ),
                 ],
                 const RadioListTile.adaptive(
                   value: TabBarStackingMode.disabled,

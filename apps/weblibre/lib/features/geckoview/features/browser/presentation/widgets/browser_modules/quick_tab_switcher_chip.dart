@@ -146,6 +146,10 @@ buildQuickTabSwitcherChipDecoration(
   BuildContext context, {
   required bool showTitles,
   required int hierarchyGlyphs,
+  // On the vertical rail nesting is shown as a corner badge on the favicon (not
+  // a leading pill), so a nested chip carries no extra inline width and can use
+  // the same zero label padding as a leaf chip instead of overflowing.
+  bool isVertical = false,
   bool Function(QuickTabSwitcherItem item)? canDelete,
   // When true, the selected item gets a thicker border in its container's
   // outline color (instead of the usual transparent selected border). The
@@ -195,7 +199,7 @@ buildQuickTabSwitcherChipDecoration(
             !item.isHistory &&
             !item.isPinned &&
             !item.isSandbox &&
-            (item.depth == 0 || hierarchyGlyphs == 0) &&
+            (item.depth == 0 || hierarchyGlyphs == 0 || isVertical) &&
             item.tabMode is! PrivateTabMode &&
             item.tabMode is! IsolatedTabMode)
         ? EdgeInsets.zero
@@ -213,13 +217,22 @@ Widget buildQuickTabSwitcherChipLabel(
   required bool showIsolatedTabUi,
   required int hierarchyGlyphs,
   required double titleMaxWidth,
+  // On the narrow vertical rail the leading depth pill has no room beside the
+  // favicon (it clips the icon), so nesting is shown as a compact corner badge
+  // overlaid on the favicon instead.
+  bool isVertical = false,
 }) {
   final appColors = AppColors.of(context);
   final hasTitle = item.isHistory || showTitles;
+  final isNested = item.depth > 0 && hierarchyGlyphs > 0;
+  final showInlineDepth = isNested && !isVertical;
+  final avatar = (isNested && isVertical)
+      ? _RailDepthAvatar(depth: item.depth, child: item.avatar)
+      : item.avatar;
   final row = Row(
     mainAxisSize: MainAxisSize.min,
     children: [
-      if (item.depth > 0 && hierarchyGlyphs > 0)
+      if (showInlineDepth)
         Padding(
           padding: const EdgeInsets.only(right: 6.0),
           child: TabDepthIndicator(
@@ -232,7 +245,7 @@ Widget buildQuickTabSwitcherChipLabel(
         ),
       Padding(
         padding: EdgeInsets.only(right: hasTitle ? 6.0 : 0.0),
-        child: item.avatar,
+        child: avatar,
       ),
       if (hasTitle)
         ConstrainedBox(
@@ -303,6 +316,67 @@ Widget buildQuickTabSwitcherChipLabel(
         ),
       ) ??
       row;
+}
+
+/// Favicon with a compact nesting badge overlaid on its bottom-right corner,
+/// used on the vertical side rail where the inline [TabDepthIndicator] pill
+/// would clip the favicon. The badge shows a subdirectory-arrow glyph for a
+/// direct child and the depth number for deeper nesting.
+class _RailDepthAvatar extends StatelessWidget {
+  final int depth;
+  final Widget child;
+
+  const _RailDepthAvatar({required this.depth, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    // Keep the exact 20px footprint of a plain favicon so a nested chip stays
+    // the same width as a leaf chip on the narrow rail; the badge is anchored
+    // inside the horizontal bounds (only the vertical corner is allowed to
+    // bleed, where there's ample room) so it never widens the chip.
+    return SizedBox(
+      width: 20,
+      height: 20,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned.fill(child: child),
+          Positioned(
+            right: -3,
+            bottom: -5,
+            child: Container(
+              constraints: const BoxConstraints(minWidth: 12, minHeight: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 1.0),
+              decoration: BoxDecoration(
+                color: scheme.secondaryContainer,
+                borderRadius: const BorderRadius.all(Radius.circular(6.0)),
+                border: Border.all(color: scheme.surfaceContainer, width: 1.0),
+              ),
+              child: Center(
+                child: depth > 1
+                    ? Text(
+                        '$depth',
+                        style: TextStyle(
+                          fontSize: 9,
+                          height: 1.0,
+                          fontWeight: FontWeight.w700,
+                          color: scheme.onSecondaryContainer,
+                        ),
+                      )
+                    : Icon(
+                        MdiIcons.subdirectoryArrowRight,
+                        size: 10,
+                        color: scheme.onSecondaryContainer,
+                      ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 /// FilterChip matching [SelectableChips]' visual contract, used by render

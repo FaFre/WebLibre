@@ -162,6 +162,7 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
       context,
       showTitles: showTitles,
       hierarchyGlyphs: hierarchyGlyphs,
+      isVertical: isVertical,
       // The tray is painted in the container color, so the active tab's normal
       // (transparent) selected border would blend in; give it a thicker border
       // in the container's outline color instead.
@@ -201,6 +202,7 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
           showIsolatedTabUi: showIsolatedTabUi,
           hierarchyGlyphs: hierarchyGlyphs,
           titleMaxWidth: titleMaxWidth,
+          isVertical: isVertical,
         ),
         // Spacing inside the expanded group is owned by the surrounding tray
         // slice so the slices abut into one continuous background.
@@ -527,7 +529,9 @@ class _AccordionHeaderChip extends StatelessWidget {
             if (iconAvatar != null) iconAvatar,
             if (countBadge != null) ...[
               if (iconAvatar != null) const SizedBox(height: 4),
-              countBadge,
+              // Multi-digit counts can exceed the narrow rail's fixed 48px chip
+              // width; scale the badge down to fit instead of overflowing.
+              FittedBox(fit: BoxFit.scaleDown, child: countBadge),
             ],
           ],
         ),

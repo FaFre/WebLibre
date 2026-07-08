@@ -511,17 +511,26 @@ class GeneralSettings with FastEquatable {
   }
 
   /// Container-dependent stacking modes degrade to a single recently-used
-  /// row when the container UI is disabled.
+  /// row when the container UI is disabled. Two-level stacking additionally
+  /// degrades to the single container-tabs row on the narrow vertical rail,
+  /// where two stacked chip lists have no room.
   TabBarStackingMode effectiveTabBarStackingMode() {
+    var mode = tabBarStackingMode;
+
+    if (tabBarPosition.isVertical && mode == TabBarStackingMode.twoLevel) {
+      mode = TabBarStackingMode.containerTabs;
+    }
+
     if (!showContainerUi &&
         const {
           TabBarStackingMode.containerTabs,
           TabBarStackingMode.accordion,
           TabBarStackingMode.twoLevel,
-        }.contains(tabBarStackingMode)) {
+        }.contains(mode)) {
       return TabBarStackingMode.lastUsedTabs;
     }
-    return tabBarStackingMode;
+
+    return mode;
   }
 
   @override
