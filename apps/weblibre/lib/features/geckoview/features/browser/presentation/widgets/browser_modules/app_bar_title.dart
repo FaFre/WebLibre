@@ -611,6 +611,9 @@ class RailAppBarTitleView extends StatelessWidget {
       children: [
         ToolbarButton(
           onTap: onSiteSettingsTap,
+          // Match the pinned extension icons' vertical spacing so the favicon
+          // sits equally close to the address field on both sides.
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
           child: Stack(
             clipBehavior: Clip.none,
             children: [

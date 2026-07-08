@@ -25,12 +25,18 @@ class ToolbarButton extends StatelessWidget {
   final VoidCallback? onDoubleTap;
   final VoidCallback? onLongPress;
 
+  /// Padding around the icon. Defaults to the horizontal-bar spacing; the
+  /// vertical rail passes a tighter value so the favicon sits as close to the
+  /// address field as the pinned extension icons do.
+  final EdgeInsetsGeometry padding;
+
   const ToolbarButton({
     super.key,
     required this.child,
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
+    this.padding = const EdgeInsets.symmetric(horizontal: 8.0, vertical: 15.0),
   });
 
   @override
@@ -43,7 +49,7 @@ class ToolbarButton extends StatelessWidget {
       onDoubleTap: onDoubleTap,
       onLongPress: onLongPress,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 15.0),
+        padding: padding,
         child: IconTheme(
           data: IconThemeData(color: iconColor),
           child: child,
