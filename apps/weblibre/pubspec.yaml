@@ -18,8 +18,8 @@ dependencies:
   crypto: ^3.0.7
   cryptography_flutter: ^2.3.4
   device_info_plus: ^13.1.0
-  drift: ^2.34.0
-  drift_dev: ^2.34.0
+  drift: 2.34.0
+  drift_dev: 2.34.0
   dynamic_color: ^1.8.1
   exceptions: ^0.6.1
   fading_scroll: ^0.9.4
