@@ -133,7 +133,7 @@ class SearchField extends HookConsumerWidget {
         controller: textEditingController,
         suggestion: suggestion.value,
         acceptSuggestionOnSubmit: acceptSuggestionOnSubmit,
-        enableSuggestions: false,
+        enableSuggestions: true,
         autocorrect: false,
         enableIMEPersonalizedLearning: !incognitoEnabled,
         focusNode: safeFocusNode,

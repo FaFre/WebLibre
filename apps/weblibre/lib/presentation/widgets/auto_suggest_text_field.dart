@@ -87,7 +87,7 @@ class AutoSuggestTextField extends HookWidget {
     this.onTapOutside,
     this.onTap,
     this.onSuggestionDismiss,
-    this.enableSuggestions = false,
+    this.enableSuggestions = true,
     this.autocorrect = false,
     this.textFieldKey,
     this.acceptSuggestionOnSubmit = false,
