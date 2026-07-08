@@ -512,13 +512,13 @@ class GeneralSettings with FastEquatable {
 
   /// Container-dependent stacking modes degrade to a single recently-used
   /// row when the container UI is disabled. Two-level stacking additionally
-  /// degrades to the single container-tabs row on the narrow vertical rail,
-  /// where two stacked chip lists have no room.
+  /// degrades to accordion (the default mode, which has a vertical form) on the
+  /// narrow vertical rail, where two stacked chip lists have no room.
   TabBarStackingMode effectiveTabBarStackingMode() {
     var mode = tabBarStackingMode;
 
     if (tabBarPosition.isVertical && mode == TabBarStackingMode.twoLevel) {
-      mode = TabBarStackingMode.containerTabs;
+      mode = TabBarStackingMode.accordion;
     }
 
     if (!showContainerUi &&
