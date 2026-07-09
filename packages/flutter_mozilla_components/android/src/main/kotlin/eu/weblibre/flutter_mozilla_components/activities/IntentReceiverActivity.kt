@@ -544,7 +544,7 @@ class IntentReceiverActivity : Activity() {
         val components = GlobalComponents.components
 
         for (appTask in activityManager.appTasks) {
-            val baseIntent = runCatching { appTask.taskInfo.baseIntent }
+            val baseIntent = runCatching { appTask.taskInfo?.baseIntent }
                 .getOrElse { error ->
                     Log.w(TAG, "Failed to inspect app task", error)
                     return@getOrElse null

@@ -217,9 +217,11 @@ class TorManager(
                 scope.launch {
                     var conn: TorControlConnection? = null
                     var attempts = 0
-                    while ((conn == null || TorService.socksPort == -1) && attempts < 60) {
+                    var upstreamSocksPort = -1
+                    while ((conn == null || upstreamSocksPort == -1) && attempts < 60) {
                         delay(500)
                         conn = torService?.torControlConnection
+                        upstreamSocksPort = torService?.socksPort ?: -1
                         attempts++
                         // Bail early if upstream gave up (typically due to a torrc
                         // parse error caught by `tor --verify-config`).
@@ -229,7 +231,7 @@ class TorManager(
                         }
                     }
 
-                    if (conn != null && TorService.socksPort != -1) {
+                    if (conn != null && upstreamSocksPort != -1) {
                         controlConnection = conn
                         try {
                             setupControlConnection(conn)
@@ -244,7 +246,7 @@ class TorManager(
                     } else {
                         val error = Exception(
                             "Failed to get fully-initialized control connection " +
-                                "(conn=${conn != null}, torServiceSocksPort=${TorService.socksPort}, " +
+                                "(conn=${conn != null}, torServiceSocksPort=$upstreamSocksPort, " +
                                 "upstreamStatus=$lastUpstreamStatus). " +
                                 "If upstreamStatus is STOPPING/OFF, tor likely rejected the torrc — check logcat for TorService."
                         )

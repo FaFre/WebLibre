@@ -57,6 +57,10 @@ class WebExtensionPromptFeature(
                 state.webExtensionPromptRequest
             }.distinctUntilChanged().collect { promptRequest ->
                 when (promptRequest) {
+                    is WebExtensionPromptRequest.InstallationRequested -> {
+                        consumePromptRequest()
+                    }
+
                     is WebExtensionPromptRequest.AfterInstallation -> {
                         handleAfterInstallationRequest(promptRequest)
                     }

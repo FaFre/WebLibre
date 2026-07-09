@@ -2,15 +2,13 @@ group = "eu.weblibre.flutter_tor"
 version = "1.0-SNAPSHOT"
 
 buildscript {
-    ext.kotlin_version = "2.3.21"
     repositories {
         google()
         mavenCentral()
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:8.13.2")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+        classpath("com.android.tools.build:gradle:9.2.1")
     }
 }
 
@@ -33,20 +31,15 @@ def requireWebLibreGoMobileAar = {
 }
 
 apply plugin: "com.android.library"
-apply plugin: "kotlin-android"
 
 android {
     namespace = "eu.weblibre.flutter_tor"
 
-    compileSdk = 36
+    compileSdk = 37
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17
     }
 
     sourceSets {
@@ -61,7 +54,7 @@ android {
 
     dependencies {
         // Tor core libraries
-        implementation("info.guardianproject:tor-android:0.4.9.6")
+        implementation("info.guardianproject:tor-android:0.4.9.11")
         implementation("info.guardianproject:jtorctl:0.4.5.7")
 
         // Pluggable transports are provided by the app-level combined gomobile AAR.
@@ -87,5 +80,11 @@ android {
                showStandardStreams = true
             }
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }

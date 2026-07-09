@@ -2,16 +2,14 @@ group = "eu.weblibre.flutter_mozilla_components"
 version = "1.0-SNAPSHOT"
 
 buildscript {
-    ext.kotlin_version = "2.3.21"
-    ext.mozillaComponentsVersion = '151.0.2'
+    ext.mozillaComponentsVersion = '152.0.4'
 
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:8.13.2")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+        classpath("com.android.tools.build:gradle:9.2.1")
     }
 }
 
@@ -36,22 +34,17 @@ rootProject.allprojects {
 }
 
 apply plugin: "com.android.library"
-apply plugin: "kotlin-android"
 
 android {
     if (project.android.hasProperty("namespace")) {
         namespace = "eu.weblibre.flutter_mozilla_components"
     }
 
-    compileSdk = 36
+    compileSdk = 37
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = '17'
     }
 
     sourceSets {
@@ -77,6 +70,12 @@ android {
                showStandardStreams = true
             }
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 
@@ -139,7 +138,7 @@ dependencies {
     implementation "org.mozilla.components:lib-publicsuffixlist:$mozillaComponentsVersion"
     implementation "org.mozilla.components:service-firefox-accounts:$mozillaComponentsVersion"
     implementation "org.mozilla.components:support-appservices:$mozillaComponentsVersion"
-    implementation "org.ironfoxoss.unifiedpush:unifiedpush:151.0.0"
+    implementation "org.ironfoxoss.unifiedpush:unifiedpush:$mozillaComponentsVersion"
     implementation ('org.unifiedpush.android:connector:3.3.3') {
         exclude group: 'com.google.protobuf', module: 'protobuf-java'
     }

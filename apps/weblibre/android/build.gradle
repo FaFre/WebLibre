@@ -1,12 +1,8 @@
 //Required by background_fetch build
 ext {
-    compileSdkVersion   = 36
-    targetSdkVersion    = 36
+    compileSdkVersion   = 37
+    targetSdkVersion    = 37
     ndkVersion          = providers.gradleProperty("weblibre.ndkVersion").get()
-}
-
-buildscript {
-    ext.kotlin_version = '2.3.21'
 }
 
 allprojects {
@@ -22,7 +18,7 @@ allprojects {
             if (details.requested.group == 'androidx.glance' &&
                     details.requested.name == 'glance-appwidget') {
                 details.useVersion '1.1.1'
-                details.because 'home_widget uses 1.+ and newer alpha releases require AGP 9.1 and compileSdk 37'
+                details.because 'home_widget uses 1.+; keep a stable Glance version for reproducible Android builds'
             }
         }
     }
@@ -34,7 +30,7 @@ subprojects {
     afterEvaluate {
         if (it.hasProperty("android")) {
             android {
-                compileSdkVersion 36
+                compileSdkVersion 37
                 ndkVersion rootProject.ext.ndkVersion
             }
         }

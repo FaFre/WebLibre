@@ -63,8 +63,6 @@ void main() {
                 openedUris.add(uri);
               },
               onFetch: (_) async {},
-              onPreview: (_) async {},
-              onOpenCapture: (_) async {},
             ),
           ),
         ),
@@ -114,8 +112,6 @@ void main() {
                 ),
                 onOpen: (_) async {},
                 onFetch: (_) async {},
-                onPreview: (_) async {},
-                onOpenCapture: (_) async {},
               ),
             ),
           ),
