@@ -25,19 +25,25 @@ import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import eu.weblibre.flutter_mozilla_components.addons.WebExtensionPromptFeature
+import eu.weblibre.flutter_mozilla_components.activities.ExternalAppBrowserActivity
 import eu.weblibre.flutter_mozilla_components.databinding.FragmentBrowserBinding
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
 import eu.weblibre.flutter_mozilla_components.ext.toPigeonDownloadState
 import eu.weblibre.flutter_mozilla_components.feature.BrowserHandlingScrollFeature
+import eu.weblibre.flutter_mozilla_components.feature.GestureAwareSwipeRefreshFeature
 import eu.weblibre.flutter_mozilla_components.feature.KeyboardVisibilityFeature
 import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
 import eu.weblibre.flutter_mozilla_components.feature.WebExtensionToolbarFeature
 import eu.weblibre.flutter_mozilla_components.integration.ReaderViewIntegration
-import eu.weblibre.flutter_mozilla_components.activities.ExternalAppBrowserActivity
 import eu.weblibre.flutter_mozilla_components.services.DownloadService
 import io.flutter.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.mapNotNull
 import mozilla.components.browser.state.selector.findCustomTabOrSelectedTab
+import mozilla.components.browser.state.selector.findTabOrCustomTabOrSelectedTab
+import mozilla.components.browser.state.state.SessionState
 import mozilla.components.browser.state.state.WebExtensionState
 import mozilla.components.browser.thumbnails.BrowserThumbnails
 import mozilla.components.concept.engine.EngineView
@@ -55,12 +61,12 @@ import mozilla.components.feature.prompts.file.AndroidPhotoPicker
 import mozilla.components.feature.session.FullScreenFeature
 import mozilla.components.feature.session.PictureInPictureFeature
 import mozilla.components.feature.session.SessionFeature
-import eu.weblibre.flutter_mozilla_components.feature.GestureAwareSwipeRefreshFeature
 import mozilla.components.feature.sitepermissions.SitePermissionsFeature
 import mozilla.components.feature.sitepermissions.SitePermissionsRules
 import mozilla.components.feature.sitepermissions.SitePermissionsRules.AutoplayAction
 import mozilla.components.feature.tabs.WindowFeature
 import mozilla.components.feature.webauthn.WebAuthnFeature
+import mozilla.components.lib.state.ext.flowScoped
 import mozilla.components.support.base.feature.ActivityResultHandler
 import mozilla.components.support.base.feature.PermissionsFeature
 import mozilla.components.support.base.feature.UserInteractionHandler
@@ -471,6 +477,12 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 view = binding.root,
             )
 
+            components.core.store.flowScoped(viewLifecycleOwner, Dispatchers.Main) { flow ->
+                flow.mapNotNull { state -> state.findTabOrCustomTabOrSelectedTab(sessionId) }
+                    .distinctUntilChangedBy { tab -> tab.content.pictureInPictureEnabled }
+                    .collect { tab -> pipModeChanged(tab) }
+            }
+
             mediaSessionFullscreenFeature.set(
                 feature = MediaSessionFullscreenFeature(
                     requireActivity(),
@@ -644,8 +656,12 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
     override fun onPictureInPictureModeChanged(enabled: Boolean) {
         pictureInPictureFeature?.onPictureInPictureModeChanged(enabled)
-        if (lifecycle.currentState == androidx.lifecycle.Lifecycle.State.CREATED) {
+    }
+
+    private fun pipModeChanged(session: SessionState) {
+        if (!session.content.pictureInPictureEnabled && session.content.fullScreen && isAdded) {
             onBackPressed()
+            fullScreenChanged(false)
         }
     }
 
@@ -691,6 +707,17 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         keyboardVisibilityFeature?.checkKeyboardState()
     }
 
+    @CallSuper
+    override fun onStop() {
+        super.onStop()
+
+        components.core.store.state.findTabOrCustomTabOrSelectedTab(sessionId)?.let { session ->
+            if (!session.content.pictureInPictureEnabled && fullScreenFeature.onBackPressed()) {
+                fullScreenChanged(false)
+            }
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
 
@@ -701,6 +728,9 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         // Stop browser scroll-handling detection
         browserHandlingScrollFeature?.stop()
         browserHandlingScrollFeature = null
+
+        // Holds the Activity, so it must not outlive the view it was created with.
+        pictureInPictureFeature = null
 
         GlobalComponents.onPullToRefreshEnabledChanged = null
         GlobalComponents.onScreenshotProtectionEnabledChanged = null

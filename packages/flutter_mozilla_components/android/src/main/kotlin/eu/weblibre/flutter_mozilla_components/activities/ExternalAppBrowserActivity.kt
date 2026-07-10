@@ -16,6 +16,7 @@ import androidx.core.view.WindowCompat
 import eu.weblibre.flutter_mozilla_components.ColorSchemePreference
 import eu.weblibre.flutter_mozilla_components.ExternalAppBrowserFragment
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.HomePressDispatcher
 import eu.weblibre.flutter_mozilla_components.PwaConstants
 import eu.weblibre.flutter_mozilla_components.PwaSessionCreator
 import eu.weblibre.flutter_mozilla_components.R
@@ -120,6 +121,14 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
         }
 
         showFragment(sessionId)
+    }
+
+    override fun onUserLeaveHint() {
+        if (HomePressDispatcher.onUserLeaveHint(this)) {
+            return
+        }
+
+        super.onUserLeaveHint()
     }
 
     private fun waitForComponents(sessionId: String) {
@@ -268,14 +277,6 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
                     }
                 }
             }
-        }
-    }
-
-    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
-        super.onPictureInPictureModeChanged(isInPictureInPictureMode)
-        val fragment = supportFragmentManager.findFragmentById(R.id.container)
-        if (fragment is ExternalAppBrowserFragment) {
-            fragment.onPictureInPictureModeChanged(isInPictureInPictureMode)
         }
     }
 

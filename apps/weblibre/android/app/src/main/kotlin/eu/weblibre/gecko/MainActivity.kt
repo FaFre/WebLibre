@@ -20,8 +20,10 @@
 package eu.weblibre.gecko
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import eu.weblibre.flutter_mozilla_components.HomePressDispatcher
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
@@ -29,9 +31,12 @@ import io.flutter.embedding.engine.FlutterJNI
 import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.plugin.common.MethodChannel
 
-class MainActivity: FlutterFragmentActivity() {
+class MainActivity : FlutterFragmentActivity() {
     companion object {
         private const val TAG = "MainActivity"
+
+        /** Marks the intent [checkAndExitPiP] sends to itself. */
+        private const val EXTRA_EXIT_PIP = "eu.weblibre.gecko.EXIT_PIP"
     }
 
     private val TRIM_MEMORY_CHANNEL = "eu.weblibre.flutter_mozilla_components/trim_memory"
@@ -48,6 +53,45 @@ class MainActivity: FlutterFragmentActivity() {
             "cachedEngine=${engineTag(FlutterEngineCache.getInstance().get(ENGINE_ID))}")
 
         super.onCreate(null)
+
+        // Restored straight into a pinned task (e.g. the process was killed while in PiP).
+        checkAndExitPiP()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        if (intent.hasExtra(EXTRA_EXIT_PIP)) {
+            // Our own intent from checkAndExitPiP, delivered back here because
+            // FLAG_ACTIVITY_REORDER_TO_FRONT re-delivers to a singleTask activity. It carries
+            // nothing for Flutter to handle, and acting on it again would recurse.
+            return
+        }
+
+        super.onNewIntent(intent)
+
+        checkAndExitPiP()
+    }
+
+    /**
+     * A picture-in-picture window cannot show a newly opened page, so an intent arriving
+     * while we are in PiP has to pull the task back to the foreground first.
+     */
+    private fun checkAndExitPiP() {
+        if (isInPictureInPictureMode) {
+            moveTaskToBack(false)
+            startActivity(
+                Intent(this, MainActivity::class.java)
+                    .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                    .putExtra(EXTRA_EXIT_PIP, true)
+            )
+        }
+    }
+
+    override fun onUserLeaveHint() {
+        if (HomePressDispatcher.onUserLeaveHint(this)) {
+            return
+        }
+
+        super.onUserLeaveHint()
     }
 
     /**
