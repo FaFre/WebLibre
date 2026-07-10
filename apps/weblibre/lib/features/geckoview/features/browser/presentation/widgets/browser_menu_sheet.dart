@@ -2024,6 +2024,9 @@ class _ConnectionCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final connectionsExpanded = ref.watch(
+      persistedBoolProvider(PersistedBoolKey.connectionsExpanded),
+    );
     final isTorActive = ref.watch(
       torProxyServiceProvider.select((value) => value.value?.isRunning == true),
     );
@@ -2103,13 +2106,53 @@ class _ConnectionCard extends ConsumerWidget {
         ),
     ];
 
+    final activeCount =
+        (isTorActive ? 1 : 0) +
+        assignedProfiles
+            .where(
+              (profile) =>
+                  runtimeEndpointIds.contains(profile.proxyConnectionId),
+            )
+            .length;
+
     return _buildMenuCard(
       context,
       children: [
-        for (var i = 0; i < rows.length; i++) ...[
-          if (i > 0) _buildDivider(),
-          rows[i],
-        ],
+        Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            leading: Icon(
+              MdiIcons.transitConnectionVariant,
+              color: activeCount > 0
+                  ? AppColors.of(context).torActiveGreen
+                  : null,
+            ),
+            title: const Text('Connections'),
+            subtitle: Text(
+              activeCount > 0 ? '$activeCount connected' : 'None connected',
+            ),
+            initiallyExpanded: connectionsExpanded,
+            onExpansionChanged: (_) => ref
+                .read(
+                  persistedBoolProvider(
+                    PersistedBoolKey.connectionsExpanded,
+                  ).notifier,
+                )
+                .toggle(),
+            children: [
+              for (final row in rows) row,
+              const Divider(indent: 56, endIndent: 16),
+              _buildSubTile(
+                'Manage Connections',
+                icon: MdiIcons.lanConnect,
+                onTap: () async {
+                  Navigator.pop(context);
+                  await const SingboxProxyProfilesRoute().push<void>(context);
+                },
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -2138,16 +2181,18 @@ class _ConnectionRow extends StatelessWidget {
     final activeColor = AppColors.of(context).torActiveGreen;
 
     return ListTile(
-      // Trim the right padding by the IconButton's internal inset (~12px) so the
-      // edit chevron's glyph lands at the same 16px from the edge as the plain
-      // trailing icons used by the Share/More/Containers rows, while keeping the
-      // button's full 48px touch target.
-      contentPadding: const EdgeInsets.only(left: 16, right: 16),
+      contentPadding: const EdgeInsets.only(left: 56, right: 16),
       leading: Icon(
         icon,
+        size: 20,
         color: active ? activeColor : colorScheme.onSurfaceVariant,
       ),
-      title: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+      title: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(fontSize: 14),
+      ),
       subtitle: Text(active ? 'Connected' : 'Off'),
       onTap: enabled ? () => onToggle() : null,
       dense: true,

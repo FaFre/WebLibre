@@ -28,6 +28,7 @@ part 'persisted_bool.g.dart';
 
 enum PersistedBoolKey {
   extensionsExpanded(key: 'ExtensionsExpanded', defaultValue: false),
+  connectionsExpanded(key: 'ConnectionsExpanded', defaultValue: true),
   searchSuggestionsExpanded(
     key: 'SearchSuggestionsExpanded',
     defaultValue: true,
