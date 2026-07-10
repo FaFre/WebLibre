@@ -22,7 +22,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/bangs/data/models/bang.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
@@ -56,7 +55,22 @@ class EditBangScreen extends HookConsumerWidget {
 
     final category = useState(initialBang?.category);
     final subCategory = useState(initialBang?.subCategory);
-    final formatFlags = useState(initialBang?.format);
+    final formatFlags = useState(
+      initialBang?.format ??
+          {BangFormat.urlEncodePlaceholder, BangFormat.urlEncodeSpaceToPlus},
+    );
+
+    void updateFormatFlag(BangFormat flag, bool enabled) {
+      final flags = {...formatFlags.value};
+
+      if (enabled) {
+        flags.add(flag);
+      } else {
+        flags.remove(flag);
+      }
+
+      formatFlags.value = flags;
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -65,14 +79,13 @@ class EditBangScreen extends HookConsumerWidget {
           IconButton(
             onPressed: () async {
               if (formKey.currentState?.validate() ?? false) {
+                final name = nameTextController.text.trim();
+                final trigger = triggerTextController.text.trim();
+                final urlTemplate = urlTextController.text.trim();
+
                 final existingBang = await ref
                     .read(bangDataRepositoryProvider.notifier)
-                    .getBang(
-                      BangKey(
-                        group: BangGroup.user,
-                        trigger: triggerTextController.text,
-                      ),
-                    );
+                    .getBang(BangKey(group: BangGroup.user, trigger: trigger));
 
                 if ((initialBang == null && existingBang != null) ||
                     (initialBang != null &&
@@ -81,7 +94,7 @@ class EditBangScreen extends HookConsumerWidget {
                   if (context.mounted) {
                     ui_helper.showErrorMessage(
                       context,
-                      'A Bang with Trigger "${triggerTextController.text}" does already exist',
+                      'A Bang with Trigger "$trigger" does already exist',
                     );
                   }
 
@@ -89,7 +102,7 @@ class EditBangScreen extends HookConsumerWidget {
                 }
 
                 final uri = parseValidatedUrl(
-                  urlTextController.text,
+                  urlTemplate,
                   eagerParsing: false,
                   onlyHttpProtocol: true,
                 );
@@ -99,18 +112,16 @@ class EditBangScreen extends HookConsumerWidget {
 
                 final bang = Bang(
                   group: BangGroup.user,
-                  trigger: triggerTextController.text,
-                  websiteName: nameTextController.text,
+                  trigger: trigger,
+                  websiteName: name,
                   domain: uri.host,
-                  urlTemplate: urlTextController.text,
+                  urlTemplate: urlTemplate,
                   searxngApi: false,
                   category: category.value,
                   subCategory: subCategory.value,
                   additionalTriggers: initialBang?.additionalTriggers,
                   snapDomain: initialBang?.snapDomain,
-                  format: formatFlags.value.isNotEmpty
-                      ? formatFlags.value
-                      : null,
+                  format: formatFlags.value,
                 );
 
                 if (initialBang != null &&
@@ -155,7 +166,7 @@ class EditBangScreen extends HookConsumerWidget {
                     ),
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
-                  validator: validateRequired,
+                  validator: (value) => validateRequired(value?.trim()),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -167,7 +178,7 @@ class EditBangScreen extends HookConsumerWidget {
                     ),
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
-                  validator: validateRequired,
+                  validator: (value) => validateRequired(value?.trim()),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -181,12 +192,14 @@ class EditBangScreen extends HookConsumerWidget {
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
                   validator: (value) {
-                    if (value?.contains('{{{s}}}') != true) {
+                    final urlTemplate = value?.trim();
+
+                    if (urlTemplate?.contains('{{{s}}}') != true) {
                       return 'Must contain the query placeholder {{{s}}}';
                     }
 
                     return validateUrl(
-                      value,
+                      urlTemplate,
                       eagerParsing: false,
                       onlyHttpProtocol: true,
                     );
@@ -237,69 +250,45 @@ class EditBangScreen extends HookConsumerWidget {
                 Text('Flags', style: Theme.of(context).textTheme.labelMedium),
                 const SizedBox(height: 4),
                 CheckboxListTile(
-                  value:
-                      formatFlags.value?.contains(BangFormat.openBasePath) ??
-                      false,
+                  contentPadding: EdgeInsets.zero,
+                  value: formatFlags.value.contains(BangFormat.openBasePath),
                   title: const Text('Open Base Path'),
                   subtitle: const Text(
                     'When the bang is invoked with no query, opens the base path of the URL (/) instead of any path given in the template (g., /search)',
                   ),
                   onChanged: (value) {
                     if (value != null) {
-                      formatFlags.value =
-                          value
-                                ? {
-                                    ...?formatFlags.value,
-                                    BangFormat.openBasePath,
-                                  }
-                                : {...?formatFlags.value}
-                            ..remove(BangFormat.openBasePath);
+                      updateFormatFlag(BangFormat.openBasePath, value);
                     }
                   },
                 ),
                 CheckboxListTile(
-                  value:
-                      formatFlags.value?.contains(
-                        BangFormat.urlEncodePlaceholder,
-                      ) ??
-                      false,
+                  contentPadding: EdgeInsets.zero,
+                  value: formatFlags.value.contains(
+                    BangFormat.urlEncodePlaceholder,
+                  ),
                   title: const Text('URL Encode Placeholder'),
                   subtitle: const Text(
                     'URL encode the search terms. Some sites do not work with this, so it can be disabled by omitting this.',
                   ),
                   onChanged: (value) {
                     if (value != null) {
-                      formatFlags.value =
-                          value
-                                ? {
-                                    ...?formatFlags.value,
-                                    BangFormat.urlEncodePlaceholder,
-                                  }
-                                : {...?formatFlags.value}
-                            ..remove(BangFormat.urlEncodePlaceholder);
+                      updateFormatFlag(BangFormat.urlEncodePlaceholder, value);
                     }
                   },
                 ),
                 CheckboxListTile(
-                  value:
-                      formatFlags.value?.contains(
-                        BangFormat.urlEncodeSpaceToPlus,
-                      ) ??
-                      false,
+                  contentPadding: EdgeInsets.zero,
+                  value: formatFlags.value.contains(
+                    BangFormat.urlEncodeSpaceToPlus,
+                  ),
                   title: const Text('URL Encode Space to Plus'),
                   subtitle: const Text(
                     'URL encodes spaces as +, instead of %20. Some sites only work correctly with one or the other.',
                   ),
                   onChanged: (value) {
                     if (value != null) {
-                      formatFlags.value =
-                          value
-                                ? {
-                                    ...?formatFlags.value,
-                                    BangFormat.urlEncodeSpaceToPlus,
-                                  }
-                                : {...?formatFlags.value}
-                            ..remove(BangFormat.urlEncodeSpaceToPlus);
+                      updateFormatFlag(BangFormat.urlEncodeSpaceToPlus, value);
                     }
                   },
                 ),
