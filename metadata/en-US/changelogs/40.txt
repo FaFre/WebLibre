@@ -1,0 +1,166 @@
+GeckoView 152.0.4
+
+This is the largest WebLibre release to date, consolidating fifteen alpha releases since v0.11.0. It introduces a full proxy management system, a local full-text search index, configurable touch gestures, a redesigned tab switcher with vertical side rails, container-aware history, and a major desktop mode overhaul.
+
+## Highlights
+
+- **Proxy Management** — sing-box powered proxy profiles with per-container and global routing
+- **Local Search Index** — full-text search of the pages you visit, entirely on-device
+- **Touch Gestures** — draw gestures on web pages to navigate and control tabs
+- **Tab Stacking** — redesigned quick tab switcher with new Accordion and Two Rows layouts
+- **Vertical Side Rail** — place the tab bar on the left or right edge of the screen
+- **Container-Aware History** — see and filter which container a visit came from
+- **Desktop Mode Overhaul** — global, per-site, and per-tab desktop mode control
+- **Pure Black (OLED) Theme** — true black backgrounds in app and reader mode
+- **Engine Upgrade** — Mozilla Components / GeckoView 152.0.4
+
+## Proxy Management (New)
+
+- **Sing-box proxy profiles** — Create and manage custom proxy connections supporting SOCKS, HTTP, Shadowsocks, VMess, VLESS, Trojan, Hysteria, Hysteria2, TUIC, SSH, WireGuard, ShadowTLS, and AnyTLS. Each profile runs its own managed tunnel with live status indicators, latency chips, and IP display.
+- **Six ways to import** — Manual configuration, subscription URLs, QR code scan, clipboard paste (auto-detects `ss://`, `vmess://`, `trojan://` and similar URIs), WireGuard config files, or raw sing-box JSON outbounds.
+- **Per-container proxy routing** — Assign any proxy profile or Tor to a specific container; tabs in that container route through the assigned proxy.
+- **Global proxy routing** — Route all regular tabs through a single proxy, with a separate assignment for private tabs. Individual containers can bypass the global proxy to connect directly.
+- **Profile management screen** — All profiles (including Tor) with protocol badges, run/stop toggles, latency testing, and a "Stop All" button.
+- **Per-request DNS leak protection** — DNS leak guarding runs per-request and per-container inside the proxy layer.
+- **Profile sharing and logs** — Export profiles as `weblibre-proxy://` URIs, and inspect the sing-box runtime with a real-time log viewer.
+
+## Local Search Index (New)
+
+- **Full-text search of browsed pages** — Visited pages are indexed locally, enabling on-device content search without sending any data off your device.
+- **Fine-grained control** — Toggle the index globally, choose whether private tabs are indexed, and exclude individual containers. Excluded containers have their history removed from the index immediately.
+- **Index management** — See how many pages are indexed and clear the index at any time while keeping your history. Stale entries are pruned automatically.
+
+## Containers
+
+- **Strict Mode** — Restrict a container so only its assigned sites can load there; unassigned sites are blocked. Requires cookie isolation.
+- **Exclude from History** — Prevent a container's visits from being recorded in browsing history (separate from the search index opt-out). Requires cookie isolation.
+- **Icon picker** — Choose from over 5,000 Material Design Icons for container branding, shown in the container bar, lists, and tab indicators.
+- **Custom colors** — In addition to the refreshed standard palette, a custom color picker with hex and HSL controls is available, applied consistently across chips, lists, selectors, and tab UI.
+- **Pinning and reordering** — Pin containers to keep them at the top of lists, and long-press-drag chips in the bottom bar to reorder them.
+- **Redesigned management UI** — The container list, selection sheet, and editor were overhauled with card layouts, tab counts, proxy info, and privacy badges.
+
+## Container-Aware History
+
+- History entries can now display which container a visit came from, and the History screen can be filtered by container.
+- With a container filter active, clearing history only clears that container's history.
+- Deleting a container offers to also delete its history; otherwise those visits are kept without a container label.
+- Note: existing history is not retroactively assigned to containers; labels apply to newly recorded visits and are local to WebLibre.
+
+## Tabs and Tab Switching
+
+- **Tab Stacking** — The quick tab switcher was redesigned and is configured under Settings > Toolbar Layout > Tab Stacking, with new layouts:
+  - **Accordion** — containers as chips, expanding the selected container inline
+  - **Two Rows** — the selected container's tabs on one row, recently used tabs on another
+  - Plus the existing Recently Used Tabs, Container Tabs, and Disabled modes. Existing settings are migrated automatically.
+- **Vertical side rail** — The tab bar can be placed on the left or right edge as a vertical rail with address controls, toolbar actions, and pinned add-ons. Swipe vertically on the rail to switch tabs.
+- **Customizable switcher buttons** — Choose which action buttons appear at the end of the tab switcher bar, configured independently from the contextual toolbar.
+- **Tab hierarchy tools** — Long-press a tab for a Hierarchy submenu (change parent, detach, reorder among siblings). Drag-and-drop can group two tabs in a new container or establish a parent-child relationship. Manual reorganizations are preserved and no longer overwritten by engine state.
+- **Depth indicators** — Nested tabs show chevron badges revealing nesting depth, with configurable depth display and compact badges on narrow layouts.
+- **Switcher polish** — Drag-to-reorder in the switcher, container-colored tab bar, tab counts on container chips, optional close buttons on every chip, reliable centering of the active tab, and clearer marking of pinned, private, isolated, and nested tabs.
+- **Faster, safer startup restore** — Restored tabs appear earlier as placeholder chips while the engine finishes restoring; tapping one queues the selection. Saved tab data is only cleaned up after the engine confirms restore is complete.
+
+## Touch Gestures (New)
+
+- Draw gestures on web pages to navigate, control tabs, and trigger page actions. Off by default; enable under Settings > Gestures.
+- A stroke interval setting prevents accidental triggers from fast, jittery movements.
+- Pull-to-refresh no longer accidentally triggers on gesture strokes near the top of the page.
+- Long-press the gestures toggle in the browser menu to jump straight to gesture settings.
+
+## Desktop Mode
+
+- **Global desktop mode** — "Always Request Desktop Site" under Settings > Browsing > Desktop Mode applies to every tab, including already-open ones.
+- **Per-site desktop mode** — Maintain a list of sites that always load in desktop mode, regardless of the global setting. Add sites from the page menu or manage the list in settings. Subdomains are covered automatically.
+- Per-tab toggling continues to work as before and takes precedence.
+
+## Reader Mode
+
+- **True black (AMOLED) reader theme** — With Pure Black enabled, the reader's dark theme is genuine black.
+- **Refreshed article layout** — Improved spacing and typography, edge-to-edge images, nicer quotes and lists, and properly wrapped code blocks.
+- The appearance button now toggles open/closed, appearance controls no longer hide behind the bottom toolbar, and a "show toolbar" button is available while reading with the toolbar hidden.
+
+## Appearance and Home Screen
+
+- **Pure Black (OLED)** — Settings > General > Pure Black switches dark mode backgrounds to true black, saving battery on OLED screens.
+- **Refresh Rate setting** — System, High, or Low under Settings > General; High (the default) makes scrolling smoother on 90/120 Hz displays, Low reduces battery usage. Android-only, depends on device support.
+- **System bar tinting** — Status and navigation bar areas match the active container or toolbar color, with icon contrast adjusted automatically.
+- **Reworked home screen** — Quick actions (New tab, View tabs, Resume last tab) moved near the top, plus a dismissible "Support WebLibre" banner explaining the optional Supporter subscription. The browser and all privacy features remain free.
+- **New app icon** — Refreshed launcher icon including adaptive and monochrome variants.
+- "Top Sites" has been renamed to "Shortcuts" throughout the app.
+- Optional close button on the new tab / search screen (Settings > General > Show Close Button), handy on e-ink devices.
+
+## Search and Bangs
+
+- **Popular Sites suggestions** — The search screen and address bar autocomplete now suggest well-known websites, so even a fresh install completes "git" to "github.com".
+- **Reverse bang matching** — Pasting a URL produced by a bang search (for example a Google search result URL) recognizes the bang template and swaps the URL for the extracted query with the bang pre-selected.
+- **Bang robustness** — Bangs match correctly across `www.`, bare, and `m.` domain variants; custom bang editing handles URL encoding safely and trims accidental whitespace; typed text is preserved when switching search providers; selecting a bang highlights the existing query for quick replacement.
+- **Find in page integration** — Tapping a search result from history or the local index prompts to find that text on the page instead of opening the find bar uninvited.
+- An "Autocomplete on Submit" setting accepts inline suggestions when pressing Enter.
+
+## Privacy and Security
+
+- **Expanded hardening** — Over 30 additional telemetry, experiment, and tracking preferences are locked against upstream Gecko updates silently re-enabling them. Locked settings show a padlock icon.
+- **Private tabs notification** — A persistent notification appears while private tabs are open; tapping or swiping it closes them all.
+- **Better .onion handling** — Onion addresses typed without a scheme open over `http://`, and HTTPS upgrades are no longer forced for onion services (explicitly typed `https://` onion addresses keep HTTPS).
+- **Tracking protection** — Custom Tracking Protection gains a separate switch for ads, analytics, and social trackers, plus a Content Blocking Database option for GeckoView's built-in blocklists (requires restart).
+- **Recent searches cleanup** — Recent searches can be cleared when deleting browsing data and included in the automatic Incognito Mode cleanup.
+- **Referer policy compatibility** — The strictest cross-origin referer mode is now an advanced opt-in instead of the default, fixing breakage on sites that depend on referer information.
+- **New lock option** — "Lock on Startup Only" unlocks a protected profile once at app start instead of on every background or timeout.
+- The Android "install unknown apps" permission was removed from the manifest.
+
+## Extensions
+
+- **Bookmark access for extensions** — Extensions such as floccus can now read and organize bookmarks, with instant change notifications — unique among mobile Gecko browsers.
+- Pinned extensions no longer appear duplicated in the overflow menu, and disabled extensions are hidden from the toolbar and shortcut menu.
+
+## Browser Behavior
+
+- **Custom Tabs toggle** — Decide whether other apps open links in a lightweight in-app tab or as a normal tab in the main browser (enabled by default).
+- **Reload doubles as stop** — The reload button shows an X during page load; tap it to cancel loading.
+- **Connections menu** — Tor and proxy controls are grouped in a collapsible Connections section of the browser menu with a connected count and quick access to management. The browser menu quick toggles use a segmented control.
+- **Improved Picture-in-Picture** — Fullscreen video behaves reliably when pressing Home, switching apps, or returning to WebLibre; accidental PiP triggers from permission prompts are fixed.
+- **Site data clearing** — "Clear Site Data" can optionally close the current tab after clearing.
+- Link context menus can open a link as a different tab type (regular, private, or isolated).
+
+## Downloads
+
+- Completion and failure snackbars, with an "Open" action to launch finished files.
+- Tapping a download in history opens it with the appropriate system app.
+- Correct filename resolution, saving downloads to the system Downloads directory with proper names.
+
+## Settings
+
+- **Global settings search** — Search across all categories from the main Settings screen; results show breadcrumbs, and tapping one navigates, auto-scrolls, and highlights the exact entry.
+- New top-level Proxy category, an ML Downloads entry in Advanced Settings to clear downloaded AI models, and remembered bookmark list preferences (sorting and folders-only view).
+
+## Tor
+
+- **Service reliability overhaul** — Fixed race conditions in service binding, proper foreground service lifecycle, bootstrap polling fallback, and pluggable transport (obfs4, snowflake) port readiness polling. Tor now survives hot restarts and engine reconnections.
+- Updated Tor components with newer upstream fixes.
+
+## Platform and Performance
+
+- **Engine upgrade** — Mozilla Components / GeckoView 152.0.4 with newer web compatibility, performance improvements, and upstream fixes.
+- **Impeller graphics engine** re-enabled for smoother rendering and animations.
+- **Smaller, faster builds** — Release builds use code and resource shrinking (R8 optimization).
+- **Reduced background work** — Browser screenshot work is skipped while full-screen panels (Settings, Search, Tabs) are open, and an advanced option can unload the web engine under full-screen overlays to free resources.
+- **Samsung and gesture navigation fixes** — System back gestures no longer cause unwanted page scrolls, and the home screen search widget is resizable with correct sizing.
+- **Better multi-window support** — Split-screen, freeform, and pop-up window resizing works smoothly, with taps landing in the right place.
+- Cold-start intent replay makes sharing links to WebLibre reliable even when the app was not running, and improved compatibility with older Android versions.
+
+## Notable Fixes
+
+- Fixed broken navigation after cancelling an "open in app" prompt.
+- Fixed tab churn when a site is assigned to a container: tabs already in the correct container are left alone.
+- Fixed site-assigned containers not taking precedence over the currently selected container, including for shared content.
+- Fixed tab hierarchy and parent relationships being lost to engine race conditions.
+- Fixed keyboard and auto-hiding toolbar layout issues, including the toolbar getting stuck after keyboard changes.
+- Fixed custom tab toolbar sizing, reappearance, and color scheme issues.
+- Fixed the QR scanner to request camera permission up front and fail gracefully when denied.
+- Fixed PWA popup and window-open handling for login and payment flows, and rare failures when reopening an existing web app window.
+
+## Upgrade Notes
+
+- Existing Quick Tab Switcher settings are migrated to the new Tab Stacking options automatically; new installs default to Accordion when container UI is enabled.
+- Existing browsing history is not retroactively assigned to containers.
+- The Content Blocking Database setting requires an app restart to take effect.
+- Container Strict Mode and Exclude from History both require cookie isolation to be enabled for the container.
