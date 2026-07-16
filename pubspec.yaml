@@ -23,6 +23,8 @@ melos:
   name: weblibre_project
 
   command:
+    bootstrap:
+      enforceLockfile: true
     clean:
       hooks:
         pre: melos exec -c 1 -- "flutter clean"
