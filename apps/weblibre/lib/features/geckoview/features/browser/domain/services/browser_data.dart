@@ -17,8 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:flutter/foundation.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -27,9 +29,17 @@ part 'browser_data.g.dart';
 
 @Riverpod(keepAlive: true)
 class BrowserDataService extends _$BrowserDataService {
-  final _service = GeckoDeleteBrowserDataService();
+  /// The [service] seam is test-only injection; production always constructs
+  /// the default. Kept `final` so the live singleton's backing service can't be
+  /// swapped at runtime.
+  @visibleForTesting
+  BrowserDataService({GeckoDeleteBrowserDataService? service})
+    : _service = service ?? GeckoDeleteBrowserDataService();
+
+  final GeckoDeleteBrowserDataService _service;
 
   var _onStartDeleted = false;
+  var _onStartContainerDataCleared = false;
 
   Future<void> deleteDataOnEngineStart(
     Set<DeleteBrowsingDataType>? types,
@@ -73,11 +83,29 @@ class BrowserDataService extends _$BrowserDataService {
     return _service.clearDataForContext(contextId);
   }
 
-  Future<void> clearContainerDataOnEngineStart(List<String> contextIds) async {
-    if (!_onStartDeleted && contextIds.isNotEmpty) {
-      for (final contextId in contextIds) {
+  /// Clears Gecko session-context data for every [contextId], best-effort: a
+  /// single failing context is logged and skipped so it never blocks the rest.
+  ///
+  /// Not gated by the one-shot startup guard — used both by the guarded
+  /// [clearContainerDataOnEngineStart] fallback and directly on explicit Quit.
+  Future<void> clearContainerData(List<String> contextIds) async {
+    for (final contextId in contextIds) {
+      try {
         await clearDataForContext(contextId);
+      } catch (e, st) {
+        logger.e(
+          'Failed to clear data for container context $contextId',
+          error: e,
+          stackTrace: st,
+        );
       }
+    }
+  }
+
+  Future<void> clearContainerDataOnEngineStart(List<String> contextIds) async {
+    if (!_onStartContainerDataCleared && contextIds.isNotEmpty) {
+      _onStartContainerDataCleared = true;
+      await clearContainerData(contextIds);
     }
   }
 

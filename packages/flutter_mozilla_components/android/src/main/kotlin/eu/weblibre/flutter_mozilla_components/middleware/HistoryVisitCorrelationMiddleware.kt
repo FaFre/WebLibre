@@ -31,18 +31,22 @@ class HistoryVisitCorrelationMiddleware :
         next: (BrowserAction) -> Unit,
         action: BrowserAction,
     ) {
-        next(action)
-
+        // Record the correlation BEFORE forwarding the action. A tab's contextId
+        // is stable across a URL change, so it is already readable here — and Gecko
+        // can fire the delegate's onVisited for this navigation as soon as the store
+        // updates. Recording first closes the window where onVisited could resolve
+        // the visit before its correlation exists (and mis-attribute or leak it).
         if (action is ContentAction.UpdateUrlAction) {
             val normalTab = store.state.findNormalTab(action.sessionId)
             if (normalTab != null) {
                 HistoryVisitCorrelationCache.record(action.url, normalTab.contextId)
-                return
-            }
-
-            store.state.findCustomTab(action.sessionId)?.let { customTab ->
-                HistoryVisitCorrelationCache.record(action.url, customTab.contextId)
+            } else {
+                store.state.findCustomTab(action.sessionId)?.let { customTab ->
+                    HistoryVisitCorrelationCache.record(action.url, customTab.contextId)
+                }
             }
         }
+
+        next(action)
     }
 }

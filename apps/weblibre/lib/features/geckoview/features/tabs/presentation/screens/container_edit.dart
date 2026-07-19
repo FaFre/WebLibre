@@ -122,31 +122,33 @@ class ContainerEditScreen extends HookConsumerWidget {
         name: name.isNotEmpty ? name : null,
         color: selectedColor.value,
         isPinned: isPinned.value,
-        metadata: initialContainer.metadata.copyWith(
-          contextualIdentity: contextualIdentity.value,
-          iconData: selectedIcon.value,
-          proxyConnectionId: contextualIdentity.value != null
-              ? proxyConnectionId.value
-              : null,
-          clearDataOnExit:
-              clearDataOnExit.value && contextualIdentity.value != null,
-          excludeFromIndex: excludeFromIndex.value,
-          // Requires a Gecko contextId: the native delegate can't hard-exclude
-          // a container's visits without one. sanitized() enforces the same
-          // invariant defensively on write.
-          excludeFromHistory:
-              excludeFromHistory.value && contextualIdentity.value != null,
-          bypassGlobalProxy:
-              contextualIdentity.value != null &&
-              proxyConnectionId.value == null &&
-              bypassGlobalProxy.value,
-          useCustomColor: useCustomColor.value,
-          assignedSites: assignedSites.value,
-          // Strict mode requires a Gecko contextId (the extension keys
-          // strictness on the tab's cookieStoreId). sanitized() enforces the
-          // same invariant defensively on write.
-          strictMode: strictMode.value && contextualIdentity.value != null,
-        ).sanitized(),
+        metadata: initialContainer.metadata
+            .copyWith(
+              contextualIdentity: contextualIdentity.value,
+              iconData: selectedIcon.value,
+              proxyConnectionId: contextualIdentity.value != null
+                  ? proxyConnectionId.value
+                  : null,
+              clearDataOnExit:
+                  clearDataOnExit.value && contextualIdentity.value != null,
+              excludeFromIndex: excludeFromIndex.value,
+              // Requires a Gecko contextId: the native delegate can't hard-exclude
+              // a container's visits without one. sanitized() enforces the same
+              // invariant defensively on write.
+              excludeFromHistory:
+                  excludeFromHistory.value && contextualIdentity.value != null,
+              bypassGlobalProxy:
+                  contextualIdentity.value != null &&
+                  proxyConnectionId.value == null &&
+                  bypassGlobalProxy.value,
+              useCustomColor: useCustomColor.value,
+              assignedSites: assignedSites.value,
+              // Strict mode requires a Gecko contextId (the extension keys
+              // strictness on the tab's cookieStoreId). sanitized() enforces the
+              // same invariant defensively on write.
+              strictMode: strictMode.value && contextualIdentity.value != null,
+            )
+            .sanitized(),
       );
     }
 
@@ -543,7 +545,9 @@ class ContainerEditScreen extends HookConsumerWidget {
                           value: clearDataOnExit.value,
                           title: const Text('Clear Data on Exit'),
                           subtitle: const Text(
-                            'Clear cookies and site data when app closes',
+                            "Clear cookies and site data for this container's "
+                            'regular tabs when the app closes. Isolated tabs '
+                            'keep separate data.',
                           ),
                           secondary: const Icon(MdiIcons.databaseRemove),
                           onChanged: (contextualIdentity.value != null)
@@ -572,7 +576,9 @@ class ContainerEditScreen extends HookConsumerWidget {
                           title: const Text('Exclude from History'),
                           subtitle: Text(
                             contextualIdentity.value != null
-                                ? "Don't record this container's browsing history"
+                                ? "Don't record new visits from this container's "
+                                      'regular tabs. Existing history is kept; '
+                                      'isolated tabs track separately.'
                                 : 'Requires cookie isolation to be enabled',
                           ),
                           secondary: const Icon(MdiIcons.incognito),

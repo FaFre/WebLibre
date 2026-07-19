@@ -24,6 +24,8 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:weblibre/core/database_registry.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 
@@ -39,6 +41,44 @@ Future<void> exitApp(ProviderContainer container) async {
     logger.i('Private tabs closed');
   } catch (e, st) {
     logger.e('Failed to close tabs', error: e, stackTrace: st);
+  }
+
+  // 1b. Explicit-Quit cleanup for containers with "Clear Data on Exit" enabled.
+  //     Done here — while the databases and Gecko engine are still alive — so the
+  //     clear gets a chance to run on a deliberate Quit rather than only on the
+  //     next launch.
+  //
+  //     Caveat: GeckoView's session-context clear is fire-and-forget (see
+  //     GeckoDeleteBrowsingDataControllerImpl.clearDataForSessionContext) — it
+  //     has no completion signal, so awaiting it does NOT mean the clear
+  //     finished, only that it was dispatched. Since step 3 tears down the
+  //     GeckoRuntime, we give the dispatched clear a short best-effort window to
+  //     reach Gecko first. The startup fallback in browser_view.dart is retained
+  //     as the actual guarantee — it covers force-stop/process death and this
+  //     window elapsing before the clear lands.
+  try {
+    final containersToClear = await container
+        .read(containerRepositoryProvider.notifier)
+        .getContainersToClearOnExit();
+
+    if (containersToClear.isNotEmpty) {
+      await container
+          .read(browserDataServiceProvider.notifier)
+          .clearContainerData(containersToClear);
+      // Best-effort settle: yield before the engine shutdown in step 3 so the
+      // fire-and-forget native clear has a chance to be processed by Gecko.
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      logger.i(
+        'Dispatched data clear for ${containersToClear.length} '
+        'on-exit container(s)',
+      );
+    }
+  } catch (e, st) {
+    logger.e(
+      'Failed to clear container data on exit',
+      error: e,
+      stackTrace: st,
+    );
   }
 
   // 2. Stop Tor proxy (only if it was initialized)

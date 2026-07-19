@@ -188,6 +188,7 @@ class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController 
                         ) || dataTypes.contains(ClearDataType.ONLY_CACHES))
                     ) {
                         callback(Result.failure(Exception("Cookies/Cache must be exclusively!")))
+                        return@withContext
                     }
 
                     // Convert ClearDataType to Engine.BrowsingData flags
@@ -200,8 +201,10 @@ class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController 
                         }
                     }.toIntArray()
 
-                    // Find tabs on this host (so we can detach their engine sessions and
-                    // also discover any container/contextId partitions that need clearing).
+                    // Find tabs on this host so we can detach their engine sessions
+                    // before clearing (across every container — the base-domain clear
+                    // below covers all partitions, so any open session on this host in
+                    // any container could otherwise re-accumulate cleared data).
                     val matchingTabs = components.core.store.state.allTabs.filter { tab ->
                         val tabHost = runCatching { tab.content.url.toUri().host }.getOrNull()
                             ?: return@filter false
@@ -215,22 +218,16 @@ class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController 
                         components.core.store.dispatch(EngineAction.UnlinkEngineSessionAction(it.id))
                     }
 
-                    // GeckoView's clearDataFromBaseDomain (used by engine.clearData(host=))
-                    // only targets the default origin attributes partition. Tabs that live
-                    // inside a contextual identity ("container") store their cookies/storage
-                    // under a `geckoViewSessionContextId` origin attribute that the
-                    // base-domain clear does not touch. To make clearing actually effective
-                    // for container tabs, also fire clearDataForSessionContext for any
-                    // contextIds we found. This is broader than ideal (it clears the whole
-                    // container, not just this host) but there is no GeckoView API to
-                    // combine host + context.
-                    val contextIds = matchingTabs.mapNotNull { it.contextId }.toSet()
-                    contextIds.forEach { contextId ->
-                        components.core.runtime.storageController
-                            .clearDataForSessionContext(contextId)
-                    }
-
-                    // Clear data for the specific host (default partition).
+                    // Clear data for the specific host only. clearDataFromBaseDomain
+                    // (used by engine.clearData(host=)) deletes the site under an
+                    // empty OriginAttributes pattern, which already matches ALL
+                    // partitions — including every container's
+                    // `geckoViewSessionContextId`. So this clears this host across all
+                    // containers WITHOUT touching other sites in those containers.
+                    //
+                    // Do NOT fall back to clearDataForSessionContext here: that wipes a
+                    // container's entire storage (every unrelated site in it), which is
+                    // the container-wide data-loss reported in #524.
                     components.core.engine.clearData(
                         data = Engine.BrowsingData.select(*browsingDataTypes),
                         host = host,
