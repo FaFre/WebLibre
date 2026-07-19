@@ -12,7 +12,7 @@ import eu.weblibre.flutter_mozilla_components.components.Core
 import eu.weblibre.flutter_mozilla_components.components.BackgroundServices
 import eu.weblibre.flutter_mozilla_components.components.Events
 import eu.weblibre.flutter_mozilla_components.components.Features
-import eu.weblibre.flutter_mozilla_components.components.Push
+import eu.weblibre.flutter_mozilla_components.push.Push
 import eu.weblibre.flutter_mozilla_components.components.Search
 import eu.weblibre.flutter_mozilla_components.components.Services
 import eu.weblibre.flutter_mozilla_components.components.UseCases
@@ -75,7 +75,11 @@ class Components(val profileApplicationContext: ProfileContext,
     }
     val features by lazy { Features(core.engine, core.store, addonEvents, tabContentEvents) }
     val search by lazy { Search(profileApplicationContext, core, useCases) }
-    val push by lazy { Push(this) }
+    private val pushDelegate = lazy { Push(this) }
+    val push: Push
+        get() = pushDelegate.value
+    internal val existingPush: Push?
+        get() = pushDelegate.takeIf { it.isInitialized() }?.value
 
     var mainBrowserEngineView: EngineView? = null
     var externalAppEngineView: EngineView? = null

@@ -18,6 +18,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettings
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoGestureEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoHistoryEvents
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPushEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestionEvents
@@ -33,11 +34,13 @@ import eu.weblibre.flutter_mozilla_components.api.GeckoViewportApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
 import eu.weblibre.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
 import eu.weblibre.flutter_mozilla_components.feature.GeckoBookmarksExtensionBridge
+import eu.weblibre.flutter_mozilla_components.push.Push
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import mozilla.components.browser.storage.sync.GlobalPlacesDependencyProvider
 import mozilla.components.browser.session.storage.RecoverableBrowserState
 import mozilla.components.browser.state.action.RestoreCompleteAction
@@ -64,6 +67,8 @@ private const val DEFAULT_QUERY_PARAMETER_STRIPPING_STRIP_LIST =
 private const val UBLOCK_FILTER_LISTS_PREF = "browser.weblibre.uBO.filterLists"
 private const val EXCLUDED_HISTORY_CONTEXT_IDS_PREF =
     "browser.weblibre.excludedHistoryContextIds"
+private const val PROFILE_SWITCH_PERSIST_TIMEOUT_MS = 3000L
+private const val PROFILE_SWITCH_DETACH_TIMEOUT_MS = 2000L
 
 object GlobalComponents {
     private var _components: Components? = null
@@ -73,6 +78,30 @@ object GlobalComponents {
 
     val components: Components?
         get() = _components
+
+    internal val isExternalMode: Boolean
+        get() = currentMode == ComponentsMode.EXTERNAL
+
+    /** Resolve a live Push only when it belongs to the supplied profile context. */
+    fun pushForProfile(context: Context): Push? {
+        val profilePath = (context as? ProfileContext)?.relativePath ?: return null
+        val current = _components ?: return null
+        if (current.profileApplicationContext.relativePath != profilePath) return null
+        return current.existingPush?.takeUnless { it.isClosed }
+    }
+
+    fun resolveActiveProfileContext(context: Context): ProfileContext? =
+        runCatching { ActiveProfile.resolveContext(context.applicationContext) }.getOrNull()
+
+    fun closePush() {
+        _components?.existingPush?.close()
+    }
+
+    fun tearDown() {
+        _components?.existingPush?.close()
+        _components = null
+        currentMode = null
+    }
 
     enum class ComponentsMode {
         FULL,
@@ -115,6 +144,11 @@ object GlobalComponents {
     // path (no Flutter engine); the delegate still hard-excludes persisted
     // container contextIds but skips Dart relation emits.
     var historyEvents: GeckoHistoryEvents? = null
+
+    // Native -> Dart UnifiedPush registration lifecycle. Null when push events
+    // arrive with no Flutter engine attached (the UnifiedPushReceiver cold-start
+    // path), in which case failures are logged natively only.
+    var pushEvents: GeckoPushEvents? = null
 
     // Gecko contextIds of containers with hard exclude-from-history enabled.
     // Pushed from Dart; read by WebLibreHistoryDelegate to skip the Places
@@ -332,6 +366,40 @@ object GlobalComponents {
             previousComponents?.core?.store?.state?.customTabs.orEmpty()
         } else {
             emptyList()
+        }
+
+        previousComponents?.existingPush?.let { previousPush ->
+            if (!isSameProfile) {
+                val targetProfileId = File(applicationContext.relativePath).name
+                    .removePrefix(PwaConstants.PROFILE_DIR_PREFIX)
+                runBlocking {
+                    // Persist the switch while holding the profile lock so an
+                    // in-flight worker or receiver cannot straddle it. Bound only
+                    // the wait for exclusivity; once the atomic write starts it
+                    // must return a definitive result. Failure aborts setup before
+                    // B's components are created.
+                    check(
+                        previousPush.persistProfileSwitch(
+                            targetProfileId,
+                            PROFILE_SWITCH_PERSIST_TIMEOUT_MS,
+                        ),
+                    ) { "Timed out waiting to persist profile switch to $targetProfileId" }
+                    // Detaching the now-inactive profile's transport is best-effort
+                    // cleanup; bound it so a slow distributor cannot stall setup.
+                    runCatching {
+                        withTimeoutOrNull(PROFILE_SWITCH_DETACH_TIMEOUT_MS) {
+                            previousPush.detachTransportForSwitch()
+                        } ?: Logger.warn("Timed out detaching push transport during switch")
+                    }.onFailure {
+                        Logger.warn("Failed to detach push transport during switch", it)
+                    }
+                }
+                // Closing may need the same dispatcher as a timed-out detach.
+                // Mark it closed now, but drain old-profile resources off-main.
+                previousPush.closeDeferred()
+            } else {
+                previousPush.close()
+            }
         }
 
         val newComponents = Components(

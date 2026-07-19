@@ -20,7 +20,12 @@
 package eu.weblibre.flutter_mozilla_components
 
 import android.content.Context
+import android.util.AtomicFile
 import java.io.File
+import java.io.FileNotFoundException
+import java.util.UUID
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 object ActiveProfile {
     @Volatile
@@ -44,11 +49,50 @@ object ActiveProfile {
      * Resolve the active profile prefix from disk.
      * Called in Application.onCreate() to handle cold-start WorkManager scenarios.
      */
-    fun resolveFromDisk(context: Context) {
+    fun resolveFromDisk(context: Context): ProfileContext? = resolveContext(context)
+
+    /** Resolve the active profile without constructing browser components. */
+    @Synchronized
+    fun resolveContext(context: Context): ProfileContext? {
         val profileFile = File(context.filesDir, PwaConstants.CURRENT_PROFILE_FILE)
-        if (!profileFile.exists()) return
-        val uuid = profileFile.readText().trim().ifEmpty { return }
+        val uuid = try {
+            AtomicFile(profileFile).openRead().bufferedReader().use { it.readText() }.trim()
+        } catch (_: FileNotFoundException) {
+            return null
+        }.ifEmpty { return null }
         val relativePath = "${PwaConstants.PROFILES_DIR_NAME}/${PwaConstants.PROFILE_DIR_PREFIX}$uuid"
+        if (!File(context.filesDir, relativePath).isDirectory) return null
+        prefix = File(relativePath).name
+        return ProfileContext(context.applicationContext, relativePath)
+    }
+
+    /** Atomically select the profile used by the next browser process. */
+    @Synchronized
+    fun switchTo(context: Context, profileId: String) {
+        val normalizedId = UUID.fromString(profileId).toString()
+        require(normalizedId == profileId.lowercase()) { "Invalid profile id" }
+
+        val relativePath =
+            "${PwaConstants.PROFILES_DIR_NAME}/${PwaConstants.PROFILE_DIR_PREFIX}$normalizedId"
+        require(File(context.filesDir, relativePath).isDirectory) { "Profile does not exist" }
+
+        val profileFile = File(context.filesDir, PwaConstants.CURRENT_PROFILE_FILE)
+        profileFile.parentFile?.mkdirs()
+        val atomicFile = AtomicFile(profileFile)
+        val output = atomicFile.startWrite()
+        try {
+            output.write(normalizedId.toByteArray(Charsets.UTF_8))
+            atomicFile.finishWrite(output)
+        } catch (error: Throwable) {
+            atomicFile.failWrite(output)
+            throw error
+        }
         prefix = File(relativePath).name
     }
+
+    /** Prevent profile switches from crossing active-profile background work. */
+    internal suspend fun <T> withProfileLock(block: suspend () -> T): T =
+        profileMutex.withLock { block() }
+
+    private val profileMutex = Mutex()
 }

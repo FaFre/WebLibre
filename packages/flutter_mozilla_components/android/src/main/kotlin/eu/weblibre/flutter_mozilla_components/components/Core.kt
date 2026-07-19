@@ -33,6 +33,7 @@ import eu.weblibre.flutter_mozilla_components.middleware.SandboxCaptureMiddlewar
 import eu.weblibre.flutter_mozilla_components.middleware.SaveToPDFMiddleware
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
+import eu.weblibre.flutter_mozilla_components.push.WebNotificationDrainCoordinator
 import kotlinx.coroutines.FlowPreview
 import mozilla.components.browser.engine.gecko.permission.GeckoSitePermissionsStorage
 import mozilla.components.browser.engine.gecko.util.EngineDownloadDelegate
@@ -225,6 +226,11 @@ class Core(
         HistoryMetadataService(storage = historyStorage)
     }
 
+    // Wraps the WebNotificationFeature delegate so headless push deliveries can
+    // wait for the service worker to actually post its notification before the
+    // process loses foreground priority. Installed when [store] is created.
+    val webNotificationDrainCoordinator = WebNotificationDrainCoordinator()
+
     @OptIn(FlowPreview::class)
     val store by lazy {
         BrowserStore(
@@ -282,7 +288,11 @@ class Core(
 
             icons.install(engine, this)
 
-            WebNotificationFeature(
+            // WebNotificationFeature self-registers as the engine's notification
+            // delegate in its init; immediately wrap it with the drain
+            // coordinator so headless deliveries observe onShowNotification while
+            // notifications still display exactly as before.
+            val webNotificationFeature = WebNotificationFeature(
                 context,
                 engine,
                 icons,
@@ -291,6 +301,8 @@ class Core(
                 NotificationActivity::class.java,
                 notificationsDelegate = components.notificationsDelegate,
             )
+            webNotificationDrainCoordinator.delegate = webNotificationFeature
+            engine.registerWebNotificationDelegate(webNotificationDrainCoordinator)
 
             MediaSessionFeature(context, MediaSessionService::class.java, this).start()
         }

@@ -11,6 +11,7 @@ import eu.weblibre.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
 import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureFeature
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPushApi
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -43,7 +44,12 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
     SandboxCaptureFeature.detachFlutterEvents(binding.binaryMessenger)
+    GeckoPushApi.setUp(binding.binaryMessenger, null)
+    browserApi.disposePushApi()
     GlobalComponents.historyEvents = null
+    // The UnifiedPush receiver outlives the Flutter engine; without this it would keep dispatching
+    // onto a dead messenger. Failures are still retained on Push.lastError.
+    GlobalComponents.pushEvents = null
   }
 
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {

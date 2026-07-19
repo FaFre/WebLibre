@@ -12,6 +12,9 @@ import java.io.File
 class ProfileContext(private val base: Context, val relativePath: String) :
     ContextWrapper(base) {
 
+    internal val rootApplicationContext: Context
+        get() = base.applicationContext
+
     private val subfolderRoot =
         File(base.filesDir, relativePath) // /data/user/0/com.app/profiles/default
 

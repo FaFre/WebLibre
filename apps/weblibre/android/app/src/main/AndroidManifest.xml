@@ -75,7 +75,7 @@
             tools:node="remove" />
 
         <receiver
-            android:name="eu.weblibre.flutter_mozilla_components.receivers.UnifiedPushReceiver"
+            android:name="eu.weblibre.flutter_mozilla_components.push.UnifiedPushReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -83,6 +83,7 @@
                 <action android:name="org.unifiedpush.android.connector.UNREGISTERED" />
                 <action android:name="org.unifiedpush.android.connector.NEW_ENDPOINT" />
                 <action android:name="org.unifiedpush.android.connector.REGISTRATION_FAILED" />
+                <action android:name="org.unifiedpush.android.connector.TEMP_UNAVAILABLE" />
             </intent-filter>
         </receiver>
         

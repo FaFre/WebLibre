@@ -63,6 +63,10 @@ part of 'routes.dart';
       name: 'ExperimentalSettingsRoute',
       path: 'experimental',
     ),
+    TypedGoRoute<WebPushSettingsRoute>(
+      name: 'WebPushSettingsRoute',
+      path: 'push',
+    ),
     TypedGoRoute<BangSettingsRoute>(name: 'BangSettingsRoute', path: 'bang'),
     TypedGoRoute<WebEngineHardeningRoute>(
       name: 'WebEngineHardeningRoute',
@@ -229,6 +233,13 @@ class ExperimentalSettingsRoute extends GoRouteData
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const ExperimentalSettingsScreen();
+  }
+}
+
+class WebPushSettingsRoute extends GoRouteData with $WebPushSettingsRoute {
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const WebPushSettingsScreen();
   }
 }
 

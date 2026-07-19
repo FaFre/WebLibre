@@ -19,7 +19,6 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
@@ -27,20 +26,8 @@ import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/utils/exit_app.dart';
-import 'package:weblibre/utils/ui_helper.dart';
 
 const List<SettingsSectionDefinition> experimentalSettingsSections = [
-  SettingsSectionDefinition(
-    title: 'Web Push',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Choose UnifiedPush Distributor',
-        subtitle: 'Select the app that delivers website push notifications',
-        keywords: ['notifications', 'push'],
-        child: _UnifiedPushDistributorTile(),
-      ),
-    ],
-  ),
   SettingsSectionDefinition(
     title: 'Runtime & Startup',
     entries: [
@@ -67,42 +54,9 @@ class ExperimentalSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const SettingsDetailScaffold(
       title: 'Experimental',
-      subtitle: 'Push delivery, runtime isolation, and startup behavior.',
+      subtitle: 'Runtime isolation and startup behavior.',
       icon: MdiIcons.flaskOutline,
       sections: experimentalSettingsSections,
-    );
-  }
-}
-
-class _UnifiedPushDistributorTile extends StatelessWidget {
-  const _UnifiedPushDistributorTile();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: const Icon(MdiIcons.bellBadgeOutline),
-      title: const Text('Choose UnifiedPush Distributor'),
-      subtitle: const Text(
-        'Select the app that should deliver website push notifications to WebLibre.',
-      ),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () async {
-        final success = await GeckoBrowserService()
-            .pickUnifiedPushDistributor();
-
-        if (!context.mounted) {
-          return;
-        }
-
-        if (success) {
-          showInfoMessage(context, 'UnifiedPush distributor configured.');
-        } else {
-          showErrorMessage(
-            context,
-            'Could not configure UnifiedPush. Install a distributor and try again.',
-          );
-        }
-      },
     );
   }
 }

@@ -20,8 +20,10 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:weblibre/core/filesystem.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/features/user/data/models/auth_settings.dart';
+import 'package:weblibre/features/web_push/domain/providers.dart';
 
 part 'profile.g.dart';
 
@@ -37,7 +39,23 @@ class ProfileRepository extends _$ProfileRepository {
   }
 
   Future<void> switchProfile(String id) async {
-    await filesystem.setStartupProfile(UuidValue.withValidation(id));
+    final profileId = UuidValue.withValidation(id).uuid;
+    final pushService = ref.read(pushServiceProvider);
+
+    try {
+      await pushService.suspendForProfileSwitch(profileId);
+    } catch (error, stackTrace) {
+      try {
+        await pushService.renewRegistration();
+      } catch (renewError, renewStackTrace) {
+        logger.e(
+          'Failed to restore push registration after profile switch failure',
+          error: renewError,
+          stackTrace: renewStackTrace,
+        );
+      }
+      Error.throwWithStackTrace(error, stackTrace);
+    }
   }
 
   Future<Profile> createProfile({

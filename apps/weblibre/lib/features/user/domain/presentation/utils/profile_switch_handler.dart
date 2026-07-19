@@ -55,9 +55,16 @@ Future<void> handleSwitchProfile(
   );
 
   if (shouldSwitch == true) {
-    await ref
-        .read(profileRepositoryProvider.notifier)
-        .switchProfile(profile.id);
+    try {
+      await ref
+          .read(profileRepositoryProvider.notifier)
+          .switchProfile(profile.id);
+    } catch (error) {
+      if (context.mounted) {
+        ui_helper.showErrorMessage(context, 'Could not switch profile: $error');
+      }
+      return;
+    }
     await exitApp(ref.container);
   }
 }

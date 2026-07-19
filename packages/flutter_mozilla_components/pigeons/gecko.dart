@@ -1417,8 +1417,6 @@ abstract class GeckoBrowserApi {
   });
   bool isDefaultBrowser();
   void requestDefaultBrowser();
-  @async
-  bool pickUnifiedPushDistributor();
   void shutdown();
 }
 
@@ -3145,4 +3143,106 @@ abstract class GeckoGestureEvents {
   ///
   /// [sequence] Event sequence number for ordering.
   void onGestureReset(int sequence);
+}
+
+/// Lifecycle state of the selected UnifiedPush distributor.
+enum PushDistributorStatus {
+  /// No distributor app is installed on the device.
+  noneAvailable,
+
+  /// Distributors are installed but the user has not chosen one.
+  notSelected,
+
+  /// A distributor is chosen but has not acknowledged our registration yet.
+  pending,
+
+  /// A distributor is chosen and has acknowledged our registration.
+  ready,
+
+  /// A distributor was chosen previously but is no longer installed. Web push
+  /// is dead in this state and there is no fallback transport.
+  unavailable,
+}
+
+class PushDistributor {
+  final String packageName;
+
+  /// Human-readable app label, or null if the package is no longer installed.
+  final String? label;
+
+  PushDistributor({required this.packageName, required this.label});
+}
+
+class PushStatus {
+  final PushDistributorStatus status;
+  final PushDistributor? current;
+  final List<PushDistributor> available;
+
+  /// Most recent distributor registration failure, or null if none.
+  ///
+  /// Held natively rather than delivered as a one-shot event: registrations are
+  /// attempted at startup and from background broadcasts, both of which can run
+  /// long before any Dart listener exists.
+  final String? lastError;
+
+  PushStatus({
+    required this.status,
+    required this.current,
+    required this.available,
+    required this.lastError,
+  });
+}
+
+class PushSubscription {
+  /// Subscription identifier, which for web push is the site's origin.
+  final String scope;
+
+  /// Whether the distributor has handed back an endpoint for this scope.
+  final bool hasEndpoint;
+
+  PushSubscription({required this.scope, required this.hasEndpoint});
+}
+
+/// Dart → Kotlin. UnifiedPush distributor management and web push introspection.
+@HostApi()
+abstract class GeckoPushApi {
+  @async
+  PushStatus getPushStatus();
+
+  /// Selects [packageName], which must be one of [PushStatus.available].
+  ///
+  /// The picker is built in Dart rather than delegated to the connector's own
+  /// dialog, which would save the selection against a non-profile context.
+  @async
+  void setDistributor(String packageName);
+
+  /// Forgets the current distributor. This is the off switch for web push.
+  @async
+  void removeDistributor();
+
+  @async
+  void renewRegistration();
+
+  /// Pauses push transport for the current profile before switching profiles.
+  /// Site subscriptions and the chosen distributor are retained for restoration
+  /// when this profile becomes active again.
+  @async
+  void suspendForProfileSwitch(String targetProfileId);
+
+  /// Subscriptions Gecko has created, read from the UnifiedPush store. Read-only:
+  /// there is no app→Gecko channel to revoke a subscription, so removal has to go
+  /// through the site's notification permission instead.
+  @async
+  List<PushSubscription> getSubscriptions();
+}
+
+/// Kotlin → Dart. Push registration lifecycle.
+///
+/// Registration failures reach Dart through [PushStatus.lastError] rather than a
+/// dedicated event, so a failure raised before any Dart listener is attached is
+/// still visible the first time the settings screen reads the status.
+@FlutterApi()
+abstract class GeckoPushEvents {
+  /// [sequence] Event sequence number for ordering.
+  void onPushStatusChanged(int sequence, PushStatus status);
 }

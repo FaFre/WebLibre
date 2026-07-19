@@ -111,6 +111,7 @@ import 'package:weblibre/features/web_feed/presentation/screens/feed_article_lis
 import 'package:weblibre/features/web_feed/presentation/screens/feed_edit.dart';
 import 'package:weblibre/features/web_feed/presentation/screens/feed_list.dart';
 import 'package:weblibre/features/web_feed/presentation/select_feed_dialog.dart';
+import 'package:weblibre/features/web_push/presentation/screens/web_push_settings.dart';
 
 part 'routes.bangs.dart';
 part 'routes.bookmarks.dart';

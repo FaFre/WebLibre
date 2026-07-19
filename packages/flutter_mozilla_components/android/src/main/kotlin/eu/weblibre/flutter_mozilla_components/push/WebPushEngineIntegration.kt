@@ -6,8 +6,11 @@ package eu.weblibre.flutter_mozilla_components.push
 
 import android.util.Base64
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import mozilla.components.concept.engine.Engine
 import mozilla.components.concept.engine.webpush.WebPushDelegate
 import mozilla.components.concept.engine.webpush.WebPushHandler
@@ -42,6 +45,25 @@ class WebPushEngineIntegration(
 
     fun stop() {
         pushFeature.unregister(this)
+    }
+
+    suspend fun deliverMessage(scope: PushScope, payload: ByteArray?) {
+        withContext(Dispatchers.Main.immediate) {
+            checkNotNull(handler) { "Web push handler is not initialized" }
+                .onPushMessage(scope, payload)
+        }
+    }
+
+    suspend fun invalidateEndpoint(scope: PushScope) {
+        withContext(Dispatchers.Main.immediate) {
+            handler?.onSubscriptionChanged(scope)
+        }
+    }
+
+    fun close() {
+        stop()
+        handler = null
+        coroutineScope.cancel()
     }
 
     override fun onMessageReceived(scope: PushScope, message: ByteArray?) {

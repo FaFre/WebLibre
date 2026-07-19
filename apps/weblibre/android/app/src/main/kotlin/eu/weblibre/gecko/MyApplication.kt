@@ -24,6 +24,7 @@ import android.content.SharedPreferences
 import eu.weblibre.flutter_mozilla_components.ActiveProfile
 import eu.weblibre.flutter_mozilla_components.MegazordSetup
 import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureFeature
+import eu.weblibre.flutter_mozilla_components.push.PushMessageScheduler
 
 class MyApplication : Application() {
     override fun onCreate() {
@@ -33,7 +34,7 @@ class MyApplication : Application() {
 
         // Resolve active profile EARLY so cold-start WorkManager workers
         // get profile-prefixed SharedPreferences
-        ActiveProfile.resolveFromDisk(this)
+        ActiveProfile.resolveFromDisk(this)?.let(PushMessageScheduler::recoverLater)
 
         // Rehydrate the sandbox capture registry from the on-disk JSON mirror
         // before Gecko has a chance to start restoring tabs. Each entry gets

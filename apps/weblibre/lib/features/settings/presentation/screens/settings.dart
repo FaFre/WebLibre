@@ -34,6 +34,7 @@ import 'package:weblibre/features/settings/presentation/screens/search_settings.
 import 'package:weblibre/features/settings/presentation/screens/web_content_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/settings/presentation/widgets/toolbar_layout_content.dart';
+import 'package:weblibre/features/web_push/presentation/screens/web_push_settings.dart';
 
 class SettingsScreen extends HookWidget {
   const SettingsScreen({super.key});
@@ -134,6 +135,14 @@ _CategoryGroups _buildCategories() {
       keywords: const ['reader mode', 'pdf', 'fonts'],
       sections: webContentSettingsSections,
       onTap: (context) => WebContentSettingsRoute().push(context),
+    ),
+    _SettingsCategoryDefinition(
+      title: 'Notifications',
+      subtitle: 'Web push delivery, distributor, site subscriptions',
+      icon: MdiIcons.bellBadgeOutline,
+      keywords: const ['push', 'unifiedpush', 'ntfy', 'distributor'],
+      sections: webPushSettingsSections,
+      onTap: (context) => WebPushSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
       title: 'Search',
