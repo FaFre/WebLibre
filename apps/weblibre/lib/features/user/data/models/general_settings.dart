@@ -444,7 +444,7 @@ class GeneralSettings with FastEquatable {
        customTabsEnabled = customTabsEnabled ?? true,
        enableLocalSearchIndex = enableLocalSearchIndex ?? true,
        indexPrivateTabs = indexPrivateTabs ?? false,
-       acceptSuggestionOnSubmit = acceptSuggestionOnSubmit ?? false,
+       acceptSuggestionOnSubmit = acceptSuggestionOnSubmit ?? true,
        pureBlack = pureBlack ?? false,
        globalDesktopMode = globalDesktopMode ?? false,
        desktopModeSites = desktopModeSites ?? const [],

@@ -90,7 +90,7 @@ class AutoSuggestTextField extends HookWidget {
     this.enableSuggestions = true,
     this.autocorrect = false,
     this.textFieldKey,
-    this.acceptSuggestionOnSubmit = false,
+    this.acceptSuggestionOnSubmit = true,
   });
 
   bool _suggestionHasMatch() =>
