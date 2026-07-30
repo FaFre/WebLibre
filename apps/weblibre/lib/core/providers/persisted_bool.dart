@@ -27,23 +27,41 @@ import 'package:weblibre/features/user/data/providers.dart';
 part 'persisted_bool.g.dart';
 
 enum PersistedBoolKey {
-  extensionsExpanded(key: 'ExtensionsExpanded', defaultValue: false),
-  connectionsExpanded(key: 'ConnectionsExpanded', defaultValue: true),
+  extensionsExpanded(
+    key: 'ExtensionsExpanded',
+    defaultValue: false,
+    cacheTime: StorageCacheTime(Duration(days: 30)),
+  ),
+  connectionsExpanded(
+    key: 'ConnectionsExpanded',
+    defaultValue: false,
+    cacheTime: StorageCacheTime(Duration(days: 30)),
+  ),
   searchSuggestionsExpanded(
     key: 'SearchSuggestionsExpanded',
     defaultValue: true,
+    cacheTime: StorageCacheTime(Duration(days: 30)),
   ),
-  infoboxExpanded(key: 'InfoboxExpanded', defaultValue: true),
+  infoboxExpanded(
+    key: 'InfoboxExpanded',
+    defaultValue: true,
+    cacheTime: StorageCacheTime(Duration(days: 30)),
+  ),
   tabSuggestions(key: 'TabSuggestions', defaultValue: false),
   supporterBannerDismissed(
     key: 'SupporterBannerDismissed',
     defaultValue: false,
   );
 
-  const PersistedBoolKey({required this.key, required this.defaultValue});
+  const PersistedBoolKey({
+    required this.key,
+    required this.defaultValue,
+    this.cacheTime = StorageCacheTime.unsafe_forever,
+  });
 
   final String key;
   final bool defaultValue;
+  final StorageCacheTime cacheTime;
 }
 
 @Riverpod(keepAlive: true)
@@ -58,6 +76,7 @@ class PersistedBool extends _$PersistedBool {
     persist(
       ref.watch(riverpodDatabaseStorageProvider),
       key: key.key,
+      options: StorageOptions(cacheTime: key.cacheTime),
       encode: (state) => jsonEncode([state]),
       decode: (encoded) => (jsonDecode(encoded) as List<dynamic>).first as bool,
     );

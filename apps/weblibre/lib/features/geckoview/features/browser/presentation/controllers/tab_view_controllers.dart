@@ -54,6 +54,7 @@ class TabsViewModeController extends _$TabsViewModeController {
     persist(
       ref.watch(riverpodDatabaseStorageProvider),
       key: 'TabsViewMode',
+      options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
       encode: (state) => jsonEncode([state.name]),
       decode: (encoded) {
         final name = (jsonDecode(encoded) as List<dynamic>).first as String;
@@ -101,6 +102,9 @@ class TabViewFilterController extends _$TabViewFilterController {
     persist(
       ref.watch(riverpodDatabaseStorageProvider),
       key: 'TabViewFilterOptions',
+      options: const StorageOptions(
+        cacheTime: StorageCacheTime(Duration(days: 7)),
+      ),
     );
 
     return stateOrNull ?? TabViewFilterOptions.withDefaults();

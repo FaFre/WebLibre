@@ -59,6 +59,7 @@ class WebSearchSettingsController extends _$WebSearchSettingsController {
     persist(
       ref.watch(riverpodDatabaseStorageProvider),
       key: 'WebSearchSettings',
+      options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
     );
 
     return stateOrNull ?? WebSearchSettings.withDefaults();

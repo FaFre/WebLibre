@@ -34,6 +34,7 @@ class BackupDirectoryUri extends _$BackupDirectoryUri {
     persist(
       ref.watch(riverpodDatabaseStorageProvider),
       key: 'BackupDirectoryUri',
+      options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
       encode: (state) => state?.toString() ?? '',
       decode: (encoded) => encoded.isEmpty ? null : Uri.parse(encoded),
     );

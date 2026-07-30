@@ -348,6 +348,7 @@ class PinnedAddonIds extends _$PinnedAddonIds {
     persist(
       ref.watch(riverpodDatabaseStorageProvider),
       key: 'PinnedAddonIds',
+      options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
       encode: (state) => jsonEncode(state.toList()),
       decode: (encoded) =>
           (jsonDecode(encoded) as List<dynamic>).cast<String>().toSet(),

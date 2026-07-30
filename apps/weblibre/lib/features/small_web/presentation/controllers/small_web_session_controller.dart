@@ -113,6 +113,9 @@ class SmallWebSessionController extends _$SmallWebSessionController {
     final persistFuture = persist(
       ref.watch(riverpodDatabaseStorageProvider),
       key: 'SmallWebSessionState',
+      options: const StorageOptions(
+        cacheTime: StorageCacheTime(Duration(days: 30)),
+      ),
       encode: (state) => jsonEncode(
         (state.value ?? SmallWebSessionState.initial(SmallWebSourceKind.kagi))
             .toJson(),

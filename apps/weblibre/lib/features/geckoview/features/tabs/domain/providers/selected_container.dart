@@ -90,6 +90,7 @@ class SelectedContainer extends _$SelectedContainer {
     final persistResult = persist(
       ref.watch(riverpodDatabaseStorageProvider),
       key: 'SelectedContainer',
+      options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
       encode: (state) => jsonEncode([state]),
       decode: (encoded) =>
           (jsonDecode(encoded) as List<dynamic>).first as String?,

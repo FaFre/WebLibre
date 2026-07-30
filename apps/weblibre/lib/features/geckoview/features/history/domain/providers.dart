@@ -61,6 +61,9 @@ class HistoryVisitsFilter extends _$HistoryVisitsFilter {
     persist(
       ref.watch(riverpodDatabaseStorageProvider),
       key: 'HistoryVisitsFilterOptions',
+      options: const StorageOptions(
+        cacheTime: StorageCacheTime(Duration(days: 7)),
+      ),
     );
 
     return stateOrNull ?? HistoryFilterOptions.withDefaults();
@@ -86,6 +89,9 @@ class HistoryDownloadsFilter extends _$HistoryDownloadsFilter {
     persist(
       ref.watch(riverpodDatabaseStorageProvider),
       key: 'HistoryDownloadsFilterOptions',
+      options: const StorageOptions(
+        cacheTime: StorageCacheTime(Duration(days: 7)),
+      ),
     );
 
     return stateOrNull ??

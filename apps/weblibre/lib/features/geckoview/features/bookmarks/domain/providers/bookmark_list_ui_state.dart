@@ -34,6 +34,7 @@ class BookmarkListUiStateNotifier extends _$BookmarkListUiStateNotifier {
     persist(
       ref.watch(riverpodDatabaseStorageProvider),
       key: 'BookmarkListUiState',
+      options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
     );
 
     return stateOrNull ?? BookmarkListUiState();

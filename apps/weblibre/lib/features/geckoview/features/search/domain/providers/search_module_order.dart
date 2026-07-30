@@ -96,6 +96,7 @@ class SearchModuleOrder extends _$SearchModuleOrder {
     persist(
       ref.watch(riverpodDatabaseStorageProvider),
       key: group.key,
+      options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
       encode: (state) => jsonEncode(state.map((e) => e.toJson()).toList()),
       decode: (encoded) {
         final decoded = (jsonDecode(encoded) as List<dynamic>)
