@@ -1235,8 +1235,6 @@ class BrowserScreen extends HookConsumerWidget {
 
     // Get pixel ratio for converting logical pixels to physical pixels
     final pixelRatio = MediaQuery.of(context).devicePixelRatio;
-    final bottomSystemInsetPx =
-        (MediaQuery.viewPaddingOf(context).bottom * pixelRatio).round();
 
     // Watch find-in-page visibility for the selected tab
     final findInPageVisible =
@@ -1274,39 +1272,34 @@ class BrowserScreen extends HookConsumerWidget {
         : 0.0;
     final stableToolbarHeightPx = (stableToolbarHeight * pixelRatio).round();
 
-    // Compute toolbar visibility for keyboard inset math.
-    // Uses ref.watch via the toolbarDismissed useState to avoid
-    // subscribing to every hide/show toggle.
-    final toolbarVisibleForLayout =
-        sheetDisplayed || (!tabInFullScreen && !toolbarDismissed.value);
-
-    final keyboardHeightPx = useState<int?>(null);
+    final keyboardVisibleState = useState(false);
 
     useOnStreamChange(
       viewportService.keyboardEvents,
       onData: (event) {
         if (!event.isAnimating) {
-          final nextKeyboardHeightPx = event.isVisible
-              ? event.heightPx + bottomSystemInsetPx
-              : null;
-          if (keyboardHeightPx.value != nextKeyboardHeightPx) {
-            keyboardHeightPx.value = nextKeyboardHeightPx;
-          }
+          keyboardVisibleState.value = event.isVisible;
         }
       },
     );
 
-    final keyboardVisible = keyboardHeightPx.value != null;
+    final keyboardVisible = keyboardVisibleState.value;
 
-    final bottomLayoutReservedPx = (!autoHideTabBar && toolbarVisibleForLayout)
-        ? (bottomAppBarTotalHeight * pixelRatio).round()
-        : 0;
-    final keyboardViewportHeightPx = keyboardVisible
-        ? math.max(0, keyboardHeightPx.value! - bottomLayoutReservedPx)
-        : 0;
-
+    // While the keyboard is up, report only the chrome that lifts itself above
+    // it. Gecko already insets its visual viewport for the IME on its own, so
+    // encoding the keyboard as dynamic toolbar chrome double-counts the bottom
+    // occlusion and leaves fixed-bottom page content cut off.
+    //
+    // The find-in-page bar anchors at max(toolbar, viewInsets.bottom), i.e. it
+    // floats above the keyboard over visible page content, so it must be
+    // reported. The bottom toolbar (Layer 2) is Positioned(bottom: 0) with no
+    // viewInsets handling and the scaffold is resizeToAvoidBottomInset: false,
+    // so it stays *behind* the keyboard even when force-shown (e.g. via
+    // showToolbarAsExpanded on form focus) and must not be reported. If Layer 2
+    // ever gains keyboard-clearing offsets, stableToolbarHeightPx has to be
+    // added back here.
     final effectiveToolbarHeightPx = keyboardVisible
-        ? keyboardViewportHeightPx + findInPageHeightPx
+        ? findInPageHeightPx
         : stableToolbarHeightPx;
 
     final lastToolbarMaxHeightPx = useRef<int?>(null);
