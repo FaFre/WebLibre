@@ -271,7 +271,7 @@
 
         <meta-data
             android:name="io.flutter.embedding.android.EnableImpeller"
-            android:value="true" />
+            android:value="${enableImpeller}" />
 
         <!-- HCPP (Hybrid Composition++) is still experimental and mis-maps
              platform-view touch coordinates when the activity runs in a resized

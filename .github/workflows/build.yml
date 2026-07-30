@@ -147,9 +147,13 @@ jobs:
           IPTPROXY_SOURCE: ${{ runner.temp }}/IPtProxy
         run: melos run build-go-runtime --no-select
 
-      - name: Build APK (Alpha)
+      - name: Build APK (Alpha, Impeller)
         if: steps.build-type.outputs.is_prerelease == 'true'
-        run: melos run build-browser-alpha --no-select
+        run: melos run build-browser-alpha-impeller --no-select
+
+      - name: Build APK (Alpha, Legacy renderer)
+        if: steps.build-type.outputs.is_prerelease == 'true'
+        run: melos run build-browser-alpha-legacy --no-select
 
       - name: Build APK (Stable)
         if: steps.build-type.outputs.is_prerelease == 'false'
@@ -164,7 +168,7 @@ jobs:
         if: steps.build-type.outputs.is_prerelease == 'true'
         uses: ncipollo/release-action@v1.17.0
         with:
-          artifacts: "apps/weblibre/build/app/outputs/apk/alpha/release/*.apk"
+          artifacts: "apps/weblibre/build/app/outputs/apk/alphaImpeller/release/*.apk,apps/weblibre/build/app/outputs/apk/alphaLegacy/release/*.apk"
           prerelease: true
 
       - name: Create github artifact release (Full)

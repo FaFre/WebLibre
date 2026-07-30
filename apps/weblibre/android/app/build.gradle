@@ -43,6 +43,10 @@ android {
         targetSdk = 37
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
+        // Whether the Flutter engine renders via Impeller or the legacy Skia
+        // backend. Read by io.flutter.embedding.android.EnableImpeller in
+        // AndroidManifest.xml. Overridden per-flavor below.
+        manifestPlaceholders = [enableImpeller: "true"]
     }
 
     flavorDimensions "track"
@@ -51,11 +55,32 @@ android {
             dimension "track"
             manifestPlaceholders = [appName: "WebLibre"]
         }
-        alpha {
+        // Same alpha release slot (applicationId/versionName suffix), split into
+        // two variants so Impeller and the legacy Skia renderer can be compared
+        // side by side. The renderer is chosen at Flutter engine startup via a
+        // manifest meta-data flag and cannot be switched at runtime, hence two
+        // separate builds rather than a single toggle.
+        alphaImpeller {
             dimension "track"
             applicationIdSuffix ".alpha"
             versionNameSuffix "-alpha"
-            manifestPlaceholders = [appName: "WebLibre Alpha"]
+            manifestPlaceholders = [appName: "WebLibre Alpha", enableImpeller: "true"]
+        }
+        alphaLegacy {
+            dimension "track"
+            applicationIdSuffix ".alpha"
+            versionNameSuffix "-alpha"
+            manifestPlaceholders = [appName: "WebLibre Alpha (Legacy)", enableImpeller: "false"]
+        }
+    }
+
+    sourceSets {
+        // Both alpha variants share the existing alpha launcher icon/branding.
+        alphaImpeller {
+            res.srcDirs += 'src/alpha/res'
+        }
+        alphaLegacy {
+            res.srcDirs += 'src/alpha/res'
         }
     }
 
