@@ -12152,6 +12152,46 @@ interface GeckoFetchApi {
   }
 }
 /**
+ * Native -> Dart progress for a bulk bookmark insertion.
+ *
+ * A large import is a single [GeckoBookmarksApi.insertTree] call that can run
+ * for a long time, so it reports how far along it is rather than leaving the
+ * app with nothing to show. Emission is throttled natively, so this fires
+ * far less often than once per bookmark.
+ *
+ * Generated class from Pigeon that represents Flutter messages that can be called from Kotlin.
+ */
+class GeckoBookmarksEvents(private val binaryMessenger: BinaryMessenger, private val messageChannelSuffix: String = "") {
+  companion object {
+    /** The codec used by GeckoBookmarksEvents. */
+    val codec: MessageCodec<Any?> by lazy {
+      GeckoPigeonCodec()
+    }
+  }
+  /**
+   * [insertedItemCount] is the running number of bookmark items written by the
+   * insertion currently in progress, counted from the start of that one call.
+   * Dart adds the offset of any earlier calls to get an overall figure.
+   */
+  fun onImportProgress(insertedItemCountArg: Long, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoBookmarksEvents.onImportProgress$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(insertedItemCountArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+}
+/**
  * Controls GeckoView's viewport behavior for dynamic toolbar and keyboard handling.
  *
  * This API allows Flutter to control how GeckoView adjusts its internal viewport

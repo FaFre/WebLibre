@@ -30,6 +30,40 @@
 /// dropped during parsing rather than modelled here.
 library;
 
+/// What an import is doing right now.
+enum BookmarkImportPhase {
+  /// Reading and parsing the file, off the UI isolate.
+  parsing,
+
+  /// Emptying the existing roots, for a replacing import.
+  erasing,
+
+  /// Writing the parsed tree into storage.
+  inserting,
+}
+
+/// How far along an import is, for display while it runs.
+class BookmarkImportProgress {
+  final BookmarkImportPhase phase;
+
+  /// Bookmarks written so far. Zero outside [BookmarkImportPhase.inserting].
+  final int inserted;
+
+  /// Bookmarks the file is expected to yield, or 0 while still unknown —
+  /// during parsing there is nothing to count against yet.
+  final int total;
+
+  const BookmarkImportProgress({
+    required this.phase,
+    this.inserted = 0,
+    this.total = 0,
+  });
+
+  /// Fraction complete, or null when it cannot be known and the UI should show
+  /// an indeterminate indicator instead.
+  double? get fraction => total > 0 ? (inserted / total).clamp(0.0, 1.0) : null;
+}
+
 /// A single node of a parsed bookmark tree.
 sealed class ImportBookmarkNode {
   /// Creation time recorded in the imported file, or null if it had none.

@@ -35,6 +35,7 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_list_ui_state.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_sort_type.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmark_list_ui_state.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
@@ -42,6 +43,7 @@ import 'package:weblibre/features/geckoview/features/bookmarks/domain/utils/book
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/delete_bookmark_dialog.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/delete_folder_dialog.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/import_bookmarks_dialog.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/import_progress_dialog.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/select_bookmark_folder_dialog.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_import_isolate.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
@@ -1086,15 +1088,39 @@ class BookmarkListScreen extends HookConsumerWidget {
       final shouldReplace = await showImportBookmarksDialog(context);
       if (shouldReplace == null) return; // User cancelled dialog
 
-      // Reading and parsing happen in a background isolate, so a large file
-      // does not freeze the UI while it is being processed.
-      final count = await ref
-          .read(bookmarksRepositoryProvider.notifier)
-          .importFromFile(
-            path: file.path!,
-            format: format,
-            replace: shouldReplace,
-          );
+      if (!context.mounted) return;
+
+      // Writing tens of thousands of bookmarks takes long enough that the app
+      // would look frozen without something to watch.
+      final progress = ValueNotifier<BookmarkImportProgress>(
+        const BookmarkImportProgress(phase: BookmarkImportPhase.parsing),
+      );
+
+      final progressDialog = showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => ImportProgressDialog(progress: progress),
+      );
+
+      final int count;
+      try {
+        // Reading and parsing happen in a background isolate, so a large file
+        // does not freeze the UI while it is being processed.
+        count = await ref
+            .read(bookmarksRepositoryProvider.notifier)
+            .importFromFile(
+              path: file.path!,
+              format: format,
+              replace: shouldReplace,
+              onProgress: (value) => progress.value = value,
+            );
+      } finally {
+        if (context.mounted) {
+          Navigator.of(context, rootNavigator: true).pop();
+          await progressDialog;
+        }
+        progress.dispose();
+      }
 
       if (context.mounted) {
         showInfoMessage(context, 'Imported $count bookmarks successfully');

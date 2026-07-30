@@ -2512,6 +2512,20 @@ class BookmarkInsertTreeResult {
   });
 }
 
+/// Native -> Dart progress for a bulk bookmark insertion.
+///
+/// A large import is a single [GeckoBookmarksApi.insertTree] call that can run
+/// for a long time, so it reports how far along it is rather than leaving the
+/// app with nothing to show. Emission is throttled natively, so this fires
+/// far less often than once per bookmark.
+@FlutterApi()
+abstract class GeckoBookmarksEvents {
+  /// [insertedItemCount] is the running number of bookmark items written by the
+  /// insertion currently in progress, counted from the start of that one call.
+  /// Dart adds the offset of any earlier calls to get an overall figure.
+  void onImportProgress(int insertedItemCount);
+}
+
 /// Class for making alterations to any bookmark node
 class BookmarkInfo {
   final String? parentGuid;

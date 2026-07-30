@@ -18,6 +18,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettings
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAppLinkEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoGestureEvents
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBookmarksEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoHistoryEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPushEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionEvents
@@ -145,6 +146,11 @@ object GlobalComponents {
     // path (no Flutter engine); the delegate still hard-excludes persisted
     // container contextIds but skips Dart relation emits.
     var historyEvents: GeckoHistoryEvents? = null
+
+    // Native -> Dart progress for a running bookmark import. Null whenever no
+    // import is in flight or Flutter is detached; progress is purely advisory,
+    // so a missing sink only means the UI shows no percentage.
+    var bookmarksEvents: GeckoBookmarksEvents? = null
 
     // Native -> Dart UnifiedPush registration lifecycle. Null when push events
     // arrive with no Flutter engine attached (the UnifiedPushReceiver cold-start

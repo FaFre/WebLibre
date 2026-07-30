@@ -21,6 +21,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_html_utils.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_import_isolate.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_importer.dart';
@@ -226,7 +227,12 @@ class BookmarksRepository extends _$BookmarksRepository {
     required String path,
     required BookmarkImportFormat format,
     bool replace = false,
+    void Function(BookmarkImportProgress)? onProgress,
   }) async {
+    onProgress?.call(
+      const BookmarkImportProgress(phase: BookmarkImportPhase.parsing),
+    );
+
     final tree = await parseBookmarkFile(
       path: path,
       format: format,
@@ -237,7 +243,7 @@ class BookmarksRepository extends _$BookmarksRepository {
 
     final count = await BookmarkTreeImporter(
       _service,
-    ).import(tree, replace: replace);
+    ).import(tree, replace: replace, onProgress: onProgress);
 
     _notifyChanged();
     return count;

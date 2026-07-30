@@ -53,6 +53,10 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     // The UnifiedPush receiver outlives the Flutter engine; without this it would keep dispatching
     // onto a dead messenger. Failures are still retained on Push.lastError.
     GlobalComponents.pushEvents = null
+    // An import in flight keeps reporting after detach, and would otherwise hold
+    // the old messenger across an engine restart. Progress is advisory, so
+    // dropping the sink only costs the percentage, never the import itself.
+    GlobalComponents.bookmarksEvents = null
   }
 
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {

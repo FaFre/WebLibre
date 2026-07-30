@@ -105,6 +105,15 @@ class _PendingItem {
   _PendingItem({required this.url, this.dateAdded, this.lastModified});
 }
 
+/// One level of the document walk: a node and how far through its children the
+/// walk has got.
+class _WalkFrame {
+  final dom.Node node;
+  int index = 0;
+
+  _WalkFrame(this.node);
+}
+
 class _Frame {
   final _ParsedFolder folder;
   int containerNesting = 0;
@@ -148,49 +157,47 @@ class _BookmarkHtmlParser {
     return _buildTree();
   }
 
-  dom.Node? _nextSibling(dom.Node node) {
-    final parent = node.parent;
-    if (parent == null) return null;
-
-    final siblings = parent.nodes;
-    final index = siblings.indexOf(node);
-
-    if (index != -1 && index + 1 < siblings.length) {
-      return siblings[index + 1];
-    }
-
-    return null;
-  }
-
+  /// Walks the document depth-first, opening each node on the way down and
+  /// closing it on the way back up.
+  ///
+  /// Keeps its own cursor into every level rather than asking a node for its
+  /// next sibling. Locating a sibling means searching the parent's child list,
+  /// which is linear, so doing it per step made the walk quadratic in the
+  /// number of siblings at a level. A flat bookmark file puts every entry under
+  /// a single list, which turned a 25k-bookmark import into hundreds of
+  /// millions of comparisons and minutes of parsing.
   void _walkTreeForImport(dom.Node? node) {
     if (node == null) return;
 
-    dom.Node? current = node;
-    dom.Node? next;
+    final stack = <_WalkFrame>[_WalkFrame(node)];
+    _enterNode(node);
 
-    for (;;) {
-      if (current?.nodeType == dom.Node.ELEMENT_NODE) {
-        _openContainer(current! as dom.Element);
-      } else if (current?.nodeType == dom.Node.TEXT_NODE) {
-        _appendText(current!.text ?? '');
-      }
+    while (stack.isNotEmpty) {
+      final frame = stack.last;
+      final children = frame.node.nodes;
 
-      if ((next = current?.firstChild) != null) {
-        current = next;
-        continue;
+      if (frame.index < children.length) {
+        final child = children[frame.index++];
+        _enterNode(child);
+        stack.add(_WalkFrame(child));
+      } else {
+        _leaveNode(frame.node);
+        stack.removeLast();
       }
+    }
+  }
 
-      for (;;) {
-        if (current?.nodeType == dom.Node.ELEMENT_NODE) {
-          _closeContainer(current! as dom.Element);
-        }
-        if (current == node) return;
-        if ((next = _nextSibling(current!)) != null) {
-          current = next;
-          break;
-        }
-        current = current.parentNode;
-      }
+  void _enterNode(dom.Node node) {
+    if (node.nodeType == dom.Node.ELEMENT_NODE) {
+      _openContainer(node as dom.Element);
+    } else if (node.nodeType == dom.Node.TEXT_NODE) {
+      _appendText(node.text ?? '');
+    }
+  }
+
+  void _leaveNode(dom.Node node) {
+    if (node.nodeType == dom.Node.ELEMENT_NODE) {
+      _closeContainer(node as dom.Element);
     }
   }
 

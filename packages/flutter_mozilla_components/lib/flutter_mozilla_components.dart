@@ -79,6 +79,7 @@ export 'src/pigeons/gecko.g.dart'
         EmailHitResult,
         FrecencyThresholdOption,
         GeckoAppLinkEvents,
+        GeckoBookmarksEvents,
         GeckoDeleteBrowsingDataController,
         GeckoEngineSettings,
         GeckoFetchResponse,

@@ -38,10 +38,20 @@ class BookmarkTreeImporter {
   /// first; the root itself is never deleted. A tree that parsed to nothing
   /// erases nothing either, so a malformed or empty file cannot wipe the
   /// user's bookmarks and leave them with an empty library.
-  Future<int> import(ImportBookmarkTree tree, {required bool replace}) async {
+  Future<int> import(
+    ImportBookmarkTree tree, {
+    required bool replace,
+    void Function(BookmarkImportProgress)? onProgress,
+  }) async {
     if (tree.isEmpty) return 0;
 
+    final total = tree.stats.bookmarkCount;
+
     if (replace) {
+      onProgress?.call(
+        const BookmarkImportProgress(phase: BookmarkImportPhase.erasing),
+      );
+
       for (final root in BookmarkRoot.values) {
         if (root != BookmarkRoot.root) {
           await _service.eraseEverything(root);
@@ -51,25 +61,60 @@ class BookmarkTreeImporter {
 
     var importedCount = 0;
 
-    for (final section in tree.sections.entries) {
-      if (section.value.isEmpty) continue;
-
-      final result = await _service.insertTree(
-        section.key,
-        section.value.map(toPigeonImportNode).toList(),
+    // Native reports progress per insertion, counted from the start of that
+    // call, so completed sections have to be added back on.
+    void report(int insertedInSection) {
+      onProgress?.call(
+        BookmarkImportProgress(
+          phase: BookmarkImportPhase.inserting,
+          inserted: importedCount + insertedInSection,
+          total: total,
+        ),
       );
+    }
 
-      importedCount += result.insertedItemCount;
+    if (onProgress != null) {
+      GeckoBookmarksEvents.setUp(_ImportProgressReceiver(report));
+    }
 
-      if (result.failedNodeCount > 0) {
-        logger.e(
-          'Failed to import ${result.failedNodeCount} top-level nodes into ${section.key}',
+    try {
+      report(0);
+
+      for (final section in tree.sections.entries) {
+        if (section.value.isEmpty) continue;
+
+        final result = await _service.insertTree(
+          section.key,
+          section.value.map(toPigeonImportNode).toList(),
         );
+
+        importedCount += result.insertedItemCount;
+        report(0);
+
+        if (result.failedNodeCount > 0) {
+          logger.e(
+            'Failed to import ${result.failedNodeCount} top-level nodes into ${section.key}',
+          );
+        }
+      }
+    } finally {
+      if (onProgress != null) {
+        GeckoBookmarksEvents.setUp(null);
       }
     }
 
     return importedCount;
   }
+}
+
+class _ImportProgressReceiver extends GeckoBookmarksEvents {
+  _ImportProgressReceiver(this._onProgress);
+
+  final void Function(int insertedItemCount) _onProgress;
+
+  @override
+  void onImportProgress(int insertedItemCount) =>
+      _onProgress(insertedItemCount);
 }
 
 /// Converts a parsed node into the Pigeon transport type.

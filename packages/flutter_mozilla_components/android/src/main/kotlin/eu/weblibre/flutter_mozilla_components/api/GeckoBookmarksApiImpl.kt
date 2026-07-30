@@ -26,6 +26,17 @@ class GeckoBookmarksApiImpl() : GeckoBookmarksApi {
          * during an import. Only visible if an import is interrupted partway.
          */
         private const val SCRATCH_FOLDER_TITLE = "Importing bookmarks…"
+
+        /** Bookmarks written between progress reports. */
+        private const val PROGRESS_STEP = 64L
+
+        /**
+         * Largest subtree handed to storage as a single insertion.
+         *
+         * Bounds how long the import can run without reporting anything. Raise
+         * it for fewer, larger writes; lower it for a smoother progress bar.
+         */
+        private const val BULK_INSERT_THRESHOLD = 1000L
     }
 
     private val components by lazy {
@@ -259,54 +270,233 @@ class GeckoBookmarksApiImpl() : GeckoBookmarksApi {
     }
 
     /**
-     * Appends [nodes] underneath [parentGuid], handing every top-level folder to
-     * storage as a single tree insertion.
+     * Appends [nodes] underneath [parentGuid].
      *
      * `insertTree` is the only storage call that carries timestamps, and it can
-     * only create a *folder*. Loose top-level items and separators would
-     * therefore lose their `ADD_DATE` if inserted with `addItem`/`addSeparator`,
-     * which have no timestamp parameters — so they are staged inside a scratch
-     * folder and reparented instead. See [stageLooseNodes].
+     * only create a *folder*. Loose items and separators would therefore lose
+     * their `ADD_DATE` if inserted with `addItem`/`addSeparator`, which have no
+     * timestamp parameters — so they pass through a scratch folder instead. See
+     * [insertLooseChunk].
      *
-     * A failing top-level node is counted and skipped rather than aborting the
-     * whole import, matching the per-node importer this replaced. Deliberately
-     * does not emit `bookmarks.onCreated`: one event per imported node would
-     * flood every installed WebExtension.
+     * A failing node is counted and skipped rather than aborting the whole
+     * import, matching the per-node importer this replaced. Deliberately does
+     * not emit `bookmarks.onCreated`: one event per imported node would flood
+     * every installed WebExtension.
      */
     private suspend fun insertImportNodes(
         parentGuid: String,
         nodes: List<BookmarkImportNode>
     ): BookmarkInsertTreeResult {
-        val storage = components.core.bookmarksStorage
+        val state = InsertState(ImportProgressReporter())
+
+        insertChildren(parentGuid, nodes, state)
+
+        state.progress.reportFinal(state.insertedItemCount)
+
+        return BookmarkInsertTreeResult(state.insertedItemCount, state.failedNodeCount)
+    }
+
+    /** Running totals for one import, shared across the recursion. */
+    private class InsertState(val progress: ImportProgressReporter) {
         var insertedItemCount = 0L
         var failedNodeCount = 0L
+    }
 
-        val staged = stageLooseNodes(parentGuid, nodes)
+    /**
+     * Writes [nodes] underneath [parentGuid], in order.
+     *
+     * Folders are written one at a time; runs of consecutive loose nodes are
+     * written in chunks. Every write appends, so walking the nodes strictly in
+     * order reproduces the file's order, and merging into a folder that already
+     * has children leaves those in place.
+     */
+    private suspend fun insertChildren(
+        parentGuid: String,
+        nodes: List<BookmarkImportNode>,
+        state: InsertState
+    ) {
+        var index = 0
 
-        for (node in nodes) {
-            // Every branch appends (position = null). Walking the nodes in order
-            // therefore reproduces the file's order, and merging into a folder
-            // that already has children leaves those in place.
-            val outcome: Result<Long> = when (node.type) {
-                BookmarkNodeType.FOLDER -> {
-                    val folder = node.toInsertableFolder(position = null)
-                    storage.insertTree(InsertableBookmarkTreeRoot(parentGuid, folder))
-                        .map { folder.itemCount() }
-                }
-
-                // Already written by stageLooseNodes; only the move is left.
-                else -> staged.reparent(node, parentGuid)
+        while (index < nodes.size) {
+            if (nodes[index].type == BookmarkNodeType.FOLDER) {
+                insertFolder(parentGuid, nodes[index], state).fold(
+                    { count -> state.insertedItemCount += count },
+                    { state.failedNodeCount += 1 }
+                )
+                state.progress.report(state.insertedItemCount)
+                index++
+                continue
             }
 
-            outcome.fold(
-                { count -> insertedItemCount += count },
-                { failedNodeCount += 1 }
-            )
+            // Take the whole run of loose nodes so they keep their place
+            // relative to the folders around them.
+            var end = index
+            while (end < nodes.size && nodes[end].type != BookmarkNodeType.FOLDER) {
+                end++
+            }
+
+            for (chunk in nodes.subList(index, end).chunked(BULK_INSERT_THRESHOLD.toInt())) {
+                insertLooseChunk(parentGuid, chunk, state)
+            }
+
+            index = end
+        }
+    }
+
+    /**
+     * Writes a chunk of loose items and separators, then moves them into place.
+     *
+     * `insertTree` is the only call that carries timestamps and it can only
+     * create a folder, so loose nodes are written into a scratch folder and
+     * reparented out of it. Doing that for the whole file at once left the
+     * progress bar at zero for the entire bulk write, so it happens a chunk at
+     * a time and the moves report as they go.
+     */
+    private suspend fun insertLooseChunk(
+        parentGuid: String,
+        chunk: List<BookmarkImportNode>,
+        state: InsertState
+    ) {
+        val storage = components.core.bookmarksStorage
+
+        val staged = ArrayList<BookmarkImportNode>(chunk.size)
+        val insertable = ArrayList<InsertableBookmarkTreeNode>(chunk.size)
+        for (node in chunk) {
+            // Positions come from the surviving order so dropping an unusable
+            // node leaves no gap.
+            val converted = node.toInsertableNode(insertable.size.toUInt())
+            if (converted == null) {
+                state.failedNodeCount += 1
+                continue
+            }
+            insertable.add(converted)
+            staged.add(node)
         }
 
-        staged.discardScratchFolder()
+        if (staged.isEmpty()) return
 
-        return BookmarkInsertTreeResult(insertedItemCount, failedNodeCount)
+        val scratch = InsertableBookmarkTreeNode.Folder(
+            title = SCRATCH_FOLDER_TITLE,
+            dateAddedTimestamp = 0L,
+            lastModifiedTimestamp = 0L,
+            position = null,
+            children = insertable
+        )
+
+        val scratchGuid = storage.insertTree(InsertableBookmarkTreeRoot(parentGuid, scratch))
+            .getOrElse {
+                state.failedNodeCount += staged.size
+                return
+            }
+
+        // Read the assigned guids back in position order, which is the order
+        // the nodes were handed to insertTree.
+        val written = storage.getTree(scratchGuid, false).getOrNull()?.children.orEmpty()
+
+        for ((position, node) in staged.withIndex()) {
+            val guid = written.getOrNull(position)?.guid
+            if (guid == null) {
+                state.failedNodeCount += 1
+                continue
+            }
+
+            // A null field means "leave unchanged"; appending (null position)
+            // keeps the file's order as the caller walks the level.
+            val move = MozillaBookmarkInfo(
+                parentGuid = parentGuid,
+                position = null,
+                title = null,
+                url = null
+            )
+
+            storage.updateNode(guid, move).fold(
+                {
+                    if (node.type == BookmarkNodeType.ITEM) {
+                        state.insertedItemCount += 1
+                    }
+                },
+                { state.failedNodeCount += 1 }
+            )
+
+            state.progress.report(state.insertedItemCount)
+        }
+
+        // Deleting cascades to children, so anything that failed to move is
+        // left behind in a visible folder rather than being silently destroyed.
+        val remaining = storage.getTree(scratchGuid, false).getOrNull()?.children
+        if (remaining.isNullOrEmpty()) {
+            storage.deleteNode(scratchGuid)
+        }
+    }
+
+    /**
+     * Writes one folder and everything under it.
+     *
+     * Storage inserts a tree as a single indivisible operation with no way to
+     * observe it, so a whole import handed over in one call reports nothing
+     * until it has finished — a bookmark file whose top level is a single
+     * folder, which is what Firefox exports look like, would leave the progress
+     * bar at zero for the entire run.
+     *
+     * Subtrees up to [BULK_INSERT_THRESHOLD] items therefore go in whole, which
+     * is the fast path, while anything larger is split: the folder itself is
+     * created empty — keeping its own timestamps — and its children are written
+     * one level down. That trades some batching for a progress bar that moves.
+     */
+    private suspend fun insertFolder(
+        parentGuid: String,
+        node: BookmarkImportNode,
+        state: InsertState
+    ): Result<Long> {
+        val storage = components.core.bookmarksStorage
+        val folder = node.toInsertableFolder(position = null)
+        val itemCount = folder.itemCount()
+
+        if (itemCount <= BULK_INSERT_THRESHOLD) {
+            return storage.insertTree(InsertableBookmarkTreeRoot(parentGuid, folder))
+                .map { itemCount }
+        }
+
+        val shell = folder.copy(children = emptyList())
+        val guid = storage.insertTree(InsertableBookmarkTreeRoot(parentGuid, shell))
+            .getOrElse { return Result.failure(it) }
+
+        insertChildren(guid, node.children, state)
+
+        // The recursion already counted everything it wrote.
+        return Result.success(0L)
+    }
+
+    /**
+     * Forwards insertion progress to Dart, throttled.
+     *
+     * A flat bookmark file has every entry as a top-level node, so the caller
+     * ticks once per bookmark — tens of thousands of times. Only every
+     * [PROGRESS_STEP]th tick crosses the channel, plus a final exact figure, so
+     * the reporting cannot itself become the bottleneck.
+     */
+    private inner class ImportProgressReporter {
+        private var lastReported = 0L
+
+        fun report(insertedItemCount: Long) {
+            if (insertedItemCount - lastReported < PROGRESS_STEP) return
+            lastReported = insertedItemCount
+            emit(insertedItemCount)
+        }
+
+        fun reportFinal(insertedItemCount: Long) {
+            if (insertedItemCount == lastReported) return
+            lastReported = insertedItemCount
+            emit(insertedItemCount)
+        }
+
+        private fun emit(insertedItemCount: Long) {
+            val events = GlobalComponents.bookmarksEvents ?: return
+            // Pigeon callbacks must be dispatched from the platform thread.
+            coroutineScope.launch {
+                events.onImportProgress(insertedItemCount) {}
+            }
+        }
     }
 
     override fun countBookmarksInTrees(
@@ -321,131 +511,6 @@ class GeckoBookmarksApiImpl() : GeckoBookmarksApi {
             }
             callback(result)
         }
-    }
-
-    /**
-     * Loose top-level nodes written into a scratch folder, waiting to be moved
-     * to their real parent.
-     *
-     * The scratch folder is created under the import destination and holds the
-     * loose nodes in file order; [reparent] hands them out one at a time as the
-     * caller walks the top level, and [discardScratchFolder] removes the folder
-     * once it has been emptied.
-     */
-    private inner class StagedLooseNodes(
-        private val scratchGuid: String?,
-        /** The loose nodes that made it into the scratch folder, in order. */
-        private val staged: List<BookmarkImportNode>,
-        /** Guid assigned to each entry of [staged], by index. */
-        private val guids: List<String>,
-        private val failure: Throwable?
-    ) {
-        private var next = 0
-
-        /**
-         * Moves the next staged node under [parentGuid].
-         *
-         * Reparenting preserves `dateAdded`, which is what bookmark ordering and
-         * "recently added" depend on. It does refresh `lastModified` — the pair
-         * cannot both survive, because the only storage call that accepts
-         * timestamps creates a folder.
-         */
-        suspend fun reparent(node: BookmarkImportNode, parentGuid: String): Result<Long> {
-            failure?.let { return Result.failure(it) }
-
-            // Nodes dropped while converting (an item with no usable url) were
-            // never staged, so the cursor must not advance past them.
-            if (staged.getOrNull(next) !== node) {
-                return Result.failure(
-                    IllegalArgumentException("Unusable bookmark node of type ${node.type}")
-                )
-            }
-
-            val guid = guids.getOrNull(next)
-                ?: return Result.failure(
-                    IllegalStateException("Storage did not report a guid for ${node.type}")
-                )
-            next++
-
-            // A null field means "leave unchanged"; appending (null position)
-            // keeps the file's order as the caller walks the top level.
-            val move = MozillaBookmarkInfo(
-                parentGuid = parentGuid,
-                position = null,
-                title = null,
-                url = null
-            )
-
-            return components.core.bookmarksStorage
-                .updateNode(guid, move)
-                .map { if (node.type == BookmarkNodeType.ITEM) 1L else 0L }
-        }
-
-        /**
-         * Deletes the scratch folder, but only once it is empty.
-         *
-         * Deleting cascades to children, so anything that failed to move is left
-         * behind in a visible folder rather than being silently destroyed.
-         */
-        suspend fun discardScratchFolder() {
-            val guid = scratchGuid ?: return
-            val storage = components.core.bookmarksStorage
-
-            val remaining = storage.getTree(guid, false).getOrNull()?.children
-            if (remaining.isNullOrEmpty()) {
-                storage.deleteNode(guid)
-            }
-        }
-    }
-
-    /**
-     * Writes every loose top-level node of [nodes] into a scratch folder under
-     * [parentGuid] in a single tree insertion, so their timestamps survive.
-     *
-     * Returns an empty staging area when the import has no loose top-level
-     * nodes, which is the common case for Firefox exports and costs nothing.
-     */
-    private suspend fun stageLooseNodes(
-        parentGuid: String,
-        nodes: List<BookmarkImportNode>
-    ): StagedLooseNodes {
-        val empty = StagedLooseNodes(null, emptyList(), emptyList(), null)
-
-        val staged = ArrayList<BookmarkImportNode>()
-        val insertable = ArrayList<InsertableBookmarkTreeNode>()
-        for (node in nodes) {
-            if (node.type == BookmarkNodeType.FOLDER) continue
-            val converted = node.toInsertableNode(insertable.size.toUInt()) ?: continue
-            insertable.add(converted)
-            staged.add(node)
-        }
-
-        if (staged.isEmpty()) return empty
-
-        val scratch = InsertableBookmarkTreeNode.Folder(
-            title = SCRATCH_FOLDER_TITLE,
-            dateAddedTimestamp = 0L,
-            lastModifiedTimestamp = 0L,
-            position = null,
-            children = insertable
-        )
-
-        val storage = components.core.bookmarksStorage
-
-        return storage.insertTree(InsertableBookmarkTreeRoot(parentGuid, scratch)).fold(
-            { scratchGuid ->
-                // Read the assigned guids back in position order, which is the
-                // order the nodes were handed to insertTree.
-                val children = storage.getTree(scratchGuid, false).getOrNull()?.children
-                StagedLooseNodes(
-                    scratchGuid = scratchGuid,
-                    staged = staged,
-                    guids = children.orEmpty().map { it.guid },
-                    failure = null
-                )
-            },
-            { error -> StagedLooseNodes(null, staged, emptyList(), error) }
-        )
     }
 
     private fun BookmarkImportNode.toInsertableFolder(position: UInt?) =

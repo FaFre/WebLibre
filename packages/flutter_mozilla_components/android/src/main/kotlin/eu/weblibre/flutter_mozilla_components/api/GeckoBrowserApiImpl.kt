@@ -52,6 +52,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPushEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPwaApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionController
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAppLinkEvents
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBookmarksEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoHistoryEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSessionApi
@@ -280,6 +281,10 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         // visit's WebLibre container to Dart.
         GlobalComponents.historyEvents =
             GeckoHistoryEvents(_flutterPluginBinding.binaryMessenger)
+
+        // Progress sink for long-running bookmark imports.
+        GlobalComponents.bookmarksEvents =
+            GeckoBookmarksEvents(_flutterPluginBinding.binaryMessenger)
 
         // Availability signal for pending app-link prompts (Flutter-owned prompts).
         GlobalComponents.appLinkEvents =
