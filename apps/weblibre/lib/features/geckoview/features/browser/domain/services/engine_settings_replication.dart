@@ -375,6 +375,12 @@ class EngineSettingsReplicationService
                 settings.inputAutoZoomEnabled,
               );
             }
+            if (previous.value?.forceUserScalableContent !=
+                settings.forceUserScalableContent) {
+              await _service.forceUserScalableContent(
+                settings.forceUserScalableContent,
+              );
+            }
             // LNA Settings
             if (previous.value?.lnaBlocking != settings.lnaBlocking) {
               await _service.lnaBlocking(settings.lnaBlocking);

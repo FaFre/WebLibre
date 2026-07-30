@@ -1143,6 +1143,10 @@ class GeckoEngineSettings {
   final int? screenHeightOverride;
   final bool? inputAutoZoomEnabled;
 
+  /// Forces pinch-to-zoom to work even on websites that set
+  /// `user-scalable=no` (or a restrictive `maximum-scale`) on the viewport.
+  final bool? forceUserScalableContent;
+
   // Process Isolation Settings (require app restart)
   final bool? fissionEnabled;
   final bool? isolatedProcessEnabled;
@@ -1192,6 +1196,7 @@ class GeckoEngineSettings {
     this.screenWidthOverride,
     this.screenHeightOverride,
     this.inputAutoZoomEnabled,
+    this.forceUserScalableContent,
     this.fissionEnabled,
     this.isolatedProcessEnabled,
     this.appZygoteProcessEnabled,

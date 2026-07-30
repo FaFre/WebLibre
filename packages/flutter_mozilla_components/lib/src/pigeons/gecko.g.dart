@@ -3739,6 +3739,7 @@ class GeckoEngineSettings {
     this.screenWidthOverride,
     this.screenHeightOverride,
     this.inputAutoZoomEnabled,
+    this.forceUserScalableContent,
     this.fissionEnabled,
     this.isolatedProcessEnabled,
     this.appZygoteProcessEnabled,
@@ -3837,6 +3838,10 @@ class GeckoEngineSettings {
 
   bool? inputAutoZoomEnabled;
 
+  /// Forces pinch-to-zoom to work even on websites that set
+  /// `user-scalable=no` (or a restrictive `maximum-scale`) on the viewport.
+  bool? forceUserScalableContent;
+
   bool? fissionEnabled;
 
   bool? isolatedProcessEnabled;
@@ -3890,6 +3895,7 @@ class GeckoEngineSettings {
       screenWidthOverride,
       screenHeightOverride,
       inputAutoZoomEnabled,
+      forceUserScalableContent,
       fissionEnabled,
       isolatedProcessEnabled,
       appZygoteProcessEnabled,
@@ -3943,13 +3949,14 @@ class GeckoEngineSettings {
       screenWidthOverride: result[34] as int?,
       screenHeightOverride: result[35] as int?,
       inputAutoZoomEnabled: result[36] as bool?,
-      fissionEnabled: result[37] as bool?,
-      isolatedProcessEnabled: result[38] as bool?,
-      appZygoteProcessEnabled: result[39] as bool?,
-      extensionsWebAPIEnabled: result[40] as bool?,
-      lnaBlocking: result[41] as bool?,
-      lnaBlockTrackers: result[42] as bool?,
-      lnaEnabled: result[43] as bool?,
+      forceUserScalableContent: result[37] as bool?,
+      fissionEnabled: result[38] as bool?,
+      isolatedProcessEnabled: result[39] as bool?,
+      appZygoteProcessEnabled: result[40] as bool?,
+      extensionsWebAPIEnabled: result[41] as bool?,
+      lnaBlocking: result[42] as bool?,
+      lnaBlockTrackers: result[43] as bool?,
+      lnaEnabled: result[44] as bool?,
     );
   }
 
@@ -3962,7 +3969,7 @@ class GeckoEngineSettings {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(javascriptEnabled, other.javascriptEnabled) && _deepEquals(trackingProtectionPolicy, other.trackingProtectionPolicy) && _deepEquals(httpsOnlyMode, other.httpsOnlyMode) && _deepEquals(globalPrivacyControlEnabled, other.globalPrivacyControlEnabled) && _deepEquals(preferredColorScheme, other.preferredColorScheme) && _deepEquals(cookieBannerHandlingMode, other.cookieBannerHandlingMode) && _deepEquals(cookieBannerHandlingModePrivateBrowsing, other.cookieBannerHandlingModePrivateBrowsing) && _deepEquals(cookieBannerHandlingGlobalRules, other.cookieBannerHandlingGlobalRules) && _deepEquals(cookieBannerHandlingGlobalRulesSubFrames, other.cookieBannerHandlingGlobalRulesSubFrames) && _deepEquals(webContentIsolationStrategy, other.webContentIsolationStrategy) && _deepEquals(userAgent, other.userAgent) && _deepEquals(contentBlocking, other.contentBlocking) && _deepEquals(enterpriseRootsEnabled, other.enterpriseRootsEnabled) && _deepEquals(dohSettings, other.dohSettings) && _deepEquals(fingerprintingProtectionOverrides, other.fingerprintingProtectionOverrides) && _deepEquals(locales, other.locales) && _deepEquals(useContentBlockingDatabase, other.useContentBlockingDatabase) && _deepEquals(blockCookies, other.blockCookies) && _deepEquals(customCookiePolicy, other.customCookiePolicy) && _deepEquals(blockTrackingContent, other.blockTrackingContent) && _deepEquals(trackingContentScope, other.trackingContentScope) && _deepEquals(blockCryptominers, other.blockCryptominers) && _deepEquals(blockFingerprinters, other.blockFingerprinters) && _deepEquals(blockRedirectTrackers, other.blockRedirectTrackers) && _deepEquals(blockSuspectedFingerprinters, other.blockSuspectedFingerprinters) && _deepEquals(suspectedFingerprintersScope, other.suspectedFingerprintersScope) && _deepEquals(allowListBaseline, other.allowListBaseline) && _deepEquals(allowListConvenience, other.allowListConvenience) && _deepEquals(blockAdsAnalyticsSocialTrackers, other.blockAdsAnalyticsSocialTrackers) && _deepEquals(webFontsEnabled, other.webFontsEnabled) && _deepEquals(automaticFontSizeAdjustment, other.automaticFontSizeAdjustment) && _deepEquals(fontSizeFactor, other.fontSizeFactor) && _deepEquals(fontInflationEnabled, other.fontInflationEnabled) && _deepEquals(displayDensityOverride, other.displayDensityOverride) && _deepEquals(screenWidthOverride, other.screenWidthOverride) && _deepEquals(screenHeightOverride, other.screenHeightOverride) && _deepEquals(inputAutoZoomEnabled, other.inputAutoZoomEnabled) && _deepEquals(fissionEnabled, other.fissionEnabled) && _deepEquals(isolatedProcessEnabled, other.isolatedProcessEnabled) && _deepEquals(appZygoteProcessEnabled, other.appZygoteProcessEnabled) && _deepEquals(extensionsWebAPIEnabled, other.extensionsWebAPIEnabled) && _deepEquals(lnaBlocking, other.lnaBlocking) && _deepEquals(lnaBlockTrackers, other.lnaBlockTrackers) && _deepEquals(lnaEnabled, other.lnaEnabled);
+    return _deepEquals(javascriptEnabled, other.javascriptEnabled) && _deepEquals(trackingProtectionPolicy, other.trackingProtectionPolicy) && _deepEquals(httpsOnlyMode, other.httpsOnlyMode) && _deepEquals(globalPrivacyControlEnabled, other.globalPrivacyControlEnabled) && _deepEquals(preferredColorScheme, other.preferredColorScheme) && _deepEquals(cookieBannerHandlingMode, other.cookieBannerHandlingMode) && _deepEquals(cookieBannerHandlingModePrivateBrowsing, other.cookieBannerHandlingModePrivateBrowsing) && _deepEquals(cookieBannerHandlingGlobalRules, other.cookieBannerHandlingGlobalRules) && _deepEquals(cookieBannerHandlingGlobalRulesSubFrames, other.cookieBannerHandlingGlobalRulesSubFrames) && _deepEquals(webContentIsolationStrategy, other.webContentIsolationStrategy) && _deepEquals(userAgent, other.userAgent) && _deepEquals(contentBlocking, other.contentBlocking) && _deepEquals(enterpriseRootsEnabled, other.enterpriseRootsEnabled) && _deepEquals(dohSettings, other.dohSettings) && _deepEquals(fingerprintingProtectionOverrides, other.fingerprintingProtectionOverrides) && _deepEquals(locales, other.locales) && _deepEquals(useContentBlockingDatabase, other.useContentBlockingDatabase) && _deepEquals(blockCookies, other.blockCookies) && _deepEquals(customCookiePolicy, other.customCookiePolicy) && _deepEquals(blockTrackingContent, other.blockTrackingContent) && _deepEquals(trackingContentScope, other.trackingContentScope) && _deepEquals(blockCryptominers, other.blockCryptominers) && _deepEquals(blockFingerprinters, other.blockFingerprinters) && _deepEquals(blockRedirectTrackers, other.blockRedirectTrackers) && _deepEquals(blockSuspectedFingerprinters, other.blockSuspectedFingerprinters) && _deepEquals(suspectedFingerprintersScope, other.suspectedFingerprintersScope) && _deepEquals(allowListBaseline, other.allowListBaseline) && _deepEquals(allowListConvenience, other.allowListConvenience) && _deepEquals(blockAdsAnalyticsSocialTrackers, other.blockAdsAnalyticsSocialTrackers) && _deepEquals(webFontsEnabled, other.webFontsEnabled) && _deepEquals(automaticFontSizeAdjustment, other.automaticFontSizeAdjustment) && _deepEquals(fontSizeFactor, other.fontSizeFactor) && _deepEquals(fontInflationEnabled, other.fontInflationEnabled) && _deepEquals(displayDensityOverride, other.displayDensityOverride) && _deepEquals(screenWidthOverride, other.screenWidthOverride) && _deepEquals(screenHeightOverride, other.screenHeightOverride) && _deepEquals(inputAutoZoomEnabled, other.inputAutoZoomEnabled) && _deepEquals(forceUserScalableContent, other.forceUserScalableContent) && _deepEquals(fissionEnabled, other.fissionEnabled) && _deepEquals(isolatedProcessEnabled, other.isolatedProcessEnabled) && _deepEquals(appZygoteProcessEnabled, other.appZygoteProcessEnabled) && _deepEquals(extensionsWebAPIEnabled, other.extensionsWebAPIEnabled) && _deepEquals(lnaBlocking, other.lnaBlocking) && _deepEquals(lnaBlockTrackers, other.lnaBlockTrackers) && _deepEquals(lnaEnabled, other.lnaEnabled);
   }
 
   @override
@@ -3971,7 +3978,7 @@ class GeckoEngineSettings {
 
   @override
   String toString() {
-    return 'GeckoEngineSettings(javascriptEnabled: $javascriptEnabled, trackingProtectionPolicy: $trackingProtectionPolicy, httpsOnlyMode: $httpsOnlyMode, globalPrivacyControlEnabled: $globalPrivacyControlEnabled, preferredColorScheme: $preferredColorScheme, cookieBannerHandlingMode: $cookieBannerHandlingMode, cookieBannerHandlingModePrivateBrowsing: $cookieBannerHandlingModePrivateBrowsing, cookieBannerHandlingGlobalRules: $cookieBannerHandlingGlobalRules, cookieBannerHandlingGlobalRulesSubFrames: $cookieBannerHandlingGlobalRulesSubFrames, webContentIsolationStrategy: $webContentIsolationStrategy, userAgent: $userAgent, contentBlocking: $contentBlocking, enterpriseRootsEnabled: $enterpriseRootsEnabled, dohSettings: $dohSettings, fingerprintingProtectionOverrides: $fingerprintingProtectionOverrides, locales: $locales, useContentBlockingDatabase: $useContentBlockingDatabase, blockCookies: $blockCookies, customCookiePolicy: $customCookiePolicy, blockTrackingContent: $blockTrackingContent, trackingContentScope: $trackingContentScope, blockCryptominers: $blockCryptominers, blockFingerprinters: $blockFingerprinters, blockRedirectTrackers: $blockRedirectTrackers, blockSuspectedFingerprinters: $blockSuspectedFingerprinters, suspectedFingerprintersScope: $suspectedFingerprintersScope, allowListBaseline: $allowListBaseline, allowListConvenience: $allowListConvenience, blockAdsAnalyticsSocialTrackers: $blockAdsAnalyticsSocialTrackers, webFontsEnabled: $webFontsEnabled, automaticFontSizeAdjustment: $automaticFontSizeAdjustment, fontSizeFactor: $fontSizeFactor, fontInflationEnabled: $fontInflationEnabled, displayDensityOverride: $displayDensityOverride, screenWidthOverride: $screenWidthOverride, screenHeightOverride: $screenHeightOverride, inputAutoZoomEnabled: $inputAutoZoomEnabled, fissionEnabled: $fissionEnabled, isolatedProcessEnabled: $isolatedProcessEnabled, appZygoteProcessEnabled: $appZygoteProcessEnabled, extensionsWebAPIEnabled: $extensionsWebAPIEnabled, lnaBlocking: $lnaBlocking, lnaBlockTrackers: $lnaBlockTrackers, lnaEnabled: $lnaEnabled)';
+    return 'GeckoEngineSettings(javascriptEnabled: $javascriptEnabled, trackingProtectionPolicy: $trackingProtectionPolicy, httpsOnlyMode: $httpsOnlyMode, globalPrivacyControlEnabled: $globalPrivacyControlEnabled, preferredColorScheme: $preferredColorScheme, cookieBannerHandlingMode: $cookieBannerHandlingMode, cookieBannerHandlingModePrivateBrowsing: $cookieBannerHandlingModePrivateBrowsing, cookieBannerHandlingGlobalRules: $cookieBannerHandlingGlobalRules, cookieBannerHandlingGlobalRulesSubFrames: $cookieBannerHandlingGlobalRulesSubFrames, webContentIsolationStrategy: $webContentIsolationStrategy, userAgent: $userAgent, contentBlocking: $contentBlocking, enterpriseRootsEnabled: $enterpriseRootsEnabled, dohSettings: $dohSettings, fingerprintingProtectionOverrides: $fingerprintingProtectionOverrides, locales: $locales, useContentBlockingDatabase: $useContentBlockingDatabase, blockCookies: $blockCookies, customCookiePolicy: $customCookiePolicy, blockTrackingContent: $blockTrackingContent, trackingContentScope: $trackingContentScope, blockCryptominers: $blockCryptominers, blockFingerprinters: $blockFingerprinters, blockRedirectTrackers: $blockRedirectTrackers, blockSuspectedFingerprinters: $blockSuspectedFingerprinters, suspectedFingerprintersScope: $suspectedFingerprintersScope, allowListBaseline: $allowListBaseline, allowListConvenience: $allowListConvenience, blockAdsAnalyticsSocialTrackers: $blockAdsAnalyticsSocialTrackers, webFontsEnabled: $webFontsEnabled, automaticFontSizeAdjustment: $automaticFontSizeAdjustment, fontSizeFactor: $fontSizeFactor, fontInflationEnabled: $fontInflationEnabled, displayDensityOverride: $displayDensityOverride, screenWidthOverride: $screenWidthOverride, screenHeightOverride: $screenHeightOverride, inputAutoZoomEnabled: $inputAutoZoomEnabled, forceUserScalableContent: $forceUserScalableContent, fissionEnabled: $fissionEnabled, isolatedProcessEnabled: $isolatedProcessEnabled, appZygoteProcessEnabled: $appZygoteProcessEnabled, extensionsWebAPIEnabled: $extensionsWebAPIEnabled, lnaBlocking: $lnaBlocking, lnaBlockTrackers: $lnaBlockTrackers, lnaEnabled: $lnaEnabled)';
   }
 }
 

@@ -122,6 +122,8 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   bool get fontInflationEnabled => super.fontInflationEnabled!;
   @override
   bool get inputAutoZoomEnabled => super.inputAutoZoomEnabled!;
+  @override
+  bool get forceUserScalableContent => super.forceUserScalableContent!;
 
   // Process Isolation Settings (require app restart)
   @override
@@ -223,6 +225,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required super.screenWidthOverride,
     required super.screenHeightOverride,
     required super.inputAutoZoomEnabled,
+    required super.forceUserScalableContent,
     required super.fissionEnabled,
     required super.isolatedProcessEnabled,
     required super.appZygoteProcessEnabled,
@@ -279,6 +282,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     super.screenWidthOverride,
     super.screenHeightOverride,
     bool? inputAutoZoomEnabled,
+    bool? forceUserScalableContent,
     bool? fissionEnabled,
     bool? isolatedProcessEnabled,
     bool? appZygoteProcessEnabled,
@@ -349,6 +353,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
          fontSizeFactor: fontSizeFactor ?? 1.0,
          fontInflationEnabled: fontInflationEnabled ?? false,
          inputAutoZoomEnabled: inputAutoZoomEnabled ?? true,
+         forceUserScalableContent: forceUserScalableContent ?? false,
          fissionEnabled: fissionEnabled ?? true,
          isolatedProcessEnabled: isolatedProcessEnabled ?? false,
          appZygoteProcessEnabled: appZygoteProcessEnabled ?? false,
@@ -432,6 +437,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     screenWidthOverride,
     screenHeightOverride,
     inputAutoZoomEnabled,
+    forceUserScalableContent,
     fissionEnabled,
     isolatedProcessEnabled,
     appZygoteProcessEnabled,

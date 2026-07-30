@@ -176,6 +176,12 @@ class GeckoEngineSettingsService {
     );
   }
 
+  Future<void> forceUserScalableContent(bool state) {
+    return _api.updateRuntimeSettings(
+      GeckoEngineSettings(forceUserScalableContent: state),
+    );
+  }
+
   // LNA Settings
   Future<void> lnaBlocking(bool? state) {
     return _api.updateRuntimeSettings(GeckoEngineSettings(lnaBlocking: state));

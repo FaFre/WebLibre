@@ -62,6 +62,14 @@ const List<SettingsSectionDefinition> webContentSettingsSections = [
         keywords: ['forms'],
         child: _InputAutoZoomEnabledTile(),
       ),
+      SettingsEntryDefinition(
+        title: 'Zoom on All Websites',
+        subtitle:
+            'Allow pinch and zoom, even on websites that prevent this '
+            'gesture',
+        keywords: ['pinch', 'accessibility'],
+        child: _ForceUserScalableContentTile(),
+      ),
     ],
   ),
   SettingsSectionDefinition(
@@ -302,6 +310,36 @@ class _InputAutoZoomEnabledTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.inputAutoZoomEnabled(value),
+            );
+      },
+    );
+  }
+}
+
+class _ForceUserScalableContentTile extends HookConsumerWidget {
+  const _ForceUserScalableContentTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final forceUserScalableContent = ref.watch(
+      engineSettingsWithDefaultsProvider.select(
+        (s) => s.forceUserScalableContent,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Zoom on All Websites'),
+      subtitle: const Text(
+        'Allow pinch and zoom, even on websites that prevent this gesture',
+      ),
+      secondary: const Icon(MdiIcons.gesturePinch),
+      value: forceUserScalableContent,
+      onChanged: (value) async {
+        await ref
+            .read(saveEngineSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.forceUserScalableContent(value),
             );
       },
     );

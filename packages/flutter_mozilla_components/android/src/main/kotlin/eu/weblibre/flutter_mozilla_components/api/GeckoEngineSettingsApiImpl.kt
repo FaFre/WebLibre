@@ -300,6 +300,9 @@ class GeckoEngineSettingsApiImpl(
         if(settings.inputAutoZoomEnabled != null) {
             components.core.runtime.settings.inputAutoZoomEnabled = settings.inputAutoZoomEnabled
         }
+        if(settings.forceUserScalableContent != null) {
+            components.core.engineSettings.forceUserScalableContent = settings.forceUserScalableContent
+        }
 
         // LNA Settings
         if(settings.lnaBlocking != null) {
@@ -404,6 +407,9 @@ class GeckoEngineSettingsApiImpl(
         if(settings.fontInflationEnabled != null) {
             components.core.engine.settings.fontInflationEnabled = components.core.engineSettings.fontInflationEnabled
             reloadSession = true
+        }
+        if(settings.forceUserScalableContent != null) {
+            components.core.engine.settings.forceUserScalableContent = components.core.engineSettings.forceUserScalableContent
         }
         // LNA settings
         if(settings.lnaEnabled != null) {

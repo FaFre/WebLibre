@@ -125,6 +125,8 @@ abstract class _$EngineSettingsCWProxy {
 
   EngineSettings inputAutoZoomEnabled(bool? inputAutoZoomEnabled);
 
+  EngineSettings forceUserScalableContent(bool? forceUserScalableContent);
+
   EngineSettings fissionEnabled(bool? fissionEnabled);
 
   EngineSettings isolatedProcessEnabled(bool? isolatedProcessEnabled);
@@ -193,6 +195,7 @@ abstract class _$EngineSettingsCWProxy {
     int? screenWidthOverride,
     int? screenHeightOverride,
     bool? inputAutoZoomEnabled,
+    bool? forceUserScalableContent,
     bool? fissionEnabled,
     bool? isolatedProcessEnabled,
     bool? appZygoteProcessEnabled,
@@ -417,6 +420,10 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
       call(inputAutoZoomEnabled: inputAutoZoomEnabled);
 
   @override
+  EngineSettings forceUserScalableContent(bool? forceUserScalableContent) =>
+      call(forceUserScalableContent: forceUserScalableContent);
+
+  @override
   EngineSettings fissionEnabled(bool? fissionEnabled) =>
       call(fissionEnabled: fissionEnabled);
 
@@ -500,6 +507,7 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? screenWidthOverride = const $CopyWithPlaceholder(),
     Object? screenHeightOverride = const $CopyWithPlaceholder(),
     Object? inputAutoZoomEnabled = const $CopyWithPlaceholder(),
+    Object? forceUserScalableContent = const $CopyWithPlaceholder(),
     Object? fissionEnabled = const $CopyWithPlaceholder(),
     Object? isolatedProcessEnabled = const $CopyWithPlaceholder(),
     Object? appZygoteProcessEnabled = const $CopyWithPlaceholder(),
@@ -731,6 +739,11 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.inputAutoZoomEnabled
           // ignore: cast_nullable_to_non_nullable
           : inputAutoZoomEnabled as bool?,
+      forceUserScalableContent:
+          forceUserScalableContent == const $CopyWithPlaceholder()
+          ? _value.forceUserScalableContent
+          // ignore: cast_nullable_to_non_nullable
+          : forceUserScalableContent as bool?,
       fissionEnabled: fissionEnabled == const $CopyWithPlaceholder()
           ? _value.fissionEnabled
           // ignore: cast_nullable_to_non_nullable
@@ -874,6 +887,7 @@ EngineSettings _$EngineSettingsFromJson(
   screenWidthOverride: (json['screenWidthOverride'] as num?)?.toInt(),
   screenHeightOverride: (json['screenHeightOverride'] as num?)?.toInt(),
   inputAutoZoomEnabled: json['inputAutoZoomEnabled'] as bool?,
+  forceUserScalableContent: json['forceUserScalableContent'] as bool?,
   fissionEnabled: json['fissionEnabled'] as bool?,
   isolatedProcessEnabled: json['isolatedProcessEnabled'] as bool?,
   appZygoteProcessEnabled: json['appZygoteProcessEnabled'] as bool?,
@@ -935,6 +949,7 @@ Map<String, dynamic> _$EngineSettingsToJson(
   'fontSizeFactor': instance.fontSizeFactor,
   'fontInflationEnabled': instance.fontInflationEnabled,
   'inputAutoZoomEnabled': instance.inputAutoZoomEnabled,
+  'forceUserScalableContent': instance.forceUserScalableContent,
   'fissionEnabled': instance.fissionEnabled,
   'isolatedProcessEnabled': instance.isolatedProcessEnabled,
   'appZygoteProcessEnabled': instance.appZygoteProcessEnabled,

@@ -214,6 +214,8 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
+      'forceUserScalableContent': settings['forceUserScalableContent']
+          ?.readAs(DriftSqlType.bool, db.typeMapping),
       // Process Isolation Settings
       'fissionEnabled': settings['fissionEnabled']?.readAs(
         DriftSqlType.bool,
