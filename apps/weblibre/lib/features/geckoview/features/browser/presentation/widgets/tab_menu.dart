@@ -52,6 +52,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/entities/contai
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_relation_visibility.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
@@ -155,32 +156,16 @@ class TabMenu extends HookConsumerWidget {
             ),
           ),
         if (enableDesktopMode)
-          Consumer(
-            builder: (context, childRef, child) {
-              final enabled = childRef.watch(
-                desktopModeProvider(selectedTabId),
-              );
-
-              return MenuItemButton(
-                onPressed: () {
-                  ref
-                      .read(desktopModeProvider(selectedTabId).notifier)
-                      .toggle();
-                },
-                leadingIcon: const Icon(MdiIcons.monitor),
-                trailingIcon: Checkbox(
-                  value: enabled,
-                  onChanged: (value) {
-                    if (value != null) {
-                      ref
-                          .read(desktopModeProvider(selectedTabId).notifier)
-                          .enabled(value);
-                      controller.close();
-                    }
-                  },
-                ),
-                child: const Text('Desktop Mode'),
-              );
+          _DesktopModeMenuItem(
+            selectedTabId: selectedTabId,
+            controller: controller,
+            onToggle: () {
+              ref.read(desktopModeProvider(selectedTabId).notifier).toggle();
+            },
+            onEnabledChanged: (value) {
+              ref
+                  .read(desktopModeProvider(selectedTabId).notifier)
+                  .enabled(value);
             },
           ),
         if (enableFindInPage || enableReaderMode || enableDesktopMode)
@@ -220,35 +205,7 @@ class TabMenu extends HookConsumerWidget {
               ).push(context);
             },
           ),
-        if (enableAddToHomeScreen)
-          Consumer(
-            builder: (context, ref, child) {
-              final isInstallable = ref.watch(isCurrentTabInstallableProvider);
-              final isShortcutable = ref.watch(
-                isCurrentTabShortcutableProvider,
-              );
-
-              return Visibility(
-                visible: isInstallable || isShortcutable,
-                child: MenuItemButton(
-                  closeOnActivate: false,
-                  leadingIcon: const Icon(Icons.add_to_home_screen),
-                  child: const Text('Add to Home Screen'),
-                  onPressed: () async {
-                    if (isInstallable) {
-                      await showPwaInstallDialog(context, ref);
-                    } else {
-                      await showShortcutInstallDialog(context, ref);
-                    }
-
-                    if (context.mounted) {
-                      MenuController.maybeOf(context)?.close();
-                    }
-                  },
-                ),
-              );
-            },
-          ),
+        if (enableAddToHomeScreen) const _AddToHomeScreenMenuItem(),
         if (enableCloneTab)
           SubmenuButton(
             menuChildren: [
@@ -434,7 +391,7 @@ class TabMenu extends HookConsumerWidget {
                   }
                 },
               ),
-              Consumer(
+              ContainerRelationUnassignedVisibility(
                 child: MenuItemButton(
                   leadingIcon: const Icon(MdiIcons.webPlus),
                   child: const Text('URL relation'),
@@ -475,19 +432,8 @@ class TabMenu extends HookConsumerWidget {
                     }
                   },
                 ),
-                builder: (context, ref, child) {
-                  final isSiteAssigned = ref.watch(
-                    watchIsCurrentSiteAssignedToContainerProvider,
-                  );
-
-                  return Visibility(
-                    visible:
-                        isSiteAssigned.hasValue && !isSiteAssigned.requireValue,
-                    child: child!,
-                  );
-                },
               ),
-              Consumer(
+              ContainerRelationAssignedVisibility(
                 child: MenuItemButton(
                   leadingIcon: const Icon(MdiIcons.webMinus),
                   child: const Text('Unassign URL relation'),
@@ -526,19 +472,9 @@ class TabMenu extends HookConsumerWidget {
                     }
                   },
                 ),
-                builder: (context, ref, child) {
-                  final isSiteAssigned = ref.watch(
-                    watchIsCurrentSiteAssignedToContainerProvider,
-                  );
-
-                  return Visibility(
-                    visible:
-                        isSiteAssigned.hasValue && isSiteAssigned.requireValue,
-                    child: child!,
-                  );
-                },
               ),
-              Consumer(
+              ContainerAssignedVisibility(
+                tabId: selectedTabId,
                 child: MenuItemButton(
                   leadingIcon: const Icon(MdiIcons.folderCancelOutline),
                   child: const Text('Unassign Container'),
@@ -550,74 +486,26 @@ class TabMenu extends HookConsumerWidget {
                         .unassignContainer(tabState.id);
                   },
                 ),
-                builder: (context, ref, child) {
-                  final containerId = ref.watch(
-                    watchContainerTabIdProvider(
-                      selectedTabId,
-                    ).select((value) => value.value),
-                  );
-
-                  return Visibility(
-                    visible: containerId != null,
-                    child: child!,
-                  );
-                },
               ),
             ],
             leadingIcon: const Icon(MdiIcons.folder),
             child: const Text('Container'),
           ),
         if (enableHierarchy)
-          Consumer(
-            builder: (childContext, childRef, child) {
-              // `MenuItemButton.onPressed` is dispatched as a post-frame
-              // callback by Flutter's menu_anchor — by the time it fires,
-              // this `Consumer` element (and any context/ref captured from
-              // its builder params) has been deactivated as the menu
-              // overlay tears down. So:
-              //  - use `childContext` / `childRef` only synchronously
-              //    inside this builder (the `watch` below),
-              //  - inside `onPressed`, use the outer `context` and `ref`
-              //    from TabMenu.build, which live above the menu overlay
-              //    and stay mounted with the trigger button.
-              final movingTab = childRef.watch(
-                watchTabDbDataProvider(selectedTabId),
+          _TabHierarchySubmenu(
+            selectedTabId: selectedTabId,
+            controller: controller,
+            onChangeParent: () async {
+              await showTabParentPicker(
+                context: context,
+                ref: ref,
+                tabId: selectedTabId,
               );
-              final tabData = movingTab.value;
-              final hasParent = tabData?.parentId != null;
-
-              final repo = ref.read(tabDataRepositoryProvider.notifier);
-
-              return SubmenuButton(
-                leadingIcon: const Icon(MdiIcons.fileTree),
-                menuChildren: [
-                  MenuItemButton(
-                    leadingIcon: const Icon(MdiIcons.swapHorizontal),
-                    onPressed: () async {
-                      controller.close();
-                      await showTabParentPicker(
-                        context: context,
-                        ref: ref,
-                        tabId: selectedTabId,
-                      );
-                    },
-                    child: const Text('Change parent…'),
-                  ),
-                  MenuItemButton(
-                    leadingIcon: const Icon(MdiIcons.fileTreeOutline),
-                    onPressed: hasParent
-                        ? () async {
-                            await repo.setTabParent(
-                              tabId: selectedTabId,
-                              newParentId: null,
-                            );
-                          }
-                        : null,
-                    child: const Text('Detach from parent'),
-                  ),
-                ],
-                child: const Text('Hierarchy'),
-              );
+            },
+            onDetachFromParent: () async {
+              await ref
+                  .read(tabDataRepositoryProvider.notifier)
+                  .setTabParent(tabId: selectedTabId, newParentId: null);
             },
           ),
         if (enableReorder)
@@ -708,73 +596,11 @@ class TabMenu extends HookConsumerWidget {
             leadingIcon: const Icon(MdiIcons.fileExport),
             child: const Text('Export'),
           ),
-        Consumer(
-          builder: (context, ref, child) {
-            final engineState = ref.watch(translationEngineStateProvider);
-            final translationState = ref.watch(
-              tabStateProvider(
-                selectedTabId,
-              ).select((s) => s?.translationState),
-            );
-            final readerActive = ref.watch(
-              tabStateProvider(
-                selectedTabId,
-              ).select((s) => s?.readerableState.active ?? false),
-            );
-
-            // Hide when reader mode is active (Fenix-aligned)
-            if (readerActive || engineState?.isEngineSupported != true) {
-              return const SizedBox.shrink();
-            }
-
-            final isTranslated = translationState?.isTranslated ?? false;
-
-            return MenuItemButton(
-              closeOnActivate: false,
-              leadingIcon: Icon(
-                Icons.translate,
-                color: isTranslated
-                    ? Theme.of(context).colorScheme.primary
-                    : null,
-              ),
-              onPressed: () async {
-                controller.close();
-                if (context.mounted) {
-                  await showTranslationBottomSheet(
-                    context,
-                    selectedTabId: selectedTabId,
-                  );
-                }
-              },
-              child: Text(isTranslated ? 'Translated' : 'Translate Page'),
-            );
-          },
+        _TranslatePageMenuItem(
+          selectedTabId: selectedTabId,
+          controller: controller,
         ),
-        if (enablePinTab)
-          Consumer(
-            builder: (context, childRef, child) {
-              final isPinned = childRef.watch(
-                watchPinnedTabIdsProvider.select(
-                  (v) => v.value?.contains(selectedTabId) ?? false,
-                ),
-              );
-
-              return MenuItemButton(
-                closeOnActivate: false,
-                onPressed: () async {
-                  await childRef
-                      .read(tabDataRepositoryProvider.notifier)
-                      .setPinned(selectedTabId, pinned: !isPinned);
-
-                  if (context.mounted) {
-                    MenuController.maybeOf(context)?.close();
-                  }
-                },
-                leadingIcon: Icon(isPinned ? MdiIcons.pinOff : MdiIcons.pin),
-                child: Text(isPinned ? 'Unpin tab' : 'Pin tab'),
-              );
-            },
-          ),
+        if (enablePinTab) _PinTabMenuItem(selectedTabId: selectedTabId),
         if (enableCloseTab)
           MenuItemButton(
             onPressed: () =>
@@ -797,42 +623,242 @@ class TabMenu extends HookConsumerWidget {
             child: const Text('Reload'),
           ),
         if (enableNavigationButtons)
-          Consumer(
-            builder: (context, ref, child) {
-              final history = ref.watch(
-                tabStateProvider(
-                  selectedTabId,
-                ).select((value) => value?.historyState),
-              );
-
-              final isLoading = ref.watch(
-                selectedTabStateProvider.select(
-                  (state) => state?.isLoading ?? false,
-                ),
-              );
-
-              return Row(
-                children: [
-                  Expanded(
-                    child: NavigateBackButton(
-                      selectedTabId: selectedTabId,
-                      isLoading: isLoading,
-                      menuControllerToClose: controller,
-                      canGoBack: history?.canGoBack == true,
-                    ),
-                  ),
-                  const SizedBox(height: 48, child: VerticalDivider()),
-                  Expanded(
-                    child: NavigateForwardButton(
-                      selectedTabId: selectedTabId,
-                      menuControllerToClose: controller,
-                      canGoForward: history?.canGoForward == true,
-                    ),
-                  ),
-                ],
-              );
-            },
+          _NavigationButtonsRow(
+            selectedTabId: selectedTabId,
+            controller: controller,
           ),
+      ],
+    );
+  }
+}
+
+class _DesktopModeMenuItem extends ConsumerWidget {
+  final String selectedTabId;
+  final MenuController controller;
+  final VoidCallback onToggle;
+  final ValueChanged<bool> onEnabledChanged;
+
+  const _DesktopModeMenuItem({
+    required this.selectedTabId,
+    required this.controller,
+    required this.onToggle,
+    required this.onEnabledChanged,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final enabled = ref.watch(desktopModeProvider(selectedTabId));
+
+    return MenuItemButton(
+      onPressed: onToggle,
+      leadingIcon: const Icon(MdiIcons.monitor),
+      trailingIcon: Checkbox(
+        value: enabled,
+        onChanged: (value) {
+          if (value != null) {
+            onEnabledChanged(value);
+            controller.close();
+          }
+        },
+      ),
+      child: const Text('Desktop Mode'),
+    );
+  }
+}
+
+class _AddToHomeScreenMenuItem extends ConsumerWidget {
+  const _AddToHomeScreenMenuItem();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isInstallable = ref.watch(isCurrentTabInstallableProvider);
+    final isShortcutable = ref.watch(isCurrentTabShortcutableProvider);
+
+    return Visibility(
+      visible: isInstallable || isShortcutable,
+      child: MenuItemButton(
+        closeOnActivate: false,
+        leadingIcon: const Icon(Icons.add_to_home_screen),
+        child: const Text('Add to Home Screen'),
+        onPressed: () async {
+          if (isInstallable) {
+            await showPwaInstallDialog(context, ref);
+          } else {
+            await showShortcutInstallDialog(context, ref);
+          }
+
+          if (context.mounted) {
+            MenuController.maybeOf(context)?.close();
+          }
+        },
+      ),
+    );
+  }
+}
+
+/// `MenuItemButton.onPressed` is dispatched as a post-frame callback by
+/// Flutter's menu_anchor — by the time it fires, this widget (and any
+/// context/ref it could watch) has been deactivated as the menu overlay
+/// tears down. So the actual navigation/mutation ([onChangeParent] /
+/// [onDetachFromParent]) is passed in from TabMenu.build, closing over
+/// TabMenu's own context/ref, which live above the menu overlay and stay
+/// mounted with the trigger button.
+class _TabHierarchySubmenu extends ConsumerWidget {
+  final String selectedTabId;
+  final MenuController controller;
+  final VoidCallback onChangeParent;
+  final VoidCallback onDetachFromParent;
+
+  const _TabHierarchySubmenu({
+    required this.selectedTabId,
+    required this.controller,
+    required this.onChangeParent,
+    required this.onDetachFromParent,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final movingTab = ref.watch(watchTabDbDataProvider(selectedTabId));
+    final tabData = movingTab.value;
+    final hasParent = tabData?.parentId != null;
+
+    return SubmenuButton(
+      leadingIcon: const Icon(MdiIcons.fileTree),
+      menuChildren: [
+        MenuItemButton(
+          leadingIcon: const Icon(MdiIcons.swapHorizontal),
+          onPressed: () {
+            controller.close();
+            onChangeParent();
+          },
+          child: const Text('Change parent…'),
+        ),
+        MenuItemButton(
+          leadingIcon: const Icon(MdiIcons.fileTreeOutline),
+          onPressed: hasParent ? onDetachFromParent : null,
+          child: const Text('Detach from parent'),
+        ),
+      ],
+      child: const Text('Hierarchy'),
+    );
+  }
+}
+
+class _TranslatePageMenuItem extends ConsumerWidget {
+  final String selectedTabId;
+  final MenuController controller;
+
+  const _TranslatePageMenuItem({
+    required this.selectedTabId,
+    required this.controller,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final engineState = ref.watch(translationEngineStateProvider);
+    final translationState = ref.watch(
+      tabStateProvider(selectedTabId).select((s) => s?.translationState),
+    );
+    final readerActive = ref.watch(
+      tabStateProvider(
+        selectedTabId,
+      ).select((s) => s?.readerableState.active ?? false),
+    );
+
+    // Hide when reader mode is active (Fenix-aligned)
+    if (readerActive || engineState?.isEngineSupported != true) {
+      return const SizedBox.shrink();
+    }
+
+    final isTranslated = translationState?.isTranslated ?? false;
+
+    return MenuItemButton(
+      closeOnActivate: false,
+      leadingIcon: Icon(
+        Icons.translate,
+        color: isTranslated ? Theme.of(context).colorScheme.primary : null,
+      ),
+      onPressed: () async {
+        controller.close();
+        if (context.mounted) {
+          await showTranslationBottomSheet(
+            context,
+            selectedTabId: selectedTabId,
+          );
+        }
+      },
+      child: Text(isTranslated ? 'Translated' : 'Translate Page'),
+    );
+  }
+}
+
+class _PinTabMenuItem extends ConsumerWidget {
+  final String selectedTabId;
+
+  const _PinTabMenuItem({required this.selectedTabId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isPinned = ref.watch(
+      watchPinnedTabIdsProvider.select(
+        (v) => v.value?.contains(selectedTabId) ?? false,
+      ),
+    );
+
+    return MenuItemButton(
+      closeOnActivate: false,
+      onPressed: () async {
+        await ref
+            .read(tabDataRepositoryProvider.notifier)
+            .setPinned(selectedTabId, pinned: !isPinned);
+
+        if (context.mounted) {
+          MenuController.maybeOf(context)?.close();
+        }
+      },
+      leadingIcon: Icon(isPinned ? MdiIcons.pinOff : MdiIcons.pin),
+      child: Text(isPinned ? 'Unpin tab' : 'Pin tab'),
+    );
+  }
+}
+
+class _NavigationButtonsRow extends ConsumerWidget {
+  final String selectedTabId;
+  final MenuController controller;
+
+  const _NavigationButtonsRow({
+    required this.selectedTabId,
+    required this.controller,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final history = ref.watch(
+      tabStateProvider(selectedTabId).select((value) => value?.historyState),
+    );
+
+    final isLoading = ref.watch(
+      selectedTabStateProvider.select((state) => state?.isLoading ?? false),
+    );
+
+    return Row(
+      children: [
+        Expanded(
+          child: NavigateBackButton(
+            selectedTabId: selectedTabId,
+            isLoading: isLoading,
+            menuControllerToClose: controller,
+            canGoBack: history?.canGoBack == true,
+          ),
+        ),
+        const SizedBox(height: 48, child: VerticalDivider()),
+        Expanded(
+          child: NavigateForwardButton(
+            selectedTabId: selectedTabId,
+            menuControllerToClose: controller,
+            canGoForward: history?.canGoForward == true,
+          ),
+        ),
       ],
     );
   }

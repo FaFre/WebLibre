@@ -66,9 +66,9 @@ import 'package:weblibre/features/geckoview/features/readerview/presentation/con
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_relation_visibility.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/domain/repositories/top_site_repository.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
@@ -1271,134 +1271,101 @@ class _ContainerExpansion extends ConsumerWidget {
           ),
 
           // URL relation (conditional)
-          Consumer(
-            builder: (context, ref, child) {
-              final isSiteAssigned = ref.watch(
-                watchIsCurrentSiteAssignedToContainerProvider,
-              );
+          ContainerRelationUnassignedVisibility(
+            child: _buildSubTile(
+              'Assign URL to Container',
+              icon: MdiIcons.webPlus,
+              onTap: () async {
+                final selection = await const ContainerSelectionRoute()
+                    .push<ContainerSelectionResult?>(context);
 
-              if (!isSiteAssigned.hasValue || isSiteAssigned.requireValue) {
-                return const SizedBox.shrink();
-              }
+                if (selection case ContainerSelectionSelected(
+                  :final containerId,
+                )) {
+                  final containerData = await ref
+                      .read(containerRepositoryProvider.notifier)
+                      .getContainerData(containerId);
 
-              return _buildSubTile(
-                'Assign URL to Container',
-                icon: MdiIcons.webPlus,
-                onTap: () async {
-                  final selection = await const ContainerSelectionRoute()
-                      .push<ContainerSelectionResult?>(context);
+                  if (containerData != null) {
+                    final tabState = ref.read(tabStateProvider(selectedTabId));
+                    final origin = tabState?.url.origin.mapNotNull(Uri.parse);
 
-                  if (selection case ContainerSelectionSelected(
-                    :final containerId,
-                  )) {
+                    if (origin != null) {
+                      await ref
+                          .read(containerRepositoryProvider.notifier)
+                          .replaceContainer(
+                            containerData.copyWith.metadata(
+                              containerData.metadata.copyWith.assignedSites([
+                                ...?containerData.metadata.assignedSites,
+                                origin,
+                              ]),
+                            ),
+                          );
+                    }
+                  }
+                }
+
+                if (context.mounted) Navigator.pop(context);
+              },
+            ),
+          ),
+
+          // Unassign URL relation (conditional)
+          ContainerRelationAssignedVisibility(
+            child: _buildSubTile(
+              'Unassign URL from Container',
+              icon: MdiIcons.webMinus,
+              onTap: () async {
+                final tabState = ref.read(tabStateProvider(selectedTabId));
+                final origin = tabState?.url.origin.mapNotNull(Uri.parse);
+
+                if (origin != null) {
+                  final containerId = await ref
+                      .read(containerRepositoryProvider.notifier)
+                      .siteAssignedContainerId(origin);
+
+                  if (containerId != null) {
                     final containerData = await ref
                         .read(containerRepositoryProvider.notifier)
                         .getContainerData(containerId);
 
                     if (containerData != null) {
-                      final tabState = ref.read(
-                        tabStateProvider(selectedTabId),
-                      );
-                      final origin = tabState?.url.origin.mapNotNull(Uri.parse);
+                      final updatedSites = containerData.metadata.assignedSites
+                          ?.where((site) => site != origin)
+                          .toList();
 
-                      if (origin != null) {
-                        await ref
-                            .read(containerRepositoryProvider.notifier)
-                            .replaceContainer(
-                              containerData.copyWith.metadata(
-                                containerData.metadata.copyWith.assignedSites([
-                                  ...?containerData.metadata.assignedSites,
-                                  origin,
-                                ]),
-                              ),
-                            );
-                      }
-                    }
-                  }
-
-                  if (context.mounted) Navigator.pop(context);
-                },
-              );
-            },
-          ),
-
-          // Unassign URL relation (conditional)
-          Consumer(
-            builder: (context, ref, child) {
-              final isSiteAssigned = ref.watch(
-                watchIsCurrentSiteAssignedToContainerProvider,
-              );
-
-              if (!isSiteAssigned.hasValue || !isSiteAssigned.requireValue) {
-                return const SizedBox.shrink();
-              }
-
-              return _buildSubTile(
-                'Unassign URL from Container',
-                icon: MdiIcons.webMinus,
-                onTap: () async {
-                  final tabState = ref.read(tabStateProvider(selectedTabId));
-                  final origin = tabState?.url.origin.mapNotNull(Uri.parse);
-
-                  if (origin != null) {
-                    final containerId = await ref
-                        .read(containerRepositoryProvider.notifier)
-                        .siteAssignedContainerId(origin);
-
-                    if (containerId != null) {
-                      final containerData = await ref
+                      await ref
                           .read(containerRepositoryProvider.notifier)
-                          .getContainerData(containerId);
-
-                      if (containerData != null) {
-                        final updatedSites = containerData
-                            .metadata
-                            .assignedSites
-                            ?.where((site) => site != origin)
-                            .toList();
-
-                        await ref
-                            .read(containerRepositoryProvider.notifier)
-                            .replaceContainer(
-                              containerData.copyWith.metadata(
-                                containerData.metadata.copyWith.assignedSites(
-                                  updatedSites,
-                                ),
+                          .replaceContainer(
+                            containerData.copyWith.metadata(
+                              containerData.metadata.copyWith.assignedSites(
+                                updatedSites,
                               ),
-                            );
-                      }
+                            ),
+                          );
                     }
                   }
+                }
 
-                  if (context.mounted) Navigator.pop(context);
-                },
-              );
-            },
+                if (context.mounted) Navigator.pop(context);
+              },
+            ),
           ),
 
           // Unassign Container (conditional)
-          Consumer(
-            builder: (context, ref, child) {
-              final containerId = ref.watch(
-                watchContainerTabIdProvider(
-                  selectedTabId,
-                ).select((value) => value.value),
-              );
-
-              if (containerId == null) return const SizedBox.shrink();
-
-              return _buildSubTile(
-                'Unassign Container',
-                icon: MdiIcons.folderCancelOutline,
-                onTap: () async {
-                  final tabState = ref.read(tabStateProvider(selectedTabId))!;
-                  await ref
-                      .read(tabDataRepositoryProvider.notifier)
-                      .unassignContainer(tabState.id);
-                  if (context.mounted) Navigator.pop(context);
-                },
-              );
-            },
+          ContainerAssignedVisibility(
+            tabId: selectedTabId,
+            child: _buildSubTile(
+              'Unassign Container',
+              icon: MdiIcons.folderCancelOutline,
+              onTap: () async {
+                final tabState = ref.read(tabStateProvider(selectedTabId))!;
+                await ref
+                    .read(tabDataRepositoryProvider.notifier)
+                    .unassignContainer(tabState.id);
+                if (context.mounted) Navigator.pop(context);
+              },
+            ),
           ),
         ],
       ),
