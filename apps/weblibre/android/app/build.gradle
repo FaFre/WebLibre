@@ -55,12 +55,13 @@ android {
             dimension "track"
             manifestPlaceholders = [appName: "WebLibre"]
         }
-        // Same alpha release slot (applicationId/versionName suffix), split into
-        // two variants so Impeller and the legacy Skia renderer can be compared
-        // side by side. The renderer is chosen at Flutter engine startup via a
-        // manifest meta-data flag and cannot be switched at runtime, hence two
-        // separate builds rather than a single toggle.
-        alphaImpeller {
+        // "alpha" stays the default alpha build (Impeller, as before this split) so
+        // existing tooling/filters keyed on the "alpha" name keep working.
+        // alphaLegacy is an additional variant using the legacy Skia renderer, for
+        // side-by-side comparison. The renderer is chosen at Flutter engine
+        // startup via a manifest meta-data flag and cannot be switched at
+        // runtime, hence a separate build rather than a single toggle.
+        alpha {
             dimension "track"
             applicationIdSuffix ".alpha"
             versionNameSuffix "-alpha"
@@ -75,10 +76,7 @@ android {
     }
 
     sourceSets {
-        // Both alpha variants share the existing alpha launcher icon/branding.
-        alphaImpeller {
-            res.srcDirs += 'src/alpha/res'
-        }
+        // alphaLegacy shares the existing alpha launcher icon/branding.
         alphaLegacy {
             res.srcDirs += 'src/alpha/res'
         }
