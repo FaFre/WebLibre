@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -31,8 +30,8 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/utils/bookmark_tree_utils.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/font_size_constants.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_id.dart';
@@ -783,18 +782,16 @@ class _BookmarkToolbarButton extends HookConsumerWidget {
     final tabUrl = scope.tabState?.url;
     final bookmarkable = tabUrl != null && !scope.isPreview;
 
-    final existingGuids = ref
-        .watch(
-          bookmarksRepositoryProvider.select(
-            (async) => EquatableValue(
-              bookmarkable
-                  ? bookmarkGuidsForUrl(async.value, tabUrl)
-                  : const <String>[],
-            ),
-          ),
-        )
-        .value;
+    // Answered by a storage lookup keyed on the URL, so this does not depend on
+    // the whole bookmark tree being resident in memory.
+    final bookmarkLookup = ref.watch(
+      bookmarkGuidsForUrlProvider(bookmarkable ? tabUrl : null),
+    );
+    final existingGuids = bookmarkLookup.value ?? const <String>[];
 
+    // Until the lookup settles an existing bookmark is indistinguishable from
+    // none, and assuming none would let a quick tap add a second copy.
+    final canToggleBookmark = bookmarkable && bookmarkLookup.hasValue;
     final isBookmarked = existingGuids.isNotEmpty;
 
     return MenuAnchor(
@@ -819,7 +816,7 @@ class _BookmarkToolbarButton extends HookConsumerWidget {
         else
           MenuItemButton(
             leadingIcon: const Icon(MdiIcons.bookmarkPlus),
-            onPressed: !bookmarkable
+            onPressed: !canToggleBookmark
                 ? null
                 : () async {
                     await ref
@@ -869,25 +866,23 @@ class _BookmarkToggleToolbarButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tabUrl = scope.tabState?.url;
     final bookmarkable = tabUrl != null && !scope.isPreview;
-    final existingGuids = ref
-        .watch(
-          bookmarksRepositoryProvider.select(
-            (async) => EquatableValue(
-              bookmarkable
-                  ? bookmarkGuidsForUrl(async.value, tabUrl)
-                  : const <String>[],
-            ),
-          ),
-        )
-        .value;
+    // Answered by a storage lookup keyed on the URL, so this does not depend on
+    // the whole bookmark tree being resident in memory.
+    final bookmarkLookup = ref.watch(
+      bookmarkGuidsForUrlProvider(bookmarkable ? tabUrl : null),
+    );
+    final existingGuids = bookmarkLookup.value ?? const <String>[];
 
+    // Until the lookup settles an existing bookmark is indistinguishable from
+    // none, and assuming none would let a quick tap add a second copy.
+    final canToggleBookmark = bookmarkable && bookmarkLookup.hasValue;
     final isBookmarked = existingGuids.isNotEmpty;
 
     return IconButton(
       tooltip: isBookmarked ? 'Remove bookmark' : 'Add bookmark',
       onPressed: scope.isPreview
           ? () {}
-          : !bookmarkable
+          : !canToggleBookmark
           ? null
           : () async {
               if (isBookmarked) {

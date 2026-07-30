@@ -129,6 +129,42 @@ class GeckoBookmarksService {
     return _api.deleteNode(guid);
   }
 
+  /// Bulk-inserts [children] underneath [parentGuid], appending them after any
+  /// nodes the parent already contains.
+  ///
+  /// Prefer this over looping [addItem]/[addFolder] when inserting a whole
+  /// tree: the entire batch crosses the platform channel once and each
+  /// top-level folder is written as a single storage operation. Separators are
+  /// preserved, and no per-node `bookmarks.onCreated` extension events are
+  /// emitted.
+  ///
+  /// Timestamps survive in full for everything nested inside a top-level
+  /// folder. Loose top-level items and separators keep their `dateAdded` but
+  /// get a fresh `lastModified`, because the only storage call that accepts
+  /// timestamps creates a folder.
+  ///
+  /// @param parentGuid The guid of the existing folder to insert underneath.
+  /// @param children The nodes to insert, in the order they should appear.
+  /// @return The number of inserted bookmark items and failed top-level nodes.
+  Future<BookmarkInsertTreeResult> insertTree(
+    String parentGuid,
+    List<BookmarkImportNode> children,
+  ) {
+    return _api.insertTree(parentGuid, children);
+  }
+
+  /// Counts the bookmark items contained in the trees rooted at [guids].
+  ///
+  /// Folders and separators are not counted. Prefer this over walking a
+  /// [getTree] result: the count is computed in storage, so no subtree has to
+  /// be materialised in Dart.
+  ///
+  /// @param guids The guids of the folders to count within.
+  /// @return The total number of bookmark items across all trees.
+  Future<int> countBookmarksInTrees(List<String> guids) {
+    return _api.countBookmarksInTrees(guids);
+  }
+
   /// Removes ALL bookmarks from the specified root folder.
   /// The root folder itself is preserved, only its children are removed.
   Future<void> eraseEverything(BookmarkRoot root) async {

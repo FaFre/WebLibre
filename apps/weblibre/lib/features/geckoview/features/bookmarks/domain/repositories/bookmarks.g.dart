@@ -13,7 +13,7 @@ part of 'bookmarks.dart';
 final bookmarksRepositoryProvider = BookmarksRepositoryProvider._();
 
 final class BookmarksRepositoryProvider
-    extends $AsyncNotifierProvider<BookmarksRepository, BookmarkItem?> {
+    extends $NotifierProvider<BookmarksRepository, int> {
   BookmarksRepositoryProvider._()
     : super(
         from: null,
@@ -31,22 +31,30 @@ final class BookmarksRepositoryProvider
   @$internal
   @override
   BookmarksRepository create() => BookmarksRepository();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(int value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<int>(value),
+    );
+  }
 }
 
 String _$bookmarksRepositoryHash() =>
-    r'2169d5b354c4a22192096451c96ab1490cf55ab4';
+    r'bf95d30f21773e931b12fd85d03d072d88d5b715';
 
-abstract class _$BookmarksRepository extends $AsyncNotifier<BookmarkItem?> {
-  FutureOr<BookmarkItem?> build();
+abstract class _$BookmarksRepository extends $Notifier<int> {
+  int build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<AsyncValue<BookmarkItem?>, BookmarkItem?>;
+    final ref = this.ref as $Ref<int, int>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<AsyncValue<BookmarkItem?>, BookmarkItem?>,
-              AsyncValue<BookmarkItem?>,
+              AnyNotifier<int, int>,
+              int,
               Object?,
               Object?
             >;

@@ -17,125 +17,38 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:async';
-
 import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
 
 part 'bookmarks.g.dart';
 
-/// Check if a root folder is effectively empty (has no non-root children)
-bool _isEmptyRootFolder(BookmarkFolder folder) {
-  if (folder.children == null) return true;
-  // A root folder is empty if it has no children, or only contains other root folders
-  return folder.children!.every(
-    (child) => bookmarkRootIds.contains(child.guid),
-  );
-}
-
-T? _selectChildRecursive<T extends BookmarkItem>(
-  List<BookmarkItem> children,
-  String guid,
-) {
-  for (final child in children) {
-    if (child.guid == guid && child is T) {
-      return child;
-    }
-
-    if (child case final BookmarkFolder folder) {
-      if (folder.children != null) {
-        final result = _selectChildRecursive<T>(folder.children!, guid);
-        if (result != null) {
-          return result;
-        }
-      }
-    }
-  }
-
-  return null;
-}
-
-T _cloneAndFilterChildrenType<T extends BookmarkItem>(T node) {
-  if (node is BookmarkFolder) {
-    if (node.children != null) {
-      return node.copyWith.children(
-            node.children
-                ?.whereType<T>()
-                .map((e) => _cloneAndFilterChildrenType<T>(e))
-                .toList(),
-          )
-          as T;
-    }
-  }
-
-  return node.clone() as T;
-}
-
-BookmarkItem? _cloneAndFilterOnGuids(BookmarkItem node, Set<String> guids) {
-  if (node is BookmarkFolder) {
-    if (node.children != null) {
-      final filtered = node.children
-          ?.where((e) => e is BookmarkFolder || guids.contains(e.guid))
-          .map((e) => _cloneAndFilterOnGuids(e, guids))
-          .nonNulls
-          .toList();
-
-      if (filtered.isNotEmpty) {
-        return node.copyWith.children(filtered);
-      } else {
-        return null;
-      }
-    }
-  }
-
-  if (guids.contains(node.guid)) {
-    return node.clone();
-  }
-
-  return null;
-}
-
-@Riverpod()
-class BookmarksSearch extends _$BookmarksSearch {
-  final _service = GeckoBookmarksService();
-  late StreamController<Set<String>> _streamController;
-
-  Future<void> search(String query, {int limit = 10}) async {
-    if (query.isNotEmpty) {
-      try {
-        await _service.searchBookmarks(query, limit: limit).then((value) {
-          if (!_streamController.isClosed) {
-            _streamController.add(value.map((e) => e.guid).toSet());
-          }
-        });
-      } on PlatformException catch (e) {
-        if (e.code == 'OperationInterrupted') return;
-        rethrow;
-      }
-    }
-  }
-
-  @override
-  Stream<Set<String>> build() {
-    _streamController = StreamController();
-
-    ref.onDispose(() async {
-      await _streamController.close();
-    });
-
-    return _streamController.stream;
-  }
+/// Whether a root folder holds anything worth showing.
+///
+/// Roots always contain each other, so a root that only contains other roots
+/// counts as empty.
+bool _hasVisibleContent(BookmarkFolder? folder) {
+  final children = folder?.children;
+  if (children == null) return false;
+  return children.any((child) => !bookmarkRootIds.contains(child.guid));
 }
 
 @Riverpod()
 class BookmarkSearchResults extends _$BookmarkSearchResults {
   final _service = GeckoBookmarksService();
 
+  /// Identifies the most recent request.
+  ///
+  /// Typing starts a search per keystroke and storage does not answer them in
+  /// order, so a slow early query could otherwise land after a fast later one
+  /// and leave the list showing results for text the user has moved on from.
+  int _latestRequest = 0;
+
   Future<void> search(String query, {int limit = 10}) async {
+    final request = ++_latestRequest;
+
     if (query.isEmpty) {
       state = [];
       return;
@@ -143,7 +56,7 @@ class BookmarkSearchResults extends _$BookmarkSearchResults {
 
     try {
       final results = await _service.searchBookmarks(query, limit: limit);
-      if (!ref.mounted) return;
+      if (!ref.mounted || request != _latestRequest) return;
       state = results
           .map(BookmarkItem.parseRecursive)
           .whereType<BookmarkEntry>()
@@ -160,98 +73,75 @@ class BookmarkSearchResults extends _$BookmarkSearchResults {
   }
 }
 
+/// A single folder with its direct children.
+///
+/// The load is scoped to one folder, so its cost tracks the folder being shown
+/// rather than the size of the library. Rebuilds whenever the repository
+/// reports a change.
 @Riverpod()
-AsyncValue<T?> bookmarks<T extends BookmarkItem>(
+Future<BookmarkFolder?> bookmarkFolder(Ref ref, String guid) {
+  ref.watch(bookmarksRepositoryProvider);
+  return ref.read(bookmarksRepositoryProvider.notifier).getFolder(guid);
+}
+
+/// The folder shown by the bookmark list, with the roots the user asked to
+/// hide already removed.
+///
+/// Emptiness can only be judged by looking inside each root, but the root level
+/// has a fixed handful of children, so the extra loads are bounded and shallow.
+@Riverpod()
+Future<BookmarkFolder?> bookmarkListFolder(
   Ref ref,
   String entryGuid, {
   bool hideEmptyRoots = false,
-}) {
-  final bookmarksAsync = ref.watch(bookmarksRepositoryProvider);
+}) async {
+  final folder = await ref.watch(bookmarkFolderProvider(entryGuid).future);
 
-  return bookmarksAsync.whenData((bookmarkNode) {
-    T? selectedNode;
+  if (folder == null ||
+      !hideEmptyRoots ||
+      entryGuid != BookmarkRoot.root.id ||
+      folder.children == null) {
+    return folder;
+  }
 
-    if (bookmarkNode != null && bookmarkNode is T) {
-      if (bookmarkNode.guid == entryGuid) {
-        selectedNode = bookmarkNode;
-      } else if (bookmarkNode case final BookmarkFolder folder) {
-        if (folder.children != null) {
-          selectedNode = _selectChildRecursive<T>(folder.children!, entryGuid);
-        }
-      }
+  final visible = <BookmarkItem>[];
+  for (final child in folder.children!) {
+    if (child is! BookmarkFolder || child.guid == BookmarkRoot.mobile.id) {
+      visible.add(child);
+      continue;
     }
 
-    if (selectedNode != null) {
-      var result = _cloneAndFilterChildrenType<T>(selectedNode);
-
-      // Filter empty root folders when viewing root level (excluding WebLibre root)
-      if (hideEmptyRoots &&
-          entryGuid == BookmarkRoot.root.id &&
-          result is BookmarkFolder) {
-        final filteredChildren = result.children
-            ?.where(
-              (child) =>
-                  child is! BookmarkFolder ||
-                  child.guid == BookmarkRoot.mobile.id ||
-                  !_isEmptyRootFolder(child),
-            )
-            .toList();
-        result = result.copyWith.children(filteredChildren) as T;
-      }
-
-      return result;
+    final loaded = await ref.watch(bookmarkFolderProvider(child.guid).future);
+    if (_hasVisibleContent(loaded)) {
+      visible.add(child);
     }
+  }
 
-    return null;
-  });
+  return folder.copyWith.children(visible);
 }
 
+/// Guids of the bookmarks pointing at [url], or an empty list when there are
+/// none.
+///
+/// Backed by a storage lookup, so "is this page bookmarked?" costs the same
+/// whether the user has ten bookmarks or fifty thousand.
 @Riverpod()
-class SeamlessBookmarks extends _$SeamlessBookmarks {
-  bool _hasSearch = false;
+Future<List<String>> bookmarkGuidsForUrl(Ref ref, Uri? url) async {
+  if (url == null) return const [];
 
-  void search(String input) {
-    if (input.isNotEmpty) {
-      if (!_hasSearch) {
-        _hasSearch = true;
-        ref.invalidateSelf();
-      }
+  ref.watch(bookmarksRepositoryProvider);
+  return ref
+      .read(bookmarksRepositoryProvider.notifier)
+      .bookmarkGuidsForUrl(url);
+}
 
-      //Don't block
-      unawaited(ref.read(bookmarksSearchProvider.notifier).search(input));
-    } else if (_hasSearch) {
-      _hasSearch = false;
-      ref.invalidateSelf();
-    }
-  }
-
-  @override
-  AsyncValue<BookmarkItem?> build(
-    String entryGuid, {
-    bool hideEmptyRoots = false,
-  }) {
-    final bookmarks = ref.watch(
-      bookmarksProvider<BookmarkItem>(
-        entryGuid,
-        hideEmptyRoots: hideEmptyRoots,
-      ),
-    );
-
-    if (_hasSearch) {
-      final filterGuids = ref.watch(bookmarksSearchProvider);
-      return bookmarks.map(
-        data: (node) =>
-            node.value.mapNotNull(
-              (node) => filterGuids.whenData(
-                (results) => _cloneAndFilterOnGuids(node, results),
-              ),
-            ) ??
-            const AsyncValue.data(null),
-        error: (e) => e,
-        loading: (s) => s,
-      );
-    } else {
-      return bookmarks;
-    }
-  }
+/// Number of bookmarks inside the trees rooted at [guids].
+///
+/// Used to tell the user how much a destructive action will affect.
+@Riverpod()
+Future<int> bookmarkCountInTrees(Ref ref, List<String> guids) {
+  ref.watch(bookmarksRepositoryProvider);
+  return ref
+      .read(bookmarksRepositoryProvider.notifier)
+      .countBookmarksInTrees(guids);
 }

@@ -82,12 +82,11 @@ class OpenInNewTab extends HookConsumerWidget {
 
     // Alternative tab types the user can explicitly choose, excluding the type
     // that the main tile action already opens (the current tab's type).
-    final alternativeTypes =
-        <TabType>[
-          TabType.regular,
-          TabType.private,
-          if (settings.showIsolatedTabUi) TabType.isolated,
-        ]..remove(currentTabMode.toTabType());
+    final alternativeTypes = <TabType>[
+      TabType.regular,
+      TabType.private,
+      if (settings.showIsolatedTabUi) TabType.isolated,
+    ]..remove(currentTabMode.toTabType());
 
     return ListTile(
       leading: const Icon(MdiIcons.tabPlus),

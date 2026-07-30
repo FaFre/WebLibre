@@ -17,10 +17,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
-import 'package:animated_tree_view/animated_tree_view.dart';
 import 'package:convert/convert.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -44,6 +43,7 @@ import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dial
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/delete_folder_dialog.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/import_bookmarks_dialog.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/select_bookmark_folder_dialog.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_import_isolate.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
@@ -52,6 +52,15 @@ import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
+/// How many hits an in-list search asks storage for.
+///
+/// Generous enough to be useful on a large library while staying a bounded,
+/// lazily rendered list.
+const _searchResultLimit = 200;
+
+/// Indentation applied per level of folder nesting.
+const _indentPerDepth = 20.0;
+
 class BookmarkListScreen extends HookConsumerWidget {
   final String entryGuid;
 
@@ -59,18 +68,15 @@ class BookmarkListScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final treeController =
-        useState<TreeViewController<BookmarkItem, TreeNode<BookmarkItem>>?>(
-          null,
-        );
-    // Tracks which folder GUIDs are expanded, so expansion state survives
-    // tree rebuilds caused by sort type changes.
-    final expandedGuids = useRef(<String>{});
     final hideEmptyRoots = useState(true);
     final uiState = ref.watch(bookmarkListUiStateProvider);
     final uiStateNotifier = ref.read(bookmarkListUiStateProvider.notifier);
-    final bookmarkList = ref.watch(
-      seamlessBookmarksProvider(
+
+    // Only the folder being shown is loaded. Descendants stay in storage until
+    // the user navigates into them, which is what keeps this screen openable on
+    // a large library.
+    final folderAsync = ref.watch(
+      bookmarkListFolderProvider(
         entryGuid,
         hideEmptyRoots: hideEmptyRoots.value,
       ),
@@ -78,24 +84,45 @@ class BookmarkListScreen extends HookConsumerWidget {
 
     final textFilterEnabled = useState(false);
     final textFilterController = useTextEditingController();
+    final searchQuery = useState('');
 
     useOnListenableChange(textFilterController, () {
-      if (ref.exists(
-        seamlessBookmarksProvider(
-          entryGuid,
-          hideEmptyRoots: hideEmptyRoots.value,
-        ),
-      )) {
+      searchQuery.value = textFilterController.text;
+      // Searching goes through storage rather than filtering a loaded tree, so
+      // it reaches bookmarks this screen never loaded.
+      unawaited(
         ref
-            .read(
-              seamlessBookmarksProvider(
-                entryGuid,
-                hideEmptyRoots: hideEmptyRoots.value,
-              ).notifier,
-            )
-            .search(textFilterController.text);
-      }
+            .read(bookmarkSearchResultsProvider.notifier)
+            .search(textFilterController.text, limit: _searchResultLimit),
+      );
     });
+
+    final isSearching = searchQuery.value.isNotEmpty;
+    final searchResults = ref.watch(bookmarkSearchResultsProvider);
+
+    // Folders the user has opened. Keyed by guid so expansion survives sort and
+    // filter changes.
+    final expandedGuids = useState(<String>{});
+
+    // Storage can only match bookmarks, never folders, so "Folders Only" and a
+    // search query have no overlap to show.
+    final searchSuppressedByFilter = isSearching && uiState.foldersOnly;
+
+    // Everything currently on screen, flattened. Selection is resolved against
+    // exactly these rows — search hits come from anywhere in the library, and
+    // expanded folders contribute items from below the entry folder.
+    final rows = isSearching
+        ? [
+            if (!searchSuppressedByFilter)
+              for (final result in searchResults) BookmarkRow(result, 0),
+          ]
+        : _buildRows(
+            ref,
+            folderAsync.value,
+            uiState,
+            expandedGuids.value,
+            depth: 0,
+          );
 
     return PopScope(
       canPop: !uiState.selectionMode,
@@ -106,13 +133,18 @@ class BookmarkListScreen extends HookConsumerWidget {
       },
       child: Scaffold(
         appBar: uiState.selectionMode
-            ? _buildSelectionAppBar(context, ref, uiState, uiStateNotifier)
+            ? _buildSelectionAppBar(
+                context,
+                ref,
+                uiState,
+                uiStateNotifier,
+                rows,
+              )
             : _buildNormalAppBar(
                 context,
                 ref,
-                treeController,
-                expandedGuids,
                 hideEmptyRoots,
+                expandedGuids,
                 textFilterEnabled,
                 textFilterController,
                 uiStateNotifier,
@@ -121,114 +153,170 @@ class BookmarkListScreen extends HookConsumerWidget {
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.only(left: 12.0),
-            child: bookmarkList.when(
-              skipLoadingOnReload: true,
-              data: (list) {
-                final sortedList = list != null
-                    ? sortBookmarkTree(
-                        list,
-                        uiState.sortType,
-                        isRoot: entryGuid == BookmarkRoot.root.id,
-                      )
-                    : null;
-
-                TreeNode<BookmarkItem> addChildren(
-                  TreeNode<BookmarkItem>? parent,
-                  BookmarkItem item,
-                ) {
-                  if (uiState.foldersOnly && item is BookmarkEntry) {
-                    return parent ?? TreeNode<BookmarkItem>.root();
-                  }
-
-                  final node = TreeNode(
-                    key: item.guid,
-                    data: item,
-                    parent: parent,
-                  );
-                  final targetNode = (parent?..add(node)) ?? node;
-
-                  if (item is BookmarkFolder && item.children != null) {
-                    for (final child in item.children!) {
-                      addChildren(node, child);
-                    }
-                  }
-
-                  return targetNode;
-                }
-
-                final root = (sortedList != null)
-                    ? addChildren(null, sortedList)
-                    : TreeNode<BookmarkItem>.root();
-
-                return TreeView.simple(
-                  key: ValueKey((uiState.sortType, uiState.foldersOnly)),
-                  tree: root,
-                  showRootNode: entryGuid != BookmarkRoot.root.id,
-                  onTreeReady: (controller) {
-                    treeController.value = controller;
-                    if (expandedGuids.value.isNotEmpty) {
-                      _restoreExpansion(controller, root, expandedGuids.value);
-                    } else {
-                      controller.expandAllChildren(root, recursive: true);
-                    }
-                  },
-                  expansionIndicatorBuilder: (context, tree) =>
-                      ChevronIndicator.upDown(
-                        tree: tree,
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 16.0,
-                          horizontal: 12.0,
-                        ),
+            child: isSearching
+                ? _buildRowList(
+                    context,
+                    ref,
+                    rows,
+                    uiState,
+                    uiStateNotifier,
+                    expandedGuids,
+                    emptyLabel: searchSuppressedByFilter
+                        ? 'Search matches bookmarks, which "Folders Only" is '
+                              'hiding'
+                        : 'No bookmarks match "${searchQuery.value}"',
+                  )
+                : folderAsync.when(
+                    skipLoadingOnReload: true,
+                    data: (_) => _buildRowList(
+                      context,
+                      ref,
+                      rows,
+                      uiState,
+                      uiStateNotifier,
+                      expandedGuids,
+                      emptyLabel: 'Empty',
+                    ),
+                    error: (error, stackTrace) => Center(
+                      child: FailureWidget(
+                        title: 'Failed to load Bookmarks',
+                        exception: error,
+                        onRetry: () {
+                          ref.invalidate(bookmarkFolderProvider(entryGuid));
+                        },
                       ),
-                  builder: (context, item) {
-                    final BookmarkItem? data = item.data;
-                    final isSelected = uiState.selectedGuids.contains(
-                      data?.guid,
-                    );
-                    final bool isLeaf = item.isLeaf;
-                    final bool isExpanded = item.isExpanded;
-
-                    return switch (data) {
-                      final BookmarkEntry bookmark => _buildEntryTile(
-                        context,
-                        ref,
-                        bookmark,
-                        uiState,
-                        uiStateNotifier,
-                        isSelected,
-                        sortedList,
-                      ),
-                      final BookmarkFolder folder => _buildFolderTile(
-                        context,
-                        ref,
-                        folder,
-                        isLeaf: isLeaf,
-                        isExpanded: isExpanded,
-                        uiState: uiState,
-                        uiStateNotifier: uiStateNotifier,
-                        isSelected: isSelected,
-                        rootItem: sortedList,
-                      ),
-                      null => const Center(child: Text('Empty')),
-                    };
-                  },
-                );
-              },
-              error: (error, stackTrace) => Center(
-                child: FailureWidget(
-                  title: 'Failed to load Bookmarks',
-                  exception: error,
-                  onRetry: () {
-                    // ignore: unused_result
-                    ref.refresh(bookmarksProvider<BookmarkItem>(entryGuid));
-                  },
-                ),
-              ),
-              loading: () => const Center(child: CircularProgressIndicator()),
-            ),
+                    ),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                  ),
           ),
         ),
       ),
+    );
+  }
+
+  /// Flattens the entry folder and every expanded folder beneath it into rows.
+  ///
+  /// A folder's children are only requested once it is expanded, so a collapsed
+  /// subtree costs nothing — this is what keeps the screen openable after a
+  /// large import or sync. Watching the child providers here means expanding
+  /// starts the load and the row list rebuilds when it lands.
+  List<BookmarkRow> _buildRows(
+    WidgetRef ref,
+    BookmarkFolder? folder,
+    BookmarkListUiState uiState,
+    Set<String> expandedGuids, {
+    required int depth,
+  }) {
+    final rows = <BookmarkRow>[];
+
+    for (final item in _visibleChildren(folder, uiState, depth: depth)) {
+      rows.add(BookmarkRow(item, depth));
+
+      if (item is! BookmarkFolder || !expandedGuids.contains(item.guid)) {
+        continue;
+      }
+
+      final child = ref.watch(bookmarkFolderProvider(item.guid));
+      if (child.value == null) {
+        rows.add(BookmarkRow(item, depth + 1, isPlaceholder: true));
+        continue;
+      }
+
+      rows.addAll(
+        _buildRows(ref, child.value, uiState, expandedGuids, depth: depth + 1),
+      );
+    }
+
+    return rows;
+  }
+
+  /// The children of [folder] in display order, with the folders-only filter
+  /// applied.
+  List<BookmarkItem> _visibleChildren(
+    BookmarkFolder? folder,
+    BookmarkListUiState uiState, {
+    required int depth,
+  }) {
+    var children = folder?.children ?? const <BookmarkItem>[];
+
+    if (uiState.foldersOnly) {
+      children = children.whereType<BookmarkFolder>().toList();
+    }
+
+    return sortBookmarkChildren(
+      children,
+      uiState.sortType,
+      // Only the entry level can be the tree root, and only there do the
+      // built-in folders need pinning.
+      isRoot: depth == 0 && entryGuid == BookmarkRoot.root.id,
+    );
+  }
+
+  /// Renders the flattened rows lazily.
+  ///
+  /// [ListView.builder] only builds the tiles actually on screen, so expanding
+  /// a folder with thousands of entries stays as cheap as a small one.
+  Widget _buildRowList(
+    BuildContext context,
+    WidgetRef ref,
+    List<BookmarkRow> rows,
+    BookmarkListUiState uiState,
+    BookmarkListUiStateNotifier uiStateNotifier,
+    ValueNotifier<Set<String>> expandedGuids, {
+    required String emptyLabel,
+  }) {
+    if (rows.isEmpty) {
+      return Center(child: Text(emptyLabel));
+    }
+
+    return ListView.builder(
+      itemCount: rows.length,
+      itemBuilder: (context, index) {
+        final row = rows[index];
+        final item = row.item;
+        final isSelected = uiState.selectedGuids.contains(item.guid);
+
+        return Padding(
+          padding: EdgeInsets.only(left: row.depth * _indentPerDepth),
+          child: row.isPlaceholder
+              ? const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12.0),
+                    child: SizedBox(
+                      height: 16.0,
+                      width: 16.0,
+                      child: CircularProgressIndicator(strokeWidth: 2.0),
+                    ),
+                  ),
+                )
+              : switch (item) {
+                  final BookmarkEntry bookmark => _buildEntryTile(
+                    context,
+                    ref,
+                    bookmark,
+                    uiState,
+                    uiStateNotifier,
+                    isSelected,
+                  ),
+                  final BookmarkFolder folder => _buildFolderTile(
+                    context,
+                    ref,
+                    folder,
+                    uiState: uiState,
+                    uiStateNotifier: uiStateNotifier,
+                    isSelected: isSelected,
+                    isExpanded: expandedGuids.value.contains(folder.guid),
+                    onToggleExpanded: () {
+                      final next = {...expandedGuids.value};
+                      if (!next.remove(folder.guid)) next.add(folder.guid);
+                      expandedGuids.value = next;
+                    },
+                  ),
+                },
+        );
+      },
     );
   }
 
@@ -239,6 +327,7 @@ class BookmarkListScreen extends HookConsumerWidget {
     WidgetRef ref,
     BookmarkListUiState uiState,
     BookmarkListUiStateNotifier uiStateNotifier,
+    List<BookmarkRow> rows,
   ) {
     final count = uiState.selectedGuids.length;
     return AppBar(
@@ -252,19 +341,21 @@ class BookmarkListScreen extends HookConsumerWidget {
           icon: const Icon(MdiIcons.tabPlus),
           tooltip: 'Open in background',
           onPressed: count > 0
-              ? () => _bulkOpenInBackground(context, ref, uiState)
+              ? () => _bulkOpenInBackground(context, ref, uiState, rows)
               : null,
         ),
         IconButton(
           icon: const Icon(MdiIcons.folderMove),
           tooltip: 'Move selected',
-          onPressed: count > 0 ? () => _bulkMove(context, ref, uiState) : null,
+          onPressed: count > 0
+              ? () => _bulkMove(context, ref, uiState, rows)
+              : null,
         ),
         IconButton(
           icon: const Icon(MdiIcons.delete),
           tooltip: 'Delete selected',
           onPressed: count > 0
-              ? () => _bulkDelete(context, ref, uiState, uiStateNotifier)
+              ? () => _bulkDelete(context, ref, uiState, uiStateNotifier, rows)
               : null,
         ),
       ],
@@ -274,10 +365,8 @@ class BookmarkListScreen extends HookConsumerWidget {
   AppBar _buildNormalAppBar(
     BuildContext context,
     WidgetRef ref,
-    ValueNotifier<TreeViewController<BookmarkItem, TreeNode<BookmarkItem>>?>
-    treeController,
-    ObjectRef<Set<String>> expandedGuids,
     ValueNotifier<bool> hideEmptyRoots,
+    ValueNotifier<Set<String>> expandedGuids,
     ValueNotifier<bool> textFilterEnabled,
     TextEditingController textFilterController,
     BookmarkListUiStateNotifier uiStateNotifier,
@@ -315,21 +404,41 @@ class BookmarkListScreen extends HookConsumerWidget {
           ),
         MenuAnchor(
           menuChildren: [
+            // Adding is otherwise only reachable from a child folder's row
+            // menu, which leaves an empty folder with no way to fill it.
+            // BookmarkRoot.root holds only the built-in folders, so it takes
+            // no children of its own.
+            if (entryGuid != BookmarkRoot.root.id) ...[
+              MenuItemButton(
+                leadingIcon: const Icon(MdiIcons.bookmarkPlus),
+                child: const Text('Add Bookmark Here'),
+                onPressed: () async {
+                  await BookmarkEntryAddRoute(
+                    bookmarkInfo: jsonEncode(
+                      BookmarkInfo(parentGuid: entryGuid).encode(),
+                    ),
+                  ).push(context);
+                },
+              ),
+              MenuItemButton(
+                leadingIcon: const Icon(MdiIcons.folderPlus),
+                child: const Text('Add Subfolder Here'),
+                onPressed: () async {
+                  await BookmarkFolderAddRoute(
+                    parentGuid: entryGuid,
+                  ).push(context);
+                },
+              ),
+            ],
             SubmenuButton(
               leadingIcon: const Icon(MdiIcons.eye),
               menuChildren: [
                 MenuItemButton(
-                  leadingIcon: const Icon(MdiIcons.expandAll),
-                  child: const Text('Expand All'),
-                  onPressed: () {
-                    final controller = treeController.value;
-                    if (controller != null) {
-                      controller.expandAllChildren(
-                        controller.tree,
-                        recursive: true,
-                      );
-                    }
-                  },
+                  leadingIcon: const Icon(MdiIcons.collapseAll),
+                  onPressed: expandedGuids.value.isEmpty
+                      ? null
+                      : () => expandedGuids.value = <String>{},
+                  child: const Text('Collapse All'),
                 ),
                 if (entryGuid == BookmarkRoot.root.id)
                   MenuItemButton(
@@ -353,13 +462,10 @@ class BookmarkListScreen extends HookConsumerWidget {
                         ? MdiIcons.bookmarkMultiple
                         : MdiIcons.folderOutline,
                   ),
+                  onPressed: uiStateNotifier.toggleFoldersOnly,
                   child: Text(
                     uiState.foldersOnly ? 'Show Bookmarks' : 'Folders Only',
                   ),
-                  onPressed: () {
-                    _snapshotExpansion(treeController.value, expandedGuids);
-                    uiStateNotifier.toggleFoldersOnly();
-                  },
                 ),
               ],
               child: const Text('Visibility'),
@@ -373,10 +479,7 @@ class BookmarkListScreen extends HookConsumerWidget {
                         ? const Icon(Icons.check)
                         : const SizedBox(width: 24),
                     child: Text(sortType.label),
-                    onPressed: () {
-                      _snapshotExpansion(treeController.value, expandedGuids);
-                      uiStateNotifier.setSortType(sortType);
-                    },
+                    onPressed: () => uiStateNotifier.setSortType(sortType),
                   ),
               ],
               child: const Text('Sort'),
@@ -387,12 +490,14 @@ class BookmarkListScreen extends HookConsumerWidget {
                 MenuItemButton(
                   leadingIcon: const Icon(MdiIcons.codeJson),
                   child: const Text('JSON'),
-                  onPressed: () => _handleImport(context, ref, 'json'),
+                  onPressed: () =>
+                      _handleImport(context, ref, BookmarkImportFormat.json),
                 ),
                 MenuItemButton(
                   leadingIcon: const Icon(MdiIcons.xml),
                   child: const Text('HTML'),
-                  onPressed: () => _handleImport(context, ref, 'html'),
+                  onPressed: () =>
+                      _handleImport(context, ref, BookmarkImportFormat.html),
                 ),
               ],
               child: const Text('Import'),
@@ -438,7 +543,6 @@ class BookmarkListScreen extends HookConsumerWidget {
     BookmarkListUiState uiState,
     BookmarkListUiStateNotifier uiStateNotifier,
     bool isSelected,
-    BookmarkItem? rootItem,
   ) {
     if (uiState.selectionMode) {
       return ListTile(
@@ -463,7 +567,7 @@ class BookmarkListScreen extends HookConsumerWidget {
       key: ValueKey(bookmark.guid),
       contentPadding: EdgeInsets.zero,
       leading: UrlIcon([bookmark.url], iconSize: 34.0),
-      trailing: _buildEntryMenu(context, ref, bookmark, rootItem),
+      trailing: _buildEntryMenu(context, ref, bookmark),
       title: Text(bookmark.title, maxLines: 3, overflow: TextOverflow.ellipsis),
       subtitle: UriBreadcrumb(uri: bookmark.url),
       onTap: () async {
@@ -487,7 +591,6 @@ class BookmarkListScreen extends HookConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     BookmarkEntry bookmark,
-    BookmarkItem? rootItem,
   ) {
     return HookBuilder(
       builder: (context) {
@@ -605,26 +708,21 @@ class BookmarkListScreen extends HookConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     BookmarkFolder folder, {
-    required bool isLeaf,
-    required bool isExpanded,
     required BookmarkListUiState uiState,
     required BookmarkListUiStateNotifier uiStateNotifier,
     required bool isSelected,
-    required BookmarkItem? rootItem,
+    required bool isExpanded,
+    required VoidCallback onToggleExpanded,
   }) {
     final isRoot = bookmarkRootIds.contains(folder.guid);
 
     if (uiState.selectionMode) {
       return Padding(
         key: ValueKey(folder.guid),
-        padding: isLeaf
-            ? const EdgeInsets.only(right: 4.0)
-            : const EdgeInsets.only(right: 42.0),
+        padding: const EdgeInsets.only(right: 4.0),
         child: ListTile(
           contentPadding: EdgeInsets.zero,
-          leading: isExpanded
-              ? const Icon(MdiIcons.folderOpen)
-              : const Icon(MdiIcons.folder),
+          leading: Icon(isExpanded ? MdiIcons.folderOpen : MdiIcons.folder),
           title: Text(folder.title),
           trailing: isRoot
               ? null
@@ -642,18 +740,21 @@ class BookmarkListScreen extends HookConsumerWidget {
 
     return Padding(
       key: ValueKey(folder.guid),
-      padding: isLeaf
-          ? const EdgeInsets.only(right: 4.0)
-          : const EdgeInsets.only(right: 42.0),
+      padding: const EdgeInsets.only(right: 4.0),
       child: HookBuilder(
         builder: (context) {
           final controller = useMenuController();
 
           return ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: isExpanded
-                ? const Icon(MdiIcons.folderOpen)
-                : const Icon(MdiIcons.folder),
+            // Whether a folder has children is unknown until it is opened, so
+            // every folder offers the toggle. Tapping the row still navigates
+            // into it, as it did before.
+            leading: IconButton(
+              icon: Icon(isExpanded ? MdiIcons.folderOpen : MdiIcons.folder),
+              tooltip: isExpanded ? 'Collapse' : 'Expand',
+              onPressed: onToggleExpanded,
+            ),
             title: Text(folder.title),
             trailing: MenuAnchor(
               controller: controller,
@@ -777,15 +878,14 @@ class BookmarkListScreen extends HookConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     BookmarkListUiState uiState,
+    List<BookmarkRow> rows,
   ) async {
-    final bookmarkData = ref.read(
-      seamlessBookmarksProvider(entryGuid, hideEmptyRoots: true),
-    );
-    final root = bookmarkData.value;
-    if (root == null) return;
-
-    final items = resolveSelectedItems(root, uiState.selectedGuids);
-    final entries = items.whereType<BookmarkEntry>().toList();
+    // Not normalised: opening is additive, so a bookmark selected inside an
+    // also-selected folder should still open rather than be dropped.
+    final entries = resolveSelectedItems([
+      for (final row in rows)
+        if (!row.isPlaceholder) row.item,
+    ], uiState.selectedGuids).whereType<BookmarkEntry>().toList();
 
     if (entries.isEmpty) {
       if (context.mounted) {
@@ -820,18 +920,14 @@ class BookmarkListScreen extends HookConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     BookmarkListUiState uiState,
+    List<BookmarkRow> rows,
   ) async {
-    final bookmarkData = ref.read(
-      seamlessBookmarksProvider(entryGuid, hideEmptyRoots: true),
-    );
-    final root = bookmarkData.value;
-    if (root == null) return;
+    final items = _selectedItems(rows, uiState.selectedGuids);
+    if (items.isEmpty) return;
 
-    final items = resolveSelectedItems(root, uiState.selectedGuids);
-
-    // Build exclusion set from selected folders and their full descendant
-    // trees fetched from storage, so hidden folders (e.g. filtered by search)
-    // are still properly excluded as move targets.
+    // A folder cannot be moved inside itself, so exclude each selected folder
+    // and its descendants. Fetched from storage rather than read off the list,
+    // which only knows the level currently on screen.
     final repo = ref.read(bookmarksRepositoryProvider.notifier);
     final excludeGuids = <String>{};
     for (final item in items) {
@@ -850,18 +946,12 @@ class BookmarkListScreen extends HookConsumerWidget {
 
     if (targetGuid == null) return;
 
-    // Normalize selection to avoid double-moves
-    final normalizedGuids = normalizeSelection(root, uiState.selectedGuids);
-    final normalizedItems = resolveSelectedItems(root, normalizedGuids);
-
-    await ref
-        .read(bookmarksRepositoryProvider.notifier)
-        .moveMany(items: normalizedItems, targetParentGuid: targetGuid);
+    await repo.moveMany(items: items, targetParentGuid: targetGuid);
 
     ref.read(bookmarkListUiStateProvider.notifier).exitSelectionMode();
 
     if (context.mounted) {
-      showInfoMessage(context, 'Moved ${normalizedItems.length} items');
+      showInfoMessage(context, 'Moved ${items.length} items');
     }
   }
 
@@ -870,81 +960,56 @@ class BookmarkListScreen extends HookConsumerWidget {
     WidgetRef ref,
     BookmarkListUiState uiState,
     BookmarkListUiStateNotifier uiStateNotifier,
+    List<BookmarkRow> rows,
   ) async {
-    final bookmarkData = ref.read(
-      seamlessBookmarksProvider(entryGuid, hideEmptyRoots: true),
-    );
-    final root = bookmarkData.value;
-    if (root == null) return;
+    final items = _selectedItems(rows, uiState.selectedGuids);
+    if (items.isEmpty) return;
 
-    final items = resolveSelectedItems(root, uiState.selectedGuids);
-    final hasFolders = items.any((item) => item is BookmarkFolder);
+    final folderGuids = items
+        .whereType<BookmarkFolder>()
+        .map((folder) => folder.guid)
+        .toList();
+
+    // Deleting a folder takes everything under it, which the user cannot see
+    // from here — so say how much before asking.
+    final nestedCount = folderGuids.isEmpty
+        ? 0
+        : await ref
+              .read(bookmarksRepositoryProvider.notifier)
+              .countBookmarksInTrees(folderGuids);
 
     if (!context.mounted) return;
-    final result = await (hasFolders
-        ? showDeleteFolderDialog(context)
+    final result = await (folderGuids.isNotEmpty
+        ? showDeleteFolderDialog(context, bookmarkCount: nestedCount)
         : showDeleteBookmarkDialog(context));
     if (result != true) return;
 
-    // Normalize to avoid deleting children whose parent folder is also being deleted
-    final normalizedGuids = normalizeSelection(root, uiState.selectedGuids);
-
-    await ref
-        .read(bookmarksRepositoryProvider.notifier)
-        .deleteMany(normalizedGuids);
+    final guids = items.map((item) => item.guid).toSet();
+    await ref.read(bookmarksRepositoryProvider.notifier).deleteMany(guids);
 
     uiStateNotifier.exitSelectionMode();
 
     if (context.mounted) {
-      showInfoMessage(context, 'Deleted ${normalizedGuids.length} items');
+      showInfoMessage(context, 'Deleted ${guids.length} items');
     }
   }
 
-  // -- Tree Expansion State Helpers --
-
-  /// Collects the GUIDs of all currently expanded nodes from the tree.
-  void _snapshotExpansion(
-    TreeViewController<BookmarkItem, TreeNode<BookmarkItem>>? controller,
-    ObjectRef<Set<String>> expandedGuids,
+  /// The selected items, with anything nested inside another selected folder
+  /// dropped.
+  ///
+  /// Expanding a folder puts its children on screen next to it, so a user can
+  /// select both — acting on each in turn would move a child out of the folder
+  /// that just moved, or delete it a second time.
+  List<BookmarkItem> _selectedItems(
+    List<BookmarkRow> rows,
+    Set<String> selectedGuids,
   ) {
-    if (controller == null) return;
-    final guids = <String>{};
-    _collectExpandedGuids(controller.tree, guids);
-    expandedGuids.value = guids;
-  }
+    final guids = normalizeSelection(rows, selectedGuids);
 
-  void _collectExpandedGuids(TreeNode<BookmarkItem> node, Set<String> guids) {
-    if (node.isExpanded && node.key != INode.ROOT_KEY) {
-      guids.add(node.key);
-    }
-    for (final child in node.childrenAsList) {
-      _collectExpandedGuids(child as TreeNode<BookmarkItem>, guids);
-    }
-  }
-
-  /// Restores expansion state by expanding nodes whose GUIDs are in the set.
-  void _restoreExpansion(
-    TreeViewController<BookmarkItem, TreeNode<BookmarkItem>> controller,
-    TreeNode<BookmarkItem> root,
-    Set<String> guids,
-  ) {
-    // Always expand root
-    controller.expandNode(root);
-    _expandMatchingNodes(controller, root, guids);
-  }
-
-  void _expandMatchingNodes(
-    TreeViewController<BookmarkItem, TreeNode<BookmarkItem>> controller,
-    TreeNode<BookmarkItem> node,
-    Set<String> guids,
-  ) {
-    for (final child in node.childrenAsList) {
-      final typedChild = child as TreeNode<BookmarkItem>;
-      if (guids.contains(typedChild.key)) {
-        controller.expandNode(typedChild);
-      }
-      _expandMatchingNodes(controller, typedChild, guids);
-    }
+    return resolveSelectedItems([
+      for (final row in rows)
+        if (!row.isPlaceholder) row.item,
+    ], guids);
   }
 
   // -- Tab Opening Helper --
@@ -995,12 +1060,14 @@ class BookmarkListScreen extends HookConsumerWidget {
   Future<void> _handleImport(
     BuildContext context,
     WidgetRef ref,
-    String format,
+    BookmarkImportFormat format,
   ) async {
     try {
       final result = await FilePicker.pickFiles(
         type: FileType.custom,
-        allowedExtensions: format == 'json' ? ['json'] : ['html', 'htm'],
+        allowedExtensions: format == BookmarkImportFormat.json
+            ? ['json']
+            : ['html', 'htm'],
       );
 
       if (result == null || result.files.isEmpty) return;
@@ -1019,12 +1086,15 @@ class BookmarkListScreen extends HookConsumerWidget {
       final shouldReplace = await showImportBookmarksDialog(context);
       if (shouldReplace == null) return; // User cancelled dialog
 
-      final content = await File(file.path!).readAsString();
-      final repository = ref.read(bookmarksRepositoryProvider.notifier);
-
-      final count = format == 'json'
-          ? await repository.importFromJSON(content, replace: shouldReplace)
-          : await repository.importFromHTML(content, replace: shouldReplace);
+      // Reading and parsing happen in a background isolate, so a large file
+      // does not freeze the UI while it is being processed.
+      final count = await ref
+          .read(bookmarksRepositoryProvider.notifier)
+          .importFromFile(
+            path: file.path!,
+            format: format,
+            replace: shouldReplace,
+          );
 
       if (context.mounted) {
         showInfoMessage(context, 'Imported $count bookmarks successfully');

@@ -27,10 +27,25 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_json_utils.dart';
 
 @GenerateMocks([GeckoBookmarksService])
 import 'bookmark_json_utils_test.mocks.dart';
+
+/// Nodes the parser routed to [root], or an empty list if it produced no such
+/// section.
+List<ImportBookmarkNode> section(ImportBookmarkTree tree, BookmarkRoot root) =>
+    tree.sections[root.id] ?? const [];
+
+/// Mirrors what the native side reports back: bookmark items only, recursively.
+int countItems(List<BookmarkImportNode> nodes) => nodes.fold(
+  0,
+  (total, node) =>
+      total +
+      (node.type == BookmarkNodeType.item ? 1 : 0) +
+      countItems(node.children),
+);
 
 void main() {
   late MockGeckoBookmarksService mockService;
@@ -39,108 +54,52 @@ void main() {
   setUp(() {
     mockService = MockGeckoBookmarksService();
     utils = BookmarkJSONUtils(mockService);
+
+    when(mockService.eraseEverything(any)).thenAnswer((_) async {});
+    when(mockService.insertTree(any, any)).thenAnswer(
+      (invocation) async => BookmarkInsertTreeResult(
+        insertedItemCount: countItems(
+          invocation.positionalArguments[1] as List<BookmarkImportNode>,
+        ),
+        failedNodeCount: 0,
+      ),
+    );
   });
 
-  group('BookmarkJSONUtils - Import', () {
-    test('should reject invalid JSON format', () {
-      const invalidJson = '[]';
-
-      expect(
-        () => utils.importFromJSON(invalidJson),
-        throwsA(isA<Exception>()),
-      );
+  group('parseBookmarkJson', () {
+    test('should reject a document that is not an object', () {
+      expect(() => parseBookmarkJson('[]'), throwsA(isA<FormatException>()));
     });
 
-    test('should return 0 for empty children', () async {
-      const emptyJson = '{"children": []}';
-
-      final count = await utils.importFromJSON(emptyJson);
-
-      expect(count, equals(0));
+    test('should produce nothing for empty or missing children', () {
+      expect(parseBookmarkJson('{"children": []}').isEmpty, isTrue);
+      expect(parseBookmarkJson('{"guid": "root________"}').isEmpty, isTrue);
     });
 
-    test('should return 0 when children is null', () async {
-      const noChildrenJson = '{"guid": "root________"}';
-
-      final count = await utils.importFromJSON(noChildrenJson);
-
-      expect(count, equals(0));
-    });
-
-    test('should filter out tags folder during import', () async {
+    test('should filter out the tags folder', () {
       final jsonData = {
         'children': [
           {
             'guid': 'tags________',
             'root': 'tagsFolder',
             'type': 'text/x-moz-place-container',
-            'children': [],
+            'children': [
+              {
+                'guid': 'tag1________',
+                'title': 'Tagged',
+                'type': 'text/x-moz-place',
+                'uri': 'https://example.com/tagged',
+              },
+            ],
           },
           {
             'guid': 'menu________',
             'root': 'bookmarksMenuFolder',
             'type': 'text/x-moz-place-container',
-            'children': [],
-          },
-        ],
-      };
-
-      when(mockService.eraseEverything(any)).thenAnswer((_) async {});
-
-      final count = await utils.importFromJSON(
-        jsonEncode(jsonData),
-        replace: true,
-      );
-
-      // Only the menu folder should be processed, tags should be filtered
-      expect(count, equals(0)); // No bookmarks, just folders
-      verify(mockService.eraseEverything(BookmarkRoot.root)).called(1);
-    });
-
-    test('should erase everything when replace is true', () async {
-      final jsonData = {
-        'children': [
-          {
-            'guid': 'menu________',
-            'type': 'text/x-moz-place-container',
-            'children': [],
-          },
-        ],
-      };
-
-      when(mockService.eraseEverything(any)).thenAnswer((_) async {});
-
-      await utils.importFromJSON(jsonEncode(jsonData), replace: true);
-
-      verify(mockService.eraseEverything(BookmarkRoot.root)).called(1);
-    });
-
-    test('should not erase when replace is false', () async {
-      final jsonData = {
-        'children': [
-          {
-            'guid': 'menu________',
-            'type': 'text/x-moz-place-container',
-            'children': [],
-          },
-        ],
-      };
-
-      await utils.importFromJSON(jsonEncode(jsonData));
-
-      verifyNever(mockService.eraseEverything(any));
-    });
-
-    test('should import bookmarks with URI field', () async {
-      final jsonData = {
-        'children': [
-          {
-            'guid': 'menu________',
-            'type': 'text/x-moz-place-container',
             'children': [
               {
                 'guid': 'bookmark1___',
-                'title': 'Test Bookmark',
+                'title': 'Kept',
                 'type': 'text/x-moz-place',
                 'uri': 'https://example.com',
               },
@@ -149,59 +108,65 @@ void main() {
         ],
       };
 
-      when(
-        mockService.addItem(any, any, any, any),
-      ).thenAnswer((_) async => 'bookmark1___');
+      final tree = parseBookmarkJson(jsonEncode(jsonData));
 
-      final count = await utils.importFromJSON(jsonEncode(jsonData));
-
-      expect(count, equals(1));
-      verify(
-        mockService.addItem(
-          'menu________',
-          Uri.parse('https://example.com'),
-          'Test Bookmark',
-          0,
-        ),
-      ).called(1);
+      expect(tree.sections.keys, equals([BookmarkRoot.menu.id]));
+      expect(tree.stats.bookmarkCount, equals(1));
     });
 
-    test('should import bookmarks with URL field', () async {
+    test('should ignore top-level nodes that are not Places roots', () {
       final jsonData = {
         'children': [
           {
-            'guid': 'menu________',
+            'guid': 'notaroot____',
             'type': 'text/x-moz-place-container',
             'children': [
               {
                 'guid': 'bookmark1___',
-                'title': 'Test Bookmark',
+                'title': 'Orphan',
                 'type': 'text/x-moz-place',
-                'url': 'https://example.com',
+                'uri': 'https://example.com',
               },
             ],
           },
         ],
       };
 
-      when(
-        mockService.addItem(any, any, any, any),
-      ).thenAnswer((_) async => 'bookmark1___');
-
-      final count = await utils.importFromJSON(jsonEncode(jsonData));
-
-      expect(count, equals(1));
-      verify(
-        mockService.addItem(
-          'menu________',
-          Uri.parse('https://example.com'),
-          'Test Bookmark',
-          0,
-        ),
-      ).called(1);
+      expect(parseBookmarkJson(jsonEncode(jsonData)).isEmpty, isTrue);
     });
 
-    test('should skip bookmarks with invalid URLs', () async {
+    test('should accept both the uri and url fields', () {
+      for (final field in ['uri', 'url']) {
+        final jsonData = {
+          'children': [
+            {
+              'guid': 'menu________',
+              'type': 'text/x-moz-place-container',
+              'children': [
+                {
+                  'guid': 'bookmark1___',
+                  'title': 'Test Bookmark',
+                  'type': 'text/x-moz-place',
+                  field: 'https://example.com',
+                },
+              ],
+            },
+          ],
+        };
+
+        final tree = parseBookmarkJson(jsonEncode(jsonData));
+
+        expect(
+          section(tree, BookmarkRoot.menu).single,
+          isA<ImportBookmarkItem>()
+              .having((i) => i.url, 'url', Uri.parse('https://example.com'))
+              .having((i) => i.title, 'title', 'Test Bookmark'),
+          reason: 'field "$field" should be read as the bookmark URL',
+        );
+      }
+    });
+
+    test('should skip bookmarks with invalid URLs', () {
       final jsonData = {
         'children': [
           {
@@ -225,26 +190,13 @@ void main() {
         ],
       };
 
-      when(
-        mockService.addItem(any, any, any, any),
-      ).thenAnswer((_) async => 'valid1______');
+      final tree = parseBookmarkJson(jsonEncode(jsonData));
 
-      final count = await utils.importFromJSON(jsonEncode(jsonData));
-
-      // Only one valid bookmark should be imported
-      expect(count, equals(1));
-      // Note: position is 1 because the invalid bookmark was skipped first
-      verify(
-        mockService.addItem(
-          'menu________',
-          Uri.parse('https://example.com'),
-          'Valid URL',
-          1,
-        ),
-      ).called(1);
+      expect(section(tree, BookmarkRoot.menu), hasLength(1));
+      expect(tree.stats.skippedUrlCount, equals(1));
     });
 
-    test('should import nested folders recursively', () async {
+    test('should nest folders recursively', () {
       final jsonData = {
         'children': [
           {
@@ -269,28 +221,20 @@ void main() {
         ],
       };
 
-      when(
-        mockService.addFolder(any, any, any),
-      ).thenAnswer((_) async => 'folder1_____');
-      when(
-        mockService.addItem(any, any, any, any),
-      ).thenAnswer((_) async => 'bookmark1___');
+      final tree = parseBookmarkJson(jsonEncode(jsonData));
 
-      final count = await utils.importFromJSON(jsonEncode(jsonData));
-
-      expect(count, equals(1));
-      verify(mockService.addFolder('menu________', 'Folder 1', 0)).called(1);
-      verify(
-        mockService.addItem(
-          'folder1_____',
-          Uri.parse('https://example.com'),
-          'Nested Bookmark',
-          0,
-        ),
-      ).called(1);
+      final folder =
+          section(tree, BookmarkRoot.menu).single as ImportBookmarkFolder;
+      expect(folder.title, equals('Folder 1'));
+      expect(
+        (folder.children.single as ImportBookmarkItem).title,
+        equals('Nested Bookmark'),
+      );
+      expect(tree.stats.bookmarkCount, equals(1));
+      expect(tree.stats.folderCount, equals(1));
     });
 
-    test('should handle separators gracefully (skip them)', () async {
+    test('should keep separators', () {
       final jsonData = {
         'children': [
           {
@@ -315,18 +259,80 @@ void main() {
         ],
       };
 
-      when(
-        mockService.addItem(any, any, any, any),
-      ).thenAnswer((invocation) async => 'generated_guid');
+      final tree = parseBookmarkJson(jsonEncode(jsonData));
+      final nodes = section(tree, BookmarkRoot.menu);
 
-      final count = await utils.importFromJSON(jsonEncode(jsonData));
-
-      // Two bookmarks, separator should be skipped
-      expect(count, equals(2));
-      verify(mockService.addItem(any, any, any, any)).called(2);
+      expect(nodes, hasLength(3));
+      expect(nodes[1], isA<ImportBookmarkSeparator>());
+      expect(tree.stats.bookmarkCount, equals(2));
+      expect(tree.stats.separatorCount, equals(1));
     });
 
-    test('should fixup place: queries with folder shortcuts', () async {
+    test('should read microsecond timestamps from Firefox backups', () {
+      final jsonData = {
+        'children': [
+          {
+            'guid': 'menu________',
+            'type': 'text/x-moz-place-container',
+            'children': [
+              {
+                'guid': 'bookmark1___',
+                'title': 'Dated',
+                'type': 'text/x-moz-place',
+                'uri': 'https://example.com',
+                'dateAdded': 1361551979350273,
+                'lastModified': 1361551979376699,
+              },
+            ],
+          },
+        ],
+      };
+
+      final tree = parseBookmarkJson(jsonEncode(jsonData));
+
+      final item =
+          section(tree, BookmarkRoot.menu).single as ImportBookmarkItem;
+      expect(
+        item.dateAdded,
+        equals(DateTime.fromMillisecondsSinceEpoch(1361551979350)),
+      );
+      expect(
+        item.lastModified,
+        equals(DateTime.fromMillisecondsSinceEpoch(1361551979376)),
+      );
+    });
+
+    test('should read millisecond timestamps from WebLibre exports', () {
+      final jsonData = {
+        'children': [
+          {
+            'guid': 'menu________',
+            'type': 'text/x-moz-place-container',
+            'children': [
+              {
+                'guid': 'bookmark1___',
+                'title': 'Dated',
+                'type': 'text/x-moz-place',
+                'uri': 'https://example.com',
+                'dateAdded': 1361551979350,
+              },
+            ],
+          },
+        ],
+      };
+
+      final tree = parseBookmarkJson(jsonEncode(jsonData));
+
+      final item =
+          section(tree, BookmarkRoot.menu).single as ImportBookmarkItem;
+      expect(
+        item.dateAdded,
+        equals(DateTime.fromMillisecondsSinceEpoch(1361551979350)),
+      );
+      expect(item.lastModified, isNull);
+    });
+
+    test('should fixup place: queries with folder shortcuts', () {
       final jsonData = {
         'children': [
           {
@@ -352,25 +358,14 @@ void main() {
         ],
       };
 
-      when(
-        mockService.addFolder(any, any, any),
-      ).thenAnswer((_) async => 'folder1_____');
-      when(
-        mockService.addItem(any, any, any, any),
-      ).thenAnswer((_) async => 'shortcut1___');
+      final tree = parseBookmarkJson(jsonEncode(jsonData));
 
-      await utils.importFromJSON(jsonEncode(jsonData));
-
-      // Capture the URI argument to verify it was fixed up
-      // Note: position is 1 because the folder was added first at position 0
-      final captured = verify(
-        mockService.addItem('unfiled_____', captureAny, 'Folder Shortcut', 1),
-      ).captured;
-
-      expect((captured[0] as Uri).toString(), contains('parent=folder1_____'));
+      final shortcut =
+          section(tree, BookmarkRoot.unfiled)[1] as ImportBookmarkItem;
+      expect(shortcut.url.toString(), contains('parent=folder1_____'));
     });
 
-    test('should handle invalid folder references in place: queries', () async {
+    test('should handle invalid folder references in place: queries', () {
       final jsonData = {
         'children': [
           {
@@ -388,48 +383,129 @@ void main() {
         ],
       };
 
-      when(
-        mockService.addItem(any, any, any, any),
-      ).thenAnswer((_) async => 'shortcut1___');
+      final tree = parseBookmarkJson(jsonEncode(jsonData));
 
-      await utils.importFromJSON(jsonEncode(jsonData));
-
-      final captured = verify(
-        mockService.addItem(
-          'unfiled_____',
-          captureAny,
-          'Invalid Folder Shortcut',
-          0,
-        ),
-      ).captured;
-
-      final url = (captured[0] as Uri).toString();
+      final url =
+          (section(tree, BookmarkRoot.unfiled).single as ImportBookmarkItem).url
+              .toString();
       expect(url, contains('invalidOldParentId=999999'));
       expect(url, contains('excludeItems=1'));
     });
 
-    test('should count imported bookmarks correctly from fixture', () async {
-      // Load the fixture
-      final fixtureFile = File('test/utils/bookmarks/fixtures/bookmarks.json');
-      final jsonString = await fixtureFile.readAsString();
+    test('should parse the bookmarks fixture', () async {
+      final jsonString = await File(
+        'test/utils/bookmarks/fixtures/bookmarks.json',
+      ).readAsString();
 
-      // Mock the service calls
-      when(mockService.eraseEverything(any)).thenAnswer((_) async {});
-      when(
-        mockService.addFolder(any, any, any),
-      ).thenAnswer((invocation) async => 'generated_guid');
-      when(
-        mockService.addItem(any, any, any, any),
-      ).thenAnswer((invocation) async => 'generated_guid');
+      final tree = parseBookmarkJson(jsonString);
 
-      final count = await utils.importFromJSON(jsonString, replace: true);
+      expect(tree.stats.bookmarkCount, greaterThan(0));
+    });
+  });
 
-      // The fixture has several bookmarks - we should count only valid ones
-      expect(count, greaterThan(0));
-      verify(mockService.eraseEverything(BookmarkRoot.root)).called(1);
+  group('BookmarkJSONUtils - Import', () {
+    test('should reject invalid JSON format', () {
+      expect(() => utils.importFromJSON('[]'), throwsA(isA<Exception>()));
     });
 
-    test('should handle import errors gracefully', () async {
+    test('should return 0 without touching storage for empty input', () async {
+      expect(await utils.importFromJSON('{"children": []}'), equals(0));
+      expect(await utils.importFromJSON('{"guid": "root________"}'), equals(0));
+
+      verifyNever(mockService.insertTree(any, any));
+      verifyNever(mockService.eraseEverything(any));
+    });
+
+    test('should insert each root section with a single bulk call', () async {
+      final jsonData = {
+        'children': [
+          {
+            'guid': 'menu________',
+            'type': 'text/x-moz-place-container',
+            'children': [
+              {
+                'guid': 'folder1_____',
+                'title': 'Folder 1',
+                'type': 'text/x-moz-place-container',
+                'children': [
+                  {
+                    'guid': 'bookmark1___',
+                    'title': 'Nested Bookmark',
+                    'type': 'text/x-moz-place',
+                    'uri': 'https://example.com',
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            'guid': 'unfiled_____',
+            'type': 'text/x-moz-place-container',
+            'children': [
+              {
+                'guid': 'bookmark2___',
+                'title': 'Unfiled Bookmark',
+                'type': 'text/x-moz-place',
+                'uri': 'https://example.com/2',
+              },
+            ],
+          },
+        ],
+      };
+
+      final count = await utils.importFromJSON(jsonEncode(jsonData));
+
+      expect(count, equals(2));
+      verify(mockService.insertTree(BookmarkRoot.menu.id, any)).called(1);
+      verify(mockService.insertTree(BookmarkRoot.unfiled.id, any)).called(1);
+      verifyNever(mockService.addItem(any, any, any, any));
+      verifyNever(mockService.addFolder(any, any, any));
+    });
+
+    test(
+      'should erase every root except the tree root when replacing',
+      () async {
+        final jsonString = await File(
+          'test/utils/bookmarks/fixtures/bookmarks.json',
+        ).readAsString();
+
+        final count = await utils.importFromJSON(jsonString, replace: true);
+
+        expect(count, greaterThan(0));
+        for (final root in BookmarkRoot.values) {
+          if (root == BookmarkRoot.root) {
+            verifyNever(mockService.eraseEverything(root));
+          } else {
+            verify(mockService.eraseEverything(root)).called(1);
+          }
+        }
+      },
+    );
+
+    test('should not erase when replace is false', () async {
+      final jsonData = {
+        'children': [
+          {
+            'guid': 'menu________',
+            'type': 'text/x-moz-place-container',
+            'children': [
+              {
+                'guid': 'bookmark1___',
+                'title': 'Test Bookmark',
+                'type': 'text/x-moz-place',
+                'uri': 'https://example.com',
+              },
+            ],
+          },
+        ],
+      };
+
+      await utils.importFromJSON(jsonEncode(jsonData));
+
+      verifyNever(mockService.eraseEverything(any));
+    });
+
+    test('should rethrow storage failures', () {
       final jsonData = {
         'children': [
           {
@@ -448,13 +524,13 @@ void main() {
       };
 
       when(
-        mockService.addItem(any, any, any, any),
+        mockService.insertTree(any, any),
       ).thenThrow(Exception('Database error'));
 
-      // Should not throw, but should log and continue
-      final count = await utils.importFromJSON(jsonEncode(jsonData));
-
-      expect(count, equals(0)); // Failed to add
+      expect(
+        () => utils.importFromJSON(jsonEncode(jsonData)),
+        throwsA(isA<Exception>()),
+      );
     });
   });
 
@@ -776,21 +852,27 @@ void main() {
       expect(exported, isNotNull);
 
       // Re-import
-      when(mockService.eraseEverything(any)).thenAnswer((_) async {});
-      when(
-        mockService.addFolder(any, any, any),
-      ).thenAnswer((_) async => 'folder1_____');
-      when(
-        mockService.addItem(any, any, any, any),
-      ).thenAnswer((_) async => 'bookmark1___');
-
       final jsonString = jsonEncode({
         'children': [exported],
       });
       final count = await utils.importFromJSON(jsonString, replace: true);
 
       expect(count, equals(1)); // One bookmark imported
-      verify(mockService.eraseEverything(BookmarkRoot.root)).called(1);
+      verify(mockService.eraseEverything(BookmarkRoot.menu)).called(1);
+
+      final inserted =
+          verify(
+                mockService.insertTree(BookmarkRoot.menu.id, captureAny),
+              ).captured.single
+              as List<BookmarkImportNode>;
+
+      final folder = inserted.single;
+      expect(folder.type, equals(BookmarkNodeType.folder));
+      expect(folder.title, equals('Test Folder'));
+
+      final bookmark = folder.children.single;
+      expect(bookmark.title, equals('Test Bookmark'));
+      expect(bookmark.url, equals('https://example.com'));
     });
   });
 }

@@ -80,15 +80,15 @@ void main() {
         },
       });
       expect(parsed.length, 2);
-      expect(parsed['host:youtube.com']!.decision, AppLinkRuleDecision.alwaysOpen);
+      expect(
+        parsed['host:youtube.com']!.decision,
+        AppLinkRuleDecision.alwaysOpen,
+      );
     });
 
     test('drops entries whose map key disagrees with the rule scope', () {
       final parsed = parseAppLinkRules({
-        'host:wrong.com': {
-          'decision': 'neverOpen',
-          'scope': 'host:right.com',
-        },
+        'host:wrong.com': {'decision': 'neverOpen', 'scope': 'host:right.com'},
       });
       expect(parsed, isEmpty);
     });

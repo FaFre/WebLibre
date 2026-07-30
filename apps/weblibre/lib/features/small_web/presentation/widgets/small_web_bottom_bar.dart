@@ -19,13 +19,12 @@
  */
 import 'dart:math';
 
-import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/utils/bookmark_tree_utils.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 // What words does the wanderer whisper?
@@ -173,18 +172,16 @@ class SmallWebBottomBar extends HookConsumerWidget {
 
     final tabUrl = currentTabUrl;
     final bookmarkable = tabUrl != null;
-    final existingGuids = ref
-        .watch(
-          bookmarksRepositoryProvider.select(
-            (async) => EquatableValue(
-              bookmarkable
-                  ? bookmarkGuidsForUrl(async.value, tabUrl)
-                  : const <String>[],
-            ),
-          ),
-        )
-        .value;
+    // Answered by a storage lookup keyed on the URL, so this does not depend on
+    // the whole bookmark tree being resident in memory.
+    final bookmarkLookup = ref.watch(
+      bookmarkGuidsForUrlProvider(bookmarkable ? tabUrl : null),
+    );
+    final existingGuids = bookmarkLookup.value ?? const <String>[];
 
+    // Until the lookup settles an existing bookmark is indistinguishable from
+    // none, and assuming none would let a quick tap add a second copy.
+    final canToggleBookmark = bookmarkable && bookmarkLookup.hasValue;
     final isBookmarked = existingGuids.isNotEmpty;
 
     return SizedBox(
@@ -224,7 +221,7 @@ class SmallWebBottomBar extends HookConsumerWidget {
           IconButton(
             icon: Icon(isBookmarked ? Icons.bookmark : Icons.bookmark_border),
             tooltip: isBookmarked ? 'Remove bookmark' : 'Add bookmark',
-            onPressed: !bookmarkable
+            onPressed: !canToggleBookmark
                 ? null
                 : () async {
                     if (isBookmarked) {

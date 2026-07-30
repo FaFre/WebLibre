@@ -53,17 +53,17 @@ class ContainerAppLinkSettingsDialog extends ConsumerWidget {
     WidgetRef ref,
     ContextAppLinkPolicy Function(ContextAppLinkPolicy current) update,
   ) async {
-    await ref
-        .read(saveGeneralSettingsControllerProvider.notifier)
-        .save((current) {
-          final existing =
-              current.appLinkContextOverrides[contextId] ??
-              ContextAppLinkPolicy.blank();
-          return current.copyWith.appLinkContextOverrides({
-            ...current.appLinkContextOverrides,
-            contextId: update(existing),
-          });
-        });
+    await ref.read(saveGeneralSettingsControllerProvider.notifier).save((
+      current,
+    ) {
+      final existing =
+          current.appLinkContextOverrides[contextId] ??
+          ContextAppLinkPolicy.blank();
+      return current.copyWith.appLinkContextOverrides({
+        ...current.appLinkContextOverrides,
+        contextId: update(existing),
+      });
+    });
   }
 
   @override
@@ -120,7 +120,9 @@ class ContainerAppLinkSettingsDialog extends ConsumerWidget {
                   RadioListTile.adaptive(
                     value: AppLinksMode.ask,
                     title: Text('Ask before opening'),
-                    subtitle: Text('Show a prompt before opening links in apps'),
+                    subtitle: Text(
+                      'Show a prompt before opening links in apps',
+                    ),
                   ),
                   RadioListTile.adaptive(
                     value: AppLinksMode.never,

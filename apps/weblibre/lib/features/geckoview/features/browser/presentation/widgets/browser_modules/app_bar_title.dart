@@ -628,7 +628,8 @@ class RailAppBarTitleView extends StatelessWidget {
                         : MdiIcons.shieldAlert,
                     size: 10,
                     color:
-                        siteSettingsBadgeState == SiteSettingsBadgeState.improved
+                        siteSettingsBadgeState ==
+                            SiteSettingsBadgeState.improved
                         ? Colors.green
                         : appColors.warningAmber,
                   ),

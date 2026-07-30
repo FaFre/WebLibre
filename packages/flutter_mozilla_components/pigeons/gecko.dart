@@ -2467,6 +2467,51 @@ class BookmarkNode {
   });
 }
 
+/// A node of a bookmark tree that is about to be bulk-inserted into storage.
+///
+/// Unlike [BookmarkNode] this carries no guids or parent links: the tree is
+/// described purely by nesting, and storage assigns guids while inserting.
+///
+/// @property type Whether this node is an item, a folder or a separator.
+/// @property title The title of the item or folder. Ignored for separators.
+/// @property url The URL of the item. Must be non-null for items, ignored otherwise.
+/// @property dateAdded Creation timestamp in milliseconds since epoch, or 0 if unknown.
+/// @property lastModified Modification timestamp in milliseconds since epoch, or 0 if unknown.
+/// @property children Child nodes of a folder, in insertion order. Empty for items and separators.
+class BookmarkImportNode {
+  final BookmarkNodeType type;
+  final String? title;
+  final String? url;
+  final int dateAdded;
+  final int lastModified;
+  final List<BookmarkImportNode> children;
+
+  BookmarkImportNode({
+    required this.type,
+    required this.title,
+    required this.url,
+    required this.dateAdded,
+    required this.lastModified,
+    required this.children,
+  });
+}
+
+/// Outcome of a bulk bookmark tree insertion.
+///
+/// @property insertedItemCount The number of bookmark items (not folders or
+/// separators) that were inserted.
+/// @property failedNodeCount The number of top-level nodes that could not be
+/// inserted. Their subtrees are missing entirely.
+class BookmarkInsertTreeResult {
+  final int insertedItemCount;
+  final int failedNodeCount;
+
+  BookmarkInsertTreeResult({
+    required this.insertedItemCount,
+    required this.failedNodeCount,
+  });
+}
+
 /// Class for making alterations to any bookmark node
 class BookmarkInfo {
   final String? parentGuid;
@@ -2639,6 +2684,45 @@ abstract class GeckoBookmarksApi {
   /// @return Whether the bookmark existed or not.
   @async
   bool deleteNode(String guid);
+
+  /// Bulk-inserts [children] underneath [parentGuid], appending them after any
+  /// nodes the parent already contains.
+  ///
+  /// Each top-level folder is handed to the storage layer as a single tree
+  /// insertion, so importing a large bookmark file costs one platform channel
+  /// call instead of one per node. Separators are preserved.
+  ///
+  /// Timestamps survive in full for everything nested inside a top-level
+  /// folder. Loose top-level items and separators keep their [dateAdded], but
+  /// their [lastModified] is set to the time of import: the only storage call
+  /// that accepts timestamps creates a folder, so nodes landing directly in
+  /// [parentGuid] have to be moved into place afterwards.
+  ///
+  /// Sync behavior: will add the inserted bookmarks to remote devices.
+  ///
+  /// Unlike [addItem] and [addFolder] this does *not* emit a
+  /// `bookmarks.onCreated` extension event per node, since a large import would
+  /// otherwise flood every installed WebExtension.
+  ///
+  /// @param parentGuid The guid of the existing folder to insert underneath.
+  /// @param children The nodes to insert, in the order they should appear.
+  /// @return The number of inserted bookmark items and failed top-level nodes.
+  @async
+  BookmarkInsertTreeResult insertTree(
+    String parentGuid,
+    List<BookmarkImportNode> children,
+  );
+
+  /// Counts the bookmark items contained in the trees rooted at [guids].
+  ///
+  /// Folders and separators are not counted, and a guid that does not exist
+  /// contributes nothing. Lets the app report how much a destructive action
+  /// affects without loading the subtrees into Dart.
+  ///
+  /// @param guids The guids of the folders to count within.
+  /// @return The total number of bookmark items across all trees.
+  @async
+  int countBookmarksInTrees(List<String> guids);
 }
 
 // =============================================================================

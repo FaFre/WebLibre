@@ -8,7 +8,6 @@ environment:
   sdk: '>=3.8.0 <4.0.0'
 
 dependencies:
-  animated_tree_view: ^2.3.0
   background_fetch: ^1.7.0
   collection: ^1.19.1
   convert: ^3.1.2

@@ -9,50 +9,6 @@ part of 'bookmarks.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(BookmarksSearch)
-final bookmarksSearchProvider = BookmarksSearchProvider._();
-
-final class BookmarksSearchProvider
-    extends $StreamNotifierProvider<BookmarksSearch, Set<String>> {
-  BookmarksSearchProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'bookmarksSearchProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$bookmarksSearchHash();
-
-  @$internal
-  @override
-  BookmarksSearch create() => BookmarksSearch();
-}
-
-String _$bookmarksSearchHash() => r'41053cbc1014e0fdd04d9510bf15c9896a9f752d';
-
-abstract class _$BookmarksSearch extends $StreamNotifier<Set<String>> {
-  Stream<Set<String>> build();
-  @$mustCallSuper
-  @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<AsyncValue<Set<String>>, Set<String>>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AsyncValue<Set<String>>, Set<String>>,
-              AsyncValue<Set<String>>,
-              Object?,
-              Object?
-            >;
-    return element.handleCreate(ref, build);
-  }
-}
-
 @ProviderFor(BookmarkSearchResults)
 final bookmarkSearchResultsProvider = BookmarkSearchResultsProvider._();
 
@@ -106,159 +62,70 @@ abstract class _$BookmarkSearchResults extends $Notifier<List<BookmarkEntry>> {
   }
 }
 
-@ProviderFor(bookmarks)
-final bookmarksProvider = BookmarksFamily._();
+/// A single folder with its direct children.
+///
+/// The load is scoped to one folder, so its cost tracks the folder being shown
+/// rather than the size of the library. Rebuilds whenever the repository
+/// reports a change.
 
-final class BookmarksProvider<T extends BookmarkItem>
-    extends $FunctionalProvider<AsyncValue<T?>, AsyncValue<T?>, AsyncValue<T?>>
-    with $Provider<AsyncValue<T?>> {
-  BookmarksProvider._({
-    required BookmarksFamily super.from,
-    required (String, {bool hideEmptyRoots}) super.argument,
+@ProviderFor(bookmarkFolder)
+final bookmarkFolderProvider = BookmarkFolderFamily._();
+
+/// A single folder with its direct children.
+///
+/// The load is scoped to one folder, so its cost tracks the folder being shown
+/// rather than the size of the library. Rebuilds whenever the repository
+/// reports a change.
+
+final class BookmarkFolderProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<BookmarkFolder?>,
+          BookmarkFolder?,
+          FutureOr<BookmarkFolder?>
+        >
+    with $FutureModifier<BookmarkFolder?>, $FutureProvider<BookmarkFolder?> {
+  /// A single folder with its direct children.
+  ///
+  /// The load is scoped to one folder, so its cost tracks the folder being shown
+  /// rather than the size of the library. Rebuilds whenever the repository
+  /// reports a change.
+  BookmarkFolderProvider._({
+    required BookmarkFolderFamily super.from,
+    required String super.argument,
   }) : super(
          retry: null,
-         name: r'bookmarksProvider',
+         name: r'bookmarkFolderProvider',
          isAutoDispose: true,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
 
   @override
-  String debugGetCreateSourceHash() => _$bookmarksHash();
+  String debugGetCreateSourceHash() => _$bookmarkFolderHash();
 
   @override
   String toString() {
-    return r'bookmarksProvider'
-        '<${T}>'
-        '$argument';
-  }
-
-  @$internal
-  @override
-  $ProviderElement<AsyncValue<T?>> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  AsyncValue<T?> create(Ref ref) {
-    final argument = this.argument as (String, {bool hideEmptyRoots});
-    return bookmarks<T>(
-      ref,
-      argument.$1,
-      hideEmptyRoots: argument.hideEmptyRoots,
-    );
-  }
-
-  $R _captureGenerics<$R>($R Function<T extends BookmarkItem>() cb) {
-    return cb<T>();
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(AsyncValue<T?> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<AsyncValue<T?>>(value),
-    );
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is BookmarksProvider &&
-        other.runtimeType == runtimeType &&
-        other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return Object.hash(runtimeType, argument);
-  }
-}
-
-String _$bookmarksHash() => r'72b54c4ff18cfdb60824a57607628be6b61d25d4';
-
-final class BookmarksFamily extends $Family {
-  BookmarksFamily._()
-    : super(
-        retry: null,
-        name: r'bookmarksProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
-
-  BookmarksProvider<T> call<T extends BookmarkItem>(
-    String entryGuid, {
-    bool hideEmptyRoots = false,
-  }) => BookmarksProvider<T>._(
-    argument: (entryGuid, hideEmptyRoots: hideEmptyRoots),
-    from: this,
-  );
-
-  @override
-  String toString() => r'bookmarksProvider';
-
-  /// {@macro riverpod.override_with}
-  Override overrideWith(
-    AsyncValue<T?> Function<T extends BookmarkItem>(
-      Ref ref,
-      (String, {bool hideEmptyRoots}) args,
-    )
-    create,
-  ) => $FamilyOverride(
-    from: this,
-    createElement: (pointer) {
-      final provider = pointer.origin as BookmarksProvider;
-      return provider._captureGenerics(<T extends BookmarkItem>() {
-        provider as BookmarksProvider<T>;
-        final argument = provider.argument as (String, {bool hideEmptyRoots});
-        return provider
-            .$view(create: (ref) => create(ref, argument))
-            .$createElement(pointer);
-      });
-    },
-  );
-}
-
-@ProviderFor(SeamlessBookmarks)
-final seamlessBookmarksProvider = SeamlessBookmarksFamily._();
-
-final class SeamlessBookmarksProvider
-    extends $NotifierProvider<SeamlessBookmarks, AsyncValue<BookmarkItem?>> {
-  SeamlessBookmarksProvider._({
-    required SeamlessBookmarksFamily super.from,
-    required (String, {bool hideEmptyRoots}) super.argument,
-  }) : super(
-         retry: null,
-         name: r'seamlessBookmarksProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
-
-  @override
-  String debugGetCreateSourceHash() => _$seamlessBookmarksHash();
-
-  @override
-  String toString() {
-    return r'seamlessBookmarksProvider'
+    return r'bookmarkFolderProvider'
         ''
-        '$argument';
+        '($argument)';
   }
 
   @$internal
   @override
-  SeamlessBookmarks create() => SeamlessBookmarks();
+  $FutureProviderElement<BookmarkFolder?> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
 
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(AsyncValue<BookmarkItem?> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<AsyncValue<BookmarkItem?>>(value),
-    );
+  @override
+  FutureOr<BookmarkFolder?> create(Ref ref) {
+    final argument = this.argument as String;
+    return bookmarkFolder(ref, argument);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is SeamlessBookmarksProvider && other.argument == argument;
+    return other is BookmarkFolderProvider && other.argument == argument;
   }
 
   @override
@@ -267,64 +134,346 @@ final class SeamlessBookmarksProvider
   }
 }
 
-String _$seamlessBookmarksHash() => r'240b213fa8fe595781ccc608c5d551be54c31992';
+String _$bookmarkFolderHash() => r'a0a3754a2b8099415cffad6358d9388dc7c4e7bf';
 
-final class SeamlessBookmarksFamily extends $Family
-    with
-        $ClassFamilyOverride<
-          SeamlessBookmarks,
-          AsyncValue<BookmarkItem?>,
-          AsyncValue<BookmarkItem?>,
-          AsyncValue<BookmarkItem?>,
-          (String, {bool hideEmptyRoots})
-        > {
-  SeamlessBookmarksFamily._()
+/// A single folder with its direct children.
+///
+/// The load is scoped to one folder, so its cost tracks the folder being shown
+/// rather than the size of the library. Rebuilds whenever the repository
+/// reports a change.
+
+final class BookmarkFolderFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<BookmarkFolder?>, String> {
+  BookmarkFolderFamily._()
     : super(
         retry: null,
-        name: r'seamlessBookmarksProvider',
+        name: r'bookmarkFolderProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
         isAutoDispose: true,
       );
 
-  SeamlessBookmarksProvider call(
+  /// A single folder with its direct children.
+  ///
+  /// The load is scoped to one folder, so its cost tracks the folder being shown
+  /// rather than the size of the library. Rebuilds whenever the repository
+  /// reports a change.
+
+  BookmarkFolderProvider call(String guid) =>
+      BookmarkFolderProvider._(argument: guid, from: this);
+
+  @override
+  String toString() => r'bookmarkFolderProvider';
+}
+
+/// The folder shown by the bookmark list, with the roots the user asked to
+/// hide already removed.
+///
+/// Emptiness can only be judged by looking inside each root, but the root level
+/// has a fixed handful of children, so the extra loads are bounded and shallow.
+
+@ProviderFor(bookmarkListFolder)
+final bookmarkListFolderProvider = BookmarkListFolderFamily._();
+
+/// The folder shown by the bookmark list, with the roots the user asked to
+/// hide already removed.
+///
+/// Emptiness can only be judged by looking inside each root, but the root level
+/// has a fixed handful of children, so the extra loads are bounded and shallow.
+
+final class BookmarkListFolderProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<BookmarkFolder?>,
+          BookmarkFolder?,
+          FutureOr<BookmarkFolder?>
+        >
+    with $FutureModifier<BookmarkFolder?>, $FutureProvider<BookmarkFolder?> {
+  /// The folder shown by the bookmark list, with the roots the user asked to
+  /// hide already removed.
+  ///
+  /// Emptiness can only be judged by looking inside each root, but the root level
+  /// has a fixed handful of children, so the extra loads are bounded and shallow.
+  BookmarkListFolderProvider._({
+    required BookmarkListFolderFamily super.from,
+    required (String, {bool hideEmptyRoots}) super.argument,
+  }) : super(
+         retry: null,
+         name: r'bookmarkListFolderProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$bookmarkListFolderHash();
+
+  @override
+  String toString() {
+    return r'bookmarkListFolderProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<BookmarkFolder?> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<BookmarkFolder?> create(Ref ref) {
+    final argument = this.argument as (String, {bool hideEmptyRoots});
+    return bookmarkListFolder(
+      ref,
+      argument.$1,
+      hideEmptyRoots: argument.hideEmptyRoots,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is BookmarkListFolderProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$bookmarkListFolderHash() =>
+    r'da6b257ef55b38021a2da7e41209b66a58cfbbb9';
+
+/// The folder shown by the bookmark list, with the roots the user asked to
+/// hide already removed.
+///
+/// Emptiness can only be judged by looking inside each root, but the root level
+/// has a fixed handful of children, so the extra loads are bounded and shallow.
+
+final class BookmarkListFolderFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<BookmarkFolder?>,
+          (String, {bool hideEmptyRoots})
+        > {
+  BookmarkListFolderFamily._()
+    : super(
+        retry: null,
+        name: r'bookmarkListFolderProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// The folder shown by the bookmark list, with the roots the user asked to
+  /// hide already removed.
+  ///
+  /// Emptiness can only be judged by looking inside each root, but the root level
+  /// has a fixed handful of children, so the extra loads are bounded and shallow.
+
+  BookmarkListFolderProvider call(
     String entryGuid, {
     bool hideEmptyRoots = false,
-  }) => SeamlessBookmarksProvider._(
+  }) => BookmarkListFolderProvider._(
     argument: (entryGuid, hideEmptyRoots: hideEmptyRoots),
     from: this,
   );
 
   @override
-  String toString() => r'seamlessBookmarksProvider';
+  String toString() => r'bookmarkListFolderProvider';
 }
 
-abstract class _$SeamlessBookmarks
-    extends $Notifier<AsyncValue<BookmarkItem?>> {
-  late final _$args = ref.$arg as (String, {bool hideEmptyRoots});
-  String get entryGuid => _$args.$1;
-  bool get hideEmptyRoots => _$args.hideEmptyRoots;
+/// Guids of the bookmarks pointing at [url], or an empty list when there are
+/// none.
+///
+/// Backed by a storage lookup, so "is this page bookmarked?" costs the same
+/// whether the user has ten bookmarks or fifty thousand.
 
-  AsyncValue<BookmarkItem?> build(
-    String entryGuid, {
-    bool hideEmptyRoots = false,
-  });
-  @$mustCallSuper
+@ProviderFor(bookmarkGuidsForUrl)
+final bookmarkGuidsForUrlProvider = BookmarkGuidsForUrlFamily._();
+
+/// Guids of the bookmarks pointing at [url], or an empty list when there are
+/// none.
+///
+/// Backed by a storage lookup, so "is this page bookmarked?" costs the same
+/// whether the user has ten bookmarks or fifty thousand.
+
+final class BookmarkGuidsForUrlProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<String>>,
+          List<String>,
+          FutureOr<List<String>>
+        >
+    with $FutureModifier<List<String>>, $FutureProvider<List<String>> {
+  /// Guids of the bookmarks pointing at [url], or an empty list when there are
+  /// none.
+  ///
+  /// Backed by a storage lookup, so "is this page bookmarked?" costs the same
+  /// whether the user has ten bookmarks or fifty thousand.
+  BookmarkGuidsForUrlProvider._({
+    required BookmarkGuidsForUrlFamily super.from,
+    required Uri? super.argument,
+  }) : super(
+         retry: null,
+         name: r'bookmarkGuidsForUrlProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
   @override
-  WhenComplete runBuild() {
-    final ref =
-        this.ref as $Ref<AsyncValue<BookmarkItem?>, AsyncValue<BookmarkItem?>>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AsyncValue<BookmarkItem?>, AsyncValue<BookmarkItem?>>,
-              AsyncValue<BookmarkItem?>,
-              Object?,
-              Object?
-            >;
-    return element.handleCreate(
-      ref,
-      () => build(_$args.$1, hideEmptyRoots: _$args.hideEmptyRoots),
-    );
+  String debugGetCreateSourceHash() => _$bookmarkGuidsForUrlHash();
+
+  @override
+  String toString() {
+    return r'bookmarkGuidsForUrlProvider'
+        ''
+        '($argument)';
   }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<String>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<String>> create(Ref ref) {
+    final argument = this.argument as Uri?;
+    return bookmarkGuidsForUrl(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is BookmarkGuidsForUrlProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$bookmarkGuidsForUrlHash() =>
+    r'aeca791afdcad74c2e8af93c392860ea3cb92b20';
+
+/// Guids of the bookmarks pointing at [url], or an empty list when there are
+/// none.
+///
+/// Backed by a storage lookup, so "is this page bookmarked?" costs the same
+/// whether the user has ten bookmarks or fifty thousand.
+
+final class BookmarkGuidsForUrlFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<List<String>>, Uri?> {
+  BookmarkGuidsForUrlFamily._()
+    : super(
+        retry: null,
+        name: r'bookmarkGuidsForUrlProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Guids of the bookmarks pointing at [url], or an empty list when there are
+  /// none.
+  ///
+  /// Backed by a storage lookup, so "is this page bookmarked?" costs the same
+  /// whether the user has ten bookmarks or fifty thousand.
+
+  BookmarkGuidsForUrlProvider call(Uri? url) =>
+      BookmarkGuidsForUrlProvider._(argument: url, from: this);
+
+  @override
+  String toString() => r'bookmarkGuidsForUrlProvider';
+}
+
+/// Number of bookmarks inside the trees rooted at [guids].
+///
+/// Used to tell the user how much a destructive action will affect.
+
+@ProviderFor(bookmarkCountInTrees)
+final bookmarkCountInTreesProvider = BookmarkCountInTreesFamily._();
+
+/// Number of bookmarks inside the trees rooted at [guids].
+///
+/// Used to tell the user how much a destructive action will affect.
+
+final class BookmarkCountInTreesProvider
+    extends $FunctionalProvider<AsyncValue<int>, int, FutureOr<int>>
+    with $FutureModifier<int>, $FutureProvider<int> {
+  /// Number of bookmarks inside the trees rooted at [guids].
+  ///
+  /// Used to tell the user how much a destructive action will affect.
+  BookmarkCountInTreesProvider._({
+    required BookmarkCountInTreesFamily super.from,
+    required List<String> super.argument,
+  }) : super(
+         retry: null,
+         name: r'bookmarkCountInTreesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$bookmarkCountInTreesHash();
+
+  @override
+  String toString() {
+    return r'bookmarkCountInTreesProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<int> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<int> create(Ref ref) {
+    final argument = this.argument as List<String>;
+    return bookmarkCountInTrees(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is BookmarkCountInTreesProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$bookmarkCountInTreesHash() =>
+    r'efe0cc45e7e77aa542d9ebbd9f4fee5cf9ee5903';
+
+/// Number of bookmarks inside the trees rooted at [guids].
+///
+/// Used to tell the user how much a destructive action will affect.
+
+final class BookmarkCountInTreesFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<int>, List<String>> {
+  BookmarkCountInTreesFamily._()
+    : super(
+        retry: null,
+        name: r'bookmarkCountInTreesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Number of bookmarks inside the trees rooted at [guids].
+  ///
+  /// Used to tell the user how much a destructive action will affect.
+
+  BookmarkCountInTreesProvider call(List<String> guids) =>
+      BookmarkCountInTreesProvider._(argument: guids, from: this);
+
+  @override
+  String toString() => r'bookmarkCountInTreesProvider';
 }

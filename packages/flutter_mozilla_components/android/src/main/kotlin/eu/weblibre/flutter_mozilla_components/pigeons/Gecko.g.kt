@@ -5272,6 +5272,127 @@ data class BookmarkNode (
 }
 
 /**
+ * A node of a bookmark tree that is about to be bulk-inserted into storage.
+ *
+ * Unlike [BookmarkNode] this carries no guids or parent links: the tree is
+ * described purely by nesting, and storage assigns guids while inserting.
+ *
+ * @property type Whether this node is an item, a folder or a separator.
+ * @property title The title of the item or folder. Ignored for separators.
+ * @property url The URL of the item. Must be non-null for items, ignored otherwise.
+ * @property dateAdded Creation timestamp in milliseconds since epoch, or 0 if unknown.
+ * @property lastModified Modification timestamp in milliseconds since epoch, or 0 if unknown.
+ * @property children Child nodes of a folder, in insertion order. Empty for items and separators.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class BookmarkImportNode (
+  val type: BookmarkNodeType,
+  val title: String? = null,
+  val url: String? = null,
+  val dateAdded: Long,
+  val lastModified: Long,
+  val children: List<BookmarkImportNode>
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): BookmarkImportNode {
+      val type = pigeonVar_list[0] as BookmarkNodeType
+      val title = pigeonVar_list[1] as String?
+      val url = pigeonVar_list[2] as String?
+      val dateAdded = pigeonVar_list[3] as Long
+      val lastModified = pigeonVar_list[4] as Long
+      val children = pigeonVar_list[5] as List<BookmarkImportNode>
+      return BookmarkImportNode(type, title, url, dateAdded, lastModified, children)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      type,
+      title,
+      url,
+      dateAdded,
+      lastModified,
+      children,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as BookmarkImportNode
+    return GeckoPigeonUtils.deepEquals(this.type, other.type) && GeckoPigeonUtils.deepEquals(this.title, other.title) && GeckoPigeonUtils.deepEquals(this.url, other.url) && GeckoPigeonUtils.deepEquals(this.dateAdded, other.dateAdded) && GeckoPigeonUtils.deepEquals(this.lastModified, other.lastModified) && GeckoPigeonUtils.deepEquals(this.children, other.children)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.type)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.title)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.url)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.dateAdded)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.lastModified)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.children)
+    return result
+  }
+  override fun toString(): String {
+    return "BookmarkImportNode(type=$type, title=$title, url=$url, dateAdded=$dateAdded, lastModified=$lastModified, children=$children)"
+  }
+}
+
+/**
+ * Outcome of a bulk bookmark tree insertion.
+ *
+ * @property insertedItemCount The number of bookmark items (not folders or
+ * separators) that were inserted.
+ * @property failedNodeCount The number of top-level nodes that could not be
+ * inserted. Their subtrees are missing entirely.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class BookmarkInsertTreeResult (
+  val insertedItemCount: Long,
+  val failedNodeCount: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): BookmarkInsertTreeResult {
+      val insertedItemCount = pigeonVar_list[0] as Long
+      val failedNodeCount = pigeonVar_list[1] as Long
+      return BookmarkInsertTreeResult(insertedItemCount, failedNodeCount)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      insertedItemCount,
+      failedNodeCount,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as BookmarkInsertTreeResult
+    return GeckoPigeonUtils.deepEquals(this.insertedItemCount, other.insertedItemCount) && GeckoPigeonUtils.deepEquals(this.failedNodeCount, other.failedNodeCount)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.insertedItemCount)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.failedNodeCount)
+    return result
+  }
+  override fun toString(): String {
+    return "BookmarkInsertTreeResult(insertedItemCount=$insertedItemCount, failedNodeCount=$failedNodeCount)"
+  }
+}
+
+/**
  * Class for making alterations to any bookmark node
  *
  * Generated class from Pigeon that represents data sent in messages.
@@ -6613,28 +6734,32 @@ private data class GeckoPigeonInternalCodecOverflow (
         
     when (type.toInt()) {
       0 ->
-        return AppLinkResolutionResult.fromList(wrapped as List<Any?>)
+        return AppLinkPolicySnapshot.fromList(wrapped as List<Any?>)
       1 ->
-        return PwaIcon.fromList(wrapped as List<Any?>)
+        return AppLinkPromptRequest.fromList(wrapped as List<Any?>)
       2 ->
-        return ShareTargetFiles.fromList(wrapped as List<Any?>)
+        return AppLinkResolutionResult.fromList(wrapped as List<Any?>)
       3 ->
-        return ShareTargetParams.fromList(wrapped as List<Any?>)
+        return PwaIcon.fromList(wrapped as List<Any?>)
       4 ->
-        return ShareTarget.fromList(wrapped as List<Any?>)
+        return ShareTargetFiles.fromList(wrapped as List<Any?>)
       5 ->
-        return ExternalApplicationResource.fromList(wrapped as List<Any?>)
+        return ShareTargetParams.fromList(wrapped as List<Any?>)
       6 ->
-        return PwaManifest.fromList(wrapped as List<Any?>)
+        return ShareTarget.fromList(wrapped as List<Any?>)
       7 ->
-        return SandboxCaptureEntry.fromList(wrapped as List<Any?>)
+        return ExternalApplicationResource.fromList(wrapped as List<Any?>)
       8 ->
-        return GestureConfig.fromList(wrapped as List<Any?>)
+        return PwaManifest.fromList(wrapped as List<Any?>)
       9 ->
-        return PushDistributor.fromList(wrapped as List<Any?>)
+        return SandboxCaptureEntry.fromList(wrapped as List<Any?>)
       10 ->
-        return PushStatus.fromList(wrapped as List<Any?>)
+        return GestureConfig.fromList(wrapped as List<Any?>)
       11 ->
+        return PushDistributor.fromList(wrapped as List<Any?>)
+      12 ->
+        return PushStatus.fromList(wrapped as List<Any?>)
+      13 ->
         return PushSubscription.fromList(wrapped as List<Any?>)
     }
     return null
@@ -7230,47 +7355,47 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
       }
       246.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          BookmarkInfo.fromList(it)
+          BookmarkImportNode.fromList(it)
         }
       }
       247.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SitePermissions.fromList(it)
+          BookmarkInsertTreeResult.fromList(it)
         }
       }
       248.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TrackingProtectionException.fromList(it)
+          BookmarkInfo.fromList(it)
         }
       }
       249.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AppLinkTarget.fromList(it)
+          SitePermissions.fromList(it)
         }
       }
       250.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ProtectedTargetPattern.fromList(it)
+          TrackingProtectionException.fromList(it)
         }
       }
       251.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          NativeAppLinkRule.fromList(it)
+          AppLinkTarget.fromList(it)
         }
       }
       252.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          NativeContextAppLinkPolicy.fromList(it)
+          ProtectedTargetPattern.fromList(it)
         }
       }
       253.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AppLinkPolicySnapshot.fromList(it)
+          NativeAppLinkRule.fromList(it)
         }
       }
       254.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AppLinkPromptRequest.fromList(it)
+          NativeContextAppLinkPolicy.fromList(it)
         }
       }
       255.toByte() -> {
@@ -7751,99 +7876,109 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
         stream.write(245)
         writeValue(stream, value.toList())
       }
-      is BookmarkInfo -> {
+      is BookmarkImportNode -> {
         stream.write(246)
         writeValue(stream, value.toList())
       }
-      is SitePermissions -> {
+      is BookmarkInsertTreeResult -> {
         stream.write(247)
         writeValue(stream, value.toList())
       }
-      is TrackingProtectionException -> {
+      is BookmarkInfo -> {
         stream.write(248)
         writeValue(stream, value.toList())
       }
-      is AppLinkTarget -> {
+      is SitePermissions -> {
         stream.write(249)
         writeValue(stream, value.toList())
       }
-      is ProtectedTargetPattern -> {
+      is TrackingProtectionException -> {
         stream.write(250)
         writeValue(stream, value.toList())
       }
-      is NativeAppLinkRule -> {
+      is AppLinkTarget -> {
         stream.write(251)
         writeValue(stream, value.toList())
       }
-      is NativeContextAppLinkPolicy -> {
+      is ProtectedTargetPattern -> {
         stream.write(252)
         writeValue(stream, value.toList())
       }
-      is AppLinkPolicySnapshot -> {
+      is NativeAppLinkRule -> {
         stream.write(253)
         writeValue(stream, value.toList())
       }
-      is AppLinkPromptRequest -> {
+      is NativeContextAppLinkPolicy -> {
         stream.write(254)
         writeValue(stream, value.toList())
       }
-      is AppLinkResolutionResult -> {
+      is AppLinkPolicySnapshot -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 0, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PwaIcon -> {
+      is AppLinkPromptRequest -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 1, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ShareTargetFiles -> {
+      is AppLinkResolutionResult -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 2, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ShareTargetParams -> {
+      is PwaIcon -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 3, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ShareTarget -> {
+      is ShareTargetFiles -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 4, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ExternalApplicationResource -> {
+      is ShareTargetParams -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 5, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PwaManifest -> {
+      is ShareTarget -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 6, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is SandboxCaptureEntry -> {
+      is ExternalApplicationResource -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 7, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is GestureConfig -> {
+      is PwaManifest -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 8, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PushDistributor -> {
+      is SandboxCaptureEntry -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 9, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PushStatus -> {
+      is GestureConfig -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 10, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PushSubscription -> {
+      is PushDistributor -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 11, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is PushStatus -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 12, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is PushSubscription -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 13, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
@@ -12253,6 +12388,42 @@ interface GeckoBookmarksApi {
    * @return Whether the bookmark existed or not.
    */
   fun deleteNode(guid: String, callback: (Result<Boolean>) -> Unit)
+  /**
+   * Bulk-inserts [children] underneath [parentGuid], appending them after any
+   * nodes the parent already contains.
+   *
+   * Each top-level folder is handed to the storage layer as a single tree
+   * insertion, so importing a large bookmark file costs one platform channel
+   * call instead of one per node. Separators are preserved.
+   *
+   * Timestamps survive in full for everything nested inside a top-level
+   * folder. Loose top-level items and separators keep their [dateAdded], but
+   * their [lastModified] is set to the time of import: the only storage call
+   * that accepts timestamps creates a folder, so nodes landing directly in
+   * [parentGuid] have to be moved into place afterwards.
+   *
+   * Sync behavior: will add the inserted bookmarks to remote devices.
+   *
+   * Unlike [addItem] and [addFolder] this does *not* emit a
+   * `bookmarks.onCreated` extension event per node, since a large import would
+   * otherwise flood every installed WebExtension.
+   *
+   * @param parentGuid The guid of the existing folder to insert underneath.
+   * @param children The nodes to insert, in the order they should appear.
+   * @return The number of inserted bookmark items and failed top-level nodes.
+   */
+  fun insertTree(parentGuid: String, children: List<BookmarkImportNode>, callback: (Result<BookmarkInsertTreeResult>) -> Unit)
+  /**
+   * Counts the bookmark items contained in the trees rooted at [guids].
+   *
+   * Folders and separators are not counted, and a guid that does not exist
+   * contributes nothing. Lets the app report how much a destructive action
+   * affects without loading the subtrees into Dart.
+   *
+   * @param guids The guids of the folders to count within.
+   * @return The total number of bookmark items across all trees.
+   */
+  fun countBookmarksInTrees(guids: List<String>, callback: (Result<Long>) -> Unit)
 
   companion object {
     /** The codec used by GeckoBookmarksApi. */
@@ -12439,6 +12610,47 @@ interface GeckoBookmarksApi {
             val args = message as List<Any?>
             val guidArg = args[0] as String
             api.deleteNode(guidArg) { result: Result<Boolean> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoBookmarksApi.insertTree$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val parentGuidArg = args[0] as String
+            val childrenArg = args[1] as List<BookmarkImportNode>
+            api.insertTree(parentGuidArg, childrenArg) { result: Result<BookmarkInsertTreeResult> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoBookmarksApi.countBookmarksInTrees$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val guidsArg = args[0] as List<String>
+            api.countBookmarksInTrees(guidsArg) { result: Result<Long> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(GeckoPigeonUtils.wrapError(error))

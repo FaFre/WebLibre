@@ -21,142 +21,101 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_sort_type.dart';
 
-/// Recursively sorts a bookmark tree by the given sort type.
-/// Root-level built-in folders are kept in their canonical order.
-BookmarkItem sortBookmarkTree(
-  BookmarkItem item,
+/// Sorts one folder's direct children by the given sort type.
+///
+/// Only the level being displayed is sorted; descendants are not loaded, so
+/// there is nothing deeper to order. Root-level built-in folders are kept
+/// pinned in their canonical order ahead of everything else.
+List<BookmarkItem> sortBookmarkChildren(
+  List<BookmarkItem> children,
   BookmarkSortType sortType, {
   bool isRoot = false,
 }) {
-  if (sortType == BookmarkSortType.manual) return item;
+  if (sortType == BookmarkSortType.manual) return children;
 
-  if (item is BookmarkFolder && item.children != null) {
-    final sortedChildren = item.children!.map((child) {
-      return sortBookmarkTree(child, sortType);
-    }).toList();
-
-    // At root level, keep built-in root folders pinned in original order
-    if (isRoot) {
-      final rootFolders = <BookmarkItem>[];
-      final nonRootItems = <BookmarkItem>[];
-      for (final child in sortedChildren) {
-        if (bookmarkRootIds.contains(child.guid)) {
-          rootFolders.add(child);
-        } else {
-          nonRootItems.add(child);
-        }
-      }
-      nonRootItems.sort((a, b) => compareBookmarkItems(a, b, sortType));
-      return BookmarkFolder(
-        guid: item.guid,
-        parentGuid: item.parentGuid,
-        title: item.title,
-        position: item.position,
-        dateAdded: item.dateAdded,
-        children: [...rootFolders, ...nonRootItems],
-      );
-    }
-
-    sortedChildren.sort((a, b) => compareBookmarkItems(a, b, sortType));
-    return BookmarkFolder(
-      guid: item.guid,
-      parentGuid: item.parentGuid,
-      title: item.title,
-      position: item.position,
-      dateAdded: item.dateAdded,
-      children: sortedChildren,
-    );
+  if (!isRoot) {
+    return [...children]..sort((a, b) => compareBookmarkItems(a, b, sortType));
   }
 
-  return item;
-}
-
-/// Collects all descendant folder GUIDs from a folder (not including the folder itself).
-Set<String> collectDescendantFolderGuids(BookmarkFolder folder) {
-  final result = <String>{};
-  if (folder.children != null) {
-    for (final child in folder.children!) {
-      if (child is BookmarkFolder) {
-        result.add(child.guid);
-        result.addAll(collectDescendantFolderGuids(child));
-      }
+  final rootFolders = <BookmarkItem>[];
+  final rest = <BookmarkItem>[];
+  for (final child in children) {
+    if (bookmarkRootIds.contains(child.guid)) {
+      rootFolders.add(child);
+    } else {
+      rest.add(child);
     }
   }
-  return result;
+  rest.sort((a, b) => compareBookmarkItems(a, b, sortType));
+
+  return [...rootFolders, ...rest];
 }
 
-/// Resolves BookmarkItems from a tree by their GUIDs.
-List<BookmarkItem> resolveSelectedItems(BookmarkItem root, Set<String> guids) {
-  final result = <BookmarkItem>[];
-  _collectByGuids(root, guids, result);
-  return result;
+/// One rendered line of the bookmark list: an item and how deep it sits.
+///
+/// The list flattens the expanded folders into rows rather than nesting
+/// widgets, so it can stay a `ListView.builder` and only build what is on
+/// screen — a folder with thousands of entries costs the same to expand as a
+/// small one.
+class BookmarkRow {
+  final BookmarkItem item;
+  final int depth;
+
+  /// True when this row only stands in for [item]'s children while they load.
+  ///
+  /// A placeholder repeats the folder it belongs to, so it must never be
+  /// treated as a second occurrence of that folder — acting on it would apply
+  /// the same operation twice.
+  final bool isPlaceholder;
+
+  const BookmarkRow(this.item, this.depth, {this.isPlaceholder = false});
 }
 
-void _collectByGuids(
-  BookmarkItem item,
+/// Resolves the items of [children] whose GUIDs are in [guids].
+///
+/// The caller passes whatever is currently displayed, which may be one folder's
+/// children, several expanded levels, or search hits from all over the library.
+List<BookmarkItem> resolveSelectedItems(
+  List<BookmarkItem> children,
   Set<String> guids,
-  List<BookmarkItem> result,
 ) {
-  if (guids.contains(item.guid)) {
-    result.add(item);
-  }
-  if (item is BookmarkFolder && item.children != null) {
-    for (final child in item.children!) {
-      _collectByGuids(child, guids, result);
-    }
-  }
+  return children.where((child) => guids.contains(child.guid)).toList();
 }
 
-/// Whether a folder can be flattened (non-root, has a parent, has children).
-bool canFlattenFolder(BookmarkFolder folder) {
-  return folder.parentGuid != null &&
-      !bookmarkRootIds.contains(folder.guid) &&
-      folder.children != null &&
-      folder.children!.isNotEmpty;
-}
+/// Drops selections that sit inside another selected folder.
+///
+/// Expanding a folder makes its children selectable alongside it, and acting on
+/// both would move a child out of the very folder that just moved, or delete it
+/// twice. A folder's descendants are exactly the rows that follow it until the
+/// depth returns to its own, so one pass over [rows] is enough.
+Set<String> normalizeSelection(List<BookmarkRow> rows, Set<String> selected) {
+  final result = <String>{};
+  var skipBelowDepth = -1;
 
-/// Normalizes a selection set: removes items that are descendants of selected folders.
-/// This prevents double-applying moves when both a folder and its children are selected.
-Set<String> normalizeSelection(BookmarkItem root, Set<String> selectedGuids) {
-  final items = resolveSelectedItems(root, selectedGuids);
-  final folderGuidsToRemove = <String>{};
-
-  for (final item in items) {
-    if (item is BookmarkFolder) {
-      _collectAllDescendantGuids(item, folderGuidsToRemove);
+  for (final row in rows) {
+    if (skipBelowDepth >= 0) {
+      if (row.depth > skipBelowDepth) continue;
+      skipBelowDepth = -1;
     }
-  }
 
-  return selectedGuids.difference(folderGuidsToRemove);
-}
+    if (row.isPlaceholder) continue;
 
-void _collectAllDescendantGuids(BookmarkFolder folder, Set<String> result) {
-  if (folder.children != null) {
-    for (final child in folder.children!) {
-      result.add(child.guid);
-      if (child is BookmarkFolder) {
-        _collectAllDescendantGuids(child, result);
-      }
-    }
-  }
-}
-
-/// Returns GUIDs of all bookmark entries matching [url] in the tree.
-List<String> bookmarkGuidsForUrl(BookmarkItem? root, Uri? url) {
-  final result = <String>[];
-  if (root == null || url == null) return result;
-
-  void collect(BookmarkItem item) {
-    if (item is BookmarkEntry && item.url == url) {
-      result.add(item.guid);
-    }
-    if (item is BookmarkFolder) {
-      for (final child in item.children ?? const <BookmarkItem>[]) {
-        collect(child);
+    if (selected.contains(row.item.guid)) {
+      result.add(row.item.guid);
+      if (row.item is BookmarkFolder) {
+        skipBelowDepth = row.depth;
       }
     }
   }
 
-  collect(root);
   return result;
+}
+
+/// Whether a folder can be flattened (non-root and has a parent).
+///
+/// Whether it actually holds anything is left to the repository, which reads
+/// the folder's children at the moment of the operation rather than relying on
+/// what the list happens to have loaded.
+bool canFlattenFolder(BookmarkFolder folder) {
+  return folder.parentGuid != null && !bookmarkRootIds.contains(folder.guid);
 }

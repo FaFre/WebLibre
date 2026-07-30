@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:animated_tree_view/animated_tree_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -28,11 +27,19 @@ import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/b
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
+/// Indentation applied per level of folder nesting.
+const _indentPerDepth = 20.0;
+
 /// A widget that displays a tree view of bookmark folders and allows the user
 /// to select a parent folder.
 ///
+/// Folders are loaded one level at a time as the user expands them, so opening
+/// the picker never pulls in the whole bookmark tree.
+///
 /// When editing a folder, pass [excludeFolderGuids] to prevent selecting the
-/// folders or their descendants as the parent (which would create a circular reference).
+/// folders or their descendants as the parent (which would create a circular
+/// reference). Descendants are excluded implicitly: an excluded folder is never
+/// rendered, so nothing underneath it can be reached or expanded.
 class FolderTreePicker extends HookConsumerWidget {
   /// The currently selected folder GUID
   final ValueNotifier<String> selectedFolderGuid;
@@ -52,99 +59,39 @@ class FolderTreePicker extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final treeKey = useMemoized(() => GlobalKey<TreeViewState>());
+    // Folders start collapsed apart from the entry point, so the picker opens
+    // after a single shallow load.
+    final expandedGuids = useState(<String>{entryGuid});
 
-    final folderList = ref.watch(bookmarksProvider<BookmarkFolder>(entryGuid));
+    final rootFolder = ref.watch(bookmarkFolderProvider(entryGuid));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Folder', style: Theme.of(context).textTheme.labelMedium),
-        folderList.when(
+        rootFolder.when(
           skipLoadingOnReload: true,
-          data: (list) {
-            TreeNode<BookmarkFolder> addChildren(
-              TreeNode<BookmarkFolder>? parent,
-              BookmarkFolder item,
-            ) {
-              final node = TreeNode(key: item.guid, data: item, parent: parent);
-              final targetNode = (parent?..add(node)) ?? node;
+          data: (folder) {
+            if (folder == null) return const SizedBox.shrink();
 
-              if (item.children != null) {
-                for (final child in item.children!) {
-                  // Skip excluded folders and their descendants
-                  if (child is BookmarkFolder &&
-                      !excludeFolderGuids.contains(child.guid)) {
-                    addChildren(node, child);
-                  }
-                }
-              }
-
-              return targetNode;
-            }
-
-            final root = (list != null)
-                ? addChildren(null, list)
-                : TreeNode<BookmarkFolder>.root();
-
-            return TreeView.simple(
-              key: treeKey,
-              tree: root,
-              shrinkWrap: true,
-              showRootNode: entryGuid != BookmarkRoot.root.id,
-              onTreeReady: (controller) {
-                controller.expandAllChildren(root, recursive: true);
-              },
-              expansionIndicatorBuilder: (context, tree) =>
-                  ChevronIndicator.upDown(
-                    tree: tree,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 16.0,
-                      horizontal: 12.0,
-                    ),
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (entryGuid != BookmarkRoot.root.id)
+                  _FolderRow(
+                    folder: folder,
+                    depth: 0,
+                    expandedGuids: expandedGuids,
+                    selectedFolderGuid: selectedFolderGuid,
                   ),
-              builder: (context, item) {
-                final isSelected = item.data?.guid == selectedFolderGuid.value;
-
-                // BookmarkRoot.root cannot be selected as a parent
-                final isRootFolder = item.data?.guid == BookmarkRoot.root.id;
-
-                return Padding(
-                  padding: const EdgeInsets.only(right: 42.0),
-                  child: switch (item.data) {
-                    final BookmarkFolder folder => ListTile(
-                      key: ValueKey(folder.guid),
-                      contentPadding: EdgeInsets.zero,
-                      selected: isSelected,
-                      enabled: !isRootFolder,
-                      leading: (item.isExpanded)
-                          ? const Icon(MdiIcons.folderOpen)
-                          : const Icon(MdiIcons.folder),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (isSelected) const Icon(Icons.check),
-                          IconButton(
-                            onPressed: () async {
-                              await BookmarkFolderAddRoute(
-                                parentGuid: folder.guid,
-                              ).push(context);
-                            },
-                            icon: const Icon(MdiIcons.folderPlus),
-                          ),
-                        ],
-                      ),
-                      title: Text(folder.title),
-                      onTap: !isRootFolder
-                          ? () {
-                              selectedFolderGuid.value = folder.guid;
-                            }
-                          : null,
-                    ),
-                    null => const SizedBox.shrink(),
-                  },
-                );
-              },
+                _FolderChildren(
+                  parentGuid: folder.guid,
+                  depth: entryGuid != BookmarkRoot.root.id ? 1 : 0,
+                  expandedGuids: expandedGuids,
+                  selectedFolderGuid: selectedFolderGuid,
+                  excludeFolderGuids: excludeFolderGuids,
+                ),
+              ],
             );
           },
           error: (error, stackTrace) => Center(
@@ -152,13 +99,143 @@ class FolderTreePicker extends HookConsumerWidget {
               title: 'Failed to load Bookmark Folders',
               exception: error,
               onRetry: () {
-                ref.invalidate(bookmarksProvider<BookmarkFolder>(entryGuid));
+                ref.invalidate(bookmarkFolderProvider(entryGuid));
               },
             ),
           ),
           loading: () => const Center(child: CircularProgressIndicator()),
         ),
       ],
+    );
+  }
+}
+
+/// The direct subfolders of [parentGuid], rendered only while its parent is
+/// expanded.
+///
+/// Mounting this widget is what triggers the load, so a collapsed folder costs
+/// nothing.
+class _FolderChildren extends HookConsumerWidget {
+  final String parentGuid;
+  final int depth;
+  final ValueNotifier<Set<String>> expandedGuids;
+  final ValueNotifier<String> selectedFolderGuid;
+  final Set<String> excludeFolderGuids;
+
+  const _FolderChildren({
+    required this.parentGuid,
+    required this.depth,
+    required this.expandedGuids,
+    required this.selectedFolderGuid,
+    required this.excludeFolderGuids,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final folder = ref.watch(bookmarkFolderProvider(parentGuid));
+
+    final subfolders = (folder.value?.children ?? const <BookmarkItem>[])
+        .whereType<BookmarkFolder>()
+        .where((child) => !excludeFolderGuids.contains(child.guid))
+        .toList();
+
+    if (folder.isLoading && folder.value == null) {
+      return Padding(
+        padding: EdgeInsets.only(left: depth * _indentPerDepth, top: 8.0),
+        child: const Align(
+          alignment: Alignment.centerLeft,
+          child: SizedBox(
+            height: 16.0,
+            width: 16.0,
+            child: CircularProgressIndicator(strokeWidth: 2.0),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final subfolder in subfolders) ...[
+          _FolderRow(
+            folder: subfolder,
+            depth: depth,
+            expandedGuids: expandedGuids,
+            selectedFolderGuid: selectedFolderGuid,
+          ),
+          if (expandedGuids.value.contains(subfolder.guid))
+            _FolderChildren(
+              parentGuid: subfolder.guid,
+              depth: depth + 1,
+              expandedGuids: expandedGuids,
+              selectedFolderGuid: selectedFolderGuid,
+              excludeFolderGuids: excludeFolderGuids,
+            ),
+        ],
+      ],
+    );
+  }
+}
+
+class _FolderRow extends HookConsumerWidget {
+  final BookmarkFolder folder;
+  final int depth;
+  final ValueNotifier<Set<String>> expandedGuids;
+  final ValueNotifier<String> selectedFolderGuid;
+
+  const _FolderRow({
+    required this.folder,
+    required this.depth,
+    required this.expandedGuids,
+    required this.selectedFolderGuid,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isExpanded = expandedGuids.value.contains(folder.guid);
+    final isSelected = folder.guid == selectedFolderGuid.value;
+
+    // BookmarkRoot.root cannot be selected as a parent
+    final isRootFolder = folder.guid == BookmarkRoot.root.id;
+
+    return Padding(
+      padding: EdgeInsets.only(left: depth * _indentPerDepth, right: 42.0),
+      child: ListTile(
+        key: ValueKey(folder.guid),
+        contentPadding: EdgeInsets.zero,
+        selected: isSelected,
+        enabled: !isRootFolder,
+        // Whether a folder has subfolders is unknown until it is opened, so
+        // every folder offers the toggle.
+        leading: IconButton(
+          icon: Icon(isExpanded ? MdiIcons.folderOpen : MdiIcons.folder),
+          onPressed: () {
+            expandedGuids.value = isExpanded
+                ? ({...expandedGuids.value}..remove(folder.guid))
+                : ({...expandedGuids.value}..add(folder.guid));
+          },
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isSelected) const Icon(Icons.check),
+            IconButton(
+              onPressed: () async {
+                await BookmarkFolderAddRoute(
+                  parentGuid: folder.guid,
+                ).push(context);
+              },
+              icon: const Icon(MdiIcons.folderPlus),
+            ),
+          ],
+        ),
+        title: Text(folder.title),
+        onTap: !isRootFolder
+            ? () {
+                selectedFolderGuid.value = folder.guid;
+              }
+            : null,
+      ),
     );
   }
 }

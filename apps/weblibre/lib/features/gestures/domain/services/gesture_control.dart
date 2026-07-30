@@ -34,7 +34,6 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/utils/bookmark_tree_utils.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/font_size_constants.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/translation_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
@@ -229,10 +228,8 @@ class GestureControlService extends _$GestureControlService {
     final bookmarkUrl =
         ref.read(sandboxSourceUriForTabProvider(tabId: tabId)) ?? tabState.url;
 
-    final bookmarks = ref.read(bookmarksRepositoryProvider).value;
-    final existingGuids = bookmarkGuidsForUrl(bookmarks, bookmarkUrl);
-
     final repository = ref.read(bookmarksRepositoryProvider.notifier);
+    final existingGuids = await repository.bookmarkGuidsForUrl(bookmarkUrl);
     if (existingGuids.isNotEmpty) {
       for (final guid in existingGuids) {
         await repository.delete(guid);

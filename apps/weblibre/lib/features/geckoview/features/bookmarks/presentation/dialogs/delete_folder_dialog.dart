@@ -19,16 +19,33 @@
  */
 import 'package:flutter/material.dart';
 
-Future<bool?> showDeleteFolderDialog(BuildContext context) {
+/// Confirms deleting a folder and everything inside it.
+///
+/// Pass [bookmarkCount] to name how many bookmarks go with it. The list only
+/// shows one level at a time, so the contents of a folder are usually off
+/// screen when this is asked.
+Future<bool?> showDeleteFolderDialog(
+  BuildContext context, {
+  int? bookmarkCount,
+}) {
   return showDialog<bool?>(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
         icon: const Icon(Icons.warning),
         title: const Text('Delete Folder'),
-        content: const Text(
-          'Are you sure you want to delete this Folder including all bookmarks?',
-        ),
+        content: Text(switch (bookmarkCount) {
+          null =>
+            'Are you sure you want to delete this Folder including '
+                'all bookmarks?',
+          0 => 'Are you sure you want to delete this Folder?',
+          1 =>
+            'Are you sure you want to delete this Folder and the '
+                '1 bookmark inside it?',
+          final count =>
+            'Are you sure you want to delete this Folder and the '
+                '$count bookmarks inside it?',
+        }),
         actions: <Widget>[
           TextButton(
             onPressed: () {

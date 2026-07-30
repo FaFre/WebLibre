@@ -24,10 +24,25 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_html_utils.dart';
 
 @GenerateMocks([GeckoBookmarksService])
 import 'bookmark_html_utils_test.mocks.dart';
+
+/// Nodes the parser routed to [root], or an empty list if it produced no such
+/// section.
+List<ImportBookmarkNode> section(ImportBookmarkTree tree, BookmarkRoot root) =>
+    tree.sections[root.id] ?? const [];
+
+/// Mirrors what the native side reports back: bookmark items only, recursively.
+int countItems(List<BookmarkImportNode> nodes) => nodes.fold(
+  0,
+  (total, node) =>
+      total +
+      (node.type == BookmarkNodeType.item ? 1 : 0) +
+      countItems(node.children),
+);
 
 void main() {
   late MockGeckoBookmarksService mockService;
@@ -36,72 +51,20 @@ void main() {
   setUp(() {
     mockService = MockGeckoBookmarksService();
     utils = BookmarkHTMLUtils(mockService);
+
+    when(mockService.eraseEverything(any)).thenAnswer((_) async {});
+    when(mockService.insertTree(any, any)).thenAnswer(
+      (invocation) async => BookmarkInsertTreeResult(
+        insertedItemCount: countItems(
+          invocation.positionalArguments[1] as List<BookmarkImportNode>,
+        ),
+        failedNodeCount: 0,
+      ),
+    );
   });
 
-  group('BookmarkHTMLUtils - Import', () {
-    test('should handle corrupt HTML file with malformed URIs', () async {
-      // Load the corrupt fixture
-      final fixtureFile = File(
-        'test/utils/bookmarks/fixtures/bookmarks.corrupt.html',
-      );
-      final htmlString = await fixtureFile.readAsString();
-
-      // Mock the service calls
-      when(mockService.eraseEverything(any)).thenAnswer((_) async {});
-      when(
-        mockService.addFolder(any, any, any),
-      ).thenAnswer((_) async => 'generated_guid');
-      when(
-        mockService.addItem(any, any, any, any),
-      ).thenAnswer((_) async => 'generated_guid');
-
-      final count = await utils.importFromHTML(htmlString, replace: true);
-
-      // Should import valid bookmarks and skip the corrupt one
-      expect(count, greaterThan(0));
-      verify(mockService.eraseEverything(BookmarkRoot.root)).called(1);
-    });
-
-    test('should import from valid HTML file', () async {
-      final fixtureFile = File(
-        'test/utils/bookmarks/fixtures/bookmarks.preplaces.html',
-      );
-      final htmlString = await fixtureFile.readAsString();
-
-      when(mockService.eraseEverything(any)).thenAnswer((_) async {});
-      when(
-        mockService.addFolder(any, any, any),
-      ).thenAnswer((_) async => 'folder_guid');
-      when(
-        mockService.addItem(any, any, any, any),
-      ).thenAnswer((_) async => 'bookmark_guid');
-
-      final count = await utils.importFromHTML(htmlString, replace: true);
-
-      expect(count, greaterThan(0));
-      verify(mockService.eraseEverything(BookmarkRoot.root)).called(1);
-      // Verify some bookmarks were added
-      verify(mockService.addItem(any, any, any, any)).called(greaterThan(0));
-    });
-
-    test('should handle empty HTML', () async {
-      const emptyHtml = '''
-        <!DOCTYPE NETSCAPE-Bookmark-file-1>
-        <TITLE>Bookmarks</TITLE>
-        <H1>Bookmarks</H1>
-        <DL><p>
-        </DL>
-      ''';
-
-      when(mockService.eraseEverything(any)).thenAnswer((_) async {});
-
-      final count = await utils.importFromHTML(emptyHtml, replace: true);
-
-      expect(count, equals(0));
-      verify(mockService.eraseEverything(BookmarkRoot.root)).called(1);
-    });
-
-    test('should not erase when replace is false', () async {
+  group('parseBookmarkHtml', () {
+    test('should route everything under menu without root markers', () {
       const simpleHtml = '''
         <!DOCTYPE NETSCAPE-Bookmark-file-1>
         <TITLE>Bookmarks</TITLE>
@@ -111,16 +74,19 @@ void main() {
         </DL>
       ''';
 
-      when(
-        mockService.addItem(any, any, any, any),
-      ).thenAnswer((_) async => 'guid');
+      final tree = parseBookmarkHtml(simpleHtml, preserveRootFolders: false);
 
-      await utils.importFromHTML(simpleHtml);
-
-      verifyNever(mockService.eraseEverything(any));
+      expect(tree.sections.keys, equals([BookmarkRoot.menu.id]));
+      expect(
+        section(tree, BookmarkRoot.menu).single,
+        isA<ImportBookmarkItem>()
+            .having((i) => i.url, 'url', Uri.parse('https://example.com'))
+            .having((i) => i.title, 'title', 'Example'),
+      );
+      expect(tree.stats.bookmarkCount, equals(1));
     });
 
-    test('should handle bookmarks with special characters in title', () async {
+    test('should decode HTML entities in titles', () {
       const htmlWithSpecialChars = '''
         <!DOCTYPE NETSCAPE-Bookmark-file-1>
         <TITLE>Bookmarks</TITLE>
@@ -130,21 +96,16 @@ void main() {
         </DL>
       ''';
 
-      when(
-        mockService.addItem(any, any, any, any),
-      ).thenAnswer((_) async => 'guid');
+      final tree = parseBookmarkHtml(
+        htmlWithSpecialChars,
+        preserveRootFolders: false,
+      );
 
-      final count = await utils.importFromHTML(htmlWithSpecialChars);
-
-      expect(count, equals(1));
-      final captured = verify(
-        mockService.addItem(any, any, captureAny, any),
-      ).captured;
-      // Should properly decode HTML entities
-      expect(captured[0], equals('<unescaped="test">'));
+      final item = section(tree, BookmarkRoot.menu).single;
+      expect((item as ImportBookmarkItem).title, equals('<unescaped="test">'));
     });
 
-    test('should import bookmarks with timestamps', () async {
+    test('should preserve item timestamps as seconds since epoch', () {
       const htmlWithDates = '''
         <!DOCTYPE NETSCAPE-Bookmark-file-1>
         <TITLE>Bookmarks</TITLE>
@@ -154,16 +115,63 @@ void main() {
         </DL>
       ''';
 
-      when(
-        mockService.addItem(any, any, any, any),
-      ).thenAnswer((_) async => 'guid');
+      final tree = parseBookmarkHtml(htmlWithDates, preserveRootFolders: false);
 
-      final count = await utils.importFromHTML(htmlWithDates);
-
-      expect(count, equals(1));
+      final item =
+          section(tree, BookmarkRoot.menu).single as ImportBookmarkItem;
+      expect(
+        item.dateAdded,
+        equals(DateTime.fromMillisecondsSinceEpoch(1177375336 * 1000)),
+      );
+      expect(
+        item.lastModified,
+        equals(DateTime.fromMillisecondsSinceEpoch(1177375423 * 1000)),
+      );
     });
 
-    test('should handle folder hierarchy', () async {
+    test('should fall back to LAST_MODIFIED when ADD_DATE is absent', () {
+      const html = '''
+        <!DOCTYPE NETSCAPE-Bookmark-file-1>
+        <H1>Bookmarks</H1>
+        <DL><p>
+          <DT><A HREF="https://example.com" LAST_MODIFIED="1177375423">Test</A>
+        </DL>
+      ''';
+
+      final tree = parseBookmarkHtml(html, preserveRootFolders: false);
+
+      final item =
+          section(tree, BookmarkRoot.menu).single as ImportBookmarkItem;
+      expect(item.dateAdded, equals(item.lastModified));
+    });
+
+    test('should preserve folder timestamps', () {
+      const html = '''
+        <!DOCTYPE NETSCAPE-Bookmark-file-1>
+        <H1>Bookmarks</H1>
+        <DL><p>
+          <DT><H3 ADD_DATE="1177375336" LAST_MODIFIED="1177375423">Dated</H3>
+          <DL><p>
+            <DT><A HREF="https://example.com">Child</A>
+          </DL><p>
+        </DL>
+      ''';
+
+      final tree = parseBookmarkHtml(html, preserveRootFolders: false);
+
+      final folder =
+          section(tree, BookmarkRoot.menu).single as ImportBookmarkFolder;
+      expect(
+        folder.dateAdded,
+        equals(DateTime.fromMillisecondsSinceEpoch(1177375336 * 1000)),
+      );
+      expect(
+        folder.lastModified,
+        equals(DateTime.fromMillisecondsSinceEpoch(1177375423 * 1000)),
+      );
+    });
+
+    test('should nest folders and keep child order', () {
       const htmlWithFolders = '''
         <!DOCTYPE NETSCAPE-Bookmark-file-1>
         <TITLE>Bookmarks</TITLE>
@@ -180,23 +188,97 @@ void main() {
         </DL>
       ''';
 
-      when(
-        mockService.addFolder(any, any, any),
-      ).thenAnswer((_) async => 'folder_guid');
-      when(
-        mockService.addItem(any, any, any, any),
-      ).thenAnswer((_) async => 'bookmark_guid');
+      final tree = parseBookmarkHtml(
+        htmlWithFolders,
+        preserveRootFolders: false,
+      );
 
-      final count = await utils.importFromHTML(htmlWithFolders);
+      final parent =
+          section(tree, BookmarkRoot.menu).single as ImportBookmarkFolder;
+      expect(parent.title, equals('Parent Folder'));
+      expect(parent.children, hasLength(2));
 
-      expect(count, equals(2)); // 2 bookmarks
-      verify(mockService.addFolder(any, any, any)).called(2); // 2 folders
+      expect(
+        (parent.children[0] as ImportBookmarkItem).title,
+        equals('Child 1'),
+      );
+
+      final nested = parent.children[1] as ImportBookmarkFolder;
+      expect(nested.title, equals('Nested Folder'));
+      expect(
+        (nested.children.single as ImportBookmarkItem).title,
+        equals('Grandchild'),
+      );
+
+      expect(tree.stats.bookmarkCount, equals(2));
+      expect(tree.stats.folderCount, equals(2));
     });
 
-    test('should recognize toolbar folder', () async {
-      const htmlWithToolbar = '''
+    test('should keep empty folders', () {
+      const html = '''
+        <!DOCTYPE NETSCAPE-Bookmark-file-1>
+        <H1>Bookmarks</H1>
+        <DL><p>
+          <DT><H3>Empty</H3>
+          <DL><p>
+          </DL><p>
+          <DT><A HREF="https://example.com">After</A>
+        </DL>
+      ''';
+
+      final tree = parseBookmarkHtml(html, preserveRootFolders: false);
+      final nodes = section(tree, BookmarkRoot.menu);
+
+      expect(nodes, hasLength(2));
+      expect(
+        nodes[0],
+        isA<ImportBookmarkFolder>()
+            .having((f) => f.title, 'title', 'Empty')
+            .having((f) => f.children, 'children', isEmpty),
+      );
+      expect(nodes[1], isA<ImportBookmarkItem>());
+    });
+
+    test('should route root-marked folders when preserving roots', () {
+      const htmlWithRoots = '''
         <!DOCTYPE NETSCAPE-Bookmark-file-1>
         <TITLE>Bookmarks</TITLE>
+        <H1>Bookmarks</H1>
+        <DL><p>
+          <DT><H3 PERSONAL_TOOLBAR_FOLDER="true">Bookmarks Toolbar</H3>
+          <DL><p>
+            <DT><A HREF="https://example.com/toolbar">Toolbar Bookmark</A>
+          </DL><p>
+          <DT><H3 UNFILED_BOOKMARKS_FOLDER="true">Unsorted Bookmarks</H3>
+          <DL><p>
+            <DT><A HREF="https://example.com/unfiled">Unfiled Bookmark</A>
+          </DL><p>
+          <DT><A HREF="https://example.com/loose">Loose</A>
+        </DL>
+      ''';
+
+      final tree = parseBookmarkHtml(htmlWithRoots, preserveRootFolders: true);
+
+      expect(
+        (section(tree, BookmarkRoot.toolbar).single as ImportBookmarkItem)
+            .title,
+        equals('Toolbar Bookmark'),
+      );
+      expect(
+        (section(tree, BookmarkRoot.unfiled).single as ImportBookmarkItem)
+            .title,
+        equals('Unfiled Bookmark'),
+      );
+      // The marked folders themselves are not recreated, only their contents.
+      expect(
+        (section(tree, BookmarkRoot.menu).single as ImportBookmarkItem).title,
+        equals('Loose'),
+      );
+    });
+
+    test('should treat root markers as plain folders when not preserving', () {
+      const htmlWithToolbar = '''
+        <!DOCTYPE NETSCAPE-Bookmark-file-1>
         <H1>Bookmarks</H1>
         <DL><p>
           <DT><H3 PERSONAL_TOOLBAR_FOLDER="true">Bookmarks Toolbar</H3>
@@ -206,47 +288,19 @@ void main() {
         </DL>
       ''';
 
-      when(mockService.eraseEverything(any)).thenAnswer((_) async {});
-      when(
-        mockService.addItem(any, any, any, any),
-      ).thenAnswer((_) async => 'guid');
+      final tree = parseBookmarkHtml(
+        htmlWithToolbar,
+        preserveRootFolders: false,
+      );
 
-      await utils.importFromHTML(htmlWithToolbar, replace: true);
-
-      // When replace is true, should add to toolbar
-      final captured = verify(
-        mockService.addItem(captureAny, any, any, any),
-      ).captured;
-      expect(captured[0], equals(BookmarkRoot.toolbar.id));
+      expect(tree.sections.keys, equals([BookmarkRoot.menu.id]));
+      expect(
+        (section(tree, BookmarkRoot.menu).single as ImportBookmarkFolder).title,
+        equals('Bookmarks Toolbar'),
+      );
     });
 
-    test('should recognize unfiled folder', () async {
-      const htmlWithUnfiled = '''
-        <!DOCTYPE NETSCAPE-Bookmark-file-1>
-        <TITLE>Bookmarks</TITLE>
-        <H1>Bookmarks</H1>
-        <DL><p>
-          <DT><H3 UNFILED_BOOKMARKS_FOLDER="true">Unsorted Bookmarks</H3>
-          <DL><p>
-            <DT><A HREF="https://example.com">Unfiled Bookmark</A>
-          </DL><p>
-        </DL>
-      ''';
-
-      when(mockService.eraseEverything(any)).thenAnswer((_) async {});
-      when(
-        mockService.addItem(any, any, any, any),
-      ).thenAnswer((_) async => 'guid');
-
-      await utils.importFromHTML(htmlWithUnfiled, replace: true);
-
-      final captured = verify(
-        mockService.addItem(captureAny, any, any, any),
-      ).captured;
-      expect(captured[0], equals(BookmarkRoot.unfiled.id));
-    });
-
-    test('should handle separators', () async {
+    test('should keep separators between bookmarks', () {
       const htmlWithSeparator = '''
         <!DOCTYPE NETSCAPE-Bookmark-file-1>
         <TITLE>Bookmarks</TITLE>
@@ -258,17 +312,19 @@ void main() {
         </DL>
       ''';
 
-      when(
-        mockService.addItem(any, any, any, any),
-      ).thenAnswer((_) async => 'guid');
+      final tree = parseBookmarkHtml(
+        htmlWithSeparator,
+        preserveRootFolders: false,
+      );
+      final nodes = section(tree, BookmarkRoot.menu);
 
-      final count = await utils.importFromHTML(htmlWithSeparator);
-
-      // Should import 2 bookmarks (separator is not supported by Android API)
-      expect(count, equals(2));
+      expect(nodes, hasLength(3));
+      expect(nodes[1], isA<ImportBookmarkSeparator>());
+      expect(tree.stats.bookmarkCount, equals(2));
+      expect(tree.stats.separatorCount, equals(1));
     });
 
-    test('should skip bookmarks without URLs', () async {
+    test('should skip bookmarks without URLs', () {
       const htmlWithoutUrl = '''
         <!DOCTYPE NETSCAPE-Bookmark-file-1>
         <TITLE>Bookmarks</TITLE>
@@ -279,16 +335,16 @@ void main() {
         </DL>
       ''';
 
-      when(
-        mockService.addItem(any, any, any, any),
-      ).thenAnswer((_) async => 'guid');
+      final tree = parseBookmarkHtml(
+        htmlWithoutUrl,
+        preserveRootFolders: false,
+      );
 
-      final count = await utils.importFromHTML(htmlWithoutUrl);
-
-      expect(count, equals(1)); // Only the valid one
+      expect(section(tree, BookmarkRoot.menu), hasLength(1));
+      expect(tree.stats.skippedUrlCount, equals(1));
     });
 
-    test('should skip bookmarks with invalid URLs', () async {
+    test('should skip bookmarks with schemeless URLs', () {
       const htmlWithInvalidUrl = '''
         <!DOCTYPE NETSCAPE-Bookmark-file-1>
         <TITLE>Bookmarks</TITLE>
@@ -299,31 +355,209 @@ void main() {
         </DL>
       ''';
 
-      when(
-        mockService.addItem(any, any, any, any),
-      ).thenAnswer((_) async => 'guid');
+      final tree = parseBookmarkHtml(
+        htmlWithInvalidUrl,
+        preserveRootFolders: false,
+      );
 
-      final count = await utils.importFromHTML(htmlWithInvalidUrl);
-
-      expect(count, equals(1));
+      expect(section(tree, BookmarkRoot.menu), hasLength(1));
+      expect(tree.stats.skippedUrlCount, equals(1));
     });
 
-    test('should handle single frame HTML', () async {
-      final fixtureFile = File(
-        'test/utils/bookmarks/fixtures/bookmarks_html_singleframe.html',
+    test('should produce no sections for an empty document', () {
+      const emptyHtml = '''
+        <!DOCTYPE NETSCAPE-Bookmark-file-1>
+        <TITLE>Bookmarks</TITLE>
+        <H1>Bookmarks</H1>
+        <DL><p>
+        </DL>
+      ''';
+
+      final tree = parseBookmarkHtml(emptyHtml, preserveRootFolders: true);
+
+      expect(tree.isEmpty, isTrue);
+      expect(tree.stats.bookmarkCount, equals(0));
+    });
+
+    test('should keep headings that never open a list', () {
+      // Firefox writes empty folders without a `<DL>`; the folder must still be
+      // emitted, and the heading after it must not inherit its metadata.
+      const html = '''
+        <!DOCTYPE NETSCAPE-Bookmark-file-1>
+        <H1>Bookmarks</H1>
+        <DL><p>
+          <DT><H3>First</H3>
+          <DT><H3 ADD_DATE="1177375336">Second</H3>
+          <DL><p>
+            <DT><A HREF="https://example.com">Child</A>
+          </DL><p>
+        </DL>
+      ''';
+
+      final tree = parseBookmarkHtml(html, preserveRootFolders: false);
+      final nodes = section(tree, BookmarkRoot.menu);
+
+      expect(nodes, hasLength(2));
+      expect((nodes[0] as ImportBookmarkFolder).title, equals('First'));
+      expect((nodes[0] as ImportBookmarkFolder).dateAdded, isNull);
+
+      final second = nodes[1] as ImportBookmarkFolder;
+      expect(second.title, equals('Second'));
+      expect(
+        second.dateAdded,
+        equals(DateTime.fromMillisecondsSinceEpoch(1177375336 * 1000)),
       );
-      final htmlString = await fixtureFile.readAsString();
+      expect(second.children, hasLength(1));
+    });
 
-      when(
-        mockService.addFolder(any, any, any),
-      ).thenAnswer((_) async => 'folder_guid');
-      when(
-        mockService.addItem(any, any, any, any),
-      ).thenAnswer((_) async => 'bookmark_guid');
+    test('should handle deeply nested folders', () {
+      const depth = 60;
+      final buffer = StringBuffer(
+        '<!DOCTYPE NETSCAPE-Bookmark-file-1>\n<DL><p>',
+      );
+      for (var i = 0; i < depth; i++) {
+        buffer.write('<DT><H3>Level $i</H3>\n<DL><p>');
+      }
+      buffer.write('<DT><A HREF="https://example.com">Deep</A>');
+      for (var i = 0; i < depth; i++) {
+        buffer.write('</DL><p>');
+      }
+      buffer.write('</DL>');
 
-      final count = await utils.importFromHTML(htmlString);
+      final tree = parseBookmarkHtml(
+        buffer.toString(),
+        preserveRootFolders: false,
+      );
 
-      expect(count, greaterThan(0));
+      var node = section(tree, BookmarkRoot.menu).single;
+      for (var i = 0; i < depth; i++) {
+        node = (node as ImportBookmarkFolder).children.single;
+      }
+      expect(node, isA<ImportBookmarkItem>());
+      expect(tree.stats.folderCount, equals(depth));
+    });
+
+    test('should parse the corrupt fixture without throwing', () async {
+      final htmlString = await File(
+        'test/utils/bookmarks/fixtures/bookmarks.corrupt.html',
+      ).readAsString();
+
+      final tree = parseBookmarkHtml(htmlString, preserveRootFolders: true);
+
+      expect(tree.stats.bookmarkCount, greaterThan(0));
+    });
+
+    test('should parse the pre-places fixture', () async {
+      final htmlString = await File(
+        'test/utils/bookmarks/fixtures/bookmarks.preplaces.html',
+      ).readAsString();
+
+      final tree = parseBookmarkHtml(htmlString, preserveRootFolders: true);
+
+      expect(tree.stats.bookmarkCount, greaterThan(0));
+    });
+
+    test('should parse the single frame fixture', () async {
+      final htmlString = await File(
+        'test/utils/bookmarks/fixtures/bookmarks_html_singleframe.html',
+      ).readAsString();
+
+      final tree = parseBookmarkHtml(htmlString, preserveRootFolders: false);
+
+      expect(tree.stats.bookmarkCount, greaterThan(0));
+    });
+  });
+
+  group('BookmarkHTMLUtils - Import', () {
+    test('should insert each section with a single bulk call', () async {
+      const htmlWithFolders = '''
+        <!DOCTYPE NETSCAPE-Bookmark-file-1>
+        <H1>Bookmarks</H1>
+        <DL><p>
+          <DT><H3>Parent Folder</H3>
+          <DL><p>
+            <DT><A HREF="https://example.com/1">Child 1</A>
+            <DT><H3>Nested Folder</H3>
+            <DL><p>
+              <DT><A HREF="https://example.com/2">Grandchild</A>
+            </DL><p>
+          </DL><p>
+        </DL>
+      ''';
+
+      final count = await utils.importFromHTML(htmlWithFolders);
+
+      expect(count, equals(2));
+      verify(mockService.insertTree(BookmarkRoot.menu.id, any)).called(1);
+      verifyNever(mockService.addItem(any, any, any, any));
+      verifyNever(mockService.addFolder(any, any, any));
+    });
+
+    test(
+      'should erase every root except the tree root when replacing',
+      () async {
+        final htmlString = await File(
+          'test/utils/bookmarks/fixtures/bookmarks.preplaces.html',
+        ).readAsString();
+
+        final count = await utils.importFromHTML(htmlString, replace: true);
+
+        expect(count, greaterThan(0));
+        for (final root in BookmarkRoot.values) {
+          if (root == BookmarkRoot.root) {
+            verifyNever(mockService.eraseEverything(root));
+          } else {
+            verify(mockService.eraseEverything(root)).called(1);
+          }
+        }
+      },
+    );
+
+    test('should not erase when replace is false', () async {
+      const simpleHtml = '''
+        <!DOCTYPE NETSCAPE-Bookmark-file-1>
+        <H1>Bookmarks</H1>
+        <DL><p>
+          <DT><A HREF="https://example.com">Example</A>
+        </DL>
+      ''';
+
+      await utils.importFromHTML(simpleHtml);
+
+      verifyNever(mockService.eraseEverything(any));
+    });
+
+    test('should route root-marked sections to their Places roots', () async {
+      const htmlWithToolbar = '''
+        <!DOCTYPE NETSCAPE-Bookmark-file-1>
+        <H1>Bookmarks</H1>
+        <DL><p>
+          <DT><H3 PERSONAL_TOOLBAR_FOLDER="true">Bookmarks Toolbar</H3>
+          <DL><p>
+            <DT><A HREF="https://example.com">Toolbar Bookmark</A>
+          </DL><p>
+        </DL>
+      ''';
+
+      await utils.importFromHTML(htmlWithToolbar, replace: true);
+
+      verify(mockService.insertTree(BookmarkRoot.toolbar.id, any)).called(1);
+    });
+
+    test('should insert nothing for an empty document', () async {
+      const emptyHtml = '''
+        <!DOCTYPE NETSCAPE-Bookmark-file-1>
+        <H1>Bookmarks</H1>
+        <DL><p>
+        </DL>
+      ''';
+
+      final count = await utils.importFromHTML(emptyHtml, replace: true);
+
+      expect(count, equals(0));
+      verifyNever(mockService.insertTree(any, any));
+      // Nothing parsed means nothing to replace, so existing bookmarks survive.
+      verifyNever(mockService.eraseEverything(any));
     });
   });
 
@@ -747,18 +981,24 @@ void main() {
       expect(html, isNotEmpty);
 
       // Re-import
-      when(mockService.eraseEverything(any)).thenAnswer((_) async {});
-      when(
-        mockService.addFolder(any, any, any),
-      ).thenAnswer((_) async => 'folder1_____');
-      when(
-        mockService.addItem(any, any, any, any),
-      ).thenAnswer((_) async => 'bookmark1___');
-
       final count = await utils.importFromHTML(html, replace: true);
 
       expect(count, equals(1)); // One bookmark imported
-      verify(mockService.eraseEverything(BookmarkRoot.root)).called(1);
+      verify(mockService.eraseEverything(BookmarkRoot.menu)).called(1);
+
+      final inserted =
+          verify(
+                mockService.insertTree(BookmarkRoot.menu.id, captureAny),
+              ).captured.single
+              as List<BookmarkImportNode>;
+
+      final folder = inserted.single;
+      expect(folder.type, equals(BookmarkNodeType.folder));
+      expect(folder.title, equals('Test Folder'));
+
+      final bookmark = folder.children.single;
+      expect(bookmark.title, equals('Test Bookmark'));
+      expect(bookmark.url, equals('https://example.com'));
     });
   });
 }

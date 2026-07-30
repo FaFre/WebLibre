@@ -20,7 +20,8 @@
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
-import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_importer.dart';
 
 const _containerNormal = 0;
 const _containerToolbar = 1;
@@ -30,18 +31,22 @@ const _containerPlaces = 4;
 
 const _exportIndent = '    ';
 
-class _Frame {
-  final Map<String, dynamic> folder;
-  int containerNesting = 0;
-  int lastContainerType = _containerNormal;
-  String previousText = '';
-  bool inDescription = false;
-  String? previousLink;
-  Map<String, dynamic>? previousItem;
-  DateTime? previousDateAdded;
-  DateTime? previousLastModifiedDate;
-
-  _Frame(this.folder);
+/// Parses a Netscape bookmark file into an [ImportBookmarkTree].
+///
+/// Pure and free of platform channels, so it is safe to run inside an isolate;
+/// see `bookmark_import_isolate.dart`.
+///
+/// When [preserveRootFolders] is set, folders carrying Firefox root markers
+/// (`PERSONAL_TOOLBAR_FOLDER`, `BOOKMARKS_MENU`, `UNFILED_BOOKMARKS_FOLDER`,
+/// `PLACES_ROOT`) at the top level are routed to the matching Places root
+/// instead of being imported as ordinary folders. Everything else lands under
+/// [BookmarkRoot.menu].
+ImportBookmarkTree parseBookmarkHtml(
+  String htmlString, {
+  required bool preserveRootFolders,
+}) {
+  final parser = _BookmarkHtmlParser(preserveRootFolders: preserveRootFolders);
+  return parser.parse(htmlString);
 }
 
 class BookmarkHTMLUtils {
@@ -50,9 +55,9 @@ class BookmarkHTMLUtils {
   BookmarkHTMLUtils(this._service);
 
   /// Import bookmarks from HTML string
-  Future<int> importFromHTML(String htmlString, {bool replace = false}) async {
-    final importer = _BookmarkImporter(_service, replace);
-    return await importer.importFromHTML(htmlString);
+  Future<int> importFromHTML(String htmlString, {bool replace = false}) {
+    final tree = parseBookmarkHtml(htmlString, preserveRootFolders: replace);
+    return BookmarkTreeImporter(_service).import(tree, replace: replace);
   }
 
   /// Export bookmarks to HTML string
@@ -67,27 +72,80 @@ class BookmarkHTMLUtils {
   }
 }
 
-class _BookmarkImporter {
-  final GeckoBookmarksService _service;
-  final bool _isImportDefaults;
-  final Map<String, dynamic> _bookmarkTree;
+/// A node collected while parsing.
+///
+/// Folders stay mutable until their closing tag so children can be appended in
+/// place; leaves are immutable as soon as they are complete.
+sealed class _ParsedNode {}
+
+final class _ParsedLeaf extends _ParsedNode {
+  final ImportBookmarkNode node;
+
+  _ParsedLeaf(this.node);
+}
+
+final class _ParsedFolder extends _ParsedNode {
+  String title = '';
+
+  /// Set when the folder carried a Firefox root marker, naming the Places root
+  /// its children belong to.
+  String? rootGuid;
+  DateTime? dateAdded;
+  DateTime? lastModified;
+  final List<_ParsedNode> children = [];
+}
+
+/// A bookmark whose `<A>` tag has been opened but whose title text has not been
+/// read yet.
+class _PendingItem {
+  final Uri url;
+  final DateTime? dateAdded;
+  final DateTime? lastModified;
+
+  _PendingItem({required this.url, this.dateAdded, this.lastModified});
+}
+
+class _Frame {
+  final _ParsedFolder folder;
+  int containerNesting = 0;
+  int lastContainerType = _containerNormal;
+  String previousText = '';
+  bool inDescription = false;
+  _PendingItem? pendingItem;
+  DateTime? previousDateAdded;
+  DateTime? previousLastModifiedDate;
+
+  _Frame(this.folder);
+}
+
+class _BookmarkHtmlParser {
+  final bool preserveRootFolders;
+
+  final _ParsedFolder _root = _ParsedFolder();
   final List<_Frame> _frames = [];
 
-  _BookmarkImporter(this._service, this._isImportDefaults)
-    : _bookmarkTree = {
-        'type': BookmarkNodeType.folder.index,
-        'guid': BookmarkRoot.menu.id,
-        'children': <Map<String, dynamic>>[],
-      } {
-    _frames.add(_Frame(_bookmarkTree));
+  int _bookmarkCount = 0;
+  int _folderCount = 0;
+  int _separatorCount = 0;
+  int _skippedUrlCount = 0;
+
+  _BookmarkHtmlParser({required this.preserveRootFolders}) {
+    _frames.add(_Frame(_root));
   }
 
   _Frame get _curFrame => _frames.last;
 
-  Future<int> importFromHTML(String htmlString) async {
+  ImportBookmarkTree parse(String htmlString) {
     final document = html_parser.parse(htmlString);
     _walkTreeForImport(document.body);
-    return await _importBookmarks();
+
+    // Close whatever the document left open so nothing is dropped.
+    while (_frames.length > 1) {
+      _popFrame();
+    }
+    _flushPendingItem();
+
+    return _buildTree();
   }
 
   dom.Node? _nextSibling(dom.Node node) {
@@ -186,29 +244,30 @@ class _BookmarkImporter {
   }
 
   void _handleHeadBegin(dom.Element element) {
-    final frame = _curFrame;
-
-    frame.previousLink = null;
-    frame.lastContainerType = _containerNormal;
-
-    if (frame.containerNesting == 0 && _frames.length > 1) {
-      _frames.removeLast();
+    // A heading that arrives while the current folder never opened its `<DL>`
+    // closes that folder first. Everything below must describe the *new*
+    // heading, so the frame is only captured once the stack has settled.
+    if (_curFrame.containerNesting == 0 && _frames.length > 1) {
+      _popFrame();
     }
 
+    final frame = _curFrame;
+    frame.lastContainerType = _containerNormal;
+
     if (element.attributes.containsKey('personal_toolbar_folder')) {
-      if (_isImportDefaults) {
+      if (preserveRootFolders) {
         frame.lastContainerType = _containerToolbar;
       }
     } else if (element.attributes.containsKey('bookmarks_menu')) {
-      if (_isImportDefaults) {
+      if (preserveRootFolders) {
         frame.lastContainerType = _containerMenu;
       }
     } else if (element.attributes.containsKey('unfiled_bookmarks_folder')) {
-      if (_isImportDefaults) {
+      if (preserveRootFolders) {
         frame.lastContainerType = _containerUnfiled;
       }
     } else if (element.attributes.containsKey('places_root')) {
-      if (_isImportDefaults) {
+      if (preserveRootFolders) {
         frame.lastContainerType = _containerPlaces;
       }
     } else {
@@ -227,67 +286,76 @@ class _BookmarkImporter {
   }
 
   void _handleLinkBegin(dom.Element element) {
-    final frame = _curFrame;
+    // An unterminated `<A>` must not swallow the one that follows it.
+    _flushPendingItem();
 
-    frame.previousItem = null;
+    final frame = _curFrame;
     frame.previousText = '';
 
+    // TAGS, SHORTCUTURL, POST_DATA and LAST_CHARSET are read by Firefox but
+    // have no representation in Places' bookmark storage, so they are dropped.
     final href = element.attributes['href']?.trim();
     final dateAdded = element.attributes['add_date']?.trim();
     final lastModified = element.attributes['last_modified']?.trim();
-    final tags = element.attributes['tags']?.trim();
-    final keyword = element.attributes['shortcuturl']?.trim();
-    final postData = element.attributes['post_data']?.trim();
-    final lastCharset = element.attributes['last_charset']?.trim();
 
     if (href == null || href.isEmpty) {
-      frame.previousLink = null;
+      _skippedUrlCount++;
       return;
     }
 
+    final Uri url;
     try {
       final uri = Uri.parse(href);
       if (!uri.hasScheme) {
-        frame.previousLink = null;
+        _skippedUrlCount++;
         return;
       }
-      frame.previousLink = uri.toString();
+      url = uri;
     } catch (e) {
-      frame.previousLink = null;
+      _skippedUrlCount++;
       return;
     }
 
-    final bookmark = <String, dynamic>{'url': frame.previousLink};
+    final lastModifiedDate = lastModified != null
+        ? _convertImportedDateToInternalDate(lastModified)
+        : null;
 
-    if (dateAdded != null) {
-      bookmark['dateAdded'] = _convertImportedDateToInternalDate(
-        dateAdded,
-      ).millisecondsSinceEpoch;
-    }
-    if (lastModified != null) {
-      bookmark['lastModified'] = _convertImportedDateToInternalDate(
-        lastModified,
-      ).millisecondsSinceEpoch;
-    }
-    if (dateAdded == null && lastModified != null) {
-      bookmark['dateAdded'] = bookmark['lastModified'];
-    }
+    frame.pendingItem = _PendingItem(
+      url: url,
+      // A bookmark that only records a modification time is treated as having
+      // been added then, matching Firefox's own importer.
+      dateAdded: dateAdded != null
+          ? _convertImportedDateToInternalDate(dateAdded)
+          : lastModifiedDate,
+      lastModified: lastModifiedDate,
+    );
+  }
 
-    if (tags != null && tags.isNotEmpty) {
-      bookmark['tags'] = tags;
-    }
-    if (keyword != null && keyword.isNotEmpty) {
-      bookmark['keyword'] = keyword;
-    }
-    if (postData != null && postData.isNotEmpty) {
-      bookmark['postData'] = postData;
-    }
-    if (lastCharset != null && lastCharset.isNotEmpty) {
-      bookmark['charset'] = lastCharset;
-    }
+  /// Materialises the frame's open bookmark, if any, using [title].
+  void _flushPendingItem({String title = ''}) {
+    final frame = _curFrame;
+    final pending = frame.pendingItem;
+    if (pending == null) return;
 
-    (frame.folder['children'] as List).add(bookmark);
-    frame.previousItem = bookmark;
+    frame.pendingItem = null;
+    frame.folder.children.add(
+      _ParsedLeaf(
+        ImportBookmarkItem(
+          url: pending.url,
+          title: title,
+          dateAdded: pending.dateAdded,
+          lastModified: pending.lastModified,
+        ),
+      ),
+    );
+    _bookmarkCount++;
+  }
+
+  /// Completes the innermost folder and hands it to its parent.
+  void _popFrame() {
+    _flushPendingItem();
+    final frame = _frames.removeLast();
+    _curFrame.folder.children.add(frame.folder);
   }
 
   void _handleContainerBegin() {
@@ -300,7 +368,7 @@ class _BookmarkImporter {
       frame.containerNesting--;
     }
     if (_frames.length > 1 && frame.containerNesting == 0) {
-      _frames.removeLast();
+      _popFrame();
     }
   }
 
@@ -310,163 +378,111 @@ class _BookmarkImporter {
 
   void _handleLinkEnd() {
     final frame = _curFrame;
-    frame.previousText = frame.previousText.trim();
-
-    if (frame.previousItem != null) {
-      frame.previousItem!['title'] = frame.previousText;
-    }
-
+    _flushPendingItem(title: frame.previousText.trim());
     frame.previousText = '';
   }
 
   void _handleSeparator() {
-    final frame = _curFrame;
-    final separator = <String, dynamic>{
-      'type': BookmarkNodeType.separator.index,
-    };
-    (frame.folder['children'] as List).add(separator);
-    frame.previousItem = separator;
+    _flushPendingItem();
+    _curFrame.folder.children.add(_ParsedLeaf(const ImportBookmarkSeparator()));
+    _separatorCount++;
   }
 
   void _newFrame() {
+    _flushPendingItem();
+
     final frame = _curFrame;
     final containerTitle = frame.previousText;
     frame.previousText = '';
-    final containerType = frame.lastContainerType;
 
-    final folder = <String, dynamic>{
-      'children': <Map<String, dynamic>>[],
-      'type': BookmarkNodeType.folder.index,
-    };
+    final folder = _ParsedFolder();
 
-    switch (containerType) {
+    switch (frame.lastContainerType) {
       case _containerNormal:
-        folder['title'] = containerTitle;
+        folder.title = containerTitle;
       case _containerPlaces:
-        folder['guid'] = BookmarkRoot.root.id;
+        folder.rootGuid = BookmarkRoot.root.id;
       case _containerMenu:
-        folder['guid'] = BookmarkRoot.menu.id;
+        folder.rootGuid = BookmarkRoot.menu.id;
       case _containerUnfiled:
-        folder['guid'] = BookmarkRoot.unfiled.id;
+        folder.rootGuid = BookmarkRoot.unfiled.id;
       case _containerToolbar:
-        folder['guid'] = BookmarkRoot.toolbar.id;
+        folder.rootGuid = BookmarkRoot.toolbar.id;
     }
 
-    (frame.folder['children'] as List).add(folder);
+    folder.lastModified = frame.previousLastModifiedDate;
+    // As for items, a folder that only records a modification time is treated
+    // as having been created then.
+    folder.dateAdded = frame.previousDateAdded ?? folder.lastModified;
+    frame.previousDateAdded = null;
+    frame.previousLastModifiedDate = null;
 
-    if (frame.previousDateAdded != null) {
-      folder['dateAdded'] = frame.previousDateAdded!.millisecondsSinceEpoch;
-      frame.previousDateAdded = null;
-    }
-    if (frame.previousLastModifiedDate != null) {
-      folder['lastModified'] =
-          frame.previousLastModifiedDate!.millisecondsSinceEpoch;
-      frame.previousLastModifiedDate = null;
-    }
-    if (!folder.containsKey('dateAdded') &&
-        folder.containsKey('lastModified')) {
-      folder['dateAdded'] = folder['lastModified'];
-    }
-
-    frame.previousItem = folder;
     _frames.add(_Frame(folder));
   }
 
   DateTime _convertImportedDateToInternalDate(String seconds) {
-    try {
-      final parsed = int.tryParse(seconds);
-      if (parsed != null) {
-        return DateTime.fromMillisecondsSinceEpoch(parsed * 1000);
-      }
-    } catch (e) {
-      // Fall through
+    final parsed = int.tryParse(seconds);
+    if (parsed != null) {
+      return DateTime.fromMillisecondsSinceEpoch(parsed * 1000);
     }
     return DateTime.now();
   }
 
-  List<Map<String, dynamic>> _getBookmarkTrees() {
-    if (!_isImportDefaults) {
-      return [_bookmarkTree];
+  /// Groups the parsed top level into per-root sections.
+  ///
+  /// Only top-level folders carrying a root marker are routed to their own
+  /// Places root; a marker deeper in the file describes a folder that Firefox
+  /// itself would have nested, so it is imported as an ordinary (untitled)
+  /// folder.
+  ImportBookmarkTree _buildTree() {
+    final menuNodes = <ImportBookmarkNode>[];
+    final rootSections = <String, List<ImportBookmarkNode>>{};
+
+    for (final child in _root.children) {
+      if (child is _ParsedFolder && child.rootGuid != null) {
+        rootSections
+            .putIfAbsent(child.rootGuid!, () => <ImportBookmarkNode>[])
+            .addAll(child.children.map(_toImmutable));
+      } else {
+        menuNodes.add(_toImmutable(child));
+      }
     }
 
-    final bookmarkTrees = <Map<String, dynamic>>[_bookmarkTree];
-    final children = _bookmarkTree['children'] as List<Map<String, dynamic>>;
+    final sections = <String, List<ImportBookmarkNode>>{
+      if (menuNodes.isNotEmpty) BookmarkRoot.menu.id: menuNodes,
+    };
+    for (final section in rootSections.entries) {
+      sections.update(
+        section.key,
+        (existing) => existing..addAll(section.value),
+        ifAbsent: () => section.value,
+      );
+    }
 
-    _bookmarkTree['children'] = children.where((child) {
-      final guid = child['guid'] as String?;
-      if (guid != null && bookmarkRootIds.contains(guid)) {
-        bookmarkTrees.add(child);
-        return false;
-      }
-      return true;
-    }).toList();
-
-    return bookmarkTrees;
+    return ImportBookmarkTree(
+      sections: sections,
+      stats: ImportBookmarkStats(
+        bookmarkCount: _bookmarkCount,
+        folderCount: _folderCount,
+        separatorCount: _separatorCount,
+        skippedUrlCount: _skippedUrlCount,
+      ),
+    );
   }
 
-  Future<int> _importBookmarks() async {
-    if (_isImportDefaults) {
-      // Delete bookmarks from each root folder (except root itself to avoid errors)
-      for (final root in BookmarkRoot.values) {
-        if (root != BookmarkRoot.root) {
-          await _service.eraseEverything(root);
-        }
-      }
+  ImportBookmarkNode _toImmutable(_ParsedNode node) {
+    switch (node) {
+      case final _ParsedLeaf leaf:
+        return leaf.node;
+      case final _ParsedFolder folder:
+        _folderCount++;
+        return ImportBookmarkFolder(
+          title: folder.title,
+          children: folder.children.map(_toImmutable).toList(),
+          dateAdded: folder.dateAdded,
+          lastModified: folder.lastModified,
+        );
     }
-
-    final bookmarkTrees = _getBookmarkTrees();
-    int bookmarkCount = 0;
-
-    for (final tree in bookmarkTrees) {
-      final children = tree['children'] as List?;
-      if (children == null || children.isEmpty) continue;
-
-      bookmarkCount += await _insertTree(tree);
-    }
-
-    return bookmarkCount;
-  }
-
-  Future<int> _insertTree(Map<String, dynamic> node) async {
-    int count = 0;
-    final children = node['children'] as List?;
-
-    if (children == null || children.isEmpty) return 0;
-
-    final parentGuid = node['guid'] as String;
-
-    for (int i = 0; i < children.length; i++) {
-      final child = children[i] as Map<String, dynamic>;
-      final type = child['type'] as int? ?? BookmarkNodeType.item.index;
-
-      if (type == BookmarkNodeType.item.index) {
-        final url = child['url'] as String?;
-        final title = child['title'] as String? ?? '';
-
-        if (url != null && url.isNotEmpty) {
-          try {
-            final uri = Uri.parse(url);
-            if (uri.hasScheme) {
-              await _service.addItem(parentGuid, uri, title, i);
-              count++;
-            }
-          } catch (e) {
-            logger.e('Failed to import bookmark "$title": $e');
-          }
-        }
-      } else if (type == BookmarkNodeType.folder.index) {
-        final title = child['title'] as String? ?? '';
-        try {
-          final newGuid = await _service.addFolder(parentGuid, title, i);
-          child['guid'] = newGuid;
-          count += await _insertTree(child);
-        } catch (e) {
-          logger.e('Failed to import folder "$title": $e');
-        }
-      }
-    }
-
-    return count;
   }
 }
 

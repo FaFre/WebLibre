@@ -18,11 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_html_utils.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_import_isolate.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_importer.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_json_utils.dart';
 
 part 'bookmarks.g.dart';
@@ -40,7 +41,7 @@ class BookmarksRepository extends _$BookmarksRepository {
     int? position,
   }) async {
     await _service.addItem(parentGuid, url, title, position);
-    ref.invalidateSelf();
+    _notifyChanged();
   }
 
   Future<void> addFolder({
@@ -49,7 +50,7 @@ class BookmarksRepository extends _$BookmarksRepository {
     int? position,
   }) async {
     await _service.addFolder(parentGuid, title, position);
-    ref.invalidateSelf();
+    _notifyChanged();
   }
 
   Future<void> editBookmark({
@@ -68,7 +69,7 @@ class BookmarksRepository extends _$BookmarksRepository {
         position: position,
       ),
     );
-    ref.invalidateSelf();
+    _notifyChanged();
   }
 
   Future<void> editFolder({
@@ -81,12 +82,12 @@ class BookmarksRepository extends _$BookmarksRepository {
       guid,
       BookmarkInfo(title: title, parentGuid: parentGuid, position: position),
     );
-    ref.invalidateSelf();
+    _notifyChanged();
   }
 
   Future<void> delete(String guid) async {
     await _service.deleteNode(guid);
-    ref.invalidateSelf();
+    _notifyChanged();
   }
 
   Future<void> moveMany({
@@ -104,7 +105,7 @@ class BookmarksRepository extends _$BookmarksRepository {
         BookmarkInfo(parentGuid: targetParentGuid),
       );
     }
-    ref.invalidateSelf();
+    _notifyChanged();
   }
 
   Future<void> deleteMany(Iterable<String> guids) async {
@@ -115,7 +116,7 @@ class BookmarksRepository extends _$BookmarksRepository {
       }
       await _service.deleteNode(guid);
     }
-    ref.invalidateSelf();
+    _notifyChanged();
   }
 
   Future<void> flattenFolder({required BookmarkFolder folder}) async {
@@ -137,7 +138,45 @@ class BookmarksRepository extends _$BookmarksRepository {
       }
     }
     await _service.deleteNode(folder.guid);
-    ref.invalidateSelf();
+    _notifyChanged();
+  }
+
+  /// Loads a single folder and its direct children.
+  ///
+  /// This is the load the bookmark UI is built on: the cost is proportional to
+  /// the folder being shown, not to the size of the library. Reach for
+  /// [getFolderTree] only when an operation genuinely needs descendants.
+  Future<BookmarkFolder?> getFolder(String guid) async {
+    final node = await _service.getTree(guid);
+    if (node == null || node.type != BookmarkNodeType.folder) return null;
+    return BookmarkItem.parseRecursive(node) as BookmarkFolder?;
+  }
+
+  /// Loads a folder with every descendant.
+  ///
+  /// Only for operations that need the whole subtree — export, flatten, "open
+  /// all in folder". Never for rendering a list.
+  Future<BookmarkFolder?> getFolderTree(String guid) async {
+    final node = await _service.getTree(guid, recursive: true);
+    if (node == null || node.type != BookmarkNodeType.folder) return null;
+    return BookmarkItem.parseRecursive(node) as BookmarkFolder?;
+  }
+
+  /// Number of bookmark items inside the trees rooted at [guids].
+  ///
+  /// Counted in storage, so this stays cheap on a large library.
+  Future<int> countBookmarksInTrees(Iterable<String> guids) {
+    if (guids.isEmpty) return Future.value(0);
+    return _service.countBookmarksInTrees(guids.toList());
+  }
+
+  /// Guids of every bookmark entry pointing at [url].
+  ///
+  /// Answers "is this page bookmarked?" through a storage lookup instead of
+  /// scanning an in-memory tree.
+  Future<List<String>> bookmarkGuidsForUrl(Uri url) async {
+    final nodes = await _service.getBookmarksWithUrl(url);
+    return nodes.map((node) => node.guid).toList();
   }
 
   /// Returns the GUIDs of all descendant folders of [guid] by fetching the
@@ -163,18 +202,44 @@ class BookmarksRepository extends _$BookmarksRepository {
 
   Future<void> eraseEverything(BookmarkRoot root) async {
     await _service.eraseEverything(root);
-    ref.invalidateSelf();
+    _notifyChanged();
   }
 
   Future<int> importFromJSON(String jsonString, {bool replace = false}) async {
     final count = await _jsonUtils.importFromJSON(jsonString, replace: replace);
-    ref.invalidateSelf();
+    _notifyChanged();
     return count;
   }
 
   Future<int> importFromHTML(String htmlString, {bool replace = false}) async {
     final count = await _htmlUtils.importFromHTML(htmlString, replace: replace);
-    ref.invalidateSelf();
+    _notifyChanged();
+    return count;
+  }
+
+  /// Imports the bookmark file at [path], parsing it in a background isolate.
+  ///
+  /// Preferred over [importFromHTML]/[importFromJSON] for user-initiated
+  /// imports: neither the raw file nor the intermediate parse tree ever touches
+  /// the UI isolate.
+  Future<int> importFromFile({
+    required String path,
+    required BookmarkImportFormat format,
+    bool replace = false,
+  }) async {
+    final tree = await parseBookmarkFile(
+      path: path,
+      format: format,
+      // Replacing the library is the only case where a file's own root folders
+      // should take over the corresponding Places roots.
+      preserveRootFolders: replace,
+    );
+
+    final count = await BookmarkTreeImporter(
+      _service,
+    ).import(tree, replace: replace);
+
+    _notifyChanged();
     return count;
   }
 
@@ -188,9 +253,16 @@ class BookmarksRepository extends _$BookmarksRepository {
     return await _htmlUtils.exportToHTML(root: root);
   }
 
+  /// A revision that advances whenever bookmarks change.
+  ///
+  /// The repository deliberately holds no bookmark data. It used to build the
+  /// entire tree recursively from [BookmarkRoot.root], which meant every
+  /// consumer paid for the whole library — the reason opening bookmarks after
+  /// a large import or sync could bring the app down. Data now comes from the
+  /// folder-scoped providers, which watch this value to know when to reload.
   @override
-  Future<BookmarkItem?> build() async {
-    final node = await _service.getTree(BookmarkRoot.root.id, recursive: true);
-    return node.mapNotNull(BookmarkItem.parseRecursive);
-  }
+  int build() => 0;
+
+  /// Signals that stored bookmarks changed, prompting dependents to reload.
+  void _notifyChanged() => state++;
 }

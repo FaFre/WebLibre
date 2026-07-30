@@ -90,7 +90,9 @@ class VisitContainerRecorder extends _$VisitContainerRecorder {
       // permanently. A genuine miss (deleted container) leaves the cache
       // non-empty, so this fallback does not fire repeatedly in steady state.
       if (containerId == null && contextIdToContainerId.isEmpty) {
-        applyContainers(await ref.read(watchContainersWithCountProvider.future));
+        applyContainers(
+          await ref.read(watchContainersWithCountProvider.future),
+        );
         containerId = contextIdToContainerId[contextId];
       }
 

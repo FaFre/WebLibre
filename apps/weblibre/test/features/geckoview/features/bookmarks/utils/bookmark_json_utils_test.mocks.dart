@@ -3,11 +3,11 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i3;
+import 'dart:async' as _i4;
 
 import 'package:flutter_mozilla_components/src/domain/services/gecko_bookmarks.dart'
-    as _i2;
-import 'package:flutter_mozilla_components/src/pigeons/gecko.g.dart' as _i4;
+    as _i3;
+import 'package:flutter_mozilla_components/src/pigeons/gecko.g.dart' as _i2;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i5;
 
@@ -26,46 +26,52 @@ import 'package:mockito/src/dummies.dart' as _i5;
 // ignore_for_file: subtype_of_sealed_class
 // ignore_for_file: invalid_use_of_internal_member
 
+class _FakeBookmarkInsertTreeResult_0 extends _i1.SmartFake
+    implements _i2.BookmarkInsertTreeResult {
+  _FakeBookmarkInsertTreeResult_0(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
 /// A class which mocks [GeckoBookmarksService].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockGeckoBookmarksService extends _i1.Mock
-    implements _i2.GeckoBookmarksService {
+    implements _i3.GeckoBookmarksService {
   MockGeckoBookmarksService() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i4.BookmarkNode?> getTree(
+  _i4.Future<_i2.BookmarkNode?> getTree(
     String? guid, {
     bool? recursive = false,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#getTree, [guid], {#recursive: recursive}),
-            returnValue: _i3.Future<_i4.BookmarkNode?>.value(),
+            returnValue: _i4.Future<_i2.BookmarkNode?>.value(),
           )
-          as _i3.Future<_i4.BookmarkNode?>);
+          as _i4.Future<_i2.BookmarkNode?>);
 
   @override
-  _i3.Future<_i4.BookmarkNode?> getBookmark(String? guid) =>
+  _i4.Future<_i2.BookmarkNode?> getBookmark(String? guid) =>
       (super.noSuchMethod(
             Invocation.method(#getBookmark, [guid]),
-            returnValue: _i3.Future<_i4.BookmarkNode?>.value(),
+            returnValue: _i4.Future<_i2.BookmarkNode?>.value(),
           )
-          as _i3.Future<_i4.BookmarkNode?>);
+          as _i4.Future<_i2.BookmarkNode?>);
 
   @override
-  _i3.Future<List<_i4.BookmarkNode>> getBookmarksWithUrl(Uri? url) =>
+  _i4.Future<List<_i2.BookmarkNode>> getBookmarksWithUrl(Uri? url) =>
       (super.noSuchMethod(
             Invocation.method(#getBookmarksWithUrl, [url]),
-            returnValue: _i3.Future<List<_i4.BookmarkNode>>.value(
-              <_i4.BookmarkNode>[],
+            returnValue: _i4.Future<List<_i2.BookmarkNode>>.value(
+              <_i2.BookmarkNode>[],
             ),
           )
-          as _i3.Future<List<_i4.BookmarkNode>>);
+          as _i4.Future<List<_i2.BookmarkNode>>);
 
   @override
-  _i3.Future<List<_i4.BookmarkNode>> getRecentBookmarks(
+  _i4.Future<List<_i2.BookmarkNode>> getRecentBookmarks(
     int? limit, {
     Duration? maxAge = Duration.zero,
     DateTime? currentTime,
@@ -76,27 +82,27 @@ class MockGeckoBookmarksService extends _i1.Mock
               [limit],
               {#maxAge: maxAge, #currentTime: currentTime},
             ),
-            returnValue: _i3.Future<List<_i4.BookmarkNode>>.value(
-              <_i4.BookmarkNode>[],
+            returnValue: _i4.Future<List<_i2.BookmarkNode>>.value(
+              <_i2.BookmarkNode>[],
             ),
           )
-          as _i3.Future<List<_i4.BookmarkNode>>);
+          as _i4.Future<List<_i2.BookmarkNode>>);
 
   @override
-  _i3.Future<List<_i4.BookmarkNode>> searchBookmarks(
+  _i4.Future<List<_i2.BookmarkNode>> searchBookmarks(
     String? query, {
     int? limit = 10,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#searchBookmarks, [query], {#limit: limit}),
-            returnValue: _i3.Future<List<_i4.BookmarkNode>>.value(
-              <_i4.BookmarkNode>[],
+            returnValue: _i4.Future<List<_i2.BookmarkNode>>.value(
+              <_i2.BookmarkNode>[],
             ),
           )
-          as _i3.Future<List<_i4.BookmarkNode>>);
+          as _i4.Future<List<_i2.BookmarkNode>>);
 
   @override
-  _i3.Future<String> addItem(
+  _i4.Future<String> addItem(
     String? parentGuid,
     Uri? url,
     String? title,
@@ -104,55 +110,79 @@ class MockGeckoBookmarksService extends _i1.Mock
   ) =>
       (super.noSuchMethod(
             Invocation.method(#addItem, [parentGuid, url, title, position]),
-            returnValue: _i3.Future<String>.value(
+            returnValue: _i4.Future<String>.value(
               _i5.dummyValue<String>(
                 this,
                 Invocation.method(#addItem, [parentGuid, url, title, position]),
               ),
             ),
           )
-          as _i3.Future<String>);
+          as _i4.Future<String>);
 
   @override
-  _i3.Future<String> addFolder(
+  _i4.Future<String> addFolder(
     String? parentGuid,
     String? title,
     int? position,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#addFolder, [parentGuid, title, position]),
-            returnValue: _i3.Future<String>.value(
+            returnValue: _i4.Future<String>.value(
               _i5.dummyValue<String>(
                 this,
                 Invocation.method(#addFolder, [parentGuid, title, position]),
               ),
             ),
           )
-          as _i3.Future<String>);
+          as _i4.Future<String>);
 
   @override
-  _i3.Future<void> updateNode(String? guid, _i4.BookmarkInfo? info) =>
+  _i4.Future<void> updateNode(String? guid, _i2.BookmarkInfo? info) =>
       (super.noSuchMethod(
             Invocation.method(#updateNode, [guid, info]),
-            returnValue: _i3.Future<void>.value(),
-            returnValueForMissingStub: _i3.Future<void>.value(),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
           )
-          as _i3.Future<void>);
+          as _i4.Future<void>);
 
   @override
-  _i3.Future<bool> deleteNode(String? guid) =>
+  _i4.Future<bool> deleteNode(String? guid) =>
       (super.noSuchMethod(
             Invocation.method(#deleteNode, [guid]),
-            returnValue: _i3.Future<bool>.value(false),
+            returnValue: _i4.Future<bool>.value(false),
           )
-          as _i3.Future<bool>);
+          as _i4.Future<bool>);
 
   @override
-  _i3.Future<void> eraseEverything(_i2.BookmarkRoot? root) =>
+  _i4.Future<_i2.BookmarkInsertTreeResult> insertTree(
+    String? parentGuid,
+    List<_i2.BookmarkImportNode>? children,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#insertTree, [parentGuid, children]),
+            returnValue: _i4.Future<_i2.BookmarkInsertTreeResult>.value(
+              _FakeBookmarkInsertTreeResult_0(
+                this,
+                Invocation.method(#insertTree, [parentGuid, children]),
+              ),
+            ),
+          )
+          as _i4.Future<_i2.BookmarkInsertTreeResult>);
+
+  @override
+  _i4.Future<int> countBookmarksInTrees(List<String>? guids) =>
+      (super.noSuchMethod(
+            Invocation.method(#countBookmarksInTrees, [guids]),
+            returnValue: _i4.Future<int>.value(0),
+          )
+          as _i4.Future<int>);
+
+  @override
+  _i4.Future<void> eraseEverything(_i3.BookmarkRoot? root) =>
       (super.noSuchMethod(
             Invocation.method(#eraseEverything, [root]),
-            returnValue: _i3.Future<void>.value(),
-            returnValueForMissingStub: _i3.Future<void>.value(),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
           )
-          as _i3.Future<void>);
+          as _i4.Future<void>);
 }

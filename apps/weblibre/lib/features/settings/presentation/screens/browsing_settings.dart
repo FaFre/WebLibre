@@ -781,8 +781,8 @@ class _AppLinksModeSection extends HookConsumerWidget {
                     await ref
                         .read(saveGeneralSettingsControllerProvider.notifier)
                         .save(
-                          (current) =>
-                              current.copyWith.appLinkMarketplaceFallback(value),
+                          (current) => current.copyWith
+                              .appLinkMarketplaceFallback(value),
                         );
                   },
           ),
@@ -845,9 +845,9 @@ class _AppLinkRulesSubsection extends ConsumerWidget {
                 await ref
                     .read(saveGeneralSettingsControllerProvider.notifier)
                     .save(
-                      (current) => current.copyWith.appLinkRules({
-                        ...current.appLinkRules,
-                      }..remove(key)),
+                      (current) => current.copyWith.appLinkRules(
+                        {...current.appLinkRules}..remove(key),
+                      ),
                     );
               },
             ),

@@ -82,7 +82,9 @@ AppLinkPolicySnapshot? appLinkPolicySnapshot(Ref ref) {
   final isolationLoaded = ref
       .watch(watchIsolatedContextContainerMapProvider)
       .hasValue;
-  final strictLoaded = ref.watch(watchStrictContextAssignmentsProvider).hasValue;
+  final strictLoaded = ref
+      .watch(watchStrictContextAssignmentsProvider)
+      .hasValue;
   final sitesLoaded = ref.watch(watchAllAssignedSitesProvider).hasValue;
   // The real proxy-routing settings drive `protectGeneralContext`; the
   // `...WithDefaults` view silently substitutes defaults while the row loads,

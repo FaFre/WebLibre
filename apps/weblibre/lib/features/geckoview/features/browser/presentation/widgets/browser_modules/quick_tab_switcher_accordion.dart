@@ -317,7 +317,9 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
     if (entries.isEmpty) {
       // Hold the 48px slot; the bar visibility is decided upstream by
       // quickTabSwitcherRowCountProvider.
-      return isVertical ? const SizedBox(width: 48) : const SizedBox(height: 48);
+      return isVertical
+          ? const SizedBox(width: 48)
+          : const SizedBox(height: 48);
     }
 
     return NotificationListener<UserScrollNotification>(
@@ -522,19 +524,54 @@ class _AccordionHeaderChip extends StatelessWidget {
       // count badge inside the label instead, dropping the avatar slot.
       return wrapLongPress(
         FilterChip(
-        labelPadding: EdgeInsets.zero,
-        label: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (iconAvatar != null) iconAvatar,
-            if (countBadge != null) ...[
-              if (iconAvatar != null) const SizedBox(height: 4),
-              // Multi-digit counts can exceed the narrow rail's fixed 48px chip
-              // width; scale the badge down to fit instead of overflowing.
-              FittedBox(fit: BoxFit.scaleDown, child: countBadge),
+          labelPadding: EdgeInsets.zero,
+          label: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (iconAvatar != null) iconAvatar,
+              if (countBadge != null) ...[
+                if (iconAvatar != null) const SizedBox(height: 4),
+                // Multi-digit counts can exceed the narrow rail's fixed 48px chip
+                // width; scale the badge down to fit instead of overflowing.
+                FittedBox(fit: BoxFit.scaleDown, child: countBadge),
+              ],
             ],
-          ],
+          ),
+          color: WidgetStatePropertyAll(fill),
+          selected: false,
+          showCheckmark: false,
+          onSelected: (value) {
+            if (value) {
+              onSelected();
+            }
+          },
+          side: side,
+          shape: shape,
         ),
+      );
+    }
+
+    return wrapLongPress(
+      FilterChip(
+        avatar: iconAvatar,
+        label: container != null
+            ? buildContainerChipLabel(
+                context,
+                container,
+                true,
+                trailing: countBadge,
+              )
+            : SizedBox(
+                height: 20,
+                child: Center(
+                  child:
+                      countBadge ??
+                      DefaultTextStyle.merge(
+                        style: TextStyle(color: nullForeground),
+                        child: const SizedBox.shrink(),
+                      ),
+                ),
+              ),
         color: WidgetStatePropertyAll(fill),
         selected: false,
         showCheckmark: false,
@@ -545,41 +582,6 @@ class _AccordionHeaderChip extends StatelessWidget {
         },
         side: side,
         shape: shape,
-        ),
-      );
-    }
-
-    return wrapLongPress(
-      FilterChip(
-      avatar: iconAvatar,
-      label: container != null
-          ? buildContainerChipLabel(
-              context,
-              container,
-              true,
-              trailing: countBadge,
-            )
-          : SizedBox(
-              height: 20,
-              child: Center(
-                child:
-                    countBadge ??
-                    DefaultTextStyle.merge(
-                      style: TextStyle(color: nullForeground),
-                      child: const SizedBox.shrink(),
-                    ),
-              ),
-            ),
-      color: WidgetStatePropertyAll(fill),
-      selected: false,
-      showCheckmark: false,
-      onSelected: (value) {
-        if (value) {
-          onSelected();
-        }
-      },
-      side: side,
-      shape: shape,
       ),
     );
   }

@@ -62,7 +62,8 @@ Future<void> _removeAppLinkOverrides(
   ) {
     if (!ids.any(current.appLinkContextOverrides.containsKey)) return current;
     return current.copyWith.appLinkContextOverrides(
-      {...current.appLinkContextOverrides}..removeWhere((key, _) => ids.contains(key)),
+      {...current.appLinkContextOverrides}
+        ..removeWhere((key, _) => ids.contains(key)),
     );
   });
 }

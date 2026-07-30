@@ -75,9 +75,9 @@ class VisitContainerDao extends DatabaseAccessor<TabDatabase>
         start,
         math.min(start + chunkSize, canonicalList.length),
       );
-      final rows = await (db.select(db.visitContainer)
-            ..where((t) => t.urlCanonical.isIn(chunk)))
-          .get();
+      final rows = await (db.select(
+        db.visitContainer,
+      )..where((t) => t.urlCanonical.isIn(chunk))).get();
       results.addAll(rows);
     }
     return results;
@@ -103,9 +103,9 @@ class VisitContainerDao extends DatabaseAccessor<TabDatabase>
   /// Container deletion dissolves relations automatically via ON DELETE CASCADE
   /// and does not go through here.
   Future<int> deleteForContainer(String containerId) {
-    return (db.delete(db.visitContainer)
-          ..where((t) => t.containerId.equals(containerId)))
-        .go();
+    return (db.delete(
+      db.visitContainer,
+    )..where((t) => t.containerId.equals(containerId))).go();
   }
 
   /// Remove every relation row, all containers. Used when the user clears all

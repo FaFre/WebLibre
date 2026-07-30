@@ -23,11 +23,8 @@ import 'package:weblibre/features/app_links/domain/services/effective_routing.da
 import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 
-SiteAssignment _assignment(String site, {String? contextId}) => SiteAssignment(
-  id: site,
-  contextualIdentity: contextId,
-  assignedSite: site,
-);
+SiteAssignment _assignment(String site, {String? contextId}) =>
+    SiteAssignment(id: site, contextualIdentity: contextId, assignedSite: site);
 
 void main() {
   group('resolveContainerAssignment', () {

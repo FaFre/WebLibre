@@ -311,7 +311,10 @@ AppLinkProtection computeAppLinkProtection({
 
   final protectedContextIds = <String>{};
   for (final MapEntry(:key, :value) in assignmentByContextId.entries) {
-    if (isAssignmentProtected(value, protectGeneralContext: protectGeneralContext)) {
+    if (isAssignmentProtected(
+      value,
+      protectGeneralContext: protectGeneralContext,
+    )) {
       protectedContextIds.add(key);
     }
   }
@@ -323,7 +326,10 @@ AppLinkProtection computeAppLinkProtection({
         .toList();
     if (assignments.isEmpty) continue;
     final chosen = resolveIsolationContextRouting(assignments).chosen;
-    if (isAssignmentProtected(chosen, protectGeneralContext: protectGeneralContext)) {
+    if (isAssignmentProtected(
+      chosen,
+      protectGeneralContext: protectGeneralContext,
+    )) {
       protectedContextIds.add(key);
     }
   }

@@ -66,10 +66,7 @@ void main() {
     });
 
     test('defaults to false', () {
-      expect(
-        ContainerMetadata.withDefaults().isolatedAppLinkSettings,
-        isFalse,
-      );
+      expect(ContainerMetadata.withDefaults().isolatedAppLinkSettings, isFalse);
     });
   });
 

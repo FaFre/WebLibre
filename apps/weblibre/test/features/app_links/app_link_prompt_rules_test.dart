@@ -86,7 +86,9 @@ void main() {
 
     test('is producible even for an ambiguous resolution', () {
       // neverOpen never launches, so it does not need a bound package.
-      final rule = neverOpenRuleFor(_target(isAmbiguous: true, packageName: null));
+      final rule = neverOpenRuleFor(
+        _target(isAmbiguous: true, packageName: null),
+      );
       expect(rule.decision, AppLinkRuleDecision.neverOpen);
       expect(rule.isValid, isTrue);
     });
