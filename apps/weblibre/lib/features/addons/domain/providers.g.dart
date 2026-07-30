@@ -843,7 +843,7 @@ final class PinnedAddonIdsProvider
   }
 }
 
-String _$pinnedAddonIdsHash() => r'4f46cd69d4817e6e19e4d04f4fdcf83d5e2efb8c';
+String _$pinnedAddonIdsHash() => r'93a3e6944156569eb6eca2bb934c8e94e64484ad';
 
 abstract class _$PinnedAddonIds extends $Notifier<Set<String>> {
   Set<String> build();

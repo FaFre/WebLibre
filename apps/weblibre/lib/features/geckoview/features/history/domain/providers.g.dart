@@ -44,7 +44,7 @@ final class HistoryVisitsFilterProvider
 }
 
 String _$historyVisitsFilterHash() =>
-    r'4c1530cfd2d94b1cdbb04fbe2df8037cb211a668';
+    r'dca9d17bcaa5c5db2757edf59a8a23e2aebe8c99';
 
 @JsonPersist()
 abstract class _$HistoryVisitsFilterBase
@@ -101,7 +101,7 @@ final class HistoryDownloadsFilterProvider
 }
 
 String _$historyDownloadsFilterHash() =>
-    r'b44de5aced7dadba361fddf69b8462ff92252a99';
+    r'30514069187520cf003759ba3f406a0adf9c5620';
 
 @JsonPersist()
 abstract class _$HistoryDownloadsFilterBase

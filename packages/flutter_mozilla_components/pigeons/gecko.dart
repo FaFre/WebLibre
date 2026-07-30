@@ -3100,7 +3100,10 @@ abstract class GeckoAppLinksApi {
   /// is alive, consume it (double-resolve is a no-op), then perform side effects
   /// after releasing the store lock (§2.6).
   @async
-  AppLinkResolutionResult resolvePendingAppLink(int requestId, AppLinkDecision decision);
+  AppLinkResolutionResult resolvePendingAppLink(
+    int requestId,
+    AppLinkDecision decision,
+  );
 
   /// Resolve [url] to an external-app target.
   ///

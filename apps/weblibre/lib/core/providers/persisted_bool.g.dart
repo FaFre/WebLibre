@@ -58,7 +58,7 @@ final class PersistedBoolProvider
   }
 }
 
-String _$persistedBoolHash() => r'97fd7ed82dfde444fddf4475a3982be00f5f197a';
+String _$persistedBoolHash() => r'b73ab03b1a9a81c27174393484b77e107be9cf50';
 
 final class PersistedBoolFamily extends $Family
     with

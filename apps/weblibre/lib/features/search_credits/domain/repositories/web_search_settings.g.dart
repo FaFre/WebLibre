@@ -45,7 +45,7 @@ final class WebSearchSettingsControllerProvider
 }
 
 String _$webSearchSettingsControllerHash() =>
-    r'f21a6203fdb8b21c28b0ddd23f1b48768673138e';
+    r'969a3998abc34280b34de2b4789645a4d68c0c77';
 
 @JsonPersist()
 abstract class _$WebSearchSettingsControllerBase

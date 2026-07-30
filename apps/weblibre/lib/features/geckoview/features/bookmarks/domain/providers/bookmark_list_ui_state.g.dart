@@ -45,7 +45,7 @@ final class BookmarkListUiStateNotifierProvider
 }
 
 String _$bookmarkListUiStateNotifierHash() =>
-    r'13f01daba9d1591c700e956428f0e0e8cb2bfe92';
+    r'ec34d3b9263463574de71dce9ab349668862c598';
 
 @JsonPersist()
 abstract class _$BookmarkListUiStateNotifierBase

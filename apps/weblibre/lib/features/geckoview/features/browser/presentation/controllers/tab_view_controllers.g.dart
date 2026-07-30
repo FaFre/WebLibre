@@ -42,7 +42,7 @@ final class TabsViewModeControllerProvider
 }
 
 String _$tabsViewModeControllerHash() =>
-    r'e013b174218fcad81981f7d939cf161c3b002adc';
+    r'f1da070a3cd00dbdc75f36120e202fa4f822fd5b';
 
 abstract class _$TabsViewModeController extends $Notifier<TabsViewMode> {
   TabsViewMode build();
@@ -97,7 +97,7 @@ final class TabViewFilterControllerProvider
 }
 
 String _$tabViewFilterControllerHash() =>
-    r'6f5d42761765c0135bf40953c574c17d141ffab2';
+    r'bbed4900c337629061550b6595d0fa0e0d52362d';
 
 @JsonPersist()
 abstract class _$TabViewFilterControllerBase
