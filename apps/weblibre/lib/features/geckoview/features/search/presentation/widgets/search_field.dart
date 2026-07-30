@@ -25,7 +25,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
-import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/widgets/auto_suggest_text_field.dart';
@@ -45,6 +44,7 @@ class SearchField extends HookConsumerWidget {
   final bool unfocusOnTapOutside;
   final GlobalKey? textFieldKey;
   final Widget? hint;
+  final bool privateMode;
 
   final BangData? activeBang;
   final bool showBangIcon;
@@ -70,11 +70,11 @@ class SearchField extends HookConsumerWidget {
     this.textFieldKey,
     this.hint,
     this.onClearPressed,
+    this.privateMode = false,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final incognitoEnabled = ref.watch(incognitoModeEnabledProvider);
     final acceptSuggestionOnSubmit = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (s) => s.acceptSuggestionOnSubmit,
@@ -135,7 +135,7 @@ class SearchField extends HookConsumerWidget {
         acceptSuggestionOnSubmit: acceptSuggestionOnSubmit,
         enableSuggestions: true,
         autocorrect: false,
-        enableIMEPersonalizedLearning: !incognitoEnabled,
+        enableIMEPersonalizedLearning: !privateMode,
         focusNode: safeFocusNode,
         maxLines: maxLines,
         textFieldKey: textFieldKey,

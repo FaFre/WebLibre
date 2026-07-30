@@ -747,6 +747,7 @@ class SearchScreen extends HookConsumerWidget {
                     textEditingController: searchTextController,
                     focusNode: searchFocusNode,
                     maxLines: isEditMode ? 3 : 1,
+                    privateMode: privateTabMode,
                     label: const Text('Search or enter URL'),
                     unfocusOnTapOutside: false,
                     onClearPressed: () {
