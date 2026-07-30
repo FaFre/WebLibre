@@ -44,7 +44,7 @@ List<ToolbarButtonConfig> _buildDefaultToolbarButtonConfigs({
     return ToolbarButtonConfig(
       buttonId: spec.id.name,
       orderKey: key,
-      isVisible: allHidden ? false : spec.defaultVisible,
+      isVisible: !allHidden && spec.defaultVisible,
       fallbackId: allHidden ? null : spec.defaultFallback?.name,
     );
   }).toList();

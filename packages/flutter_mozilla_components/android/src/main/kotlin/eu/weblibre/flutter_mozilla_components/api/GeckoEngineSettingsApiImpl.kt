@@ -7,13 +7,9 @@
 package eu.weblibre.flutter_mozilla_components.api
 
 import android.content.Context
-import androidx.core.content.edit
-import androidx.preference.PreferenceManager
 import eu.weblibre.flutter_mozilla_components.ColorSchemePreference
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.R
 import eu.weblibre.flutter_mozilla_components.feature.ReaderViewAppearanceFeature
-import eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode
 import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMode as PigeonBounceTrackingProtectionMode
 import eu.weblibre.flutter_mozilla_components.pigeons.ColorScheme
 import eu.weblibre.flutter_mozilla_components.pigeons.CookieBannerHandlingMode
@@ -434,35 +430,6 @@ class GeckoEngineSettingsApiImpl(
 
     override fun setScreenshotProtectionEnabled(enabled: Boolean) {
         GlobalComponents.screenshotProtectionEnabled = enabled
-    }
-
-    override fun setAppLinksMode(mode: AppLinksMode) {
-        val context = components.profileApplicationContext
-        val prefKey = context.getString(R.string.pref_key_open_links_in_apps)
-        val modeValue = when (mode) {
-            AppLinksMode.ALWAYS -> context.getString(R.string.pref_key_open_links_in_apps_always)
-            AppLinksMode.ASK -> context.getString(R.string.pref_key_open_links_in_apps_ask)
-            AppLinksMode.NEVER -> context.getString(R.string.pref_key_open_links_in_apps_never)
-        }
-
-        PreferenceManager.getDefaultSharedPreferences(context).edit {
-            putString(prefKey, modeValue)
-        }
-    }
-
-    override fun getAppLinksMode(): AppLinksMode {
-        val context = components.profileApplicationContext
-        val prefKey = context.getString(R.string.pref_key_open_links_in_apps)
-        val defaultValue = context.getString(R.string.pref_key_open_links_in_apps_ask)
-        val modeValue = PreferenceManager.getDefaultSharedPreferences(context)
-            .getString(prefKey, defaultValue) ?: defaultValue
-
-        return when (modeValue) {
-            context.getString(R.string.pref_key_open_links_in_apps_always) -> AppLinksMode.ALWAYS
-            context.getString(R.string.pref_key_open_links_in_apps_ask) -> AppLinksMode.ASK
-            context.getString(R.string.pref_key_open_links_in_apps_never) -> AppLinksMode.NEVER
-            else -> AppLinksMode.ASK
-        }
     }
 
     override fun setUseExternalDownloadManager(enabled: Boolean) {

@@ -23,6 +23,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
+import 'package:weblibre/presentation/hooks/cached_future.dart';
 
 class LaunchExternal extends HookConsumerWidget {
   final HitResult hitResult;
@@ -33,19 +34,26 @@ class LaunchExternal extends HookConsumerWidget {
 
   static Future<bool> isSupported(HitResult hitResult) async {
     return hitResult.tryGetLink().mapNotNull(
-          (url) => _service.hasExternalApp(url),
+          (url) async => (await _service.resolveAppLink(url)) != null,
         ) ??
         false;
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final url = hitResult.tryGetLink();
+    final appLink = useCachedFuture(
+      () => url != null ? _service.resolveAppLink(url) : Future.value(null),
+      [url],
+    );
+    final appName = appLink.data?.appName;
+
     return ListTile(
       leading: const Icon(Icons.open_in_new),
-      title: const Text('Open in App'),
+      title: Text(appName != null ? 'Open in $appName' : 'Open in App'),
       onTap: () async {
         await hitResult.tryGetLink().mapNotNull((url) async {
-          final success = await _service.openAppLink(url);
+          final success = await _service.launchAppLink(url);
 
           if (success && context.mounted) {
             context.pop();

@@ -1267,18 +1267,3 @@ class _TabGroupRecord {
     required this.dateKey,
   });
 }
-
-@Riverpod()
-class AppLinksModeNotifier extends _$AppLinksModeNotifier {
-  final _service = GeckoEngineSettingsService();
-
-  Future<void> setMode(AppLinksMode mode) async {
-    await _service.setAppLinksMode(mode);
-    ref.invalidateSelf();
-  }
-
-  @override
-  Future<AppLinksMode> build() {
-    return _service.getAppLinksMode();
-  }
-}

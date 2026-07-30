@@ -12,6 +12,7 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.applinks.WebLibreAppLinksInterceptor
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.feature.InertExternalSchemes
 import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureBridge
@@ -29,6 +30,9 @@ class AppRequestInterceptor(private val context: Context) : RequestInterceptor {
     private val components by lazy {
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
     }
+
+    // The WebLibre-owned §2.4 app-links tail.
+    private val webLibreAppLinks by lazy { WebLibreAppLinksInterceptor(context) }
 
     override fun onLoadRequest(
         engineSession: EngineSession,
@@ -130,12 +134,13 @@ class AppRequestInterceptor(private val context: Context) : RequestInterceptor {
             return it
         }
 
-        return components.services.appLinksInterceptor.onLoadRequest(
+        // App-links tail: the WebLibre-owned §2.4 implementation. Structural guards above
+        // (PWA/TWA, sandbox, weblibre://, FxA) already answered.
+        return webLibreAppLinks.onLoadRequest(
             engineSession,
             uri,
             lastUri,
             hasUserGesture,
-            isSameDomain,
             isRedirect,
             isDirectNavigation,
             isSubframeRequest,

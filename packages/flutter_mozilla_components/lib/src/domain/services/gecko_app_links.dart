@@ -10,31 +10,52 @@ final _api = GeckoAppLinksApi();
 
 /// Service for detecting and launching external applications that can handle URLs.
 ///
-/// This service wraps Mozilla Android Components' AppLinksUseCases to allow
-/// checking if native apps can handle URLs and launching them directly.
-/// This matches the behavior in Firefox/Fenix for "Open in App" functionality.
+/// WebLibre-owned resolution/launch surface. Policy lives in Dart; the native side
+/// owns PackageManager resolution and Intent launch. Used by the manual
+/// "Open in app" entry points.
 class GeckoAppLinksService {
-  /// Checks if an external application is available to handle the given URL.
+  /// Resolve [url] to an external-app target, or null when no external app is
+  /// available (or on any resolution error / always-denied scheme).
   ///
-  /// This method uses mozilla-components AppLinksUseCases to determine if
-  /// a native app can handle the URL (e.g., YouTube app for youtube.com links).
-  ///
-  /// @param url The URL to check.
-  /// @return true if an external app is available, false otherwise.
-  Future<bool> hasExternalApp(Uri url) {
-    return _api.hasExternalApp(url.toString());
+  /// [includeHttpAppLinks] when true, an app resolving an engine-supported
+  /// (http(s)) URL is surfaced (e.g. the YouTube app for a youtube.com link).
+  Future<AppLinkTarget?> resolveAppLink(
+    Uri url, {
+    bool includeHttpAppLinks = true,
+  }) {
+    return _api.resolveAppLink(url.toString(), includeHttpAppLinks);
   }
 
-  /// Opens the URL in an external application if available.
+  /// Re-resolve [url] and launch it in an external app.
   ///
-  /// This method will:
-  /// 1. Check if an external app can handle the URL
-  /// 2. If available, launch the app directly with Intent.FLAG_ACTIVITY_NEW_TASK
-  /// 3. Return true if successfully launched, false otherwise
+  /// Returns true if launched, false if no app is available or the launch failed.
+  Future<bool> launchAppLink(Uri url) {
+    return _api.launchAppLink(url.toString());
+  }
+
+  /// Push the complete app-link policy snapshot to native (last-write-wins).
   ///
-  /// @param url The URL to open in external app.
-  /// @return true if URL was opened in external app, false if no app available.
-  Future<bool> openAppLink(Uri url) {
-    return _api.openAppLink(url.toString());
+  /// Throws if no profile is bound yet; the caller (replicator) retries after
+  /// initialisation.
+  Future<void> setAppLinkPolicy(AppLinkPolicySnapshot snapshot) {
+    return _api.setAppLinkPolicy(snapshot);
+  }
+
+  /// Non-consuming query of pending prompts for [owner] (§2.6). Query on
+  /// attach/resume and when the availability event fires; render idempotently by
+  /// requestId.
+  Future<List<AppLinkPromptRequest>> getPendingAppLinkPrompts(
+    AppLinkPromptOwner owner,
+  ) {
+    return _api.getPendingAppLinkPrompts(owner);
+  }
+
+  /// Atomically resolve a pending prompt (§2.6). A double-resolve or stale id is
+  /// a no-op returning `failureReason == "stale"`.
+  Future<AppLinkResolutionResult> resolvePendingAppLink(
+    int requestId,
+    AppLinkDecision decision,
+  ) {
+    return _api.resolvePendingAppLink(requestId, decision);
   }
 }

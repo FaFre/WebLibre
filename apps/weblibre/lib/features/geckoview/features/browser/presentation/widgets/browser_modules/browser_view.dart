@@ -30,6 +30,7 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/device_info.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/app_links/domain/services/app_link_policy_replication.dart';
 import 'package:weblibre/features/bangs/data/models/web_search_bang.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/services/search_history_cleanup.dart';
@@ -670,6 +671,19 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       onError: (error, stackTrace) {
         logger.e(
           'Error listening to proxySettingsReplicationProvider',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+
+    ref.listenManual(
+      fireImmediately: true,
+      appLinkPolicyReplicationProvider,
+      (previous, next) {},
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to appLinkPolicyReplicationProvider',
           error: error,
           stackTrace: stackTrace,
         );

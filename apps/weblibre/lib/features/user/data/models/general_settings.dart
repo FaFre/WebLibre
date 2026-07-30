@@ -20,8 +20,12 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
+    show AppLinksMode;
 import 'package:json_annotation/json_annotation.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
+import 'package:weblibre/features/app_links/domain/entities/context_app_link_policy.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
@@ -202,6 +206,30 @@ class GeneralSettings with FastEquatable {
   /// via the intent gatekeeper prefs bridge. Defaults to true.
   final bool customTabsEnabled;
 
+  /// Global app-links behaviour: always open in native apps, ask each time, or
+  /// never leave the browser. Defaults to [AppLinksMode.ask]. Per-site rules in
+  /// [appLinkRules] and container/proxy protection can override this per-target.
+  final AppLinksMode appLinksMode;
+
+  /// Remembered per-scope app-link rules, keyed by canonical scope
+  /// (`host:youtube.com` | `pkg:...`). One rule per scope, last write wins.
+  /// Malformed entries are dropped on read (see [parseAppLinkRules]).
+  @JsonKey(fromJson: parseAppLinkRules)
+  final Map<String, PersistedAppLinkRule> appLinkRules;
+
+  /// Per-container app-link overrides for containers with "isolated app link
+  /// settings" enabled, keyed by the container's Gecko contextId. Each entry
+  /// fully *replaces* the global mode + [appLinkRules] for navigations in that
+  /// container (replace semantics). Containers without isolation have no entry
+  /// and fall back to the global policy. Malformed entries dropped on read.
+  @JsonKey(fromJson: parseAppLinkContextOverrides)
+  final Map<String, ContextAppLinkPolicy> appLinkContextOverrides;
+
+  /// Whether an install-app (marketplace) intent is offered when an app link
+  /// resolves to no installed app and has no validated http(s) fallback.
+  /// Defaults to false — the wrong default for a de-Googled browser.
+  final bool appLinkMarketplaceFallback;
+
   /// Whether the local search index (`history` table populated via tab→
   /// history triggers) is active. When false, the SQL trigger guard returns
   /// without writing; existing rows stay until the user clears them.
@@ -296,6 +324,10 @@ class GeneralSettings with FastEquatable {
     required this.blockExternalAppsEnabled,
     required this.externalAppIntentPolicies,
     required this.customTabsEnabled,
+    required this.appLinksMode,
+    required this.appLinkRules,
+    required this.appLinkContextOverrides,
+    required this.appLinkMarketplaceFallback,
     required this.enableLocalSearchIndex,
     required this.indexPrivateTabs,
     required this.acceptSuggestionOnSubmit,
@@ -364,6 +396,10 @@ class GeneralSettings with FastEquatable {
     bool? blockExternalAppsEnabled,
     Map<String, IntentSourcePolicy>? externalAppIntentPolicies,
     bool? customTabsEnabled,
+    AppLinksMode? appLinksMode,
+    Map<String, PersistedAppLinkRule>? appLinkRules,
+    Map<String, ContextAppLinkPolicy>? appLinkContextOverrides,
+    bool? appLinkMarketplaceFallback,
     bool? enableLocalSearchIndex,
     bool? indexPrivateTabs,
     bool? acceptSuggestionOnSubmit,
@@ -442,6 +478,10 @@ class GeneralSettings with FastEquatable {
        blockExternalAppsEnabled = blockExternalAppsEnabled ?? false,
        externalAppIntentPolicies = externalAppIntentPolicies ?? const {},
        customTabsEnabled = customTabsEnabled ?? true,
+       appLinksMode = appLinksMode ?? AppLinksMode.ask,
+       appLinkRules = appLinkRules ?? const {},
+       appLinkContextOverrides = appLinkContextOverrides ?? const {},
+       appLinkMarketplaceFallback = appLinkMarketplaceFallback ?? false,
        enableLocalSearchIndex = enableLocalSearchIndex ?? true,
        indexPrivateTabs = indexPrivateTabs ?? false,
        acceptSuggestionOnSubmit = acceptSuggestionOnSubmit ?? true,
@@ -593,6 +633,10 @@ class GeneralSettings with FastEquatable {
     blockExternalAppsEnabled,
     externalAppIntentPolicies,
     customTabsEnabled,
+    appLinksMode,
+    appLinkRules,
+    appLinkContextOverrides,
+    appLinkMarketplaceFallback,
     enableLocalSearchIndex,
     indexPrivateTabs,
     acceptSuggestionOnSubmit,

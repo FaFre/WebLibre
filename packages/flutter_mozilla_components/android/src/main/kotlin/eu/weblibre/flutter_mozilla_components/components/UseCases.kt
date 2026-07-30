@@ -8,7 +8,6 @@ import android.content.Context
 import android.os.Environment
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.Engine
-import mozilla.components.feature.app.links.AppLinksUseCases
 import mozilla.components.feature.contextmenu.ContextMenuUseCases
 import mozilla.components.feature.downloads.DownloadsUseCases
 import mozilla.components.feature.session.SessionUseCases
@@ -69,8 +68,6 @@ class UseCases(
      * Use cases related to Custom Tabs.
      */
     val customTabsUseCases: CustomTabsUseCases by lazy { CustomTabsUseCases(store, sessionUseCases.loadUrl) }
-
-    val appLinksUseCases by lazy { AppLinksUseCases(context) }
 
     val trackingProtectionUseCases by lazy { TrackingProtectionUseCases(store, engine) }
 

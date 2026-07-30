@@ -22,6 +22,7 @@ import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/app_links/domain/services/effective_routing.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
@@ -33,45 +34,10 @@ import 'package:weblibre/features/user/domain/repositories/proxy_routing_setting
 
 part 'proxy_settings_replication.g.dart';
 
-sealed class _ProxyAssignment with FastEquatable {
-  _ProxyAssignment();
-
-  factory _ProxyAssignment.inherit() = _InheritProxyAssignment;
-
-  factory _ProxyAssignment.direct(String scopeId) = _DirectProxyAssignment;
-
-  factory _ProxyAssignment.explicit(String proxyId) = _ExplicitProxyAssignment;
-}
-
-final class _InheritProxyAssignment extends _ProxyAssignment {
-  _InheritProxyAssignment();
-
-  @override
-  List<Object?> get hashParameters => const ['inherit'];
-}
-
-final class _DirectProxyAssignment extends _ProxyAssignment {
-  final String scopeId;
-
-  _DirectProxyAssignment(this.scopeId);
-
-  @override
-  List<Object?> get hashParameters => [scopeId];
-}
-
-final class _ExplicitProxyAssignment extends _ProxyAssignment {
-  final String proxyId;
-
-  _ExplicitProxyAssignment(this.proxyId);
-
-  @override
-  List<Object?> get hashParameters => [proxyId];
-}
-
 @Riverpod(keepAlive: true)
 class ProxySettingsReplication extends _$ProxySettingsReplication {
-  var _isolatedProxyAssignments = <String, _ProxyAssignment>{};
-  var _appliedContainerProxies = <String, _ProxyAssignment>{};
+  var _isolatedProxyAssignments = <String, ProxyAssignment>{};
+  var _appliedContainerProxies = <String, ProxyAssignment>{};
 
   final _recomputeLock = Lock();
   var _recomputeDirty = false;
@@ -117,19 +83,17 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
         .read(containerRepositoryProvider.notifier)
         .getAllContainersWithCount();
 
-    final containerAssignments = <String, _ProxyAssignment>{
+    final containerAssignments = <String, ProxyAssignment>{
       for (final c in containers)
         if (c.metadata.contextualIdentity case final contextId?)
-          c.id: switch (c.metadata.proxyConnectionId) {
-            final proxyId? => _ProxyAssignment.explicit(proxyId.encode()),
-            null when c.metadata.bypassGlobalProxy => _ProxyAssignment.direct(
-              contextId,
-            ),
-            null => _ProxyAssignment.inherit(),
-          },
+          c.id: resolveContainerAssignment(
+            contextId: contextId,
+            proxyConnectionId: c.metadata.proxyConnectionId,
+            bypassGlobalProxy: c.metadata.bypassGlobalProxy,
+          ),
     };
 
-    final newAssignments = <String, _ProxyAssignment>{};
+    final newAssignments = <String, ProxyAssignment>{};
     for (final entry in contextContainerMap.entries) {
       final assignments = entry.value
           .map((containerId) => containerAssignments[containerId])
@@ -138,50 +102,19 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
 
       if (assignments.isEmpty) continue;
 
-      final proxyIds =
-          assignments
-              .whereType<_ExplicitProxyAssignment>()
-              .map((assignment) => assignment.proxyId)
-              .toSet()
-              .toList()
-            ..sort();
-      final directScopeIds =
-          assignments
-              .whereType<_DirectProxyAssignment>()
-              .map((assignment) => assignment.scopeId)
-              .toSet()
-              .toList()
-            ..sort();
-      final hasInheritedAssignment = assignments.any(
-        (assignment) => assignment is _InheritProxyAssignment,
-      );
-
-      final chosenAssignment = proxyIds.isNotEmpty
-          ? _ProxyAssignment.explicit(proxyIds.first)
-          : directScopeIds.isNotEmpty && !hasInheritedAssignment
-          ? _ProxyAssignment.direct(directScopeIds.first)
-          : _ProxyAssignment.inherit();
-      if (chosenAssignment is! _InheritProxyAssignment) {
-        newAssignments[entry.key] = chosenAssignment;
+      final routing = resolveIsolationContextRouting(assignments);
+      if (routing.chosen is! InheritProxyAssignment) {
+        newAssignments[entry.key] = routing.chosen;
       }
-      final chosenLabel = switch (chosenAssignment) {
-        _DirectProxyAssignment(:final scopeId) => 'direct:$scopeId',
-        _ExplicitProxyAssignment(:final proxyId) => proxyId,
-        _InheritProxyAssignment() => 'inherit',
-      };
 
-      final distinctAssignmentCount =
-          proxyIds.length +
-          directScopeIds.length +
-          (hasInheritedAssignment ? 1 : 0);
-      if (distinctAssignmentCount > 1) {
+      if (routing.distinctAssignmentCount > 1) {
         // Isolation contexts can hold multiple containers; if they disagree on
         // routing, the alias is forced to pick one. Surface this so the user
         // can split the containers across isolation contexts.
         logger.w(
           'Isolation context ${entry.key} has containers with multiple '
           'proxy routing assignments '
-          '(${[if (hasInheritedAssignment) 'inherit', ...directScopeIds.map((id) => 'direct:$id'), ...proxyIds].join(', ')}); using $chosenLabel',
+          '(${routing.assignmentLabels.join(', ')}); using ${routing.chosenLabel}',
         );
       }
     }
@@ -339,20 +272,19 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
   ) async {
     if (containers == null) return;
 
-    final desired = <String, _ProxyAssignment>{};
+    final desired = <String, ProxyAssignment>{};
     for (final container in containers) {
       final contextId = container.metadata.contextualIdentity;
       if (contextId == null || contextId.isEmpty) continue;
-      final proxyConnectionId = container.metadata.proxyConnectionId;
-      desired[contextId] = proxyConnectionId != null
-          ? _ProxyAssignment.explicit(proxyConnectionId.encode())
-          : container.metadata.bypassGlobalProxy
-          ? _ProxyAssignment.direct(contextId)
-          : _ProxyAssignment.inherit();
+      desired[contextId] = resolveContainerAssignment(
+        contextId: contextId,
+        proxyConnectionId: container.metadata.proxyConnectionId,
+        bypassGlobalProxy: container.metadata.bypassGlobalProxy,
+      );
     }
 
     final repo = ref.read(containerProxyRepositoryProvider.notifier);
-    final nextApplied = Map<String, _ProxyAssignment>.from(
+    final nextApplied = Map<String, ProxyAssignment>.from(
       _appliedContainerProxies,
     );
 
@@ -395,15 +327,15 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
 
   Future<void> _applyProxyAssignment(
     String contextId,
-    _ProxyAssignment assignment,
+    ProxyAssignment assignment,
   ) async {
     final repo = ref.read(containerProxyRepositoryProvider.notifier);
     switch (assignment) {
-      case _ExplicitProxyAssignment(:final proxyId):
+      case ExplicitProxyAssignment(:final proxyId):
         await repo.setContainerProxy(contextId, proxyId);
-      case _DirectProxyAssignment(:final scopeId):
+      case DirectProxyAssignment(:final scopeId):
         await repo.setContainerDirectConnection(contextId, scopeId: scopeId);
-      case _InheritProxyAssignment():
+      case InheritProxyAssignment():
         await repo.clearContainerProxy(contextId);
     }
   }

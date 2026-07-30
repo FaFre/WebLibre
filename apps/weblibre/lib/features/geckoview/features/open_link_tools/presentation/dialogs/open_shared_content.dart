@@ -184,11 +184,11 @@ class OpenSharedContent extends HookConsumerWidget {
       };
     }, [containerMode, contextId, selectionUrlKey, globalSelectedContainer]);
 
-    final hasExternalApp = useCachedFuture(
+    final appLink = useCachedFuture(
       // ignore: discarded_futures useFuture
       () => parsedDebouncedUrl != null
-          ? _appLinksService.hasExternalApp(parsedDebouncedUrl)
-          : Future.value(false),
+          ? _appLinksService.resolveAppLink(parsedDebouncedUrl)
+          : Future.value(null),
       [parsedDebouncedUrl],
     );
 
@@ -288,7 +288,7 @@ class OpenSharedContent extends HookConsumerWidget {
         final uri = parseValidatedUrl(textController.text, eagerParsing: false);
         if (uri == null) return;
 
-        final success = await _appLinksService.openAppLink(uri);
+        final success = await _appLinksService.launchAppLink(uri);
 
         if (success && context.mounted) {
           context.pop(true);
@@ -429,9 +429,11 @@ class OpenSharedContent extends HookConsumerWidget {
                   },
                 ),
               ],
-              if (hasExternalApp.data == true)
+              if (appLink.data != null)
                 _OpenActionTile(
-                  title: 'Open in App',
+                  title: appLink.data?.appName != null
+                      ? 'Open in ${appLink.data!.appName}'
+                      : 'Open in App',
                   subtitle: 'Open in an installed app',
                   icon: Icons.open_in_new,
                   onTap: openInApp,

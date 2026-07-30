@@ -103,12 +103,10 @@ class TabDataRepository extends _$TabDataRepository {
               ),
               // parentId defaults to null - breaks parent chain when changing contextual identity
               selectTab: selectedTabId == tabState.id,
-              // Assignment-driven navigation to an assigned site: bypass the
-              // app-links delegate so cancelling an "open in app" prompt does
-              // not re-trigger it on the recreated tab's load.
-              flags: replacementUrl != null
-                  ? LoadUrlFlags.LOAD_FLAGS_BYPASS_LOAD_URI_DELEGATE
-                  : LoadUrlFlags.NONE,
+              // Assignment-driven navigation is classified in its assigned context
+              // like any other load; the app-links fallback re-entry map (§2.7)
+              // covers the redirect loop the old delegate bypass used to guard.
+              flags: LoadUrlFlags.NONE,
             );
       }
     }

@@ -27,6 +27,8 @@ abstract class _$ContainerMetadataCWProxy {
 
   ContainerMetadata strictMode(bool strictMode);
 
+  ContainerMetadata isolatedAppLinkSettings(bool isolatedAppLinkSettings);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContainerMetadata(...).copyWith.fieldName(value)`.
   ///
@@ -45,6 +47,7 @@ abstract class _$ContainerMetadataCWProxy {
     bool useCustomColor,
     List<Uri>? assignedSites,
     bool strictMode,
+    bool isolatedAppLinkSettings,
   });
 }
 
@@ -94,6 +97,10 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
   ContainerMetadata strictMode(bool strictMode) => call(strictMode: strictMode);
 
   @override
+  ContainerMetadata isolatedAppLinkSettings(bool isolatedAppLinkSettings) =>
+      call(isolatedAppLinkSettings: isolatedAppLinkSettings);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContainerMetadata(...).copyWith.fieldName(value)`.
   ///
@@ -112,6 +119,7 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
     Object? useCustomColor = const $CopyWithPlaceholder(),
     Object? assignedSites = const $CopyWithPlaceholder(),
     Object? strictMode = const $CopyWithPlaceholder(),
+    Object? isolatedAppLinkSettings = const $CopyWithPlaceholder(),
   }) {
     return ContainerMetadata(
       iconData: iconData == const $CopyWithPlaceholder()
@@ -165,6 +173,12 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
           ? _value.strictMode
           // ignore: cast_nullable_to_non_nullable
           : strictMode as bool,
+      isolatedAppLinkSettings:
+          isolatedAppLinkSettings == const $CopyWithPlaceholder() ||
+              isolatedAppLinkSettings == null
+          ? _value.isolatedAppLinkSettings
+          // ignore: cast_nullable_to_non_nullable
+          : isolatedAppLinkSettings as bool,
     );
   }
 }
@@ -308,6 +322,8 @@ ContainerMetadata _$ContainerMetadataFromJson(Map<String, dynamic> json) =>
           ?.map((e) => Uri.parse(e as String))
           .toList(),
       strictMode: json['strictMode'] as bool? ?? false,
+      isolatedAppLinkSettings:
+          json['isolatedAppLinkSettings'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$ContainerMetadataToJson(
@@ -326,6 +342,7 @@ Map<String, dynamic> _$ContainerMetadataToJson(
   'useCustomColor': instance.useCustomColor,
   'assignedSites': instance.assignedSites?.map((e) => e.toString()).toList(),
   'strictMode': instance.strictMode,
+  'isolatedAppLinkSettings': instance.isolatedAppLinkSettings,
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(

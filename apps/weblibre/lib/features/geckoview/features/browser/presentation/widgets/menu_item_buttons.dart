@@ -329,24 +329,27 @@ class OpenInAppMenuItemButton extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tabState = ref.watch(tabStateProvider(selectedTabId));
     final url = tabState?.url;
-    final hasExternalApp = useCachedFuture(
+    final appLink = useCachedFuture(
       // ignore: discarded_futures useFuture
-      () => url != null ? _service.hasExternalApp(url) : Future.value(false),
+      () => url != null ? _service.resolveAppLink(url) : Future.value(null),
       [url],
     );
 
-    if (hasExternalApp.data != true) {
+    final target = appLink.data;
+    if (target == null) {
       return const SizedBox.shrink();
     }
+
+    final appName = target.appName;
 
     return MenuItemButton(
       leadingIcon: const Icon(Icons.open_in_new),
       closeOnActivate: false,
-      child: const Text('Open in App'),
+      child: Text(appName != null ? 'Open in $appName' : 'Open in App'),
       onPressed: () async {
         if (url == null) return;
 
-        final success = await _service.openAppLink(url);
+        final success = await _service.launchAppLink(url);
 
         if (success && context.mounted) {
           MenuController.maybeOf(context)?.close();

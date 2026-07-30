@@ -29,6 +29,7 @@ import 'package:weblibre/core/providers/global_drop.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/drag_data.dart';
 import 'package:weblibre/extensions/media_query.dart';
+import 'package:weblibre/features/app_links/presentation/widgets/app_link_prompt_host.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/overlay.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
@@ -1275,6 +1276,39 @@ class BrowserScreen extends HookConsumerWidget {
                     return FindInPageWidget(key: ValueKey(tabId), tabId: tabId);
                   },
                 ),
+              ),
+
+              // Layer 7: App-link prompt banner (§2.6). Anchored above the bottom app
+              // bar / keyboard exactly like find-in-page, so it is never hidden behind
+              // the toolbar. Custom Tab sessions are prompted natively instead; this is
+              // the browser-tab surface only.
+              Consumer(
+                builder: (context, ref, child) {
+                  final toolbarState = ref.watch(
+                    toolbarVisibilityControllerProvider(selectedTabId),
+                  );
+                  final visible =
+                      sheetDisplayed ||
+                      (!tabInFullScreen &&
+                          toolbarState == ToolbarVisibility.visible);
+                  return Positioned(
+                    left: (tabBarPosition == TabBarPosition.left && visible)
+                        ? sideRailTotalWidth
+                        : 0.0,
+                    right: (tabBarPosition == TabBarPosition.right && visible)
+                        ? sideRailTotalWidth
+                        : 0.0,
+                    bottom: math.max(
+                      isRail
+                          ? bottomSafeArea
+                          : (visible
+                                ? bottomAppBarTotalHeight
+                                : bottomSafeArea),
+                      MediaQuery.viewInsetsOf(context).bottom,
+                    ),
+                    child: const AppLinkPromptHost(),
+                  );
+                },
               ),
             ],
           ),

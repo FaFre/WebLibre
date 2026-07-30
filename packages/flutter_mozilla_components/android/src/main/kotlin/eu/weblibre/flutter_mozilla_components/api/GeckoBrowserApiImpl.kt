@@ -51,6 +51,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPushApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPushEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPwaApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionController
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAppLinkEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoHistoryEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSelectionActionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSessionApi
@@ -279,6 +280,10 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         // visit's WebLibre container to Dart.
         GlobalComponents.historyEvents =
             GeckoHistoryEvents(_flutterPluginBinding.binaryMessenger)
+
+        // Availability signal for pending app-link prompts (Flutter-owned prompts).
+        GlobalComponents.appLinkEvents =
+            GeckoAppLinkEvents(_flutterPluginBinding.binaryMessenger)
 
         // Also set before GlobalComponents.setUp, which calls push.initialize() and can therefore
         // surface a registration failure before this sink would otherwise exist.

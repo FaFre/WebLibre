@@ -199,16 +199,6 @@ class GeckoEngineSettingsService {
     return _api.setPullToRefreshEnabled(enabled);
   }
 
-  /// Sets the app links mode preference.
-  /// Controls how external app links are handled in browser.
-  Future<void> setAppLinksMode(AppLinksMode mode) {
-    return _api.setAppLinksMode(mode);
-  }
-
-  Future<AppLinksMode> getAppLinksMode() {
-    return _api.getAppLinksMode();
-  }
-
   /// Sets whether to use external download managers for downloads.
   /// When enabled, downloads are forwarded to third-party apps like ADM, 1DM, AB DM.
   Future<void> setUseExternalDownloadManager(bool enabled) {

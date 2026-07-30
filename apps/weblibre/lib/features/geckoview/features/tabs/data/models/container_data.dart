@@ -83,6 +83,16 @@ class ContainerMetadata with FastEquatable {
   @JsonKey(defaultValue: false)
   final bool strictMode;
 
+  // When true, this container has its own app-link policy (open-in-app mode +
+  // remembered per-site rules) that fully replaces the global one for its tabs.
+  // The override itself lives in `GeneralSettings.appLinkContextOverrides` keyed
+  // by [contextualIdentity]; this flag only gates whether that override is
+  // consulted. Requires a Gecko contextId — the native interceptor keys the
+  // override on the tab's contextId, so it is normalized to false when
+  // [contextualIdentity] is null (mirrors [strictMode]/[excludeFromHistory]).
+  @JsonKey(defaultValue: false)
+  final bool isolatedAppLinkSettings;
+
   ContainerMetadata({
     required this.iconData,
     required this.contextualIdentity,
@@ -94,6 +104,7 @@ class ContainerMetadata with FastEquatable {
     required this.useCustomColor,
     required this.assignedSites,
     required this.strictMode,
+    required this.isolatedAppLinkSettings,
   });
 
   ContainerMetadata.withDefaults({
@@ -107,6 +118,7 @@ class ContainerMetadata with FastEquatable {
     bool? useCustomColor,
     List<Uri>? assignedSites,
     bool? strictMode,
+    bool? isolatedAppLinkSettings,
   }) : this(
          iconData: iconData,
          contextualIdentity: contextualIdentity,
@@ -128,6 +140,11 @@ class ContainerMetadata with FastEquatable {
          // normalize away the invalid combination on read, and writers re-apply
          // it via [sanitized].
          strictMode: (strictMode ?? false) && contextualIdentity != null,
+         // Isolated app-link settings need a contextId — the native interceptor
+         // keys the override on the tab's contextId. Normalize the invalid
+         // combination on read; writers re-apply it via [sanitized].
+         isolatedAppLinkSettings:
+             (isolatedAppLinkSettings ?? false) && contextualIdentity != null,
        );
 
   /// Enforce the [excludeFromHistory] invariant before persistence: it can only
@@ -144,6 +161,11 @@ class ContainerMetadata with FastEquatable {
     // strictness on the tab's cookieStoreId.
     if (result.strictMode && result.contextualIdentity == null) {
       result = result.copyWith(strictMode: false);
+    }
+    // Isolated app-link settings need a contextId: the interceptor keys the
+    // override on the tab's contextId.
+    if (result.isolatedAppLinkSettings && result.contextualIdentity == null) {
+      result = result.copyWith(isolatedAppLinkSettings: false);
     }
     return result;
   }
@@ -167,6 +189,7 @@ class ContainerMetadata with FastEquatable {
     useCustomColor,
     assignedSites,
     strictMode,
+    isolatedAppLinkSettings,
   ];
 }
 

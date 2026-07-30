@@ -25,7 +25,6 @@ import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import eu.weblibre.flutter_mozilla_components.addons.WebExtensionPromptFeature
-import eu.weblibre.flutter_mozilla_components.activities.ExternalAppBrowserActivity
 import eu.weblibre.flutter_mozilla_components.databinding.FragmentBrowserBinding
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
@@ -37,6 +36,9 @@ import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
 import eu.weblibre.flutter_mozilla_components.feature.WebExtensionToolbarFeature
 import eu.weblibre.flutter_mozilla_components.integration.ReaderViewIntegration
 import eu.weblibre.flutter_mozilla_components.services.DownloadService
+import eu.weblibre.flutter_mozilla_components.applinks.AppLinkRuntime
+import eu.weblibre.flutter_mozilla_components.applinks.NativeAppLinkPromptFeature
+import eu.weblibre.flutter_mozilla_components.applinks.PendingAppLinkStores
 import io.flutter.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -49,7 +51,6 @@ import mozilla.components.browser.thumbnails.BrowserThumbnails
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.feature.accounts.FxaCapability
 import mozilla.components.feature.accounts.FxaWebChannelFeature
-import mozilla.components.feature.app.links.AppLinksFeature
 import mozilla.components.feature.downloads.DownloadsFeature
 import mozilla.components.feature.downloads.manager.FetchDownloadManager
 import mozilla.components.feature.downloads.temporary.CopyDownloadFeature
@@ -89,7 +90,8 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     private val shareResourceFeature = ViewBoundFeatureWrapper<ShareResourceFeature>()
     private val copyDownloadFeature = ViewBoundFeatureWrapper<CopyDownloadFeature>()
     private val downloadsFeature = ViewBoundFeatureWrapper<DownloadsFeature>()
-    private val appLinksFeature = ViewBoundFeatureWrapper<AppLinksFeature>()
+    // Native prompt for Custom Tab sessions with no Flutter engine.
+    private val nativeAppLinkPromptFeature = ViewBoundFeatureWrapper<NativeAppLinkPromptFeature>()
     private val promptFeature = ViewBoundFeatureWrapper<PromptFeature>()
     private val webExtensionPromptFeature = ViewBoundFeatureWrapper<WebExtensionPromptFeature>()
     private val sitePermissionsFeature = ViewBoundFeatureWrapper<SitePermissionsFeature>()
@@ -362,42 +364,24 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 view = view,
             )
 
-            appLinksFeature.set(
-                feature = AppLinksFeature(
-                    context = profileContext,
-                    store = components.core.store,
-                    sessionId = sessionId,
-                    fragmentManager = parentFragmentManager,
-                    loadUrlUseCase = components.useCases.sessionUseCases.loadUrl,
-                    launchInApp = {
-                        GlobalComponents.shouldOpenLinksInApp(
-                            requireActivity() is ExternalAppBrowserActivity
-                        )
-                    },
-                    shouldPrompt = {
-                        GlobalComponents.shouldPromptOpenLinksInApp(
-                            requireActivity() is ExternalAppBrowserActivity
-                        )
-                    },
-                    alwaysOpenCheckboxAction = {
-                        GlobalComponents.engineSettingsApi?.setAppLinksMode(
-                            eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.ALWAYS
-                        )
-                    },
-                    failedToLaunchAction = { fallbackUrl ->
-                        fallbackUrl?.let {
-                            val appLinksUseCases = components.useCases.appLinksUseCases
-                            val getRedirect = appLinksUseCases.appLinkRedirect
-                            val redirect = getRedirect.invoke(fallbackUrl)
-                            redirect.appIntent?.flags =
-                                Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
-                            appLinksUseCases.openAppLink.invoke(redirect.appIntent)
-                        }
-                    },
-                ),
-                owner = this,
-                view = view,
-            )
+            // App-link prompting: browser tabs are prompted by Flutter's AppLinkPromptHost, so only
+            // native Custom Tab sessions (no Flutter engine) install a native prompt feature here.
+            val nativeTabId = sessionId
+            if (this is ExternalAppBrowserFragment && nativeTabId != null) {
+                nativeAppLinkPromptFeature.set(
+                    feature = NativeAppLinkPromptFeature(
+                        context = profileContext,
+                        tabId = nativeTabId,
+                        store = PendingAppLinkStores.forProfile(
+                            components.profileApplicationContext.relativePath,
+                        ),
+                        launcher = AppLinkRuntime.get(profileContext).launcher,
+                        sessionUseCases = components.useCases.sessionUseCases,
+                    ),
+                    owner = this,
+                    view = view,
+                )
+            }
 
             promptFeature.set(
                 feature = PromptFeature(

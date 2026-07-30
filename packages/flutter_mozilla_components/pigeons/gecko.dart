@@ -1557,12 +1557,6 @@ abstract class GeckoEngineSettingsApi {
   void setScreenshotProtectionEnabled(bool enabled);
   void setPullToRefreshEnabled(bool enabled);
 
-  /// Sets the app links mode preference (stored in SharedPreferences).
-  /// Controls how external app links are handled in the browser.
-  void setAppLinksMode(AppLinksMode mode);
-
-  AppLinksMode getAppLinksMode();
-
   /// Sets whether to use external download managers for downloads.
   /// When enabled, downloads are forwarded to third-party apps like ADM, 1DM, AB DM.
   void setUseExternalDownloadManager(bool enabled);
@@ -2800,31 +2794,239 @@ abstract class GeckoTrackingProtectionApi {
 // App Links API
 // =============================================================================
 
+/// Resolved external-app target for a URL (see APP_LINKS_OWN_IMPLEMENTATION_PLAN.md §2.8).
+class AppLinkTarget {
+  /// The URL that was resolved.
+  final String url;
+
+  /// User-facing app label (control/bidi-sanitised), or null when unknown.
+  final String? appName;
+
+  /// Resolved package name, or null when ambiguous / unknown.
+  final String? packageName;
+
+  /// Pre-validated http(s) fallback URL, or null.
+  final String? fallbackUrl;
+
+  /// True when the only offer is a marketplace (install-app) intent.
+  final bool isMarketplace;
+
+  /// True when resolution is ambiguous (chooser / multiple handlers / no default).
+  final bool isAmbiguous;
+
+  /// True when the Gecko engine can load the URL scheme itself.
+  final bool engineSupportsScheme;
+
+  /// Canonical native-owned rule scope key ("host:youtube.com" | "pkg:...").
+  final String scopeKey;
+
+  const AppLinkTarget({
+    required this.url,
+    this.appName,
+    this.packageName,
+    this.fallbackUrl,
+    required this.isMarketplace,
+    required this.isAmbiguous,
+    required this.engineSupportsScheme,
+    required this.scopeKey,
+  });
+}
+
+/// Target-side protection pattern replicated to native (§2.3/§2.8). Any target
+/// assigned to an effectively-proxied or strict container is protected
+/// independent of the source tab.
+class ProtectedTargetPattern {
+  final String scheme;
+  final String hostOrSuffix;
+  final bool includeSubdomains;
+
+  /// Effective port for exact entries; null for wildcard entries (ignore port).
+  final int? port;
+
+  const ProtectedTargetPattern({
+    required this.scheme,
+    required this.hostOrSuffix,
+    required this.includeSubdomains,
+    this.port,
+  });
+}
+
+enum NativeAppLinkRuleDecision { alwaysOpen, neverOpen }
+
+/// A remembered per-scope rule replicated to native (§2.8). Distinct from the
+/// Dart-persisted `PersistedAppLinkRule`; explicit mappers bridge the two.
+class NativeAppLinkRule {
+  final NativeAppLinkRuleDecision decision;
+  final String scope;
+  final String? packageName;
+
+  const NativeAppLinkRule({
+    required this.decision,
+    required this.scope,
+    this.packageName,
+  });
+}
+
+/// A container's self-contained app-link policy override (§ container isolation).
+/// Present only for containers with "isolated app link settings" enabled; when a
+/// navigation's source contextId has an entry here, it fully *replaces* the
+/// global mode + rules for that navigation (no layering with the global policy).
+class NativeContextAppLinkPolicy {
+  final AppLinksMode mode;
+
+  /// The container's own remembered rules keyed by canonical scope.
+  final Map<String, NativeAppLinkRule> rules;
+
+  const NativeContextAppLinkPolicy({required this.mode, required this.rules});
+}
+
+/// Complete, last-write-wins policy snapshot pushed from the single Dart writer
+/// to native (§2.8). Native persists it to the profile-scoped prefs record
+/// before swapping the in-memory reference.
+class AppLinkPolicySnapshot {
+  final AppLinksMode globalMode;
+
+  /// Remembered rules keyed by canonical scope.
+  final Map<String, NativeAppLinkRule> rules;
+
+  final bool marketplaceFallbackEnabled;
+
+  /// Regular / no-contextId tabs are proxied via the `general` scope.
+  final bool protectGeneralContext;
+
+  /// contextIds that resolve to a proxy after inherit/bypass/alias.
+  final List<String> protectedContextIds;
+
+  /// strictMode containers, independent of routing.
+  final List<String> strictContextIds;
+
+  final List<ProtectedTargetPattern> protectedTargetPatterns;
+
+  /// Per-container app-link policy overrides keyed by contextId. Only isolated
+  /// containers appear here; a navigation whose source contextId is a key uses
+  /// the entry's mode + rules in place of the global ones (replace semantics).
+  final Map<String, NativeContextAppLinkPolicy> contextOverrides;
+
+  const AppLinkPolicySnapshot({
+    required this.globalMode,
+    required this.rules,
+    required this.marketplaceFallbackEnabled,
+    required this.protectGeneralContext,
+    required this.protectedContextIds,
+    required this.strictContextIds,
+    required this.protectedTargetPatterns,
+    required this.contextOverrides,
+  });
+}
+
+/// Which surface owns a pending prompt (§2.6). Fixed at creation, never transfers.
+enum AppLinkPromptOwner { flutterBrowser, nativeExternal }
+
+/// A pending app-link prompt request held in the native `PendingAppLinkStore`
+/// until resolved, invalidated, or expired (§2.6/§2.8). Holds only stable
+/// identifiers and sanitised data — never engine/store references.
+class AppLinkPromptRequest {
+  /// Monotonic per-process id (Kotlin Long).
+  final int requestId;
+  final AppLinkPromptOwner owner;
+  final String tabId;
+  final String? contextId;
+  final String? sourceUrl;
+  final bool isPrivate;
+  final bool isWallet;
+  final bool isProtectedContext;
+  final bool canRemember;
+
+  /// false for the http(s) banner class (non-modal); true for the modal
+  /// unsupported-scheme prompt.
+  final bool isModal;
+  final AppLinkTarget target;
+
+  const AppLinkPromptRequest({
+    required this.requestId,
+    required this.owner,
+    required this.tabId,
+    this.contextId,
+    this.sourceUrl,
+    required this.isPrivate,
+    required this.isWallet,
+    required this.isProtectedContext,
+    required this.canRemember,
+    required this.isModal,
+    required this.target,
+  });
+}
+
+/// User decision on a pending prompt (§2.6).
+enum AppLinkDecision { open, cancel, dismiss }
+
+/// Result of resolving a pending prompt (§2.8).
+class AppLinkResolutionResult {
+  final bool launched;
+  final bool loadedFallback;
+
+  /// "stale" | "dead_session" | "launch_failed" | null.
+  final String? failureReason;
+
+  const AppLinkResolutionResult({
+    required this.launched,
+    required this.loadedFallback,
+    this.failureReason,
+  });
+}
+
 /// API for detecting and launching external applications that can handle URLs.
 ///
-/// This API wraps Mozilla Android Components' AppLinksUseCases to allow Flutter
-/// code to check if native apps can handle URLs and launch them directly.
+/// WebLibre-owned resolution/launch surface (replaces the Mozilla AC use-case
+/// wrappers). Policy lives in Dart; this surface owns PackageManager resolution
+/// and Intent launch.
 @HostApi()
 abstract class GeckoAppLinksApi {
-  /// Checks if an external application is available to handle the given URL.
-  ///
-  /// This method uses mozilla-components AppLinksUseCases to determine if
-  /// a native app can handle the URL (e.g., YouTube app for youtube.com links).
-  ///
-  /// Returns true if an external app is available, false otherwise.
+  /// Push the complete policy snapshot to native (last-write-wins). Native
+  /// persists it durably to the active profile's prefs record before acking.
   @async
-  bool hasExternalApp(String url);
+  void setAppLinkPolicy(AppLinkPolicySnapshot snapshot);
 
-  /// Opens the URL in an external application if available.
-  ///
-  /// This method will:
-  /// 1. Check if an external app can handle the URL
-  /// 2. If available, launch the app directly with Intent.FLAG_ACTIVITY_NEW_TASK
-  /// 3. Return true if successfully launched, false otherwise
-  ///
-  /// Returns true if URL was opened in external app, false if no app available.
+  /// Non-consuming query of pending prompts for [owner] (§2.6). Surfaces call
+  /// this on attach/resume/rotation and when the availability event fires, and
+  /// render idempotently by requestId.
   @async
-  bool openAppLink(String url);
+  List<AppLinkPromptRequest> getPendingAppLinkPrompts(AppLinkPromptOwner owner);
+
+  /// Atomically resolve a pending prompt: validate it still exists and its tab
+  /// is alive, consume it (double-resolve is a no-op), then perform side effects
+  /// after releasing the store lock (§2.6).
+  @async
+  AppLinkResolutionResult resolvePendingAppLink(int requestId, AppLinkDecision decision);
+
+  /// Resolve [url] to an external-app target.
+  ///
+  /// Returns null when no external app is available, on any resolution error, or
+  /// for always-denied schemes — callers cannot distinguish "nothing installed"
+  /// from "resolution failed", matching the previous `hasExternalApp` contract.
+  ///
+  /// [includeHttpAppLinks] when true, an app resolving an engine-supported
+  /// (http(s)) URL is surfaced (e.g. the YouTube app for a youtube.com link).
+  @async
+  AppLinkTarget? resolveAppLink(String url, bool includeHttpAppLinks);
+
+  /// Re-resolve [url] and launch it in an external app.
+  ///
+  /// Re-resolves internally immediately before launch and returns false on
+  /// no-app or ActivityNotFoundException/SecurityException; never throws across
+  /// the channel for expected conditions.
+  @async
+  bool launchAppLink(String url);
+}
+
+/// Optimisation-only availability signal for pending app-link prompts (§2.8).
+///
+/// A Pigeon `@FlutterApi()` callback has no buffering or replay: an event
+/// emitted while Flutter is detached is lost. The `PendingAppLinkStore` is the
+/// source of truth; surfaces query on attach/resume and dedupe by requestId.
+@FlutterApi()
+abstract class GeckoAppLinkEvents {
+  void onAppLinkPromptAvailable(int sequence, AppLinkPromptOwner owner);
 }
 
 // =============================================================================

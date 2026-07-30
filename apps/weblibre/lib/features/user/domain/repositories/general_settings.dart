@@ -272,6 +272,18 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         DriftSqlType.bool,
         db.typeMapping,
       ),
+      'appLinksMode': settings['appLinksMode']?.readAs(
+        DriftSqlType.string,
+        db.typeMapping,
+      ),
+      'appLinkRules': settings['appLinkRules']
+          ?.readAs(DriftSqlType.string, db.typeMapping)
+          .mapNotNull(jsonDecode),
+      'appLinkContextOverrides': settings['appLinkContextOverrides']
+          ?.readAs(DriftSqlType.string, db.typeMapping)
+          .mapNotNull(jsonDecode),
+      'appLinkMarketplaceFallback': settings['appLinkMarketplaceFallback']
+          ?.readAs(DriftSqlType.bool, db.typeMapping),
       'enableLocalSearchIndex': settings['enableLocalSearchIndex']?.readAs(
         DriftSqlType.bool,
         db.typeMapping,

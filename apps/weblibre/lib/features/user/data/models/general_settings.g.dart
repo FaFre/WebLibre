@@ -143,6 +143,16 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings customTabsEnabled(bool customTabsEnabled);
 
+  GeneralSettings appLinksMode(AppLinksMode appLinksMode);
+
+  GeneralSettings appLinkRules(Map<String, PersistedAppLinkRule> appLinkRules);
+
+  GeneralSettings appLinkContextOverrides(
+    Map<String, ContextAppLinkPolicy> appLinkContextOverrides,
+  );
+
+  GeneralSettings appLinkMarketplaceFallback(bool appLinkMarketplaceFallback);
+
   GeneralSettings enableLocalSearchIndex(bool enableLocalSearchIndex);
 
   GeneralSettings indexPrivateTabs(bool indexPrivateTabs);
@@ -223,6 +233,10 @@ abstract class _$GeneralSettingsCWProxy {
     bool blockExternalAppsEnabled,
     Map<String, IntentSourcePolicy> externalAppIntentPolicies,
     bool customTabsEnabled,
+    AppLinksMode appLinksMode,
+    Map<String, PersistedAppLinkRule> appLinkRules,
+    Map<String, ContextAppLinkPolicy> appLinkContextOverrides,
+    bool appLinkMarketplaceFallback,
     bool enableLocalSearchIndex,
     bool indexPrivateTabs,
     bool acceptSuggestionOnSubmit,
@@ -491,6 +505,24 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(customTabsEnabled: customTabsEnabled);
 
   @override
+  GeneralSettings appLinksMode(AppLinksMode appLinksMode) =>
+      call(appLinksMode: appLinksMode);
+
+  @override
+  GeneralSettings appLinkRules(
+    Map<String, PersistedAppLinkRule> appLinkRules,
+  ) => call(appLinkRules: appLinkRules);
+
+  @override
+  GeneralSettings appLinkContextOverrides(
+    Map<String, ContextAppLinkPolicy> appLinkContextOverrides,
+  ) => call(appLinkContextOverrides: appLinkContextOverrides);
+
+  @override
+  GeneralSettings appLinkMarketplaceFallback(bool appLinkMarketplaceFallback) =>
+      call(appLinkMarketplaceFallback: appLinkMarketplaceFallback);
+
+  @override
   GeneralSettings enableLocalSearchIndex(bool enableLocalSearchIndex) =>
       call(enableLocalSearchIndex: enableLocalSearchIndex);
 
@@ -586,6 +618,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? blockExternalAppsEnabled = const $CopyWithPlaceholder(),
     Object? externalAppIntentPolicies = const $CopyWithPlaceholder(),
     Object? customTabsEnabled = const $CopyWithPlaceholder(),
+    Object? appLinksMode = const $CopyWithPlaceholder(),
+    Object? appLinkRules = const $CopyWithPlaceholder(),
+    Object? appLinkContextOverrides = const $CopyWithPlaceholder(),
+    Object? appLinkMarketplaceFallback = const $CopyWithPlaceholder(),
     Object? enableLocalSearchIndex = const $CopyWithPlaceholder(),
     Object? indexPrivateTabs = const $CopyWithPlaceholder(),
     Object? acceptSuggestionOnSubmit = const $CopyWithPlaceholder(),
@@ -938,6 +974,28 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.customTabsEnabled
           // ignore: cast_nullable_to_non_nullable
           : customTabsEnabled as bool,
+      appLinksMode:
+          appLinksMode == const $CopyWithPlaceholder() || appLinksMode == null
+          ? _value.appLinksMode
+          // ignore: cast_nullable_to_non_nullable
+          : appLinksMode as AppLinksMode,
+      appLinkRules:
+          appLinkRules == const $CopyWithPlaceholder() || appLinkRules == null
+          ? _value.appLinkRules
+          // ignore: cast_nullable_to_non_nullable
+          : appLinkRules as Map<String, PersistedAppLinkRule>,
+      appLinkContextOverrides:
+          appLinkContextOverrides == const $CopyWithPlaceholder() ||
+              appLinkContextOverrides == null
+          ? _value.appLinkContextOverrides
+          // ignore: cast_nullable_to_non_nullable
+          : appLinkContextOverrides as Map<String, ContextAppLinkPolicy>,
+      appLinkMarketplaceFallback:
+          appLinkMarketplaceFallback == const $CopyWithPlaceholder() ||
+              appLinkMarketplaceFallback == null
+          ? _value.appLinkMarketplaceFallback
+          // ignore: cast_nullable_to_non_nullable
+          : appLinkMarketplaceFallback as bool,
       enableLocalSearchIndex:
           enableLocalSearchIndex == const $CopyWithPlaceholder() ||
               enableLocalSearchIndex == null
@@ -1110,6 +1168,17 @@ GeneralSettings _$GeneralSettingsFromJson(
         (k, e) => MapEntry(k, $enumDecode(_$IntentSourcePolicyEnumMap, e)),
       ),
   customTabsEnabled: json['customTabsEnabled'] as bool?,
+  appLinksMode: $enumDecodeNullable(
+    _$AppLinksModeEnumMap,
+    json['appLinksMode'],
+  ),
+  appLinkRules: parseAppLinkRules(
+    json['appLinkRules'] as Map<String, dynamic>?,
+  ),
+  appLinkContextOverrides: parseAppLinkContextOverrides(
+    json['appLinkContextOverrides'] as Map<String, dynamic>?,
+  ),
+  appLinkMarketplaceFallback: json['appLinkMarketplaceFallback'] as bool?,
   enableLocalSearchIndex: json['enableLocalSearchIndex'] as bool?,
   indexPrivateTabs: json['indexPrivateTabs'] as bool?,
   acceptSuggestionOnSubmit: json['acceptSuggestionOnSubmit'] as bool?,
@@ -1196,6 +1265,12 @@ Map<String, dynamic> _$GeneralSettingsToJson(
     (k, e) => MapEntry(k, _$IntentSourcePolicyEnumMap[e]!),
   ),
   'customTabsEnabled': instance.customTabsEnabled,
+  'appLinksMode': _$AppLinksModeEnumMap[instance.appLinksMode]!,
+  'appLinkRules': instance.appLinkRules.map((k, e) => MapEntry(k, e.toJson())),
+  'appLinkContextOverrides': instance.appLinkContextOverrides.map(
+    (k, e) => MapEntry(k, e.toJson()),
+  ),
+  'appLinkMarketplaceFallback': instance.appLinkMarketplaceFallback,
   'enableLocalSearchIndex': instance.enableLocalSearchIndex,
   'indexPrivateTabs': instance.indexPrivateTabs,
   'acceptSuggestionOnSubmit': instance.acceptSuggestionOnSubmit,
@@ -1282,4 +1357,10 @@ const _$TabBarStackingModeEnumMap = {
 const _$IntentSourcePolicyEnumMap = {
   IntentSourcePolicy.allow: 'allow',
   IntentSourcePolicy.block: 'block',
+};
+
+const _$AppLinksModeEnumMap = {
+  AppLinksMode.always: 'always',
+  AppLinksMode.ask: 'ask',
+  AppLinksMode.never: 'never',
 };

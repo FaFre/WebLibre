@@ -114,7 +114,6 @@ dependencies {
     implementation "org.mozilla.components:browser-icons:$mozillaComponentsVersion"
     implementation "org.mozilla.components:browser-thumbnails:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-addons:$mozillaComponentsVersion"
-    implementation "org.mozilla.components:feature-app-links:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-accounts:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-accounts-push:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-awesomebar:$mozillaComponentsVersion"

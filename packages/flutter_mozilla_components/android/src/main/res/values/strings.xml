@@ -30,4 +30,12 @@
     <string name="private_tabs_notification_title_android_14">Close private tabs?</string>
     <string name="private_tabs_notification_text_android_14">Tap or swipe this notification to close private tabs.</string>
 
+    <!-- App-link prompt shown in native Custom Tab sessions (no Flutter engine). -->
+    <!-- %1$s is the target app name. -->
+    <string name="weblibre_app_link_prompt_title_named">Open in %1$s?</string>
+    <string name="weblibre_app_link_prompt_title_generic">Open in another app?</string>
+    <string name="weblibre_app_link_prompt_message">This link is handled by an app outside WebLibre.</string>
+    <string name="weblibre_app_link_prompt_open">Open</string>
+    <string name="weblibre_app_link_prompt_cancel">Cancel</string>
+
 </resources>

@@ -16,6 +16,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMo
 import eu.weblibre.flutter_mozilla_components.pigeons.ContentBlocking
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettings
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAppLinkEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoGestureEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoHistoryEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPushEvents
@@ -150,6 +151,11 @@ object GlobalComponents {
     // path), in which case failures are logged natively only.
     var pushEvents: GeckoPushEvents? = null
 
+    // Native -> Dart availability signal for pending app-link prompts. Optimisation
+    // only (no buffering/replay): null when Flutter is detached, in which case the
+    // Flutter surface picks the prompt up on its next getPendingAppLinkPrompts query.
+    var appLinkEvents: GeckoAppLinkEvents? = null
+
     // Gecko contextIds of containers with hard exclude-from-history enabled.
     // Pushed from Dart; read by WebLibreHistoryDelegate to skip the Places
     // write for visits resolved to one of these containers.
@@ -248,22 +254,6 @@ object GlobalComponents {
         privateTabsNotificationFeature = null
 
         context?.stopService(Intent(context, PrivateTabsNotificationService::class.java))
-    }
-
-    fun shouldOpenLinksInApp(isExternalSession: Boolean = false): Boolean {
-        return when (engineSettingsApi!!.getAppLinksMode()) {
-            eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.ALWAYS -> true
-            eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.ASK -> true
-            eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.NEVER -> isExternalSession
-        }
-    }
-
-    fun shouldPromptOpenLinksInApp(isExternalSession: Boolean = false): Boolean {
-        return when (engineSettingsApi!!.getAppLinksMode()) {
-            eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.ALWAYS -> false
-            eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.ASK -> true
-            eu.weblibre.flutter_mozilla_components.pigeons.AppLinksMode.NEVER -> isExternalSession
-        }
     }
 
     @DelicateCoroutinesApi

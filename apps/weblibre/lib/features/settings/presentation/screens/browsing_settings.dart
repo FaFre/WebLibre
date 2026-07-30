@@ -23,7 +23,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
@@ -709,7 +709,15 @@ class _AppLinksModeSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLinksMode = ref.watch(
-      appLinksModeProvider.select((value) => value.value),
+      generalSettingsWithDefaultsProvider.select((s) => s.appLinksMode),
+    );
+    final marketplaceFallback = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.appLinkMarketplaceFallback,
+      ),
+    );
+    final rules = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.appLinkRules),
     );
 
     return Padding(
@@ -730,7 +738,9 @@ class _AppLinksModeSection extends HookConsumerWidget {
             groupValue: appLinksMode,
             onChanged: (value) async {
               if (value != null) {
-                await ref.read(appLinksModeProvider.notifier).setMode(value);
+                await ref
+                    .read(saveGeneralSettingsControllerProvider.notifier)
+                    .save((current) => current.copyWith.appLinksMode(value));
               }
             },
             child: const Column(
@@ -757,8 +767,92 @@ class _AppLinksModeSection extends HookConsumerWidget {
               ],
             ),
           ),
+          SwitchListTile.adaptive(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Offer app store fallback'),
+            subtitle: const Text(
+              "When a link points to an app you don't have installed and there "
+              'is no web fallback, offer to open the app store',
+            ),
+            value: marketplaceFallback,
+            onChanged: appLinksMode == AppLinksMode.never
+                ? null
+                : (value) async {
+                    await ref
+                        .read(saveGeneralSettingsControllerProvider.notifier)
+                        .save(
+                          (current) =>
+                              current.copyWith.appLinkMarketplaceFallback(value),
+                        );
+                  },
+          ),
+          _AppLinkRulesSubsection(rules: rules),
         ],
       ),
+    );
+  }
+}
+
+/// Managed per-site app-link rules (§2.5): "always open" and "never open"
+/// decisions the user remembered from a prompt. Read-only list with removal.
+class _AppLinkRulesSubsection extends ConsumerWidget {
+  final Map<String, PersistedAppLinkRule> rules;
+
+  const _AppLinkRulesSubsection({required this.rules});
+
+  String _displayScope(String scope) {
+    if (scope.startsWith('host:')) return scope.substring('host:'.length);
+    if (scope.startsWith('pkg:')) return scope.substring('pkg:'.length);
+    return scope;
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (rules.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final entries = rules.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(top: 16, bottom: 4),
+          child: Text('Remembered site rules'),
+        ),
+        for (final MapEntry(:key, :value) in entries)
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            dense: true,
+            leading: Icon(
+              value.decision == AppLinkRuleDecision.alwaysOpen
+                  ? MdiIcons.openInApp
+                  : Icons.public,
+            ),
+            title: Text(_displayScope(key)),
+            subtitle: Text(
+              value.decision == AppLinkRuleDecision.alwaysOpen
+                  ? 'Always open in the app'
+                  : 'Always keep in the browser',
+            ),
+            trailing: IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: 'Remove rule',
+              onPressed: () async {
+                await ref
+                    .read(saveGeneralSettingsControllerProvider.notifier)
+                    .save(
+                      (current) => current.copyWith.appLinkRules({
+                        ...current.appLinkRules,
+                      }..remove(key)),
+                    );
+              },
+            ),
+          ),
+      ],
     );
   }
 }

@@ -9,7 +9,6 @@ import android.content.Intent
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri
 import androidx.preference.PreferenceManager
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.R
 import eu.weblibre.flutter_mozilla_components.activities.AuthIntentReceiverActivity
 import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
@@ -18,7 +17,6 @@ import mozilla.components.concept.engine.Engine
 import mozilla.components.feature.accounts.FirefoxAccountsAuthFeature
 import mozilla.components.feature.accounts.FxaCapability
 import mozilla.components.feature.accounts.FxaWebChannelFeature
-import mozilla.components.feature.app.links.AppLinksInterceptor
 import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.service.fxa.ServerConfig
 import mozilla.components.service.fxa.manager.FxaAccountManager
@@ -66,11 +64,4 @@ class Services(
         )
     }
 
-    val appLinksInterceptor by lazy {
-        AppLinksInterceptor(
-            context = context,
-            launchInApp = { GlobalComponents.shouldOpenLinksInApp() },
-            store = store,
-        )
-    }
 }

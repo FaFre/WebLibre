@@ -47,6 +47,9 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     GeckoPushApi.setUp(binding.binaryMessenger, null)
     browserApi.disposePushApi()
     GlobalComponents.historyEvents = null
+    // The availability event is optimisation-only; once Flutter detaches, the surface
+    // re-queries pending prompts on its next attach/resume, so dropping the sink is safe.
+    GlobalComponents.appLinkEvents = null
     // The UnifiedPush receiver outlives the Flutter engine; without this it would keep dispatching
     // onto a dead messenger. Failures are still retained on Push.lastError.
     GlobalComponents.pushEvents = null

@@ -24,7 +24,8 @@ import eu.weblibre.flutter_mozilla_components.services.MediaSessionService
 import eu.weblibre.flutter_mozilla_components.activities.NotificationActivity
 import eu.weblibre.flutter_mozilla_components.R
 import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
-import eu.weblibre.flutter_mozilla_components.middleware.AppLinksCancelRetryMiddleware
+import eu.weblibre.flutter_mozilla_components.applinks.PendingAppLinkStores
+import eu.weblibre.flutter_mozilla_components.middleware.AppLinkNavigationMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.FlutterEventMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataService
@@ -238,7 +239,12 @@ class Core(
                 // Must run before any engine middleware so we can rewrite
                 // sandbox new-tab URLs before Gecko issues a request.
                 SandboxCaptureMiddleware,
-                AppLinksCancelRetryMiddleware(),
+                // WebLibre-owned app-link pending-request invalidation + suppression clearing.
+                AppLinkNavigationMiddleware(
+                    PendingAppLinkStores.forProfile(
+                        components.profileApplicationContext.relativePath,
+                    ),
+                ),
                 HistoryMetadataMiddleware(historyMetadataService),
                 // Correlates url -> contextId so WebLibreHistoryDelegate can
                 // resolve a visit's container at record time.

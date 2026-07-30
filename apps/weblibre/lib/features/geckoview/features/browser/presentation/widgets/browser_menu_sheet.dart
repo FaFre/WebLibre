@@ -1575,22 +1575,25 @@ class _OpenInAppTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tabState = ref.watch(tabStateProvider(selectedTabId));
     final url = tabState?.url;
-    final hasExternalApp = useCachedFuture(
-      () => url != null ? _service.hasExternalApp(url) : Future.value(false),
+    final appLink = useCachedFuture(
+      () => url != null ? _service.resolveAppLink(url) : Future.value(null),
       [url],
     );
 
-    if (hasExternalApp.data != true) return const SizedBox.shrink();
+    final target = appLink.data;
+    if (target == null) return const SizedBox.shrink();
+
+    final appName = target.appName;
 
     return Column(
       children: [
         _buildDivider(),
         ListTile(
           leading: const Icon(Icons.open_in_new),
-          title: const Text('Open in App'),
+          title: Text(appName != null ? 'Open in $appName' : 'Open in App'),
           onTap: () async {
             if (url == null) return;
-            final success = await _service.openAppLink(url);
+            final success = await _service.launchAppLink(url);
             if (success && context.mounted) Navigator.pop(context);
           },
         ),

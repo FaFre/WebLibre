@@ -226,7 +226,7 @@ final class PushDistributorMutationProvider
 }
 
 String _$pushDistributorMutationHash() =>
-    r'5797ca731c90c1e06e089fb71ad602aecda59634';
+    r'58e489179c2e1fdaf6d8a6bd3b758ec16641358c';
 
 abstract class _$PushDistributorMutation extends $AsyncNotifier<void> {
   FutureOr<void> build();

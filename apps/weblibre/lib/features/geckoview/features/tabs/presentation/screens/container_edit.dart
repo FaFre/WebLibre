@@ -26,6 +26,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/uuid.dart';
+import 'package:weblibre/features/app_links/presentation/widgets/container_app_link_settings_dialog.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/container_history.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
@@ -40,8 +41,31 @@ import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 enum _DialogMode { create, edit }
+
+/// Remove any per-container app-link overrides (§ container isolation) stored for
+/// [contextIds] in GeneralSettings. Null ids are ignored; a no-op when none are
+/// present. Keeps overrides from lingering after a container drops isolation or
+/// is deleted.
+Future<void> _removeAppLinkOverrides(
+  WidgetRef ref,
+  Set<String?> contextIds,
+) async {
+  final ids = contextIds.nonNulls.toSet();
+  if (ids.isEmpty) return;
+
+  await ref.read(generalSettingsRepositoryProvider.notifier).updateSettings((
+    current,
+  ) {
+    if (!ids.any(current.appLinkContextOverrides.containsKey)) return current;
+    return current.copyWith.appLinkContextOverrides(
+      {...current.appLinkContextOverrides}..removeWhere((key, _) => ids.contains(key)),
+    );
+  });
+}
 
 class ContainerEditScreen extends HookConsumerWidget {
   final _DialogMode _mode;
@@ -109,6 +133,9 @@ class ContainerEditScreen extends HookConsumerWidget {
     );
     final assignedSites = useState(initialContainer.metadata.assignedSites);
     final strictMode = useState(initialContainer.metadata.strictMode);
+    final isolatedAppLinkSettings = useState(
+      initialContainer.metadata.isolatedAppLinkSettings,
+    );
     final isPinned = useState(initialContainer.isPinned);
 
     final textController = useTextEditingController(
@@ -147,6 +174,12 @@ class ContainerEditScreen extends HookConsumerWidget {
               // strictness on the tab's cookieStoreId). sanitized() enforces the
               // same invariant defensively on write.
               strictMode: strictMode.value && contextualIdentity.value != null,
+              // Isolated app-link settings require a Gecko contextId (the
+              // interceptor keys the override on the tab's contextId).
+              // sanitized() enforces the same invariant defensively on write.
+              isolatedAppLinkSettings:
+                  isolatedAppLinkSettings.value &&
+                  contextualIdentity.value != null,
             )
             .sanitized(),
       );
@@ -166,6 +199,15 @@ class ContainerEditScreen extends HookConsumerWidget {
           container.id,
           isPinned: isPinned.value,
         );
+      }
+      // Keep the per-container app-link override in step with the isolation
+      // toggle: drop it when the container is no longer isolated (or lost its
+      // contextId) so it can't linger orphaned in GeneralSettings.
+      if (!container.metadata.isolatedAppLinkSettings) {
+        await _removeAppLinkOverrides(ref, {
+          initialContainer.metadata.contextualIdentity,
+          container.metadata.contextualIdentity,
+        });
       }
       return container;
     }
@@ -263,6 +305,11 @@ class ContainerEditScreen extends HookConsumerWidget {
         await ref
             .read(containerRepositoryProvider.notifier)
             .deleteContainer(initialContainer.id);
+
+        // Drop the container's app-link override so it doesn't outlive it.
+        await _removeAppLinkOverrides(ref, {
+          initialContainer.metadata.contextualIdentity,
+        });
 
         if (context.mounted) {
           context.pop();
@@ -651,6 +698,79 @@ class ContainerEditScreen extends HookConsumerWidget {
                                 }
                               : null,
                         ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'App Links',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Card.filled(
+                    margin: EdgeInsets.zero,
+                    color: colorScheme.surfaceContainer,
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      children: [
+                        SwitchListTile.adaptive(
+                          value:
+                              contextualIdentity.value != null &&
+                              isolatedAppLinkSettings.value,
+                          title: const Text('Isolated App Link Settings'),
+                          subtitle: Text(
+                            contextualIdentity.value != null
+                                ? 'Use a separate open-in-app mode and remembered '
+                                      'site rules for this container instead of the '
+                                      'global settings'
+                                : 'Requires cookie isolation to be enabled',
+                          ),
+                          secondary: const Icon(MdiIcons.openInApp),
+                          onChanged: (contextualIdentity.value != null)
+                              ? (value) {
+                                  isolatedAppLinkSettings.value = value;
+                                }
+                              : null,
+                        ),
+                        // The per-container mode + rules live in GeneralSettings
+                        // (keyed by the persisted contextId) and are edited live,
+                        // like the global app-link settings. Only offered in edit
+                        // mode against the saved, immutable contextId — a create
+                        // draft's contextId can still churn (cookie-isolation
+                        // toggling regenerates it), which would orphan overrides.
+                        if (_mode == _DialogMode.edit &&
+                            initialContainer.metadata.contextualIdentity !=
+                                null &&
+                            isolatedAppLinkSettings.value) ...[
+                          const Divider(height: 1, indent: 56),
+                          ListTile(
+                            leading: const Icon(Icons.tune),
+                            title: const Text('App Link Behavior'),
+                            subtitle: const Text(
+                              "Configure this container's open-in-app mode and "
+                              'remembered sites',
+                            ),
+                            trailing: const Icon(Icons.chevron_right),
+                            onTap: () async {
+                              await showDialog<void>(
+                                context: context,
+                                builder: (context) =>
+                                    ContainerAppLinkSettingsDialog(
+                                      contextId: initialContainer
+                                          .metadata
+                                          .contextualIdentity!,
+                                      containerName:
+                                          textController.text.trim().isNotEmpty
+                                          ? textController.text.trim()
+                                          : initialContainer.name,
+                                    ),
+                              );
+                            },
+                          ),
+                        ],
                       ],
                     ),
                   ),

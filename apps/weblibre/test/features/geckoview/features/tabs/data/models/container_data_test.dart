@@ -35,6 +35,44 @@ void main() {
     });
   });
 
+  group('ContainerMetadata isolatedAppLinkSettings invariant', () {
+    test('stays enabled when the container has a contextId', () {
+      final metadata = ContainerMetadata.withDefaults(
+        contextualIdentity: 'work',
+        isolatedAppLinkSettings: true,
+      );
+
+      expect(metadata.isolatedAppLinkSettings, isTrue);
+      expect(metadata.sanitized().isolatedAppLinkSettings, isTrue);
+    });
+
+    test('is normalized off without a contextId (read + sanitized)', () {
+      final metadata = ContainerMetadata.withDefaults(
+        contextualIdentity: null,
+        isolatedAppLinkSettings: true,
+      );
+
+      // withDefaults normalizes on construction/read.
+      expect(metadata.isolatedAppLinkSettings, isFalse);
+
+      // A record that somehow carries the bad combination is re-normalized.
+      final restored = ContainerMetadata.fromJson({
+        ...metadata.toJson(),
+        'isolatedAppLinkSettings': true,
+        'contextualIdentity': null,
+      });
+      expect(restored.isolatedAppLinkSettings, isFalse);
+      expect(restored.sanitized().isolatedAppLinkSettings, isFalse);
+    });
+
+    test('defaults to false', () {
+      expect(
+        ContainerMetadata.withDefaults().isolatedAppLinkSettings,
+        isFalse,
+      );
+    });
+  });
+
   group('ContainerMetadata icon serialization', () {
     test('stores MDI icon names', () {
       final metadata = ContainerMetadata.withDefaults(
