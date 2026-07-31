@@ -21,7 +21,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:fading_scroll/fading_scroll.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -134,59 +133,51 @@ class _BrowserMenuSheet extends HookConsumerWidget {
 
             // Scrollable content
             Expanded(
-              child: FadingScroll(
+              child: ListView(
                 controller: scrollController,
-                fadingSize: 25,
-                builder: (context, controller) {
-                  return ListView(
-                    controller: controller,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    children: [
-                      // Quick toggles (Desktop / Reader / Gestures)
-                      if (selectedTabId != null) ...[
-                        _QuickTogglesGrid(selectedTabId: selectedTabId),
-                        const SizedBox(height: 16),
-                      ],
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                children: [
+                  // Quick toggles (Desktop / Reader / Gestures)
+                  if (selectedTabId != null) ...[
+                    _QuickTogglesGrid(selectedTabId: selectedTabId),
+                    const SizedBox(height: 16),
+                  ],
 
-                      // Page actions
-                      if (selectedTabId != null) ...[
-                        _PageActionsCard(selectedTabId: selectedTabId),
-                        const SizedBox(height: 16),
-                      ],
+                  // Page actions
+                  if (selectedTabId != null) ...[
+                    _PageActionsCard(selectedTabId: selectedTabId),
+                    const SizedBox(height: 16),
+                  ],
 
-                      // Extensions
-                      _ExtensionsCard(),
-                      const SizedBox(height: 16),
+                  // Extensions
+                  _ExtensionsCard(),
+                  const SizedBox(height: 16),
 
-                      // Tab actions
-                      if (selectedTabId != null) ...[
-                        _TabActionsCard(selectedTabId: selectedTabId),
-                        const SizedBox(height: 16),
-                      ],
+                  // Tab actions
+                  if (selectedTabId != null) ...[
+                    _TabActionsCard(selectedTabId: selectedTabId),
+                    const SizedBox(height: 16),
+                  ],
 
-                      // Quick links grid
-                      _QuickLinksGrid(
-                        showContainerUi: settings.showContainerUi,
-                      ),
-                      const SizedBox(height: 16),
+                  // Quick links grid
+                  _QuickLinksGrid(showContainerUi: settings.showContainerUi),
+                  const SizedBox(height: 16),
 
-                      // Connection (Tor + proxy profiles)
-                      const _ConnectionCard(),
-                      const SizedBox(height: 16),
+                  // Connection (Tor + proxy profiles)
+                  const _ConnectionCard(),
+                  const SizedBox(height: 16),
 
-                      // Profile
-                      _ProfileCard(),
-                      const SizedBox(height: 16),
+                  // Profile
+                  _ProfileCard(),
+                  const SizedBox(height: 16),
 
-                      // App
-                      const _SettingsCard(),
-                      const SizedBox(height: 24),
-                    ],
-                  );
-                },
+                  // App
+                  const _SettingsCard(),
+                  const SizedBox(height: 24),
+                ],
               ),
             ),
 

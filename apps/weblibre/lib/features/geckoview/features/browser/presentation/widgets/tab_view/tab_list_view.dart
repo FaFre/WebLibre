@@ -20,7 +20,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:fading_scroll/fading_scroll.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -366,139 +365,133 @@ class _TabListView extends HookConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: FadingScroll(
-        fadingSize: 5,
-        controller: scrollController,
-        builder: (context, controller) {
-          return !reorderEnabled
-              ? ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 56),
-                  controller: scrollController,
-                  itemCount: displayItemCount,
-                  itemExtent: _itemHeight,
-                  itemBuilder: (context, index) {
-                    if (index < primaryRows.length) {
-                      final row = primaryRows[index];
-                      final tab = CustomDraggable(
-                        key: Key(row.tabId),
-                        data: TabDragData(row.tabId),
-                        child: _TabDraggable(
-                          tabId: row.tabId,
-                          onClose: onClose,
-                          sourceSearchQuery: row.sourceSearchQuery,
-                          height: _itemHeight,
-                          groupToggle: _listGroupToggleFor(row),
-                          depth: _depthFor(row),
-                        ),
-                      );
+      child: !reorderEnabled
+          ? ListView.builder(
+              padding: const EdgeInsets.only(bottom: 56),
+              controller: scrollController,
+              itemCount: displayItemCount,
+              itemExtent: _itemHeight,
+              itemBuilder: (context, index) {
+                if (index < primaryRows.length) {
+                  final row = primaryRows[index];
+                  final tab = CustomDraggable(
+                    key: Key(row.tabId),
+                    data: TabDragData(row.tabId),
+                    child: _TabDraggable(
+                      tabId: row.tabId,
+                      onClose: onClose,
+                      sourceSearchQuery: row.sourceSearchQuery,
+                      height: _itemHeight,
+                      groupToggle: _listGroupToggleFor(row),
+                      depth: _depthFor(row),
+                    ),
+                  );
 
-                      return TabDropTarget(
-                        targetTabId: row.tabId,
-                        child: TabContextMenuDraggable(
-                          tabId: row.tabId,
-                          data: tab.data! as TabDragData,
-                          feedbackSize: Size(
-                            MediaQuery.of(context).size.width,
-                            _itemHeight,
-                          ),
-                          child: tab.child,
-                        ),
-                      );
-                    }
-
-                    final suggestedIndex = index - primaryRows.length;
-                    final entity = suggestedTabEntities.value[suggestedIndex];
-                    final tab = CustomDraggable(
-                      key: Key('suggested_${entity.tabId}'),
-                      child: _TabDraggable(
-                        tabId: entity.tabId,
-                        onClose: onClose,
-                        suggestedContainerId: containerId,
-                        height: _itemHeight,
+                  return TabDropTarget(
+                    targetTabId: row.tabId,
+                    child: TabContextMenuDraggable(
+                      tabId: row.tabId,
+                      data: tab.data! as TabDragData,
+                      feedbackSize: Size(
+                        MediaQuery.of(context).size.width,
+                        _itemHeight,
                       ),
-                    );
-                    return TabDropTarget(
-                      targetTabId: entity.tabId,
-                      enabled: false,
                       child: tab.child,
-                    );
-                  },
-                )
-              : ReorderableListView.builder(
-                  scrollController: controller,
-                  padding: const EdgeInsets.only(bottom: 56),
-                  itemCount: displayItemCount,
-                  itemExtent: _itemHeight,
-                  onReorderStart: (index) {
-                    ref.read(willAcceptDropProvider.notifier).clear();
-                  },
-                  onReorderItem: (oldIndex, newIndex) async {
-                    //Suggestions are at the end and not reorderable, so skip
-                    if (oldIndex >= primaryRows.length) {
-                      return;
-                    }
+                    ),
+                  );
+                }
 
-                    final result = buildTabViewReorderResult(
-                      visibleItems: primaryRows,
-                      treeRows: treeRows,
-                      collapsedGroups: collapsedGroups,
-                      pinnedTabIds: pinnedTabIds,
-                      oldIndex: oldIndex,
-                      newIndex: newIndex,
-                      tabListDirection: tabListDirection,
-                      hierarchical: showHierarchicalTabs && !hasActiveSearch,
-                      sortPinnedFirst: filterOptions.sortPinnedFirst,
-                    );
-
-                    if (result == null) return;
-
-                    await ref
-                        .read(tabDataRepositoryProvider.notifier)
-                        .reorderTabs(
-                          movingTabIds: result.movingTabIds,
-                          previousTabId: result.previousTabId,
-                          nextTabId: result.nextTabId,
-                          parentChange: result.parentChange,
-                        );
-                  },
-                  itemBuilder: (context, index) {
-                    if (index < primaryRows.length) {
-                      final row = primaryRows[index];
-                      return CustomDraggable(
-                        key: Key(row.tabId),
-                        data: TabDragData(row.tabId),
-                        child: TabContextMenuDraggable(
-                          tabId: row.tabId,
-                          feedbackSize: Size.zero,
-                          externalDrag: true,
-                          child: _TabDraggable(
-                            tabId: row.tabId,
-                            onClose: onClose,
-                            sourceSearchQuery: row.sourceSearchQuery,
-                            height: _itemHeight,
-                            groupToggle: _listGroupToggleFor(row),
-                            depth: _depthFor(row),
-                          ),
-                        ),
-                      );
-                    } else {
-                      final suggestedIndex = index - primaryRows.length;
-                      final entity = suggestedTabEntities.value[suggestedIndex];
-
-                      return CustomDraggable(
-                        key: Key('suggested_${entity.tabId}'),
-                        child: _TabDraggable(
-                          tabId: entity.tabId,
-                          onClose: onClose,
-                          suggestedContainerId: containerId,
-                          height: _itemHeight,
-                        ),
-                      );
-                    }
-                  },
+                final suggestedIndex = index - primaryRows.length;
+                final entity = suggestedTabEntities.value[suggestedIndex];
+                final tab = CustomDraggable(
+                  key: Key('suggested_${entity.tabId}'),
+                  child: _TabDraggable(
+                    tabId: entity.tabId,
+                    onClose: onClose,
+                    suggestedContainerId: containerId,
+                    height: _itemHeight,
+                  ),
                 );
-        },
-      ),
+                return TabDropTarget(
+                  targetTabId: entity.tabId,
+                  enabled: false,
+                  child: tab.child,
+                );
+              },
+            )
+          : ReorderableListView.builder(
+              scrollController: scrollController,
+              padding: const EdgeInsets.only(bottom: 56),
+              itemCount: displayItemCount,
+              itemExtent: _itemHeight,
+              onReorderStart: (index) {
+                ref.read(willAcceptDropProvider.notifier).clear();
+              },
+              onReorderItem: (oldIndex, newIndex) async {
+                //Suggestions are at the end and not reorderable, so skip
+                if (oldIndex >= primaryRows.length) {
+                  return;
+                }
+
+                final result = buildTabViewReorderResult(
+                  visibleItems: primaryRows,
+                  treeRows: treeRows,
+                  collapsedGroups: collapsedGroups,
+                  pinnedTabIds: pinnedTabIds,
+                  oldIndex: oldIndex,
+                  newIndex: newIndex,
+                  tabListDirection: tabListDirection,
+                  hierarchical: showHierarchicalTabs && !hasActiveSearch,
+                  sortPinnedFirst: filterOptions.sortPinnedFirst,
+                );
+
+                if (result == null) return;
+
+                await ref
+                    .read(tabDataRepositoryProvider.notifier)
+                    .reorderTabs(
+                      movingTabIds: result.movingTabIds,
+                      previousTabId: result.previousTabId,
+                      nextTabId: result.nextTabId,
+                      parentChange: result.parentChange,
+                    );
+              },
+              itemBuilder: (context, index) {
+                if (index < primaryRows.length) {
+                  final row = primaryRows[index];
+                  return CustomDraggable(
+                    key: Key(row.tabId),
+                    data: TabDragData(row.tabId),
+                    child: TabContextMenuDraggable(
+                      tabId: row.tabId,
+                      feedbackSize: Size.zero,
+                      externalDrag: true,
+                      child: _TabDraggable(
+                        tabId: row.tabId,
+                        onClose: onClose,
+                        sourceSearchQuery: row.sourceSearchQuery,
+                        height: _itemHeight,
+                        groupToggle: _listGroupToggleFor(row),
+                        depth: _depthFor(row),
+                      ),
+                    ),
+                  );
+                } else {
+                  final suggestedIndex = index - primaryRows.length;
+                  final entity = suggestedTabEntities.value[suggestedIndex];
+
+                  return CustomDraggable(
+                    key: Key('suggested_${entity.tabId}'),
+                    child: _TabDraggable(
+                      tabId: entity.tabId,
+                      onClose: onClose,
+                      suggestedContainerId: containerId,
+                      height: _itemHeight,
+                    ),
+                  );
+                }
+              },
+            ),
     );
   }
 }

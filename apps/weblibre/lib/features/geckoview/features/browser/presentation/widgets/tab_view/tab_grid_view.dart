@@ -20,7 +20,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:fading_scroll/fading_scroll.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -328,113 +327,107 @@ class _TabGridView extends HookConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: FadingScroll(
-        fadingSize: 5,
-        controller: scrollController,
-        builder: (context, controller) {
-          return !reorderEnabled
-              ? _TabGrid(
-                  key: ValueKey(crossAxisCount),
+      child: !reorderEnabled
+          ? _TabGrid(
+              key: ValueKey(crossAxisCount),
+              crossAxisCount: crossAxisCount,
+              itemCount: displayItemCount,
+              scrollController: scrollController,
+              itemBuilder: (widget, _) {
+                if (widget is CustomDraggable) {
+                  if (widget.data case final TabDragData dragData) {
+                    return TabContextMenuDraggable(
+                      tabId: dragData.tabId,
+                      data: dragData,
+                      feedbackSize: itemSize,
+                      child: widget.child,
+                    );
+                  }
+                }
+
+                return widget;
+              },
+              suggestedContainerId: containerId,
+              primaryRows: primaryRows,
+              suggestedTabEntities: suggestedTabEntities,
+              onClose: onClose,
+            )
+          : ReorderableBuilder.builder(
+              //Rebuild when cross axis count changes
+              key: ValueKey(crossAxisCount),
+              scrollController: scrollController,
+              itemCount: displayItemCount,
+              onDragStarted: (index) {
+                ref.read(willAcceptDropProvider.notifier).clear();
+              },
+              onReorderPositions: (positions) async {
+                assert(
+                  positions.length == 1,
+                  'Not ready for multiple reorders',
+                );
+
+                final oldIndex = positions.first.oldIndex;
+                final newIndex = positions.first.newIndex;
+
+                //Suggestions are at the end and not reorderable, so skip
+                if (oldIndex >= primaryRows.length) {
+                  return;
+                }
+
+                final result = buildTabViewReorderResult(
+                  visibleItems: primaryRows,
+                  treeRows: treeRows,
+                  collapsedGroups: collapsedGroups,
+                  pinnedTabIds: pinnedTabIds,
+                  oldIndex: oldIndex,
+                  newIndex: newIndex,
+                  tabListDirection: tabListDirection,
+                  hierarchical: showHierarchicalTabs && !hasActiveSearch,
+                  sortPinnedFirst: filterOptions.sortPinnedFirst,
+                );
+
+                if (result == null) return;
+
+                await ref
+                    .read(tabDataRepositoryProvider.notifier)
+                    .reorderTabs(
+                      movingTabIds: result.movingTabIds,
+                      previousTabId: result.previousTabId,
+                      nextTabId: result.nextTabId,
+                      parentChange: result.parentChange,
+                    );
+              },
+              childBuilder: (reorderableItemBuilder) {
+                return _TabGrid(
                   crossAxisCount: crossAxisCount,
                   itemCount: displayItemCount,
-                  scrollController: controller,
-                  itemBuilder: (widget, _) {
+                  scrollController: scrollController,
+                  itemBuilder: (widget, index) {
+                    // Wrap with context menu before passing to reorderable
+                    Widget wrapped = widget;
                     if (widget is CustomDraggable) {
                       if (widget.data case final TabDragData dragData) {
-                        return TabContextMenuDraggable(
-                          tabId: dragData.tabId,
-                          data: dragData,
-                          feedbackSize: itemSize,
-                          child: widget.child,
+                        wrapped = CustomDraggable(
+                          key: widget.key!,
+                          data: widget.data,
+                          child: TabContextMenuDraggable(
+                            tabId: dragData.tabId,
+                            feedbackSize: Size.zero,
+                            externalDrag: true,
+                            child: widget.child,
+                          ),
                         );
                       }
                     }
-
-                    return widget;
+                    return reorderableItemBuilder(wrapped, index);
                   },
                   suggestedContainerId: containerId,
                   primaryRows: primaryRows,
                   suggestedTabEntities: suggestedTabEntities,
                   onClose: onClose,
-                )
-              : ReorderableBuilder.builder(
-                  //Rebuild when cross axis count changes
-                  key: ValueKey(crossAxisCount),
-                  scrollController: controller,
-                  itemCount: displayItemCount,
-                  onDragStarted: (index) {
-                    ref.read(willAcceptDropProvider.notifier).clear();
-                  },
-                  onReorderPositions: (positions) async {
-                    assert(
-                      positions.length == 1,
-                      'Not ready for multiple reorders',
-                    );
-
-                    final oldIndex = positions.first.oldIndex;
-                    final newIndex = positions.first.newIndex;
-
-                    //Suggestions are at the end and not reorderable, so skip
-                    if (oldIndex >= primaryRows.length) {
-                      return;
-                    }
-
-                    final result = buildTabViewReorderResult(
-                      visibleItems: primaryRows,
-                      treeRows: treeRows,
-                      collapsedGroups: collapsedGroups,
-                      pinnedTabIds: pinnedTabIds,
-                      oldIndex: oldIndex,
-                      newIndex: newIndex,
-                      tabListDirection: tabListDirection,
-                      hierarchical: showHierarchicalTabs && !hasActiveSearch,
-                      sortPinnedFirst: filterOptions.sortPinnedFirst,
-                    );
-
-                    if (result == null) return;
-
-                    await ref
-                        .read(tabDataRepositoryProvider.notifier)
-                        .reorderTabs(
-                          movingTabIds: result.movingTabIds,
-                          previousTabId: result.previousTabId,
-                          nextTabId: result.nextTabId,
-                          parentChange: result.parentChange,
-                        );
-                  },
-                  childBuilder: (reorderableItemBuilder) {
-                    return _TabGrid(
-                      crossAxisCount: crossAxisCount,
-                      itemCount: displayItemCount,
-                      scrollController: controller,
-                      itemBuilder: (widget, index) {
-                        // Wrap with context menu before passing to reorderable
-                        Widget wrapped = widget;
-                        if (widget is CustomDraggable) {
-                          if (widget.data case final TabDragData dragData) {
-                            wrapped = CustomDraggable(
-                              key: widget.key!,
-                              data: widget.data,
-                              child: TabContextMenuDraggable(
-                                tabId: dragData.tabId,
-                                feedbackSize: Size.zero,
-                                externalDrag: true,
-                                child: widget.child,
-                              ),
-                            );
-                          }
-                        }
-                        return reorderableItemBuilder(wrapped, index);
-                      },
-                      suggestedContainerId: containerId,
-                      primaryRows: primaryRows,
-                      suggestedTabEntities: suggestedTabEntities,
-                      onClose: onClose,
-                    );
-                  },
                 );
-        },
-      ),
+              },
+            ),
     );
   }
 }

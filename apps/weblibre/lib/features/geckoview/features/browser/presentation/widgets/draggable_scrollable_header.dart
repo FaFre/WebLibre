@@ -50,26 +50,7 @@ class DraggableScrollableHeader extends StatefulWidget {
       _DraggableScrollableHeaderState();
 }
 
-class _DraggableScrollableHeaderState extends State<DraggableScrollableHeader>
-    with TickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double>? _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: widget.animationDuration,
-    );
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
+class _DraggableScrollableHeaderState extends State<DraggableScrollableHeader> {
   Future<void> _animateToPosition(
     double targetSize, {
     Duration? customDuration,
@@ -79,34 +60,17 @@ class _DraggableScrollableHeaderState extends State<DraggableScrollableHeader>
       return;
     }
 
-    if (customDuration != null) {
-      _animationController.duration = customDuration;
-    } else {
-      _animationController.duration = widget.animationDuration;
-    }
-
-    _animation = Tween<double>(begin: widget.controller.size, end: targetSize)
-        .animate(
-          CurvedAnimation(
-            parent: _animationController,
-            curve: widget.animationCurve,
-          ),
-        );
-
-    _animationController.reset();
-    await _animationController.forward();
-
-    _animation!.addListener(() {
-      widget.controller.jumpTo(_animation!.value);
-    });
+    await widget.controller.animateTo(
+      targetSize,
+      duration: customDuration ?? widget.animationDuration,
+      curve: widget.animationCurve,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onVerticalDragUpdate: (details) {
-        _animationController.stop();
-
         // Apply drag sensitivity
         final adjustedDelta = details.delta.dy * widget.dragSensitivity;
 

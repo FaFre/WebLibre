@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -144,48 +143,42 @@ class ViewTabSheetWidget extends HookConsumerWidget {
           ),
         ),
       ],
-      body: FadingScroll(
-        fadingSize: 15,
+      body: ListView(
+        padding: EdgeInsets.zero,
         controller: sheetScrollController,
-        builder: (context, controller) {
-          return ListView(
-            padding: EdgeInsets.zero,
-            controller: controller,
-            physics: const ClampingScrollPhysicsWithoutImplicit(),
-            children: [
-              // Tracking Protection Section
-              TrackingProtectionSection(tabId: initialTabState.id),
-              const Divider(),
-              // Gesture Exclusion Section
-              GestureExclusionSection(url: initialTabState.url),
-              const Divider(),
-              // Desktop Mode Section
-              DesktopModeSection(
-                tabId: initialTabState.id,
-                url: initialTabState.url,
-              ),
-              const Divider(),
-              // App Link Section
-              AppLinkSection(
-                url: initialTabState.url,
-                contextId: initialTabState.contextId,
-              ),
-              const Divider(),
-              // Permissions Section
-              PermissionsSection(
-                origin: initialTabState.url.origin,
-                isPrivate: initialTabState.tabMode is PrivateTabMode,
-              ),
-              const Divider(),
-              // Clear Site Data Section
-              ClearSiteDataSection(
-                url: initialTabState.url,
-                onExpandedChanged: onClearSiteDataExpandedChanged,
-              ),
-              const SizedBox(height: 16.0),
-            ],
-          );
-        },
+        physics: const ClampingScrollPhysicsWithoutImplicit(),
+        children: [
+          // Tracking Protection Section
+          TrackingProtectionSection(tabId: initialTabState.id),
+          const Divider(),
+          // Gesture Exclusion Section
+          GestureExclusionSection(url: initialTabState.url),
+          const Divider(),
+          // Desktop Mode Section
+          DesktopModeSection(
+            tabId: initialTabState.id,
+            url: initialTabState.url,
+          ),
+          const Divider(),
+          // App Link Section
+          AppLinkSection(
+            url: initialTabState.url,
+            contextId: initialTabState.contextId,
+          ),
+          const Divider(),
+          // Permissions Section
+          PermissionsSection(
+            origin: initialTabState.url.origin,
+            isPrivate: initialTabState.tabMode is PrivateTabMode,
+          ),
+          const Divider(),
+          // Clear Site Data Section
+          ClearSiteDataSection(
+            url: initialTabState.url,
+            onExpandedChanged: onClearSiteDataExpandedChanged,
+          ),
+          const SizedBox(height: 16.0),
+        ],
       ),
     );
   }
