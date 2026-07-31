@@ -89,6 +89,11 @@ enum TabBarStackingMode {
 
 enum TabIntentOpenSetting { regular, private, isolated, ask }
 
+/// Determines what happens when a bookmark is tapped in the bookmark list.
+/// [ask] shows the "open in..." sheet (today's behavior, and the default);
+/// the other values open the bookmark directly with no intermediate prompt.
+enum BookmarkOpenSetting { regular, isolated, customTab, ask }
+
 enum TabDirection { newestFirst, oldestFirst }
 
 enum TabBarPosition {
@@ -157,6 +162,10 @@ class GeneralSettings with FastEquatable {
   final TabDirection tabListDirection;
   final TabDirection tabBarDirection;
   final TabIntentOpenSetting tabIntentOpenSetting;
+
+  /// Determines what happens when a bookmark is tapped. See
+  /// [BookmarkOpenSetting] and [effectiveBookmarkOpenSetting].
+  final BookmarkOpenSetting bookmarkOpenSetting;
   final bool autoHideTabBar;
   final TabBarSwipeAction tabBarSwipeAction;
   final Duration historyAutoCleanInterval;
@@ -286,6 +295,7 @@ class GeneralSettings with FastEquatable {
     required this.tabListDirection,
     required this.tabBarDirection,
     required this.tabIntentOpenSetting,
+    required this.bookmarkOpenSetting,
     required this.autoHideTabBar,
     required this.tabBarSwipeAction,
     required this.historyAutoCleanInterval,
@@ -358,6 +368,7 @@ class GeneralSettings with FastEquatable {
     TabDirection? tabListDirection,
     TabDirection? tabBarDirection,
     TabIntentOpenSetting? tabIntentOpenSetting,
+    BookmarkOpenSetting? bookmarkOpenSetting,
     bool? autoHideTabBar,
     TabBarSwipeAction? tabBarSwipeAction,
     Duration? historyAutoCleanInterval,
@@ -428,6 +439,7 @@ class GeneralSettings with FastEquatable {
        tabListDirection = tabListDirection ?? TabDirection.newestFirst,
        tabBarDirection = tabBarDirection ?? TabDirection.newestFirst,
        tabIntentOpenSetting = tabIntentOpenSetting ?? TabIntentOpenSetting.ask,
+       bookmarkOpenSetting = bookmarkOpenSetting ?? BookmarkOpenSetting.ask,
        autoHideTabBar = autoHideTabBar ?? true,
        tabBarSwipeAction =
            tabBarSwipeAction ?? TabBarSwipeAction.switchLastOpened,
@@ -550,6 +562,14 @@ class GeneralSettings with FastEquatable {
     return tabIntentOpenSetting;
   }
 
+  BookmarkOpenSetting get effectiveBookmarkOpenSetting {
+    if (!showIsolatedTabUi &&
+        bookmarkOpenSetting == BookmarkOpenSetting.isolated) {
+      return BookmarkOpenSetting.ask;
+    }
+    return bookmarkOpenSetting;
+  }
+
   /// Container-dependent stacking modes degrade to a single recently-used
   /// row when the container UI is disabled. Two-level stacking additionally
   /// degrades to accordion (the default mode, which has a vertical form) on the
@@ -595,6 +615,7 @@ class GeneralSettings with FastEquatable {
     tabListDirection,
     tabBarDirection,
     tabIntentOpenSetting,
+    bookmarkOpenSetting,
     autoHideTabBar,
     tabBarSwipeAction,
     historyAutoCleanInterval,

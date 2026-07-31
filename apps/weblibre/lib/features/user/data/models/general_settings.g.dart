@@ -55,6 +55,8 @@ abstract class _$GeneralSettingsCWProxy {
     TabIntentOpenSetting tabIntentOpenSetting,
   );
 
+  GeneralSettings bookmarkOpenSetting(BookmarkOpenSetting bookmarkOpenSetting);
+
   GeneralSettings autoHideTabBar(bool autoHideTabBar);
 
   GeneralSettings tabBarSwipeAction(TabBarSwipeAction tabBarSwipeAction);
@@ -195,6 +197,7 @@ abstract class _$GeneralSettingsCWProxy {
     TabDirection tabListDirection,
     TabDirection tabBarDirection,
     TabIntentOpenSetting tabIntentOpenSetting,
+    BookmarkOpenSetting bookmarkOpenSetting,
     bool autoHideTabBar,
     TabBarSwipeAction tabBarSwipeAction,
     Duration historyAutoCleanInterval,
@@ -337,6 +340,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings tabIntentOpenSetting(
     TabIntentOpenSetting tabIntentOpenSetting,
   ) => call(tabIntentOpenSetting: tabIntentOpenSetting);
+
+  @override
+  GeneralSettings bookmarkOpenSetting(
+    BookmarkOpenSetting bookmarkOpenSetting,
+  ) => call(bookmarkOpenSetting: bookmarkOpenSetting);
 
   @override
   GeneralSettings autoHideTabBar(bool autoHideTabBar) =>
@@ -578,6 +586,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? tabListDirection = const $CopyWithPlaceholder(),
     Object? tabBarDirection = const $CopyWithPlaceholder(),
     Object? tabIntentOpenSetting = const $CopyWithPlaceholder(),
+    Object? bookmarkOpenSetting = const $CopyWithPlaceholder(),
     Object? autoHideTabBar = const $CopyWithPlaceholder(),
     Object? tabBarSwipeAction = const $CopyWithPlaceholder(),
     Object? historyAutoCleanInterval = const $CopyWithPlaceholder(),
@@ -746,6 +755,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.tabIntentOpenSetting
           // ignore: cast_nullable_to_non_nullable
           : tabIntentOpenSetting as TabIntentOpenSetting,
+      bookmarkOpenSetting:
+          bookmarkOpenSetting == const $CopyWithPlaceholder() ||
+              bookmarkOpenSetting == null
+          ? _value.bookmarkOpenSetting
+          // ignore: cast_nullable_to_non_nullable
+          : bookmarkOpenSetting as BookmarkOpenSetting,
       autoHideTabBar:
           autoHideTabBar == const $CopyWithPlaceholder() ||
               autoHideTabBar == null
@@ -1096,6 +1111,10 @@ GeneralSettings _$GeneralSettingsFromJson(
     _$TabIntentOpenSettingEnumMap,
     json['tabIntentOpenSetting'],
   ),
+  bookmarkOpenSetting: $enumDecodeNullable(
+    _$BookmarkOpenSettingEnumMap,
+    json['bookmarkOpenSetting'],
+  ),
   autoHideTabBar: json['autoHideTabBar'] as bool?,
   tabBarSwipeAction: $enumDecodeNullable(
     _$TabBarSwipeActionEnumMap,
@@ -1221,6 +1240,8 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'tabBarDirection': _$TabDirectionEnumMap[instance.tabBarDirection]!,
   'tabIntentOpenSetting':
       _$TabIntentOpenSettingEnumMap[instance.tabIntentOpenSetting]!,
+  'bookmarkOpenSetting':
+      _$BookmarkOpenSettingEnumMap[instance.bookmarkOpenSetting]!,
   'autoHideTabBar': instance.autoHideTabBar,
   'tabBarSwipeAction': _$TabBarSwipeActionEnumMap[instance.tabBarSwipeAction]!,
   'historyAutoCleanInterval': instance.historyAutoCleanInterval.inMicroseconds,
@@ -1327,6 +1348,13 @@ const _$TabIntentOpenSettingEnumMap = {
   TabIntentOpenSetting.private: 'private',
   TabIntentOpenSetting.isolated: 'isolated',
   TabIntentOpenSetting.ask: 'ask',
+};
+
+const _$BookmarkOpenSettingEnumMap = {
+  BookmarkOpenSetting.regular: 'regular',
+  BookmarkOpenSetting.isolated: 'isolated',
+  BookmarkOpenSetting.customTab: 'customTab',
+  BookmarkOpenSetting.ask: 'ask',
 };
 
 const _$TabBarSwipeActionEnumMap = {

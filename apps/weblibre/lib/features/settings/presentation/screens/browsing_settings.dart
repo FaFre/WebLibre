@@ -172,6 +172,17 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
       ),
     ],
   ),
+  SettingsSectionDefinition(
+    title: 'Bookmarks',
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Bookmark Open Behavior',
+        subtitle: 'Choose how tapping a bookmark opens it',
+        keywords: ['bookmarks', 'open', 'custom tab', 'isolated'],
+        child: _BookmarkOpenBehaviorSection(),
+      ),
+    ],
+  ),
 ];
 
 class BrowsingSettingsScreen extends StatelessWidget {
@@ -422,6 +433,81 @@ class _ExternalLinkHandlingSection extends HookConsumerWidget {
   }
 }
 
+class _BookmarkOpenBehaviorSection extends HookConsumerWidget {
+  const _BookmarkOpenBehaviorSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final bookmarkOpenSetting = settings.effectiveBookmarkOpenSetting;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const ListTile(
+            title: Text('Bookmark Open Behavior'),
+            subtitle: Text('Choose how tapping a bookmark opens it'),
+            leading: Icon(MdiIcons.bookmarkMultiple),
+            contentPadding: EdgeInsets.zero,
+          ),
+          RadioGroup(
+            groupValue: bookmarkOpenSetting,
+            onChanged: (value) async {
+              if (value != null) {
+                await ref
+                    .read(saveGeneralSettingsControllerProvider.notifier)
+                    .save(
+                      (currentSettings) =>
+                          currentSettings.copyWith.bookmarkOpenSetting(value),
+                    );
+              }
+            },
+            child: Column(
+              children: [
+                const RadioListTile.adaptive(
+                  value: BookmarkOpenSetting.ask,
+                  title: Text('Prompt'),
+                  subtitle: Text('Ask how the bookmark should open'),
+                  secondary: Icon(MdiIcons.messageQuestion),
+                ),
+                const RadioListTile.adaptive(
+                  value: BookmarkOpenSetting.regular,
+                  title: Text('Regular'),
+                  subtitle: Text('Open the bookmark in a regular tab'),
+                  secondary: Icon(MdiIcons.tab),
+                ),
+                const RadioListTile.adaptive(
+                  value: BookmarkOpenSetting.customTab,
+                  title: Text('Custom Tab'),
+                  subtitle: Text(
+                    'Open the bookmark in a lightweight custom tab',
+                  ),
+                  secondary: Icon(MdiIcons.applicationOutline),
+                ),
+                if (settings.showIsolatedTabUi)
+                  RadioListTile.adaptive(
+                    value: BookmarkOpenSetting.isolated,
+                    title: const Text('Isolated'),
+                    subtitle: const Text(
+                      'Open the bookmark in an isolated tab',
+                    ),
+                    secondary: Icon(
+                      MdiIcons.snowflake,
+                      color: AppColors.of(context).isolatedTabTeal,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _TabListDirectionSection extends HookConsumerWidget {
   const _TabListDirectionSection();
 
@@ -638,6 +724,12 @@ class _ShowIsolatedTabUiTile extends HookConsumerWidget {
           }
           if (!value && updated.smallWebTabType == TabType.isolated) {
             updated = updated.copyWith.smallWebTabType(TabType.private);
+          }
+          if (!value &&
+              updated.bookmarkOpenSetting == BookmarkOpenSetting.isolated) {
+            updated = updated.copyWith.bookmarkOpenSetting(
+              BookmarkOpenSetting.ask,
+            );
           }
           return updated;
         });

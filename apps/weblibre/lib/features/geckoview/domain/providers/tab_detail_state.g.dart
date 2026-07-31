@@ -181,7 +181,7 @@ final class TabThumbnailsProvider
   }
 }
 
-String _$tabThumbnailsHash() => r'16c4bb6edff2e6413100d9ce02c1ae7948740cfe';
+String _$tabThumbnailsHash() => r'c3066c4d05520d9edefcafc03810cda47302f43e';
 
 /// Page screenshots per tab. Refreshed on a 10s timer for the selected tab and
 /// consumed only by the tab tray previews.
@@ -323,7 +323,7 @@ final class TabHistoryStatesProvider
   }
 }
 
-String _$tabHistoryStatesHash() => r'3920410334c4354ca66da605d9bfe85b4853f3bf';
+String _$tabHistoryStatesHash() => r'e27d36cbb16f7c025fa9a5034699151706d7ba21';
 
 /// Session history (back/forward stack) per tab.
 
@@ -464,7 +464,7 @@ final class TabFindResultStatesProvider
 }
 
 String _$tabFindResultStatesHash() =>
-    r'f57dee1658eae789002ac3cff15808cbc96b7883';
+    r'e9d68ea9ed3d8d4f319073204415fa27420de29d';
 
 /// Find-in-page match counters per tab. Emitted at a high rate by Gecko while
 /// a search is running.
@@ -612,7 +612,7 @@ final class TabTranslationStatesProvider
 }
 
 String _$tabTranslationStatesHash() =>
-    r'f04004026dc5fd638319528a55e2f10e0f64c9b3';
+    r'28daf6c0d421a3ed60ccb5087021d5fc078c2927';
 
 /// Translation progress/result per tab.
 
