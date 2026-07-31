@@ -34,6 +34,7 @@ import 'package:weblibre/features/app_links/domain/services/app_link_policy_repl
 import 'package:weblibre/features/bangs/data/models/web_search_bang.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/services/search_history_cleanup.dart';
+import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/browser_extension.dart';
@@ -119,6 +120,15 @@ class _BrowserViewState extends ConsumerState<BrowserView>
     // See https://github.com/FaFre/WebLibre/issues/492.
     final topRoute = ref.read(currentTopRouteProvider);
     if (topRoute is! GoRoute || topRoute.name != BrowserRoute.name) {
+      return;
+    }
+
+    // In-tree sheets (tab tray, site settings, …) are not routes — they are
+    // Stack layers driven by [bottomSheetControllerProvider] — so the route
+    // check above does not catch them. They occlude the browser just the same,
+    // and the resulting thumbnail event would rebuild the tray that is on
+    // screen, so skip the capture while one is displayed.
+    if (ref.read(bottomSheetControllerProvider) != null) {
       return;
     }
 

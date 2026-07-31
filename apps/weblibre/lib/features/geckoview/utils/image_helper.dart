@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:convert';
+import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -28,7 +29,7 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/domain/entities/equatable_image.dart';
 import 'package:weblibre/utils/lru_cache.dart';
 
-final _cache = LRUCache<int, EquatableImage>(100);
+final _cache = LRUCache<ImageIdentity, EquatableImage>(100);
 const _defaultSvgIconSize = 32;
 
 /// Clears the global image decode cache.
@@ -42,13 +43,23 @@ Future<EquatableImage?> tryDecodeImage(
   int? targetHeight,
   bool allowUpscaling = true,
 }) async {
-  final digest = secureHash(bytes);
+  // The decode options are part of the identity of the result, not just of the
+  // request: the same bytes decoded at a thumbnail's target width and at an
+  // icon's native size are different images. Keying on the content digest
+  // alone would both hand back a wrongly-sized image to whichever caller ran
+  // second, and make two genuinely different decodes compare equal.
+  final identity = (
+    digest: secureHash(bytes),
+    targetWidth: targetWidth,
+    targetHeight: targetHeight,
+    allowUpscaling: allowUpscaling,
+  );
 
-  final cached = _cache.get(digest);
+  final cached = _cache.get(identity);
   if (cached?.value != null) {
     return cached;
   } else if (cached != null) {
-    _cache.remove(digest);
+    _cache.remove(identity);
   }
 
   try {
@@ -60,10 +71,10 @@ Future<EquatableImage?> tryDecodeImage(
     );
 
     final frameInfo = await codec.getNextFrame();
-    final image = EquatableImage(frameInfo.image, hash: digest);
+    final image = EquatableImage(frameInfo.image, identity: identity);
 
     if (image.value != null && image.value!.width > 0) {
-      _cache.set(digest, image);
+      _cache.set(identity, image);
       return image;
     }
   } catch (e, s) {
@@ -71,12 +82,12 @@ Future<EquatableImage?> tryDecodeImage(
       try {
         final svgImage = await _tryDecodeSvg(
           bytes,
-          hash: digest,
+          identity: identity,
           targetWidth: targetWidth,
           targetHeight: targetHeight,
         );
         if (svgImage != null) {
-          _cache.set(digest, svgImage);
+          _cache.set(identity, svgImage);
           return svgImage;
         }
       } catch (svgError, svgStackTrace) {
@@ -92,6 +103,46 @@ Future<EquatableImage?> tryDecodeImage(
   }
 
   return null;
+}
+
+/// Transcodes a native screenshot (delivered as WebP) to PNG off the main
+/// isolate.
+///
+/// Decoding a full-resolution screenshot and re-encoding it as PNG costs tens
+/// of milliseconds on the UI thread, and every caller does it right as a share
+/// sheet or file picker is animating in — so the cost lands as a visible hitch.
+/// dart:ui's codec APIs are usable from background isolates, so the whole
+/// transcode runs there; if that ever fails we fall back to doing it inline
+/// rather than losing the feature.
+Future<Uint8List?> encodeScreenshotAsPng(Uint8List screenshot) async {
+  try {
+    return await Isolate.run(() => _transcodeToPng(screenshot));
+  } catch (e, s) {
+    logger.w(
+      'Screenshot PNG transcode failed in background isolate, retrying inline',
+      error: e,
+      stackTrace: s,
+    );
+
+    return _transcodeToPng(screenshot);
+  }
+}
+
+Future<Uint8List?> _transcodeToPng(Uint8List bytes) async {
+  final codec = await instantiateImageCodec(bytes);
+
+  try {
+    final frameInfo = await codec.getNextFrame();
+
+    try {
+      final png = await frameInfo.image.toByteData(format: ImageByteFormat.png);
+      return png?.buffer.asUint8List();
+    } finally {
+      frameInfo.image.dispose();
+    }
+  } finally {
+    codec.dispose();
+  }
 }
 
 bool _isLikelySvg(Uint8List bytes) {
@@ -110,7 +161,7 @@ bool _isLikelySvg(Uint8List bytes) {
 
 Future<EquatableImage?> _tryDecodeSvg(
   Uint8List bytes, {
-  required int hash,
+  required ImageIdentity identity,
   int? targetWidth,
   int? targetHeight,
 }) async {
@@ -153,7 +204,7 @@ Future<EquatableImage?> _tryDecodeSvg(
         dimensions.width,
         dimensions.height,
       );
-      return EquatableImage(rasterized, hash: hash);
+      return EquatableImage(rasterized, identity: identity);
     } finally {
       scaledPicture.dispose();
     }

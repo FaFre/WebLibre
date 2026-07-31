@@ -20,6 +20,7 @@
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
@@ -45,17 +46,17 @@ class ToolbarVisibilityController extends _$ToolbarVisibilityController {
     });
 
     // Show toolbar on navigation (history state change)
-    ref.listen(tabStatesProvider.select((tabs) => tabs[tabId]?.historyState), (
-      previous,
-      next,
-    ) {
-      if (!ref.read(generalSettingsWithDefaultsProvider).autoHideTabBar) {
-        return;
-      }
-      if (next != null && previous != null && previous != next) {
-        show();
-      }
-    });
+    ref.listen(
+      tabHistoryStatesProvider.select((histories) => histories[tabId]),
+      (previous, next) {
+        if (!ref.read(generalSettingsWithDefaultsProvider).autoHideTabBar) {
+          return;
+        }
+        if (next != null && previous != null && previous != next) {
+          show();
+        }
+      },
+    );
 
     // Force-show when GeckoView requests toolbar expansion
     // (e.g. touch on form input)

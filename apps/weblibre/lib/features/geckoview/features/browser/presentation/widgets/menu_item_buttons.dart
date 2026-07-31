@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:ui' as ui;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -35,6 +34,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/dialog
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
@@ -235,29 +235,15 @@ class ShareScreenshotMenuItemButton extends HookConsumerWidget {
         final tabState = ref.read(tabStateProvider(selectedTabId))!;
 
         if (screenshot != null) {
-          ui.decodeImageFromList(screenshot, (result) async {
-            try {
-              final png = await result.toByteData(
-                format: ui.ImageByteFormat.png,
-              );
+          final png = await encodeScreenshotAsPng(screenshot);
 
-              if (png != null) {
-                final file = XFile.fromData(
-                  png.buffer.asUint8List(),
-                  mimeType: 'image/png',
-                );
+          if (png != null) {
+            final file = XFile.fromData(png, mimeType: 'image/png');
 
-                await SharePlus.instance.share(
-                  ShareParams(
-                    files: [file],
-                    subject: tabState.titleOrAuthority,
-                  ),
-                );
-              }
-            } finally {
-              result.dispose();
-            }
-          });
+            await SharePlus.instance.share(
+              ShareParams(files: [file], subject: tabState.titleOrAuthority),
+            );
+          }
         }
 
         if (context.mounted) {
@@ -290,24 +276,16 @@ class ExportScreenshotMenuItemButton extends HookConsumerWidget {
         final tabState = ref.read(tabStateProvider(selectedTabId))!;
 
         if (screenshot != null) {
-          ui.decodeImageFromList(screenshot, (result) async {
-            try {
-              final png = await result.toByteData(
-                format: ui.ImageByteFormat.png,
-              );
+          final png = await encodeScreenshotAsPng(screenshot);
 
-              if (png != null) {
-                await FilePicker.saveFile(
-                  fileName: '${tabState.titleOrAuthority}.png',
-                  type: FileType.custom,
-                  allowedExtensions: ['png'],
-                  bytes: png.buffer.asUint8List(),
-                );
-              }
-            } finally {
-              result.dispose();
-            }
-          });
+          if (png != null) {
+            await FilePicker.saveFile(
+              fileName: '${tabState.titleOrAuthority}.png',
+              type: FileType.custom,
+              allowedExtensions: ['png'],
+              bytes: png,
+            );
+          }
         }
 
         if (context.mounted) {

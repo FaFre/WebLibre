@@ -26,6 +26,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -67,18 +68,19 @@ class TranslationBottomSheet extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    final tabState = ref.watch(tabStateProvider(selectedTabId));
-    final translationState = tabState?.translationState;
+    final translationState = ref.watch(
+      tabTranslationStateProvider(selectedTabId),
+    );
     final engineState = ref.watch(translationEngineStateProvider);
 
     final fromLanguages = engineState?.fromLanguages?.nonNulls.toList() ?? [];
     final toLanguages = engineState?.toLanguages?.nonNulls.toList() ?? [];
     final suggestedFrom =
-        translationState?.detectedLanguageCode ??
-        translationState?.requestedFromLanguage;
+        translationState.detectedLanguageCode ??
+        translationState.requestedFromLanguage;
     final suggestedTo =
-        translationState?.userPreferredLanguageCode ??
-        translationState?.requestedToLanguage;
+        translationState.userPreferredLanguageCode ??
+        translationState.requestedToLanguage;
 
     final selectedFrom = useState<String?>(suggestedFrom);
     final selectedTo = useState<String?>(suggestedTo);
@@ -93,10 +95,10 @@ class TranslationBottomSheet extends HookConsumerWidget {
       return null;
     }, [suggestedFrom, suggestedTo]);
 
-    final isTranslated = translationState?.isTranslated ?? false;
-    final isProcessing = translationState?.isTranslateProcessing ?? false;
-    final hasError = translationState?.hasError ?? false;
-    final errorName = translationState?.translationErrorName;
+    final isTranslated = translationState.isTranslated;
+    final isProcessing = translationState.isTranslateProcessing;
+    final hasError = translationState.hasError;
+    final errorName = translationState.translationErrorName;
     final translatePhase = useState(_TranslatePhase.idle);
 
     final effectiveProcessing =

@@ -881,17 +881,14 @@ EquatableValue<List<TabPreview>> filteredTabPreviews(
     return EquatableValue([]);
   }
 
-  final sandboxCaptureMap =
-      ref.watch(sandboxCaptureMapProvider).value ?? const {};
+  final sandboxSourceUris = ref.watch(sandboxSourceUrisProvider).value;
 
   return EquatableValue(
     tabSearchResults.results
         .where((tab) => availableTabStates.value.containsKey(tab.id))
         .map((tab) {
           final tabState = availableTabStates.value[tab.id]!;
-          final sandboxSourceUri = parseSandboxSource(
-            sandboxCaptureMap[tab.id],
-          );
+          final sandboxSourceUri = sandboxSourceUris[tab.id];
 
           return TabPreview(
             id: tab.id,
@@ -933,7 +930,12 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
   }
 
   final tabList = ref.watch(tabListProvider);
-  final tabStates = ref.watch(tabStatesProvider);
+  // Narrow projection instead of the whole `Map<String, TabState>`: this
+  // provider does a graph walk plus several sorts, and it feeds the always
+  // visible quick tab switcher's depth map. It only reads the tab mode (for
+  // filtering) and the title/url (for sorting) — none of which change more
+  // often than once per navigation.
+  final tabSortKeys = ref.watch(tabSortKeysProvider).value;
   final filterOptions = ref.watch(tabViewFilterControllerProvider);
   final pinnedTabIds = ref.watch(
     watchPinnedTabIdsProvider.select(
@@ -963,7 +965,7 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
       .where((row) => tabList.value.contains(row.id))
       .where(
         (row) => filterOptions.matchesTab(
-          tabStates[row.id]?.tabMode,
+          tabSortKeys[row.id]?.tabMode,
           tabTimestamps?[row.id],
         ),
       )
@@ -1032,7 +1034,7 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
   for (final entry in byRoot.entries) {
     final rootMember = entry.value.firstWhere((r) => r.row.id == entry.key);
     final root = rootMember.row;
-    final state = tabStates[root.id];
+    final sortKeys = tabSortKeys[root.id];
     final timestamp = tabTimestamps?[root.id];
     groupRecords.add(
       _TabGroupRecord(
@@ -1043,10 +1045,10 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
         isPinned: pinnedTabIds.contains(root.id),
         titleKey:
             sortField == SortField.titleAsc || sortField == SortField.titleDesc
-            ? (state?.titleOrAuthority ?? '').toLowerCase()
+            ? (sortKeys?.titleOrAuthority ?? '').toLowerCase()
             : null,
         urlKey: sortField == SortField.urlAsc || sortField == SortField.urlDesc
-            ? (state?.url.toString() ?? '')
+            ? (sortKeys?.url ?? '')
             : null,
         dateKey:
             sortField == SortField.dateAsc || sortField == SortField.dateDesc

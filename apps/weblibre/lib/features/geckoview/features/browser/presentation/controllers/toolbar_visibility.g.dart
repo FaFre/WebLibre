@@ -61,7 +61,7 @@ final class ToolbarVisibilityControllerProvider
 }
 
 String _$toolbarVisibilityControllerHash() =>
-    r'e947508c351d4cbbe8c63289171a6d0a34f1a61a';
+    r'9d88ca83964d84acfb23f400d02ae277d6866b3f';
 
 final class ToolbarVisibilityControllerFamily extends $Family
     with

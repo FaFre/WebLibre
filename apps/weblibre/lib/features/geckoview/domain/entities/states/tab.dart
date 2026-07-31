@@ -23,15 +23,20 @@ import 'package:nullability/nullability.dart';
 import 'package:weblibre/data/models/web_page_info.dart';
 import 'package:weblibre/domain/entities/equatable_image.dart';
 import 'package:weblibre/features/geckoview/domain/entities/browser_icon.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/find_result.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/history.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/security.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/translation.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 
 part 'tab.g.dart';
 
+/// Per-tab state the browser chrome and tab ordering depend on.
+///
+/// Deliberately narrow: the whole `Map<String, TabState>` is watched by the
+/// providers feeding the always-visible quick tab switcher and the grouped tab
+/// list, so any field added here rebuilds every visible chip whenever it
+/// changes on *any* tab. High-churn fields (load progress, thumbnails, session
+/// history, find-in-page results, translation) live in per-tab notifiers in
+/// `providers/tab_detail_state.dart` instead.
 @CopyWith(constructor: '_')
 class TabState extends WebPageInfo {
   static final defaultUrl = Uri.parse('about:blank');
@@ -59,10 +64,6 @@ class TabState extends WebPageInfo {
     ),
   );
 
-  final EquatableImage? thumbnail;
-
-  final int progress;
-
   final TabMode tabMode;
   String? get isolationContextId => tabMode.isolationContextId;
 
@@ -70,13 +71,8 @@ class TabState extends WebPageInfo {
   final bool isLoading;
   final bool showToolbarAsExpanded;
 
-  bool get isFinishedLoading => !isLoading && progress == 100;
-
   final SecurityState securityInfoState;
-  final HistoryState historyState;
   final ReaderableState readerableState;
-  final FindResultState findResultState;
-  final TranslationState translationState;
 
   TabState({
     required this.id,
@@ -85,17 +81,12 @@ class TabState extends WebPageInfo {
     required super.url,
     required String title,
     required this.icon,
-    required this.thumbnail,
-    required this.progress,
     this.tabMode = TabMode.regular,
     required this.isFullScreen,
     required this.isLoading,
     required this.showToolbarAsExpanded,
     required this.securityInfoState,
-    required this.historyState,
     required this.readerableState,
-    required this.findResultState,
-    required this.translationState,
   }) : super(title: title.trim());
 
   TabState._({
@@ -105,17 +96,12 @@ class TabState extends WebPageInfo {
     required super.url,
     required super.title,
     required this.icon,
-    required this.thumbnail,
-    required this.progress,
     required this.tabMode,
     required this.isFullScreen,
     required this.isLoading,
     required this.showToolbarAsExpanded,
     required this.securityInfoState,
-    required this.historyState,
     required this.readerableState,
-    required this.findResultState,
-    required this.translationState,
   });
 
   factory TabState.$default(String tabId) => TabState(
@@ -125,16 +111,11 @@ class TabState extends WebPageInfo {
     url: defaultUrl,
     title: "",
     icon: null,
-    thumbnail: null,
-    progress: 0,
     isFullScreen: false,
     isLoading: false,
     showToolbarAsExpanded: false,
     securityInfoState: SecurityState.$default(),
-    historyState: HistoryState.$default(),
     readerableState: ReaderableState.$default(),
-    findResultState: FindResultState.$default(),
-    translationState: TranslationState.$default(),
   );
 
   @override
@@ -144,16 +125,11 @@ class TabState extends WebPageInfo {
     parentId,
     contextId,
     icon,
-    thumbnail,
-    progress,
     tabMode,
     isFullScreen,
     isLoading,
     showToolbarAsExpanded,
     securityInfoState,
-    historyState,
     readerableState,
-    findResultState,
-    translationState,
   ];
 }

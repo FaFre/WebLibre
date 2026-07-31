@@ -33,6 +33,7 @@ import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
@@ -757,7 +758,7 @@ class _TranslatePageMenuItem extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final engineState = ref.watch(translationEngineStateProvider);
     final translationState = ref.watch(
-      tabStateProvider(selectedTabId).select((s) => s?.translationState),
+      tabTranslationStateProvider(selectedTabId),
     );
     final readerActive = ref.watch(
       tabStateProvider(
@@ -770,7 +771,7 @@ class _TranslatePageMenuItem extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    final isTranslated = translationState?.isTranslated ?? false;
+    final isTranslated = translationState.isTranslated;
 
     return MenuItemButton(
       closeOnActivate: false,
@@ -833,9 +834,7 @@ class _NavigationButtonsRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final history = ref.watch(
-      tabStateProvider(selectedTabId).select((value) => value?.historyState),
-    );
+    final history = ref.watch(tabHistoryStateProvider(selectedTabId));
 
     final isLoading = ref.watch(
       selectedTabStateProvider.select((state) => state?.isLoading ?? false),
@@ -848,7 +847,7 @@ class _NavigationButtonsRow extends ConsumerWidget {
             selectedTabId: selectedTabId,
             isLoading: isLoading,
             menuControllerToClose: controller,
-            canGoBack: history?.canGoBack == true,
+            canGoBack: history.canGoBack,
           ),
         ),
         const SizedBox(height: 48, child: VerticalDivider()),
@@ -856,7 +855,7 @@ class _NavigationButtonsRow extends ConsumerWidget {
           child: NavigateForwardButton(
             selectedTabId: selectedTabId,
             menuControllerToClose: controller,
-            canGoForward: history?.canGoForward == true,
+            canGoForward: history.canGoForward,
           ),
         ),
       ],

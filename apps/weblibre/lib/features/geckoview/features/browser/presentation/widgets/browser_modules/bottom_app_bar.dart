@@ -815,8 +815,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
               )
               .value
         : null;
-    final sandboxCaptureMap =
-        ref.watch(sandboxCaptureMapProvider).value ?? const {};
+    final sandboxSourceUris = ref.watch(sandboxSourceUrisProvider).value;
     // Reorder is only meaningful when the bar renders the user's actual tab
     // order (containerTabs). Other modes (lastUsedTabs / MRU) sort by recency,
     // so dragging would just snap back on the next tab switch.
@@ -870,9 +869,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
             selectedTabId: selectedTabId,
             pinnedTabIds: pinnedTabIds,
             tabDepthById: tabDepthById,
-            sandboxSourceUri: parseSandboxSource(
-              sandboxCaptureMap[state.$1.id],
-            ),
+            sandboxSourceUri: sandboxSourceUris[state.$1.id],
             isPlaceholder:
                 !restoreComplete && !nativeTabIds.contains(state.$1.id),
           ),

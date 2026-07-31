@@ -35,6 +35,7 @@ import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/pending_tab_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
@@ -957,9 +958,15 @@ class TabRepository extends _$TabRepository {
                 return;
               }
 
+              final historyIsEmpty =
+                  ref
+                      .read(tabHistoryStatesProvider)[currentTabState.id]
+                      ?.items
+                      .isEmpty ??
+                  true;
+
               final tabIsEmpty =
-                  currentTabState.url == TabState.defaultUrl &&
-                  currentTabState.historyState.items.isEmpty;
+                  currentTabState.url == TabState.defaultUrl && historyIsEmpty;
 
               if (event.blocked || tabIsEmpty) {
                 final newTabId = await addTab(
@@ -976,7 +983,7 @@ class TabRepository extends _$TabRepository {
                   return;
                 }
 
-                if (currentTabState.historyState.items.isEmpty) {
+                if (historyIsEmpty) {
                   await closeTab(currentTabState.id);
                   if (!ref.mounted) {
                     return;

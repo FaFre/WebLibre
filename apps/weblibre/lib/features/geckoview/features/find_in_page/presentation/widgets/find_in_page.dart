@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
@@ -41,15 +42,13 @@ class FindInPageWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final findInPageState = ref.watch(findInPageControllerProvider(tabId));
-    final searchResult = ref.watch(
-      selectedTabStateProvider.select((state) => state?.findResultState),
-    );
+    final searchResult = ref.watch(tabFindResultStateProvider(tabId));
     final privateTabMode =
         ref.watch(tabStateProvider(tabId))?.tabMode == TabMode.private;
 
     final focusNode = useFocusNode();
     final textController = useTextEditingController(
-      text: searchResult?.lastSearchText ?? findInPageState.lastSearchText,
+      text: searchResult.lastSearchText ?? findInPageState.lastSearchText,
     );
 
     // Sync text field when the find-in-page query is set externally (e.g.,
@@ -88,7 +87,7 @@ class FindInPageWidget extends HookConsumerWidget {
     }
 
     return Visibility(
-      visible: findInPageState.visible || searchResult?.hasMatches == true,
+      visible: findInPageState.visible || searchResult.hasMatches,
       child: Padding(
         padding: padding,
         child: Material(
@@ -125,7 +124,7 @@ class FindInPageWidget extends HookConsumerWidget {
                   ),
                 ),
                 Text(
-                  (searchResult != null && searchResult.hasMatches)
+                  searchResult.hasMatches
                       ? '${searchResult.activeMatchOrdinal + 1} of ${searchResult.numberOfMatches}'
                       : 'Not found',
                 ),

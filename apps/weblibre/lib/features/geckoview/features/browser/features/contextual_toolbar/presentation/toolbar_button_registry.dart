@@ -26,6 +26,7 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
@@ -104,7 +105,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     label: 'Back',
     icon: Icons.arrow_back,
     isPrimaryAvailable: (scope, ref) {
-      final canGoBack = scope.tabState?.historyState.canGoBack == true;
+      final canGoBack = scope.historyState.canGoBack;
       final isLoading = scope.tabState?.isLoading == true;
       // The back button only doubles as a stop-loading control when no
       // dedicated reload button is present to take over that role.
@@ -132,8 +133,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: forwardToolbarButtonSpec,
     label: 'Forward',
     icon: Icons.arrow_forward,
-    isPrimaryAvailable: (scope, ref) =>
-        scope.tabState?.historyState.canGoForward == true,
+    isPrimaryAvailable: (scope, ref) => scope.historyState.canGoForward,
     longPressActions: ['History Menu (Forward pages)'],
     builder: (scope, context, ref) {
       if (scope.isPreview) {
@@ -1026,9 +1026,7 @@ class _TranslateToolbarButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isTranslated = ref.watch(
-      tabStateProvider(
-        selectedTabId,
-      ).select((s) => s?.translationState.isTranslated ?? false),
+      tabTranslationStateProvider(selectedTabId).select((s) => s.isTranslated),
     );
 
     return IconButton(

@@ -188,6 +188,81 @@ final class SandboxCaptureForTabFamily extends $Family
   String toString() => r'sandboxCaptureForTabProvider';
 }
 
+/// Canonical source URLs of sandbox-captured tabs, keyed by tabId.
+///
+/// [sandboxCaptureMapProvider] is a drift stream over the whole capture-tab
+/// table, so it re-emits a fresh map (and a fresh `CaptureTabData` per row) on
+/// any write to that table — including ones that touch columns nothing on
+/// screen renders. Consumers that build a tab-keyed list and only need the
+/// source URL watch this instead, so an unrelated write can't rebuild the
+/// always-visible quick tab switcher or the tab-preview list.
+
+@ProviderFor(sandboxSourceUris)
+final sandboxSourceUrisProvider = SandboxSourceUrisProvider._();
+
+/// Canonical source URLs of sandbox-captured tabs, keyed by tabId.
+///
+/// [sandboxCaptureMapProvider] is a drift stream over the whole capture-tab
+/// table, so it re-emits a fresh map (and a fresh `CaptureTabData` per row) on
+/// any write to that table — including ones that touch columns nothing on
+/// screen renders. Consumers that build a tab-keyed list and only need the
+/// source URL watch this instead, so an unrelated write can't rebuild the
+/// always-visible quick tab switcher or the tab-preview list.
+
+final class SandboxSourceUrisProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<Map<String, Uri>>,
+          EquatableValue<Map<String, Uri>>,
+          EquatableValue<Map<String, Uri>>
+        >
+    with $Provider<EquatableValue<Map<String, Uri>>> {
+  /// Canonical source URLs of sandbox-captured tabs, keyed by tabId.
+  ///
+  /// [sandboxCaptureMapProvider] is a drift stream over the whole capture-tab
+  /// table, so it re-emits a fresh map (and a fresh `CaptureTabData` per row) on
+  /// any write to that table — including ones that touch columns nothing on
+  /// screen renders. Consumers that build a tab-keyed list and only need the
+  /// source URL watch this instead, so an unrelated write can't rebuild the
+  /// always-visible quick tab switcher or the tab-preview list.
+  SandboxSourceUrisProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'sandboxSourceUrisProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$sandboxSourceUrisHash();
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<Map<String, Uri>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<Map<String, Uri>> create(Ref ref) {
+    return sandboxSourceUris(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EquatableValue<Map<String, Uri>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<EquatableValue<Map<String, Uri>>>(
+        value,
+      ),
+    );
+  }
+}
+
+String _$sandboxSourceUrisHash() => r'2d04e6e0e79c5b79e640386fe29e101fdd64688d';
+
 /// The canonical source URL of a sandbox-captured tab, or `null` when the
 /// tab is not a sandbox capture (the regular `tabState.url` should be used in
 /// that case).

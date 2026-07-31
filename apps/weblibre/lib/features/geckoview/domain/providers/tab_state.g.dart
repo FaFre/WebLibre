@@ -41,7 +41,7 @@ final class TabStatesProvider
   }
 }
 
-String _$tabStatesHash() => r'04b7f1ea704575e368a0f1186fc1c58f317620b1';
+String _$tabStatesHash() => r'1ae4e941890116eabf1803809014b3e575c33e73';
 
 abstract class _$TabStates extends $Notifier<Map<String, TabState>> {
   Map<String, TabState> build();
@@ -137,6 +137,68 @@ final class TabStateFamily extends $Family
   @override
   String toString() => r'tabStateProvider';
 }
+
+/// Projection of [tabStatesProvider] for consumers that order or filter tabs
+/// but render nothing from the state itself. Watching this instead of the full
+/// map keeps the (expensive) grouping/sorting passes off the path of every
+/// icon, security-info and readerable event.
+
+@ProviderFor(tabSortKeys)
+final tabSortKeysProvider = TabSortKeysProvider._();
+
+/// Projection of [tabStatesProvider] for consumers that order or filter tabs
+/// but render nothing from the state itself. Watching this instead of the full
+/// map keeps the (expensive) grouping/sorting passes off the path of every
+/// icon, security-info and readerable event.
+
+final class TabSortKeysProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<Map<String, TabSortKeys>>,
+          EquatableValue<Map<String, TabSortKeys>>,
+          EquatableValue<Map<String, TabSortKeys>>
+        >
+    with $Provider<EquatableValue<Map<String, TabSortKeys>>> {
+  /// Projection of [tabStatesProvider] for consumers that order or filter tabs
+  /// but render nothing from the state itself. Watching this instead of the full
+  /// map keeps the (expensive) grouping/sorting passes off the path of every
+  /// icon, security-info and readerable event.
+  TabSortKeysProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'tabSortKeysProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$tabSortKeysHash();
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<Map<String, TabSortKeys>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<Map<String, TabSortKeys>> create(Ref ref) {
+    return tabSortKeys(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EquatableValue<Map<String, TabSortKeys>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<EquatableValue<Map<String, TabSortKeys>>>(value),
+    );
+  }
+}
+
+String _$tabSortKeysHash() => r'7bf660099d006b6df9846594d2a5d78a32fa3bdb';
 
 @ProviderFor(tabStateWithFallback)
 final tabStateWithFallbackProvider = TabStateWithFallbackFamily._();

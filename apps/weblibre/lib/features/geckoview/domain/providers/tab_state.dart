@@ -19,6 +19,7 @@
  */
 import 'dart:async';
 
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
@@ -34,6 +35,7 @@ import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/translation.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
@@ -46,8 +48,33 @@ import 'package:weblibre/features/user/domain/repositories/proxy_routing_setting
 
 part 'tab_state.g.dart';
 
+/// Decode width for tab thumbnails. The screenshots arrive at full device
+/// resolution but are only ever shown in tab-tray previews a few hundred
+/// logical pixels wide, so decoding them at native size burns main-isolate
+/// time and GPU memory for detail nobody sees. Only the width is constrained
+/// so the decoder keeps the aspect ratio; upscaling is disabled so smaller
+/// sources are left alone.
+const thumbnailDecodeWidth = 720;
+
 @Riverpod(keepAlive: true)
 class TabStates extends _$TabStates {
+  /// Replaces the entry for [tabId] — but only when [next] actually differs.
+  ///
+  /// Every write here allocates a new map, and `Map` compares by identity, so
+  /// an unconditional assignment notifies *all* whole-map watchers (the quick
+  /// tab switcher, the grouped tab list, the FIFO list) even when nothing
+  /// changed. Gecko re-emits the full content state on every progress tick, so
+  /// without this guard a single page load pushed dozens of no-op rebuilds
+  /// through the entire browser chrome. [TabState] is `FastEquatable`, so the
+  /// comparison is a cached-hash check.
+  void _put(String tabId, TabState next) {
+    if (state[tabId] == next) {
+      return;
+    }
+
+    state = {...state}..[tabId] = next;
+  }
+
   Future<void> _onTabContentStateChange(TabContentState contentState) async {
     final current = await patchedState(contentState.id);
 
@@ -82,14 +109,19 @@ class TabStates extends _$TabStates {
       contextId: contentState.contextId,
       url: url,
       title: resolvedTitle,
-      progress: contentState.progress,
       tabMode: inferredTabMode,
       isFullScreen: contentState.isFullScreen,
       isLoading: contentState.isLoading,
       showToolbarAsExpanded: contentState.showToolbarAsExpanded,
     );
 
-    state = {...state}..[contentState.id] = newState;
+    _put(contentState.id, newState);
+
+    // Progress lives outside [TabState] so a load tick doesn't invalidate the
+    // whole map (and with it every chip in the quick tab switcher).
+    ref
+        .read(tabProgressStatesProvider.notifier)
+        .update(contentState.id, contentState.progress);
 
     // Only reconcile DB hierarchy when the engine parent link actually changes.
     // Content-state events also fire on every progress/title tick, and seeding
@@ -106,7 +138,7 @@ class TabStates extends _$TabStates {
           );
     }
 
-    if (newState.isFinishedLoading) {
+    if (!contentState.isLoading && contentState.progress == 100) {
       ref
           .read(geckoInferenceRepositoryProvider.notifier)
           .markInitialLoadComplete();
@@ -138,97 +170,111 @@ class TabStates extends _$TabStates {
     final IconChangeEvent(:tabId, :bytes) = event;
 
     final image = await bytes.mapNotNull((bytes) => tryDecodeImage(bytes));
-    final current = state[tabId] ?? TabState.$default(tabId);
 
-    state = {...state}..[tabId] = current.copyWith.icon(image);
+    if (!ref.mounted) {
+      return;
+    }
+
+    final current = state[tabId] ?? TabState.$default(tabId);
+    _put(tabId, current.copyWith.icon(image));
   }
 
   Future<void> _onThumbnailChange(ThumbnailEvent event) async {
     final ThumbnailEvent(:tabId, :bytes) = event;
 
-    final image = await bytes.mapNotNull((bytes) => tryDecodeImage(bytes));
-    final current = state[tabId] ?? TabState.$default(tabId);
+    final image = await bytes.mapNotNull(
+      (bytes) => tryDecodeImage(
+        bytes,
+        targetWidth: thumbnailDecodeWidth,
+        allowUpscaling: false,
+      ),
+    );
 
-    state = {...state}..[tabId] = current.copyWith.thumbnail(image);
+    if (!ref.mounted) {
+      return;
+    }
+
+    ref.read(tabThumbnailsProvider.notifier).update(tabId, image);
   }
 
   void _onSecurityInfoStateChange(SecurityInfoEvent event) {
     final SecurityInfoEvent(:tabId, :securityInfo) = event;
 
     final current = state[tabId] ?? TabState.$default(tabId);
-    state = {...state}
-      ..[tabId] = current.copyWith.securityInfoState(
+    _put(
+      tabId,
+      current.copyWith.securityInfoState(
         SecurityState(
           secure: securityInfo.secure,
           host: securityInfo.host,
           issuer: securityInfo.issuer,
         ),
-      );
+      ),
+    );
   }
 
   void _onHistoryStateChange(HistoryEvent event) {
     final HistoryEvent(:tabId, :history) = event;
 
-    final current = state[tabId] ?? TabState.$default(tabId);
-    state = {...state}
-      ..[tabId] = current.copyWith.historyState(
-        HistoryState(
-          items: history.items.nonNulls
-              .map(
-                (item) =>
-                    HistoryItem(url: Uri.parse(item.url), title: item.title),
-              )
-              .toList(),
-          currentIndex: history.currentIndex,
-          canGoBack: history.canGoBack,
-          canGoForward: history.canGoForward,
-        ),
-      );
+    ref
+        .read(tabHistoryStatesProvider.notifier)
+        .update(
+          tabId,
+          HistoryState(
+            items: history.items.nonNulls
+                .map(
+                  (item) =>
+                      HistoryItem(url: Uri.parse(item.url), title: item.title),
+                )
+                .toList(),
+            currentIndex: history.currentIndex,
+            canGoBack: history.canGoBack,
+            canGoForward: history.canGoForward,
+          ),
+        );
   }
 
   void _onReaderableStateChange(ReaderableEvent event) {
     final ReaderableEvent(:tabId, :readerable) = event;
 
     final current = state[tabId] ?? TabState.$default(tabId);
-    state = {...state}
-      ..[tabId] = current.copyWith.readerableState(
+    _put(
+      tabId,
+      current.copyWith.readerableState(
         ReaderableState(
           readerable: readerable.readerable,
           active: readerable.active,
         ),
-      );
+      ),
+    );
   }
 
   void _onTabTranslationStateChange(TabTranslationEvent event) {
     final TabTranslationEvent(:tabId, :state) = event;
 
-    final current = this.state[tabId] ?? TabState.$default(tabId);
-    this.state = {...this.state}
-      ..[tabId] = current.copyWith.translationState(
-        TranslationState.fromData(state),
-      );
+    ref
+        .read(tabTranslationStatesProvider.notifier)
+        .update(tabId, TranslationState.fromData(state));
   }
 
   void _onFindResultsChange(FindResultsEvent event) {
     final FindResultsEvent(:tabId, :results) = event;
-    final current = state[tabId] ?? TabState.$default(tabId);
+    final findResults = ref.read(tabFindResultStatesProvider.notifier);
 
     if (results.isNotEmpty) {
       final result = results.last;
 
-      state = {...state}
-        ..[tabId] = current.copyWith.findResultState(
-          FindResultState(
-            lastSearchText: ref.read(findInPageRepositoryProvider(tabId)),
-            activeMatchOrdinal: result.activeMatchOrdinal,
-            numberOfMatches: result.numberOfMatches,
-            isDoneCounting: result.isDoneCounting,
-          ),
-        );
-    } else if (current.findResultState.hasMatches) {
-      state = {
-        ...state,
-      }..[tabId] = current.copyWith.findResultState(FindResultState.$default());
+      findResults.update(
+        tabId,
+        FindResultState(
+          lastSearchText: ref.read(findInPageRepositoryProvider(tabId)),
+          activeMatchOrdinal: result.activeMatchOrdinal,
+          numberOfMatches: result.numberOfMatches,
+          isDoneCounting: result.isDoneCounting,
+        ),
+      );
+    } else if (findResults.resultFor(tabId).hasMatches) {
+      findResults.update(tabId, FindResultState.$default());
     }
   }
 
@@ -309,8 +355,15 @@ class TabStates extends _$TabStates {
           );
         },
       ),
+      // Gecko emits match counters at ~40/s while a find is running. 25ms let
+      // essentially every one of those through; 100ms is still well under the
+      // threshold where the counter feels laggy. Debounced *per tab* so a
+      // background tab still counting can't starve the foreground one.
       eventService.findResultsEvent
-          .debounceTime(const Duration(milliseconds: 25))
+          .groupBy((event) => event.tabId)
+          .flatMap(
+            (group) => group.debounceTime(const Duration(milliseconds: 100)),
+          )
           .listen(
             (event) {
               _onFindResultsChange(event);
@@ -379,6 +432,42 @@ TabState? tabState(Ref ref, String? tabId) {
   }
 
   return ref.watch(tabStatesProvider.select((tabs) => tabs[tabId]));
+}
+
+/// The only fields of [TabState] that tab filtering/sorting depends on.
+class TabSortKeys with FastEquatable {
+  final TabMode tabMode;
+  final String titleOrAuthority;
+  final String url;
+
+  TabSortKeys({
+    required this.tabMode,
+    required this.titleOrAuthority,
+    required this.url,
+  });
+
+  @override
+  List<Object?> get hashParameters => [tabMode, titleOrAuthority, url];
+}
+
+/// Projection of [tabStatesProvider] for consumers that order or filter tabs
+/// but render nothing from the state itself. Watching this instead of the full
+/// map keeps the (expensive) grouping/sorting passes off the path of every
+/// icon, security-info and readerable event.
+@Riverpod(keepAlive: true)
+EquatableValue<Map<String, TabSortKeys>> tabSortKeys(Ref ref) {
+  return ref.watch(
+    tabStatesProvider.select(
+      (states) => EquatableValue({
+        for (final MapEntry(:key, :value) in states.entries)
+          key: TabSortKeys(
+            tabMode: value.tabMode,
+            titleOrAuthority: value.titleOrAuthority,
+            url: value.url.toString(),
+          ),
+      }),
+    ),
+  );
 }
 
 @Riverpod()

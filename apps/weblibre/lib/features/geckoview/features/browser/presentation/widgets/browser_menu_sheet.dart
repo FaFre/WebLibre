@@ -20,7 +20,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ui' as ui;
 
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:fast_equatable/fast_equatable.dart';
@@ -46,6 +45,7 @@ import 'package:weblibre/features/geckoview/domain/entities/tab_container_select
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
@@ -70,6 +70,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_relation_visibility.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/domain/repositories/top_site_repository.dart';
+import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/proxy/data/models/singbox_proxy_profile.dart';
@@ -248,9 +249,7 @@ class _NavigationRow extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final history = ref.watch(
-      tabStateProvider(selectedTabId).select((value) => value?.historyState),
-    );
+    final history = ref.watch(tabHistoryStateProvider(selectedTabId));
     final host = ref.watch(
       tabStateProvider(selectedTabId).select((value) => value?.url.host),
     );
@@ -280,7 +279,7 @@ class _NavigationRow extends HookConsumerWidget {
           child: _buildNavIcon(
             icon: isLoading ? Icons.close : Icons.arrow_back,
             label: isLoading ? 'Stop' : 'Back',
-            disabled: !isLoading && history?.canGoBack != true,
+            disabled: !isLoading && !history.canGoBack,
             onTap: () async {
               final controller = ref.read(
                 tabSessionProvider(tabId: selectedTabId).notifier,
@@ -296,7 +295,7 @@ class _NavigationRow extends HookConsumerWidget {
               }
               if (context.mounted) Navigator.pop(context);
             },
-            onLongPress: isLoading || history?.canGoBack != true
+            onLongPress: isLoading || !history.canGoBack
                 ? null
                 : () {
                     if (backMenuController.isOpen) {
@@ -314,14 +313,14 @@ class _NavigationRow extends HookConsumerWidget {
           child: _buildNavIcon(
             icon: Icons.arrow_forward,
             label: 'Forward',
-            disabled: history?.canGoForward != true,
+            disabled: !history.canGoForward,
             onTap: () async {
               await ref
                   .read(tabSessionProvider(tabId: selectedTabId).notifier)
                   .goForward();
               if (context.mounted) Navigator.pop(context);
             },
-            onLongPress: history?.canGoForward != true
+            onLongPress: !history.canGoForward
                 ? null
                 : () {
                     if (forwardMenuController.isOpen) {
@@ -899,7 +898,7 @@ class _TranslatePageTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final engineState = ref.watch(translationEngineStateProvider);
     final translationState = ref.watch(
-      tabStateProvider(selectedTabId).select((s) => s?.translationState),
+      tabTranslationStateProvider(selectedTabId),
     );
     final readerActive = ref.watch(
       tabStateProvider(
@@ -912,7 +911,7 @@ class _TranslatePageTile extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    final isTranslated = translationState?.isTranslated ?? false;
+    final isTranslated = translationState.isTranslated;
 
     return Column(
       children: [
@@ -1470,29 +1469,15 @@ class _ShareExpansion extends HookConsumerWidget {
               final ts = ref.read(tabStateProvider(selectedTabId))!;
 
               if (screenshot != null) {
-                ui.decodeImageFromList(screenshot, (result) async {
-                  try {
-                    final png = await result.toByteData(
-                      format: ui.ImageByteFormat.png,
-                    );
+                final png = await encodeScreenshotAsPng(screenshot);
 
-                    if (png != null) {
-                      final file = XFile.fromData(
-                        png.buffer.asUint8List(),
-                        mimeType: 'image/png',
-                      );
+                if (png != null) {
+                  final file = XFile.fromData(png, mimeType: 'image/png');
 
-                      await SharePlus.instance.share(
-                        ShareParams(
-                          files: [file],
-                          subject: ts.titleOrAuthority,
-                        ),
-                      );
-                    }
-                  } finally {
-                    result.dispose();
-                  }
-                });
+                  await SharePlus.instance.share(
+                    ShareParams(files: [file], subject: ts.titleOrAuthority),
+                  );
+                }
               }
 
               if (context.mounted) Navigator.pop(context);
@@ -1771,24 +1756,16 @@ class _ExportExpansion extends ConsumerWidget {
               final ts = ref.read(tabStateProvider(selectedTabId))!;
 
               if (screenshot != null) {
-                ui.decodeImageFromList(screenshot, (result) async {
-                  try {
-                    final png = await result.toByteData(
-                      format: ui.ImageByteFormat.png,
-                    );
+                final png = await encodeScreenshotAsPng(screenshot);
 
-                    if (png != null) {
-                      await FilePicker.saveFile(
-                        fileName: '${ts.titleOrAuthority}.png',
-                        type: FileType.custom,
-                        allowedExtensions: ['png'],
-                        bytes: png.buffer.asUint8List(),
-                      );
-                    }
-                  } finally {
-                    result.dispose();
-                  }
-                });
+                if (png != null) {
+                  await FilePicker.saveFile(
+                    fileName: '${ts.titleOrAuthority}.png',
+                    type: FileType.custom,
+                    allowedExtensions: ['png'],
+                    bytes: png,
+                  );
+                }
               }
 
               if (context.mounted) Navigator.pop(context);

@@ -1092,7 +1092,7 @@ final class FilteredTabPreviewsProvider
 }
 
 String _$filteredTabPreviewsHash() =>
-    r'074df0d2000ae325fbd1db775abe4836491b32dd';
+    r'e291cdb7848c9607d388f8fdfb640f25265fca03';
 
 final class FilteredTabPreviewsFamily extends $Family
     with
@@ -1212,7 +1212,7 @@ final class GroupedTabListItemsProvider
 }
 
 String _$groupedTabListItemsHash() =>
-    r'dbb510f22c00858fcbadfb94547d46841221fca4';
+    r'd7158c50ca34014d63044e7fb52a7197245c59ad';
 
 /// Grouped flat-list rendering for the list and grid views.
 ///

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
     as fmc;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -74,6 +75,26 @@ CaptureTabData? sandboxCaptureForTab(Ref ref, {required String? tabId}) {
   if (tabId == null) return null;
   final map = ref.watch(sandboxCaptureMapProvider).value;
   return map?[tabId];
+}
+
+/// Canonical source URLs of sandbox-captured tabs, keyed by tabId.
+///
+/// [sandboxCaptureMapProvider] is a drift stream over the whole capture-tab
+/// table, so it re-emits a fresh map (and a fresh `CaptureTabData` per row) on
+/// any write to that table — including ones that touch columns nothing on
+/// screen renders. Consumers that build a tab-keyed list and only need the
+/// source URL watch this instead, so an unrelated write can't rebuild the
+/// always-visible quick tab switcher or the tab-preview list.
+@Riverpod(keepAlive: true)
+EquatableValue<Map<String, Uri>> sandboxSourceUris(Ref ref) {
+  final rows = ref.watch(sandboxCaptureMapProvider).value ?? const {};
+
+  // Equatable result, so a re-emit that doesn't change any source URL stops
+  // here instead of propagating.
+  return EquatableValue({
+    for (final MapEntry(:key, :value) in rows.entries)
+      if (parseSandboxSource(value) case final uri?) key: uri,
+  });
 }
 
 /// The canonical source URL of a sandbox-captured tab, or `null` when the

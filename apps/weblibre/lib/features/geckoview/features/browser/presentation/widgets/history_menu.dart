@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/history.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/history_menu_item.dart';
 
@@ -42,9 +43,7 @@ class HistoryMenu extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final historyState = ref.watch(
-      tabStateProvider(selectedTabId).select((state) => state?.historyState),
-    );
+    final historyState = ref.watch(tabHistoryStateProvider(selectedTabId));
 
     final menuItems = useMemoized(() => _buildMenuItems(historyState), [
       historyState,
@@ -58,8 +57,8 @@ class HistoryMenu extends HookConsumerWidget {
     );
   }
 
-  List<Widget> _buildMenuItems(HistoryState? historyState) {
-    if (historyState == null || historyState.items.isEmpty) {
+  List<Widget> _buildMenuItems(HistoryState historyState) {
+    if (historyState.items.isEmpty) {
       return [
         MenuItemButton(
           child: Text(

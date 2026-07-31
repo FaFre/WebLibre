@@ -33,7 +33,26 @@ class SingboxProxyLogsScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final logs = ref.watch(singboxProxyLogsProvider);
+    // The ring buffer fills from app start but only publishes snapshots while
+    // this screen is up, so opt in for as long as we're mounted. Seeded from
+    // the notifier's live buffer during the first build, so the backlog is
+    // painted immediately rather than after the first published snapshot.
+    final logsState = useState(
+      useMemoized(() => ref.read(singboxProxyLogsProvider.notifier).snapshot),
+    );
+
+    useEffect(() {
+      final notifier = ref.read(singboxProxyLogsProvider.notifier);
+      notifier.setLivePublishing(true);
+
+      return () => notifier.setLivePublishing(false);
+    }, []);
+
+    ref.listen(singboxProxyLogsProvider, (previous, next) {
+      logsState.value = next;
+    });
+
+    final logs = logsState.value;
     final filter = useState<String?>(null);
     final autoScroll = useState(true);
     final scrollController = useScrollController();
@@ -71,9 +90,14 @@ class SingboxProxyLogsScreen extends HookConsumerWidget {
       return () => scrollController.removeListener(onScroll);
     }, [scrollController]);
 
-    final filtered = filter.value == null
-        ? logs
-        : logs.where((m) => m.level.toLowerCase() == filter.value).toList();
+    // Memoized so scroll-driven rebuilds (autoScroll flipping) don't re-scan
+    // up to 2000 entries; only a new snapshot or a filter change does.
+    final filtered = useMemoized(
+      () => filter.value == null
+          ? logs
+          : logs.where((m) => m.level.toLowerCase() == filter.value).toList(),
+      [logs, filter.value],
+    );
 
     return Scaffold(
       appBar: AppBar(

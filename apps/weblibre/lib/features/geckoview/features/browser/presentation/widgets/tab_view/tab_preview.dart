@@ -25,6 +25,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
@@ -174,6 +175,8 @@ class GridTabPreview extends HookConsumerWidget {
         ) ??
         TabState.$default(tabId);
 
+    final thumbnail = ref.watch(tabThumbnailProvider(tabId));
+
     final sandboxSourceUri = ref.watch(
       sandboxSourceUriForTabProvider(tabId: tabId),
     );
@@ -233,13 +236,9 @@ class GridTabPreview extends HookConsumerWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  if (tabState.thumbnail != null &&
-                      !tabState.thumbnail!.isDisposed)
+                  if (thumbnail != null && !thumbnail.isDisposed)
                     RepaintBoundary(
-                      child: SafeRawImage(
-                        image: tabState.thumbnail,
-                        fit: BoxFit.cover,
-                      ),
+                      child: SafeRawImage(image: thumbnail, fit: BoxFit.cover),
                     )
                   else
                     Center(child: TabIcon(tabState: tabState, iconSize: 48)),
@@ -498,6 +497,12 @@ class ListTabPreview extends HookConsumerWidget {
       generalSettingsWithDefaultsProvider.select((s) => s.tabListShowFavicons),
     );
 
+    // Only the leading tile renders the thumbnail, and only when favicons are
+    // off — don't subscribe to screenshot churn otherwise.
+    final thumbnail = tabListShowFavicons
+        ? null
+        : ref.watch(tabThumbnailProvider(tabId));
+
     final extendedDeleteMenuController = useMenuController();
 
     // ignore: avoid_bool_literals_in_conditional_expressions
@@ -509,7 +514,7 @@ class ListTabPreview extends HookConsumerWidget {
           )
         : false;
 
-    final leadingWidget = switch ((tabListShowFavicons, tabState.thumbnail)) {
+    final leadingWidget = switch ((tabListShowFavicons, thumbnail)) {
       (false, final thumbnail?) when !thumbnail.isDisposed => ClipRRect(
         borderRadius: const BorderRadius.all(Radius.circular(8.0)),
         child: RepaintBoundary(
@@ -799,7 +804,104 @@ class SingleGridTabPreview extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dragStartPosition = useRef(Offset.zero);
-    final draggedDistance = useState(0.0);
+    // A ValueNotifier rather than useState: the drag fires per pointer event,
+    // and useState would rebuild this whole subtree — thumbnail, favicon,
+    // title, menus, badges — inside a scrolling list on every one. Only the
+    // ValueListenableBuilder below reruns now.
+    final draggedDistance = useValueNotifier(0.0);
+
+    // Built once per rebuild of *this* widget and handed to the builder as its
+    // `child`, so the drag never reconstructs it.
+    final preview = RepaintBoundary(
+      child: GridTabPreview(
+        tabId: tabId,
+        isActive: tabId == activeTabId,
+        showPinBadge: true,
+        groupToggle: groupToggle,
+        depth: depth,
+        onTap: () async {
+          if (tabId != activeTabId) {
+            // Offer to locate the match within the page instead of opening
+            // Find in Page unprompted (see #421). Shown before onClose so it
+            // surfaces on the root messenger and survives the tray closing.
+            final query = sourceSearchQuery;
+            if (query != null &&
+                query.isNotEmpty &&
+                ref.read(findInPageControllerProvider(tabId)) ==
+                    FindInPageState.hidden()) {
+              final findController = ref.read(
+                findInPageControllerProvider(tabId).notifier,
+              );
+              ui_helper.showFindInPageSuggestion(
+                context,
+                query: query,
+                onFind: () => findController.findAll(text: query),
+              );
+            }
+
+            //Close first to avoid rebuilds
+            onClose();
+            await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
+          } else {
+            onClose();
+          }
+        },
+        onDeleteAll: (host) async {
+          final containerId = await ref
+              .read(tabDataRepositoryProvider.notifier)
+              .getTabContainerId(tabId);
+
+          final count = await ref
+              .read(tabDataRepositoryProvider.notifier)
+              .closeAllTabsByHost(containerId, host);
+
+          if (context.mounted) {
+            ui_helper.showTabUndoClose(
+              context,
+              ref.read(tabRepositoryProvider.notifier).undoClose,
+              count: count,
+            );
+          }
+        },
+        onCloseSubtree: () async {
+          final subtreeIds = await ref
+              .read(tabDataRepositoryProvider.notifier)
+              .getTabDescendants(tabId)
+              .then((descendants) => descendants.keys.toList());
+          if (!context.mounted) return;
+
+          final didClose = await closeTabsWithConfirmation(
+            context,
+            ref,
+            subtreeIds,
+          );
+
+          if (context.mounted && didClose) {
+            ui_helper.showTabUndoClose(
+              context,
+              ref.read(tabRepositoryProvider.notifier).undoClose,
+              count: subtreeIds.length,
+            );
+          }
+        },
+        onDelete: () async {
+          onBeforeDelete?.call();
+
+          if (!await _confirmIsolatedTabCloseIfNeeded(context, ref, tabId)) {
+            return;
+          }
+
+          await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
+
+          if (context.mounted) {
+            ui_helper.showTabUndoClose(
+              context,
+              ref.read(tabRepositoryProvider.notifier).undoClose,
+            );
+          }
+        },
+      ),
+    );
 
     return GestureDetector(
       onHorizontalDragStart: (details) {
@@ -807,12 +909,10 @@ class SingleGridTabPreview extends HookConsumerWidget {
         draggedDistance.value = 0.0;
       },
       onHorizontalDragUpdate: (details) {
-        final cappedDistance = math.min(
+        draggedDistance.value = math.min(
           (dragStartPosition.value - details.globalPosition).dx.abs(),
           deleteThreshold,
         );
-
-        draggedDistance.value = cappedDistance;
       },
       onHorizontalDragEnd: (details) async {
         if (draggedDistance.value >= deleteThreshold) {
@@ -833,96 +933,14 @@ class SingleGridTabPreview extends HookConsumerWidget {
 
         draggedDistance.value = 0.0;
       },
-      child: Opacity(
-        opacity: 1.0 - draggedDistance.value / deleteThreshold,
-        child: GridTabPreview(
-          tabId: tabId,
-          isActive: tabId == activeTabId,
-          showPinBadge: true,
-          groupToggle: groupToggle,
-          depth: depth,
-          onTap: () async {
-            if (tabId != activeTabId) {
-              // Offer to locate the match within the page instead of opening
-              // Find in Page unprompted (see #421). Shown before onClose so it
-              // surfaces on the root messenger and survives the tray closing.
-              final query = sourceSearchQuery;
-              if (query != null &&
-                  query.isNotEmpty &&
-                  ref.read(findInPageControllerProvider(tabId)) ==
-                      FindInPageState.hidden()) {
-                final findController = ref.read(
-                  findInPageControllerProvider(tabId).notifier,
-                );
-                ui_helper.showFindInPageSuggestion(
-                  context,
-                  query: query,
-                  onFind: () => findController.findAll(text: query),
-                );
-              }
-
-              //Close first to avoid rebuilds
-              onClose();
-              await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
-            } else {
-              onClose();
-            }
-          },
-          onDeleteAll: (host) async {
-            final containerId = await ref
-                .read(tabDataRepositoryProvider.notifier)
-                .getTabContainerId(tabId);
-
-            final count = await ref
-                .read(tabDataRepositoryProvider.notifier)
-                .closeAllTabsByHost(containerId, host);
-
-            if (context.mounted) {
-              ui_helper.showTabUndoClose(
-                context,
-                ref.read(tabRepositoryProvider.notifier).undoClose,
-                count: count,
-              );
-            }
-          },
-          onCloseSubtree: () async {
-            final subtreeIds = await ref
-                .read(tabDataRepositoryProvider.notifier)
-                .getTabDescendants(tabId)
-                .then((descendants) => descendants.keys.toList());
-            if (!context.mounted) return;
-
-            final didClose = await closeTabsWithConfirmation(
-              context,
-              ref,
-              subtreeIds,
-            );
-
-            if (context.mounted && didClose) {
-              ui_helper.showTabUndoClose(
-                context,
-                ref.read(tabRepositoryProvider.notifier).undoClose,
-                count: subtreeIds.length,
-              );
-            }
-          },
-          onDelete: () async {
-            onBeforeDelete?.call();
-
-            if (!await _confirmIsolatedTabCloseIfNeeded(context, ref, tabId)) {
-              return;
-            }
-
-            await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
-
-            if (context.mounted) {
-              ui_helper.showTabUndoClose(
-                context,
-                ref.read(tabRepositoryProvider.notifier).undoClose,
-              );
-            }
-          },
-        ),
+      child: ValueListenableBuilder<double>(
+        valueListenable: draggedDistance,
+        // Kept unconditionally (rather than skipping it at rest) so the
+        // element tree doesn't reshape on drag start/end. Opacity at 1.0
+        // pushes no layer, so this costs nothing when not dragging.
+        builder: (context, distance, child) =>
+            Opacity(opacity: 1.0 - distance / deleteThreshold, child: child),
+        child: preview,
       ),
     );
   }
@@ -955,7 +973,100 @@ class SingleListTabPreview extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dragStartPosition = useRef(Offset.zero);
-    final draggedDistance = useState(0.0);
+    // See [SingleGridTabPreview]: per-pointer-event drag updates must not
+    // rebuild the row's subtree inside a scrolling list.
+    final draggedDistance = useValueNotifier(0.0);
+
+    final preview = RepaintBoundary(
+      child: ListTabPreview(
+        tabId: tabId,
+        isActive: tabId == activeTabId,
+        showPinBadge: true,
+        groupToggle: groupToggle,
+        depth: depth,
+        onTap: () async {
+          if (tabId != activeTabId) {
+            // Offer to locate the match within the page instead of opening
+            // Find in Page unprompted (see #421). Shown before onClose so it
+            // surfaces on the root messenger and survives the tray closing.
+            final query = sourceSearchQuery;
+            if (query != null &&
+                query.isNotEmpty &&
+                ref.read(findInPageControllerProvider(tabId)) ==
+                    FindInPageState.hidden()) {
+              final findController = ref.read(
+                findInPageControllerProvider(tabId).notifier,
+              );
+              ui_helper.showFindInPageSuggestion(
+                context,
+                query: query,
+                onFind: () => findController.findAll(text: query),
+              );
+            }
+
+            //Close first to avoid rebuilds
+            onClose();
+            await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
+          } else {
+            onClose();
+          }
+        },
+        onDeleteAll: (host) async {
+          final containerId = await ref
+              .read(tabDataRepositoryProvider.notifier)
+              .getTabContainerId(tabId);
+
+          final count = await ref
+              .read(tabDataRepositoryProvider.notifier)
+              .closeAllTabsByHost(containerId, host);
+
+          if (context.mounted) {
+            ui_helper.showTabUndoClose(
+              context,
+              ref.read(tabRepositoryProvider.notifier).undoClose,
+              count: count,
+            );
+          }
+        },
+        onCloseSubtree: () async {
+          final subtreeIds = await ref
+              .read(tabDataRepositoryProvider.notifier)
+              .getTabDescendants(tabId)
+              .then((descendants) => descendants.keys.toList());
+          if (!context.mounted) return;
+
+          final didClose = await closeTabsWithConfirmation(
+            context,
+            ref,
+            subtreeIds,
+          );
+
+          if (context.mounted && didClose) {
+            ui_helper.showTabUndoClose(
+              context,
+              ref.read(tabRepositoryProvider.notifier).undoClose,
+              count: subtreeIds.length,
+            );
+          }
+        },
+        onDelete: () async {
+          onBeforeDelete?.call();
+
+          if (!await _confirmIsolatedTabCloseIfNeeded(context, ref, tabId)) {
+            return;
+          }
+
+          await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
+
+          if (context.mounted) {
+            ui_helper.showTabUndoClose(
+              context,
+              ref.read(tabRepositoryProvider.notifier).undoClose,
+            );
+          }
+        },
+      ),
+    );
 
     return GestureDetector(
       onHorizontalDragStart: (details) {
@@ -963,12 +1074,10 @@ class SingleListTabPreview extends HookConsumerWidget {
         draggedDistance.value = 0.0;
       },
       onHorizontalDragUpdate: (details) {
-        final cappedDistance = math.min(
+        draggedDistance.value = math.min(
           (dragStartPosition.value - details.globalPosition).dx.abs(),
           deleteThreshold,
         );
-
-        draggedDistance.value = cappedDistance;
       },
       onHorizontalDragEnd: (details) async {
         if (draggedDistance.value >= deleteThreshold) {
@@ -989,96 +1098,11 @@ class SingleListTabPreview extends HookConsumerWidget {
 
         draggedDistance.value = 0.0;
       },
-      child: Opacity(
-        opacity: 1.0 - draggedDistance.value / deleteThreshold,
-        child: ListTabPreview(
-          tabId: tabId,
-          isActive: tabId == activeTabId,
-          showPinBadge: true,
-          groupToggle: groupToggle,
-          depth: depth,
-          onTap: () async {
-            if (tabId != activeTabId) {
-              // Offer to locate the match within the page instead of opening
-              // Find in Page unprompted (see #421). Shown before onClose so it
-              // surfaces on the root messenger and survives the tray closing.
-              final query = sourceSearchQuery;
-              if (query != null &&
-                  query.isNotEmpty &&
-                  ref.read(findInPageControllerProvider(tabId)) ==
-                      FindInPageState.hidden()) {
-                final findController = ref.read(
-                  findInPageControllerProvider(tabId).notifier,
-                );
-                ui_helper.showFindInPageSuggestion(
-                  context,
-                  query: query,
-                  onFind: () => findController.findAll(text: query),
-                );
-              }
-
-              //Close first to avoid rebuilds
-              onClose();
-              await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
-            } else {
-              onClose();
-            }
-          },
-          onDeleteAll: (host) async {
-            final containerId = await ref
-                .read(tabDataRepositoryProvider.notifier)
-                .getTabContainerId(tabId);
-
-            final count = await ref
-                .read(tabDataRepositoryProvider.notifier)
-                .closeAllTabsByHost(containerId, host);
-
-            if (context.mounted) {
-              ui_helper.showTabUndoClose(
-                context,
-                ref.read(tabRepositoryProvider.notifier).undoClose,
-                count: count,
-              );
-            }
-          },
-          onCloseSubtree: () async {
-            final subtreeIds = await ref
-                .read(tabDataRepositoryProvider.notifier)
-                .getTabDescendants(tabId)
-                .then((descendants) => descendants.keys.toList());
-            if (!context.mounted) return;
-
-            final didClose = await closeTabsWithConfirmation(
-              context,
-              ref,
-              subtreeIds,
-            );
-
-            if (context.mounted && didClose) {
-              ui_helper.showTabUndoClose(
-                context,
-                ref.read(tabRepositoryProvider.notifier).undoClose,
-                count: subtreeIds.length,
-              );
-            }
-          },
-          onDelete: () async {
-            onBeforeDelete?.call();
-
-            if (!await _confirmIsolatedTabCloseIfNeeded(context, ref, tabId)) {
-              return;
-            }
-
-            await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
-
-            if (context.mounted) {
-              ui_helper.showTabUndoClose(
-                context,
-                ref.read(tabRepositoryProvider.notifier).undoClose,
-              );
-            }
-          },
-        ),
+      child: ValueListenableBuilder<double>(
+        valueListenable: draggedDistance,
+        builder: (context, distance, child) =>
+            Opacity(opacity: 1.0 - distance / deleteThreshold, child: child),
+        child: preview,
       ),
     );
   }

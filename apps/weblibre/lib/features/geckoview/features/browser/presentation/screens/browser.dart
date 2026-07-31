@@ -35,6 +35,7 @@ import 'package:weblibre/features/geckoview/domain/controllers/overlay.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
@@ -492,9 +493,14 @@ class _BrowserContentPositioned extends ConsumerWidget {
     final toolbarState = ref.watch(
       toolbarVisibilityControllerProvider(selectedTabId),
     );
+    // Deliberately does NOT include `sheetDisplayed` (unlike the layers that
+    // render chrome above the page). A sheet is painted over the browser, so
+    // letting it force the toolbar "visible" here would move the Positioned
+    // that wraps the platform view — a native re-layout, and under hybrid
+    // composition a surface recreation, in the same frame as the sheet's
+    // slide-in. The geometry the page sees stays frozen while a sheet is up.
     final toolbarVisible =
-        sheetDisplayed ||
-        (!tabInFullScreen && toolbarState == ToolbarVisibility.visible);
+        !tabInFullScreen && toolbarState == ToolbarVisibility.visible;
 
     // When auto-hide is disabled, constrain browser above toolbar
     // (unless toolbar is manually dismissed via swipe gesture).
@@ -527,11 +533,14 @@ class _BrowserContentPositioned extends ConsumerWidget {
     // hidden state is still handled by GeckoView's dynamic
     // toolbar/clipping logic. On the rail there is never a bottom
     // bar, so the browser always needs the bottom safe inset.
+    //
+    // `sheetDisplayed` is likewise excluded here: toggling the safe-area
+    // padding on sheet open/close would resize the platform view for content
+    // the sheet covers anyway.
     final applyBottomSafeArea = isRail
-        ? (!tabInFullScreen && !isSmallWebActive && !sheetDisplayed)
+        ? (!tabInFullScreen && !isSmallWebActive)
         : (!tabInFullScreen &&
               !isSmallWebActive &&
-              !sheetDisplayed &&
               bottomOffset == 0 &&
               toolbarState == ToolbarVisibility.dismissed);
 
@@ -812,16 +821,13 @@ class _ProgressIndicatorBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final value = ref.watch(
-      selectedTabStateProvider.select((state) {
-        if (state?.isLoading == true) {
-          return state?.progress ?? 100;
-        }
-
-        //When not loading we assumed finished
-        return 100;
-      }),
+    final tabId = ref.watch(selectedTabProvider);
+    final isLoading = ref.watch(
+      tabStateProvider(tabId).select((state) => state?.isLoading == true),
     );
+
+    //When not loading we assumed finished
+    final value = isLoading ? ref.watch(tabProgressProvider(tabId)) : 100;
 
     return Visibility(
       visible: value < 100,
@@ -1182,13 +1188,26 @@ class BrowserScreen extends HookConsumerWidget {
 
     // Calculate bottom toolbar size for FAB and sheet positioning
     final Size bottomAppBarContentSize;
+    // The same size computed as if no sheet were displayed. `ViewTabsSheet`
+    // hides the main toolbar and the quick tab switcher, which shrinks the bar
+    // by 48-152px — and that value feeds the browser's viewport geometry
+    // (dynamic toolbar inset, vertical clipping and the Positioned that wraps
+    // the platform view). Resizing the Gecko viewport when a sheet opens costs
+    // a page reflow plus, under hybrid composition, a native surface
+    // recreation — all in the same frame as the sheet's slide-in animation.
+    // The sheet is drawn *on top* of the page, so the page's viewport has no
+    // reason to change: the inset math below uses this frozen value while the
+    // widgets that actually render the bar keep the real one.
+    final Size viewportBottomAppBarContentSize;
     if (isSmallWebActive) {
       bottomAppBarContentSize = const Size.fromHeight(
         SmallWebBrowserOverlay.barHeight,
       );
+      viewportBottomAppBarContentSize = bottomAppBarContentSize;
     } else if (isRail) {
       // The rail occupies a side, not the bottom; no bottom bar is rendered.
       bottomAppBarContentSize = Size.zero;
+      viewportBottomAppBarContentSize = bottomAppBarContentSize;
     } else {
       // Pass actual displayedSheet to get correct height when ViewTabsSheet hides main toolbar
       bottomAppBarContentSize = BrowserBottomAppBar(
@@ -1198,10 +1217,21 @@ class BrowserScreen extends HookConsumerWidget {
         isSmallWebMode: false,
         displayedSheet: displayedSheet,
       ).preferredSize;
+      viewportBottomAppBarContentSize = displayedSheet == null
+          ? bottomAppBarContentSize
+          : BrowserBottomAppBar(
+              showMainToolbar: tabBarPosition == TabBarPosition.bottom,
+              showContextualToolbar: showContextualToolbar,
+              quickTabSwitcherRowCount: quickTabSwitcherRowCount,
+              isSmallWebMode: false,
+              displayedSheet: null,
+            ).preferredSize;
     }
     // Total height includes safe area padding
     final bottomAppBarTotalHeight =
         bottomAppBarContentSize.height + bottomSafeArea;
+    final viewportBottomAppBarTotalHeight =
+        viewportBottomAppBarContentSize.height + bottomSafeArea;
 
     // Side rail width reservation (vertical positions only): the fixed content
     // width plus the system safe-area inset on the rail's outer edge.
@@ -1262,7 +1292,8 @@ class BrowserScreen extends HookConsumerWidget {
     final autoHideToolbarHeight = switch (tabBarPosition) {
       // Gecko's dynamic toolbar value is consumed as a bottom inset by Dart and
       // native UI. The top toolbar itself is positioned with Flutter's topOffset.
-      TabBarPosition.top || TabBarPosition.bottom => bottomAppBarTotalHeight,
+      TabBarPosition.top ||
+      TabBarPosition.bottom => viewportBottomAppBarTotalHeight,
       TabBarPosition.left || TabBarPosition.right => 0.0,
     };
 
@@ -1348,7 +1379,7 @@ class BrowserScreen extends HookConsumerWidget {
       // When visible/dismissed or overridden by keyboard/loading: no clipping.
       final hiddenToolbarClippingPx = switch (tabBarPosition) {
         TabBarPosition.top || TabBarPosition.bottom =>
-          -(bottomAppBarTotalHeight * pixelRatio).round(),
+          -(viewportBottomAppBarTotalHeight * pixelRatio).round(),
         TabBarPosition.left || TabBarPosition.right => 0,
       };
       final targetClippingPx =
@@ -1402,7 +1433,7 @@ class BrowserScreen extends HookConsumerWidget {
         keyboardVisible,
         tabIsLoading,
         tabInFullScreen,
-        bottomAppBarTotalHeight,
+        viewportBottomAppBarTotalHeight,
         pixelRatio,
         selectedTabId,
         tabBarPosition,
@@ -1601,6 +1632,12 @@ class _SheetContainer extends HookConsumerWidget {
     required this.bottomAppBarHeight,
   });
 
+  /// How far the scrim is allowed to extend *under* the sheet. The sheets round
+  /// their top corners (radius 28), and the page shows through those cutouts —
+  /// so the scrim has to reach a little past the sheet's top edge or the
+  /// corners would reveal unscrimmed content.
+  static const _sheetCornerOverlap = 32.0;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -1608,7 +1645,29 @@ class _SheetContainer extends HookConsumerWidget {
         Theme.of(context).bottomSheetTheme.modalBarrierColor ??
         colorScheme.scrim.withValues(alpha: 0.5);
 
-    bool dismissOnThreshold(DraggableScrollableNotification notification) {
+    final (sheet, initialExtent) = switch (displayedSheet) {
+      ViewTabsSheet() => (
+        _ViewTabsSheet(maxChildSize: relativeSafeArea),
+        _ViewTabsSheet.initialHeight,
+      ),
+      final SiteSettingsSheet parameter => (
+        _SiteSettingsSheet(
+          initialTabState: parameter.tabState,
+          maxChildSize: relativeSafeArea,
+          bottomAppBarHeight: bottomAppBarHeight,
+        ),
+        _SiteSettingsSheet.initialHeight,
+      ),
+    };
+
+    // Drives the scrim's height. Seeded with the sheet's initial extent so the
+    // very first frame is already clipped correctly, then tracked from the
+    // sheet's own drag notifications.
+    final sheetExtent = useValueNotifier(initialExtent);
+
+    bool onSheetNotification(DraggableScrollableNotification notification) {
+      sheetExtent.value = notification.extent;
+
       if (notification.extent <= 0.1) {
         logger.i('Dismissing sheet, reached min extend');
         ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
@@ -1617,36 +1676,61 @@ class _SheetContainer extends HookConsumerWidget {
       return false;
     }
 
-    return GestureDetector(
-      onTap: () {
-        // Dismiss sheet when tapping outside
-        ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final available = constraints.maxHeight;
+
+        return Stack(
+          children: [
+            // Scrim. Hit-testing stays full-area (opaque) so tapping anywhere
+            // the sheet doesn't occupy still dismisses — including beside a
+            // width-constrained sheet — but the *paint* is clipped to the band
+            // above the sheet. Under hybrid composition every pixel painted
+            // over the platform view goes through an overlay surface, and once
+            // the tab sheet settles near full extent almost all of a
+            // full-screen scrim is hidden behind it anyway.
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  ref
+                      .read(bottomSheetControllerProvider.notifier)
+                      .requestDismiss();
+                },
+                child: ValueListenableBuilder<double>(
+                  valueListenable: sheetExtent,
+                  builder: (context, extent, _) {
+                    final scrimHeight =
+                        (available * (1.0 - extent) + _sheetCornerOverlap)
+                            .clamp(0.0, available);
+
+                    return Align(
+                      alignment: Alignment.topCenter,
+                      child: SizedBox(
+                        height: scrimHeight,
+                        width: double.infinity,
+                        child: ColoredBox(color: modalBarrierColor),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+
+            // The sheet itself sits above the scrim, so taps on it hit its own
+            // widgets and taps above it fall through to the scrim's detector.
+            Positioned.fill(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: NotificationListener<DraggableScrollableNotification>(
+                  onNotification: onSheetNotification,
+                  child: sheet,
+                ),
+              ),
+            ),
+          ],
+        );
       },
-      child: ColoredBox(
-        color: modalBarrierColor,
-        child: GestureDetector(
-          onTap: () {}, // Prevent tap from propagating to parent
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: switch (displayedSheet) {
-              ViewTabsSheet() =>
-                NotificationListener<DraggableScrollableNotification>(
-                  onNotification: dismissOnThreshold,
-                  child: _ViewTabsSheet(maxChildSize: relativeSafeArea),
-                ),
-              final SiteSettingsSheet parameter =>
-                NotificationListener<DraggableScrollableNotification>(
-                  onNotification: dismissOnThreshold,
-                  child: _SiteSettingsSheet(
-                    initialTabState: parameter.tabState,
-                    maxChildSize: relativeSafeArea,
-                    bottomAppBarHeight: bottomAppBarHeight,
-                  ),
-                ),
-            },
-          ),
-        ),
-      ),
     );
   }
 }
@@ -1810,7 +1894,9 @@ class _Browser extends HookConsumerWidget {
                       .toggleReaderView(false);
 
                   return true;
-                } else if (tabState?.historyState.canGoBack == true) {
+                } else if (ref
+                    .read(tabHistoryStateProvider(tabState?.id))
+                    .canGoBack) {
                   lastBackButtonPress.value = null;
 
                   final controller = ref.read(selectedTabSessionProvider);
@@ -2036,6 +2122,10 @@ class _SiteSettingsSheet extends HookConsumerWidget {
 class _ViewTabsSheet extends HookConsumerWidget {
   final double maxChildSize;
 
+  /// Matches [DraggableScrollableSheet]'s default, made explicit so the
+  /// scrim in [_SheetContainer] can seed its clip from it.
+  static const initialHeight = 0.5;
+
   const _ViewTabsSheet({this.maxChildSize = 1.0});
 
   @override
@@ -2061,6 +2151,7 @@ class _ViewTabsSheet extends HookConsumerWidget {
       key: ValueKey(tabsReorderable),
       controller: draggableScrollableController,
       expand: false,
+      initialChildSize: initialHeight,
       minChildSize: 0.1,
       maxChildSize: maxChildSize,
       builder: (context, scrollController) {

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:weblibre/features/geckoview/domain/entities/states/history.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
@@ -26,6 +27,12 @@ class ContextualToolbarScope with FastEquatable {
   final String? selectedTabId;
   final Sheet? displayedSheet;
   final TabState? tabState;
+
+  /// Back/forward availability. Lives outside [TabState] (see
+  /// `providers/tab_detail_state.dart`) but the navigation buttons need it, so
+  /// the toolbar resolves it once and passes it down with the scope.
+  final HistoryState historyState;
+
   final bool isPreview;
 
   /// Which configuration set this scope renders for, so shared registry
@@ -38,14 +45,16 @@ class ContextualToolbarScope with FastEquatable {
     required this.displayedSheet,
     required this.tabState,
     required this.isPreview,
+    HistoryState? historyState,
     this.location = ToolbarConfigLocation.contextual,
-  });
+  }) : historyState = historyState ?? HistoryState.$default();
 
   @override
   List<Object?> get hashParameters => [
     selectedTabId,
     displayedSheet,
     tabState,
+    historyState,
     isPreview,
     location,
   ];

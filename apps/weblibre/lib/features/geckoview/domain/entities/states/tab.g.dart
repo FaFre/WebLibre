@@ -17,10 +17,6 @@ abstract class _$TabStateCWProxy {
 
   TabState icon(EquatableImage? icon);
 
-  TabState thumbnail(EquatableImage? thumbnail);
-
-  TabState progress(int progress);
-
   TabState tabMode(TabMode tabMode);
 
   TabState isFullScreen(bool isFullScreen);
@@ -31,13 +27,7 @@ abstract class _$TabStateCWProxy {
 
   TabState securityInfoState(SecurityState securityInfoState);
 
-  TabState historyState(HistoryState historyState);
-
   TabState readerableState(ReaderableState readerableState);
-
-  TabState findResultState(FindResultState findResultState);
-
-  TabState translationState(TranslationState translationState);
 
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TabState(...).copyWith.fieldName(value)`.
@@ -52,17 +42,12 @@ abstract class _$TabStateCWProxy {
     Uri url,
     String? title,
     EquatableImage? icon,
-    EquatableImage? thumbnail,
-    int progress,
     TabMode tabMode,
     bool isFullScreen,
     bool isLoading,
     bool showToolbarAsExpanded,
     SecurityState securityInfoState,
-    HistoryState historyState,
     ReaderableState readerableState,
-    FindResultState findResultState,
-    TranslationState translationState,
   });
 }
 
@@ -89,12 +74,6 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
   TabState icon(EquatableImage? icon) => call(icon: icon);
 
   @override
-  TabState thumbnail(EquatableImage? thumbnail) => call(thumbnail: thumbnail);
-
-  @override
-  TabState progress(int progress) => call(progress: progress);
-
-  @override
   TabState tabMode(TabMode tabMode) => call(tabMode: tabMode);
 
   @override
@@ -112,20 +91,8 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
       call(securityInfoState: securityInfoState);
 
   @override
-  TabState historyState(HistoryState historyState) =>
-      call(historyState: historyState);
-
-  @override
   TabState readerableState(ReaderableState readerableState) =>
       call(readerableState: readerableState);
-
-  @override
-  TabState findResultState(FindResultState findResultState) =>
-      call(findResultState: findResultState);
-
-  @override
-  TabState translationState(TranslationState translationState) =>
-      call(translationState: translationState);
 
   @override
   /// Creates a new instance with the provided field values.
@@ -141,17 +108,12 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
     Object? url = const $CopyWithPlaceholder(),
     Object? title = const $CopyWithPlaceholder(),
     Object? icon = const $CopyWithPlaceholder(),
-    Object? thumbnail = const $CopyWithPlaceholder(),
-    Object? progress = const $CopyWithPlaceholder(),
     Object? tabMode = const $CopyWithPlaceholder(),
     Object? isFullScreen = const $CopyWithPlaceholder(),
     Object? isLoading = const $CopyWithPlaceholder(),
     Object? showToolbarAsExpanded = const $CopyWithPlaceholder(),
     Object? securityInfoState = const $CopyWithPlaceholder(),
-    Object? historyState = const $CopyWithPlaceholder(),
     Object? readerableState = const $CopyWithPlaceholder(),
-    Object? findResultState = const $CopyWithPlaceholder(),
-    Object? translationState = const $CopyWithPlaceholder(),
   }) {
     return TabState._(
       id: _value.id,
@@ -175,14 +137,6 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
           ? _value.icon
           // ignore: cast_nullable_to_non_nullable
           : icon as EquatableImage?,
-      thumbnail: thumbnail == const $CopyWithPlaceholder()
-          ? _value.thumbnail
-          // ignore: cast_nullable_to_non_nullable
-          : thumbnail as EquatableImage?,
-      progress: progress == const $CopyWithPlaceholder() || progress == null
-          ? _value.progress
-          // ignore: cast_nullable_to_non_nullable
-          : progress as int,
       tabMode: tabMode == const $CopyWithPlaceholder() || tabMode == null
           ? _value.tabMode
           // ignore: cast_nullable_to_non_nullable
@@ -208,29 +162,12 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
           ? _value.securityInfoState
           // ignore: cast_nullable_to_non_nullable
           : securityInfoState as SecurityState,
-      historyState:
-          historyState == const $CopyWithPlaceholder() || historyState == null
-          ? _value.historyState
-          // ignore: cast_nullable_to_non_nullable
-          : historyState as HistoryState,
       readerableState:
           readerableState == const $CopyWithPlaceholder() ||
               readerableState == null
           ? _value.readerableState
           // ignore: cast_nullable_to_non_nullable
           : readerableState as ReaderableState,
-      findResultState:
-          findResultState == const $CopyWithPlaceholder() ||
-              findResultState == null
-          ? _value.findResultState
-          // ignore: cast_nullable_to_non_nullable
-          : findResultState as FindResultState,
-      translationState:
-          translationState == const $CopyWithPlaceholder() ||
-              translationState == null
-          ? _value.translationState
-          // ignore: cast_nullable_to_non_nullable
-          : translationState as TranslationState,
     );
   }
 }
