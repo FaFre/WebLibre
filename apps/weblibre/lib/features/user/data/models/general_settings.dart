@@ -92,7 +92,7 @@ enum TabIntentOpenSetting { regular, private, isolated, ask }
 /// Determines what happens when a bookmark is tapped in the bookmark list.
 /// [ask] shows the "open in..." sheet (today's behavior, and the default);
 /// the other values open the bookmark directly with no intermediate prompt.
-enum BookmarkOpenSetting { regular, isolated, customTab, ask }
+enum BookmarkOpenSetting { regular, private, isolated, customTab, ask }
 
 enum TabDirection { newestFirst, oldestFirst }
 

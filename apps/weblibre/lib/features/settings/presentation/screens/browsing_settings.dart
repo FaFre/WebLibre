@@ -479,6 +479,15 @@ class _BookmarkOpenBehaviorSection extends HookConsumerWidget {
                   subtitle: Text('Open the bookmark in a regular tab'),
                   secondary: Icon(MdiIcons.tab),
                 ),
+                RadioListTile.adaptive(
+                  value: BookmarkOpenSetting.private,
+                  title: const Text('Private'),
+                  subtitle: const Text('Open the bookmark in a private tab'),
+                  secondary: Icon(
+                    MdiIcons.dominoMask,
+                    color: AppColors.of(context).privateTabPurple,
+                  ),
+                ),
                 const RadioListTile.adaptive(
                   value: BookmarkOpenSetting.customTab,
                   title: Text('Custom Tab'),

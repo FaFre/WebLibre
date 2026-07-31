@@ -1352,6 +1352,7 @@ const _$TabIntentOpenSettingEnumMap = {
 
 const _$BookmarkOpenSettingEnumMap = {
   BookmarkOpenSetting.regular: 'regular',
+  BookmarkOpenSetting.private: 'private',
   BookmarkOpenSetting.isolated: 'isolated',
   BookmarkOpenSetting.customTab: 'customTab',
   BookmarkOpenSetting.ask: 'ask',

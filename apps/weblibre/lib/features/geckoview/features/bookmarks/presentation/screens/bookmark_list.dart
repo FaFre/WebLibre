@@ -1032,18 +1032,22 @@ class BookmarkListScreen extends HookConsumerWidget {
           const BrowserRoute().go(context);
         }
       case BookmarkOpenSetting.regular:
+      case BookmarkOpenSetting.private:
       case BookmarkOpenSetting.isolated:
-        final isolated =
-            settings.effectiveBookmarkOpenSetting ==
-            BookmarkOpenSetting.isolated;
+        final effective = settings.effectiveBookmarkOpenSetting;
+        final tabMode = switch (effective) {
+          BookmarkOpenSetting.private => TabMode.private,
+          BookmarkOpenSetting.isolated => TabMode.newIsolated(),
+          _ => TabMode.regular,
+        };
 
         await ref
             .read(tabRepositoryProvider.notifier)
             .addTab(
               url: url,
-              tabMode: isolated ? TabMode.newIsolated() : TabMode.regular,
+              tabMode: tabMode,
               selectTab: true,
-              containerSelection: isolated
+              containerSelection: effective == BookmarkOpenSetting.isolated
                   ? const TabContainerSelection.unassigned()
                   : const TabContainerSelection.useSelected(),
             );
