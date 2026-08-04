@@ -46,6 +46,11 @@ const forwardToolbarButtonSpec = ToolbarButtonSpec(
   defaultFallback: ToolbarButtonId.share,
 );
 
+const homeToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.home,
+  defaultVisible: false,
+);
+
 const historyToolbarButtonSpec = ToolbarButtonSpec(
   id: ToolbarButtonId.history,
   defaultVisible: false,
@@ -174,9 +179,16 @@ const toggleGesturesToolbarButtonSpec = ToolbarButtonSpec(
   defaultVisible: false,
 );
 
+const hideTabBarToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.hideTabBar,
+  defaultVisible: false,
+  canBeFallbackTarget: false,
+);
+
 const toolbarButtonSpecs = [
   backToolbarButtonSpec,
   forwardToolbarButtonSpec,
+  homeToolbarButtonSpec,
   historyToolbarButtonSpec,
   bookmarksToolbarButtonSpec,
   bookmarkToggleToolbarButtonSpec,
@@ -200,6 +212,7 @@ const toolbarButtonSpecs = [
   fontToolbarButtonSpec,
   extensionShortcutToolbarButtonSpec,
   toggleGesturesToolbarButtonSpec,
+  hideTabBarToolbarButtonSpec,
   quitToolbarButtonSpec,
 ];
 

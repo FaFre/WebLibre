@@ -162,6 +162,12 @@ enum GestureAction {
   ),
 
   // Open
+  showHome(
+    'Home',
+    'Open the home screen',
+    Icons.home_outlined,
+    GestureActionCategory.open,
+  ),
   showHistory(
     'History',
     'Open browsing history',
@@ -176,6 +182,12 @@ enum GestureAction {
   ),
 
   // App
+  toggleTabBar(
+    'Hide / Show Tab Bar',
+    'Hide the tab bar, or bring it back',
+    MdiIcons.dockBottom,
+    GestureActionCategory.app,
+  ),
   moveToBackground(
     'Minimize',
     'Send WebLibre to the background',

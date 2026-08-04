@@ -66,7 +66,7 @@ final class GestureControlServiceProvider
 }
 
 String _$gestureControlServiceHash() =>
-    r'3741c0a3d9cb6726c044bab1efd4ce80208f21d8';
+    r'be774bb3a9cd7793167c7b6f6c656caf2abff380';
 
 /// Bridges gesture settings and recognized-gesture events to app actions.
 ///

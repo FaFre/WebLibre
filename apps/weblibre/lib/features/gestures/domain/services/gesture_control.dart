@@ -35,10 +35,12 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/font_size_constants.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/translation_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_action.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
@@ -193,6 +195,20 @@ class GestureControlService extends _$GestureControlService {
         await _adjustFontSize(increase: true);
       case GestureAction.decreaseFontSize:
         await _adjustFontSize(increase: false);
+      case GestureAction.showHome:
+        ref.read(forceBrowserHomeProvider.notifier).request();
+      case GestureAction.toggleTabBar:
+        final controller = ref.read(
+          toolbarVisibilityControllerProvider(tabId).notifier,
+        );
+        // Dismissing is the only state the user cannot leave by scrolling, so
+        // the same gesture has to bring the bar back.
+        if (ref.read(toolbarVisibilityControllerProvider(tabId)) ==
+            ToolbarVisibility.dismissed) {
+          controller.forceShow();
+        } else {
+          controller.dismiss();
+        }
       case GestureAction.showHistory:
         await _pushLocation(const HistoryRoute().location);
       case GestureAction.showBookmarks:

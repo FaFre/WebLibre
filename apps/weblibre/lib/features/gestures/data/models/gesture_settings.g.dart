@@ -259,8 +259,10 @@ const _$GestureActionEnumMap = {
   GestureAction.decreaseFontSize: 'decreaseFontSize',
   GestureAction.toggleBookmark: 'toggleBookmark',
   GestureAction.translatePage: 'translatePage',
+  GestureAction.showHome: 'showHome',
   GestureAction.showHistory: 'showHistory',
   GestureAction.showBookmarks: 'showBookmarks',
+  GestureAction.toggleTabBar: 'toggleTabBar',
   GestureAction.moveToBackground: 'moveToBackground',
   GestureAction.quitBrowser: 'quitBrowser',
 };

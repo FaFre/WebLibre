@@ -40,6 +40,7 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/models/contextual_toolbar_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_bar_buttons.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_shortcut_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/font_size_bottom_sheet.dart';
@@ -49,6 +50,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
@@ -144,6 +146,22 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
         );
       }
       return NavigateForwardButton(selectedTabId: scope.selectedTabId);
+    },
+  ),
+  ToolbarButtonDefinition(
+    spec: homeToolbarButtonSpec,
+    label: 'Home',
+    icon: Icons.home_outlined,
+    builder: (scope, context, ref) {
+      return IconButton(
+        tooltip: 'Home',
+        onPressed: scope.isPreview
+            ? () {}
+            : () {
+                ref.read(forceBrowserHomeProvider.notifier).request();
+              },
+        icon: const Icon(Icons.home_outlined),
+      );
     },
   ),
   ToolbarButtonDefinition(
@@ -447,6 +465,30 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
                     );
               },
         icon: Icon(on ? MdiIcons.gestureSwipe : MdiIcons.gestureDoubleTap),
+      );
+    },
+  ),
+  ToolbarButtonDefinition(
+    spec: hideTabBarToolbarButtonSpec,
+    label: 'Hide Tab Bar',
+    icon: MdiIcons.dockBottom,
+    builder: (scope, context, ref) {
+      return IconButton(
+        tooltip: 'Hide tab bar',
+        // Same dismissal the swipe on the bar performs; the dock FAB brings it
+        // back afterwards, since this button goes away with the bar.
+        onPressed: scope.isPreview
+            ? () {}
+            : () {
+                ref
+                    .read(
+                      toolbarVisibilityControllerProvider(
+                        scope.selectedTabId,
+                      ).notifier,
+                    )
+                    .dismiss();
+              },
+        icon: const Icon(MdiIcons.dockBottom),
       );
     },
   ),

@@ -21,6 +21,7 @@
 enum ToolbarButtonId {
   back,
   forward,
+  home,
   history,
   bookmarks,
   bookmarkToggle,
@@ -44,5 +45,6 @@ enum ToolbarButtonId {
   font,
   extensionShortcut,
   toggleGestures,
+  hideTabBar,
   quit,
 }
