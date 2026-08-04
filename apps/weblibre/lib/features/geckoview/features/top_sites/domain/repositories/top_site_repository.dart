@@ -18,7 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:async';
+import 'dart:math' as math;
 
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:weblibre/core/uuid.dart';
@@ -27,6 +29,7 @@ import 'package:weblibre/features/geckoview/features/history/domain/repositories
 import 'package:weblibre/features/geckoview/features/top_sites/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/data/entities/stored_top_site_source.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/data/providers.dart';
+import 'package:weblibre/features/geckoview/features/top_sites/domain/entities/top_site_host.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/domain/entities/top_site_item.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/domain/entities/top_site_source.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/domain/providers.dart';
@@ -34,17 +37,56 @@ import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
 part 'top_site_repository.g.dart';
 
+/// Turns frecency-ranked history rows into shortcut tiles, dropping anything
+/// the user has hidden.
+///
+/// Pure and exported so the exclusion rules can be tested directly: this is
+/// what decides whether "remove this shortcut" actually sticks.
+List<TopSiteItem> filterFrecentTopSites({
+  required List<TopFrecentSiteInfo> sites,
+  required int limit,
+  required Set<String> excludeUrls,
+  required Set<String> excludeHosts,
+}) {
+  final items = <TopSiteItem>[];
+
+  for (final site in sites) {
+    if (items.length >= limit) break;
+
+    final uri = Uri.tryParse(site.url);
+    if (uri == null) continue;
+
+    if (excludeUrls.contains(uri.normalized.toString())) continue;
+    if (excludeHosts.contains(canonicalTopSiteHost(uri))) continue;
+
+    final title = (site.title?.trim().isNotEmpty == true)
+        ? site.title!.trim()
+        : uri.host;
+
+    items.add(
+      TopSiteItem(title: title, url: uri, source: TopSiteSource.history),
+    );
+  }
+
+  return items;
+}
+
 @Riverpod(keepAlive: true)
 class TopSiteRepository extends _$TopSiteRepository {
   Stream<List<TopSiteItem>> watchTopSites({int limit = 8}) {
     final db = ref.read(topSiteDatabaseProvider);
 
-    return CombineLatestStream.combine2(
+    return CombineLatestStream.combine3(
       db.topSiteDao.selectAllTopSites().watch(),
       db.hiddenTopSiteDao.watchHiddenUrls(),
-      (List<TopSiteData> rows, Set<String> hiddenUrls) => (rows, hiddenUrls),
+      db.hiddenTopSiteDao.watchHiddenHosts(),
+      (
+        List<TopSiteData> rows,
+        Set<String> hiddenUrls,
+        Set<String> hiddenHosts,
+      ) => (rows, hiddenUrls, hiddenHosts),
     ).asyncMap((record) async {
-      final (rows, hiddenUrls) = record;
+      final (rows, hiddenUrls, hiddenHosts) = record;
       final persistedItems = rows.map(_mapRow).toList();
       final persistedUrls = persistedItems
           .map((s) => s.url.normalized.toString())
@@ -66,10 +108,15 @@ class TopSiteRepository extends _$TopSiteRepository {
       final excludeUrls = {
         ...persistedUrls,
         ...defaultItems.map((s) => s.url.normalized.toString()),
+        // Hiding a site has to suppress it wherever it comes from. Without
+        // this, removing a frecency-ranked shortcut appeared to work and then
+        // the site came straight back on the next refresh.
+        ...hiddenUrls,
       };
       final historyItems = await _getHistoryItems(
         limit: remaining,
         excludeUrls: excludeUrls,
+        excludeHosts: hiddenHosts,
       );
 
       return [...combined, ...historyItems];
@@ -80,6 +127,7 @@ class TopSiteRepository extends _$TopSiteRepository {
     final db = ref.read(topSiteDatabaseProvider);
     final rows = await db.topSiteDao.getAllTopSites();
     final hiddenUrls = await db.hiddenTopSiteDao.getHiddenUrls();
+    final hiddenHosts = await db.hiddenTopSiteDao.getHiddenHosts();
 
     final persistedItems = rows.map(_mapRow).toList();
     final persistedUrls = persistedItems
@@ -102,10 +150,12 @@ class TopSiteRepository extends _$TopSiteRepository {
     final excludeUrls = {
       ...persistedUrls,
       ...defaultItems.map((s) => s.url.normalized.toString()),
+      ...hiddenUrls,
     };
     final historyItems = await _getHistoryItems(
       limit: remaining,
       excludeUrls: excludeUrls,
+      excludeHosts: hiddenHosts,
     );
 
     return [...combined, ...historyItems];
@@ -173,7 +223,12 @@ class TopSiteRepository extends _$TopSiteRepository {
     _validateUrl(url);
     final db = ref.read(topSiteDatabaseProvider);
 
-    // If it was a hidden default, unhide it
+    // If it was a hidden default, unhide it.
+    //
+    // Deliberately does not lift a domain-wide hide: pinned sites are returned
+    // ahead of the hidden filters anyway, so pinning one URL already works on a
+    // blacklisted host — and un-hiding the host here would silently restore
+    // every *other* page on that domain the user had just got rid of.
     await db.hiddenTopSiteDao.unhideUrl(url);
 
     // Check if URL already exists
@@ -219,8 +274,29 @@ class TopSiteRepository extends _$TopSiteRepository {
     return ref.read(topSiteDatabaseProvider).topSiteDao.deleteSite(id);
   }
 
-  Future<void> hideDefaultSite(Uri url) {
-    return ref.read(topSiteDatabaseProvider).hiddenTopSiteDao.hideUrl(url);
+  /// Suppresses [url] so it stops coming back — from the bundled defaults, and
+  /// from frecency-ranked history.
+  ///
+  /// With [wholeDomain] the whole host is hidden instead, which is the only
+  /// practical way to get rid of a site that generates many distinct URLs.
+  Future<void> hideSite(Uri url, {bool wholeDomain = false}) async {
+    final dao = ref.read(topSiteDatabaseProvider).hiddenTopSiteDao;
+
+    await dao.hideUrl(url);
+    if (wholeDomain) {
+      await dao.hideHost(canonicalTopSiteHost(url));
+    }
+  }
+
+  /// Reverses [hideSite]. Undo has to lift both suppressions, or the shortcut
+  /// silently fails to come back.
+  Future<void> unhideSite(Uri url, {bool wholeDomain = false}) async {
+    final dao = ref.read(topSiteDatabaseProvider).hiddenTopSiteDao;
+
+    await dao.unhideUrl(url);
+    if (wholeDomain) {
+      await dao.unhideHost(canonicalTopSiteHost(url));
+    }
   }
 
   Future<bool> isPinnedTopSiteUrl(Uri url) async {
@@ -318,30 +394,28 @@ class TopSiteRepository extends _$TopSiteRepository {
   Future<List<TopSiteItem>> _getHistoryItems({
     required int limit,
     required Set<String> excludeUrls,
+    required Set<String> excludeHosts,
   }) async {
-    final frecentSites = await ref
-        .read(historyRepositoryProvider.notifier)
-        .getTopFrecentSites(limit: limit + excludeUrls.length);
-
-    final items = <TopSiteItem>[];
-    for (final site in frecentSites) {
-      if (items.length >= limit) break;
-
-      final uri = Uri.tryParse(site.url);
-      if (uri == null) continue;
-
-      if (excludeUrls.contains(uri.normalized.toString())) continue;
-
-      final title = (site.title?.trim().isNotEmpty == true)
-          ? site.title!.trim()
-          : uri.host;
-
-      items.add(
-        TopSiteItem(title: title, url: uri, source: TopSiteSource.history),
-      );
+    if (limit <= 0) {
+      return const [];
     }
 
-    return items;
+    // Over-fetch, because filtering happens after the query. One exclusion can
+    // eliminate many rows — a PWA on a hidden host may own dozens of distinct
+    // URLs — so scaling by the exclusion count alone under-fetches and leaves
+    // the grid short. Capped so a large blacklist can't pull an unbounded read.
+    final fetchLimit = math.min(200, (limit + excludeUrls.length + 1) * 4);
+
+    final frecentSites = await ref
+        .read(historyRepositoryProvider.notifier)
+        .getTopFrecentSites(limit: fetchLimit);
+
+    return filterFrecentTopSites(
+      sites: frecentSites,
+      limit: limit,
+      excludeUrls: excludeUrls,
+      excludeHosts: excludeHosts,
+    );
   }
 
   TopSiteItem _mapRow(TopSiteData row) {

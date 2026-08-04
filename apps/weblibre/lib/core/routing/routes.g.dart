@@ -1675,6 +1675,21 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       factory: $UnshortenerSettingsRoute._fromState,
     ),
     GoRouteData.$route(
+      path: 'home',
+      name: 'HomeSettingsRoute',
+      factory: $HomeSettingsRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'home_modules',
+      name: 'HomeModulesSettingsRoute',
+      factory: $HomeModulesSettingsRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: 'new_tab_modules',
+      name: 'NewTabModulesSettingsRoute',
+      factory: $NewTabModulesSettingsRoute._fromState,
+    ),
+    GoRouteData.$route(
       path: 'contextual_toolbar',
       name: 'ContextualToolbarSettingsRoute',
       factory: $ContextualToolbarSettingsRoute._fromState,
@@ -2280,6 +2295,69 @@ mixin $UnshortenerSettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/unshortener');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $HomeSettingsRoute on GoRouteData {
+  static HomeSettingsRoute _fromState(GoRouterState state) =>
+      const HomeSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/home');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $HomeModulesSettingsRoute on GoRouteData {
+  static HomeModulesSettingsRoute _fromState(GoRouterState state) =>
+      const HomeModulesSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/home_modules');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $NewTabModulesSettingsRoute on GoRouteData {
+  static NewTabModulesSettingsRoute _fromState(GoRouterState state) =>
+      const NewTabModulesSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/new_tab_modules');
 
   @override
   void go(BuildContext context) => context.go(location);

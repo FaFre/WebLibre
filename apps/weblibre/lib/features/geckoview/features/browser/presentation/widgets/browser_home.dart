@@ -17,227 +17,216 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/design/app_colors.dart';
+import 'package:sliver_tools/sliver_tools.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/account/presentation/widgets/supporter_home_banner.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/providers/browser_viewport_toolbar_insets.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/home/home_search_pill.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/module_surface_scope.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/module_surface_slivers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
-import 'package:weblibre/features/quotes/data/database/definitions.drift.dart';
-import 'package:weblibre/features/quotes/domain/providers.dart';
+import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
 
+/// The home surface creates tabs of the user's configured default type; the
+/// child type is meaningless here because there is no tab to be a child of.
+TabMode _tabModeFor(TabType tabType) => switch (tabType) {
+  TabType.regular || TabType.child => TabMode.regular,
+  TabType.private => TabMode.private,
+  TabType.isolated => TabMode.newIsolated(),
+};
+
+/// The browser home: what fills the viewport when no tab is selected, or when
+/// the selected tab belongs to a different container than the selected one.
+///
+/// Renders the same configurable module list as the new-tab page, under
+/// [ModuleSurface.home] so the two keep separate layouts. Everything below the
+/// header is user-arrangeable; only the brand/container header, the search pill
+/// and the supporter banner are fixed chrome.
+///
+/// Each piece owns its own provider subscriptions rather than watching
+/// everything at the root, so a settings write or a toolbar-inset animation
+/// does not rebuild the module list underneath.
 class BrowserHome extends ConsumerWidget {
   const BrowserHome({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final quoteAsync = ref.watch(randomQuoteProvider);
-    final hasTabs = ref.watch(
-      tabListProvider.select((tabs) => tabs.value.isNotEmpty),
-    );
-    final viewportToolbarInsets = ref.watch(
-      browserViewportToolbarInsetsControllerProvider,
-    );
-
-    final containerData = ref.watch(
-      selectedContainerDataProvider.select((value) => value.value),
-    );
-    final hasContainerTabs = ref.watch(
-      selectedContainerTabCountProvider.select(
-        (data) => switch (data) {
-          AsyncData(:final value) => value > 0,
-          _ => false,
-        },
-      ),
-    );
-
-    final pixelRatio = MediaQuery.devicePixelRatioOf(context);
-
-    final bottomViewportInset =
-        viewportToolbarInsets.effectiveBottomInsetPx / pixelRatio;
-
     Future<void> openNewTab() {
-      return SearchRoute(
-        tabType: settings.effectiveDefaultCreateTabType,
-      ).push(context);
+      final tabType = ref
+          .read(generalSettingsWithDefaultsProvider)
+          .effectiveDefaultCreateTabType;
+      return SearchRoute(tabType: tabType).push(context);
     }
 
-    Future<void> viewTabs() {
-      return const TabViewRoute().push(context);
-    }
+    Future<void> viewTabs() => const TabViewRoute().push(context);
 
-    Future<void> resumeLatestTab() async {
-      await ref.read(tabRepositoryProvider.notifier).resumeLatestTab();
-    }
-
-    Future<void> resumeLatestContainerTab() async {
+    Future<void> resumeLastTab() async {
       final containerId = ref.read(selectedContainerProvider);
-      await ref
-          .read(tabRepositoryProvider.notifier)
-          .resumeLatestContainerTab(containerId);
+      final repository = ref.read(tabRepositoryProvider.notifier);
+
+      // Resume within the container in scope; falling back to the global
+      // "latest tab" would silently jump the user into another container.
+      if (containerId != null) {
+        await repository.resumeLatestContainerTab(containerId);
+      } else {
+        await repository.resumeLatestTab();
+      }
     }
+
+    final callbacks = ModuleSurfaceCallbacks(
+      onUriSelected: (uri) async {
+        final container = ref.read(selectedContainerDataProvider).value;
+
+        await ref
+            .read(tabRepositoryProvider.notifier)
+            .addTab(
+              url: uri,
+              tabMode: _tabModeFor(
+                ref
+                    .read(generalSettingsWithDefaultsProvider)
+                    .effectiveDefaultCreateTabType,
+              ),
+              selectTab: true,
+              containerSelection: container == null
+                  ? const TabContainerSelection.unassigned()
+                  : TabContainerSelection.specific(container),
+            );
+      },
+      onTabSelected: (tabId) async {
+        await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
+      },
+      onArticleSelected: (article) {
+        unawaited(FeedArticleRoute(articleId: article.id).push(context));
+      },
+      onContainerSelected: (container) async {
+        final result = await ref
+            .read(selectedContainerProvider.notifier)
+            .setContainerId(container.id);
+
+        if (!context.mounted) return;
+
+        if (result == SetContainerResult.success) {
+          await ensureProxyStartedForContainer(context, ref, container);
+        }
+      },
+      onNewTab: openNewTab,
+      onViewTabs: viewTabs,
+      onResumeLastTab: resumeLastTab,
+    );
 
     return BrowserPage(
-      child: BrowserPageContent(
-        bottomViewportInset: bottomViewportInset,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (containerData != null)
-              _ContainerHeader(container: containerData)
-            else
-              BrandHeader(colorScheme: colorScheme),
-            const SizedBox(height: 24),
-            if (!hasTabs) ...[
-              Text(
-                'WebLibre is ready',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'A browser that respects you. Open a tab and experience the web, libre.',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  height: 1.45,
-                ),
-              ),
-              const SizedBox(height: 28),
-            ] else if (containerData != null) ...[
-              Text(
-                containerData.name?.isNotEmpty == true
-                    ? containerData.name!
-                    : 'Container',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                hasContainerTabs
-                    ? 'No matching tab selected'
-                    : 'No open tabs in this container',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  height: 1.45,
-                ),
-              ),
-              const SizedBox(height: 28),
-            ],
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                if (hasTabs)
-                  OutlinedButton.icon(
-                    onPressed: viewTabs,
-                    icon: const Icon(Icons.tab_rounded),
-                    label: const Text('View tabs'),
+      // The viewport, not just its first sliver, has to clear the status bar:
+      // BrowserSystemBars fills that inset with an opaque strip painted over
+      // this surface, and the pinned pill below would scroll underneath it and
+      // disappear. Bottom stays excluded — [_HomeBottomInsetSpacer] owns it,
+      // because that inset animates with the toolbar.
+      child: SafeArea(
+        bottom: false,
+        child: RepaintBoundary(
+          child: ModuleSurfaceScope(
+            surface: ModuleSurface.home,
+            // Unpinned: the sections here are short, and the pinned search pill
+            // above already holds the top of the viewport. Backing each header
+            // so it could pin would lay opaque bands across the aura gradient.
+            pinnedHeaderBackgroundColor: null,
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                const SliverToBoxAdapter(child: SizedBox(height: 20)),
+                const SliverToBoxAdapter(child: _HomeHeader()),
+                // Pinned, because the browser toolbar's address field is
+                // suppressed while home is showing: this is the only way into
+                // search, so it has to survive scrolling. Pinning it above the
+                // section headers also gives them something to slide under.
+                const SliverPinnedHeader(child: HomeSearchPill()),
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: SupporterHomeBanner(),
                   ),
-                FilledButton.icon(
-                  onPressed: openNewTab,
-                  icon: const Icon(Icons.add_rounded),
-                  label: const Text('New tab'),
                 ),
-                if (hasContainerTabs)
-                  FilledButton.tonalIcon(
-                    onPressed: resumeLatestContainerTab,
-                    icon: const Icon(Icons.history_rounded),
-                    label: const Text('Resume last tab'),
-                  )
-                else if (hasTabs && containerData == null)
-                  FilledButton.tonalIcon(
-                    onPressed: resumeLatestTab,
-                    icon: const Icon(Icons.history_rounded),
-                    label: const Text('Resume last tab'),
-                  ),
+                ModuleSurfaceSliverList(
+                  surface: ModuleSurface.home,
+                  callbacks: callbacks,
+                ),
+                const _HomeBottomInsetSpacer(),
               ],
             ),
-            const SizedBox(height: 24),
-            const SupporterHomeBanner(),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainer.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(
-                  color: Color.alphaBlend(
-                    AppColors.brandGrey.withValues(alpha: 0.18),
-                    colorScheme.outlineVariant,
-                  ),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerHigh,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(MdiIcons.formatQuoteOpen, size: 18),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'A thought for the road',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      IconButton.filledTonal(
-                        tooltip: 'Refresh quote',
-                        onPressed: () {
-                          ref.invalidate(randomQuoteProvider);
-                        },
-                        icon: const Icon(Icons.refresh_rounded),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  switch (quoteAsync) {
-                    AsyncData(:final value) => _QuoteBlock(quote: value),
-                    AsyncError() => Text(
-                      'Open a new tab and make this space your own.',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        height: 1.5,
-                      ),
-                    ),
-                    _ => const LinearProgressIndicator(minHeight: 3),
-                  },
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
+  }
+}
+
+/// Brand mark, or the selected container's identity when there is one.
+class _HomeHeader extends ConsumerWidget {
+  const _HomeHeader();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final container = ref.watch(
+      selectedContainerDataProvider.select((value) => value.value),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      child: Column(
+        children: [
+          if (container != null)
+            _ContainerHeader(container: container)
+          else
+            BrandHeader(colorScheme: theme.colorScheme),
+          if (container != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              container.name?.isNotEmpty == true
+                  ? container.name!
+                  : 'Container',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Trailing space so the last module clears the bottom app bar.
+///
+/// A spacer rather than a [SliverPadding] around the list: the inset animates
+/// with the toolbar, and padding would relayout every module on each frame.
+/// Owning the watch here also keeps those frames off the module list entirely.
+class _HomeBottomInsetSpacer extends ConsumerWidget {
+  const _HomeBottomInsetSpacer();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final insetPx = ref.watch(
+      browserViewportToolbarInsetsControllerProvider.select(
+        (state) => state.effectiveBottomInsetPx,
+      ),
+    );
+    final inset = insetPx / MediaQuery.devicePixelRatioOf(context);
+
+    return SliverToBoxAdapter(child: SizedBox(height: 24 + inset));
   }
 }
 
@@ -249,19 +238,18 @@ class _ContainerHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final containerColor = container.color;
     final containerPalette = ContainerColors.palette(
       context,
-      containerColor,
+      container.color,
       useCustomColor: container.metadata.useCustomColor,
     );
 
     return Container(
-      width: 112,
-      height: 112,
-      padding: const EdgeInsets.all(20),
+      width: 96,
+      height: 96,
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(28),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -279,61 +267,11 @@ class _ContainerHeader extends StatelessWidget {
           ),
         ],
       ),
+      // See [BrandHeader]: the mark needs room inside the tile, and 60 in a
+      // 96 tile with 18 of padding leaves it none.
       child: Center(
-        child: SvgPicture.asset('assets/icon/icon.svg', width: 72, height: 72),
+        child: SvgPicture.asset('assets/icon/icon.svg', width: 48, height: 48),
       ),
-    );
-  }
-}
-
-class _QuoteBlock extends StatelessWidget {
-  final Quote? quote;
-
-  const _QuoteBlock({required this.quote});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    if (quote == null) {
-      return Text(
-        'Open a new tab and make this space your own.',
-        style: theme.textTheme.bodyLarge?.copyWith(
-          color: colorScheme.onSurfaceVariant,
-          height: 1.5,
-        ),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '"${quote!.quote}"',
-          style: theme.textTheme.bodyLarge?.copyWith(
-            height: 1.55,
-            color: colorScheme.onSurface,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          '- ${quote!.author}',
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        if (quote!.source case final String source when source.isNotEmpty) ...[
-          const SizedBox(height: 4),
-          Text(
-            source,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ],
     );
   }
 }

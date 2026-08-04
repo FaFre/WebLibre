@@ -18,11 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:drift/drift.dart';
+import 'package:drift/internal/versioned_schema.dart';
 import 'package:drift_dev/api/migrations_native.dart';
 import 'package:flutter/foundation.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/data/database/daos/hidden_top_site.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/data/database/daos/top_site.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/data/database/database.drift.dart';
+import 'package:weblibre/features/geckoview/features/top_sites/data/database/database.steps.dart';
 
 @DriftDatabase(
   include: {'definitions.drift'},
@@ -30,7 +32,7 @@ import 'package:weblibre/features/geckoview/features/top_sites/data/database/dat
 )
 class TopSiteDatabase extends $TopSiteDatabase {
   @override
-  final int schemaVersion = 1;
+  final int schemaVersion = 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -41,7 +43,38 @@ class TopSiteDatabase extends $TopSiteDatabase {
 
       await customStatement('PRAGMA foreign_keys = ON;');
     },
+    onUpgrade: (m, from, to) async {
+      // Following the advice from https://drift.simonbinder.eu/Migrations/api/#general-tips
+      await customStatement('PRAGMA foreign_keys = OFF');
+
+      await transaction(
+        () => VersionedSchema.runMigrationSteps(
+          migrator: m,
+          from: from,
+          to: to,
+          steps: _upgrade,
+        ),
+      );
+
+      if (kDebugMode) {
+        final wrongForeignKeys = await customSelect(
+          'PRAGMA foreign_key_check',
+        ).get();
+        assert(
+          wrongForeignKeys.isEmpty,
+          '${wrongForeignKeys.map((e) => e.data)}',
+        );
+      }
+
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
   );
 
   TopSiteDatabase(super.e);
+
+  static final _upgrade = migrationSteps(
+    from1To2: (m, schema) async {
+      await m.createTable(schema.hiddenTopSiteHost);
+    },
+  );
 }

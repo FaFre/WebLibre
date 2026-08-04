@@ -63,6 +63,7 @@ import 'package:weblibre/features/geckoview/features/readerview/presentation/con
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_autofocus.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
@@ -133,6 +134,21 @@ class _AnimatedToolbar extends HookWidget {
 }
 
 /// Manages scroll-based auto-hide logic and returns the toolbar widget.
+/// Whether the main toolbar row should be dropped for the browser home surface.
+///
+/// Held back when there is no contextual toolbar: the tab count and the
+/// navigation menu relocate there when it exists, and the main row is their only
+/// other home — dropping it without one would leave no way to reach the menu.
+///
+/// A function rather than an inline condition because it is evaluated in two
+/// places — where the bar is built and where its height is measured for the
+/// browser viewport inset. If those two disagree the browser is inset for a row
+/// that is not drawn.
+bool _suppressMainToolbarForHome({
+  required bool showBrowserHome,
+  required bool showContextualToolbar,
+}) => showBrowserHome && showContextualToolbar;
+
 /// Animation is handled by the parent _AnimatedToolbar wrapper.
 class _TabBar extends HookConsumerWidget {
   final bool showMainToolbar;
@@ -228,6 +244,11 @@ class _TabBar extends HookConsumerWidget {
       },
     );
 
+    final suppressMainToolbar = _suppressMainToolbarForHome(
+      showBrowserHome: ref.watch(shouldShowBrowserHomeProvider),
+      showContextualToolbar: showContextualToolbar,
+    );
+
     // Return the toolbar widget - parent handles animation.
     // Rail positions are rendered by a dedicated Stack layer, not _TabBar, but
     // are handled here for exhaustiveness/correctness.
@@ -238,6 +259,7 @@ class _TabBar extends HookConsumerWidget {
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         isSmallWebMode: isSmallWebMode,
         enableGestures: enableGestures,
+        suppressMainToolbar: suppressMainToolbar,
       ),
       TabBarPosition.bottom => BrowserBottomAppBar(
         displayedSheet: displayedSheet,
@@ -245,12 +267,14 @@ class _TabBar extends HookConsumerWidget {
         showContextualToolbar: showContextualToolbar,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         isSmallWebMode: isSmallWebMode,
+        suppressMainToolbar: suppressMainToolbar,
       ),
       TabBarPosition.left || TabBarPosition.right => BrowserSideRail(
         position: tabBarPosition,
         showContextualToolbar: showContextualToolbar,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         isSmallWebMode: isSmallWebMode,
+        suppressMainToolbar: suppressMainToolbar,
       ),
     };
   }
@@ -673,6 +697,11 @@ class _SideRailToolbarLayer extends StatelessWidget {
   final int quickTabSwitcherRowCount;
   final String? selectedTabId;
 
+  /// Resolved by the caller, as for the horizontal bars: the rail is built here
+  /// rather than by [_TabBar], so without this the home surface would keep the
+  /// main toolbar row only in the rail positions.
+  final bool suppressMainToolbar;
+
   const _SideRailToolbarLayer({
     required this.sheetDisplayed,
     required this.tabInFullScreen,
@@ -680,6 +709,7 @@ class _SideRailToolbarLayer extends StatelessWidget {
     required this.showContextualToolbar,
     required this.quickTabSwitcherRowCount,
     required this.selectedTabId,
+    required this.suppressMainToolbar,
   });
 
   @override
@@ -694,6 +724,7 @@ class _SideRailToolbarLayer extends StatelessWidget {
         showContextualToolbar: showContextualToolbar,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         isSmallWebMode: false,
+        suppressMainToolbar: suppressMainToolbar,
       ),
     );
   }
@@ -1186,6 +1217,13 @@ class BrowserScreen extends HookConsumerWidget {
     final relativeSafeArea = MediaQuery.of(context).relativeSafeArea();
     final bottomSafeArea = MediaQuery.of(context).padding.bottom;
 
+    // Must match what _TabBar resolves, or the browser is inset for a toolbar
+    // row that is not drawn.
+    final suppressMainToolbarForHome = _suppressMainToolbarForHome(
+      showBrowserHome: ref.watch(shouldShowBrowserHomeProvider),
+      showContextualToolbar: showContextualToolbar,
+    );
+
     // Calculate bottom toolbar size for FAB and sheet positioning
     final Size bottomAppBarContentSize;
     // The same size computed as if no sheet were displayed. `ViewTabsSheet`
@@ -1216,6 +1254,7 @@ class BrowserScreen extends HookConsumerWidget {
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         isSmallWebMode: false,
         displayedSheet: displayedSheet,
+        suppressMainToolbar: suppressMainToolbarForHome,
       ).preferredSize;
       viewportBottomAppBarContentSize = displayedSheet == null
           ? bottomAppBarContentSize
@@ -1225,6 +1264,7 @@ class BrowserScreen extends HookConsumerWidget {
               quickTabSwitcherRowCount: quickTabSwitcherRowCount,
               isSmallWebMode: false,
               displayedSheet: null,
+              suppressMainToolbar: suppressMainToolbarForHome,
             ).preferredSize;
     }
     // Total height includes safe area padding
@@ -1260,6 +1300,7 @@ class BrowserScreen extends HookConsumerWidget {
       quickTabSwitcherRowCount: quickTabSwitcherRowCount,
       isSmallWebMode: isSmallWebActive,
       enableGestures: !isSmallWebActive,
+      suppressMainToolbar: suppressMainToolbarForHome,
     ).preferredSize;
     final topAppBarTotalHeight = topAppBarContentSize.height + topSafeArea;
 
@@ -1563,6 +1604,7 @@ class BrowserScreen extends HookConsumerWidget {
                     showContextualToolbar: showContextualToolbar,
                     quickTabSwitcherRowCount: quickTabSwitcherRowCount,
                     selectedTabId: selectedTabId,
+                    suppressMainToolbar: suppressMainToolbarForHome,
                   ),
                 ),
 

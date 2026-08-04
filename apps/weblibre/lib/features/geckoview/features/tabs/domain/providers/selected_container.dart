@@ -172,10 +172,31 @@ Stream<ContainerData?> selectedContainerData(Ref ref) {
   return Stream.value(null);
 }
 
+/// Forces the home surface on regardless of what is selected.
+///
+/// The home-target setting needs a way to say "stay on home" that survives the
+/// engine auto-selecting a tab underneath — for instance when the last tab in a
+/// container is closed. Keeping it as a separate flag leaves
+/// [shouldShowBrowserHome] a pure predicate, and avoids pinning the selected
+/// container, which [SelectedContainer]'s own tab listener would immediately
+/// undo.
+///
+/// Cleared by [TabRepository.selectTab] and by creating a tab, i.e. by the user
+/// deliberately going somewhere.
+@Riverpod(keepAlive: true)
+class ForceBrowserHome extends _$ForceBrowserHome {
+  void request() => state = true;
+  void clear() => state = false;
+
+  @override
+  bool build() => false;
+}
+
 /// Whether the browser home screen should be displayed instead of the
 /// active tab's content.
 ///
 /// Returns `true` when any of the following hold:
+/// 0. [ForceBrowserHome] is set, i.e. the home target asked to stay here.
 /// 1. No tab is selected at all (app just started or all tabs closed).
 /// 2. The selected tab belongs to a different container than the currently
 ///    selected container – this implies the user manually switched
@@ -187,6 +208,8 @@ Stream<ContainerData?> selectedContainerData(Ref ref) {
 /// (if any) necessarily belongs to a different container.
 @Riverpod()
 bool shouldShowBrowserHome(Ref ref) {
+  if (ref.watch(forceBrowserHomeProvider)) return true;
+
   final selectedTab = ref.watch(selectedTabProvider);
 
   // No tab selected → always show home.

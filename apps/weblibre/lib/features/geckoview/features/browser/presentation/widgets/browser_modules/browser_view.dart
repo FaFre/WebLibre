@@ -43,6 +43,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/controllers/home_target_controller.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers/intent.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers/lifecycle.dart';
@@ -190,6 +191,10 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
     final showHome = ref.watch(shouldShowBrowserHomeProvider);
 
+    // Instantiate the home-target controller so its cold-start listener is
+    // alive. Its state is void, so watching costs nothing.
+    ref.watch(homeTargetControllerProvider);
+
     final topRoute = ref.watch(currentTopRouteProvider);
     final androidInfoAsync = ref.watch(androidDeviceInfoProvider);
     final unmountGeckoViewOffRoute = ref.watch(
@@ -246,98 +251,125 @@ class _BrowserViewState extends ConsumerState<BrowserView>
             }
           : null,
       child: Stack(
+        // Expand rather than the default loose fit: every layer here is meant
+        // to fill the viewport, and the enclosing stack passes loose
+        // constraints down. Under a loose fit the stack would size itself from
+        // its only non-positioned child — the engine — and collapse to nothing
+        // whenever that child is offstage, taking the [Positioned.fill] home
+        // surface and gesture overlay down with it.
+        fit: StackFit.expand,
         children: [
-          Visibility(
-            visible: isGeckoViewVisible,
-            child: GeckoView(
-              preInitializationStep: () async {
-                await ref
-                    .read(eventServiceProvider)
-                    .viewReadyStateEvents
-                    .firstWhere((state) => state == true)
-                    .timeout(
-                      const Duration(seconds: 3),
-                      onTimeout: () {
-                        logger.e(
-                          'Browser fragement not reported ready, trying to intitialize anyways',
-                        );
-                        return true;
-                      },
-                    );
-              },
-              postInitializationStep: () async {
-                await widget.postInitializationStep?.call();
+          // Two separate concerns, deliberately not folded into one flag:
+          //
+          // [Offstage] — the home surface covers the whole viewport, so the
+          // engine contributes no visible pixels while it is up. Painting it
+          // anyway pushes a platform-view layer, which puts every frame through
+          // [AndroidExternalViewEmbedder] hybrid composition: the frame is split
+          // into a platform-view surface plus Flutter overlay surfaces and
+          // submitted with a platform-thread round-trip, pinning the raster
+          // thread for tens of milliseconds. Offstage still lays the view out
+          // and keeps the element (and with it the view controller and the
+          // native fragment) alive, so there is no teardown, reload or flicker
+          // — it just stops painting, and the home composites as a single
+          // surface.
+          //
+          // [Visibility] — the off-route unmount, which deliberately *does*
+          // destroy the platform view (see [isGeckoViewVisible] above), so it
+          // keeps the default maintainState: false.
+          Offstage(
+            offstage: showHome,
+            child: Visibility(
+              visible: isGeckoViewVisible,
+              child: GeckoView(
+                preInitializationStep: () async {
+                  await ref
+                      .read(eventServiceProvider)
+                      .viewReadyStateEvents
+                      .firstWhere((state) => state == true)
+                      .timeout(
+                        const Duration(seconds: 3),
+                        onTimeout: () {
+                          logger.e(
+                            'Browser fragement not reported ready, trying to intitialize anyways',
+                          );
+                          return true;
+                        },
+                      );
+                },
+                postInitializationStep: () async {
+                  await widget.postInitializationStep?.call();
 
-                if (!_initializationCompleter.isCompleted) {
-                  _initializationCompleter.complete();
+                  if (!_initializationCompleter.isCompleted) {
+                    _initializationCompleter.complete();
 
-                  const quickActions = QuickActions();
+                    const quickActions = QuickActions();
 
-                  //Debounce: https://github.com/flutter/flutter/issues/131121
-                  DateTime? lastAction;
-                  await quickActions.initialize((type) async {
-                    if (lastAction == null ||
-                        DateTime.now().difference(lastAction!) >
-                            const Duration(seconds: 5)) {
-                      if (type == 'new_tab') {
-                        lastAction = DateTime.now();
+                    //Debounce: https://github.com/flutter/flutter/issues/131121
+                    DateTime? lastAction;
+                    await quickActions.initialize((type) async {
+                      if (lastAction == null ||
+                          DateTime.now().difference(lastAction!) >
+                              const Duration(seconds: 5)) {
+                        if (type == 'new_tab') {
+                          lastAction = DateTime.now();
 
-                        final router = await ref.read(routerProvider.future);
-                        const route = SearchRoute(tabType: TabType.regular);
+                          final router = await ref.read(routerProvider.future);
+                          const route = SearchRoute(tabType: TabType.regular);
 
-                        await router.push(route.location);
-                      } else if (type == 'new_private_tab') {
-                        lastAction = DateTime.now();
+                          await router.push(route.location);
+                        } else if (type == 'new_private_tab') {
+                          lastAction = DateTime.now();
 
-                        final router = await ref.read(routerProvider.future);
-                        const route = SearchRoute(tabType: TabType.private);
+                          final router = await ref.read(routerProvider.future);
+                          const route = SearchRoute(tabType: TabType.private);
 
-                        await router.push(route.location);
-                      } else if (type == 'new_isolated_tab') {
-                        final settings = ref.read(
-                          generalSettingsWithDefaultsProvider,
-                        );
-                        if (!settings.showIsolatedTabUi) {
-                          return;
+                          await router.push(route.location);
+                        } else if (type == 'new_isolated_tab') {
+                          final settings = ref.read(
+                            generalSettingsWithDefaultsProvider,
+                          );
+                          if (!settings.showIsolatedTabUi) {
+                            return;
+                          }
+
+                          lastAction = DateTime.now();
+
+                          final router = await ref.read(routerProvider.future);
+                          const route = SearchRoute(tabType: TabType.isolated);
+
+                          await router.push(route.location);
+                        } else {
+                          throw UnimplementedError(
+                            'Unknown quick action shortcut type',
+                          );
                         }
-
-                        lastAction = DateTime.now();
-
-                        final router = await ref.read(routerProvider.future);
-                        const route = SearchRoute(tabType: TabType.isolated);
-
-                        await router.push(route.location);
-                      } else {
-                        throw UnimplementedError(
-                          'Unknown quick action shortcut type',
-                        );
                       }
-                    }
-                  });
+                    });
 
-                  final settings = ref.read(
-                    generalSettingsWithDefaultsProvider,
-                  );
-                  await quickActions.setShortcutItems([
-                    const ShortcutItem(
-                      type: 'new_tab',
-                      localizedTitle: 'New Tab',
-                      icon: 'mdi_icon_tab',
-                    ),
-                    const ShortcutItem(
-                      type: 'new_private_tab',
-                      localizedTitle: 'New Private Tab',
-                      icon: 'mdi_icon_domino_mask',
-                    ),
-                    if (settings.showIsolatedTabUi)
+                    final settings = ref.read(
+                      generalSettingsWithDefaultsProvider,
+                    );
+                    await quickActions.setShortcutItems([
                       const ShortcutItem(
-                        type: 'new_isolated_tab',
-                        localizedTitle: 'New Isolated Tab',
-                        icon: 'mdi_icon_snowflake',
+                        type: 'new_tab',
+                        localizedTitle: 'New Tab',
+                        icon: 'mdi_icon_tab',
                       ),
-                  ]);
-                }
-              },
+                      const ShortcutItem(
+                        type: 'new_private_tab',
+                        localizedTitle: 'New Private Tab',
+                        icon: 'mdi_icon_domino_mask',
+                      ),
+                      if (settings.showIsolatedTabUi)
+                        const ShortcutItem(
+                          type: 'new_isolated_tab',
+                          localizedTitle: 'New Isolated Tab',
+                          icon: 'mdi_icon_snowflake',
+                        ),
+                    ]);
+                  }
+                },
+              ),
             ),
           ),
           if (showHome) const Positioned.fill(child: BrowserHome()),

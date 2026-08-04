@@ -117,12 +117,42 @@
       "references": [],
       "type": "table",
       "data": {
-        "name": "top_site_seed_state",
+        "name": "hidden_top_site",
         "was_declared_in_moor": true,
         "columns": [
           {
-            "name": "seed_id",
-            "getter_name": "seedId",
+            "name": "url",
+            "getter_name": "url",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": "PRIMARY KEY NOT NULL",
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "primary-key"
+            ],
+            "type_converter": {
+              "dart_expr": "const UriConverter()",
+              "dart_type_name": "Uri"
+            }
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": []
+      }
+    },
+    {
+      "id": 3,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "hidden_top_site_host",
+        "was_declared_in_moor": true,
+        "columns": [
+          {
+            "name": "host",
+            "getter_name": "host",
             "moor_type": "string",
             "nullable": false,
             "customConstraints": "PRIMARY KEY NOT NULL",
@@ -131,16 +161,6 @@
             "dsl_features": [
               "primary-key"
             ]
-          },
-          {
-            "name": "applied_at",
-            "getter_name": "appliedAt",
-            "moor_type": "dateTime",
-            "nullable": false,
-            "customConstraints": "NOT NULL",
-            "default_dart": null,
-            "default_client_dart": null,
-            "dsl_features": []
           }
         ],
         "is_virtual": false,
@@ -169,11 +189,20 @@
       ]
     },
     {
-      "name": "top_site_seed_state",
+      "name": "hidden_top_site",
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"top_site_seed_state\" (\"seed_id\" TEXT PRIMARY KEY NOT NULL, \"applied_at\" INTEGER NOT NULL);"
+          "sql": "CREATE TABLE IF NOT EXISTS \"hidden_top_site\" (\"url\" TEXT PRIMARY KEY NOT NULL);"
+        }
+      ]
+    },
+    {
+      "name": "hidden_top_site_host",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"hidden_top_site_host\" (\"host\" TEXT PRIMARY KEY NOT NULL);"
         }
       ]
     }

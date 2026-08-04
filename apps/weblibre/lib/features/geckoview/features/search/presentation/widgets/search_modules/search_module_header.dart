@@ -77,11 +77,15 @@ class SearchModuleHeader extends StatelessWidget {
               onLongPress: onLongPress,
               borderRadius: BorderRadius.circular(8),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                // Tighter when collapsed: a run of collapsed sections is
+                // otherwise a stack of full-height bands with nothing in them.
+                padding: EdgeInsets.symmetric(
+                  vertical: isCollapsed ? 4.0 : 8.0,
+                ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 4),
                     AnimatedRotation(
                       turns: isCollapsed ? -0.25 : 0,
                       duration: disableAnimations
@@ -96,7 +100,11 @@ class SearchModuleHeader extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       title.toUpperCase(),
-                      style: Theme.of(context).textTheme.labelSmall,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.8,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
@@ -105,39 +113,22 @@ class SearchModuleHeader extends StatelessWidget {
           ),
           if (headerTrailing != null) headerTrailing!,
           if (showTrailing)
+            // Borderless: an outlined pill next to an 11px label reads as the
+            // most important thing in the row, which it is not.
             TextButton(
               onPressed: onToggleExpansion,
               style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(999),
-                  side: BorderSide(
-                    color: Theme.of(context).colorScheme.outline,
-                    width: 0.5,
-                  ),
-                ),
+                foregroundColor: Theme.of(context).colorScheme.primary,
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    isExpanded ? 'Show less' : 'Show all $totalCount',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    isExpanded ? Icons.expand_less : Icons.expand_more,
-                    size: 16,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ],
+              child: Text(
+                isExpanded ? 'Show less' : 'Show all $totalCount',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
         ],

@@ -20,25 +20,37 @@
 import 'package:flutter/material.dart';
 import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
+/// Edits an existing shortcut, or — with both initial values omitted — creates
+/// one from scratch.
 Future<({String title, Uri url})?> showEditTopSiteDialog(
   BuildContext context, {
-  required String initialTitle,
-  required Uri initialUrl,
+  String initialTitle = '',
+  Uri? initialUrl,
+  String dialogTitle = 'Edit Shortcut',
+  String confirmLabel = 'Save',
 }) {
   return showDialog<({String title, Uri url})>(
     context: context,
-    builder: (context) =>
-        _EditTopSiteDialog(initialTitle: initialTitle, initialUrl: initialUrl),
+    builder: (context) => _EditTopSiteDialog(
+      initialTitle: initialTitle,
+      initialUrl: initialUrl,
+      dialogTitle: dialogTitle,
+      confirmLabel: confirmLabel,
+    ),
   );
 }
 
 class _EditTopSiteDialog extends StatefulWidget {
   final String initialTitle;
-  final Uri initialUrl;
+  final Uri? initialUrl;
+  final String dialogTitle;
+  final String confirmLabel;
 
   const _EditTopSiteDialog({
     required this.initialTitle,
     required this.initialUrl,
+    required this.dialogTitle,
+    required this.confirmLabel,
   });
 
   @override
@@ -54,7 +66,9 @@ class _EditTopSiteDialogState extends State<_EditTopSiteDialog> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.initialTitle);
-    _urlController = TextEditingController(text: widget.initialUrl.toString());
+    _urlController = TextEditingController(
+      text: widget.initialUrl?.toString() ?? '',
+    );
   }
 
   @override
@@ -67,7 +81,7 @@ class _EditTopSiteDialogState extends State<_EditTopSiteDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Edit Shortcut'),
+      title: Text(widget.dialogTitle),
       content: Form(
         key: _formKey,
         child: Column(
@@ -125,7 +139,7 @@ class _EditTopSiteDialogState extends State<_EditTopSiteDialog> {
               ));
             }
           },
-          child: const Text('Save'),
+          child: Text(widget.confirmLabel),
         ),
       ],
     );

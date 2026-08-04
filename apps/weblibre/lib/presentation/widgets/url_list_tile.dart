@@ -31,6 +31,11 @@ class UrlListTile extends StatelessWidget {
   final Color? containerColor;
   final IconData? containerIcon;
   final bool useCustomColor;
+
+  /// Off by default, as at every other [UriBreadcrumb] call site: under a title
+  /// that is usually the host itself, a leading `https ›` is a crumb that never
+  /// varies. The insecure case is carried by the address bar's security icon,
+  /// not by these rows.
   final bool showHttpScheme;
   final VoidCallback? onTap;
 
@@ -43,7 +48,7 @@ class UrlListTile extends StatelessWidget {
     this.containerColor,
     this.containerIcon,
     this.useCustomColor = false,
-    this.showHttpScheme = true,
+    this.showHttpScheme = false,
     this.onTap,
   });
 

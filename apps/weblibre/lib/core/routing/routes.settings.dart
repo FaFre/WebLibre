@@ -117,6 +117,15 @@ part of 'routes.dart';
       name: 'UnshortenerSettingsRoute',
       path: 'unshortener',
     ),
+    TypedGoRoute<HomeSettingsRoute>(name: 'HomeSettingsRoute', path: 'home'),
+    TypedGoRoute<HomeModulesSettingsRoute>(
+      name: 'HomeModulesSettingsRoute',
+      path: 'home_modules',
+    ),
+    TypedGoRoute<NewTabModulesSettingsRoute>(
+      name: 'NewTabModulesSettingsRoute',
+      path: 'new_tab_modules',
+    ),
     TypedGoRoute<ContextualToolbarSettingsRoute>(
       name: 'ContextualToolbarSettingsRoute',
       path: 'contextual_toolbar',
@@ -356,6 +365,38 @@ class UnshortenerSettingsRoute extends GoRouteData
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const UnshortenerSettingsScreen();
+  }
+}
+
+class HomeSettingsRoute extends GoRouteData with $HomeSettingsRoute {
+  const HomeSettingsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const HomeSettingsScreen();
+  }
+}
+
+class HomeModulesSettingsRoute extends GoRouteData
+    with $HomeModulesSettingsRoute {
+  const HomeModulesSettingsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const ModuleSurfaceSettingsScreen();
+  }
+}
+
+class NewTabModulesSettingsRoute extends GoRouteData
+    with $NewTabModulesSettingsRoute {
+  const NewTabModulesSettingsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const ModuleSurfaceSettingsScreen(
+      surface: ModuleSurface.newTab,
+      title: 'Customize New Tab',
+    );
   }
 }
 

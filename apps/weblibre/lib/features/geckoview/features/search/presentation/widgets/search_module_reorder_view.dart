@@ -23,13 +23,13 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/sea
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 
 class SearchModuleReorderView extends ConsumerWidget {
-  final SearchModuleGroup group;
+  final ModuleSurface surface;
 
-  const SearchModuleReorderView({super.key, required this.group});
+  const SearchModuleReorderView({super.key, required this.surface});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final entries = ref.watch(searchModuleOrderProvider(group));
+    final entries = ref.watch(searchModuleOrderProvider(surface));
     final colorScheme = Theme.of(context).colorScheme;
 
     return SliverMainAxisGroup(
@@ -46,8 +46,9 @@ class SearchModuleReorderView extends ConsumerWidget {
                   ),
                 ),
                 TextButton(
-                  onPressed: () =>
-                      ref.read(searchReorderModeProvider.notifier).deactivate(),
+                  onPressed: () => ref
+                      .read(searchReorderModeProvider(surface).notifier)
+                      .deactivate(),
                   child: const Text('Done'),
                 ),
               ],
@@ -58,7 +59,7 @@ class SearchModuleReorderView extends ConsumerWidget {
           itemCount: entries.length,
           onReorderItem: (oldIndex, newIndex) {
             ref
-                .read(searchModuleOrderProvider(group).notifier)
+                .read(searchModuleOrderProvider(surface).notifier)
                 .reorder(oldIndex, newIndex);
           },
           itemBuilder: (context, index) {
@@ -75,7 +76,7 @@ class SearchModuleReorderView extends ConsumerWidget {
                         : colorScheme.onSurfaceVariant,
                   ),
                   onPressed: () => ref
-                      .read(searchModuleOrderProvider(group).notifier)
+                      .read(searchModuleOrderProvider(surface).notifier)
                       .toggleVisibility(entry.type),
                 ),
                 title: Text(

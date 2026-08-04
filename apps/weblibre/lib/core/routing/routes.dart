@@ -55,6 +55,7 @@ import 'package:weblibre/features/geckoview/features/history/presentation/screen
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/dialogs/open_shared_content.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/screens/unshortener_settings.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/screens/url_cleaner_settings.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/screens/search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_draft_suggestions.dart';
@@ -82,7 +83,9 @@ import 'package:weblibre/features/settings/presentation/screens/experimental_set
 import 'package:weblibre/features/settings/presentation/screens/extensions_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/fingerprint_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/general_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/home_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/locale_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/module_surface_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/privacy_security_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/proxy_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/search_settings.dart';

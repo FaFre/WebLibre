@@ -45,28 +45,45 @@ class ModuleOrderEntry with FastEquatable {
   List<Object?> get hashParameters => [type, visible];
 }
 
-List<ModuleOrderEntry> _mergeWithDefaults(
+/// Reconciles a persisted module order with the surface's current defaults.
+///
+/// Persisted entries whose module no longer exists on the surface are dropped,
+/// and modules that were added since the order was saved are inserted at their
+/// position in [defaults] rather than appended, so a new module lands where it
+/// was designed to sit instead of at the bottom of the user's list.
+///
+/// Pure and exported so the reconciliation can be tested directly — it runs on
+/// every read of a persisted order, and a regression here silently rewrites
+/// user configuration.
+List<ModuleOrderEntry> mergeModuleOrderWithDefaults(
   List<ModuleOrderEntry>? persisted,
-  List<SearchModuleType> defaults,
+  List<ModuleSurfaceDefault> defaults,
 ) {
+  List<ModuleOrderEntry> fromDefaults() => defaults
+      .map((d) => ModuleOrderEntry(type: d.type, visible: d.visible))
+      .toList();
+
   if (persisted == null) {
-    return defaults
-        .map((type) => ModuleOrderEntry(type: type, visible: true))
-        .toList();
+    return fromDefaults();
   }
 
-  final defaultSet = defaults.toSet();
+  final offered = {for (final d in defaults) d.type: d};
   // Keep persisted entries that are still valid
-  final result = persisted.where((e) => defaultSet.contains(e.type)).toList();
+  final result = persisted.where((e) => offered.containsKey(e.type)).toList();
   // Insert any new defaults at their position from the defaults list so newly
   // introduced modules land where they're meant to (e.g. at the top), instead
-  // of trailing the user's persisted order.
+  // of trailing the user's persisted order. They keep the default's own
+  // visibility, so a module can be offered without being switched on for
+  // everyone who already customised this surface.
   final persistedTypes = result.map((e) => e.type).toSet();
   for (var i = 0; i < defaults.length; i++) {
-    final type = defaults[i];
-    if (!persistedTypes.contains(type)) {
+    final entry = defaults[i];
+    if (!persistedTypes.contains(entry.type)) {
       final insertAt = i.clamp(0, result.length);
-      result.insert(insertAt, ModuleOrderEntry(type: type, visible: true));
+      result.insert(
+        insertAt,
+        ModuleOrderEntry(type: entry.type, visible: entry.visible),
+      );
     }
   }
   return result;
@@ -91,11 +108,16 @@ class SearchModuleOrder extends _$SearchModuleOrder {
     ];
   }
 
+  /// Discards the user's layout for this surface and returns to its defaults.
+  void resetToDefaults() {
+    state = mergeModuleOrderWithDefaults(null, surface.defaultModules);
+  }
+
   @override
-  List<ModuleOrderEntry> build(SearchModuleGroup group) {
+  List<ModuleOrderEntry> build(ModuleSurface surface) {
     persist(
       ref.watch(riverpodDatabaseStorageProvider),
-      key: group.key,
+      key: surface.key,
       options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
       encode: (state) => jsonEncode(state.map((e) => e.toJson()).toList()),
       decode: (encoded) {
@@ -111,13 +133,11 @@ class SearchModuleOrder extends _$SearchModuleOrder {
             .whereType<ModuleOrderEntry>()
             .toList();
         // Merge with defaults to pick up newly added or remove deleted modules
-        return _mergeWithDefaults(decoded, group.defaultModules);
+        return mergeModuleOrderWithDefaults(decoded, surface.defaultModules);
       },
     );
 
     return stateOrNull ??
-        group.defaultModules
-            .map((type) => ModuleOrderEntry(type: type, visible: true))
-            .toList();
+        mergeModuleOrderWithDefaults(null, surface.defaultModules);
   }
 }

@@ -28,6 +28,7 @@ import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
 import 'package:weblibre/features/app_links/domain/entities/context_app_link_policy.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/home_target.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 
@@ -157,6 +158,18 @@ class GeneralSettings with FastEquatable {
   /// be dismissed without a system back button or back gesture (e.g. on e-ink
   /// devices). Defaults to false. Only shown when the route can be popped.
   final bool showSearchCloseButton;
+
+  /// What to land on when there is no tab to show — at cold start, and when
+  /// the last tab in scope is closed if [homeTargetOnLastTabClosed] is set.
+  final HomeTarget homeTarget;
+
+  /// Address opened when [homeTarget] is [HomeTarget.customUrl]. An unset or
+  /// unparseable value falls back to the home surface.
+  final String? homeTargetUrl;
+
+  /// Also apply [homeTarget] when the last tab in the current container is
+  /// closed, instead of falling through to a tab from somewhere else.
+  final bool homeTargetOnLastTabClosed;
   @JsonKey(name: 'defaultCreateTabType')
   final TabType storedDefaultCreateTabType;
   final TabDirection tabListDirection;
@@ -291,6 +304,9 @@ class GeneralSettings with FastEquatable {
     required this.showContainerUi,
     required this.showIsolatedTabUi,
     required this.showSearchCloseButton,
+    required this.homeTarget,
+    required this.homeTargetUrl,
+    required this.homeTargetOnLastTabClosed,
     required this.storedDefaultCreateTabType,
     required this.tabListDirection,
     required this.tabBarDirection,
@@ -364,6 +380,9 @@ class GeneralSettings with FastEquatable {
     bool? showContainerUi,
     bool? showIsolatedTabUi,
     bool? showSearchCloseButton,
+    HomeTarget? homeTarget,
+    this.homeTargetUrl,
+    bool? homeTargetOnLastTabClosed,
     TabType? storedDefaultCreateTabType,
     TabDirection? tabListDirection,
     TabDirection? tabBarDirection,
@@ -434,6 +453,10 @@ class GeneralSettings with FastEquatable {
        showContainerUi = showContainerUi ?? true,
        showIsolatedTabUi = showIsolatedTabUi ?? true,
        showSearchCloseButton = showSearchCloseButton ?? false,
+       // Defaults to `home`, which is exactly what the browser did before this
+       // setting existed. Anything else would change startup for every user.
+       homeTarget = homeTarget ?? HomeTarget.home,
+       homeTargetOnLastTabClosed = homeTargetOnLastTabClosed ?? false,
        storedDefaultCreateTabType =
            storedDefaultCreateTabType ?? TabType.regular,
        tabListDirection = tabListDirection ?? TabDirection.newestFirst,
@@ -611,6 +634,9 @@ class GeneralSettings with FastEquatable {
     showContainerUi,
     showIsolatedTabUi,
     showSearchCloseButton,
+    homeTarget,
+    homeTargetUrl,
+    homeTargetOnLastTabClosed,
     storedDefaultCreateTabType,
     tabListDirection,
     tabBarDirection,

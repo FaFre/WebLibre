@@ -41,7 +41,7 @@ final class TopSiteRepositoryProvider
   }
 }
 
-String _$topSiteRepositoryHash() => r'43c0495dfb3044dc9bb2f420524b45afb5735a0b';
+String _$topSiteRepositoryHash() => r'3907d90d379190fe3fc3e8897b08c254642239cf';
 
 abstract class _$TopSiteRepository extends $Notifier<void> {
   void build();

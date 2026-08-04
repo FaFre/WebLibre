@@ -74,6 +74,7 @@ class BrowserTopAppBar extends StatelessWidget {
   final int quickTabSwitcherRowCount;
   final bool isSmallWebMode;
   final bool enableGestures;
+  final bool suppressMainToolbar;
 
   late final BrowserTabBar _tabBar;
   late final _size = Size.fromHeight(_tabBar.getToolbarHeight());
@@ -85,6 +86,7 @@ class BrowserTopAppBar extends StatelessWidget {
     required this.quickTabSwitcherRowCount,
     required this.isSmallWebMode,
     this.enableGestures = true,
+    this.suppressMainToolbar = false,
   }) {
     _tabBar = BrowserTabBar(
       showMainToolbar: showMainToolbar,
@@ -95,6 +97,7 @@ class BrowserTopAppBar extends StatelessWidget {
       enableGestures: enableGestures,
       hideMainToolbarButtonsDuplicatedInContextualToolbar:
           showContextualToolbar,
+      suppressMainToolbar: suppressMainToolbar,
     );
   }
 
@@ -115,6 +118,7 @@ class BrowserBottomAppBar extends StatelessWidget {
   final bool isSmallWebMode;
   final Sheet? displayedSheet;
   final bool enableGestures;
+  final bool suppressMainToolbar;
 
   late final BrowserTabBar _tabBar;
   late final _size = Size.fromHeight(_tabBar.getToolbarHeight());
@@ -127,6 +131,7 @@ class BrowserBottomAppBar extends StatelessWidget {
     required this.quickTabSwitcherRowCount,
     required this.isSmallWebMode,
     this.enableGestures = true,
+    this.suppressMainToolbar = false,
   }) {
     _tabBar = BrowserTabBar(
       displayedSheet: displayedSheet,
@@ -137,6 +142,7 @@ class BrowserBottomAppBar extends StatelessWidget {
       enableGestures: enableGestures,
       hideMainToolbarButtonsDuplicatedInContextualToolbar:
           showContextualToolbar,
+      suppressMainToolbar: suppressMainToolbar,
     );
   }
 
@@ -173,6 +179,8 @@ class BrowserSideRail extends ConsumerWidget {
   /// [TabBarPosition.right]).
   final TabBarPosition position;
 
+  final bool suppressMainToolbar;
+
   late final BrowserTabBar _tabBar;
   late final _size = Size.fromWidth(_tabBar.getToolbarWidth());
 
@@ -182,6 +190,7 @@ class BrowserSideRail extends ConsumerWidget {
     required this.quickTabSwitcherRowCount,
     required this.isSmallWebMode,
     required this.position,
+    this.suppressMainToolbar = false,
   }) {
     _tabBar = BrowserTabBar(
       displayedSheet: null,
@@ -192,6 +201,7 @@ class BrowserSideRail extends ConsumerWidget {
       enableGestures: true,
       hideMainToolbarButtonsDuplicatedInContextualToolbar:
           showContextualToolbar,
+      suppressMainToolbar: suppressMainToolbar,
     );
   }
 
@@ -251,6 +261,22 @@ class BrowserTabBar extends HookConsumerWidget {
   final bool isSmallWebMode;
   final bool enableGestures;
 
+  /// Drops the main toolbar row entirely — not just its contents.
+  ///
+  /// Set on the home surface, where this row has nothing left to say: its
+  /// address field is replaced by the home surface's own pinned search pill,
+  /// and what sits beside it — the pinned add-ons, the reader button — acts on
+  /// a page that is not open. Blanking only the title would strand the add-ons
+  /// at the right of an empty strip and still reserve [kToolbarHeight] here.
+  ///
+  /// The caller resolves this rather than deriving it from
+  /// `shouldShowBrowserHomeProvider`, for two reasons: [getToolbarHeight] runs
+  /// outside the widget tree (from the wrappers' constructors, to size the bar
+  /// before it is built), and the decision also depends on whether a contextual
+  /// toolbar exists to take over the tab count and navigation menu — which the
+  /// wrappers rewrite before it reaches this widget.
+  final bool suppressMainToolbar;
+
   const BrowserTabBar({
     super.key,
     required this.showMainToolbar,
@@ -260,6 +286,7 @@ class BrowserTabBar extends HookConsumerWidget {
     required this.isSmallWebMode,
     required this.enableGestures,
     this.hideMainToolbarButtonsDuplicatedInContextualToolbar = false,
+    this.suppressMainToolbar = false,
   });
 
   static const contextualToolabarHeight = 54.0;
@@ -275,6 +302,7 @@ class BrowserTabBar extends HookConsumerWidget {
 
   bool get displayAppBar =>
       showMainToolbar &&
+      !suppressMainToolbar &&
       (!showContextualToolbar || displayedSheet is! ViewTabsSheet);
 
   bool get displayQuickTabSwitcher =>

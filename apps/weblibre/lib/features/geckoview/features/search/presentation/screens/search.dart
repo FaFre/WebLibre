@@ -44,14 +44,8 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/sea
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/animated_tab_type_switcher.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/clipboard_fill.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/containers_section.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/frequent_bangs_section.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/history_highlights_section.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_feed_articles_section.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_history_section.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_searches_section.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_tabs_section.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/top_sites_section.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/module_surface_scope.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/module_surface_slivers.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_field.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_module_reorder_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/bookmark_search.dart';
@@ -529,61 +523,46 @@ class SearchScreen extends HookConsumerWidget {
       return () => scrollController.removeListener(listener);
     }, [scrollController]);
 
-    final reorderGroup = ref.watch(searchReorderModeProvider);
+    // The screen is two surfaces in one: before anything is typed it is the
+    // new-tab page, afterwards it is the search results page. They are mutually
+    // exclusive, so a single scope covers both.
+    final activeSurface = showNoInputSections
+        ? ModuleSurface.newTab
+        : ModuleSurface.search;
 
-    final emptyStateOrder = ref.watch(
-      searchModuleOrderProvider(SearchModuleGroup.emptyState),
+    final reorderActive = ref.watch(searchReorderModeProvider(activeSurface));
+
+    final moduleCallbacks = ModuleSurfaceCallbacks(
+      onUriSelected: openUriInTab,
+      searchTextController: searchTextController,
+      submitSearch: submitSearch,
+      onArticleSelected: (article) {
+        FeedArticleRoute(articleId: article.id).pushReplacement(context);
+      },
+      onTabSelected: (tabId) async {
+        await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
+
+        if (context.mounted) {
+          ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
+          const BrowserRoute().go(context);
+        }
+      },
+      onContainerSelected: (container) async {
+        final result = await ref
+            .read(selectedContainerProvider.notifier)
+            .setContainerId(container.id);
+
+        if (!context.mounted) return;
+
+        if (result == SetContainerResult.success) {
+          await ensureProxyStartedForContainer(context, ref, container);
+        }
+
+        if (context.mounted && result == SetContainerResult.success) {
+          const TabViewRoute().go(context);
+        }
+      },
     );
-    final searchOrder = ref.watch(
-      searchModuleOrderProvider(SearchModuleGroup.search),
-    );
-
-    final emptyStateWidgets = <SearchModuleType, Widget>{
-      SearchModuleType.recentSearches: RecentSearchesSection(
-        searchTextController: searchTextController,
-        submitSearch: submitSearch,
-      ),
-      SearchModuleType.frequentBangs: const FrequentBangsSection(),
-      SearchModuleType.topSites: TopSitesSection(onUriSelected: openUriInTab),
-      SearchModuleType.recentArticles: RecentFeedArticlesSection(
-        onArticleSelected: (article) {
-          FeedArticleRoute(articleId: article.id).pushReplacement(context);
-        },
-      ),
-      SearchModuleType.recentTabs: RecentTabsSection(
-        onTabSelected: (tabId) async {
-          await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
-
-          if (context.mounted) {
-            ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
-            const BrowserRoute().go(context);
-          }
-        },
-      ),
-      SearchModuleType.recentHistory: RecentHistorySection(
-        onUriSelected: openUriInTab,
-      ),
-      SearchModuleType.historyHighlights: HistoryHighlightsSection(
-        onUriSelected: openUriInTab,
-      ),
-      SearchModuleType.containers: ContainersSection(
-        onContainerSelected: (container) async {
-          final result = await ref
-              .read(selectedContainerProvider.notifier)
-              .setContainerId(container.id);
-
-          if (!context.mounted) return;
-
-          if (result == SetContainerResult.success) {
-            await ensureProxyStartedForContainer(context, ref, container);
-          }
-
-          if (context.mounted && result == SetContainerResult.success) {
-            const TabViewRoute().go(context);
-          }
-        },
-      ),
-    };
 
     final searchWidgets = <SearchModuleType, Widget>{
       SearchModuleType.searchProviders: SearchProvidersSection(
@@ -620,6 +599,10 @@ class SearchScreen extends HookConsumerWidget {
       ),
     };
 
+    final searchOrder = ref.watch(
+      searchModuleOrderProvider(ModuleSurface.search),
+    );
+
     bool canShowSearchModule(SearchModuleType type) {
       if (!isUrlInput.value) {
         return true;
@@ -642,266 +625,250 @@ class SearchScreen extends HookConsumerWidget {
       body: SafeArea(
         child: Form(
           key: formKey,
-          child: CustomScrollView(
-            controller: scrollController,
-            slivers: [
-              SliverAppBar(
-                floating: true,
-                pinned: true,
-                automaticallyImplyLeading: false,
-                leading: showCloseButton
-                    ? IconButton(
-                        tooltip: 'Close',
-                        icon: const Icon(Icons.close),
-                        onPressed: () => context.pop(),
-                      )
-                    : null,
-                backgroundColor: colorScheme.surface,
-                scrolledUnderElevation: 0,
-                shadowColor: Colors.transparent,
-                surfaceTintColor: Colors.transparent,
-                // Collapse the toolbar in edit mode (no tab-type switcher), but
-                // keep it when the close button needs somewhere to render.
-                toolbarHeight: (isEditMode && !showCloseButton)
-                    ? 0
-                    : kToolbarHeight,
-                titleSpacing: 0.0,
-                title: isEditMode
-                    ? null
-                    : Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Builder(
-                          builder: (context) {
-                            final tabTypeSwitcher = Focus(
-                              canRequestFocus: false,
-                              child: AnimatedTabTypeSwitcher(
-                                selected: selectedTabType.value,
-                                onChanged: (value) {
-                                  selectedTabType.value = value;
-                                  // Restore focus to search field after segment change
-                                  WidgetsBinding.instance.addPostFrameCallback((
-                                    _,
-                                  ) {
-                                    searchFocusNode.requestFocus();
-                                  });
-                                },
-                                showChildOption: createChildTabsOption,
-                                showIsolatedOption: settings.showIsolatedTabUi,
-                                selectedBackgroundColor: switch (selectedTabType
-                                    .value) {
-                                  TabType.regular => null,
-                                  TabType.private =>
-                                    appColors.privateSelectionOverlay,
-                                  TabType.isolated =>
-                                    appColors.isolatedSelectionOverlay,
-                                  TabType.child => switch (currentTabTabType) {
-                                    TabType.private =>
-                                      appColors.privateSelectionOverlay,
-                                    TabType.isolated =>
-                                      appColors.isolatedSelectionOverlay,
-                                    _ => null,
+          child: ModuleSurfaceScope(
+            surface: activeSurface,
+            pinnedHeaderBackgroundColor: Theme.of(context).canvasColor,
+            child: CustomScrollView(
+              controller: scrollController,
+              slivers: [
+                SliverAppBar(
+                  floating: true,
+                  pinned: true,
+                  automaticallyImplyLeading: false,
+                  leading: showCloseButton
+                      ? IconButton(
+                          tooltip: 'Close',
+                          icon: const Icon(Icons.close),
+                          onPressed: () => context.pop(),
+                        )
+                      : null,
+                  backgroundColor: colorScheme.surface,
+                  scrolledUnderElevation: 0,
+                  shadowColor: Colors.transparent,
+                  surfaceTintColor: Colors.transparent,
+                  // Collapse the toolbar in edit mode (no tab-type switcher), but
+                  // keep it when the close button needs somewhere to render.
+                  toolbarHeight: (isEditMode && !showCloseButton)
+                      ? 0
+                      : kToolbarHeight,
+                  titleSpacing: 0.0,
+                  title: isEditMode
+                      ? null
+                      : Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Builder(
+                            builder: (context) {
+                              final tabTypeSwitcher = Focus(
+                                canRequestFocus: false,
+                                child: AnimatedTabTypeSwitcher(
+                                  selected: selectedTabType.value,
+                                  onChanged: (value) {
+                                    selectedTabType.value = value;
+                                    // Restore focus to search field after segment change
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((_) {
+                                          searchFocusNode.requestFocus();
+                                        });
                                   },
-                                },
-                              ),
-                            );
-
-                            if (!settings.showContainerUi) {
-                              return Center(
-                                child: Transform.scale(
-                                  scale: 1.08,
-                                  child: tabTypeSwitcher,
+                                  showChildOption: createChildTabsOption,
+                                  showIsolatedOption:
+                                      settings.showIsolatedTabUi,
+                                  selectedBackgroundColor:
+                                      switch (selectedTabType.value) {
+                                        TabType.regular => null,
+                                        TabType.private =>
+                                          appColors.privateSelectionOverlay,
+                                        TabType.isolated =>
+                                          appColors.isolatedSelectionOverlay,
+                                        TabType.child =>
+                                          switch (currentTabTabType) {
+                                            TabType.private =>
+                                              appColors.privateSelectionOverlay,
+                                            TabType.isolated =>
+                                              appColors
+                                                  .isolatedSelectionOverlay,
+                                            _ => null,
+                                          },
+                                      },
                                 ),
                               );
-                            }
 
-                            return Row(
-                              children: [
-                                Expanded(
-                                  flex: 4,
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
+                              if (!settings.showContainerUi) {
+                                return Center(
+                                  child: Transform.scale(
+                                    scale: 1.08,
                                     child: tabTypeSwitcher,
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                Flexible(
-                                  flex: 2,
-                                  child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: CompactContainerSelector(
-                                      selectedContainer: selectedContainer,
-                                      emphasizeSelection: false,
+                                );
+                              }
+
+                              return Row(
+                                children: [
+                                  Expanded(
+                                    flex: 4,
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: tabTypeSwitcher,
                                     ),
                                   ),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      ),
-                bottom: PreferredSize(
-                  preferredSize: Size.fromHeight(preferredHeight.value),
-                  child: SearchField(
-                    textFieldKey: textFieldKey,
-                    showBangIcon: showBangIcon,
-                    textEditingController: searchTextController,
-                    focusNode: searchFocusNode,
-                    maxLines: isEditMode ? 3 : 1,
-                    privateMode: privateTabMode,
-                    label: const Text('Search or enter URL'),
-                    unfocusOnTapOutside: false,
-                    onClearPressed: () {
-                      final url = revertUrl.value;
-                      if (url != null &&
-                          searchTextController.text ==
-                              reverseMatchedQuery.value) {
-                        // First press after a reverse-match swap: restore the
-                        // original URL and drop the auto-selected bang. The
-                        // user can press again to actually clear.
-                        searchTextController.value = TextEditingValue(
-                          text: url,
-                          selection: TextSelection(
-                            baseOffset: 0,
-                            extentOffset: url.length,
-                          ),
-                        );
-                        revertUrl.value = null;
-                        reverseMatchedQuery.value = null;
-                        ref
-                            .read(selectedBangTriggerProvider().notifier)
-                            .clearTrigger();
-                      } else {
-                        revertUrl.value = null;
-                        reverseMatchedQuery.value = null;
-                        searchTextController.clear();
-                      }
-                    },
-                    onSubmitted: (value) async {
-                      if (value.isEmpty) return;
-
-                      switch (classifyAddressBarInput(value)) {
-                        case NavigateInputClassification(:final uri):
-                          await openUriInTab(uri);
-                        case SearchInputClassification(:final query):
-                          // Read from both providers - use site if set, otherwise global
-                          final siteBang = isEditMode
-                              ? ref.read(
-                                  selectedBangDataProvider(
-                                    domain: existingTabState.url.host,
+                                  const SizedBox(width: 8),
+                                  Flexible(
+                                    flex: 2,
+                                    child: Align(
+                                      alignment: Alignment.centerRight,
+                                      child: CompactContainerSelector(
+                                        selectedContainer: selectedContainer,
+                                        emphasizeSelection: false,
+                                      ),
+                                    ),
                                   ),
-                                )
-                              : null;
-                          final globalBang = ref.read(
-                            selectedBangDataProvider(),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                  bottom: PreferredSize(
+                    preferredSize: Size.fromHeight(preferredHeight.value),
+                    child: SearchField(
+                      textFieldKey: textFieldKey,
+                      showBangIcon: showBangIcon,
+                      textEditingController: searchTextController,
+                      focusNode: searchFocusNode,
+                      maxLines: isEditMode ? 3 : 1,
+                      privateMode: privateTabMode,
+                      label: const Text('Search or enter URL'),
+                      unfocusOnTapOutside: false,
+                      onClearPressed: () {
+                        final url = revertUrl.value;
+                        if (url != null &&
+                            searchTextController.text ==
+                                reverseMatchedQuery.value) {
+                          // First press after a reverse-match swap: restore the
+                          // original URL and drop the auto-selected bang. The
+                          // user can press again to actually clear.
+                          searchTextController.value = TextEditingValue(
+                            text: url,
+                            selection: TextSelection(
+                              baseOffset: 0,
+                              extentOffset: url.length,
+                            ),
                           );
-                          final bang =
-                              siteBang ??
-                              globalBang ??
-                              await ref.read(defaultSearchBangProvider.future);
+                          revertUrl.value = null;
+                          reverseMatchedQuery.value = null;
+                          ref
+                              .read(selectedBangTriggerProvider().notifier)
+                              .clearTrigger();
+                        } else {
+                          revertUrl.value = null;
+                          reverseMatchedQuery.value = null;
+                          searchTextController.clear();
+                        }
+                      },
+                      onSubmitted: (value) async {
+                        if (value.isEmpty) return;
 
-                          if (bang == null) return;
-
-                          final uri = await resolveSearchUri(bang, query);
-                          if (uri == null) {
-                            // Web search dispatched in-app; reset edit state.
-                            isEditingAfterSearch.value = false;
-                            return;
-                          }
-                          await openUriInTab(uri);
-                        case InvalidInputClassification():
-                          if (context.mounted) {
-                            ui_helper.showErrorMessage(
-                              context,
-                              'Invalid address',
+                        switch (classifyAddressBarInput(value)) {
+                          case NavigateInputClassification(:final uri):
+                            await openUriInTab(uri);
+                          case SearchInputClassification(:final query):
+                            // Read from both providers - use site if set, otherwise global
+                            final siteBang = isEditMode
+                                ? ref.read(
+                                    selectedBangDataProvider(
+                                      domain: existingTabState.url.host,
+                                    ),
+                                  )
+                                : null;
+                            final globalBang = ref.read(
+                              selectedBangDataProvider(),
                             );
-                          }
-                      }
-                    },
-                    activeBang: activeBang,
-                    showSuggestions: true,
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: ClipboardFillLink(controller: searchTextController),
-              ),
-              if (isWebSearchBang(activeBang))
-                const SliverPadding(
-                  padding: EdgeInsets.fromLTRB(0, 8, 0, 4),
-                  sliver: SliverToBoxAdapter(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _WebSearchOptionsRow(),
-                        WebSearchTorBootstrapProgress(),
-                      ],
+                            final bang =
+                                siteBang ??
+                                globalBang ??
+                                await ref.read(
+                                  defaultSearchBangProvider.future,
+                                );
+
+                            if (bang == null) return;
+
+                            final uri = await resolveSearchUri(bang, query);
+                            if (uri == null) {
+                              // Web search dispatched in-app; reset edit state.
+                              isEditingAfterSearch.value = false;
+                              return;
+                            }
+                            await openUriInTab(uri);
+                          case InvalidInputClassification():
+                            if (context.mounted) {
+                              ui_helper.showErrorMessage(
+                                context,
+                                'Invalid address',
+                              );
+                            }
+                        }
+                      },
+                      activeBang: activeBang,
+                      showSuggestions: true,
                     ),
                   ),
                 ),
-              if (reorderGroup != null)
-                SearchModuleReorderView(group: reorderGroup)
-              else if (isWebSearchBang(activeBang) &&
-                  ref.watch(
-                    metaSearchControllerProvider.select(
-                      (s) =>
-                          s.status != WebSearchStatus.idle ||
-                          s.query.isNotEmpty,
+                SliverToBoxAdapter(
+                  child: ClipboardFillLink(controller: searchTextController),
+                ),
+                if (isWebSearchBang(activeBang))
+                  const SliverPadding(
+                    padding: EdgeInsets.fromLTRB(0, 8, 0, 4),
+                    sliver: SliverToBoxAdapter(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _WebSearchOptionsRow(),
+                          WebSearchTorBootstrapProgress(),
+                        ],
+                      ),
                     ),
-                  )) ...[
-                // Once a web search has been dispatched, the screen shows
-                // the fetched results only — search suggestions and search
-                // providers belong to the normal search page, not the
-                // results view.
-                WebSearchResultsSection(
-                  resolveOpenTarget: () => WebSearchOpenTarget(
-                    tabMode: effectiveTabMode,
-                    containerSelection: selectedContainer == null
-                        ? const TabContainerSelection.unassigned()
-                        : TabContainerSelection.specific(selectedContainer),
-                    parentId: (selectedTabType.value == TabType.child)
-                        ? ref.read(selectedTabProvider)
-                        : null,
                   ),
-                ),
-              ] else if (showNoInputSections) ...[
-                for (final entry in emptyStateOrder)
-                  if (emptyStateWidgets.containsKey(entry.type))
-                    emptyStateWidgets[entry.type]!,
-                const _CustomizeSectionsButton(
-                  group: SearchModuleGroup.emptyState,
-                ),
-              ] else ...[
-                for (final entry in searchOrder)
-                  if (searchWidgets.containsKey(entry.type) &&
-                      canShowSearchModule(entry.type))
-                    searchWidgets[entry.type]!,
-                const _CustomizeSectionsButton(group: SearchModuleGroup.search),
+                if (reorderActive)
+                  SearchModuleReorderView(surface: activeSurface)
+                else if (isWebSearchBang(activeBang) &&
+                    ref.watch(
+                      metaSearchControllerProvider.select(
+                        (s) =>
+                            s.status != WebSearchStatus.idle ||
+                            s.query.isNotEmpty,
+                      ),
+                    )) ...[
+                  // Once a web search has been dispatched, the screen shows
+                  // the fetched results only — search suggestions and search
+                  // providers belong to the normal search page, not the
+                  // results view.
+                  WebSearchResultsSection(
+                    resolveOpenTarget: () => WebSearchOpenTarget(
+                      tabMode: effectiveTabMode,
+                      containerSelection: selectedContainer == null
+                          ? const TabContainerSelection.unassigned()
+                          : TabContainerSelection.specific(selectedContainer),
+                      parentId: (selectedTabType.value == TabType.child)
+                          ? ref.read(selectedTabProvider)
+                          : null,
+                    ),
+                  ),
+                ] else if (showNoInputSections)
+                  ModuleSurfaceSliverList(
+                    surface: ModuleSurface.newTab,
+                    callbacks: moduleCallbacks,
+                  )
+                else ...[
+                  for (final entry in searchOrder)
+                    if (searchWidgets.containsKey(entry.type) &&
+                        entry.visible &&
+                        canShowSearchModule(entry.type))
+                      searchWidgets[entry.type]!,
+                  const CustomizeSectionsButton(surface: ModuleSurface.search),
+                ],
               ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CustomizeSectionsButton extends ConsumerWidget {
-  final SearchModuleGroup group;
-
-  const _CustomizeSectionsButton({required this.group});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return SliverToBoxAdapter(
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 24),
-          child: TextButton.icon(
-            onPressed: () =>
-                ref.read(searchReorderModeProvider.notifier).activate(group),
-            icon: const Icon(Icons.tune, size: 18),
-            label: const Text('Customize sections'),
+            ),
           ),
         ),
       ),

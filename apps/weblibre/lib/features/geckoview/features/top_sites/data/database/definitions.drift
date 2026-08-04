@@ -17,6 +17,15 @@ CREATE TABLE hidden_top_site (
   url TEXT PRIMARY KEY NOT NULL MAPPED BY `const UriConverter()`
 );
 
+-- Domain-wide suppression, kept separate from hidden_top_site because the two
+-- mean different things: hidden_top_site suppresses one exact URL (which the
+-- edit flow relies on to stop an edited default reappearing), while this hides
+-- every frecency result on a host. A single PWA can otherwise flood the grid
+-- with dozens of distinct URLs that each need hiding individually.
+CREATE TABLE hidden_top_site_host (
+  host TEXT PRIMARY KEY NOT NULL
+);
+
 leadingOrderKey(:bucket AS INTEGER):
   SELECT lexo_rank_previous(
     :bucket,

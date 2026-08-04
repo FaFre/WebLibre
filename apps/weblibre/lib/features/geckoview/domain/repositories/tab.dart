@@ -38,6 +38,7 @@ import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/controllers/home_target_controller.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
@@ -213,6 +214,8 @@ class TabRepository extends _$TabRepository {
     }
 
     if (selectTab && ref.mounted) {
+      _clearForceBrowserHome();
+
       final selectedContainerNotifier = ref.read(
         selectedContainerProvider.notifier,
       );
@@ -269,7 +272,7 @@ class TabRepository extends _$TabRepository {
       SpecificContainerTabSelection(:final container) => container,
     };
 
-    return await db.transaction(() async {
+    final createdTabIds = await db.transaction(() async {
       final createdTabIds = await _tabsService.addMultipleTabs(
         tabs: tabs,
         selectTabId: selectTabId,
@@ -320,6 +323,12 @@ class TabRepository extends _$TabRepository {
 
       return createdTabIds;
     });
+
+    if (selectTabId != null && ref.mounted) {
+      _clearForceBrowserHome();
+    }
+
+    return createdTabIds;
   }
 
   Future<String> duplicateTab({
@@ -363,7 +372,7 @@ class TabRepository extends _$TabRepository {
             .getSingleOrNull() ??
         selectTabId;
 
-    return await tabDao.upsertTabTransactional(
+    final newTabId = await tabDao.upsertTabTransactional(
       () {
         return _tabsService.duplicateTab(
           selectTabId: selectTabId,
@@ -376,6 +385,12 @@ class TabRepository extends _$TabRepository {
       containerId: Value(containerData?.id),
       tabMode: Value(duplicateTabMode),
     );
+
+    if (selectTab && ref.mounted) {
+      _clearForceBrowserHome();
+    }
+
+    return newTabId;
   }
 
   Future<bool> selectPreviouslyOpenedTab(String tabId) async {
@@ -392,11 +407,11 @@ class TabRepository extends _$TabRepository {
     return false;
   }
 
-  Future<bool> resumeLatestTab() async {
+  Future<bool> resumeLatestTab({Set<String> excludedTabIds = const {}}) async {
     final latestTab = await ref
         .read(tabDatabaseProvider)
         .tabDao
-        .getTabsFifo(limit: 1)
+        .getTabsFifo(limit: 1, excludedTabIds: excludedTabIds)
         .getSingleOrNull();
 
     if (!ref.mounted || latestTab == null) {
@@ -406,11 +421,18 @@ class TabRepository extends _$TabRepository {
     return selectTab(latestTab.id);
   }
 
-  Future<bool> resumeLatestContainerTab(String? containerId) async {
+  Future<bool> resumeLatestContainerTab(
+    String? containerId, {
+    Set<String> excludedTabIds = const {},
+  }) async {
     final latestTab = await ref
         .read(tabDatabaseProvider)
         .tabDao
-        .getContainerTabsFifo(containerId, limit: 1)
+        .getContainerTabsFifo(
+          containerId,
+          limit: 1,
+          excludedTabIds: excludedTabIds,
+        )
         .getSingleOrNull();
 
     if (!ref.mounted || latestTab == null) {
@@ -464,6 +486,7 @@ class TabRepository extends _$TabRepository {
     if (!ref.read(browserRestoreCompleteProvider) &&
         !ref.read(tabStatesProvider).containsKey(tabId)) {
       ref.read(pendingTabSelectionProvider.notifier).queue(tabId);
+      _clearForceBrowserHome();
       return true;
     }
 
@@ -487,8 +510,34 @@ class TabRepository extends _$TabRepository {
       }
     }
 
+    _clearForceBrowserHome();
     await _tabsService.selectTab(tabId: tabId);
     return true;
+  }
+
+  /// Cancels a pending "stay on home", because something is about to be shown.
+  ///
+  /// Done explicitly at each selection rather than by listening to the selected
+  /// tab: the engine selects tabs on its own (restore, session recovery) and
+  /// such a listener would immediately undo the flag the home target had just
+  /// set. Call it only once the selection is certain — a proxy healthcheck can
+  /// still refuse it, and discarding the flag then would drop the user off home
+  /// without putting anything in its place.
+  void _clearForceBrowserHome() {
+    ref.read(forceBrowserHomeProvider.notifier).clear();
+  }
+
+  /// Selects [tabId] on behalf of the engine's own follow-up logic, i.e. not
+  /// because the user asked for this particular tab.
+  ///
+  /// Still counts as leaving home: a neighbour is now on screen, so a
+  /// "stay on home" left over from an earlier close no longer describes
+  /// anything. Safe against the home target's own flag, because the branch of
+  /// [_selectNextTab] that sets it is reached only when nothing was selected
+  /// here.
+  Future<void> _selectTabAfterClose(String tabId) async {
+    _clearForceBrowserHome();
+    await _tabsService.selectTab(tabId: tabId);
   }
 
   Future<String?> _adjacentVisibleTabByOrder(
@@ -588,7 +637,7 @@ class TabRepository extends _$TabRepository {
     if (tabState?.parentId != null) {
       final parentId = tabState!.parentId!;
       if (!excludedTabIds.contains(parentId)) {
-        return _tabsService.selectTab(tabId: parentId);
+        return _selectTabAfterClose(parentId);
       }
     }
 
@@ -601,7 +650,7 @@ class TabRepository extends _$TabRepository {
 
     if (previousTabId != null) {
       if (sameContainerTabs.any((tab) => tab == previousTabId)) {
-        return _tabsService.selectTab(tabId: previousTabId);
+        return _selectTabAfterClose(previousTabId);
       }
     }
 
@@ -614,10 +663,32 @@ class TabRepository extends _$TabRepository {
     );
 
     if (orderedNeighborTabId != null) {
-      return _tabsService.selectTab(tabId: orderedNeighborTabId);
+      return _selectTabAfterClose(orderedNeighborTabId);
     }
 
     if (!ref.mounted) return;
+
+    // Out of candidates in this container. By default the search widens to
+    // unassigned tabs and then to other containers, which drags the user out
+    // of the container they were working in; the home target keeps them here.
+    if (ref
+        .read(generalSettingsWithDefaultsProvider)
+        .homeTargetOnLastTabClosed) {
+      await ref
+          .read(homeTargetControllerProvider.notifier)
+          .applyTarget(
+            // currentContainerId is null for the unassigned container, which is
+            // still a scope to stay inside — hence the explicit flag.
+            scopeToContainer: true,
+            containerId: currentContainerId,
+            closingTabUrl: tabState?.url,
+            // Tab rows outlive this call — they are deleted only after the next
+            // selection is made — so without this the resume would pick the
+            // very tab being closed, which sorts first as the active one.
+            excludedTabIds: {...excludedTabIds, tabId},
+          );
+      return;
+    }
 
     final unassignedTabs = await ref
         .read(containerRepositoryProvider.notifier)
@@ -629,7 +700,7 @@ class TabRepository extends _$TabRepository {
         );
 
     if (unassignedTabs.isNotEmpty) {
-      return _tabsService.selectTab(tabId: unassignedTabs.first);
+      return _selectTabAfterClose(unassignedTabs.first);
     }
 
     if (!ref.mounted) return;
@@ -654,7 +725,7 @@ class TabRepository extends _$TabRepository {
     );
 
     if (nextContainerTabs.isNotEmpty) {
-      return _tabsService.selectTab(tabId: nextContainerTabs!.first);
+      return _selectTabAfterClose(nextContainerTabs!.first);
     }
   }
 

@@ -22,6 +22,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_module_order.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/module_surface_scope.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_header.dart';
 
 const previewItemsPerModule = 3;
@@ -75,6 +76,11 @@ class SearchModuleSection extends ConsumerWidget {
   })
   contentSliverBuilder;
 
+  /// Overrides the surface this section configures itself from. Normally left
+  /// null so it is inherited from the enclosing [ModuleSurfaceScope]; set it in
+  /// tests that render a section without a host.
+  final ModuleSurface? surface;
+
   const SearchModuleSection({
     super.key,
     required this.title,
@@ -85,11 +91,15 @@ class SearchModuleSection extends ConsumerWidget {
     this.previewLimit = previewItemsPerModule,
     this.hideWhenEmpty = false,
     this.showPagination = true,
+    this.surface,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final moduleOrder = ref.watch(searchModuleOrderProvider(moduleType.group));
+    final scope = this.surface == null ? ModuleSurfaceScope.of(context) : null;
+    final surface = this.surface ?? scope!.surface;
+
+    final moduleOrder = ref.watch(searchModuleOrderProvider(surface));
     final isVisible = moduleOrder.any((e) => e.type == moduleType && e.visible);
     if (!isVisible) {
       return MultiSliver(children: const []);
@@ -100,7 +110,7 @@ class SearchModuleSection extends ConsumerWidget {
     }
 
     final displayState = ref.watch(
-      searchModuleDisplayStateControllerProvider(moduleType),
+      searchModuleDisplayStateControllerProvider(surface, moduleType),
     );
 
     final isCollapsed = displayState == SearchModuleDisplayState.collapsed;
@@ -112,40 +122,52 @@ class SearchModuleSection extends ConsumerWidget {
         ? 0
         : (showAllItems ? totalCount : previewLimit);
 
+    // A section rendered without a host (tests) behaves like the search
+    // screen, which is the surface that has one.
+    final pinnedBackground = scope == null
+        ? Theme.of(context).canvasColor
+        : scope.pinnedHeaderBackgroundColor;
+
+    final header = SearchModuleHeader(
+      title: title,
+      totalCount: totalCount,
+      displayState: displayState,
+      headerTrailing: isCollapsed ? null : headerTrailing,
+      previewLimit: previewLimit,
+      showPagination: showPagination,
+      onToggleCollapse: () => ref
+          .read(
+            searchModuleDisplayStateControllerProvider(
+              surface,
+              moduleType,
+            ).notifier,
+          )
+          .toggleCollapse(),
+      onToggleExpansion: () => ref
+          .read(
+            searchModuleDisplayStateControllerProvider(
+              surface,
+              moduleType,
+            ).notifier,
+          )
+          .toggleExpansion(),
+      onLongPress: () =>
+          ref.read(searchReorderModeProvider(surface).notifier).activate(),
+    );
+
     return MultiSliver(
-      pushPinnedChildren: true,
+      pushPinnedChildren: pinnedBackground != null,
       children: [
-        const SliverToBoxAdapter(child: Divider()),
-        SliverPinnedHeader(
-          child: ColoredBox(
-            color: Theme.of(context).canvasColor,
-            child: SearchModuleHeader(
-              title: title,
-              totalCount: totalCount,
-              displayState: displayState,
-              headerTrailing: isCollapsed ? null : headerTrailing,
-              previewLimit: previewLimit,
-              showPagination: showPagination,
-              onToggleCollapse: () => ref
-                  .read(
-                    searchModuleDisplayStateControllerProvider(
-                      moduleType,
-                    ).notifier,
-                  )
-                  .toggleCollapse(),
-              onToggleExpansion: () => ref
-                  .read(
-                    searchModuleDisplayStateControllerProvider(
-                      moduleType,
-                    ).notifier,
-                  )
-                  .toggleExpansion(),
-              onLongPress: () => ref
-                  .read(searchReorderModeProvider.notifier)
-                  .activate(moduleType.group),
-            ),
-          ),
-        ),
+        // Sections are separated by space rather than a rule. A divider drawn
+        // directly above a header that carries its own backdrop produces two
+        // edges where the eye expects one.
+        const SliverToBoxAdapter(child: SizedBox(height: 8)),
+        if (pinnedBackground != null)
+          SliverPinnedHeader(
+            child: ColoredBox(color: pinnedBackground, child: header),
+          )
+        else
+          SliverToBoxAdapter(child: header),
         ...contentSliverBuilder(
           isCollapsed: isCollapsed,
           visibleCount: visibleCount,

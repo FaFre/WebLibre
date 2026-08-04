@@ -21,6 +21,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -32,6 +33,106 @@ part 'general_settings.g.dart';
 typedef UpdateGeneralSettingsFunc =
     GeneralSettings Function(GeneralSettings currentSettings);
 
+/// Column type for every persisted `general` setting, keyed by its JSON name.
+///
+/// Also carries legacy keys that no longer exist on [GeneralSettings] but are
+/// still read so the migrations in `GeneralSettings.fromJson` keep working.
+///
+/// **Every field on [GeneralSettings] must appear here or in
+/// [generalSettingJsonKeys].** A missing entry means the setting writes fine
+/// but silently reverts to its default on the next launch, because it is never
+/// read back out of the database. `general_settings_deserialize_test.dart`
+/// guards this.
+@visibleForTesting
+const generalSettingColumnTypes = <String, DriftSqlType>{
+  'themeMode': DriftSqlType.string,
+  'uiScaleFactor': DriftSqlType.double,
+  'disableAnimations': DriftSqlType.bool,
+  'refreshRateMode': DriftSqlType.string,
+  'showModalBarrier': DriftSqlType.bool,
+  'enableReadability': DriftSqlType.bool,
+  'enforceReadability': DriftSqlType.bool,
+  'screenshotProtectionEnabled': DriftSqlType.bool,
+  'defaultSearchProvider': DriftSqlType.string,
+  'defaultSearchSuggestionsProvider': DriftSqlType.string,
+  'createChildTabsOption': DriftSqlType.bool,
+  'enableLocalAiFeatures': DriftSqlType.bool,
+  'showContainerUi': DriftSqlType.bool,
+  'showIsolatedTabUi': DriftSqlType.bool,
+  'defaultCreateTabType': DriftSqlType.string,
+  // Legacy: superseded by tabListDirection/tabBarDirection.
+  'newTabPosition': DriftSqlType.string,
+  'tabListDirection': DriftSqlType.string,
+  'tabBarDirection': DriftSqlType.string,
+  'tabIntentOpenSetting': DriftSqlType.string,
+  'bookmarkOpenSetting': DriftSqlType.string,
+  'autoHideTabBar': DriftSqlType.bool,
+  'tabBarSwipeAction': DriftSqlType.string,
+  'historyAutoCleanInterval': DriftSqlType.int,
+  'tabViewBottomSheet': DriftSqlType.bool,
+  'tabBarShowContextualBar': DriftSqlType.bool,
+  // Legacy: folded into tabBarStackingMode.
+  'tabBarShowQuickTabSwitcherBar': DriftSqlType.bool,
+  'tabBarPosition': DriftSqlType.string,
+  'tabBarLayout': DriftSqlType.string,
+  // Legacy: folded into tabBarStackingMode.
+  'quickTabSwitcherMode': DriftSqlType.string,
+  'tabBarStackingMode': DriftSqlType.string,
+  'pullToRefreshEnabled': DriftSqlType.bool,
+  'useExternalDownloadManager': DriftSqlType.bool,
+  'doubleBackCloseTab': DriftSqlType.bool,
+  'unassignedTabsAutoCleanInterval': DriftSqlType.int,
+  'maxSearchHistoryEntries': DriftSqlType.int,
+  'allowClipboardAccess': DriftSqlType.bool,
+  'tabListShowFavicons': DriftSqlType.bool,
+  'quickTabSwitcherShowTitles': DriftSqlType.bool,
+  'quickTabSwitcherHierarchyGlyphs': DriftSqlType.int,
+  'quickTabSwitcherShowHistorySuggestions': DriftSqlType.bool,
+  'quickTabSwitcherTitleWidth': DriftSqlType.double,
+  'quickTabSwitcherShowCloseButtonOnAllTabs': DriftSqlType.bool,
+  'syncServerOverride': DriftSqlType.string,
+  'syncTokenServerOverride': DriftSqlType.string,
+  'urlCleanerEnabled': DriftSqlType.bool,
+  'urlCleanerAutoApply': DriftSqlType.bool,
+  'urlCleanerAllowReferralMarketing': DriftSqlType.bool,
+  'urlCleanerCatalogUrl': DriftSqlType.string,
+  'urlCleanerHashUrl': DriftSqlType.string,
+  'urlCleanerAutoUpdate': DriftSqlType.bool,
+  'urlCleanerLastCheckEpochMs': DriftSqlType.int,
+  'urlCleanerLastUpdateWasAuto': DriftSqlType.bool,
+  'smallWebTabType': DriftSqlType.string,
+  'tabBarLongPressUrlCopy': DriftSqlType.bool,
+  'unshortenerEnabled': DriftSqlType.bool,
+  'unshortenerToken': DriftSqlType.string,
+  'allowNonManifestPwaInstall': DriftSqlType.bool,
+  'blockExternalAppsEnabled': DriftSqlType.bool,
+  'customTabsEnabled': DriftSqlType.bool,
+  'appLinksMode': DriftSqlType.string,
+  'appLinkMarketplaceFallback': DriftSqlType.bool,
+  'enableLocalSearchIndex': DriftSqlType.bool,
+  'indexPrivateTabs': DriftSqlType.bool,
+  'acceptSuggestionOnSubmit': DriftSqlType.bool,
+  'pureBlack': DriftSqlType.bool,
+  'showSearchCloseButton': DriftSqlType.bool,
+  'homeTarget': DriftSqlType.string,
+  'homeTargetUrl': DriftSqlType.string,
+  'homeTargetOnLastTabClosed': DriftSqlType.bool,
+  'globalDesktopMode': DriftSqlType.bool,
+  'unmountGeckoViewOffRoute': DriftSqlType.bool,
+};
+
+/// Settings stored as a JSON document in a TEXT column. Their value has to be
+/// decoded before it reaches `GeneralSettings.fromJson`, which expects the
+/// already-parsed list/map.
+@visibleForTesting
+const generalSettingJsonKeys = <String>{
+  'deleteBrowsingDataOnQuit',
+  'externalAppIntentPolicies',
+  'appLinkRules',
+  'appLinkContextOverrides',
+  'desktopModeSites',
+};
+
 @Riverpod(keepAlive: true)
 class GeneralSettingsRepository extends _$GeneralSettingsRepository {
   final _partitionKey = 'general';
@@ -41,284 +142,16 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
   ) {
     final settings = Map.fromEntries(entries);
 
-    final db = ref.read(userDatabaseProvider);
+    final typeMapping = ref.read(userDatabaseProvider).typeMapping;
 
     return GeneralSettings.fromJson({
-      'themeMode': settings['themeMode']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'uiScaleFactor': settings['uiScaleFactor']?.readAs(
-        DriftSqlType.double,
-        db.typeMapping,
-      ),
-      'disableAnimations': settings['disableAnimations']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'refreshRateMode': settings['refreshRateMode']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'showModalBarrier': settings['showModalBarrier']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'enableReadability': settings['enableReadability']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'enforceReadability': settings['enforceReadability']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'deleteBrowsingDataOnQuit': settings['deleteBrowsingDataOnQuit']
-          ?.readAs(DriftSqlType.string, db.typeMapping)
-          .mapNotNull(jsonDecode),
-      'screenshotProtectionEnabled': settings['screenshotProtectionEnabled']
-          ?.readAs(DriftSqlType.bool, db.typeMapping),
-      'defaultSearchProvider': settings['defaultSearchProvider']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'defaultSearchSuggestionsProvider':
-          settings['defaultSearchSuggestionsProvider']?.readAs(
-            DriftSqlType.string,
-            db.typeMapping,
-          ),
-      'createChildTabsOption': settings['createChildTabsOption']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'enableLocalAiFeatures': settings['enableLocalAiFeatures']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'showContainerUi': settings['showContainerUi']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'showIsolatedTabUi': settings['showIsolatedTabUi']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'defaultCreateTabType': settings['defaultCreateTabType']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'newTabPosition': settings['newTabPosition']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'tabListDirection': settings['tabListDirection']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'tabBarDirection': settings['tabBarDirection']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'tabIntentOpenSetting': settings['tabIntentOpenSetting']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'bookmarkOpenSetting': settings['bookmarkOpenSetting']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'autoHideTabBar': settings['autoHideTabBar']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'tabBarSwipeAction': settings['tabBarSwipeAction']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'historyAutoCleanInterval': settings['historyAutoCleanInterval']?.readAs(
-        DriftSqlType.int,
-        db.typeMapping,
-      ),
-      'tabViewBottomSheet': settings['tabViewBottomSheet']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'tabBarShowContextualBar': settings['tabBarShowContextualBar']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'tabBarShowQuickTabSwitcherBar': settings['tabBarShowQuickTabSwitcherBar']
-          ?.readAs(DriftSqlType.bool, db.typeMapping),
-      'tabBarPosition': settings['tabBarPosition']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'tabBarLayout': settings['tabBarLayout']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'quickTabSwitcherMode': settings['quickTabSwitcherMode']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'tabBarStackingMode': settings['tabBarStackingMode']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'pullToRefreshEnabled': settings['pullToRefreshEnabled']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'useExternalDownloadManager': settings['useExternalDownloadManager']
-          ?.readAs(DriftSqlType.bool, db.typeMapping),
-      'doubleBackCloseTab': settings['doubleBackCloseTab']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'unassignedTabsAutoCleanInterval':
-          settings['unassignedTabsAutoCleanInterval']?.readAs(
-            DriftSqlType.int,
-            db.typeMapping,
-          ),
-      'maxSearchHistoryEntries': settings['maxSearchHistoryEntries']?.readAs(
-        DriftSqlType.int,
-        db.typeMapping,
-      ),
-      'allowClipboardAccess': settings['allowClipboardAccess']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'tabListShowFavicons': settings['tabListShowFavicons']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'quickTabSwitcherShowTitles': settings['quickTabSwitcherShowTitles']
-          ?.readAs(DriftSqlType.bool, db.typeMapping),
-      'quickTabSwitcherHierarchyGlyphs':
-          settings['quickTabSwitcherHierarchyGlyphs']?.readAs(
-            DriftSqlType.int,
-            db.typeMapping,
-          ),
-      'quickTabSwitcherShowHistorySuggestions':
-          settings['quickTabSwitcherShowHistorySuggestions']?.readAs(
-            DriftSqlType.bool,
-            db.typeMapping,
-          ),
-      'quickTabSwitcherTitleWidth': settings['quickTabSwitcherTitleWidth']
-          ?.readAs(DriftSqlType.double, db.typeMapping),
-      'quickTabSwitcherShowCloseButtonOnAllTabs':
-          settings['quickTabSwitcherShowCloseButtonOnAllTabs']?.readAs(
-            DriftSqlType.bool,
-            db.typeMapping,
-          ),
-      'syncServerOverride': settings['syncServerOverride']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'syncTokenServerOverride': settings['syncTokenServerOverride']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'urlCleanerEnabled': settings['urlCleanerEnabled']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'urlCleanerAutoApply': settings['urlCleanerAutoApply']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'urlCleanerAllowReferralMarketing':
-          settings['urlCleanerAllowReferralMarketing']?.readAs(
-            DriftSqlType.bool,
-            db.typeMapping,
-          ),
-      'urlCleanerCatalogUrl': settings['urlCleanerCatalogUrl']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'urlCleanerHashUrl': settings['urlCleanerHashUrl']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'urlCleanerAutoUpdate': settings['urlCleanerAutoUpdate']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'urlCleanerLastCheckEpochMs': settings['urlCleanerLastCheckEpochMs']
-          ?.readAs(DriftSqlType.int, db.typeMapping),
-      'urlCleanerLastUpdateWasAuto': settings['urlCleanerLastUpdateWasAuto']
-          ?.readAs(DriftSqlType.bool, db.typeMapping),
-      'smallWebTabType': settings['smallWebTabType']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'tabBarLongPressUrlCopy': settings['tabBarLongPressUrlCopy']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'unshortenerEnabled': settings['unshortenerEnabled']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'unshortenerToken': settings['unshortenerToken']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'allowNonManifestPwaInstall': settings['allowNonManifestPwaInstall']
-          ?.readAs(DriftSqlType.bool, db.typeMapping),
-      'blockExternalAppsEnabled': settings['blockExternalAppsEnabled']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'externalAppIntentPolicies': settings['externalAppIntentPolicies']
-          ?.readAs(DriftSqlType.string, db.typeMapping)
-          .mapNotNull(jsonDecode),
-      'customTabsEnabled': settings['customTabsEnabled']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'appLinksMode': settings['appLinksMode']?.readAs(
-        DriftSqlType.string,
-        db.typeMapping,
-      ),
-      'appLinkRules': settings['appLinkRules']
-          ?.readAs(DriftSqlType.string, db.typeMapping)
-          .mapNotNull(jsonDecode),
-      'appLinkContextOverrides': settings['appLinkContextOverrides']
-          ?.readAs(DriftSqlType.string, db.typeMapping)
-          .mapNotNull(jsonDecode),
-      'appLinkMarketplaceFallback': settings['appLinkMarketplaceFallback']
-          ?.readAs(DriftSqlType.bool, db.typeMapping),
-      'enableLocalSearchIndex': settings['enableLocalSearchIndex']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'indexPrivateTabs': settings['indexPrivateTabs']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'acceptSuggestionOnSubmit': settings['acceptSuggestionOnSubmit']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'pureBlack': settings['pureBlack']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'showSearchCloseButton': settings['showSearchCloseButton']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'globalDesktopMode': settings['globalDesktopMode']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
-      'desktopModeSites': settings['desktopModeSites']
-          ?.readAs(DriftSqlType.string, db.typeMapping)
-          .mapNotNull(jsonDecode),
-      'unmountGeckoViewOffRoute': settings['unmountGeckoViewOffRoute']?.readAs(
-        DriftSqlType.bool,
-        db.typeMapping,
-      ),
+      for (final MapEntry(key: key, value: type)
+          in generalSettingColumnTypes.entries)
+        key: settings[key]?.readAs(type, typeMapping),
+      for (final key in generalSettingJsonKeys)
+        key: settings[key]
+            ?.readAs(DriftSqlType.string, typeMapping)
+            .mapNotNull(jsonDecode),
     });
   }
 

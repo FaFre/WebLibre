@@ -17,6 +17,9 @@ abstract class $TopSiteDatabase extends i0.GeneratedDatabase {
   $TopSiteDatabaseManager get managers => $TopSiteDatabaseManager(this);
   late final i1.TopSite topSite = i1.TopSite(this);
   late final i1.HiddenTopSite hiddenTopSite = i1.HiddenTopSite(this);
+  late final i1.HiddenTopSiteHost hiddenTopSiteHost = i1.HiddenTopSiteHost(
+    this,
+  );
   late final i2.TopSiteDao topSiteDao = i2.TopSiteDao(
     this as i3.TopSiteDatabase,
   );
@@ -34,6 +37,7 @@ abstract class $TopSiteDatabase extends i0.GeneratedDatabase {
     topSite,
     i1.idxTopSiteOrderKey,
     hiddenTopSite,
+    hiddenTopSiteHost,
   ];
 }
 
@@ -44,6 +48,8 @@ class $TopSiteDatabaseManager {
       i1.$TopSiteTableManager(_db, _db.topSite);
   i1.$HiddenTopSiteTableManager get hiddenTopSite =>
       i1.$HiddenTopSiteTableManager(_db, _db.hiddenTopSite);
+  i1.$HiddenTopSiteHostTableManager get hiddenTopSiteHost =>
+      i1.$HiddenTopSiteHostTableManager(_db, _db.hiddenTopSiteHost);
 }
 
 extension DefineFunctions on i6.CommonDatabase {

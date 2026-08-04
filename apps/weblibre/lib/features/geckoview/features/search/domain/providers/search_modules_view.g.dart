@@ -21,7 +21,7 @@ final class SearchModuleDisplayStateControllerProvider
         > {
   SearchModuleDisplayStateControllerProvider._({
     required SearchModuleDisplayStateControllerFamily super.from,
-    required SearchModuleType super.argument,
+    required (ModuleSurface, SearchModuleType) super.argument,
   }) : super(
          retry: null,
          name: r'searchModuleDisplayStateControllerProvider',
@@ -38,7 +38,7 @@ final class SearchModuleDisplayStateControllerProvider
   String toString() {
     return r'searchModuleDisplayStateControllerProvider'
         ''
-        '($argument)';
+        '$argument';
   }
 
   @$internal
@@ -67,7 +67,7 @@ final class SearchModuleDisplayStateControllerProvider
 }
 
 String _$searchModuleDisplayStateControllerHash() =>
-    r'c3f1c93b618eec76e86c1c9cf0bf8fbdfdcb1430';
+    r'6e17f17c4dee1ad560560b81e9c4c9cade8aeec4';
 
 final class SearchModuleDisplayStateControllerFamily extends $Family
     with
@@ -76,7 +76,7 @@ final class SearchModuleDisplayStateControllerFamily extends $Family
           SearchModuleDisplayState,
           SearchModuleDisplayState,
           SearchModuleDisplayState,
-          SearchModuleType
+          (ModuleSurface, SearchModuleType)
         > {
   SearchModuleDisplayStateControllerFamily._()
     : super(
@@ -87,11 +87,13 @@ final class SearchModuleDisplayStateControllerFamily extends $Family
         isAutoDispose: true,
       );
 
-  SearchModuleDisplayStateControllerProvider call(SearchModuleType module) =>
-      SearchModuleDisplayStateControllerProvider._(
-        argument: module,
-        from: this,
-      );
+  SearchModuleDisplayStateControllerProvider call(
+    ModuleSurface surface,
+    SearchModuleType module,
+  ) => SearchModuleDisplayStateControllerProvider._(
+    argument: (surface, module),
+    from: this,
+  );
 
   @override
   String toString() => r'searchModuleDisplayStateControllerProvider';
@@ -99,10 +101,14 @@ final class SearchModuleDisplayStateControllerFamily extends $Family
 
 abstract class _$SearchModuleDisplayStateController
     extends $Notifier<SearchModuleDisplayState> {
-  late final _$args = ref.$arg as SearchModuleType;
-  SearchModuleType get module => _$args;
+  late final _$args = ref.$arg as (ModuleSurface, SearchModuleType);
+  ModuleSurface get surface => _$args.$1;
+  SearchModuleType get module => _$args.$2;
 
-  SearchModuleDisplayState build(SearchModuleType module);
+  SearchModuleDisplayState build(
+    ModuleSurface surface,
+    SearchModuleType module,
+  );
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
@@ -116,58 +122,103 @@ abstract class _$SearchModuleDisplayStateController
               Object?,
               Object?
             >;
-    return element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args.$1, _$args.$2));
   }
 }
 
 @ProviderFor(SearchReorderMode)
-final searchReorderModeProvider = SearchReorderModeProvider._();
+final searchReorderModeProvider = SearchReorderModeFamily._();
 
 final class SearchReorderModeProvider
-    extends $NotifierProvider<SearchReorderMode, SearchModuleGroup?> {
-  SearchReorderModeProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'searchReorderModeProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+    extends $NotifierProvider<SearchReorderMode, bool> {
+  SearchReorderModeProvider._({
+    required SearchReorderModeFamily super.from,
+    required ModuleSurface super.argument,
+  }) : super(
+         retry: null,
+         name: r'searchReorderModeProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
   @override
   String debugGetCreateSourceHash() => _$searchReorderModeHash();
+
+  @override
+  String toString() {
+    return r'searchReorderModeProvider'
+        ''
+        '($argument)';
+  }
 
   @$internal
   @override
   SearchReorderMode create() => SearchReorderMode();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(SearchModuleGroup? value) {
+  Override overrideWithValue(bool value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<SearchModuleGroup?>(value),
+      providerOverride: $SyncValueProvider<bool>(value),
     );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SearchReorderModeProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
   }
 }
 
-String _$searchReorderModeHash() => r'eda188e53e5b5f1a331ce94c3cb8808c79e358d3';
+String _$searchReorderModeHash() => r'2fda7e61b9c67e04e39254733e0ba957ff5de35a';
 
-abstract class _$SearchReorderMode extends $Notifier<SearchModuleGroup?> {
-  SearchModuleGroup? build();
+final class SearchReorderModeFamily extends $Family
+    with
+        $ClassFamilyOverride<
+          SearchReorderMode,
+          bool,
+          bool,
+          bool,
+          ModuleSurface
+        > {
+  SearchReorderModeFamily._()
+    : super(
+        retry: null,
+        name: r'searchReorderModeProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  SearchReorderModeProvider call(ModuleSurface surface) =>
+      SearchReorderModeProvider._(argument: surface, from: this);
+
+  @override
+  String toString() => r'searchReorderModeProvider';
+}
+
+abstract class _$SearchReorderMode extends $Notifier<bool> {
+  late final _$args = ref.$arg as ModuleSurface;
+  ModuleSurface get surface => _$args;
+
+  bool build(ModuleSurface surface);
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<SearchModuleGroup?, SearchModuleGroup?>;
+    final ref = this.ref as $Ref<bool, bool>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<SearchModuleGroup?, SearchModuleGroup?>,
-              SearchModuleGroup?,
+              AnyNotifier<bool, bool>,
+              bool,
               Object?,
               Object?
             >;
-    return element.handleCreate(ref, build);
+    return element.handleCreate(ref, () => build(_$args));
   }
 }

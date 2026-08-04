@@ -51,4 +51,31 @@ class HiddenTopSiteDao extends DatabaseAccessor<TopSiteDatabase>
           ..where((t) => t.url.equalsValue(url.normalized)))
         .go();
   }
+
+  Future<Set<String>> getHiddenHosts() async {
+    final rows = await db.hiddenTopSiteHost.select().get();
+    return rows.map((r) => r.host).toSet();
+  }
+
+  Stream<Set<String>> watchHiddenHosts() {
+    return db.hiddenTopSiteHost.select().watch().map(
+      (rows) => rows.map((r) => r.host).toSet(),
+    );
+  }
+
+  Future<void> hideHost(String host) {
+    if (host.isEmpty) {
+      return Future.value();
+    }
+
+    return db.hiddenTopSiteHost.insertOne(
+      HiddenTopSiteHostCompanion.insert(host: host),
+      mode: InsertMode.insertOrIgnore,
+    );
+  }
+
+  Future<void> unhideHost(String host) {
+    return (db.hiddenTopSiteHost.delete()..where((t) => t.host.equals(host)))
+        .go();
+  }
 }

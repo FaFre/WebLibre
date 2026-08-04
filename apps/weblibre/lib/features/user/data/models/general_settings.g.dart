@@ -43,6 +43,12 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings showSearchCloseButton(bool showSearchCloseButton);
 
+  GeneralSettings homeTarget(HomeTarget homeTarget);
+
+  GeneralSettings homeTargetUrl(String? homeTargetUrl);
+
+  GeneralSettings homeTargetOnLastTabClosed(bool homeTargetOnLastTabClosed);
+
   GeneralSettings storedDefaultCreateTabType(
     TabType storedDefaultCreateTabType,
   );
@@ -193,6 +199,9 @@ abstract class _$GeneralSettingsCWProxy {
     bool showContainerUi,
     bool showIsolatedTabUi,
     bool showSearchCloseButton,
+    HomeTarget homeTarget,
+    String? homeTargetUrl,
+    bool homeTargetOnLastTabClosed,
     TabType storedDefaultCreateTabType,
     TabDirection tabListDirection,
     TabDirection tabBarDirection,
@@ -322,6 +331,18 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings showSearchCloseButton(bool showSearchCloseButton) =>
       call(showSearchCloseButton: showSearchCloseButton);
+
+  @override
+  GeneralSettings homeTarget(HomeTarget homeTarget) =>
+      call(homeTarget: homeTarget);
+
+  @override
+  GeneralSettings homeTargetUrl(String? homeTargetUrl) =>
+      call(homeTargetUrl: homeTargetUrl);
+
+  @override
+  GeneralSettings homeTargetOnLastTabClosed(bool homeTargetOnLastTabClosed) =>
+      call(homeTargetOnLastTabClosed: homeTargetOnLastTabClosed);
 
   @override
   GeneralSettings storedDefaultCreateTabType(
@@ -582,6 +603,9 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? showContainerUi = const $CopyWithPlaceholder(),
     Object? showIsolatedTabUi = const $CopyWithPlaceholder(),
     Object? showSearchCloseButton = const $CopyWithPlaceholder(),
+    Object? homeTarget = const $CopyWithPlaceholder(),
+    Object? homeTargetUrl = const $CopyWithPlaceholder(),
+    Object? homeTargetOnLastTabClosed = const $CopyWithPlaceholder(),
     Object? storedDefaultCreateTabType = const $CopyWithPlaceholder(),
     Object? tabListDirection = const $CopyWithPlaceholder(),
     Object? tabBarDirection = const $CopyWithPlaceholder(),
@@ -731,6 +755,21 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.showSearchCloseButton
           // ignore: cast_nullable_to_non_nullable
           : showSearchCloseButton as bool,
+      homeTarget:
+          homeTarget == const $CopyWithPlaceholder() || homeTarget == null
+          ? _value.homeTarget
+          // ignore: cast_nullable_to_non_nullable
+          : homeTarget as HomeTarget,
+      homeTargetUrl: homeTargetUrl == const $CopyWithPlaceholder()
+          ? _value.homeTargetUrl
+          // ignore: cast_nullable_to_non_nullable
+          : homeTargetUrl as String?,
+      homeTargetOnLastTabClosed:
+          homeTargetOnLastTabClosed == const $CopyWithPlaceholder() ||
+              homeTargetOnLastTabClosed == null
+          ? _value.homeTargetOnLastTabClosed
+          // ignore: cast_nullable_to_non_nullable
+          : homeTargetOnLastTabClosed as bool,
       storedDefaultCreateTabType:
           storedDefaultCreateTabType == const $CopyWithPlaceholder() ||
               storedDefaultCreateTabType == null
@@ -1095,6 +1134,9 @@ GeneralSettings _$GeneralSettingsFromJson(
   showContainerUi: json['showContainerUi'] as bool?,
   showIsolatedTabUi: json['showIsolatedTabUi'] as bool?,
   showSearchCloseButton: json['showSearchCloseButton'] as bool?,
+  homeTarget: $enumDecodeNullable(_$HomeTargetEnumMap, json['homeTarget']),
+  homeTargetUrl: json['homeTargetUrl'] as String?,
+  homeTargetOnLastTabClosed: json['homeTargetOnLastTabClosed'] as bool?,
   storedDefaultCreateTabType: $enumDecodeNullable(
     _$TabTypeEnumMap,
     json['defaultCreateTabType'],
@@ -1234,6 +1276,9 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'showContainerUi': instance.showContainerUi,
   'showIsolatedTabUi': instance.showIsolatedTabUi,
   'showSearchCloseButton': instance.showSearchCloseButton,
+  'homeTarget': _$HomeTargetEnumMap[instance.homeTarget]!,
+  'homeTargetUrl': instance.homeTargetUrl,
+  'homeTargetOnLastTabClosed': instance.homeTargetOnLastTabClosed,
   'defaultCreateTabType':
       _$TabTypeEnumMap[instance.storedDefaultCreateTabType]!,
   'tabListDirection': _$TabDirectionEnumMap[instance.tabListDirection]!,
@@ -1329,6 +1374,12 @@ const _$SearchSuggestionProvidersEnumMap = {
   SearchSuggestionProviders.ddg: 'ddg',
   SearchSuggestionProviders.kagi: 'kagi',
   SearchSuggestionProviders.qwant: 'qwant',
+};
+
+const _$HomeTargetEnumMap = {
+  HomeTarget.home: 'home',
+  HomeTarget.resumeLastTab: 'resumeLastTab',
+  HomeTarget.customUrl: 'customUrl',
 };
 
 const _$TabTypeEnumMap = {

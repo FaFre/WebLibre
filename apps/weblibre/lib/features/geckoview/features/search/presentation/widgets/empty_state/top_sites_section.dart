@@ -27,7 +27,9 @@ import 'package:flutter_reorderable_grid_view/widgets/reorderable_builder.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/dialogs/edit_top_site_dialog.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/module_surface_scope.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
+import 'package:weblibre/features/geckoview/features/top_sites/domain/entities/top_site_host.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/domain/entities/top_site_item.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/domain/entities/top_site_source.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/domain/providers.dart';
@@ -121,21 +123,30 @@ class TopSitesSection extends HookConsumerWidget {
       ).select((value) => value.value ?? []),
     );
 
-    if (topSites.isEmpty) {
-      return const SliverToBoxAdapter(child: SizedBox.shrink());
-    }
-
     final reorderMode = useState(false);
     final reorderBusy = useState(false);
 
     final persistedItems = topSites.where((s) => s.isPersisted).toList();
     final historyItems = topSites.where((s) => !s.isPersisted).toList();
 
+    // Home leads with the user's own shortcuts, so its preview is sized to the
+    // curated tiles rather than to a fixed count: every pinned and default site
+    // is on screen from the start, and frecency suggestions — which pad the
+    // list out to [_topSitesMaxLimit] — stay behind "Show all N". The cap only
+    // bites for someone who has pinned more than a grid's worth.
+    //
+    // The other surfaces sit above a search field where the grid is one module
+    // among many, and keep the short fixed preview.
+    final isHome = ModuleSurfaceScope.surfaceOf(context) == ModuleSurface.home;
+    final previewLimit = isHome
+        ? persistedItems.length.clamp(0, _topSitesMaxLimit)
+        : _topSitesPreviewLimit;
+
     return SearchModuleSection(
       title: 'Shortcuts',
       moduleType: SearchModuleType.topSites,
       totalCount: topSites.length,
-      previewLimit: _topSitesPreviewLimit,
+      previewLimit: previewLimit,
       headerTrailing: persistedItems.length >= 2
           ? IconButton.filledTonal(
               icon: const Icon(Icons.swap_vert),
@@ -159,22 +170,35 @@ class TopSitesSection extends HookConsumerWidget {
             )
           : null,
       contentSliverBuilder:
-          ({required bool isCollapsed, required int visibleCount}) => [
-            if (!isCollapsed)
-              if (reorderMode.value)
-                _ReorderableTopSitesGrid(
-                  persistedItems: persistedItems,
-                  historyItems: historyItems,
-                  reorderBusy: reorderBusy,
-                  onUriSelected: onUriSelected,
-                )
-              else
-                _TopSitesGrid(
-                  items: topSites,
-                  visibleCount: visibleCount,
-                  onUriSelected: onUriSelected,
-                ),
-          ],
+          ({required bool isCollapsed, required int visibleCount}) {
+            // Suggestions are the tail of the list, so they are on screen
+            // exactly when the visible window reaches past the curated tiles.
+            // Reorder mode lays the two groups out itself and has to be told.
+            final showSuggestions = visibleCount > persistedItems.length;
+
+            return [
+              if (!isCollapsed)
+                if (reorderMode.value)
+                  _ReorderableTopSitesGrid(
+                    persistedItems: persistedItems,
+                    historyItems: showSuggestions
+                        ? historyItems
+                        : const <TopSiteItem>[],
+                    reorderBusy: reorderBusy,
+                    onUriSelected: onUriSelected,
+                  )
+                else
+                  _TopSitesGrid(
+                    items: topSites,
+                    visibleCount: visibleCount,
+                    onUriSelected: onUriSelected,
+                    // Counted over curated tiles only: the cap is on how many
+                    // shortcuts you may keep, and gating on the padded length
+                    // hid the "+" as soon as suggestions filled the list out.
+                    showAddTile: persistedItems.length < _topSitesMaxLimit,
+                  ),
+            ];
+          },
     );
   }
 }
@@ -183,11 +207,13 @@ class _TopSitesGrid extends ConsumerWidget {
   final List<TopSiteItem> items;
   final int visibleCount;
   final void Function(Uri uri) onUriSelected;
+  final bool showAddTile;
 
   const _TopSitesGrid({
     required this.items,
     required this.visibleCount,
     required this.onUriSelected,
+    this.showAddTile = false,
   });
 
   @override
@@ -198,17 +224,51 @@ class _TopSitesGrid extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
       sliver: SliverGrid.builder(
         gridDelegate: const _TopSitesGridDelegate(),
-        itemCount: displayItems.length,
+        itemCount: displayItems.length + (showAddTile ? 1 : 0),
         itemBuilder: (context, index) {
+          if (index == displayItems.length) {
+            return _AddShortcutTile(onPressed: () => _addItem(context, ref));
+          }
+
           final item = displayItems[index];
           return _TopSiteGridTile(
             item: item,
             onTap: () => onUriSelected(item.url),
-            onPin: () => _pinItem(context, ref, item),
-            onEdit: () => _editItem(context, ref, item),
+            onPin: item.isPersisted ? null : () => _pinItem(context, ref, item),
+            onEdit: item.isPersisted
+                ? () => _editItem(context, ref, item)
+                : null,
             onRemove: () => _removeItem(context, ref, item),
+            onRemoveDomain: () =>
+                _removeItem(context, ref, item, wholeDomain: true),
           );
         },
+      ),
+    );
+  }
+}
+
+/// Trailing "+" cell. Creating a shortcut previously required visiting the site
+/// and pinning it from the browser menu; there was no way to just type one in.
+class _AddShortcutTile extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _AddShortcutTile({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Material(
+      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+      borderRadius: _TopSiteGridTile._borderRadius,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onPressed,
+        child: Tooltip(
+          message: 'Add shortcut',
+          child: Icon(Icons.add, color: colorScheme.onSurfaceVariant),
+        ),
       ),
     );
   }
@@ -231,6 +291,22 @@ class _ReorderableTopSitesGrid extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final localItems = useKeyedState(persistedItems, [persistedItems]);
 
+    // Attached to the inner grid below, and handed to ReorderableBuilder so it
+    // reads its scroll position from there rather than from the enclosing
+    // CustomScrollView.
+    //
+    // The package records each tile's position as `localPosition +
+    // scrollOffset` when the tile is first built, but during a drag it tests
+    // collisions against `pointerLocalPosition + (scrollOffset -
+    // scrollOffsetAtDragStart)`. Those two agree only if the scroll offset was
+    // zero when the tiles were created. Left to find the outer scrollable, that
+    // holds only when the surface happens to be scrolled to the top — and
+    // reaching this module's reorder toggle usually means it is not, so every
+    // tile ends up displaced by the scroll amount and the drop lands on the
+    // wrong cell. The inner grid never scrolls, so sourcing the offset from it
+    // pins it at zero and both sides reduce to plain local coordinates.
+    final gridScrollController = useScrollController();
+
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
@@ -238,6 +314,7 @@ class _ReorderableTopSitesGrid extends HookConsumerWidget {
           builder: (context, constraints) {
             final layout = _resolveGridLayout(constraints.maxWidth);
             return ReorderableBuilder.builder(
+              scrollController: gridScrollController,
               itemCount: localItems.value.length,
               onReorderPositions: (positions) async {
                 if (reorderBusy.value || positions.isEmpty) return;
@@ -337,6 +414,12 @@ class _ReorderableTopSitesGrid extends HookConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     GridView.builder(
+                      // Never scrolls (the outer surface does), so this
+                      // controller's offset stays at zero — which is exactly
+                      // what ReorderableBuilder needs to read. Only this grid
+                      // gets it: a controller attached to two positions throws
+                      // when the package asks for `position`.
+                      controller: gridScrollController,
                       padding: EdgeInsets.zero,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
@@ -403,6 +486,7 @@ class _TopSiteGridTile extends StatefulWidget {
   final VoidCallback? onPin;
   final VoidCallback? onEdit;
   final VoidCallback? onRemove;
+  final VoidCallback? onRemoveDomain;
   final bool showDragHandle;
 
   const _TopSiteGridTile({
@@ -411,6 +495,7 @@ class _TopSiteGridTile extends StatefulWidget {
     this.onPin,
     this.onEdit,
     this.onRemove,
+    this.onRemoveDomain,
     this.showDragHandle = false,
   });
 
@@ -425,9 +510,10 @@ class _TopSiteGridTileState extends State<_TopSiteGridTile> {
   final _menuController = MenuController();
 
   bool get _hasMenu =>
-      (widget.item.isPersisted &&
-          (widget.onEdit != null || widget.onRemove != null)) ||
-      (!widget.item.isPersisted && widget.onPin != null);
+      widget.onPin != null ||
+      widget.onEdit != null ||
+      widget.onRemove != null ||
+      widget.onRemoveDomain != null;
 
   @override
   Widget build(BuildContext context) {
@@ -437,14 +523,25 @@ class _TopSiteGridTileState extends State<_TopSiteGridTile> {
     return MenuAnchor(
       controller: _menuController,
       menuChildren: [
-        if (!widget.item.isPersisted && widget.onPin != null)
+        if (widget.onPin != null)
           MenuItemButton(onPressed: widget.onPin, child: const Text('Pin')),
-        if (widget.item.isPersisted && widget.onEdit != null)
+        if (widget.onEdit != null)
           MenuItemButton(onPressed: widget.onEdit, child: const Text('Edit')),
-        if (widget.item.isPersisted && widget.onRemove != null)
+        // Offered for history-derived tiles too. Without it a frequently
+        // visited site — a PWA especially — could occupy most of the grid
+        // with no way to get rid of it.
+        if (widget.onRemove != null)
           MenuItemButton(
             onPressed: widget.onRemove,
             child: const Text('Remove'),
+          ),
+        if (widget.onRemoveDomain != null &&
+            canonicalTopSiteHost(widget.item.url).isNotEmpty)
+          MenuItemButton(
+            onPressed: widget.onRemoveDomain,
+            child: Text(
+              'Hide all from ${canonicalTopSiteHost(widget.item.url)}',
+            ),
           ),
       ],
       child: Material(
@@ -636,7 +733,7 @@ Future<void> _editItem(
     // If the URL changed, hide the original so it doesn't reappear
     // from the const defaults list.
     if (item.url != result.url) {
-      await repo.hideDefaultSite(item.url);
+      await repo.hideSite(item.url);
     }
 
     await repo.updateSite(id: id, title: result.title, url: result.url);
@@ -650,29 +747,64 @@ Future<void> _editItem(
   }
 }
 
+Future<void> _addItem(BuildContext context, WidgetRef ref) async {
+  final result = await showEditTopSiteDialog(
+    context,
+    dialogTitle: 'Add shortcut',
+    confirmLabel: 'Add',
+  );
+
+  if (result == null || !context.mounted) return;
+
+  try {
+    await ref
+        .read(topSiteRepositoryProvider.notifier)
+        .addPinnedSite(title: result.title, url: result.url);
+    if (context.mounted) {
+      ui_helper.showInfoMessage(context, 'Added "${result.title}"');
+    }
+  } catch (e) {
+    if (context.mounted) {
+      ui_helper.showErrorMessage(context, 'Failed to add shortcut');
+    }
+  }
+}
+
 Future<void> _removeItem(
   BuildContext context,
   WidgetRef ref,
-  TopSiteItem item,
-) async {
+  TopSiteItem item, {
+  bool wholeDomain = false,
+}) async {
   final repo = ref.read(topSiteRepositoryProvider.notifier);
+  final wasPersisted = item.id != null;
 
   try {
-    if (item.id != null) {
+    if (wasPersisted) {
       await repo.removeSite(item.id!);
     }
-    // Hide the URL so it doesn't reappear from the const defaults list
-    await repo.hideDefaultSite(item.url);
+    // Hide it so it doesn't come back from the bundled defaults or from
+    // frecency-ranked history.
+    await repo.hideSite(item.url, wholeDomain: wholeDomain);
 
     if (context.mounted) {
       ui_helper.showInfoMessage(
         context,
-        'Removed "${item.title}"',
+        wholeDomain
+            ? 'Hid all shortcuts from ${canonicalTopSiteHost(item.url)}'
+            : 'Removed "${item.title}"',
         action: SnackBarAction(
           label: 'Undo',
           onPressed: () async {
             try {
-              await repo.addPinnedSite(title: item.title, url: item.url);
+              // Lift the suppression first, then restore the pin only if the
+              // shortcut was one. An unpinned history entry comes back on its
+              // own once it is no longer hidden; re-pinning it would silently
+              // promote it to something the user never created.
+              await repo.unhideSite(item.url, wholeDomain: wholeDomain);
+              if (wasPersisted) {
+                await repo.addPinnedSite(title: item.title, url: item.url);
+              }
             } catch (_) {}
           },
         ),

@@ -36,6 +36,8 @@ const _$SearchModuleTypeEnumMap = {
   SearchModuleType.recentTabs: 'recentTabs',
   SearchModuleType.containers: 'containers',
   SearchModuleType.frequentBangs: 'frequentBangs',
+  SearchModuleType.quote: 'quote',
+  SearchModuleType.quickActions: 'quickActions',
 };
 
 // **************************************************************************
@@ -52,7 +54,7 @@ final class SearchModuleOrderProvider
     extends $NotifierProvider<SearchModuleOrder, List<ModuleOrderEntry>> {
   SearchModuleOrderProvider._({
     required SearchModuleOrderFamily super.from,
-    required SearchModuleGroup super.argument,
+    required ModuleSurface super.argument,
   }) : super(
          retry: null,
          name: r'searchModuleOrderProvider',
@@ -94,7 +96,7 @@ final class SearchModuleOrderProvider
   }
 }
 
-String _$searchModuleOrderHash() => r'153cebf32e0bf7b42c4eaaa113b0ca5f36851b5f';
+String _$searchModuleOrderHash() => r'ef43bc259db7a07ca1accab9d7ae803c376e76b4';
 
 final class SearchModuleOrderFamily extends $Family
     with
@@ -103,7 +105,7 @@ final class SearchModuleOrderFamily extends $Family
           List<ModuleOrderEntry>,
           List<ModuleOrderEntry>,
           List<ModuleOrderEntry>,
-          SearchModuleGroup
+          ModuleSurface
         > {
   SearchModuleOrderFamily._()
     : super(
@@ -114,18 +116,18 @@ final class SearchModuleOrderFamily extends $Family
         isAutoDispose: false,
       );
 
-  SearchModuleOrderProvider call(SearchModuleGroup group) =>
-      SearchModuleOrderProvider._(argument: group, from: this);
+  SearchModuleOrderProvider call(ModuleSurface surface) =>
+      SearchModuleOrderProvider._(argument: surface, from: this);
 
   @override
   String toString() => r'searchModuleOrderProvider';
 }
 
 abstract class _$SearchModuleOrder extends $Notifier<List<ModuleOrderEntry>> {
-  late final _$args = ref.$arg as SearchModuleGroup;
-  SearchModuleGroup get group => _$args;
+  late final _$args = ref.$arg as ModuleSurface;
+  ModuleSurface get surface => _$args;
 
-  List<ModuleOrderEntry> build(SearchModuleGroup group);
+  List<ModuleOrderEntry> build(ModuleSurface surface);
   @$mustCallSuper
   @override
   WhenComplete runBuild() {

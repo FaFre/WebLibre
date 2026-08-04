@@ -62,7 +62,16 @@ enum SearchModuleType {
   recentArticles,
   recentTabs,
   containers,
-  frequentBangs;
+  frequentBangs,
+
+  /// The daily quote card. Carries no list of its own, so it neither paginates
+  /// nor reports a count; the header's trailing slot holds the reroll button.
+  quote,
+
+  /// New tab / View tabs / Resume last tab. These act on the browser shell
+  /// around the surface, so they are only offered on [ModuleSurface.home] —
+  /// on the new-tab page "New tab" is the page you are already looking at.
+  quickActions;
 
   String get label => switch (this) {
     recentSearches => 'Recent Searches',
@@ -82,61 +91,83 @@ enum SearchModuleType {
     recentTabs => 'Recent Tabs',
     containers => 'Containers',
     frequentBangs => 'Frequent Bangs',
+    quote => 'Quote',
+    quickActions => 'Quick Actions',
   };
 }
 
-enum SearchModuleGroup {
-  emptyState(
-    key: 'EmptyStateModuleOrder',
+/// One module slot on a surface: which module, and whether it starts enabled.
+typedef ModuleSurfaceDefault = ({SearchModuleType type, bool visible});
+
+/// An independently-configured module list.
+///
+/// Each surface persists its own order and visibility under [key] while sharing
+/// one module catalogue ([SearchModuleType]), one section chrome
+/// ([SearchModuleSection]) and one customization UI — the same split
+/// `ToolbarConfigLocation` uses for the two toolbars.
+///
+/// A module may appear on several surfaces, so the surface cannot be derived
+/// from the module. It is supplied by the host instead, via `ModuleSurfaceScope`.
+enum ModuleSurface {
+  /// The browser home shown when no tab is selected.
+  home(
+    key: 'HomeModuleOrder',
     defaultModules: [
-      SearchModuleType.recentSearches,
-      SearchModuleType.frequentBangs,
-      SearchModuleType.topSites,
-      SearchModuleType.recentArticles,
-      SearchModuleType.recentTabs,
-      SearchModuleType.recentHistory,
-      SearchModuleType.historyHighlights,
-      SearchModuleType.containers,
+      (type: SearchModuleType.quickActions, visible: true),
+      (type: SearchModuleType.topSites, visible: true),
+      (type: SearchModuleType.recentTabs, visible: true),
+      (type: SearchModuleType.quote, visible: true),
+      (type: SearchModuleType.recentHistory, visible: false),
+      (type: SearchModuleType.historyHighlights, visible: false),
+      (type: SearchModuleType.recentArticles, visible: false),
+      (type: SearchModuleType.containers, visible: false),
     ],
   ),
+
+  /// The new-tab page: the search screen before anything has been typed.
+  ///
+  /// [key] is a compatibility contract — this order has shipped to users under
+  /// that exact string, and renaming it resets every existing layout.
+  newTab(
+    key: 'EmptyStateModuleOrder',
+    defaultModules: [
+      (type: SearchModuleType.recentSearches, visible: true),
+      (type: SearchModuleType.frequentBangs, visible: true),
+      (type: SearchModuleType.topSites, visible: true),
+      (type: SearchModuleType.recentArticles, visible: true),
+      (type: SearchModuleType.recentTabs, visible: true),
+      (type: SearchModuleType.recentHistory, visible: true),
+      (type: SearchModuleType.historyHighlights, visible: true),
+      (type: SearchModuleType.containers, visible: true),
+      // Offered but off, so adding it leaves existing new-tab pages untouched.
+      (type: SearchModuleType.quote, visible: false),
+    ],
+  ),
+
+  /// The search screen once a query has been entered.
   search(
     key: 'SearchModuleOrder',
     defaultModules: [
-      SearchModuleType.searchProviders,
-      SearchModuleType.searchSuggestions,
-      SearchModuleType.tabs,
-      SearchModuleType.bookmarks,
-      SearchModuleType.articles,
-      SearchModuleType.combinedHistory,
-      SearchModuleType.popularSites,
+      (type: SearchModuleType.searchProviders, visible: true),
+      (type: SearchModuleType.searchSuggestions, visible: true),
+      (type: SearchModuleType.tabs, visible: true),
+      (type: SearchModuleType.bookmarks, visible: true),
+      (type: SearchModuleType.articles, visible: true),
+      (type: SearchModuleType.combinedHistory, visible: true),
+      (type: SearchModuleType.popularSites, visible: true),
     ],
   );
 
-  const SearchModuleGroup({required this.key, required this.defaultModules});
-  final String key;
-  final List<SearchModuleType> defaultModules;
-}
+  const ModuleSurface({required this.key, required this.defaultModules});
 
-extension SearchModuleTypeGroup on SearchModuleType {
-  SearchModuleGroup get group => switch (this) {
-    SearchModuleType.recentSearches ||
-    SearchModuleType.topSites ||
-    SearchModuleType.recentArticles ||
-    SearchModuleType.recentTabs ||
-    SearchModuleType.recentHistory ||
-    SearchModuleType.historyHighlights ||
-    SearchModuleType.containers ||
-    SearchModuleType.frequentBangs => SearchModuleGroup.emptyState,
-    SearchModuleType.searchProviders ||
-    SearchModuleType.searchSuggestions ||
-    SearchModuleType.tabs ||
-    SearchModuleType.bookmarks ||
-    SearchModuleType.articles ||
-    SearchModuleType.history ||
-    SearchModuleType.localHistory ||
-    SearchModuleType.combinedHistory ||
-    SearchModuleType.popularSites => SearchModuleGroup.search,
-  };
+  /// Storage key for this surface's persisted order. Never change a shipped one.
+  final String key;
+
+  final List<ModuleSurfaceDefault> defaultModules;
+
+  /// Whether [module] is offered on this surface at all.
+  bool offers(SearchModuleType module) =>
+      defaultModules.any((d) => d.type == module);
 }
 
 enum SearchModuleDisplayState { preview, expanded, collapsed }
@@ -167,18 +198,30 @@ class SearchModuleDisplayStateController
     };
   }
 
+  /// Keyed by surface as well as module: the same module can be on screen on
+  /// two surfaces at once (home stays mounted underneath the pushed search
+  /// screen), and collapsing it in one place must not collapse it in the other.
   @override
-  SearchModuleDisplayState build(SearchModuleType module) {
+  SearchModuleDisplayState build(
+    ModuleSurface surface,
+    SearchModuleType module,
+  ) {
     return SearchModuleDisplayState.preview;
   }
 }
 
 @Riverpod()
 class SearchReorderMode extends _$SearchReorderMode {
-  // ignore: use_setters_to_change_properties
-  void activate(SearchModuleGroup group) => state = group;
-  void deactivate() => state = null;
+  void activate() => state = true;
+  void deactivate() => state = false;
 
+  /// Keyed by surface, like [SearchModuleDisplayStateController] — and here the
+  /// key also bounds the state's lifetime. The browser home stays mounted
+  /// underneath the pushed search screen and would keep a single shared
+  /// instance alive, so a reorder started on the search screen and left by the
+  /// system back gesture (rather than "Done") would survive the pop and still
+  /// be active the next time that screen opened. Per surface, the search
+  /// screen's own instance is disposed with the screen.
   @override
-  SearchModuleGroup? build() => null;
+  bool build(ModuleSurface surface) => false;
 }

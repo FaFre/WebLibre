@@ -358,6 +358,137 @@ typedef $HiddenTopSiteProcessedTableManager =
       i1.HiddenTopSiteData,
       i0.PrefetchHooks Function()
     >;
+typedef $HiddenTopSiteHostCreateCompanionBuilder =
+    i1.HiddenTopSiteHostCompanion Function({
+      required String host,
+      i0.Value<int> rowid,
+    });
+typedef $HiddenTopSiteHostUpdateCompanionBuilder =
+    i1.HiddenTopSiteHostCompanion Function({
+      i0.Value<String> host,
+      i0.Value<int> rowid,
+    });
+
+class $HiddenTopSiteHostFilterComposer
+    extends i0.Composer<i0.GeneratedDatabase, i1.HiddenTopSiteHost> {
+  $HiddenTopSiteHostFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnFilters<String> get host => $composableBuilder(
+    column: $table.host,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+}
+
+class $HiddenTopSiteHostOrderingComposer
+    extends i0.Composer<i0.GeneratedDatabase, i1.HiddenTopSiteHost> {
+  $HiddenTopSiteHostOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnOrderings<String> get host => $composableBuilder(
+    column: $table.host,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+}
+
+class $HiddenTopSiteHostAnnotationComposer
+    extends i0.Composer<i0.GeneratedDatabase, i1.HiddenTopSiteHost> {
+  $HiddenTopSiteHostAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.GeneratedColumn<String> get host =>
+      $composableBuilder(column: $table.host, builder: (column) => column);
+}
+
+class $HiddenTopSiteHostTableManager
+    extends
+        i0.RootTableManager<
+          i0.GeneratedDatabase,
+          i1.HiddenTopSiteHost,
+          i1.HiddenTopSiteHostData,
+          i1.$HiddenTopSiteHostFilterComposer,
+          i1.$HiddenTopSiteHostOrderingComposer,
+          i1.$HiddenTopSiteHostAnnotationComposer,
+          $HiddenTopSiteHostCreateCompanionBuilder,
+          $HiddenTopSiteHostUpdateCompanionBuilder,
+          (
+            i1.HiddenTopSiteHostData,
+            i0.BaseReferences<
+              i0.GeneratedDatabase,
+              i1.HiddenTopSiteHost,
+              i1.HiddenTopSiteHostData
+            >,
+          ),
+          i1.HiddenTopSiteHostData,
+          i0.PrefetchHooks Function()
+        > {
+  $HiddenTopSiteHostTableManager(
+    i0.GeneratedDatabase db,
+    i1.HiddenTopSiteHost table,
+  ) : super(
+        i0.TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              i1.$HiddenTopSiteHostFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              i1.$HiddenTopSiteHostOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              i1.$HiddenTopSiteHostAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                i0.Value<String> host = const i0.Value.absent(),
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i1.HiddenTopSiteHostCompanion(host: host, rowid: rowid),
+          createCompanionCallback:
+              ({
+                required String host,
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i1.HiddenTopSiteHostCompanion.insert(
+                host: host,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $HiddenTopSiteHostProcessedTableManager =
+    i0.ProcessedTableManager<
+      i0.GeneratedDatabase,
+      i1.HiddenTopSiteHost,
+      i1.HiddenTopSiteHostData,
+      i1.$HiddenTopSiteHostFilterComposer,
+      i1.$HiddenTopSiteHostOrderingComposer,
+      i1.$HiddenTopSiteHostAnnotationComposer,
+      $HiddenTopSiteHostCreateCompanionBuilder,
+      $HiddenTopSiteHostUpdateCompanionBuilder,
+      (
+        i1.HiddenTopSiteHostData,
+        i0.BaseReferences<
+          i0.GeneratedDatabase,
+          i1.HiddenTopSiteHost,
+          i1.HiddenTopSiteHostData
+        >,
+      ),
+      i1.HiddenTopSiteHostData,
+      i0.PrefetchHooks Function()
+    >;
 
 class TopSite extends i0.Table with i0.TableInfo<TopSite, i1.TopSiteData> {
   @override
@@ -872,6 +1003,156 @@ class HiddenTopSiteCompanion extends i0.UpdateCompanion<i1.HiddenTopSiteData> {
   String toString() {
     return (StringBuffer('HiddenTopSiteCompanion(')
           ..write('url: $url, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class HiddenTopSiteHost extends i0.Table
+    with i0.TableInfo<HiddenTopSiteHost, i1.HiddenTopSiteHostData> {
+  @override
+  final i0.GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  HiddenTopSiteHost(this.attachedDatabase, [this._alias]);
+  late final i0.GeneratedColumn<String> host = i0.GeneratedColumn<String>(
+    'host',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'PRIMARY KEY NOT NULL',
+  );
+  @override
+  List<i0.GeneratedColumn> get $columns => [host];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'hidden_top_site_host';
+  @override
+  Set<i0.GeneratedColumn> get $primaryKey => {host};
+  @override
+  i1.HiddenTopSiteHostData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return i1.HiddenTopSiteHostData(
+      host: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}host'],
+      )!,
+    );
+  }
+
+  @override
+  HiddenTopSiteHost createAlias(String alias) {
+    return HiddenTopSiteHost(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class HiddenTopSiteHostData extends i0.DataClass
+    implements i0.Insertable<i1.HiddenTopSiteHostData> {
+  final String host;
+  const HiddenTopSiteHostData({required this.host});
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    map['host'] = i0.Variable<String>(host);
+    return map;
+  }
+
+  factory HiddenTopSiteHostData.fromJson(
+    Map<String, dynamic> json, {
+    i0.ValueSerializer? serializer,
+  }) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return HiddenTopSiteHostData(
+      host: serializer.fromJson<String>(json['host']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({i0.ValueSerializer? serializer}) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{'host': serializer.toJson<String>(host)};
+  }
+
+  i1.HiddenTopSiteHostData copyWith({String? host}) =>
+      i1.HiddenTopSiteHostData(host: host ?? this.host);
+  HiddenTopSiteHostData copyWithCompanion(i1.HiddenTopSiteHostCompanion data) {
+    return HiddenTopSiteHostData(
+      host: data.host.present ? data.host.value : this.host,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HiddenTopSiteHostData(')
+          ..write('host: $host')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => host.hashCode;
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is i1.HiddenTopSiteHostData && other.host == this.host);
+}
+
+class HiddenTopSiteHostCompanion
+    extends i0.UpdateCompanion<i1.HiddenTopSiteHostData> {
+  final i0.Value<String> host;
+  final i0.Value<int> rowid;
+  const HiddenTopSiteHostCompanion({
+    this.host = const i0.Value.absent(),
+    this.rowid = const i0.Value.absent(),
+  });
+  HiddenTopSiteHostCompanion.insert({
+    required String host,
+    this.rowid = const i0.Value.absent(),
+  }) : host = i0.Value(host);
+  static i0.Insertable<i1.HiddenTopSiteHostData> custom({
+    i0.Expression<String>? host,
+    i0.Expression<int>? rowid,
+  }) {
+    return i0.RawValuesInsertable({
+      if (host != null) 'host': host,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  i1.HiddenTopSiteHostCompanion copyWith({
+    i0.Value<String>? host,
+    i0.Value<int>? rowid,
+  }) {
+    return i1.HiddenTopSiteHostCompanion(
+      host: host ?? this.host,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    if (host.present) {
+      map['host'] = i0.Variable<String>(host.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = i0.Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HiddenTopSiteHostCompanion(')
+          ..write('host: $host, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();

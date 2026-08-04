@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -26,14 +25,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 
 class BrowserPage extends ConsumerWidget {
-  final double bottomViewportInset;
   final Widget child;
 
-  const BrowserPage({
-    super.key,
-    this.bottomViewportInset = 0,
-    required this.child,
-  });
+  const BrowserPage({super.key, required this.child});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -41,9 +35,64 @@ class BrowserPage extends ConsumerWidget {
     final colorScheme = theme.colorScheme;
     final appColors = AppColors.of(context);
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // The aura backdrop is static: it only changes when the theme does.
+        // Isolating it in a repaint boundary keeps it out of the scrolling
+        // content's repaints, and the picture itself is raster-cacheable.
+        RepaintBoundary(
+          child: CustomPaint(
+            painter: _AuraBackdropPainter(
+              colorScheme: colorScheme,
+              appColors: appColors,
+            ),
+            isComplex: true,
+            willChange: false,
+          ),
+        ),
+        Positioned.fill(child: child),
+      ],
+    );
+  }
+}
+
+/// The decorative background shared by the browser home and the onboarding
+/// pages: a diagonal wash with three soft coloured orbs bleeding in from the
+/// edges.
+///
+/// This used to be three solid circles under a full-viewport
+/// `BackdropFilter(ImageFilter.blur(sigma: 72))`. That cost a save-layer plus a
+/// multi-pass gaussian blur of the entire screen *on every frame* —
+/// `BackdropFilter` re-reads and re-blurs its backdrop unconditionally and is
+/// never raster-cached — to soften artwork that never moves. Above the GeckoView
+/// platform view it was worse still, forcing the Android external view embedder
+/// to split the frame into extra overlay surfaces.
+///
+/// A blurred disc is, to the eye, exactly a radial gradient, so the orbs are
+/// drawn as gradients directly. No save-layers, no blur passes, and the whole
+/// backdrop reduces to four shader-filled rects.
+class _AuraBackdropPainter extends CustomPainter {
+  final ColorScheme colorScheme;
+  final AppColors appColors;
+
+  const _AuraBackdropPainter({
+    required this.colorScheme,
+    required this.appColors,
+  });
+
+  /// Sigma the orbs were previously blurred with. Retained as the falloff width
+  /// so the gradients match the look the blur produced.
+  static const _sigma = 72.0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final bounds = Offset.zero & size;
+
+    canvas.drawRect(
+      bounds,
+      Paint()
+        ..shader = LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
@@ -60,55 +109,87 @@ class BrowserPage extends ConsumerWidget {
               colorScheme.surfaceContainerHigh,
             ),
           ],
-        ),
-      ),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Positioned(
-            top: -70,
-            left: -120,
-            child: _BackdropOrb(
-              width: 400,
-              height: 400,
-              color: appColors.auraPurple,
-            ),
-          ),
-          Positioned(
-            top: 220,
-            right: -150,
-            child: _BackdropOrb(
-              width: 340,
-              height: 340,
-              color: appColors.auraGold,
-            ),
-          ),
-          Positioned(
-            bottom: 18,
-            left: -8,
-            child: _BackdropOrb(
-              width: 320,
-              height: 320,
-              color: appColors.auraShadowHighlight,
-            ),
-          ),
-          Positioned.fill(
-            child: IgnorePointer(
-              child: ClipRect(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 72, sigmaY: 72),
-                  child: ColoredBox(
-                    color: appColors.auraTint.withValues(alpha: 0.12),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Positioned.fill(child: child),
-        ],
-      ),
+        ).createShader(bounds),
+    );
+
+    // Centres and radii are the previous `Positioned` orbs resolved against the
+    // viewport: 400² at (top: -70, left: -120), 340² at (top: 220, right: -150)
+    // and 320² at (bottom: 18, left: -8).
+    _paintOrb(canvas, bounds, const Offset(80, 130), 200, appColors.auraPurple);
+    _paintOrb(
+      canvas,
+      bounds,
+      Offset(size.width - 20, 390),
+      170,
+      appColors.auraGold,
+    );
+    _paintOrb(
+      canvas,
+      bounds,
+      Offset(152, size.height - 178),
+      160,
+      appColors.auraShadowHighlight,
+    );
+
+    canvas.drawRect(
+      bounds,
+      Paint()..color = appColors.auraTint.withValues(alpha: 0.12),
     );
   }
+
+  void _paintOrb(
+    Canvas canvas,
+    Rect bounds,
+    Offset center,
+    double radius,
+    Color color,
+  ) {
+    // Blur energy is spent by 2σ past the edge, so that is where the gradient
+    // ends.
+    final gradientRadius = radius + 2 * _sigma;
+
+    // A gaussian-blurred disc holds an alpha of `1 - exp(-r²/2σ²)` at its
+    // centre and falls off across the edge along the blur's error function,
+    // which is ~0.98/0.84/0.5/0.16/0 at -2σ/-σ/0/+σ/+2σ relative to the edge.
+    // Sampling those five points reproduces the blur closely enough that the
+    // difference is invisible at this scale.
+    final centerAlpha =
+        1 - math.exp(-(radius * radius) / (2 * _sigma * _sigma));
+    const falloff = <double>[0.977, 0.841, 0.5, 0.159, 0.0];
+
+    final colors = <Color>[color.withValues(alpha: centerAlpha)];
+    final stops = <double>[0.0];
+
+    for (var i = 0; i < falloff.length; i++) {
+      final sampleRadius = radius + (i - 2) * _sigma;
+      if (sampleRadius <= 0) {
+        // The disc is smaller than the blur reaches inward; the samples that
+        // fall inside the centre are already covered by [centerAlpha].
+        continue;
+      }
+
+      colors.add(
+        // Clamped so the profile stays monotonically fading outward for small
+        // discs, where the edge samples would otherwise exceed the centre.
+        color.withValues(alpha: math.min(falloff[i], centerAlpha)),
+      );
+      stops.add(sampleRadius / gradientRadius);
+    }
+
+    canvas.drawRect(
+      bounds,
+      Paint()
+        ..shader = RadialGradient(
+          colors: colors,
+          stops: stops,
+        ).createShader(Rect.fromCircle(center: center, radius: gradientRadius)),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_AuraBackdropPainter oldDelegate) =>
+      oldDelegate.colorScheme != colorScheme ||
+      oldDelegate.appColors != appColors;
 }
 
 class BrowserPageContent extends StatelessWidget {
@@ -161,16 +242,18 @@ class BrandHeader extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(32),
+        // Enough tint to read as brand colours: below roughly a quarter the
+        // blend lands on a neutral grey and the mark looks like a placeholder.
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
             Color.alphaBlend(
-              AppColors.brandPurple.withValues(alpha: 0.18),
+              AppColors.brandPurple.withValues(alpha: 0.28),
               colorScheme.surfaceContainerHighest,
             ),
             Color.alphaBlend(
-              AppColors.brandYellow.withValues(alpha: 0.12),
+              AppColors.brandYellow.withValues(alpha: 0.20),
               colorScheme.surfaceContainer,
             ),
           ],
@@ -186,31 +269,11 @@ class BrandHeader extends StatelessWidget {
           ),
         ],
       ),
+      // 56 inside a 112 tile with 20 of padding: at 72 the mark exactly fills
+      // the content box and its arms touch the tile edge, which reads as a
+      // cropped image rather than a logo.
       child: Center(
-        child: SvgPicture.asset('assets/icon/icon.svg', width: 72, height: 72),
-      ),
-    );
-  }
-}
-
-class _BackdropOrb extends StatelessWidget {
-  final double width;
-  final double height;
-  final Color color;
-
-  const _BackdropOrb({
-    required this.width,
-    required this.height,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+        child: SvgPicture.asset('assets/icon/icon.svg', width: 56, height: 56),
       ),
     );
   }

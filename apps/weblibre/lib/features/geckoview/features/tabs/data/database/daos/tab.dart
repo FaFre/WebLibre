@@ -112,17 +112,34 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     return query.map((row) => row.read(db.tab.id)!);
   }
 
-  Selectable<TabData> getTabsFifo({int limit = 25}) {
-    return select(db.tab)
+  /// Most recently used tabs first.
+  ///
+  /// [excludedTabIds] skips tabs that are on their way out: tab rows are only
+  /// deleted after the next selection has been made, so a tab being closed is
+  /// still present here — and, having just been active, sorts first.
+  Selectable<TabData> getTabsFifo({
+    int limit = 25,
+    Set<String> excludedTabIds = const {},
+  }) {
+    final query = select(db.tab)
       ..limit(limit)
       ..orderBy([(t) => OrderingTerm.desc(t.timestamp)]);
+
+    if (excludedTabIds.isNotEmpty) {
+      query.where((t) => t.id.isNotIn(excludedTabIds));
+    }
+
+    return query;
   }
 
+  /// As [getTabsFifo], restricted to one container. A null [containerId] is the
+  /// unassigned container, not "any container".
   Selectable<TabData> getContainerTabsFifo(
     String? containerId, {
     int limit = 25,
+    Set<String> excludedTabIds = const {},
   }) {
-    return select(db.tab)
+    final query = select(db.tab)
       ..where(
         (t) => containerId != null
             ? t.containerId.equals(containerId)
@@ -130,6 +147,12 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
       )
       ..limit(limit)
       ..orderBy([(t) => OrderingTerm.desc(t.timestamp)]);
+
+    if (excludedTabIds.isNotEmpty) {
+      query.where((t) => t.id.isNotIn(excludedTabIds));
+    }
+
+    return query;
   }
 
   SingleOrNullSelectable<String?> getTabContainerId(String tabId) {
