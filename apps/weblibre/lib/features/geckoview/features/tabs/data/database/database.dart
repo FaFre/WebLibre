@@ -19,8 +19,11 @@
  */
 import 'package:drift/drift.dart';
 import 'package:drift/internal/versioned_schema.dart';
+import 'package:drift_dev/api/migrations_native.dart';
 import 'package:flutter/foundation.dart';
 import 'package:lexo_rank/lexo_rank.dart';
+import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
+import 'package:weblibre/data/database/functions/url_functions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/capture_tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/history.dart';
@@ -51,12 +54,12 @@ class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
       if (kDebugMode) {
         // This check pulls in a fair amount of code that's not needed
         // anywhere else, so we recommend only doing it in debug builds.
-        // await validateDatabaseSchema(
-        //   setup: (database) {
-        //     registerLexorankFunctions(database);
-        //     registerUrlFunctions(database);
-        //   },
-        // );
+        await validateDatabaseSchema(
+          setup: (database) {
+            registerLexorankFunctions(database);
+            registerUrlFunctions(database);
+          },
+        );
       }
 
       await customStatement('PRAGMA foreign_keys = ON');
