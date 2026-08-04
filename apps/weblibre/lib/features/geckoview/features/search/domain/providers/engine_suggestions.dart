@@ -34,7 +34,8 @@ class EngineSuggestions extends _$EngineSuggestions {
   /// autocomplete (history/top-domains); when that yields nothing, falls back
   /// to a popular-domain prefix match from the bundled Tranco-derived
   /// `sites.db` so typing "git" still completes to "github.com" without any
-  /// local history.
+  /// local history. The fallback can be turned off via the
+  /// `popularSitesAutocompleteEnabled` setting.
   Future<String?> getAutocompleteSuggestion(String query) async {
     final engineResult = await ref
         .read(engineSuggestionsServiceProvider)
@@ -46,6 +47,16 @@ class EngineSuggestions extends _$EngineSuggestions {
     }
 
     if (!ref.mounted) return null;
+
+    final popularSitesEnabled = ref.read(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.popularSitesAutocompleteEnabled,
+      ),
+    );
+
+    if (!popularSitesEnabled) {
+      return null;
+    }
 
     final popularSites = await ref
         .read(popularSitesRepositoryProvider.notifier)

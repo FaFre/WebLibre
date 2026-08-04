@@ -90,6 +90,12 @@ const List<SettingsSectionDefinition> searchSettingsSections = [
         keywords: ['submit', 'keyboard', 'suggestions'],
         child: _AcceptSuggestionOnSubmitTile(),
       ),
+      SettingsEntryDefinition(
+        title: 'Popular site suggestions',
+        subtitle: 'Complete typed text with well-known domains',
+        keywords: ['popular sites', 'domains', 'ghost text', 'autocomplete'],
+        child: _PopularSitesAutocompleteTile(),
+      ),
     ],
   ),
   SettingsSectionDefinition(
@@ -381,6 +387,36 @@ class _AcceptSuggestionOnSubmitTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.acceptSuggestionOnSubmit(value),
+            );
+      },
+    );
+  }
+}
+
+class _PopularSitesAutocompleteTile extends HookConsumerWidget {
+  const _PopularSitesAutocompleteTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final popularSitesAutocompleteEnabled = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.popularSitesAutocompleteEnabled,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Popular site suggestions'),
+      subtitle: const Text(
+        'Complete typed text with well-known domains when your history has no match',
+      ),
+      secondary: const Icon(MdiIcons.web),
+      value: popularSitesAutocompleteEnabled,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) => currentSettings.copyWith
+                  .popularSitesAutocompleteEnabled(value),
             );
       },
     );

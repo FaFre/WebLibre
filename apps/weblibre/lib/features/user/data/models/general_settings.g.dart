@@ -167,6 +167,10 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings acceptSuggestionOnSubmit(bool acceptSuggestionOnSubmit);
 
+  GeneralSettings popularSitesAutocompleteEnabled(
+    bool popularSitesAutocompleteEnabled,
+  );
+
   GeneralSettings pureBlack(bool pureBlack);
 
   GeneralSettings globalDesktopMode(bool globalDesktopMode);
@@ -252,6 +256,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool enableLocalSearchIndex,
     bool indexPrivateTabs,
     bool acceptSuggestionOnSubmit,
+    bool popularSitesAutocompleteEnabled,
     bool pureBlack,
     bool globalDesktopMode,
     List<String> desktopModeSites,
@@ -564,6 +569,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(acceptSuggestionOnSubmit: acceptSuggestionOnSubmit);
 
   @override
+  GeneralSettings popularSitesAutocompleteEnabled(
+    bool popularSitesAutocompleteEnabled,
+  ) => call(popularSitesAutocompleteEnabled: popularSitesAutocompleteEnabled);
+
+  @override
   GeneralSettings pureBlack(bool pureBlack) => call(pureBlack: pureBlack);
 
   @override
@@ -658,6 +668,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? enableLocalSearchIndex = const $CopyWithPlaceholder(),
     Object? indexPrivateTabs = const $CopyWithPlaceholder(),
     Object? acceptSuggestionOnSubmit = const $CopyWithPlaceholder(),
+    Object? popularSitesAutocompleteEnabled = const $CopyWithPlaceholder(),
     Object? pureBlack = const $CopyWithPlaceholder(),
     Object? globalDesktopMode = const $CopyWithPlaceholder(),
     Object? desktopModeSites = const $CopyWithPlaceholder(),
@@ -1068,6 +1079,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.acceptSuggestionOnSubmit
           // ignore: cast_nullable_to_non_nullable
           : acceptSuggestionOnSubmit as bool,
+      popularSitesAutocompleteEnabled:
+          popularSitesAutocompleteEnabled == const $CopyWithPlaceholder() ||
+              popularSitesAutocompleteEnabled == null
+          ? _value.popularSitesAutocompleteEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : popularSitesAutocompleteEnabled as bool,
       pureBlack: pureBlack == const $CopyWithPlaceholder() || pureBlack == null
           ? _value.pureBlack
           // ignore: cast_nullable_to_non_nullable
@@ -1243,6 +1260,8 @@ GeneralSettings _$GeneralSettingsFromJson(
   enableLocalSearchIndex: json['enableLocalSearchIndex'] as bool?,
   indexPrivateTabs: json['indexPrivateTabs'] as bool?,
   acceptSuggestionOnSubmit: json['acceptSuggestionOnSubmit'] as bool?,
+  popularSitesAutocompleteEnabled:
+      json['popularSitesAutocompleteEnabled'] as bool?,
   pureBlack: json['pureBlack'] as bool?,
   globalDesktopMode: json['globalDesktopMode'] as bool?,
   desktopModeSites: (json['desktopModeSites'] as List<dynamic>?)
@@ -1340,6 +1359,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'enableLocalSearchIndex': instance.enableLocalSearchIndex,
   'indexPrivateTabs': instance.indexPrivateTabs,
   'acceptSuggestionOnSubmit': instance.acceptSuggestionOnSubmit,
+  'popularSitesAutocompleteEnabled': instance.popularSitesAutocompleteEnabled,
   'pureBlack': instance.pureBlack,
   'globalDesktopMode': instance.globalDesktopMode,
   'desktopModeSites': instance.desktopModeSites,

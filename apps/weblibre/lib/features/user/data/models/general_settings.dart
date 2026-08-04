@@ -264,6 +264,11 @@ class GeneralSettings with FastEquatable {
   /// accept and complete an inline search suggestion. Defaults to false.
   final bool acceptSuggestionOnSubmit;
 
+  /// Whether the bundled Tranco-derived popular-domain list may supply the
+  /// omnibar's inline ghost-text completion when the engine's own autocomplete
+  /// (history/top domains) has no match. Defaults to true.
+  final bool popularSitesAutocompleteEnabled;
+
   /// Whether dark mode should use pure-black ("OLED"/high-contrast) surfaces.
   /// Only takes effect when the effective brightness is dark. Defaults to false.
   final bool pureBlack;
@@ -357,6 +362,7 @@ class GeneralSettings with FastEquatable {
     required this.enableLocalSearchIndex,
     required this.indexPrivateTabs,
     required this.acceptSuggestionOnSubmit,
+    required this.popularSitesAutocompleteEnabled,
     required this.pureBlack,
     required this.globalDesktopMode,
     required this.desktopModeSites,
@@ -433,6 +439,7 @@ class GeneralSettings with FastEquatable {
     bool? enableLocalSearchIndex,
     bool? indexPrivateTabs,
     bool? acceptSuggestionOnSubmit,
+    bool? popularSitesAutocompleteEnabled,
     bool? pureBlack,
     bool? globalDesktopMode,
     List<String>? desktopModeSites,
@@ -520,6 +527,8 @@ class GeneralSettings with FastEquatable {
        enableLocalSearchIndex = enableLocalSearchIndex ?? true,
        indexPrivateTabs = indexPrivateTabs ?? false,
        acceptSuggestionOnSubmit = acceptSuggestionOnSubmit ?? true,
+       popularSitesAutocompleteEnabled =
+           popularSitesAutocompleteEnabled ?? true,
        pureBlack = pureBlack ?? false,
        globalDesktopMode = globalDesktopMode ?? false,
        desktopModeSites = desktopModeSites ?? const [],
@@ -687,6 +696,7 @@ class GeneralSettings with FastEquatable {
     enableLocalSearchIndex,
     indexPrivateTabs,
     acceptSuggestionOnSubmit,
+    popularSitesAutocompleteEnabled,
     pureBlack,
     globalDesktopMode,
     desktopModeSites,
