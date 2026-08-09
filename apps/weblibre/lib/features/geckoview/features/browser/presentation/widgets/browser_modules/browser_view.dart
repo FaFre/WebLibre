@@ -281,21 +281,15 @@ class _BrowserViewState extends ConsumerState<BrowserView>
             child: Visibility(
               visible: isGeckoViewVisible,
               child: GeckoView(
-                preInitializationStep: () async {
-                  await ref
-                      .read(eventServiceProvider)
-                      .viewReadyStateEvents
-                      .firstWhere((state) => state == true)
-                      .timeout(
-                        const Duration(seconds: 3),
-                        onTimeout: () {
-                          logger.e(
-                            'Browser fragement not reported ready, trying to intitialize anyways',
-                          );
-                          return true;
-                        },
-                      );
-                },
+                // Reports when the native container enters the window, which
+                // under the [Offstage] above is not until the home surface is
+                // dismissed. [GeckoView] attaches the browser fragment on every
+                // such report, so an engine kept alive but unpainted for the
+                // whole of startup still gets its fragment the moment it is
+                // shown. See https://github.com/FaFre/WebLibre/issues/557.
+                viewReadyEvents: ref
+                    .read(eventServiceProvider)
+                    .viewReadyStateEvents,
                 postInitializationStep: () async {
                   await widget.postInitializationStep?.call();
 

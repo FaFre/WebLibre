@@ -42,6 +42,32 @@ private class NativeFragmentView(
 
     private val container: View
 
+    /**
+     * Reports whether the container is reachable through [Activity.findViewById], which is what
+     * `GeckoBrowserApiImpl.showFragmentCallback` needs before it can attach the browser fragment.
+     *
+     * Hybrid composition (and HC++) only insert the platform view into the Flutter view hierarchy
+     * the first time its layer is composited — `PlatformViewsController#onDisplayPlatformView` ->
+     * `initializePlatformViewIfNeeded` -> `flutterView.addView(parentView)`. A widget that lays the
+     * view out but does not paint it (an `Offstage` ancestor, for instance) therefore keeps the
+     * container out of the hierarchy indefinitely, and every attach attempt made in the meantime
+     * fails.
+     *
+     * [onFlutterViewAttached] is no signal for this: Flutter calls it while constructing the
+     * platform view, so reporting readiness from there claims the container is usable long before
+     * it is. The container's own attach state is the fact that matters, so it is what gets
+     * reported. See https://github.com/FaFre/WebLibre/issues/557.
+     */
+    private val attachStateListener = object : View.OnAttachStateChangeListener {
+        override fun onViewAttachedToWindow(v: View) {
+            flutterEvents.onViewReadyStateChange(EventSequence.next(), true) { _ -> }
+        }
+
+        override fun onViewDetachedFromWindow(v: View) {
+            flutterEvents.onViewReadyStateChange(EventSequence.next(), false) { _ -> }
+        }
+    }
+
     init {
         val vParams: ViewGroup.LayoutParams =
             FrameLayout.LayoutParams(
@@ -56,13 +82,13 @@ private class NativeFragmentView(
         container = BackGestureFilterFrameLayout(activity, activity)
         container.layoutParams = vParams
         container.id = containerId
+        container.addOnAttachStateChangeListener(attachStateListener)
     }
 
     override fun onFlutterViewAttached(flutterView: View) {
         super.onFlutterViewAttached(flutterView)
 
         components.engineReportedInitialized = false
-        flutterEvents.onViewReadyStateChange(EventSequence.next(), true) { _ -> }
     }
 
     override fun getView(): View {
@@ -70,6 +96,11 @@ private class NativeFragmentView(
     }
 
     override fun dispose() {
-        // Clean up if needed
+        container.removeOnAttachStateChangeListener(attachStateListener)
+
+        // Removing the listener suppresses the detach callback that tearing the view down would
+        // otherwise deliver, so report the container gone explicitly. Dart must not keep believing
+        // an attach is possible against a container that no longer exists.
+        flutterEvents.onViewReadyStateChange(EventSequence.next(), false) { _ -> }
     }
 }
