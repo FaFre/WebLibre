@@ -110,6 +110,7 @@ AppLinkPolicySnapshot? appLinkPolicySnapshot(Ref ref) {
         key: _toNativeRule(value),
     },
     marketplaceFallbackEnabled: settings.appLinkMarketplaceFallback,
+    authExceptionsEnabled: settings.appLinkAuthExceptionsEnabled,
     protectGeneralContext: protection.protectGeneralContext,
     protectedContextIds: protection.protectedContextIds.toList(),
     strictContextIds: protection.strictContextIds.toList(),

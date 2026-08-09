@@ -58,9 +58,27 @@ class WebLibreAppLinksInterceptor(
 
         val uriScheme = runCatching { uri.toUri().scheme }.getOrNull()
         val engineSupportsScheme = AppLinkSchemes.isEngineSupported(uriScheme)
+        val session = components.core.store.state.findTabOrCustomTab(engineSession)
+        val policy = AppLinkPolicyStores.forProfile(components.profileApplicationContext).policy
+
+        // A tab an external app opened for us (Custom Tab / ActionView) may be hosting a sign-in
+        // round trip. Gated on the policy so turning the carve-out off restores the plain §2.4
+        // eligibility rules rather than only skipping the launch below.
+        val authExceptionsAllowed = policy.authExceptionsEnabled && isPossibleAuthentication(session)
 
         // Step 2 — navigation eligibility. Any hit lets the engine proceed normally.
-        if (!isEligible(uri, lastUri, uriScheme, engineSupportsScheme, hasUserGesture, isRedirect, isDirectNavigation, isSubframeRequest)) {
+        if (!isEligible(
+                uri,
+                lastUri,
+                uriScheme,
+                engineSupportsScheme,
+                hasUserGesture,
+                isRedirect,
+                isDirectNavigation,
+                isSubframeRequest,
+                authExceptionsAllowed,
+            )
+        ) {
             return null
         }
 
@@ -74,10 +92,6 @@ class WebLibreAppLinksInterceptor(
 
         val resolved = runtime.resolver.resolve(uri, includeHttpAppLinks = true, useCache = true)
 
-        val policy = AppLinkPolicyStores.forProfile(components.profileApplicationContext).policy
-
-        val session = components.core.store.state.findTabOrCustomTab(engineSession)
-
         // Container isolation (replace semantics): a container with "isolated app link settings"
         // enabled contributes an entry keyed by its contextId. When the source tab's contextId has
         // one, its mode + rules fully replace the global ones for this navigation.
@@ -85,12 +99,47 @@ class WebLibreAppLinksInterceptor(
         val effectiveMode = override?.globalMode ?: policy.globalMode
         val effectiveRules = override?.rules ?: policy.rules
 
+        val isProtectedNavigation = isProtected(policy, session, uri)
+        val isPrivateNavigation = session?.content?.private ?: false
+        val isWalletNavigation = AppLinkSchemes.isWallet(resolved.originalScheme) ||
+            AppLinkSchemes.isWallet(resolved.intentDataScheme)
+
+        // An ambiguous resolution is never treated as a callback: with several handlers we cannot
+        // show the caller *is* the target, and the launch would raise a chooser rather than return
+        // to the app. AC declines here too — its package comes from the bound component, which is
+        // only set for an unambiguous handler.
+        val authTargetPackage = if (resolved.isAmbiguous) null else resolved.packageName
+
+        // §2.4 authentication carve-out (AC parity): a tab opened *by* the app the navigation
+        // targets is a sign-in round trip rather than a general app link, so it returns to its
+        // caller even under `never`. The forced-prompt contexts still win — a protected container,
+        // a private tab or a wallet scheme must not leak out silently, so those fall through to the
+        // classifier, which prompts for them regardless of mode (§2.4 step 4).
+        if (authExceptionsAllowed &&
+            isAuthenticationCallback(session, authTargetPackage) &&
+            !isProtectedNavigation && !isPrivateNavigation && !isWalletNavigation
+        ) {
+            val result = runtime.launcher.launch(
+                uri,
+                AppLinkLaunchMode.AUTHENTICATION,
+                expectedPackage = authTargetPackage,
+            )
+            logger.info(
+                "auth app-link callback uri=$uri tab=${session?.id} " +
+                    "caller=${callerPackage(session)} package=$authTargetPackage -> $result",
+            )
+            return if (result == AppLinkLaunchResult.LAUNCHED) {
+                RequestInterceptor.InterceptionResponse.Deny
+            } else {
+                safeNonLaunchResponse(pendingStore, resolved)
+            }
+        }
+
         val input = ClassifierInput(
             resolved = resolved,
-            isProtected = isProtected(policy, session, uri),
-            isPrivate = session?.content?.private ?: false,
-            isWallet = AppLinkSchemes.isWallet(resolved.originalScheme) ||
-                AppLinkSchemes.isWallet(resolved.intentDataScheme),
+            isProtected = isProtectedNavigation,
+            isPrivate = isPrivateNavigation,
+            isWallet = isWalletNavigation,
             missingSession = session == null,
             suppressionHit = session != null &&
                 pendingStore.isSuppressed(session.id, targetFingerprint(uri, resolved)),
@@ -262,6 +311,38 @@ class WebLibreAppLinksInterceptor(
         }
     }
 
+    /**
+     * True when [targetPackage] is the very app that opened this tab — the shape of a sign-in
+     * callback. [targetPackage] must be an unambiguous resolution; pass `null` otherwise.
+     */
+    private fun isAuthenticationCallback(session: SessionState?, targetPackage: String?): Boolean {
+        if (targetPackage.isNullOrEmpty()) return false
+        return callerPackage(session) == targetPackage
+    }
+
+    /**
+     * The package that launched this session, as recorded by
+     * [eu.weblibre.flutter_mozilla_components.activities.addExternalCallerInformation]. Note the
+     * underlying referrer is caller-supplied and can be spoofed, so this may only gate actions the
+     * caller could already perform itself (here: launching its own intent).
+     */
+    private fun callerPackage(session: SessionState?): String? {
+        return when (val source = session?.source) {
+            is SessionState.Source.External.CustomTab -> source.caller?.packageId
+            is SessionState.Source.External.ActionView -> source.caller?.packageId
+            else -> null
+        }
+    }
+
+    private fun isPossibleAuthentication(session: SessionState?): Boolean {
+        return when (session?.source) {
+            is SessionState.Source.External.CustomTab,
+            is SessionState.Source.External.ActionView,
+            -> true
+            else -> false
+        }
+    }
+
     // ---- Eligibility (§2.4 step 2) ----
 
     private fun isEligible(
@@ -273,6 +354,7 @@ class WebLibreAppLinksInterceptor(
         isRedirect: Boolean,
         isDirectNavigation: Boolean,
         isSubframeRequest: Boolean,
+        authExceptionsAllowed: Boolean,
     ): Boolean {
         if (uriScheme == null) return false
         // A subframe request not triggered by the user and outside the allowlist stays in-page.
@@ -282,8 +364,10 @@ class WebLibreAppLinksInterceptor(
         val isIntentionalNavigation = hasUserGesture || isAllowedRedirect || isDirectNavigation
         // Unintentional engine-supported navigation continues in the browser.
         if (engineSupportsScheme && !isIntentionalNavigation) return false
-        // Same-domain engine-supported navigation continues in the browser (AC subdomain stripping).
-        if (engineSupportsScheme && isSameDomain(lastUri, uri)) return false
+        // Same-domain engine-supported navigation continues in the browser (AC subdomain stripping),
+        // unless this tab could be hosting an authentication round trip whose callback is an http
+        // app link on the same site.
+        if (engineSupportsScheme && isSameDomain(lastUri, uri) && !authExceptionsAllowed) return false
         // Always-denied schemes never resolve or launch externally.
         if (AppLinkSchemes.isAlwaysDenied(uriScheme)) return false
         return true

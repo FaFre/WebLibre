@@ -161,6 +161,10 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings appLinkMarketplaceFallback(bool appLinkMarketplaceFallback);
 
+  GeneralSettings appLinkAuthExceptionsEnabled(
+    bool appLinkAuthExceptionsEnabled,
+  );
+
   GeneralSettings enableLocalSearchIndex(bool enableLocalSearchIndex);
 
   GeneralSettings indexPrivateTabs(bool indexPrivateTabs);
@@ -253,6 +257,7 @@ abstract class _$GeneralSettingsCWProxy {
     Map<String, PersistedAppLinkRule> appLinkRules,
     Map<String, ContextAppLinkPolicy> appLinkContextOverrides,
     bool appLinkMarketplaceFallback,
+    bool appLinkAuthExceptionsEnabled,
     bool enableLocalSearchIndex,
     bool indexPrivateTabs,
     bool acceptSuggestionOnSubmit,
@@ -557,6 +562,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(appLinkMarketplaceFallback: appLinkMarketplaceFallback);
 
   @override
+  GeneralSettings appLinkAuthExceptionsEnabled(
+    bool appLinkAuthExceptionsEnabled,
+  ) => call(appLinkAuthExceptionsEnabled: appLinkAuthExceptionsEnabled);
+
+  @override
   GeneralSettings enableLocalSearchIndex(bool enableLocalSearchIndex) =>
       call(enableLocalSearchIndex: enableLocalSearchIndex);
 
@@ -665,6 +675,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? appLinkRules = const $CopyWithPlaceholder(),
     Object? appLinkContextOverrides = const $CopyWithPlaceholder(),
     Object? appLinkMarketplaceFallback = const $CopyWithPlaceholder(),
+    Object? appLinkAuthExceptionsEnabled = const $CopyWithPlaceholder(),
     Object? enableLocalSearchIndex = const $CopyWithPlaceholder(),
     Object? indexPrivateTabs = const $CopyWithPlaceholder(),
     Object? acceptSuggestionOnSubmit = const $CopyWithPlaceholder(),
@@ -1061,6 +1072,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.appLinkMarketplaceFallback
           // ignore: cast_nullable_to_non_nullable
           : appLinkMarketplaceFallback as bool,
+      appLinkAuthExceptionsEnabled:
+          appLinkAuthExceptionsEnabled == const $CopyWithPlaceholder() ||
+              appLinkAuthExceptionsEnabled == null
+          ? _value.appLinkAuthExceptionsEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : appLinkAuthExceptionsEnabled as bool,
       enableLocalSearchIndex:
           enableLocalSearchIndex == const $CopyWithPlaceholder() ||
               enableLocalSearchIndex == null
@@ -1257,6 +1274,7 @@ GeneralSettings _$GeneralSettingsFromJson(
     json['appLinkContextOverrides'] as Map<String, dynamic>?,
   ),
   appLinkMarketplaceFallback: json['appLinkMarketplaceFallback'] as bool?,
+  appLinkAuthExceptionsEnabled: json['appLinkAuthExceptionsEnabled'] as bool?,
   enableLocalSearchIndex: json['enableLocalSearchIndex'] as bool?,
   indexPrivateTabs: json['indexPrivateTabs'] as bool?,
   acceptSuggestionOnSubmit: json['acceptSuggestionOnSubmit'] as bool?,
@@ -1356,6 +1374,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
     (k, e) => MapEntry(k, e.toJson()),
   ),
   'appLinkMarketplaceFallback': instance.appLinkMarketplaceFallback,
+  'appLinkAuthExceptionsEnabled': instance.appLinkAuthExceptionsEnabled,
   'enableLocalSearchIndex': instance.enableLocalSearchIndex,
   'indexPrivateTabs': instance.indexPrivateTabs,
   'acceptSuggestionOnSubmit': instance.acceptSuggestionOnSubmit,

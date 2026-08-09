@@ -1397,8 +1397,8 @@ final class VisibleTabListItemsFamily extends $Family
 /// switcher lays them out — the unassigned bucket first, then containers by
 /// pinned/`order_key`. Stepping off the end of one container therefore
 /// continues into the next, and selecting that tab moves the selected container
-/// along with it. Containers without tabs are skipped so their tree query never
-/// runs.
+/// along with it. Named containers holding no tabs are skipped so their tree
+/// query never runs.
 ///
 /// "Previous" is a step towards the top of that order and "next" a step
 /// towards its end, so direction follows `tabListDirection` (baked into the
@@ -1443,8 +1443,8 @@ final sequentialTabNavigationOrderProvider =
 /// switcher lays them out — the unassigned bucket first, then containers by
 /// pinned/`order_key`. Stepping off the end of one container therefore
 /// continues into the next, and selecting that tab moves the selected container
-/// along with it. Containers without tabs are skipped so their tree query never
-/// runs.
+/// along with it. Named containers holding no tabs are skipped so their tree
+/// query never runs.
 ///
 /// "Previous" is a step towards the top of that order and "next" a step
 /// towards its end, so direction follows `tabListDirection` (baked into the
@@ -1493,8 +1493,8 @@ final class SequentialTabNavigationOrderProvider
   /// switcher lays them out — the unassigned bucket first, then containers by
   /// pinned/`order_key`. Stepping off the end of one container therefore
   /// continues into the next, and selecting that tab moves the selected container
-  /// along with it. Containers without tabs are skipped so their tree query never
-  /// runs.
+  /// along with it. Named containers holding no tabs are skipped so their tree
+  /// query never runs.
   ///
   /// "Previous" is a step towards the top of that order and "next" a step
   /// towards its end, so direction follows `tabListDirection` (baked into the

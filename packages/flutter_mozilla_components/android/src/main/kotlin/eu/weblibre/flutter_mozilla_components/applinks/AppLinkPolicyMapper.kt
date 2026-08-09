@@ -28,6 +28,7 @@ fun AppLinkPolicySnapshot.toAppLinkPolicy(): AppLinkPolicy {
                 port = pattern.port?.toInt(),
             )
         },
+        authExceptionsEnabled = authExceptionsEnabled,
         contextOverrides = contextOverrides.mapValues { (_, override) ->
             ContextAppLinkPolicy(
                 globalMode = override.mode.toAppLinkMode(),

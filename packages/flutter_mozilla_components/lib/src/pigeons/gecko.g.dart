@@ -6486,6 +6486,7 @@ class AppLinkPolicySnapshot {
     required this.globalMode,
     required this.rules,
     required this.marketplaceFallbackEnabled,
+    required this.authExceptionsEnabled,
     required this.protectGeneralContext,
     required this.protectedContextIds,
     required this.strictContextIds,
@@ -6499,6 +6500,10 @@ class AppLinkPolicySnapshot {
   Map<String, NativeAppLinkRule> rules;
 
   bool marketplaceFallbackEnabled;
+
+  /// Allows same-caller Custom Tab / ActionView authentication callbacks to
+  /// return to their app even when the general app-link mode is `never`.
+  bool authExceptionsEnabled;
 
   /// Regular / no-contextId tabs are proxied via the `general` scope.
   bool protectGeneralContext;
@@ -6521,6 +6526,7 @@ class AppLinkPolicySnapshot {
       globalMode,
       rules,
       marketplaceFallbackEnabled,
+      authExceptionsEnabled,
       protectGeneralContext,
       protectedContextIds,
       strictContextIds,
@@ -6540,12 +6546,13 @@ class AppLinkPolicySnapshot {
       rules: (result[1]! as Map<Object?, Object?>)
           .cast<String, NativeAppLinkRule>(),
       marketplaceFallbackEnabled: result[2]! as bool,
-      protectGeneralContext: result[3]! as bool,
-      protectedContextIds: (result[4]! as List<Object?>).cast<String>(),
-      strictContextIds: (result[5]! as List<Object?>).cast<String>(),
-      protectedTargetPatterns: (result[6]! as List<Object?>)
+      authExceptionsEnabled: result[3]! as bool,
+      protectGeneralContext: result[4]! as bool,
+      protectedContextIds: (result[5]! as List<Object?>).cast<String>(),
+      strictContextIds: (result[6]! as List<Object?>).cast<String>(),
+      protectedTargetPatterns: (result[7]! as List<Object?>)
           .cast<ProtectedTargetPattern>(),
-      contextOverrides: (result[7]! as Map<Object?, Object?>)
+      contextOverrides: (result[8]! as Map<Object?, Object?>)
           .cast<String, NativeContextAppLinkPolicy>(),
     );
   }
@@ -6565,6 +6572,7 @@ class AppLinkPolicySnapshot {
           marketplaceFallbackEnabled,
           other.marketplaceFallbackEnabled,
         ) &&
+        _deepEquals(authExceptionsEnabled, other.authExceptionsEnabled) &&
         _deepEquals(protectGeneralContext, other.protectGeneralContext) &&
         _deepEquals(protectedContextIds, other.protectedContextIds) &&
         _deepEquals(strictContextIds, other.strictContextIds) &&
@@ -6578,7 +6586,7 @@ class AppLinkPolicySnapshot {
 
   @override
   String toString() {
-    return 'AppLinkPolicySnapshot(globalMode: $globalMode, rules: $rules, marketplaceFallbackEnabled: $marketplaceFallbackEnabled, protectGeneralContext: $protectGeneralContext, protectedContextIds: $protectedContextIds, strictContextIds: $strictContextIds, protectedTargetPatterns: $protectedTargetPatterns, contextOverrides: $contextOverrides)';
+    return 'AppLinkPolicySnapshot(globalMode: $globalMode, rules: $rules, marketplaceFallbackEnabled: $marketplaceFallbackEnabled, authExceptionsEnabled: $authExceptionsEnabled, protectGeneralContext: $protectGeneralContext, protectedContextIds: $protectedContextIds, strictContextIds: $strictContextIds, protectedTargetPatterns: $protectedTargetPatterns, contextOverrides: $contextOverrides)';
   }
 }
 

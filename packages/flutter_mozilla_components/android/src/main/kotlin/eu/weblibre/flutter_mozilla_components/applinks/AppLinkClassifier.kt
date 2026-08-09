@@ -57,6 +57,7 @@ data class AppLinkPolicy(
     val protectedContextIds: Set<String>,
     val strictContextIds: Set<String>,
     val protectedTargetPatterns: List<ProtectedTargetPattern>,
+    val authExceptionsEnabled: Boolean,
     /**
      * Per-container overrides keyed by contextId; only isolated containers appear. A navigation whose
      * source contextId is a key uses the entry's mode + rules instead of the global ones (replace).
@@ -72,6 +73,7 @@ data class AppLinkPolicy(
             protectedContextIds = emptySet(),
             strictContextIds = emptySet(),
             protectedTargetPatterns = emptyList(),
+            authExceptionsEnabled = true,
             contextOverrides = emptyMap(),
         )
     }

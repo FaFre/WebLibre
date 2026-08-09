@@ -93,6 +93,7 @@ class AppLinkPolicyStore internal constructor(
         root.put(FIELD_MIGRATED, migrated)
         root.put(FIELD_GLOBAL_MODE, policy.globalMode.name)
         root.put(FIELD_MARKETPLACE, policy.marketplaceFallbackEnabled)
+        root.put(FIELD_AUTH_EXCEPTIONS, policy.authExceptionsEnabled)
         root.put(FIELD_PROTECT_GENERAL, policy.protectGeneralContext)
         root.put(FIELD_PROTECTED_CONTEXTS, JSONArray(policy.protectedContextIds.toList()))
         root.put(FIELD_STRICT_CONTEXTS, JSONArray(policy.strictContextIds.toList()))
@@ -177,6 +178,7 @@ class AppLinkPolicyStore internal constructor(
             globalMode = AppLinkMode.valueOf(root.getString(FIELD_GLOBAL_MODE)),
             rules = rules,
             marketplaceFallbackEnabled = root.optBoolean(FIELD_MARKETPLACE, false),
+            authExceptionsEnabled = root.optBoolean(FIELD_AUTH_EXCEPTIONS, true),
             protectGeneralContext = root.optBoolean(FIELD_PROTECT_GENERAL, false),
             protectedContextIds = root.optJSONArray(FIELD_PROTECTED_CONTEXTS).toStringSet(),
             strictContextIds = root.optJSONArray(FIELD_STRICT_CONTEXTS).toStringSet(),
@@ -218,6 +220,7 @@ class AppLinkPolicyStore internal constructor(
         private const val FIELD_MIGRATED = "migrated"
         private const val FIELD_GLOBAL_MODE = "globalMode"
         private const val FIELD_MARKETPLACE = "marketplaceFallbackEnabled"
+        private const val FIELD_AUTH_EXCEPTIONS = "authExceptionsEnabled"
         private const val FIELD_PROTECT_GENERAL = "protectGeneralContext"
         private const val FIELD_PROTECTED_CONTEXTS = "protectedContextIds"
         private const val FIELD_STRICT_CONTEXTS = "strictContextIds"

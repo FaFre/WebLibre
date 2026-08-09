@@ -120,7 +120,7 @@ final class AppLinkPolicySnapshotProvider
 }
 
 String _$appLinkPolicySnapshotHash() =>
-    r'6fe2dca118d7162561fc7f6280d1a0411d50972a';
+    r'4d456a3cbf091e95ac35d913e8fa20d5f25978ab';
 
 /// Single serialised writer that mirrors the Dart-owned app-link policy to the
 /// native profile-scoped store (§2.8), the sole policy source consulted by the

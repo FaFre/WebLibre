@@ -93,7 +93,7 @@ class IntentReceiverActivity : Activity() {
             }
         }
 
-        val caller = resolveCallerPackage(intent) ?: return false
+        val caller = resolveExternalCallerPackage(intent) ?: return false
         if (caller == packageName) return false
         if (!IntentGatekeeperPreferences.isBlocked(applicationContext, caller)) return false
 
@@ -102,32 +102,17 @@ class IntentReceiverActivity : Activity() {
         return true
     }
 
-    private fun resolveCallerPackage(intent: Intent): String? {
-        referrer?.let { uri ->
-            if (uri.scheme == "android-app") {
-                uri.host?.let { return it }
-            }
-        }
-
-        @Suppress("DEPRECATION")
-        val referrerUri: Uri? = intent.getParcelableExtra(Intent.EXTRA_REFERRER)
-        if (referrerUri?.scheme == "android-app") {
-            referrerUri.host?.let { return it }
-        }
-
-        intent.getStringExtra(Intent.EXTRA_REFERRER_NAME)?.let { name ->
-            Uri.parse(name).takeIf { it.scheme == "android-app" }?.host?.let { return it }
-        }
-
-        return callingPackage
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         coroutineScope.cancel()
     }
 
     private fun processIntent(intent: Intent) {
+        // Must run before any intent processor: CustomTabIntentProcessor reads the caller off the
+        // intent when it builds the session source, and the app-links authentication carve-out
+        // needs that caller to recognise a sign-in callback.
+        addExternalCallerInformation(intent)
+
         if (GlobalComponents.components == null) {
             if (GlobalComponents.ensureExternalComponents(applicationContext)) {
                 routeIntent(intent)

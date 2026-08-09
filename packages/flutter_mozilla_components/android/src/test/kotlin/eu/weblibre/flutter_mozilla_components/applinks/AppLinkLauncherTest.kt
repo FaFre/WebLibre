@@ -13,6 +13,7 @@ import kotlin.test.assertEquals
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 
 class AppLinkLauncherTest {
@@ -70,12 +71,55 @@ class AppLinkLauncherTest {
     }
 
     @Test
+    fun authenticationLaunchUsesClearTopFlags() {
+        val intent = mock(Intent::class.java)
+        val resolved = ResolvedAppLink(
+            hasExternalApp = true,
+            appIntent = intent,
+            packageName = "com.example.app",
+            appName = "App",
+            fallbackUrl = null,
+            marketplaceIntent = null,
+            isAmbiguous = false,
+            engineSupportsScheme = false,
+            scopeKey = "pkg:com.example.app",
+            originalScheme = "example",
+            intentDataScheme = "example",
+        )
+        var startedIntent: Intent? = null
+        val l = launcher(resolved, FakeClock()) { startedIntent = it }
+
+        assertEquals(
+            AppLinkLaunchResult.LAUNCHED,
+            l.launch("example://callback", AppLinkLaunchMode.AUTHENTICATION),
+        )
+        verify(intent).flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        assertEquals(intent, startedIntent)
+    }
+
+    @Test
     fun automaticLaunchWithinCooldownIsRefused() {
         val clock = FakeClock(1000L)
         val l = launcher(resolvedFor("com.example.app"), clock)
         assertEquals(AppLinkLaunchResult.LAUNCHED, l.launch("zoommtg://x", AppLinkLaunchMode.AUTOMATIC))
         clock.now = 1500L // < 2000 ms later
         assertEquals(AppLinkLaunchResult.COOLDOWN, l.launch("zoommtg://x", AppLinkLaunchMode.AUTOMATIC))
+    }
+
+    @Test
+    fun authenticationLaunchWithinCooldownIsRefused() {
+        val clock = FakeClock(1000L)
+        val l = launcher(resolvedFor("com.example.app"), clock)
+        assertEquals(
+            AppLinkLaunchResult.LAUNCHED,
+            l.launch("zoommtg://x", AppLinkLaunchMode.AUTHENTICATION),
+        )
+        // An app that re-opens its Custom Tab on receiving the callback would otherwise ping-pong.
+        clock.now = 1500L // < 2000 ms later
+        assertEquals(
+            AppLinkLaunchResult.COOLDOWN,
+            l.launch("zoommtg://x", AppLinkLaunchMode.AUTHENTICATION),
+        )
     }
 
     @Test

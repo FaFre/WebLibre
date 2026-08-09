@@ -252,6 +252,12 @@ class GeneralSettings with FastEquatable {
   /// Defaults to false — the wrong default for a de-Googled browser.
   final bool appLinkMarketplaceFallback;
 
+  /// Whether app-link "never" rules allow a same-caller Custom Tab / ActionView
+  /// login callback to return to the app that opened the browser. Defaults to
+  /// true to keep OAuth-style sign-in flows working while normal app links still
+  /// obey [appLinksMode].
+  final bool appLinkAuthExceptionsEnabled;
+
   /// Whether the local search index (`history` table populated via tab→
   /// history triggers) is active. When false, the SQL trigger guard returns
   /// without writing; existing rows stay until the user clears them.
@@ -359,6 +365,7 @@ class GeneralSettings with FastEquatable {
     required this.appLinkRules,
     required this.appLinkContextOverrides,
     required this.appLinkMarketplaceFallback,
+    required this.appLinkAuthExceptionsEnabled,
     required this.enableLocalSearchIndex,
     required this.indexPrivateTabs,
     required this.acceptSuggestionOnSubmit,
@@ -436,6 +443,7 @@ class GeneralSettings with FastEquatable {
     Map<String, PersistedAppLinkRule>? appLinkRules,
     Map<String, ContextAppLinkPolicy>? appLinkContextOverrides,
     bool? appLinkMarketplaceFallback,
+    bool? appLinkAuthExceptionsEnabled,
     bool? enableLocalSearchIndex,
     bool? indexPrivateTabs,
     bool? acceptSuggestionOnSubmit,
@@ -524,6 +532,7 @@ class GeneralSettings with FastEquatable {
        appLinkRules = appLinkRules ?? const {},
        appLinkContextOverrides = appLinkContextOverrides ?? const {},
        appLinkMarketplaceFallback = appLinkMarketplaceFallback ?? false,
+       appLinkAuthExceptionsEnabled = appLinkAuthExceptionsEnabled ?? true,
        enableLocalSearchIndex = enableLocalSearchIndex ?? true,
        indexPrivateTabs = indexPrivateTabs ?? false,
        acceptSuggestionOnSubmit = acceptSuggestionOnSubmit ?? true,
@@ -693,6 +702,7 @@ class GeneralSettings with FastEquatable {
     appLinkRules,
     appLinkContextOverrides,
     appLinkMarketplaceFallback,
+    appLinkAuthExceptionsEnabled,
     enableLocalSearchIndex,
     indexPrivateTabs,
     acceptSuggestionOnSubmit,

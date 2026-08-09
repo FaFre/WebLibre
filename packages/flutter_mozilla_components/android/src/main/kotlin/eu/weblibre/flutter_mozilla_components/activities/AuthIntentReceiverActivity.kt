@@ -19,6 +19,10 @@ class AuthIntentReceiverActivity : Activity() {
 
         val sourceIntent = intent?.let { Intent(it) } ?: Intent()
 
+        // Stamp the caller before CustomTabIntentProcessor builds the session source, so the
+        // app-links authentication carve-out can recognise a sign-in callback for this tab.
+        addExternalCallerInformation(sourceIntent)
+
         if (GlobalComponents.components == null && !GlobalComponents.ensureExternalComponents(applicationContext)) {
             finish()
             return

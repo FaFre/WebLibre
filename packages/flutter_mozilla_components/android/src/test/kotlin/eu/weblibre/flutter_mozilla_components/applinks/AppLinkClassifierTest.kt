@@ -59,6 +59,11 @@ class AppLinkClassifierTest {
     // ---- §2.2 table: engine-supported (http) scheme, app resolves ----
 
     @Test
+    fun safeDefaultAllowsAuthExceptions() {
+        assertEquals(true, AppLinkPolicy.SAFE_DEFAULT.authExceptionsEnabled)
+    }
+
+    @Test
     fun engineSupportedAlwaysAutoLaunches() {
         val d = AppLinkClassifier.classify(
             input(resolved(engineSupportsScheme = true), globalMode = AppLinkMode.ALWAYS),

@@ -817,6 +817,11 @@ class _AppLinksModeSection extends HookConsumerWidget {
         (s) => s.appLinkMarketplaceFallback,
       ),
     );
+    final authExceptionsEnabled = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.appLinkAuthExceptionsEnabled,
+      ),
+    );
     final rules = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.appLinkRules),
     );
@@ -886,6 +891,23 @@ class _AppLinksModeSection extends HookConsumerWidget {
                               .appLinkMarketplaceFallback(value),
                         );
                   },
+          ),
+          SwitchListTile.adaptive(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Allow login app callbacks'),
+            subtitle: const Text(
+              'Let apps that opened a Custom Tab receive their login callback, '
+              'even when links are set to never open in apps',
+            ),
+            value: authExceptionsEnabled,
+            onChanged: (value) async {
+              await ref
+                  .read(saveGeneralSettingsControllerProvider.notifier)
+                  .save(
+                    (current) =>
+                        current.copyWith.appLinkAuthExceptionsEnabled(value),
+                  );
+            },
           ),
           _AppLinkRulesSubsection(rules: rules),
         ],

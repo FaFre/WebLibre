@@ -16,11 +16,15 @@ import mozilla.components.support.base.log.logger.Logger
  *   behaviour so the app opens in its own recents entry.
  * - [AUTOMATIC]: global-`always` or a remembered `alwaysOpen` rule — `NEW_TASK`, subject to the
  *   2 s same-package cooldown loop-breaker (§2.4).
+ * - [AUTHENTICATION]: same-caller Custom Tab / ActionView callback — `NEW_TASK | CLEAR_TOP` so the
+ *   originating app can resume its existing task. Not a user gesture, so it takes the same 2 s
+ *   cooldown as [AUTOMATIC] (AC applies its loop-breaker to authentication flows too).
  * - [MARKETPLACE]: install-app fallback — `NEW_TASK | CLEAR_TASK`.
  */
 enum class AppLinkLaunchMode {
     MANUAL,
     AUTOMATIC,
+    AUTHENTICATION,
     MARKETPLACE,
 }
 
@@ -34,9 +38,9 @@ enum class AppLinkLaunchResult {
 
 /**
  * Launches external apps. Every launch re-resolves immediately first (no cache) and verifies the
- * expected package before `startActivity` (§2.7). Automatic launches honour a 2 s same-package
- * cooldown to break app→browser→app ping-pong loops (§2.4); manual and prompt-resolved opens are
- * user gestures that bypass the check but still record it.
+ * expected package before `startActivity` (§2.7). Automatic and authentication launches honour a 2 s
+ * same-package cooldown to break app→browser→app ping-pong loops (§2.4); manual and prompt-resolved
+ * opens are user gestures that bypass the check but still record it.
  */
 class AppLinkLauncher(
     private val resolver: ExternalAppResolver,
@@ -81,7 +85,7 @@ class AppLinkLauncher(
             else -> resolved.packageName
         }
 
-        if (mode == AppLinkLaunchMode.AUTOMATIC) {
+        if (mode == AppLinkLaunchMode.AUTOMATIC || mode == AppLinkLaunchMode.AUTHENTICATION) {
             val (lastPackage, lastTs) = lastLaunch
             if (lastPackage != null && lastPackage == targetPackage &&
                 clock.elapsedRealtime() < lastTs + cooldownMs
@@ -117,6 +121,8 @@ class AppLinkLauncher(
                     Intent.FLAG_ACTIVITY_NEW_TASK
             AppLinkLaunchMode.AUTOMATIC ->
                 Intent.FLAG_ACTIVITY_NEW_TASK
+            AppLinkLaunchMode.AUTHENTICATION ->
+                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             AppLinkLaunchMode.MARKETPLACE ->
                 Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }

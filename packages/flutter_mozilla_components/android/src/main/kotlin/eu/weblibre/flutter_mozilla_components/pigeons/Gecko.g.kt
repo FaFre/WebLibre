@@ -5830,6 +5830,11 @@ data class AppLinkPolicySnapshot (
   /** Remembered rules keyed by canonical scope. */
   val rules: Map<String, NativeAppLinkRule>,
   val marketplaceFallbackEnabled: Boolean,
+  /**
+   * Allows same-caller Custom Tab / ActionView authentication callbacks to
+   * return to their app even when the general app-link mode is `never`.
+   */
+  val authExceptionsEnabled: Boolean,
   /** Regular / no-contextId tabs are proxied via the `general` scope. */
   val protectGeneralContext: Boolean,
   /** contextIds that resolve to a proxy after inherit/bypass/alias. */
@@ -5850,12 +5855,13 @@ data class AppLinkPolicySnapshot (
       val globalMode = pigeonVar_list[0] as AppLinksMode
       val rules = pigeonVar_list[1] as Map<String, NativeAppLinkRule>
       val marketplaceFallbackEnabled = pigeonVar_list[2] as Boolean
-      val protectGeneralContext = pigeonVar_list[3] as Boolean
-      val protectedContextIds = pigeonVar_list[4] as List<String>
-      val strictContextIds = pigeonVar_list[5] as List<String>
-      val protectedTargetPatterns = pigeonVar_list[6] as List<ProtectedTargetPattern>
-      val contextOverrides = pigeonVar_list[7] as Map<String, NativeContextAppLinkPolicy>
-      return AppLinkPolicySnapshot(globalMode, rules, marketplaceFallbackEnabled, protectGeneralContext, protectedContextIds, strictContextIds, protectedTargetPatterns, contextOverrides)
+      val authExceptionsEnabled = pigeonVar_list[3] as Boolean
+      val protectGeneralContext = pigeonVar_list[4] as Boolean
+      val protectedContextIds = pigeonVar_list[5] as List<String>
+      val strictContextIds = pigeonVar_list[6] as List<String>
+      val protectedTargetPatterns = pigeonVar_list[7] as List<ProtectedTargetPattern>
+      val contextOverrides = pigeonVar_list[8] as Map<String, NativeContextAppLinkPolicy>
+      return AppLinkPolicySnapshot(globalMode, rules, marketplaceFallbackEnabled, authExceptionsEnabled, protectGeneralContext, protectedContextIds, strictContextIds, protectedTargetPatterns, contextOverrides)
     }
   }
   fun toList(): List<Any?> {
@@ -5863,6 +5869,7 @@ data class AppLinkPolicySnapshot (
       globalMode,
       rules,
       marketplaceFallbackEnabled,
+      authExceptionsEnabled,
       protectGeneralContext,
       protectedContextIds,
       strictContextIds,
@@ -5878,7 +5885,7 @@ data class AppLinkPolicySnapshot (
       return true
     }
     val other = other as AppLinkPolicySnapshot
-    return GeckoPigeonUtils.deepEquals(this.globalMode, other.globalMode) && GeckoPigeonUtils.deepEquals(this.rules, other.rules) && GeckoPigeonUtils.deepEquals(this.marketplaceFallbackEnabled, other.marketplaceFallbackEnabled) && GeckoPigeonUtils.deepEquals(this.protectGeneralContext, other.protectGeneralContext) && GeckoPigeonUtils.deepEquals(this.protectedContextIds, other.protectedContextIds) && GeckoPigeonUtils.deepEquals(this.strictContextIds, other.strictContextIds) && GeckoPigeonUtils.deepEquals(this.protectedTargetPatterns, other.protectedTargetPatterns) && GeckoPigeonUtils.deepEquals(this.contextOverrides, other.contextOverrides)
+    return GeckoPigeonUtils.deepEquals(this.globalMode, other.globalMode) && GeckoPigeonUtils.deepEquals(this.rules, other.rules) && GeckoPigeonUtils.deepEquals(this.marketplaceFallbackEnabled, other.marketplaceFallbackEnabled) && GeckoPigeonUtils.deepEquals(this.authExceptionsEnabled, other.authExceptionsEnabled) && GeckoPigeonUtils.deepEquals(this.protectGeneralContext, other.protectGeneralContext) && GeckoPigeonUtils.deepEquals(this.protectedContextIds, other.protectedContextIds) && GeckoPigeonUtils.deepEquals(this.strictContextIds, other.strictContextIds) && GeckoPigeonUtils.deepEquals(this.protectedTargetPatterns, other.protectedTargetPatterns) && GeckoPigeonUtils.deepEquals(this.contextOverrides, other.contextOverrides)
   }
 
   override fun hashCode(): Int {
@@ -5886,6 +5893,7 @@ data class AppLinkPolicySnapshot (
     result = 31 * result + GeckoPigeonUtils.deepHash(this.globalMode)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.rules)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.marketplaceFallbackEnabled)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.authExceptionsEnabled)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.protectGeneralContext)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.protectedContextIds)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.strictContextIds)
@@ -5894,7 +5902,7 @@ data class AppLinkPolicySnapshot (
     return result
   }
   override fun toString(): String {
-    return "AppLinkPolicySnapshot(globalMode=$globalMode, rules=$rules, marketplaceFallbackEnabled=$marketplaceFallbackEnabled, protectGeneralContext=$protectGeneralContext, protectedContextIds=$protectedContextIds, strictContextIds=$strictContextIds, protectedTargetPatterns=$protectedTargetPatterns, contextOverrides=$contextOverrides)"
+    return "AppLinkPolicySnapshot(globalMode=$globalMode, rules=$rules, marketplaceFallbackEnabled=$marketplaceFallbackEnabled, authExceptionsEnabled=$authExceptionsEnabled, protectGeneralContext=$protectGeneralContext, protectedContextIds=$protectedContextIds, strictContextIds=$strictContextIds, protectedTargetPatterns=$protectedTargetPatterns, contextOverrides=$contextOverrides)"
   }
 }
 

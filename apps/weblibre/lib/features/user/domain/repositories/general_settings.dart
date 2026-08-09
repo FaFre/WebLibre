@@ -109,6 +109,7 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'customTabsEnabled': DriftSqlType.bool,
   'appLinksMode': DriftSqlType.string,
   'appLinkMarketplaceFallback': DriftSqlType.bool,
+  'appLinkAuthExceptionsEnabled': DriftSqlType.bool,
   'enableLocalSearchIndex': DriftSqlType.bool,
   'indexPrivateTabs': DriftSqlType.bool,
   'acceptSuggestionOnSubmit': DriftSqlType.bool,

@@ -2994,6 +2994,10 @@ class AppLinkPolicySnapshot {
 
   final bool marketplaceFallbackEnabled;
 
+  /// Allows same-caller Custom Tab / ActionView authentication callbacks to
+  /// return to their app even when the general app-link mode is `never`.
+  final bool authExceptionsEnabled;
+
   /// Regular / no-contextId tabs are proxied via the `general` scope.
   final bool protectGeneralContext;
 
@@ -3014,6 +3018,7 @@ class AppLinkPolicySnapshot {
     required this.globalMode,
     required this.rules,
     required this.marketplaceFallbackEnabled,
+    required this.authExceptionsEnabled,
     required this.protectGeneralContext,
     required this.protectedContextIds,
     required this.strictContextIds,
