@@ -1253,3 +1253,271 @@ final class GroupedTabListItemsFamily extends $Family
   @override
   String toString() => r'groupedTabListItemsProvider';
 }
+
+/// The final row order the tab tray renders, i.e.
+/// [groupedTabListItemsProvider] plus the flat-mode post-processing: with
+/// hierarchy display turned off there are no groups to keep together, so
+/// pinned tabs move ahead of unpinned ones across the whole list.
+///
+/// Shared by the list view, the grid view and sequential tab navigation so all
+/// three agree on what "the tab after this one" means.
+
+@ProviderFor(visibleTabListItems)
+final visibleTabListItemsProvider = VisibleTabListItemsFamily._();
+
+/// The final row order the tab tray renders, i.e.
+/// [groupedTabListItemsProvider] plus the flat-mode post-processing: with
+/// hierarchy display turned off there are no groups to keep together, so
+/// pinned tabs move ahead of unpinned ones across the whole list.
+///
+/// Shared by the list view, the grid view and sequential tab navigation so all
+/// three agree on what "the tab after this one" means.
+
+final class VisibleTabListItemsProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<List<TabListItemEntity>>,
+          EquatableValue<List<TabListItemEntity>>,
+          EquatableValue<List<TabListItemEntity>>
+        >
+    with $Provider<EquatableValue<List<TabListItemEntity>>> {
+  /// The final row order the tab tray renders, i.e.
+  /// [groupedTabListItemsProvider] plus the flat-mode post-processing: with
+  /// hierarchy display turned off there are no groups to keep together, so
+  /// pinned tabs move ahead of unpinned ones across the whole list.
+  ///
+  /// Shared by the list view, the grid view and sequential tab navigation so all
+  /// three agree on what "the tab after this one" means.
+  VisibleTabListItemsProvider._({
+    required VisibleTabListItemsFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'visibleTabListItemsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$visibleTabListItemsHash();
+
+  @override
+  String toString() {
+    return r'visibleTabListItemsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<List<TabListItemEntity>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<List<TabListItemEntity>> create(Ref ref) {
+    final argument = this.argument as String?;
+    return visibleTabListItems(ref, containerId: argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EquatableValue<List<TabListItemEntity>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<EquatableValue<List<TabListItemEntity>>>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is VisibleTabListItemsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$visibleTabListItemsHash() =>
+    r'5249a3e7e1f0b24e408987956856926d0958b0db';
+
+/// The final row order the tab tray renders, i.e.
+/// [groupedTabListItemsProvider] plus the flat-mode post-processing: with
+/// hierarchy display turned off there are no groups to keep together, so
+/// pinned tabs move ahead of unpinned ones across the whole list.
+///
+/// Shared by the list view, the grid view and sequential tab navigation so all
+/// three agree on what "the tab after this one" means.
+
+final class VisibleTabListItemsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          EquatableValue<List<TabListItemEntity>>,
+          String?
+        > {
+  VisibleTabListItemsFamily._()
+    : super(
+        retry: null,
+        name: r'visibleTabListItemsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// The final row order the tab tray renders, i.e.
+  /// [groupedTabListItemsProvider] plus the flat-mode post-processing: with
+  /// hierarchy display turned off there are no groups to keep together, so
+  /// pinned tabs move ahead of unpinned ones across the whole list.
+  ///
+  /// Shared by the list view, the grid view and sequential tab navigation so all
+  /// three agree on what "the tab after this one" means.
+
+  VisibleTabListItemsProvider call({required String? containerId}) =>
+      VisibleTabListItemsProvider._(argument: containerId, from: this);
+
+  @override
+  String toString() => r'visibleTabListItemsProvider';
+}
+
+/// Flat tab id order used by sequential tab navigation: the tab bar swipe
+/// action and the next/previous tab gestures.
+///
+/// Navigation follows the rendered tray order instead of the raw storage
+/// `order_key`, so it carries the active sort type, tree grouping, collapsed
+/// groups, pinned-first handling and the tab-type/date filter — stepping to the
+/// tab the user sees next to the current one rather than to an unrelated
+/// `order_key` neighbour.
+///
+/// "Previous" is a step towards the top of that order and "next" a step
+/// towards its end, so direction follows `tabListDirection` (baked into the
+/// order) rather than `tabBarDirection`. The two only disagree when the user
+/// sets them apart, and the tray order is the one the sequence is built from.
+///
+/// The tray's own search results are deliberately not part of this: the swipe
+/// and the gestures are only reachable with the tray closed.
+///
+/// `null` means the underlying tree data has not arrived yet — the only state
+/// in which the caller may fall back to storage order. An empty list is a real
+/// answer ("the filter leaves nothing to move to") and must not be mistaken for
+/// a missing one, or the filter the user set would be bypassed.
+///
+/// Kept alive and actively listened to by [TabRepository]: it is consumed by a
+/// synchronous `ref.read` at the moment of the swipe/gesture, from outside the
+/// widget tree. Without a listener Riverpod pauses the chain when nothing is on
+/// screen watching it, so the order could go stale — or be created empty on the
+/// read, with its tree stream still loading, and silently drop navigation back
+/// to storage order. It is alive anyway whenever the quick tab switcher or the
+/// tray is on screen — both watch the same [groupedTabListItemsProvider] chain.
+
+@ProviderFor(sequentialTabNavigationOrder)
+final sequentialTabNavigationOrderProvider =
+    SequentialTabNavigationOrderProvider._();
+
+/// Flat tab id order used by sequential tab navigation: the tab bar swipe
+/// action and the next/previous tab gestures.
+///
+/// Navigation follows the rendered tray order instead of the raw storage
+/// `order_key`, so it carries the active sort type, tree grouping, collapsed
+/// groups, pinned-first handling and the tab-type/date filter — stepping to the
+/// tab the user sees next to the current one rather than to an unrelated
+/// `order_key` neighbour.
+///
+/// "Previous" is a step towards the top of that order and "next" a step
+/// towards its end, so direction follows `tabListDirection` (baked into the
+/// order) rather than `tabBarDirection`. The two only disagree when the user
+/// sets them apart, and the tray order is the one the sequence is built from.
+///
+/// The tray's own search results are deliberately not part of this: the swipe
+/// and the gestures are only reachable with the tray closed.
+///
+/// `null` means the underlying tree data has not arrived yet — the only state
+/// in which the caller may fall back to storage order. An empty list is a real
+/// answer ("the filter leaves nothing to move to") and must not be mistaken for
+/// a missing one, or the filter the user set would be bypassed.
+///
+/// Kept alive and actively listened to by [TabRepository]: it is consumed by a
+/// synchronous `ref.read` at the moment of the swipe/gesture, from outside the
+/// widget tree. Without a listener Riverpod pauses the chain when nothing is on
+/// screen watching it, so the order could go stale — or be created empty on the
+/// read, with its tree stream still loading, and silently drop navigation back
+/// to storage order. It is alive anyway whenever the quick tab switcher or the
+/// tray is on screen — both watch the same [groupedTabListItemsProvider] chain.
+
+final class SequentialTabNavigationOrderProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<List<String>?>,
+          EquatableValue<List<String>?>,
+          EquatableValue<List<String>?>
+        >
+    with $Provider<EquatableValue<List<String>?>> {
+  /// Flat tab id order used by sequential tab navigation: the tab bar swipe
+  /// action and the next/previous tab gestures.
+  ///
+  /// Navigation follows the rendered tray order instead of the raw storage
+  /// `order_key`, so it carries the active sort type, tree grouping, collapsed
+  /// groups, pinned-first handling and the tab-type/date filter — stepping to the
+  /// tab the user sees next to the current one rather than to an unrelated
+  /// `order_key` neighbour.
+  ///
+  /// "Previous" is a step towards the top of that order and "next" a step
+  /// towards its end, so direction follows `tabListDirection` (baked into the
+  /// order) rather than `tabBarDirection`. The two only disagree when the user
+  /// sets them apart, and the tray order is the one the sequence is built from.
+  ///
+  /// The tray's own search results are deliberately not part of this: the swipe
+  /// and the gestures are only reachable with the tray closed.
+  ///
+  /// `null` means the underlying tree data has not arrived yet — the only state
+  /// in which the caller may fall back to storage order. An empty list is a real
+  /// answer ("the filter leaves nothing to move to") and must not be mistaken for
+  /// a missing one, or the filter the user set would be bypassed.
+  ///
+  /// Kept alive and actively listened to by [TabRepository]: it is consumed by a
+  /// synchronous `ref.read` at the moment of the swipe/gesture, from outside the
+  /// widget tree. Without a listener Riverpod pauses the chain when nothing is on
+  /// screen watching it, so the order could go stale — or be created empty on the
+  /// read, with its tree stream still loading, and silently drop navigation back
+  /// to storage order. It is alive anyway whenever the quick tab switcher or the
+  /// tray is on screen — both watch the same [groupedTabListItemsProvider] chain.
+  SequentialTabNavigationOrderProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'sequentialTabNavigationOrderProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$sequentialTabNavigationOrderHash();
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<List<String>?>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<List<String>?> create(Ref ref) {
+    return sequentialTabNavigationOrder(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EquatableValue<List<String>?> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<EquatableValue<List<String>?>>(
+        value,
+      ),
+    );
+  }
+}
+
+String _$sequentialTabNavigationOrderHash() =>
+    r'2a6b1965657942524e8e514cd4deb0ce77667fe1';

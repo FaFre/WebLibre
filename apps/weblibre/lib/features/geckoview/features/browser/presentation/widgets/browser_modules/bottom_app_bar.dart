@@ -380,7 +380,10 @@ class BrowserTabBar extends HookConsumerWidget {
     final dragStartPosition = useRef(Offset.zero);
 
     // Swipe along the primary switch axis moves between tabs. [delta] is
-    // (dragStart - dragEnd) along that axis; its sign chooses prev/next.
+    // (dragStart - dragEnd) along that axis, so a right-to-left (or upward)
+    // swipe is positive and moves *up* the visible tab order, a rightward (or
+    // downward) swipe moves down it — the swipe drags the list under the
+    // finger.
     Future<void> switchTabsBy(double delta) async {
       final selectedTab = ref.read(selectedTabProvider);
       final setting = await ref
@@ -395,7 +398,7 @@ class BrowserTabBar extends HookConsumerWidget {
               .read(tabRepositoryProvider.notifier)
               .selectPreviouslyOpenedTab(selectedTab);
         case TabBarSwipeAction.navigateOrderedTabs:
-          if (delta < 0) {
+          if (delta > 0) {
             await ref
                 .read(tabRepositoryProvider.notifier)
                 .selectPreviousTab(selectedTab);

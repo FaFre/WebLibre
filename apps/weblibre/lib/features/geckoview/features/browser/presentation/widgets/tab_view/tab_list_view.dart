@@ -283,11 +283,11 @@ class _TabListView extends HookConsumerWidget {
           ),
       ];
     } else {
-      final grouped = ref.watch(
-        groupedTabListItemsProvider(containerId: containerId),
+      final visibleItems = ref.watch(
+        visibleTabListItemsProvider(containerId: containerId),
       );
       primaryRows = [
-        for (final item in grouped.value)
+        for (final item in visibleItems.value)
           switch (item) {
             TabListStandaloneItem(:final tabId) => TabViewItem.standalone(
               tabId: tabId,
@@ -302,15 +302,6 @@ class _TabListView extends HookConsumerWidget {
                   : TabViewItem.standalone(tabId: c.tabId),
           },
       ];
-      if (!showHierarchicalTabs && filterOptions.sortPinnedFirst) {
-        final pinned = primaryRows
-            .where((r) => pinnedTabIds.contains(r.tabId))
-            .toList();
-        final unpinned = primaryRows
-            .where((r) => !pinnedTabIds.contains(r.tabId))
-            .toList();
-        primaryRows = [...pinned, ...unpinned];
-      }
     }
 
     final tabSuggestionsEnabled = ref.watch(

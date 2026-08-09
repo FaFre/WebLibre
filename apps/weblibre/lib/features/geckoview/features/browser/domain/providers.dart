@@ -1211,6 +1211,88 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
   return EquatableValue(result);
 }
 
+/// The final row order the tab tray renders, i.e.
+/// [groupedTabListItemsProvider] plus the flat-mode post-processing: with
+/// hierarchy display turned off there are no groups to keep together, so
+/// pinned tabs move ahead of unpinned ones across the whole list.
+///
+/// Shared by the list view, the grid view and sequential tab navigation so all
+/// three agree on what "the tab after this one" means.
+@Riverpod()
+EquatableValue<List<TabListItemEntity>> visibleTabListItems(
+  Ref ref, {
+  required String? containerId,
+}) {
+  final groupedItems = ref
+      .watch(groupedTabListItemsProvider(containerId: containerId))
+      .value;
+
+  final filterOptions = ref.watch(tabViewFilterControllerProvider);
+  if (filterOptions.showHierarchicalTabs || !filterOptions.sortPinnedFirst) {
+    return EquatableValue(groupedItems);
+  }
+
+  final pinnedTabIds = ref.watch(
+    watchPinnedTabIdsProvider.select(
+      (value) => value.value ?? const <String>{},
+    ),
+  );
+
+  return EquatableValue([
+    ...groupedItems.where((item) => pinnedTabIds.contains(item.tabId)),
+    ...groupedItems.where((item) => !pinnedTabIds.contains(item.tabId)),
+  ]);
+}
+
+/// Flat tab id order used by sequential tab navigation: the tab bar swipe
+/// action and the next/previous tab gestures.
+///
+/// Navigation follows the rendered tray order instead of the raw storage
+/// `order_key`, so it carries the active sort type, tree grouping, collapsed
+/// groups, pinned-first handling and the tab-type/date filter — stepping to the
+/// tab the user sees next to the current one rather than to an unrelated
+/// `order_key` neighbour.
+///
+/// "Previous" is a step towards the top of that order and "next" a step
+/// towards its end, so direction follows `tabListDirection` (baked into the
+/// order) rather than `tabBarDirection`. The two only disagree when the user
+/// sets them apart, and the tray order is the one the sequence is built from.
+///
+/// The tray's own search results are deliberately not part of this: the swipe
+/// and the gestures are only reachable with the tray closed.
+///
+/// `null` means the underlying tree data has not arrived yet — the only state
+/// in which the caller may fall back to storage order. An empty list is a real
+/// answer ("the filter leaves nothing to move to") and must not be mistaken for
+/// a missing one, or the filter the user set would be bypassed.
+///
+/// Kept alive and actively listened to by [TabRepository]: it is consumed by a
+/// synchronous `ref.read` at the moment of the swipe/gesture, from outside the
+/// widget tree. Without a listener Riverpod pauses the chain when nothing is on
+/// screen watching it, so the order could go stale — or be created empty on the
+/// read, with its tree stream still loading, and silently drop navigation back
+/// to storage order. It is alive anyway whenever the quick tab switcher or the
+/// tray is on screen — both watch the same [groupedTabListItemsProvider] chain.
+@Riverpod(keepAlive: true)
+EquatableValue<List<String>?> sequentialTabNavigationOrder(Ref ref) {
+  final containerId = ref.watch(selectedContainerProvider);
+
+  final hasTreeData = ref.watch(
+    watchTabsWithRootAndDepthProvider(
+      containerId,
+    ).select((value) => value.hasValue),
+  );
+  if (!hasTreeData) {
+    return EquatableValue(null);
+  }
+
+  final visibleItems = ref
+      .watch(visibleTabListItemsProvider(containerId: containerId))
+      .value;
+
+  return EquatableValue([for (final item in visibleItems) item.tabId]);
+}
+
 String _nearestVisibleParentId(
   TabsWithRootAndDepthResult row,
   String rootId,

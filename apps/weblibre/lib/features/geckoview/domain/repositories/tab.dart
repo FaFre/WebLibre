@@ -39,6 +39,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.da
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/controllers/home_target_controller.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
@@ -446,35 +447,83 @@ class TabRepository extends _$TabRepository {
     String tabId, {
     String? containerId,
     bool skipContainerCheck = true,
-  }) async {
-    final previousTabId = await _adjacentVisibleTabByOrder(
-      tabId,
-      containerId: containerId,
-      skipContainerCheck: skipContainerCheck,
-      selectPrevious: true,
-    );
-
-    if (ref.mounted && previousTabId != null) {
-      return selectTab(previousTabId);
-    }
-
-    return false;
-  }
+  }) => _selectAdjacentTab(
+    tabId,
+    containerId: containerId,
+    skipContainerCheck: skipContainerCheck,
+    selectPrevious: true,
+  );
 
   Future<bool> selectNextTab(
     String tabId, {
     String? containerId,
     bool skipContainerCheck = true,
+  }) => _selectAdjacentTab(
+    tabId,
+    containerId: containerId,
+    skipContainerCheck: skipContainerCheck,
+    selectPrevious: false,
+  );
+
+  /// Moves the selection one step through the tab sequence.
+  ///
+  /// Unscoped calls — the tab bar swipe and the next/previous tab gestures —
+  /// step through the *rendered* order
+  /// ([sequentialTabNavigationOrderProvider]) so navigation matches the tabs the
+  /// user sees, including the tray's sort type, grouping, filters and
+  /// pinned-first handling. That order is authoritative once it exists, and
+  /// every outcome stays inside it:
+  ///
+  /// - current tab in the order: step one row, stopping at either end;
+  /// - current tab outside it — hidden by the active filter, or folded into a
+  ///   collapsed group — enter the visible sequence from the end the step comes
+  ///   from, rather than jumping to a tab the filter excludes;
+  /// - nothing visible at all: do nothing.
+  ///
+  /// The storage-order path is left for calls that scope navigation to a
+  /// container (which the rendered order, tied to the selected container, cannot
+  /// answer) and for the brief window before the tree data has loaded.
+  Future<bool> _selectAdjacentTab(
+    String tabId, {
+    required String? containerId,
+    required bool skipContainerCheck,
+    required bool selectPrevious,
   }) async {
-    final previousTabId = await _adjacentVisibleTabByOrder(
+    if (containerId == null && skipContainerCheck) {
+      final visibleOrder = ref.read(sequentialTabNavigationOrderProvider).value;
+
+      if (visibleOrder != null) {
+        if (visibleOrder.isEmpty) {
+          return false;
+        }
+
+        final index = visibleOrder.indexOf(tabId);
+
+        if (index < 0) {
+          return selectTab(
+            selectPrevious ? visibleOrder.last : visibleOrder.first,
+          );
+        }
+
+        final targetIndex = selectPrevious ? index - 1 : index + 1;
+
+        if (targetIndex < 0 || targetIndex >= visibleOrder.length) {
+          return false;
+        }
+
+        return selectTab(visibleOrder[targetIndex]);
+      }
+    }
+
+    final adjacentTabId = await _adjacentVisibleTabByOrder(
       tabId,
       containerId: containerId,
       skipContainerCheck: skipContainerCheck,
-      selectPrevious: false,
+      selectPrevious: selectPrevious,
     );
 
-    if (ref.mounted && previousTabId != null) {
-      return selectTab(previousTabId);
+    if (ref.mounted && adjacentTabId != null) {
+      return selectTab(adjacentTabId);
     }
 
     return false;
@@ -546,12 +595,14 @@ class TabRepository extends _$TabRepository {
     required bool skipContainerCheck,
     required bool selectPrevious,
   }) {
-    // "Previous/next" here is interpreted relative to the *tab bar*
-    // direction, even when the user triggered the navigation from the tab
-    // tray (which has its own `tabListDirection`). If the two settings
-    // disagree, "next tab" while looking at the tray flows by tab-bar
-    // direction. Treat as intentional — keyboard / gesture navigation is
-    // anchored to the bar's mental model.
+    // Storage-order walk: neighbours by `order_key` only, so it sees neither
+    // the tray's sort and filters nor its grouping. User-facing sequential
+    // navigation goes through the rendered order in [_selectAdjacentTab] and
+    // reaches this only as a fallback; what remains here is picking a tab
+    // after a close and container-scoped stepping.
+    //
+    // "Previous/next" is interpreted relative to the *tab bar* direction,
+    // which is the only direction this path has to go by.
     final newestFirst =
         ref.read(generalSettingsWithDefaultsProvider).tabBarDirection ==
         TabDirection.newestFirst;
@@ -946,6 +997,18 @@ class TabRepository extends _$TabRepository {
 
   @override
   void build() {
+    // Hold an active listener on the rendered navigation order: swipes and
+    // gestures read it synchronously, and Riverpod pauses a provider nothing is
+    // listening to — a one-off read would neither keep it current nor guarantee
+    // it has data when the first swipe arrives. Listened rather than watched
+    // because it changes with every tab update, which must not rebuild this
+    // repository; the callback is intentionally empty.
+    ref.listen(
+      sequentialTabNavigationOrderProvider,
+      (_, _) {},
+      fireImmediately: true,
+    );
+
     final eventSerivce = ref.watch(eventServiceProvider);
     final tabContentService = ref.watch(tabContentServiceProvider);
 
