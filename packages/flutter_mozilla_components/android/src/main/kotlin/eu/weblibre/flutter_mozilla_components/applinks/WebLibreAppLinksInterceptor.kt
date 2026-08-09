@@ -65,17 +65,17 @@ class WebLibreAppLinksInterceptor(
         // round trip. Gated on the policy so turning the carve-out off restores the plain §2.4
         // eligibility rules rather than only skipping the launch below.
         val authExceptionsAllowed = policy.authExceptionsEnabled && isPossibleAuthentication(session)
+        val isSameDomainNavigation = isSameDomain(lastUri, uri)
 
         // Step 2 — navigation eligibility. Any hit lets the engine proceed normally.
         if (!isEligible(
-                uri,
-                lastUri,
                 uriScheme,
                 engineSupportsScheme,
                 hasUserGesture,
                 isRedirect,
                 isDirectNavigation,
                 isSubframeRequest,
+                isSameDomainNavigation,
                 authExceptionsAllowed,
             )
         ) {
@@ -109,15 +109,35 @@ class WebLibreAppLinksInterceptor(
         // to the app. AC declines here too — its package comes from the bound component, which is
         // only set for an unambiguous handler.
         val authTargetPackage = if (resolved.isAmbiguous) null else resolved.packageName
+        val isAuthCallback = isAuthenticationCallback(session, authTargetPackage)
+
+        // Re-apply the same-domain guard now that the target is known (AC parity: `AppLinksInterceptor`
+        // re-checks after resolution for exactly this reason). Eligibility waived it on the mere
+        // possibility of a sign-in round trip — the tab was opened by *some* app — which would
+        // otherwise re-classify every ordinary in-site navigation for the whole life of a Custom Tab
+        // and, under the default `ask` mode, prompt on each one. Only a navigation that really does
+        // target the calling app keeps the waiver.
+        if (engineSupportsScheme && isSameDomainNavigation && authExceptionsAllowed && !isAuthCallback) {
+            return null
+        }
+
+        val matchingRule = effectiveRules[resolved.scopeKey]
+        val fingerprint = targetFingerprint(uri, resolved)
+        val suppressionHit = session != null && pendingStore.isSuppressed(session.id, fingerprint)
 
         // §2.4 authentication carve-out (AC parity): a tab opened *by* the app the navigation
         // targets is a sign-in round trip rather than a general app link, so it returns to its
         // caller even under `never`. The forced-prompt contexts still win — a protected container,
         // a private tab or a wallet scheme must not leak out silently, so those fall through to the
-        // classifier, which prompts for them regardless of mode (§2.4 step 4).
+        // classifier, which prompts for them regardless of mode (§2.4 step 4). An explicit
+        // `neverOpen` rule for this scope and a live suppression are the user having answered this
+        // exact question already (classifier steps 5–6); the carve-out is about a mode the user set
+        // for links in general, not a licence to override a specific "no".
         if (authExceptionsAllowed &&
-            isAuthenticationCallback(session, authTargetPackage) &&
-            !isProtectedNavigation && !isPrivateNavigation && !isWalletNavigation
+            isAuthCallback &&
+            !isProtectedNavigation && !isPrivateNavigation && !isWalletNavigation &&
+            matchingRule?.decision != AppLinkRuleDecision.NEVER_OPEN &&
+            !suppressionHit
         ) {
             val result = runtime.launcher.launch(
                 uri,
@@ -141,9 +161,8 @@ class WebLibreAppLinksInterceptor(
             isPrivate = isPrivateNavigation,
             isWallet = isWalletNavigation,
             missingSession = session == null,
-            suppressionHit = session != null &&
-                pendingStore.isSuppressed(session.id, targetFingerprint(uri, resolved)),
-            matchingRule = effectiveRules[resolved.scopeKey],
+            suppressionHit = suppressionHit,
+            matchingRule = matchingRule,
             globalMode = effectiveMode,
             marketplaceFallbackEnabled = policy.marketplaceFallbackEnabled,
         )
@@ -346,14 +365,13 @@ class WebLibreAppLinksInterceptor(
     // ---- Eligibility (§2.4 step 2) ----
 
     private fun isEligible(
-        uri: String,
-        lastUri: String?,
         uriScheme: String?,
         engineSupportsScheme: Boolean,
         hasUserGesture: Boolean,
         isRedirect: Boolean,
         isDirectNavigation: Boolean,
         isSubframeRequest: Boolean,
+        isSameDomainNavigation: Boolean,
         authExceptionsAllowed: Boolean,
     ): Boolean {
         if (uriScheme == null) return false
@@ -366,8 +384,10 @@ class WebLibreAppLinksInterceptor(
         if (engineSupportsScheme && !isIntentionalNavigation) return false
         // Same-domain engine-supported navigation continues in the browser (AC subdomain stripping),
         // unless this tab could be hosting an authentication round trip whose callback is an http
-        // app link on the same site.
-        if (engineSupportsScheme && isSameDomain(lastUri, uri) && !authExceptionsAllowed) return false
+        // app link on the same site. That "could be" is provisional — it only knows the tab was
+        // opened by *some* app, not that this navigation targets it — so the guard is re-applied in
+        // [onLoadRequest] once resolution reveals the actual target package.
+        if (engineSupportsScheme && isSameDomainNavigation && !authExceptionsAllowed) return false
         // Always-denied schemes never resolve or launch externally.
         if (AppLinkSchemes.isAlwaysDenied(uriScheme)) return false
         return true

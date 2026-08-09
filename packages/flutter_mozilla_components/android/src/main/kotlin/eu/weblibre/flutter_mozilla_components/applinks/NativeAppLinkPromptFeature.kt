@@ -56,8 +56,24 @@ class NativeAppLinkPromptFeature(
     private val sessionUseCases: SessionUseCases,
 ) : LifecycleAwareFeature {
     private var dialog: AlertDialog? = null
-    private var shownRequestId: Long? = null
+    private var shownRequest: PendingAppLinkRequest? = null
     private val mainHandler = Handler(Looper.getMainLooper())
+
+    /**
+     * The lapse tick for the dialog currently on screen. Held as a single instance so it can be
+     * cancelled: the delay is up to [PendingAppLinkStore.REQUEST_EXPIRY_MS] (10 minutes) and the
+     * runnable retains this feature — and through it the Activity-derived [context] — for its whole
+     * duration, so it must never outlive [stop].
+     */
+    private val expiryTick = Runnable {
+        dismissStaleDialog()
+        // The store sweeps on a strict `>`, so a tick can land a millisecond before the request is
+        // actually droppable and dismiss nothing. Re-arm in that case rather than leave the dialog
+        // with no deadline at all; [MIN_EXPIRY_TICK_MS] keeps that from spinning.
+        shownRequest?.let(::scheduleExpiryTick)
+        // A dialog retired by its own deadline still has to make way for whatever else pends.
+        showNext()
+    }
 
     override fun start() {
         NativeAppLinkPromptNotifier.register(tabId, this)
@@ -66,12 +82,13 @@ class NativeAppLinkPromptFeature(
 
     override fun stop() {
         NativeAppLinkPromptNotifier.unregister(tabId, this)
+        mainHandler.removeCallbacksAndMessages(null)
         // Dismissing on stop is not a user dismissal: the request stays pending and
         // is re-presented on the next start().
         dialog?.setOnDismissListener(null)
         dialog?.dismiss()
         dialog = null
-        shownRequestId = null
+        shownRequest = null
     }
 
     /**
@@ -91,13 +108,26 @@ class NativeAppLinkPromptFeature(
      * dud whose Open button consumes nothing. Not a user dismissal: nothing is suppressed.
      */
     private fun dismissStaleDialog() {
-        val shown = shownRequestId ?: return
-        if (store.peek(shown) != null) return
+        val shown = shownRequest ?: return
+        if (store.peek(shown.requestId) != null) return
+        mainHandler.removeCallbacks(expiryTick)
         dialog?.setOnCancelListener(null)
         dialog?.setOnDismissListener(null)
         dialog?.dismiss()
         dialog = null
-        shownRequestId = null
+        shownRequest = null
+    }
+
+    /**
+     * Expiry in the store is lazy, so nothing would take a dialog down when its request lapses —
+     * its buttons would consume nothing. Retire it on its own deadline instead.
+     */
+    private fun scheduleExpiryTick(request: PendingAppLinkRequest) {
+        mainHandler.removeCallbacks(expiryTick)
+        mainHandler.postDelayed(
+            expiryTick,
+            store.expiresInMs(request).coerceAtLeast(MIN_EXPIRY_TICK_MS),
+        )
     }
 
     private fun showNext() {
@@ -126,14 +156,8 @@ class NativeAppLinkPromptFeature(
             }
             .setOnDismissListener { dialog = null }
             .show()
-        shownRequestId = request.requestId
-
-        // Expiry in the store is lazy, so nothing would take this dialog down when the request
-        // lapses — its buttons would consume nothing. Retire it on its own deadline.
-        mainHandler.postDelayed(
-            { dismissStaleDialog() },
-            store.expiresInMs(request).coerceAtLeast(MIN_EXPIRY_TICK_MS),
-        )
+        shownRequest = request
+        scheduleExpiryTick(request)
     }
 
     private fun resolveOpen(request: PendingAppLinkRequest) {
@@ -168,8 +192,9 @@ class NativeAppLinkPromptFeature(
     }
 
     private fun afterResolve() {
+        mainHandler.removeCallbacks(expiryTick)
         dialog = null
-        shownRequestId = null
+        shownRequest = null
         showNext()
     }
 

@@ -23,7 +23,7 @@ final appLinksCoordinatorProvider = AppLinksCoordinatorProvider._();
 /// list is authoritative from the query and deduped by `requestId` — the event
 /// is only a nudge to re-query.
 final class AppLinksCoordinatorProvider
-    extends $NotifierProvider<AppLinksCoordinator, List<AppLinkPromptRequest>> {
+    extends $NotifierProvider<AppLinksCoordinator, List<PendingAppLinkPrompt>> {
   /// Orchestrates Flutter-owned app-link prompts (§2.6): registers the availability
   /// event handler, queries the native pending store on attach/resume/event, and
   /// exposes resolution (including the remember-then-resolve flow). The presented
@@ -48,16 +48,16 @@ final class AppLinksCoordinatorProvider
   AppLinksCoordinator create() => AppLinksCoordinator();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(List<AppLinkPromptRequest> value) {
+  Override overrideWithValue(List<PendingAppLinkPrompt> value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<List<AppLinkPromptRequest>>(value),
+      providerOverride: $SyncValueProvider<List<PendingAppLinkPrompt>>(value),
     );
   }
 }
 
 String _$appLinksCoordinatorHash() =>
-    r'183fc7ac1264a63c24b1d10f4a22cbfbf6046da7';
+    r'3dc91825b659add92d2f651306c30b9aec4e557b';
 
 /// Orchestrates Flutter-owned app-link prompts (§2.6): registers the availability
 /// event handler, queries the native pending store on attach/resume/event, and
@@ -66,22 +66,22 @@ String _$appLinksCoordinatorHash() =>
 /// is only a nudge to re-query.
 
 abstract class _$AppLinksCoordinator
-    extends $Notifier<List<AppLinkPromptRequest>> {
-  List<AppLinkPromptRequest> build();
+    extends $Notifier<List<PendingAppLinkPrompt>> {
+  List<PendingAppLinkPrompt> build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
     final ref =
         this.ref
-            as $Ref<List<AppLinkPromptRequest>, List<AppLinkPromptRequest>>;
+            as $Ref<List<PendingAppLinkPrompt>, List<PendingAppLinkPrompt>>;
     final element =
         ref.element
             as $ClassProviderElement<
               AnyNotifier<
-                List<AppLinkPromptRequest>,
-                List<AppLinkPromptRequest>
+                List<PendingAppLinkPrompt>,
+                List<PendingAppLinkPrompt>
               >,
-              List<AppLinkPromptRequest>,
+              List<PendingAppLinkPrompt>,
               Object?,
               Object?
             >;

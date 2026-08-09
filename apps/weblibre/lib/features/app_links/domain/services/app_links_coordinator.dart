@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:flutter/foundation.dart' show immutable;
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
@@ -42,6 +43,28 @@ class _AppLinkEventsReceiver extends GeckoAppLinkEvents {
   }
 }
 
+/// A pending prompt paired with the absolute instant it lapses.
+///
+/// [AppLinkPromptRequest.expiresInMs] is a *snapshot* taken when native answered
+/// the query — it does not tick down. Comparing that raw field to zero on a later
+/// build would treat a long-lapsed request as live (switch tabs for three minutes
+/// and come back, and a 90 s banner still reports 90 s), so the remaining time is
+/// anchored to a wall-clock deadline the moment the answer arrives.
+@immutable
+class PendingAppLinkPrompt {
+  final AppLinkPromptRequest request;
+  final DateTime expiresAt;
+
+  const PendingAppLinkPrompt({required this.request, required this.expiresAt});
+
+  int get requestId => request.requestId;
+  String get tabId => request.tabId;
+  bool get isModal => request.isModal;
+
+  /// Whether native would still accept a resolution for this request.
+  bool isLive(DateTime now) => expiresAt.isAfter(now);
+}
+
 /// Orchestrates Flutter-owned app-link prompts (§2.6): registers the availability
 /// event handler, queries the native pending store on attach/resume/event, and
 /// exposes resolution (including the remember-then-resolve flow). The presented
@@ -52,7 +75,7 @@ class AppLinksCoordinator extends _$AppLinksCoordinator {
   final _service = GeckoAppLinksService();
 
   @override
-  List<AppLinkPromptRequest> build() {
+  List<PendingAppLinkPrompt> build() {
     final receiver = _AppLinkEventsReceiver((owner) {
       if (owner == AppLinkPromptOwner.flutterBrowser) {
         // ignore: discarded_futures
@@ -76,11 +99,22 @@ class AppLinksCoordinator extends _$AppLinksCoordinator {
       final prompts = await _service.getPendingAppLinkPrompts(
         AppLinkPromptOwner.flutterBrowser,
       );
+      // Anchor the reported TTL immediately: every millisecond spent between the
+      // native read and here has already been consumed.
+      final queriedAt = DateTime.now();
       logger.i(
         'app-link refresh -> ${prompts.length} prompt(s): '
         '${prompts.map((p) => '${p.requestId}@${p.tabId}(${p.isModal ? 'modal' : 'banner'})').toList()}',
       );
-      state = prompts;
+      state = [
+        for (final prompt in prompts)
+          PendingAppLinkPrompt(
+            request: prompt,
+            expiresAt: queriedAt.add(
+              Duration(milliseconds: prompt.expiresInMs),
+            ),
+          ),
+      ];
     } catch (error, stackTrace) {
       logger.w(
         'Failed to query pending app-link prompts',
