@@ -95,6 +95,17 @@ enum TabIntentOpenSetting { regular, private, isolated, ask }
 /// the other values open the bookmark directly with no intermediate prompt.
 enum BookmarkOpenSetting { regular, private, isolated, customTab, ask }
 
+/// What happens after an action opens a new tab in the background — context
+/// menu "open in new tab"/"open in container", tab cloning, and the contextual
+/// toolbar clone buttons.
+///
+/// [prompt] keeps the "New tab opened" snackbar with its `Switch` action (the
+/// behavior that predates this setting); [switchImmediately] selects the new
+/// tab right away and shows no snackbar. Actions the user explicitly asked to
+/// happen in the background (e.g. the bookmark list's "Open in Background")
+/// always stay in the background and are unaffected.
+enum BackgroundTabOpenAction { prompt, switchImmediately }
+
 enum TabDirection { newestFirst, oldestFirst }
 
 enum TabBarPosition {
@@ -179,6 +190,10 @@ class GeneralSettings with FastEquatable {
   /// Determines what happens when a bookmark is tapped. See
   /// [BookmarkOpenSetting] and [effectiveBookmarkOpenSetting].
   final BookmarkOpenSetting bookmarkOpenSetting;
+
+  /// What happens after a tab is opened in the background. See
+  /// [BackgroundTabOpenAction].
+  final BackgroundTabOpenAction backgroundTabOpenAction;
   final bool autoHideTabBar;
   final TabBarSwipeAction tabBarSwipeAction;
   final Duration historyAutoCleanInterval;
@@ -323,6 +338,7 @@ class GeneralSettings with FastEquatable {
     required this.tabBarDirection,
     required this.tabIntentOpenSetting,
     required this.bookmarkOpenSetting,
+    required this.backgroundTabOpenAction,
     required this.autoHideTabBar,
     required this.tabBarSwipeAction,
     required this.historyAutoCleanInterval,
@@ -401,6 +417,7 @@ class GeneralSettings with FastEquatable {
     TabDirection? tabBarDirection,
     TabIntentOpenSetting? tabIntentOpenSetting,
     BookmarkOpenSetting? bookmarkOpenSetting,
+    BackgroundTabOpenAction? backgroundTabOpenAction,
     bool? autoHideTabBar,
     TabBarSwipeAction? tabBarSwipeAction,
     Duration? historyAutoCleanInterval,
@@ -478,6 +495,8 @@ class GeneralSettings with FastEquatable {
        tabBarDirection = tabBarDirection ?? TabDirection.newestFirst,
        tabIntentOpenSetting = tabIntentOpenSetting ?? TabIntentOpenSetting.ask,
        bookmarkOpenSetting = bookmarkOpenSetting ?? BookmarkOpenSetting.ask,
+       backgroundTabOpenAction =
+           backgroundTabOpenAction ?? BackgroundTabOpenAction.prompt,
        autoHideTabBar = autoHideTabBar ?? true,
        tabBarSwipeAction =
            tabBarSwipeAction ?? TabBarSwipeAction.switchLastOpened,
@@ -660,6 +679,7 @@ class GeneralSettings with FastEquatable {
     tabBarDirection,
     tabIntentOpenSetting,
     bookmarkOpenSetting,
+    backgroundTabOpenAction,
     autoHideTabBar,
     tabBarSwipeAction,
     historyAutoCleanInterval,

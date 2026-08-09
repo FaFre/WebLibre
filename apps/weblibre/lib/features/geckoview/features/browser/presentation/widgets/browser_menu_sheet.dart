@@ -68,6 +68,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/entities/contai
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_relation_visibility.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/domain/repositories/top_site_repository.dart';
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
@@ -1109,12 +1110,8 @@ class _CloneTabExpansion extends ConsumerWidget {
                         );
 
               if (context.mounted) {
-                final repo = ref.read(tabRepositoryProvider.notifier);
+                handleBackgroundTabOpened(context, ref, tabId);
                 Navigator.pop(context);
-                ui_helper.showTabSwitchMessage(
-                  context,
-                  onSwitch: () => repo.selectTab(tabId),
-                );
               }
             },
           ),
@@ -1153,12 +1150,8 @@ class _CloneTabExpansion extends ConsumerWidget {
                         );
 
               if (context.mounted) {
-                final repo = ref.read(tabRepositoryProvider.notifier);
+                handleBackgroundTabOpened(context, ref, tabId);
                 Navigator.pop(context);
-                ui_helper.showTabSwitchMessage(
-                  context,
-                  onSwitch: () => repo.selectTab(tabId),
-                );
               }
             },
           ),
@@ -1190,12 +1183,8 @@ class _CloneTabExpansion extends ConsumerWidget {
                     );
 
                 if (context.mounted) {
-                  final repo = ref.read(tabRepositoryProvider.notifier);
+                  handleBackgroundTabOpened(context, ref, tabId);
                   Navigator.pop(context);
-                  ui_helper.showTabSwitchMessage(
-                    context,
-                    onSwitch: () => repo.selectTab(tabId),
-                  );
                 }
               },
             ),

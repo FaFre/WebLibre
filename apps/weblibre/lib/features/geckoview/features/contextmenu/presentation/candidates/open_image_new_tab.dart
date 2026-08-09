@@ -26,8 +26,8 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/utils/ui_helper.dart';
 
 class OpenImageInNewTab extends HookConsumerWidget {
   final HitResult hitResult;
@@ -63,15 +63,7 @@ class OpenImageInNewTab extends HookConsumerWidget {
             );
 
         if (context.mounted) {
-          //save reference before pop `ref` gets disposed
-          final repo = ref.read(tabRepositoryProvider.notifier);
-
-          showTabSwitchMessage(
-            context,
-            onSwitch: () async {
-              await repo.selectTab(tabId);
-            },
-          );
+          handleBackgroundTabOpened(context, ref, tabId);
 
           context.pop();
         }

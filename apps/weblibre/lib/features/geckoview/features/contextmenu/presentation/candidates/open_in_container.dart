@@ -37,9 +37,9 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/container_
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_list_tile.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
-import 'package:weblibre/utils/ui_helper.dart';
 
 sealed class _PickerResult {}
 
@@ -112,14 +112,7 @@ class OpenInContainer extends HookConsumerWidget {
             );
 
         if (context.mounted) {
-          final repo = ref.read(tabRepositoryProvider.notifier);
-
-          showTabSwitchMessage(
-            context,
-            onSwitch: () async {
-              await repo.selectTab(tabId);
-            },
-          );
+          handleBackgroundTabOpened(context, ref, tabId);
 
           context.pop();
         }

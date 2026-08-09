@@ -66,6 +66,7 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'tabBarDirection': DriftSqlType.string,
   'tabIntentOpenSetting': DriftSqlType.string,
   'bookmarkOpenSetting': DriftSqlType.string,
+  'backgroundTabOpenAction': DriftSqlType.string,
   'autoHideTabBar': DriftSqlType.bool,
   'tabBarSwipeAction': DriftSqlType.string,
   'historyAutoCleanInterval': DriftSqlType.int,

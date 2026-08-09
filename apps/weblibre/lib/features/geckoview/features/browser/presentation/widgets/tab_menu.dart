@@ -54,6 +54,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_relation_visibility.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
@@ -246,15 +247,7 @@ class TabMenu extends HookConsumerWidget {
                             );
 
                   if (context.mounted) {
-                    //save reference before pop `ref` gets disposed
-                    final repo = ref.read(tabRepositoryProvider.notifier);
-
-                    ui_helper.showTabSwitchMessage(
-                      context,
-                      onSwitch: () async {
-                        await repo.selectTab(tabId);
-                      },
-                    );
+                    handleBackgroundTabOpened(context, ref, tabId);
                   }
                 },
               ),
@@ -297,15 +290,7 @@ class TabMenu extends HookConsumerWidget {
                             );
 
                   if (context.mounted) {
-                    //save reference before pop `ref` gets disposed
-                    final repo = ref.read(tabRepositoryProvider.notifier);
-
-                    ui_helper.showTabSwitchMessage(
-                      context,
-                      onSwitch: () async {
-                        await repo.selectTab(tabId);
-                      },
-                    );
+                    handleBackgroundTabOpened(context, ref, tabId);
                   }
                 },
               ),
@@ -339,14 +324,7 @@ class TabMenu extends HookConsumerWidget {
                         );
 
                     if (context.mounted) {
-                      final repo = ref.read(tabRepositoryProvider.notifier);
-
-                      ui_helper.showTabSwitchMessage(
-                        context,
-                        onSwitch: () async {
-                          await repo.selectTab(tabId);
-                        },
-                      );
+                      handleBackgroundTabOpened(context, ref, tabId);
                     }
                   },
                 ),

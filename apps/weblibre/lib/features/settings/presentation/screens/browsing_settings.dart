@@ -76,6 +76,12 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
         keywords: ['child tabs'],
         child: _CreateChildTabsTile(),
       ),
+      SettingsEntryDefinition(
+        title: 'Background Tab Behavior',
+        subtitle: 'Choose what happens after a tab opens in the background',
+        keywords: ['switch', 'background', 'new tab', 'snackbar', 'prompt'],
+        child: _BackgroundTabOpenSection(),
+      ),
     ],
   ),
   SettingsSectionDefinition(
@@ -743,6 +749,68 @@ class _ShowIsolatedTabUiTile extends HookConsumerWidget {
           return updated;
         });
       },
+    );
+  }
+}
+
+class _BackgroundTabOpenSection extends HookConsumerWidget {
+  const _BackgroundTabOpenSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final backgroundTabOpenAction = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.backgroundTabOpenAction,
+      ),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const ListTile(
+            title: Text('Background Tab Behavior'),
+            subtitle: Text(
+              'Applies when an action opens a new tab in the background, e.g. '
+              '"Open in new tab" or cloning a tab',
+            ),
+            leading: Icon(MdiIcons.tabPlus),
+            contentPadding: EdgeInsets.zero,
+          ),
+          RadioGroup(
+            groupValue: backgroundTabOpenAction,
+            onChanged: (value) async {
+              if (value != null) {
+                await ref
+                    .read(saveGeneralSettingsControllerProvider.notifier)
+                    .save(
+                      (currentSettings) => currentSettings.copyWith
+                          .backgroundTabOpenAction(value),
+                    );
+              }
+            },
+            child: const Column(
+              children: [
+                RadioListTile.adaptive(
+                  value: BackgroundTabOpenAction.prompt,
+                  title: Text('Stay and Offer to Switch'),
+                  subtitle: Text(
+                    'Keep the current tab and show a notice with a Switch '
+                    'action',
+                  ),
+                ),
+                RadioListTile.adaptive(
+                  value: BackgroundTabOpenAction.switchImmediately,
+                  title: Text('Switch Immediately'),
+                  subtitle: Text('Jump straight to the newly opened tab'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

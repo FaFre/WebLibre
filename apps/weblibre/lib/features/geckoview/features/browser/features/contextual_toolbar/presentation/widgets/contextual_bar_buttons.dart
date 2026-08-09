@@ -35,10 +35,10 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart'
     as tab_data;
+import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
-import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class ShareMenuButton extends StatelessWidget {
   final String? selectedTabId;
@@ -311,11 +311,7 @@ Future<void> _cloneCurrentTabMode(
       );
 
   if (context.mounted) {
-    final repo = ref.read(tabRepositoryProvider.notifier);
-    ui_helper.showTabSwitchMessage(
-      context,
-      onSwitch: () => repo.selectTab(tabId),
-    );
+    handleBackgroundTabOpened(context, ref, tabId);
   }
 }
 
@@ -410,10 +406,7 @@ Future<void> _cloneTabAsMode(
   };
 
   if (context.mounted) {
-    ui_helper.showTabSwitchMessage(
-      context,
-      onSwitch: () => repo.selectTab(tabId),
-    );
+    handleBackgroundTabOpened(context, ref, tabId);
   }
 }
 
