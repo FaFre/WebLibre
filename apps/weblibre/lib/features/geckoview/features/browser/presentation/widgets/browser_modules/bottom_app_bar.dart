@@ -26,6 +26,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/addons/presentation/widgets/pinned_addon_bar.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
@@ -419,6 +420,23 @@ class BrowserTabBar extends HookConsumerWidget {
       }
     }
 
+    // Counterpart of dismissToolbar: swiping the bar *inward* (away from the
+    // edge it is docked to) opens the tab view, the same surface the tab count
+    // button opens — so the dismiss axis reads as one continuous control,
+    // pushing the bar off screen in one direction and pulling the tab view out
+    // of it in the other.
+    void showTabView() {
+      if (ref.read(bottomSheetControllerProvider) != null) return;
+
+      unawaited(HapticFeedback.lightImpact());
+
+      if (settings.tabViewBottomSheet) {
+        ref.read(bottomSheetControllerProvider.notifier).show(ViewTabsSheet());
+      } else {
+        unawaited(const TabViewRoute().push(context));
+      }
+    }
+
     final showTabTitle = displayedSheet is! ViewTabsSheet;
 
     final effectiveContainerColor =
@@ -546,14 +564,24 @@ class BrowserTabBar extends HookConsumerWidget {
               const dismissThreshold = kToolbarHeight * 0.5;
 
               if (isVertical) {
-                // Rail: horizontal swipe dismisses toward the docked edge.
+                // Rail: horizontal swipe dismisses toward the docked edge, and
+                // the opposite (inward) swipe opens the tab view.
                 // distance = start - end, so a leftward swipe is positive dx.
                 final shouldDismiss = switch (tabBarPosition) {
                   TabBarPosition.left => distance.dx > dismissThreshold,
                   TabBarPosition.right => distance.dx < -dismissThreshold,
                   _ => false,
                 };
-                if (shouldDismiss) dismissToolbar();
+                final shouldShowTabView = switch (tabBarPosition) {
+                  TabBarPosition.left => distance.dx < -dismissThreshold,
+                  TabBarPosition.right => distance.dx > dismissThreshold,
+                  _ => false,
+                };
+                if (shouldDismiss) {
+                  dismissToolbar();
+                } else if (shouldShowTabView) {
+                  showTabView();
+                }
               } else {
                 // Horizontal bar: horizontal swipe switches tabs.
                 if (distance.dx.abs() > 50 && distance.dy.abs() < 20) {
@@ -579,9 +607,10 @@ class BrowserTabBar extends HookConsumerWidget {
                 return;
               }
 
-              // Horizontal bar dismiss direction depends on position:
-              // - Bottom bar: swipe down to dismiss (positive distance.dy)
-              // - Top bar: swipe up to dismiss (negative distance.dy)
+              // Horizontal bar dismiss direction depends on position; the
+              // opposite (inward) swipe opens the tab view:
+              // - Bottom bar: swipe down to dismiss, swipe up for the tab view
+              // - Top bar: swipe up to dismiss, swipe down for the tab view
               const dismissThreshold = kToolbarHeight * 0.5;
               final shouldDismiss = switch (tabBarPosition) {
                 TabBarPosition.bottom =>
@@ -592,7 +621,20 @@ class BrowserTabBar extends HookConsumerWidget {
                       distance.dy.abs() > dismissThreshold,
                 _ => false,
               };
-              if (shouldDismiss) dismissToolbar();
+              final shouldShowTabView = switch (tabBarPosition) {
+                TabBarPosition.bottom =>
+                  !distance.dy.isNegative &&
+                      distance.dy.abs() > dismissThreshold,
+                TabBarPosition.top =>
+                  distance.dy.isNegative &&
+                      distance.dy.abs() > dismissThreshold,
+                _ => false,
+              };
+              if (shouldDismiss) {
+                dismissToolbar();
+              } else if (shouldShowTabView) {
+                showTabView();
+              }
             },
     );
   }
