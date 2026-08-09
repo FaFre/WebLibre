@@ -56,6 +56,7 @@ class NativeAppLinkPromptFeature(
     private val sessionUseCases: SessionUseCases,
 ) : LifecycleAwareFeature {
     private var dialog: AlertDialog? = null
+    private var shownRequestId: Long? = null
     private val mainHandler = Handler(Looper.getMainLooper())
 
     override fun start() {
@@ -70,15 +71,33 @@ class NativeAppLinkPromptFeature(
         dialog?.setOnDismissListener(null)
         dialog?.dismiss()
         dialog = null
+        shownRequestId = null
     }
 
     /**
-     * A new pending request may have been created for this tab (interceptor, engine thread) after
-     * [start] already queried. Re-check on the main thread; [showNext] is idempotent (a no-op while a
-     * dialog is up or when nothing pends).
+     * The tab's pending requests changed (interceptor created one on an engine thread after [start]
+     * already queried, or the navigation middleware invalidated one). Re-check on the main thread;
+     * [showNext] is idempotent (a no-op while a live dialog is up or when nothing pends).
      */
     fun onPromptAvailable() {
-        mainHandler.post { showNext() }
+        mainHandler.post {
+            dismissStaleDialog()
+            showNext()
+        }
+    }
+
+    /**
+     * Drop a dialog whose request has since been invalidated — otherwise it stays on screen as a
+     * dud whose Open button consumes nothing. Not a user dismissal: nothing is suppressed.
+     */
+    private fun dismissStaleDialog() {
+        val shown = shownRequestId ?: return
+        if (store.peek(shown) != null) return
+        dialog?.setOnCancelListener(null)
+        dialog?.setOnDismissListener(null)
+        dialog?.dismiss()
+        dialog = null
+        shownRequestId = null
     }
 
     private fun showNext() {
@@ -107,6 +126,14 @@ class NativeAppLinkPromptFeature(
             }
             .setOnDismissListener { dialog = null }
             .show()
+        shownRequestId = request.requestId
+
+        // Expiry in the store is lazy, so nothing would take this dialog down when the request
+        // lapses — its buttons would consume nothing. Retire it on its own deadline.
+        mainHandler.postDelayed(
+            { dismissStaleDialog() },
+            store.expiresInMs(request).coerceAtLeast(MIN_EXPIRY_TICK_MS),
+        )
     }
 
     private fun resolveOpen(request: PendingAppLinkRequest) {
@@ -142,6 +169,12 @@ class NativeAppLinkPromptFeature(
 
     private fun afterResolve() {
         dialog = null
+        shownRequestId = null
         showNext()
+    }
+
+    private companion object {
+        /** Never schedule a zero-delay expiry tick; a lapsed request would reschedule in a spin. */
+        const val MIN_EXPIRY_TICK_MS = 250L
     }
 }

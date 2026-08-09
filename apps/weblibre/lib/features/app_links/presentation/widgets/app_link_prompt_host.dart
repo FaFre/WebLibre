@@ -54,9 +54,32 @@ class AppLinkPromptHost extends HookConsumerWidget {
       }
     });
 
+    // Native expiry is lazy — it only runs when the store is queried or consumed — and nothing
+    // pushes an expiry event. A prompt that outlives its deadline would keep rendering live
+    // buttons whose resolution is already a no-op, so drop anything already past due rather than
+    // offering an action that cannot happen.
     final activeRequests = prompts
-        .where((request) => request.tabId == activeTabId)
+        .where(
+          (request) => request.tabId == activeTabId && request.expiresInMs > 0,
+        )
         .toList();
+
+    // ...and re-query when the soonest deadline passes, so a prompt retires itself on time
+    // instead of waiting for the next event or resume. The lower clamp matters: a request that
+    // reports 0 would otherwise reschedule instantly and spin.
+    final soonestExpiry = activeRequests.isEmpty
+        ? null
+        : activeRequests
+              .map((request) => request.expiresInMs)
+              .reduce((a, b) => a < b ? a : b);
+    useEffect(() {
+      if (soonestExpiry == null) return null;
+      final timer = Timer(
+        Duration(milliseconds: soonestExpiry.clamp(250, 10 * 60 * 1000)),
+        () => unawaited(ref.read(appLinksCoordinatorProvider.notifier).refresh()),
+      );
+      return timer.cancel;
+    }, [soonestExpiry]);
 
     final modalRequest = activeRequests
         .where((request) => request.isModal)

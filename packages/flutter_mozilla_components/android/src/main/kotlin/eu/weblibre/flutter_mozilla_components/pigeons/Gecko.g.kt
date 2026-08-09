@@ -5929,7 +5929,14 @@ data class AppLinkPromptRequest (
    * unsupported-scheme prompt.
    */
   val isModal: Boolean,
-  val target: AppLinkTarget
+  val target: AppLinkTarget,
+  /**
+   * Milliseconds until the native store drops this request, measured at query
+   * time. The surface showing it must stop offering it by then: resolving an
+   * expired request is a no-op, so a prompt left on screen past this becomes a
+   * button that silently does nothing.
+   */
+  val expiresInMs: Long
 )
  {
   companion object {
@@ -5945,7 +5952,8 @@ data class AppLinkPromptRequest (
       val canRemember = pigeonVar_list[8] as Boolean
       val isModal = pigeonVar_list[9] as Boolean
       val target = pigeonVar_list[10] as AppLinkTarget
-      return AppLinkPromptRequest(requestId, owner, tabId, contextId, sourceUrl, isPrivate, isWallet, isProtectedContext, canRemember, isModal, target)
+      val expiresInMs = pigeonVar_list[11] as Long
+      return AppLinkPromptRequest(requestId, owner, tabId, contextId, sourceUrl, isPrivate, isWallet, isProtectedContext, canRemember, isModal, target, expiresInMs)
     }
   }
   fun toList(): List<Any?> {
@@ -5961,6 +5969,7 @@ data class AppLinkPromptRequest (
       canRemember,
       isModal,
       target,
+      expiresInMs,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -5971,7 +5980,7 @@ data class AppLinkPromptRequest (
       return true
     }
     val other = other as AppLinkPromptRequest
-    return GeckoPigeonUtils.deepEquals(this.requestId, other.requestId) && GeckoPigeonUtils.deepEquals(this.owner, other.owner) && GeckoPigeonUtils.deepEquals(this.tabId, other.tabId) && GeckoPigeonUtils.deepEquals(this.contextId, other.contextId) && GeckoPigeonUtils.deepEquals(this.sourceUrl, other.sourceUrl) && GeckoPigeonUtils.deepEquals(this.isPrivate, other.isPrivate) && GeckoPigeonUtils.deepEquals(this.isWallet, other.isWallet) && GeckoPigeonUtils.deepEquals(this.isProtectedContext, other.isProtectedContext) && GeckoPigeonUtils.deepEquals(this.canRemember, other.canRemember) && GeckoPigeonUtils.deepEquals(this.isModal, other.isModal) && GeckoPigeonUtils.deepEquals(this.target, other.target)
+    return GeckoPigeonUtils.deepEquals(this.requestId, other.requestId) && GeckoPigeonUtils.deepEquals(this.owner, other.owner) && GeckoPigeonUtils.deepEquals(this.tabId, other.tabId) && GeckoPigeonUtils.deepEquals(this.contextId, other.contextId) && GeckoPigeonUtils.deepEquals(this.sourceUrl, other.sourceUrl) && GeckoPigeonUtils.deepEquals(this.isPrivate, other.isPrivate) && GeckoPigeonUtils.deepEquals(this.isWallet, other.isWallet) && GeckoPigeonUtils.deepEquals(this.isProtectedContext, other.isProtectedContext) && GeckoPigeonUtils.deepEquals(this.canRemember, other.canRemember) && GeckoPigeonUtils.deepEquals(this.isModal, other.isModal) && GeckoPigeonUtils.deepEquals(this.target, other.target) && GeckoPigeonUtils.deepEquals(this.expiresInMs, other.expiresInMs)
   }
 
   override fun hashCode(): Int {
@@ -5987,10 +5996,11 @@ data class AppLinkPromptRequest (
     result = 31 * result + GeckoPigeonUtils.deepHash(this.canRemember)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.isModal)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.target)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.expiresInMs)
     return result
   }
   override fun toString(): String {
-    return "AppLinkPromptRequest(requestId=$requestId, owner=$owner, tabId=$tabId, contextId=$contextId, sourceUrl=$sourceUrl, isPrivate=$isPrivate, isWallet=$isWallet, isProtectedContext=$isProtectedContext, canRemember=$canRemember, isModal=$isModal, target=$target)"
+    return "AppLinkPromptRequest(requestId=$requestId, owner=$owner, tabId=$tabId, contextId=$contextId, sourceUrl=$sourceUrl, isPrivate=$isPrivate, isWallet=$isWallet, isProtectedContext=$isProtectedContext, canRemember=$canRemember, isModal=$isModal, target=$target, expiresInMs=$expiresInMs)"
   }
 }
 

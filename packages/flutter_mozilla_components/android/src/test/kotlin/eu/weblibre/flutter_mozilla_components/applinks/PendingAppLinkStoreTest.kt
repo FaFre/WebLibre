@@ -103,33 +103,82 @@ class PendingAppLinkStoreTest {
     }
 
     @Test
-    fun bannerTargetCommitKeepsRequestButUnrelatedCommitInvalidates() {
-        val store = PendingAppLinkStore(FakeClock())
-        val banner = store.createRequest(
-            newRequest(urlClass = AppLinkUrlClass.BANNER, url = "https://youtu.be/x"),
+    fun aNewerBannerForTheTabReplacesTheOlderOne() {
+        val clock = FakeClock()
+        val store = PendingAppLinkStore(clock)
+        val first = store.createRequest(
+            newRequest(urlClass = AppLinkUrlClass.BANNER, url = "https://a.example/x"),
         )
-        // The banner's own target committing keeps it alive.
-        store.onCommittedNavigation("tab1", "https://youtu.be/x")
-        assertNotNull(store.peek(banner.requestId))
-        // An unrelated commit invalidates it.
-        store.onCommittedNavigation("tab1", "https://example.com/other")
-        assertNull(store.peek(banner.requestId))
+        clock.now = 5000L // past the dedupe window, so this is a genuinely new offer
+        val second = store.createRequest(
+            newRequest(
+                urlClass = AppLinkUrlClass.BANNER,
+                url = "https://b.example/y",
+                fingerprint = "fp2",
+            ),
+        )
+
+        // One live banner per tab: visiting a second app-link site replaces the offer rather than
+        // stacking behind it.
+        assertNull(store.peek(first.requestId))
+        assertNotNull(store.peek(second.requestId))
+        assertEquals(1, store.getPending(AppLinkPromptOwner.FLUTTER_BROWSER).size)
     }
 
     @Test
-    fun bannerSurvivesSameSiteRedirectAndNormalisation() {
-        val store = PendingAppLinkStore(FakeClock())
-        // The intercepted URL is rarely byte-identical to the committed one: the initial
-        // load redirects/normalises (www stripped, tracking params added, trailing slash).
-        val banner = store.createRequest(
-            newRequest(urlClass = AppLinkUrlClass.BANNER, url = "https://www.reddit.com/r/foo"),
+    fun aBannerForAnotherTabIsUntouched() {
+        val clock = FakeClock()
+        val store = PendingAppLinkStore(clock)
+        val other = store.createRequest(
+            newRequest(tabId = "tab2", urlClass = AppLinkUrlClass.BANNER, url = "https://a.example/x"),
         )
-        store.onCommittedNavigation("tab1", "https://reddit.com/r/foo/?utm_source=share")
-        assertNotNull(store.peek(banner.requestId))
+        clock.now = 5000L
+        store.createRequest(
+            newRequest(tabId = "tab1", urlClass = AppLinkUrlClass.BANNER, url = "https://b.example/y"),
+        )
+        assertNotNull(store.peek(other.requestId))
+    }
 
-        // A commit to a genuinely different site still invalidates it.
-        store.onCommittedNavigation("tab1", "https://twitter.com/reddit")
+    @Test
+    fun bannersExpireSoonerThanModals() {
+        val clock = FakeClock()
+        val store = PendingAppLinkStore(
+            clock,
+            requestExpiryMs = 10_000L,
+            bannerExpiryMs = 1_000L,
+        )
+        val banner = store.createRequest(
+            newRequest(urlClass = AppLinkUrlClass.BANNER, url = "https://a.example/x"),
+        )
+        val modal = store.createRequest(
+            newRequest(urlClass = AppLinkUrlClass.MODAL, fingerprint = "fp-modal"),
+        )
+
+        // The banner is a passive offer bounded by time; the modal is holding a navigation open
+        // and keeps the long window.
+        clock.now = 1001L
         assertNull(store.peek(banner.requestId))
+        assertNotNull(store.peek(modal.requestId))
+
+        clock.now = 10_001L
+        assertNull(store.peek(modal.requestId))
+    }
+
+    @Test
+    fun remainingTtlIsReportedSoTheSurfaceCanRetireThePromptOnTime() {
+        val clock = FakeClock()
+        val store = PendingAppLinkStore(clock, bannerExpiryMs = 1_000L)
+        val banner = store.createRequest(
+            newRequest(urlClass = AppLinkUrlClass.BANNER, url = "https://a.example/x"),
+        )
+        assertEquals(1_000L, store.expiresInMs(banner))
+
+        clock.now = 400L
+        assertEquals(600L, store.expiresInMs(banner))
+
+        // Never negative: a surface schedules on this value, and expiry itself is lazy.
+        clock.now = 5_000L
+        assertEquals(0L, store.expiresInMs(banner))
     }
 
     @Test
@@ -137,7 +186,7 @@ class PendingAppLinkStoreTest {
         val store = PendingAppLinkStore(FakeClock())
         val request = store.createRequest(newRequest())
         store.recordSuppression("tab1", "fp1")
-        store.invalidateTab("tab1")
+        assertEquals(setOf(AppLinkPromptOwner.FLUTTER_BROWSER), store.invalidateTab("tab1"))
         assertNull(store.peek(request.requestId))
         assertFalse(store.isSuppressed("tab1", "fp1"))
     }
@@ -148,8 +197,7 @@ class PendingAppLinkStoreTest {
         val store = PendingAppLinkStore(clock, suppressionExpiryMs = 1000L)
         store.recordSuppression("tab1", "fp1")
         assertTrue(store.isSuppressed("tab1", "fp1"))
-        // Ordinary committed navigation does not clear it.
-        store.onCommittedNavigation("tab1", "https://redirect.example")
+        // A redirect within the current load does not clear it (no load start is dispatched).
         assertTrue(store.isSuppressed("tab1", "fp1"))
         // Direct navigation clears it.
         store.clearSuppressionForTab("tab1")

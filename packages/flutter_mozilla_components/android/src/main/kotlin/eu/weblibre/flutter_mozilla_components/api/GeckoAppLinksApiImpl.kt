@@ -134,7 +134,12 @@ class GeckoAppLinksApiImpl(
             try {
                 val components = GlobalComponents.components
                 val list = components
-                    ?.let { pendingStoreFor(it).getPending(owner).map(PendingAppLinkRequest::toPigeon) }
+                    ?.let {
+                        val store = pendingStoreFor(it)
+                        store.getPending(owner).map { request ->
+                            request.toPigeon(store.expiresInMs(request))
+                        }
+                    }
                     ?: emptyList()
                 callback(Result.success(list))
             } catch (e: Exception) {

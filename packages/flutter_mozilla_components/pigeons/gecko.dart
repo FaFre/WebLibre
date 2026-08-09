@@ -3050,6 +3050,12 @@ class AppLinkPromptRequest {
   final bool isModal;
   final AppLinkTarget target;
 
+  /// Milliseconds until the native store drops this request, measured at query
+  /// time. The surface showing it must stop offering it by then: resolving an
+  /// expired request is a no-op, so a prompt left on screen past this becomes a
+  /// button that silently does nothing.
+  final int expiresInMs;
+
   const AppLinkPromptRequest({
     required this.requestId,
     required this.owner,
@@ -3062,6 +3068,7 @@ class AppLinkPromptRequest {
     required this.canRemember,
     required this.isModal,
     required this.target,
+    required this.expiresInMs,
   });
 }
 
