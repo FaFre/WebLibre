@@ -11,6 +11,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import org.json.JSONObject
 
 internal class FlutterSingboxProxyPluginTest {
@@ -36,6 +37,41 @@ internal class FlutterSingboxProxyPluginTest {
         assertContains(result.configJson, "\"type\": \"wireguard\"")
         assertContains(result.configJson, "\"endpoints\"")
         assertContains(result.configJson, "\"private_key\": \"secret\"")
+    }
+
+    @Test
+    fun buildConfig_usesRandomDistinctInboundPortsWhenNoPreferredBaseIsSet() {
+        val builder = SingboxConfigBuilder()
+        val profiles = listOf(
+            SingboxProxyProfile(
+                id = "proxy-a",
+                name = "Proxy A",
+                type = SingboxProxyProfileType.SOCKS,
+                configJson = "{\"server\":\"127.0.0.1\",\"server_port\":1080}",
+                secretJson = null
+            ),
+            SingboxProxyProfile(
+                id = "proxy-b",
+                name = "Proxy B",
+                type = SingboxProxyProfileType.SOCKS,
+                configJson = "{\"server\":\"127.0.0.1\",\"server_port\":1081}",
+                secretJson = null
+            )
+        )
+
+        val result = builder.build(
+            profiles,
+            SingboxProxyRuntimeOptions(preferredBasePort = null, blockUnmatchedTraffic = true)
+        )
+
+        val ports = result.endpoints.map { it.port }
+        val inbounds = JSONObject(result.configJson).getJSONArray("inbounds")
+
+        assertEquals(2, ports.size)
+        assertEquals(2, ports.toSet().size)
+        assertTrue(ports.all { it in 1L..65535L })
+        assertEquals(ports[0], inbounds.getJSONObject(0).getLong("listen_port"))
+        assertEquals(ports[1], inbounds.getJSONObject(1).getLong("listen_port"))
     }
 
     @Test

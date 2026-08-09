@@ -7,6 +7,9 @@ import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyProfile
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyProfileType
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyRuntimeEndpoint
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyRuntimeOptions
+import java.io.IOException
+import java.net.InetAddress
+import java.net.ServerSocket
 import java.net.URI
 import java.security.SecureRandom
 import org.json.JSONArray
@@ -14,7 +17,6 @@ import org.json.JSONException
 import org.json.JSONObject
 
 private const val LOCALHOST = "127.0.0.1"
-private const val DEFAULT_BASE_PORT = 12000L
 private const val BASE64_URL_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
 
 /**
@@ -51,7 +53,8 @@ class SingboxConfigBuilder(
 
     fun build(
         profiles: List<SingboxProxyProfile>,
-        options: SingboxProxyRuntimeOptions
+        options: SingboxProxyRuntimeOptions,
+        reusableEndpoints: List<SingboxProxyRuntimeEndpoint> = emptyList(),
     ): SingboxProxyConfigResult {
         profiles.forEach { profile ->
             validateProfile(profile)?.let { throw IllegalArgumentException(it) }
@@ -62,12 +65,12 @@ class SingboxConfigBuilder(
         val outbounds = JSONArray()
         val rules = JSONArray()
         val endpoints = mutableListOf<SingboxProxyRuntimeEndpoint>()
-        val basePort = options.preferredBasePort ?: DEFAULT_BASE_PORT
+        val ports = inboundPorts(profiles, options, reusableEndpoints)
 
         profiles.forEachIndexed { index, profile ->
             val inboundTag = inboundTag(profile.id)
             val outboundTag = outboundTag(profile.id)
-            val port = basePort + index
+            val port = ports[index]
             val username = generateToken("u")
             val password = generateToken("p")
 
@@ -151,6 +154,52 @@ class SingboxConfigBuilder(
             configJson = config.toString(2),
             endpoints = endpoints
         )
+    }
+
+    private fun inboundPorts(
+        profiles: List<SingboxProxyProfile>,
+        options: SingboxProxyRuntimeOptions,
+        reusableEndpoints: List<SingboxProxyRuntimeEndpoint>,
+    ): List<Long> {
+        options.preferredBasePort?.let { basePort ->
+            return profiles.indices.map { index -> basePort + index }
+        }
+
+        val reusablePortsByProfile = reusableEndpoints.associate { endpoint ->
+            endpoint.profileId to endpoint.port
+        }
+        val usedPorts = mutableSetOf<Int>()
+        val reservedSockets = mutableListOf<ServerSocket>()
+
+        try {
+            return profiles.map { profile ->
+                val reusablePort = reusablePortsByProfile[profile.id]
+                    ?.toInt()
+                    ?.takeIf { it in 1..65535 && usedPorts.add(it) }
+
+                (reusablePort ?: reserveRandomLocalPort(usedPorts, reservedSockets)).toLong()
+            }
+        } finally {
+            reservedSockets.forEach { socket -> runCatching { socket.close() } }
+        }
+    }
+
+    private fun reserveRandomLocalPort(
+        usedPorts: MutableSet<Int>,
+        reservedSockets: MutableList<ServerSocket>,
+    ): Int {
+        repeat(64) {
+            val socket = ServerSocket(0, 0, InetAddress.getByName(LOCALHOST))
+            val port = socket.localPort
+            if (usedPorts.add(port)) {
+                reservedSockets += socket
+                return port
+            }
+
+            socket.close()
+        }
+
+        throw IOException("Could not allocate a free local SOCKS port")
     }
 
     private fun buildDnsBlock(dns: SingboxProxyDnsConfig): JSONObject? {

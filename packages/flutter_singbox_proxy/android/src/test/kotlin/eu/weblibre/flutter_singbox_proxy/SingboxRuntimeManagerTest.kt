@@ -35,6 +35,36 @@ internal class SingboxRuntimeManagerTest {
         assertEquals(firstState.endpoints, stateAfterFailure.endpoints)
         assertEquals("start failed", stateAfterFailure.message)
     }
+
+    @Test
+    fun start_reusesRunningProfilePortWhenAddingAnotherProfile() {
+        val runtime = FakeLibboxRuntime()
+        val manager = SingboxRuntimeManager(
+            context = mock(Context::class.java),
+            libboxRuntime = runtime,
+            dispatchToMain = { action -> action() }
+        )
+
+        val firstState = manager.awaitStart(
+            listOf(profile(id = "profile-a")),
+            options = SingboxProxyRuntimeOptions(
+                preferredBasePort = null,
+                blockUnmatchedTraffic = true
+            )
+        ).getOrThrow()
+        val secondState = manager.awaitStart(
+            listOf(profile(id = "profile-a"), profile(id = "profile-b")),
+            options = SingboxProxyRuntimeOptions(
+                preferredBasePort = null,
+                blockUnmatchedTraffic = true
+            )
+        ).getOrThrow()
+        manager.close()
+
+        val firstPort = firstState.endpoints.single().port
+        assertEquals(firstPort, secondState.endpoints.first { it.profileId == "profile-a" }.port)
+        assertTrue(secondState.endpoints.first { it.profileId == "profile-b" }.port != firstPort)
+    }
 }
 
 private fun profile(id: String) = SingboxProxyProfile(
@@ -46,12 +76,16 @@ private fun profile(id: String) = SingboxProxyProfile(
 )
 
 private fun SingboxRuntimeManager.awaitStart(
-    profiles: List<SingboxProxyProfile>
+    profiles: List<SingboxProxyProfile>,
+    options: SingboxProxyRuntimeOptions = SingboxProxyRuntimeOptions(
+        preferredBasePort = 12080,
+        blockUnmatchedTraffic = true
+    ),
 ): Result<SingboxProxyRuntimeState> {
     val latch = CountDownLatch(1)
     var result: Result<SingboxProxyRuntimeState>? = null
 
-    start(profiles, SingboxProxyRuntimeOptions(preferredBasePort = 12080, blockUnmatchedTraffic = true)) {
+    start(profiles, options) {
         result = it
         latch.countDown()
     }
@@ -61,8 +95,8 @@ private fun SingboxRuntimeManager.awaitStart(
 }
 
 private class FakeLibboxRuntime(
-    private val failOnStartAttempt: Int,
-) : LibboxRuntime(mock(Context::class.java)) {
+    private val failOnStartAttempt: Int = Int.MAX_VALUE,
+) : LibboxRuntime(mock(Context::class.java), mock(PlatformDohResolver::class.java)) {
     private var startAttempts = 0
 
     override fun isAvailable(): Boolean = true

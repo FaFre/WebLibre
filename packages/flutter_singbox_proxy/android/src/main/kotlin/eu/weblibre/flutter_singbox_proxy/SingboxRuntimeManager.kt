@@ -11,6 +11,7 @@ import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyRuntimeOptions
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyRuntimeEndpoint
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyRuntimeState
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyRuntimeStatus
+import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.Executors
 
 class SingboxRuntimeManager(
@@ -112,7 +113,10 @@ class SingboxRuntimeManager(
         options: SingboxProxyRuntimeOptions,
         callback: (Result<SingboxProxyConfigResult>) -> Unit
     ) {
-        runCatching { configBuilder.build(profiles, options) }
+        // Feed the running runtime's endpoints back in so the previewed
+        // listen_ports match what is actually bound instead of allocating a
+        // fresh throwaway set on every call.
+        runCatching { configBuilder.build(profiles, options, reusableEndpoints()) }
             .onSuccess { callback(Result.success(it)) }
             .onFailure { callback(Result.failure(it)) }
     }
@@ -131,8 +135,6 @@ class SingboxRuntimeManager(
                         emptyList(),
                         "Building sing-box config"
                     )
-                    val config = configBuilder.build(profiles, options)
-
                     if (!libboxRuntime.isAvailable()) {
                         val message = "sing-box libbox runtime is not linked"
                         updateStateLocked(
@@ -145,8 +147,13 @@ class SingboxRuntimeManager(
 
                     val previousBootstrapDohUrl = activeOptions.bootstrapDohUrl
                     libboxRuntime.setBootstrapDohUrl(options.bootstrapDohUrl)
+                    val config: SingboxProxyConfigResult
                     try {
-                        libboxRuntime.start(config.configJson)
+                        config = startWithConfigRetries(
+                            profiles = profiles,
+                            options = options,
+                            reusableEndpoints = reusableEndpoints(previousState),
+                        )
                     } catch (error: Throwable) {
                         libboxRuntime.setBootstrapDohUrl(previousBootstrapDohUrl)
                         throw error
@@ -192,12 +199,15 @@ class SingboxRuntimeManager(
                             null
                         )
                     } else {
-                        val config = configBuilder.build(remaining, activeOptions)
                         // Partial stop keeps activeOptions.bootstrapDohUrl, so
                         // no setBootstrapDohUrl call is needed here — the
                         // libbox bridge already holds the right URL from the
                         // most recent start().
-                        libboxRuntime.start(config.configJson)
+                        val config = startWithConfigRetries(
+                            profiles = remaining,
+                            options = activeOptions,
+                            reusableEndpoints = reusableEndpoints(state),
+                        )
                         activeProfiles = remaining
                         updateStateLocked(
                             SingboxProxyRuntimeStatus.RUNNING,
@@ -243,6 +253,72 @@ class SingboxRuntimeManager(
     }
 
     override fun getState(): SingboxProxyRuntimeState = synchronized(stateLock) { state }
+
+    /**
+     * Ports may only be reused while we still hold them, which is exactly the
+     * RUNNING state. The ERROR path deliberately keeps the last endpoints
+     * around for reporting, but those ports are already released — reusing
+     * them risks binding a port the OS has since handed to someone else.
+     */
+    private fun reusableEndpoints(
+        from: SingboxProxyRuntimeState = getState(),
+    ): List<SingboxProxyRuntimeEndpoint> =
+        if (from.status == SingboxProxyRuntimeStatus.RUNNING) from.endpoints else emptyList()
+
+    private fun startWithConfigRetries(
+        profiles: List<SingboxProxyProfile>,
+        options: SingboxProxyRuntimeOptions,
+        reusableEndpoints: List<SingboxProxyRuntimeEndpoint>,
+    ): SingboxProxyConfigResult {
+        val maxAttempts = if (options.preferredBasePort == null) 3 else 1
+        var lastError: Throwable? = null
+
+        repeat(maxAttempts) { attempt ->
+            val config = configBuilder.build(
+                profiles,
+                options,
+                reusableEndpoints = if (attempt == 0) reusableEndpoints else emptyList(),
+            )
+
+            try {
+                libboxRuntime.start(config.configJson)
+                return config
+            } catch (error: Throwable) {
+                lastError = error
+                if (attempt == maxAttempts - 1 || !isLocalInboundBindFailure(error)) {
+                    throw error
+                }
+            }
+        }
+
+        throw lastError ?: IllegalStateException("Failed to start sing-box runtime")
+    }
+
+    private fun isLocalInboundBindFailure(error: Throwable): Boolean {
+        val text = errorChain(error)
+            .mapNotNull { it.message }
+            .joinToString(" ")
+            .lowercase()
+
+        // sing-box prefixes every inbound startup failure with
+        // "start inbound/<type>[<tag>]:", so that phrase alone says nothing
+        // about port conflicts — matching it would retry (and fully reload the
+        // service) for errors no new port could fix.
+        return text.contains("address already in use") ||
+            (text.contains("bind") && text.contains("listen"))
+    }
+
+    private fun errorChain(error: Throwable): Sequence<Throwable> = sequence {
+        val seen = mutableSetOf<Throwable>()
+        var current: Throwable? = error
+        while (current != null && seen.add(current)) {
+            yield(current)
+            current = when (current) {
+                is InvocationTargetException -> current.targetException ?: current.cause
+                else -> current.cause
+            }
+        }
+    }
 
     fun close() {
         runtimeExecutor.execute {
