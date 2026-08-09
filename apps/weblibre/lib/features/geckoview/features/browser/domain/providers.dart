@@ -1247,16 +1247,26 @@ EquatableValue<List<TabListItemEntity>> visibleTabListItems(
 /// Flat tab id order used by sequential tab navigation: the tab bar swipe
 /// action and the next/previous tab gestures.
 ///
-/// Navigation follows the rendered tray order instead of the raw storage
+/// Navigation follows the rendered order instead of the raw storage
 /// `order_key`, so it carries the active sort type, tree grouping, collapsed
 /// groups, pinned-first handling and the tab-type/date filter — stepping to the
 /// tab the user sees next to the current one rather than to an unrelated
 /// `order_key` neighbour.
 ///
+/// It spans **all** containers, keeping the boundary-crossing reach the
+/// storage-order walk had: each container contributes the rows its tray would
+/// render, and the containers follow one another in the order the quick tab
+/// switcher lays them out — the unassigned bucket first, then containers by
+/// pinned/`order_key`. Stepping off the end of one container therefore
+/// continues into the next, and selecting that tab moves the selected container
+/// along with it. Named containers holding no tabs are skipped so their tree
+/// query never runs.
+///
 /// "Previous" is a step towards the top of that order and "next" a step
 /// towards its end, so direction follows `tabListDirection` (baked into the
 /// order) rather than `tabBarDirection`. The two only disagree when the user
-/// sets them apart, and the tray order is the one the sequence is built from.
+/// sets them apart, and the rendered order is the one the sequence is built
+/// from.
 ///
 /// The tray's own search results are deliberately not part of this: the swipe
 /// and the gestures are only reachable with the tray closed.
@@ -1271,26 +1281,44 @@ EquatableValue<List<TabListItemEntity>> visibleTabListItems(
 /// widget tree. Without a listener Riverpod pauses the chain when nothing is on
 /// screen watching it, so the order could go stale — or be created empty on the
 /// read, with its tree stream still loading, and silently drop navigation back
-/// to storage order. It is alive anyway whenever the quick tab switcher or the
-/// tray is on screen — both watch the same [groupedTabListItemsProvider] chain.
+/// to storage order. The selected container's chain is alive anyway whenever the
+/// quick tab switcher or the tray is on screen; the price of crossing container
+/// boundaries is that the other populated containers' tree queries are kept
+/// alive too.
 @Riverpod(keepAlive: true)
 EquatableValue<List<String>?> sequentialTabNavigationOrder(Ref ref) {
-  final containerId = ref.watch(selectedContainerProvider);
-
-  final hasTreeData = ref.watch(
-    watchTabsWithRootAndDepthProvider(
-      containerId,
-    ).select((value) => value.hasValue),
+  final containers = ref.watch(
+    watchContainersWithCountProvider.select((value) => value.value),
   );
-  if (!hasTreeData) {
+  if (containers == null) {
     return EquatableValue(null);
   }
 
-  final visibleItems = ref
-      .watch(visibleTabListItemsProvider(containerId: containerId))
-      .value;
+  final containerIds = <String?>[
+    null,
+    for (final container in containers)
+      if ((container.tabCount ?? 0) > 0) container.id,
+  ];
 
-  return EquatableValue([for (final item in visibleItems) item.tabId]);
+  final order = <String>[];
+  for (final containerId in containerIds) {
+    final hasTreeData = ref.watch(
+      watchTabsWithRootAndDepthProvider(
+        containerId,
+      ).select((value) => value.hasValue),
+    );
+    if (!hasTreeData) {
+      return EquatableValue(null);
+    }
+
+    final visibleItems = ref
+        .watch(visibleTabListItemsProvider(containerId: containerId))
+        .value;
+
+    order.addAll(visibleItems.map((item) => item.tabId));
+  }
+
+  return EquatableValue(order);
 }
 
 String _nearestVisibleParentId(

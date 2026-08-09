@@ -467,12 +467,14 @@ class TabRepository extends _$TabRepository {
 
   /// Moves the selection one step through the tab sequence.
   ///
-  /// Unscoped calls — the tab bar swipe and the next/previous tab gestures —
+  /// Calls that cross containers ([skipContainerCheck] with no explicit
+  /// [containerId]) — the tab bar swipe and the next/previous tab gestures —
   /// step through the *rendered* order
   /// ([sequentialTabNavigationOrderProvider]) so navigation matches the tabs the
   /// user sees, including the tray's sort type, grouping, filters and
-  /// pinned-first handling. That order is authoritative once it exists, and
-  /// every outcome stays inside it:
+  /// pinned-first handling. That order spans every populated container, so this
+  /// keeps walking past a container boundary exactly like the storage-order walk
+  /// did. It is authoritative once it exists, and every outcome stays inside it:
   ///
   /// - current tab in the order: step one row, stopping at either end;
   /// - current tab outside it — hidden by the active filter, or folded into a
@@ -480,9 +482,9 @@ class TabRepository extends _$TabRepository {
   ///   from, rather than jumping to a tab the filter excludes;
   /// - nothing visible at all: do nothing.
   ///
-  /// The storage-order path is left for calls that scope navigation to a
-  /// container (which the rendered order, tied to the selected container, cannot
-  /// answer) and for the brief window before the tree data has loaded.
+  /// The storage-order path is left for calls that scope navigation to a single
+  /// container (which the cross-container order cannot answer) and for the brief
+  /// window before the tree data has loaded.
   Future<bool> _selectAdjacentTab(
     String tabId, {
     required String? containerId,

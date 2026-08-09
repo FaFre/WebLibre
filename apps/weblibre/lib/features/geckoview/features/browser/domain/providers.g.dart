@@ -1385,16 +1385,26 @@ final class VisibleTabListItemsFamily extends $Family
 /// Flat tab id order used by sequential tab navigation: the tab bar swipe
 /// action and the next/previous tab gestures.
 ///
-/// Navigation follows the rendered tray order instead of the raw storage
+/// Navigation follows the rendered order instead of the raw storage
 /// `order_key`, so it carries the active sort type, tree grouping, collapsed
 /// groups, pinned-first handling and the tab-type/date filter — stepping to the
 /// tab the user sees next to the current one rather than to an unrelated
 /// `order_key` neighbour.
 ///
+/// It spans **all** containers, keeping the boundary-crossing reach the
+/// storage-order walk had: each container contributes the rows its tray would
+/// render, and the containers follow one another in the order the quick tab
+/// switcher lays them out — the unassigned bucket first, then containers by
+/// pinned/`order_key`. Stepping off the end of one container therefore
+/// continues into the next, and selecting that tab moves the selected container
+/// along with it. Containers without tabs are skipped so their tree query never
+/// runs.
+///
 /// "Previous" is a step towards the top of that order and "next" a step
 /// towards its end, so direction follows `tabListDirection` (baked into the
 /// order) rather than `tabBarDirection`. The two only disagree when the user
-/// sets them apart, and the tray order is the one the sequence is built from.
+/// sets them apart, and the rendered order is the one the sequence is built
+/// from.
 ///
 /// The tray's own search results are deliberately not part of this: the swipe
 /// and the gestures are only reachable with the tray closed.
@@ -1409,8 +1419,10 @@ final class VisibleTabListItemsFamily extends $Family
 /// widget tree. Without a listener Riverpod pauses the chain when nothing is on
 /// screen watching it, so the order could go stale — or be created empty on the
 /// read, with its tree stream still loading, and silently drop navigation back
-/// to storage order. It is alive anyway whenever the quick tab switcher or the
-/// tray is on screen — both watch the same [groupedTabListItemsProvider] chain.
+/// to storage order. The selected container's chain is alive anyway whenever the
+/// quick tab switcher or the tray is on screen; the price of crossing container
+/// boundaries is that the other populated containers' tree queries are kept
+/// alive too.
 
 @ProviderFor(sequentialTabNavigationOrder)
 final sequentialTabNavigationOrderProvider =
@@ -1419,16 +1431,26 @@ final sequentialTabNavigationOrderProvider =
 /// Flat tab id order used by sequential tab navigation: the tab bar swipe
 /// action and the next/previous tab gestures.
 ///
-/// Navigation follows the rendered tray order instead of the raw storage
+/// Navigation follows the rendered order instead of the raw storage
 /// `order_key`, so it carries the active sort type, tree grouping, collapsed
 /// groups, pinned-first handling and the tab-type/date filter — stepping to the
 /// tab the user sees next to the current one rather than to an unrelated
 /// `order_key` neighbour.
 ///
+/// It spans **all** containers, keeping the boundary-crossing reach the
+/// storage-order walk had: each container contributes the rows its tray would
+/// render, and the containers follow one another in the order the quick tab
+/// switcher lays them out — the unassigned bucket first, then containers by
+/// pinned/`order_key`. Stepping off the end of one container therefore
+/// continues into the next, and selecting that tab moves the selected container
+/// along with it. Containers without tabs are skipped so their tree query never
+/// runs.
+///
 /// "Previous" is a step towards the top of that order and "next" a step
 /// towards its end, so direction follows `tabListDirection` (baked into the
 /// order) rather than `tabBarDirection`. The two only disagree when the user
-/// sets them apart, and the tray order is the one the sequence is built from.
+/// sets them apart, and the rendered order is the one the sequence is built
+/// from.
 ///
 /// The tray's own search results are deliberately not part of this: the swipe
 /// and the gestures are only reachable with the tray closed.
@@ -1443,8 +1465,10 @@ final sequentialTabNavigationOrderProvider =
 /// widget tree. Without a listener Riverpod pauses the chain when nothing is on
 /// screen watching it, so the order could go stale — or be created empty on the
 /// read, with its tree stream still loading, and silently drop navigation back
-/// to storage order. It is alive anyway whenever the quick tab switcher or the
-/// tray is on screen — both watch the same [groupedTabListItemsProvider] chain.
+/// to storage order. The selected container's chain is alive anyway whenever the
+/// quick tab switcher or the tray is on screen; the price of crossing container
+/// boundaries is that the other populated containers' tree queries are kept
+/// alive too.
 
 final class SequentialTabNavigationOrderProvider
     extends
@@ -1457,16 +1481,26 @@ final class SequentialTabNavigationOrderProvider
   /// Flat tab id order used by sequential tab navigation: the tab bar swipe
   /// action and the next/previous tab gestures.
   ///
-  /// Navigation follows the rendered tray order instead of the raw storage
+  /// Navigation follows the rendered order instead of the raw storage
   /// `order_key`, so it carries the active sort type, tree grouping, collapsed
   /// groups, pinned-first handling and the tab-type/date filter — stepping to the
   /// tab the user sees next to the current one rather than to an unrelated
   /// `order_key` neighbour.
   ///
+  /// It spans **all** containers, keeping the boundary-crossing reach the
+  /// storage-order walk had: each container contributes the rows its tray would
+  /// render, and the containers follow one another in the order the quick tab
+  /// switcher lays them out — the unassigned bucket first, then containers by
+  /// pinned/`order_key`. Stepping off the end of one container therefore
+  /// continues into the next, and selecting that tab moves the selected container
+  /// along with it. Containers without tabs are skipped so their tree query never
+  /// runs.
+  ///
   /// "Previous" is a step towards the top of that order and "next" a step
   /// towards its end, so direction follows `tabListDirection` (baked into the
   /// order) rather than `tabBarDirection`. The two only disagree when the user
-  /// sets them apart, and the tray order is the one the sequence is built from.
+  /// sets them apart, and the rendered order is the one the sequence is built
+  /// from.
   ///
   /// The tray's own search results are deliberately not part of this: the swipe
   /// and the gestures are only reachable with the tray closed.
@@ -1481,8 +1515,10 @@ final class SequentialTabNavigationOrderProvider
   /// widget tree. Without a listener Riverpod pauses the chain when nothing is on
   /// screen watching it, so the order could go stale — or be created empty on the
   /// read, with its tree stream still loading, and silently drop navigation back
-  /// to storage order. It is alive anyway whenever the quick tab switcher or the
-  /// tray is on screen — both watch the same [groupedTabListItemsProvider] chain.
+  /// to storage order. The selected container's chain is alive anyway whenever the
+  /// quick tab switcher or the tray is on screen; the price of crossing container
+  /// boundaries is that the other populated containers' tree queries are kept
+  /// alive too.
   SequentialTabNavigationOrderProvider._()
     : super(
         from: null,
@@ -1520,4 +1556,4 @@ final class SequentialTabNavigationOrderProvider
 }
 
 String _$sequentialTabNavigationOrderHash() =>
-    r'2a6b1965657942524e8e514cd4deb0ce77667fe1';
+    r'cd8f2337012473028084f2efb1bff540e80abdf4';
