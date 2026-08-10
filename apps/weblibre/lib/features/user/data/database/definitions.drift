@@ -12,6 +12,7 @@ CREATE TABLE proxy_profile (
   type ENUMNAME(SingboxProxyProfileType) NOT NULL,
   config_json TEXT NOT NULL,
   dns_override_json TEXT,
+  autostart BOOLEAN NOT NULL DEFAULT FALSE,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) AS ProxyProfile;

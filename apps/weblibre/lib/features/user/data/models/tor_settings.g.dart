@@ -17,6 +17,8 @@ abstract class _$TorSettingsCWProxy {
 
   TorSettings exitNodeCountry(String? exitNodeCountry);
 
+  TorSettings autostart(bool autostart);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TorSettings(...).copyWith.fieldName(value)`.
   ///
@@ -30,6 +32,7 @@ abstract class _$TorSettingsCWProxy {
     bool fetchRemoteBridges,
     String? entryNodeCountry,
     String? exitNodeCountry,
+    bool autostart,
   });
 }
 
@@ -60,6 +63,9 @@ class _$TorSettingsCWProxyImpl implements _$TorSettingsCWProxy {
       call(exitNodeCountry: exitNodeCountry);
 
   @override
+  TorSettings autostart(bool autostart) => call(autostart: autostart);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TorSettings(...).copyWith.fieldName(value)`.
   ///
@@ -73,6 +79,7 @@ class _$TorSettingsCWProxyImpl implements _$TorSettingsCWProxy {
     Object? fetchRemoteBridges = const $CopyWithPlaceholder(),
     Object? entryNodeCountry = const $CopyWithPlaceholder(),
     Object? exitNodeCountry = const $CopyWithPlaceholder(),
+    Object? autostart = const $CopyWithPlaceholder(),
   }) {
     return TorSettings(
       config: config == const $CopyWithPlaceholder() || config == null
@@ -98,6 +105,10 @@ class _$TorSettingsCWProxyImpl implements _$TorSettingsCWProxy {
           ? _value.exitNodeCountry
           // ignore: cast_nullable_to_non_nullable
           : exitNodeCountry as String?,
+      autostart: autostart == const $CopyWithPlaceholder() || autostart == null
+          ? _value.autostart
+          // ignore: cast_nullable_to_non_nullable
+          : autostart as bool,
     );
   }
 }
@@ -120,6 +131,7 @@ TorSettings _$TorSettingsFromJson(Map<String, dynamic> json) =>
       fetchRemoteBridges: json['fetchRemoteBridges'] as bool?,
       entryNodeCountry: json['entryNodeCountry'] as String?,
       exitNodeCountry: json['exitNodeCountry'] as String?,
+      autostart: json['autostart'] as bool?,
     );
 
 Map<String, dynamic> _$TorSettingsToJson(TorSettings instance) =>
@@ -129,6 +141,7 @@ Map<String, dynamic> _$TorSettingsToJson(TorSettings instance) =>
       'fetchRemoteBridges': instance.fetchRemoteBridges,
       'entryNodeCountry': instance.entryNodeCountry,
       'exitNodeCountry': instance.exitNodeCountry,
+      'autostart': instance.autostart,
     };
 
 const _$TorConnectionConfigEnumMap = {

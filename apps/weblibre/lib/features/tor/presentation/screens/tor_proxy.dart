@@ -48,6 +48,12 @@ const List<SettingsSectionDefinition> torProxySettingsSections = [
         child: _TorServiceTile(),
       ),
       SettingsEntryDefinition(
+        title: 'Start Automatically',
+        subtitle: 'Connect the $torBrand service when WebLibre starts',
+        keywords: ['autostart', 'launch', 'startup', 'boot'],
+        child: _TorAutostartTile(),
+      ),
+      SettingsEntryDefinition(
         title: 'Request New Identity',
         subtitle: 'Use a fresh circuit for new connections',
         keywords: ['circuit'],
@@ -125,6 +131,18 @@ class TorProxyScreen extends HookConsumerWidget {
     });
 
     ref.listen(torSettingsRepositoryProvider, (previous, next) async {
+      final previousSettings = previous?.value;
+      final nextSettings = next.value;
+
+      // Autostart only decides whether we connect at app start, so flipping it
+      // must not tear down and rebuild a running circuit.
+      if (previousSettings != null &&
+          nextSettings != null &&
+          previousSettings.copyWith.autostart(false) ==
+              nextSettings.copyWith.autostart(false)) {
+        return;
+      }
+
       final torService = ref.read(torProxyServiceProvider.notifier);
       final currentStatus = await torService.requestSync();
 
@@ -203,6 +221,32 @@ class _TorServiceTile extends HookConsumerWidget {
             child: LinearProgressIndicator(value: progress / 100),
           ),
       ],
+    );
+  }
+}
+
+class _TorAutostartTile extends ConsumerWidget {
+  const _TorAutostartTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final autostart = ref.watch(
+      torSettingsWithDefaultsProvider.select((value) => value.autostart),
+    );
+
+    return SwitchListTile.adaptive(
+      secondary: const Icon(MdiIcons.rocketLaunchOutline),
+      title: const Text('Start Automatically'),
+      subtitle: const Text(
+        'Connect the $torBrand service when WebLibre starts, so tabs using it '
+        'are ready without a prompt',
+      ),
+      value: autostart,
+      onChanged: (value) async {
+        await ref
+            .read(saveTorSettingsControllerProvider.notifier)
+            .save((current) => current.copyWith.autostart(value));
+      },
     );
   }
 }

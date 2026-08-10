@@ -26,6 +26,7 @@ import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
+import 'package:weblibre/features/proxy/domain/services/proxy_autostart.dart';
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
 import 'package:weblibre/features/tor/presentation/widgets/tor_dialog.dart';
 import 'package:weblibre/utils/ui_helper.dart';
@@ -51,6 +52,17 @@ Future<bool> ensureProxyStartedForConnection(
   ProxyConnectionId? proxyConnectionId,
 ) async {
   if (proxyConnectionId == null) return true;
+
+  // An autostart triggered at app launch may still be in flight. Wait it out
+  // rather than reading a "not running yet" snapshot and prompting the user to
+  // start what is already starting.
+  final pendingAutostart = ref
+      .read(proxyAutostartServiceProvider.notifier)
+      .pendingStartFor(proxyConnectionId);
+  if (pendingAutostart != null) {
+    await pendingAutostart;
+    if (!context.mounted) return false;
+  }
 
   if (proxyConnectionId is TorProxyConnectionId) {
     return await _ensureTorStarted(context, ref);

@@ -25,6 +25,8 @@ abstract class _$ProxyProfileDraftStateCWProxy {
 
   ProxyProfileDraftState customSecretJson(String customSecretJson);
 
+  ProxyProfileDraftState autostart(bool autostart);
+
   ProxyProfileDraftState isSaving(bool isSaving);
 
   ProxyProfileDraftState secretLoaded(bool secretLoaded);
@@ -46,6 +48,7 @@ abstract class _$ProxyProfileDraftStateCWProxy {
     String? dnsOverrideJson,
     String customConfigJson,
     String customSecretJson,
+    bool autostart,
     bool isSaving,
     bool secretLoaded,
   });
@@ -94,6 +97,10 @@ class _$ProxyProfileDraftStateCWProxyImpl
       call(customSecretJson: customSecretJson);
 
   @override
+  ProxyProfileDraftState autostart(bool autostart) =>
+      call(autostart: autostart);
+
+  @override
   ProxyProfileDraftState isSaving(bool isSaving) => call(isSaving: isSaving);
 
   @override
@@ -118,6 +125,7 @@ class _$ProxyProfileDraftStateCWProxyImpl
     Object? dnsOverrideJson = const $CopyWithPlaceholder(),
     Object? customConfigJson = const $CopyWithPlaceholder(),
     Object? customSecretJson = const $CopyWithPlaceholder(),
+    Object? autostart = const $CopyWithPlaceholder(),
     Object? isSaving = const $CopyWithPlaceholder(),
     Object? secretLoaded = const $CopyWithPlaceholder(),
   }) {
@@ -162,6 +170,10 @@ class _$ProxyProfileDraftStateCWProxyImpl
           ? _value.customSecretJson
           // ignore: cast_nullable_to_non_nullable
           : customSecretJson as String,
+      autostart: autostart == const $CopyWithPlaceholder() || autostart == null
+          ? _value.autostart
+          // ignore: cast_nullable_to_non_nullable
+          : autostart as bool,
       isSaving: isSaving == const $CopyWithPlaceholder() || isSaving == null
           ? _value.isSaving
           // ignore: cast_nullable_to_non_nullable
@@ -239,7 +251,7 @@ final class ProxyProfileDraftProvider
   }
 }
 
-String _$proxyProfileDraftHash() => r'88dccb74624a8257f77646ab6755dce4e0de465a';
+String _$proxyProfileDraftHash() => r'c3aa75ca326d6c9ff2a4e8bd9319d143086271c3';
 
 final class ProxyProfileDraftFamily extends $Family
     with

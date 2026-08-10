@@ -35,7 +35,7 @@ class StartProxyController extends _$StartProxyController {
     return !currentStatus.isRunning;
   }
 
-  Future<void> startProxy() async {
+  Future<void> startProxy({bool showNotification = true}) async {
     if (state) return;
 
     state = true;
@@ -45,12 +45,14 @@ class StartProxyController extends _$StartProxyController {
           .read(torProxyServiceProvider.notifier)
           .startOrReconfigure(reconfigureIfRunning: false);
 
-      ref
-          .read(overlayControllerProvider.notifier)
-          .show(
-            (context) =>
-                const Positioned(top: 0, left: 0, child: TorNotification()),
-          );
+      if (showNotification) {
+        ref
+            .read(overlayControllerProvider.notifier)
+            .show(
+              (context) =>
+                  const Positioned(top: 0, left: 0, child: TorNotification()),
+            );
+      }
 
       await connection;
     } finally {

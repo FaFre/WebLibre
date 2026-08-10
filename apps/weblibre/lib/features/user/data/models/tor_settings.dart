@@ -34,12 +34,16 @@ class TorSettings with FastEquatable {
   final String? entryNodeCountry;
   final String? exitNodeCountry;
 
+  /// Connect on app start instead of waiting for the first tab that needs it.
+  final bool autostart;
+
   TorSettings({
     required this.config,
     required this.requireBridge,
     required this.fetchRemoteBridges,
     required this.entryNodeCountry,
     required this.exitNodeCountry,
+    required this.autostart,
   });
 
   TorSettings.withDefaults({
@@ -48,9 +52,11 @@ class TorSettings with FastEquatable {
     bool? fetchRemoteBridges,
     this.entryNodeCountry,
     this.exitNodeCountry,
+    bool? autostart,
   }) : config = config ?? TorConnectionConfig.auto,
        requireBridge = requireBridge ?? false,
-       fetchRemoteBridges = fetchRemoteBridges ?? true;
+       fetchRemoteBridges = fetchRemoteBridges ?? true,
+       autostart = autostart ?? false;
 
   factory TorSettings.fromJson(Map<String, dynamic> json) =>
       _$TorSettingsFromJson(json);
@@ -64,5 +70,6 @@ class TorSettings with FastEquatable {
     fetchRemoteBridges,
     entryNodeCountry,
     exitNodeCountry,
+    autostart,
   ];
 }

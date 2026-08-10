@@ -45,7 +45,7 @@ import 'package:weblibre/features/user/data/database/database.steps.dart';
 )
 class UserDatabase extends $UserDatabase {
   @override
-  final int schemaVersion = 9;
+  final int schemaVersion = 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -126,6 +126,9 @@ class UserDatabase extends $UserDatabase {
     from8To9: (m, schema) async {
       await m.createTable(schema.quickSwitcherButtonConfigs);
       await m.createIndex(schema.idxQuickSwitcherOrderKey);
+    },
+    from9To10: (m, schema) async {
+      await m.addColumn(schema.proxyProfile, schema.proxyProfile.autostart);
     },
   );
 }

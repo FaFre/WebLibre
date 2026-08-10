@@ -20,6 +20,7 @@
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -259,6 +260,18 @@ class _GeneralSection extends HookConsumerWidget {
               }
             },
           ),
+        const SizedBox(height: 8),
+        SwitchListTile.adaptive(
+          contentPadding: EdgeInsets.zero,
+          secondary: const Icon(MdiIcons.rocketLaunchOutline),
+          title: const Text('Start Automatically'),
+          subtitle: const Text(
+            'Connect this profile when WebLibre starts, so tabs using it are '
+            'ready without a prompt',
+          ),
+          value: draft.autostart,
+          onChanged: ref.read(draftProvider.notifier).setAutostart,
+        ),
       ],
     );
   }

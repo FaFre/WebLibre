@@ -112,6 +112,7 @@ ProxyProfile _profile({
   required String name,
   required SingboxProxyProfileType type,
   required String configJson,
+  bool autostart = false,
 }) {
   final createdAt = DateTime(2026);
   return ProxyProfile(
@@ -119,6 +120,7 @@ ProxyProfile _profile({
     name: name,
     type: type,
     configJson: configJson,
+    autostart: autostart,
     createdAt: createdAt,
     updatedAt: createdAt,
   );
@@ -165,12 +167,14 @@ class _FakeProfilesRepository extends SingboxProxyProfilesRepository {
     required String configJson,
     String? secretJson,
     String? dnsOverrideJson,
+    bool autostart = false,
   }) async {
     final profile = _profile(
       id: 'created-profile',
       name: name,
       type: type,
       configJson: configJson,
+      autostart: autostart,
     );
     createdProfiles.add(profile);
     createdSecrets.add(secretJson);

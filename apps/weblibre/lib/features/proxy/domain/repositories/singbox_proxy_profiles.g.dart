@@ -39,7 +39,7 @@ final class SingboxProxyProfilesRepositoryProvider
 }
 
 String _$singboxProxyProfilesRepositoryHash() =>
-    r'5250f2aafb7ec621b3b33a53ff5a00874e8a4b12';
+    r'f0da164c69d5f76751a1aafcf141c1ad3593c7e3';
 
 abstract class _$SingboxProxyProfilesRepository
     extends $StreamNotifier<List<ProxyProfile>> {

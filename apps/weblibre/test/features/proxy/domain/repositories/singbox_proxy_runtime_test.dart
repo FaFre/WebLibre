@@ -250,6 +250,7 @@ ProxyProfile _profile({required String id, required String name}) {
     name: name,
     type: SingboxProxyProfileType.customOutbound,
     configJson: '{"type":"socks"}',
+    autostart: false,
     createdAt: createdAt,
     updatedAt: createdAt,
   );

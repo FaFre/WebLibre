@@ -55,6 +55,10 @@ class TorSettingsRepository extends _$TorSettingsRepository {
         DriftSqlType.string,
         db.typeMapping,
       ),
+      'autostart': settings['autostart']?.readAs(
+        DriftSqlType.bool,
+        db.typeMapping,
+      ),
     });
   }
 

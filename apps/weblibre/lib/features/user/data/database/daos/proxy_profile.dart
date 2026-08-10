@@ -41,6 +41,13 @@ class ProxyProfileDao extends DatabaseAccessor<UserDatabase>
         .getSingleOrNull();
   }
 
+  Future<List<ProxyProfile>> fetchAutostart() {
+    return (db.proxyProfile.select()
+          ..where((t) => t.autostart.equals(true))
+          ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
+        .get();
+  }
+
   Future<void> upsert(ProxyProfile profile) {
     return db.proxyProfile.insertOne(
       profile,
@@ -50,10 +57,17 @@ class ProxyProfileDao extends DatabaseAccessor<UserDatabase>
           type: Value(profile.type),
           configJson: Value(profile.configJson),
           dnsOverrideJson: Value(profile.dnsOverrideJson),
+          autostart: Value(profile.autostart),
           updatedAt: Value(profile.updatedAt),
         ),
         target: [db.proxyProfile.id],
       ),
+    );
+  }
+
+  Future<void> setAutostart(String id, bool autostart) {
+    return (db.proxyProfile.update()..where((t) => t.id.equals(id))).write(
+      ProxyProfileCompanion(autostart: Value(autostart)),
     );
   }
 

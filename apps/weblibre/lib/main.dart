@@ -59,6 +59,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_pruner.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_settings_sync.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_logs.dart';
+import 'package:weblibre/features/proxy/domain/services/proxy_autostart.dart';
 import 'package:weblibre/features/proxy/domain/services/singbox_proxy_endpoint_sync.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -349,6 +350,13 @@ class _MainWidget extends HookConsumerWidget {
       // Mirror the sing-box runtime's SOCKS endpoints into Gecko's
       // container-proxy registry. Side-effect-only notifier.
       ref.read(singboxProxyEndpointSyncProvider);
+
+      // Bring up the proxy connections flagged for autostart. Registered after
+      // the endpoint sync so their SOCKS endpoints reach Gecko, and left
+      // unawaited so a slow Tor bootstrap can't stall startup — tabs that need
+      // one of these connections wait on the pending start instead of
+      // prompting.
+      unawaited(ref.read(proxyAutostartServiceProvider.notifier).run());
 
       if (!kDebugMode) {
         await BackgroundFetch.configure(

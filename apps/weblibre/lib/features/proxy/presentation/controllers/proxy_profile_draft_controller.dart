@@ -67,6 +67,7 @@ class ProxyProfileDraftState with FastEquatable {
   final String? dnsOverrideJson;
   final String customConfigJson;
   final String customSecretJson;
+  final bool autostart;
   final bool isSaving;
   final bool secretLoaded;
 
@@ -80,6 +81,7 @@ class ProxyProfileDraftState with FastEquatable {
     required this.dnsOverrideJson,
     required this.customConfigJson,
     required this.customSecretJson,
+    required this.autostart,
     required this.isSaving,
     required this.secretLoaded,
   });
@@ -96,6 +98,7 @@ class ProxyProfileDraftState with FastEquatable {
       dnsOverrideJson: seed?.dnsOverrideJson,
       customConfigJson: defaultCustomOutboundConfigJson,
       customSecretJson: '',
+      autostart: false,
       isSaving: false,
       secretLoaded: true,
     );
@@ -112,6 +115,7 @@ class ProxyProfileDraftState with FastEquatable {
       dnsOverrideJson: null,
       customConfigJson: defaultCustomOutboundConfigJson,
       customSecretJson: '',
+      autostart: false,
       isSaving: false,
       secretLoaded: false,
     );
@@ -133,6 +137,7 @@ class ProxyProfileDraftState with FastEquatable {
     dnsOverrideJson,
     customConfigJson,
     customSecretJson,
+    autostart,
     isSaving,
     secretLoaded,
   ];
@@ -188,6 +193,7 @@ class ProxyProfileDraft extends _$ProxyProfileDraft {
         customSecretJson: profile.type == SingboxProxyProfileType.customOutbound
             ? secretJson ?? ''
             : '',
+        autostart: profile.autostart,
         secretLoaded: true,
       );
     } catch (error) {
@@ -230,6 +236,10 @@ class ProxyProfileDraft extends _$ProxyProfileDraft {
     state = state.copyWith(customSecretJson: json);
   }
 
+  void setAutostart(bool autostart) {
+    state = state.copyWith(autostart: autostart);
+  }
+
   Future<SaveOutcome> save() async {
     if (state.isSaving) {
       return const SaveFailed('Profile is already saving.');
@@ -264,6 +274,7 @@ class ProxyProfileDraft extends _$ProxyProfileDraft {
             type: draft.type,
             configJson: configJson,
             dnsOverrideJson: draft.dnsOverrideJson,
+            autostart: draft.autostart,
             createdAt: existing?.createdAt ?? DateTime.now(),
             updatedAt: DateTime.now(),
           );
@@ -284,6 +295,7 @@ class ProxyProfileDraft extends _$ProxyProfileDraft {
                   configJson: configJson,
                   secretJson: secretJson,
                   dnsOverrideJson: draft.dnsOverrideJson,
+                  autostart: draft.autostart,
                 );
           } else {
             await ref

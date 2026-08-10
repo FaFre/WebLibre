@@ -25,6 +25,7 @@ import 'package:weblibre/features/proxy/data/models/proxy_share.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/extensions/singbox_proxy_profile_type_x.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_credentials.dart';
+import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_latency_tester.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/menu_row.dart';
@@ -36,7 +37,7 @@ import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ProxyProfile;
 import 'package:weblibre/utils/ui_helper.dart';
 
-enum ProfileAction { edit, testLatency, share, delete }
+enum ProfileAction { edit, testLatency, toggleAutostart, share, delete }
 
 class ProfileTile extends ConsumerWidget {
   final ProxyProfile profile;
@@ -83,6 +84,7 @@ class ProfileTile extends ConsumerWidget {
       subtitle: ProfileSubtitle(
         typeLabel: profile.type.label,
         latency: latencyResult,
+        autostart: profile.autostart,
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -104,6 +106,11 @@ class ProfileTile extends ConsumerWidget {
                       : Icons.network_check,
                   label: 'Test connection',
                 ),
+              ),
+              CheckedPopupMenuItem(
+                value: ProfileAction.toggleAutostart,
+                checked: profile.autostart,
+                child: const Text('Start on launch'),
               ),
               const PopupMenuItem(
                 value: ProfileAction.share,
@@ -165,6 +172,8 @@ class ProfileTile extends ConsumerWidget {
         await _handleEdit(context);
       case ProfileAction.testLatency:
         await _handleTestLatency(ref);
+      case ProfileAction.toggleAutostart:
+        await _handleToggleAutostart(context, ref);
       case ProfileAction.share:
         await _handleShare(context, ref);
       case ProfileAction.delete:
@@ -178,6 +187,36 @@ class ProfileTile extends ConsumerWidget {
 
   Future<void> _handleTestLatency(WidgetRef ref) {
     return ref.read(proxyLatencyResultsProvider.notifier).test(profile.id);
+  }
+
+  Future<void> _handleToggleAutostart(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final autostart = !profile.autostart;
+
+    try {
+      await ref
+          .read(singboxProxyProfilesRepositoryProvider.notifier)
+          .setAutostart(profile.id, autostart);
+      if (context.mounted) {
+        showInfoMessage(
+          context,
+          autostart
+              ? '${profile.name} will start with WebLibre'
+              : '${profile.name} will no longer start with WebLibre',
+        );
+      }
+    } catch (error, stackTrace) {
+      logger.e(
+        'Failed to toggle autostart for singbox proxy profile ${profile.id}',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      if (context.mounted) {
+        showErrorMessage(context, 'Failed to update autostart: $error');
+      }
+    }
   }
 
   Future<void> _handleShare(BuildContext context, WidgetRef ref) async {

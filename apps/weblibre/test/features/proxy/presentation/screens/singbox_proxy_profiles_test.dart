@@ -12,6 +12,8 @@ import 'package:weblibre/features/proxy/presentation/screens/singbox_proxy_profi
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/profile_tile.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ProxyProfile;
+import 'package:weblibre/features/user/data/models/tor_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 
 void main() {
   testWidgets('deleting a running profile stops through runtime repository', (
@@ -42,6 +44,10 @@ void main() {
           ),
           singboxProxyRuntimeRepositoryProvider.overrideWith(
             () => runtimeRepository,
+          ),
+          // The Tor tile reads its autostart flag from the settings database.
+          torSettingsRepositoryProvider.overrideWith(
+            _FakeTorSettingsRepository.new,
           ),
         ],
         child: const MaterialApp(home: SingboxProxyProfilesScreen()),
@@ -178,6 +184,7 @@ ProxyProfile _profile({
     name: name,
     type: type,
     configJson: configJson,
+    autostart: false,
     createdAt: createdAt,
     updatedAt: createdAt,
   );
@@ -190,6 +197,11 @@ class _FakeProfilesRepository extends SingboxProxyProfilesRepository {
 
   @override
   Stream<List<ProxyProfile>> build() => Stream.value(profiles);
+}
+
+class _FakeTorSettingsRepository extends TorSettingsRepository {
+  @override
+  Stream<TorSettings> build() => Stream.value(TorSettings.withDefaults());
 }
 
 class _FakeCredentialsRepository extends SingboxProxyCredentialsRepository {

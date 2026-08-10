@@ -37,12 +37,17 @@ class SingboxProxyProfilesRepository extends _$SingboxProxyProfilesRepository {
     return ref.read(userDatabaseProvider).proxyProfileDao.findById(id);
   }
 
+  Future<List<ProxyProfile>> fetchAutostartProfiles() {
+    return ref.read(userDatabaseProvider).proxyProfileDao.fetchAutostart();
+  }
+
   Future<ProxyProfile> createProfile({
     required String name,
     required SingboxProxyProfileType type,
     required String configJson,
     String? secretJson,
     String? dnsOverrideJson,
+    bool autostart = false,
   }) async {
     final now = DateTime.now();
     final profile = ProxyProfile(
@@ -51,6 +56,7 @@ class SingboxProxyProfilesRepository extends _$SingboxProxyProfilesRepository {
       type: type,
       configJson: configJson,
       dnsOverrideJson: dnsOverrideJson,
+      autostart: autostart,
       createdAt: now,
       updatedAt: now,
     );
@@ -74,7 +80,8 @@ class SingboxProxyProfilesRepository extends _$SingboxProxyProfilesRepository {
         existing.name != profile.name ||
         existing.type != profile.type ||
         existing.configJson != profile.configJson ||
-        existing.dnsOverrideJson != profile.dnsOverrideJson;
+        existing.dnsOverrideJson != profile.dnsOverrideJson ||
+        existing.autostart != profile.autostart;
 
     if (contentChanged) {
       await dao.upsert(
@@ -84,6 +91,7 @@ class SingboxProxyProfilesRepository extends _$SingboxProxyProfilesRepository {
           type: profile.type,
           configJson: profile.configJson,
           dnsOverrideJson: profile.dnsOverrideJson,
+          autostart: profile.autostart,
           createdAt: existing?.createdAt ?? profile.createdAt,
           updatedAt: DateTime.now(),
         ),
@@ -95,6 +103,15 @@ class SingboxProxyProfilesRepository extends _$SingboxProxyProfilesRepository {
           .read(singboxProxyCredentialsRepositoryProvider.notifier)
           .writeSecretJson(profile.id, secretJson);
     }
+  }
+
+  /// Flips the "start with WebLibre" flag without touching the profile's
+  /// connection config, so toggling it can't invalidate a running connection.
+  Future<void> setAutostart(String profileId, bool autostart) {
+    return ref
+        .read(userDatabaseProvider)
+        .proxyProfileDao
+        .setAutostart(profileId, autostart);
   }
 
   Future<void> deleteProfile(String profileId) async {

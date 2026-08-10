@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_latency_tester.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/ip_chip.dart';
@@ -26,18 +27,46 @@ import 'package:weblibre/features/proxy/presentation/widgets/profile_list/latenc
 class ProfileSubtitle extends StatelessWidget {
   final String typeLabel;
   final AsyncValue<ProxyLatencyData>? latency;
+  final bool autostart;
 
   const ProfileSubtitle({
     super.key,
     required this.typeLabel,
     required this.latency,
+    this.autostart = false,
   });
+
+  Widget _label(BuildContext context) {
+    if (!autostart) return Text(typeLabel);
+
+    final scheme = Theme.of(context).colorScheme;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(child: Text(typeLabel, overflow: TextOverflow.ellipsis)),
+        const SizedBox(width: 6),
+        Icon(
+          MdiIcons.rocketLaunchOutline,
+          size: 14,
+          color: scheme.onSurfaceVariant,
+        ),
+        const SizedBox(width: 2),
+        Text(
+          'Starts with WebLibre',
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final latency = this.latency;
     if (latency == null) {
-      return Text(typeLabel);
+      return _label(context);
     }
 
     final egressIp = latency.value?.egressIp;
@@ -45,7 +74,7 @@ class ProfileSubtitle extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(typeLabel),
+        _label(context),
         const SizedBox(height: 4),
         Wrap(
           spacing: 6,

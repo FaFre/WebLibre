@@ -178,6 +178,7 @@ typedef $ProxyProfileTableCreateCompanionBuilder =
       required i2.SingboxProxyProfileType type,
       required String configJson,
       i0.Value<String?> dnsOverrideJson,
+      i0.Value<bool> autostart,
       i0.Value<DateTime> createdAt,
       i0.Value<DateTime> updatedAt,
       i0.Value<int> rowid,
@@ -189,6 +190,7 @@ typedef $ProxyProfileTableUpdateCompanionBuilder =
       i0.Value<i2.SingboxProxyProfileType> type,
       i0.Value<String> configJson,
       i0.Value<String?> dnsOverrideJson,
+      i0.Value<bool> autostart,
       i0.Value<DateTime> createdAt,
       i0.Value<DateTime> updatedAt,
       i0.Value<int> rowid,
@@ -230,6 +232,11 @@ class $ProxyProfileTableFilterComposer
 
   i0.ColumnFilters<String> get dnsOverrideJson => $composableBuilder(
     column: $table.dnsOverrideJson,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<bool> get autostart => $composableBuilder(
+    column: $table.autostart,
     builder: (column) => i0.ColumnFilters(column),
   );
 
@@ -278,6 +285,11 @@ class $ProxyProfileTableOrderingComposer
     builder: (column) => i0.ColumnOrderings(column),
   );
 
+  i0.ColumnOrderings<bool> get autostart => $composableBuilder(
+    column: $table.autostart,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
   i0.ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => i0.ColumnOrderings(column),
@@ -317,6 +329,9 @@ class $ProxyProfileTableAnnotationComposer
     column: $table.dnsOverrideJson,
     builder: (column) => column,
   );
+
+  i0.GeneratedColumn<bool> get autostart =>
+      $composableBuilder(column: $table.autostart, builder: (column) => column);
 
   i0.GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -368,6 +383,7 @@ class $ProxyProfileTableTableManager
                     const i0.Value.absent(),
                 i0.Value<String> configJson = const i0.Value.absent(),
                 i0.Value<String?> dnsOverrideJson = const i0.Value.absent(),
+                i0.Value<bool> autostart = const i0.Value.absent(),
                 i0.Value<DateTime> createdAt = const i0.Value.absent(),
                 i0.Value<DateTime> updatedAt = const i0.Value.absent(),
                 i0.Value<int> rowid = const i0.Value.absent(),
@@ -377,6 +393,7 @@ class $ProxyProfileTableTableManager
                 type: type,
                 configJson: configJson,
                 dnsOverrideJson: dnsOverrideJson,
+                autostart: autostart,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -388,6 +405,7 @@ class $ProxyProfileTableTableManager
                 required i2.SingboxProxyProfileType type,
                 required String configJson,
                 i0.Value<String?> dnsOverrideJson = const i0.Value.absent(),
+                i0.Value<bool> autostart = const i0.Value.absent(),
                 i0.Value<DateTime> createdAt = const i0.Value.absent(),
                 i0.Value<DateTime> updatedAt = const i0.Value.absent(),
                 i0.Value<int> rowid = const i0.Value.absent(),
@@ -397,6 +415,7 @@ class $ProxyProfileTableTableManager
                 type: type,
                 configJson: configJson,
                 dnsOverrideJson: dnsOverrideJson,
+                autostart: autostart,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -1813,6 +1832,15 @@ class ProxyProfileTable extends i0.Table
         requiredDuringInsert: false,
         $customConstraints: '',
       );
+  late final i0.GeneratedColumn<bool> autostart = i0.GeneratedColumn<bool>(
+    'autostart',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.bool,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT FALSE',
+    defaultValue: const i0.CustomExpression('FALSE'),
+  );
   late final i0.GeneratedColumn<DateTime> createdAt =
       i0.GeneratedColumn<DateTime>(
         'created_at',
@@ -1840,6 +1868,7 @@ class ProxyProfileTable extends i0.Table
     type,
     configJson,
     dnsOverrideJson,
+    autostart,
     createdAt,
     updatedAt,
   ];
@@ -1876,6 +1905,10 @@ class ProxyProfileTable extends i0.Table
         i0.DriftSqlType.string,
         data['${effectivePrefix}dns_override_json'],
       ),
+      autostart: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.bool,
+        data['${effectivePrefix}autostart'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         i0.DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -1907,6 +1940,7 @@ class ProxyProfile extends i0.DataClass
   final i2.SingboxProxyProfileType type;
   final String configJson;
   final String? dnsOverrideJson;
+  final bool autostart;
   final DateTime createdAt;
   final DateTime updatedAt;
   const ProxyProfile({
@@ -1915,6 +1949,7 @@ class ProxyProfile extends i0.DataClass
     required this.type,
     required this.configJson,
     this.dnsOverrideJson,
+    required this.autostart,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -1932,6 +1967,7 @@ class ProxyProfile extends i0.DataClass
     if (!nullToAbsent || dnsOverrideJson != null) {
       map['dns_override_json'] = i0.Variable<String>(dnsOverrideJson);
     }
+    map['autostart'] = i0.Variable<bool>(autostart);
     map['created_at'] = i0.Variable<DateTime>(createdAt);
     map['updated_at'] = i0.Variable<DateTime>(updatedAt);
     return map;
@@ -1950,6 +1986,7 @@ class ProxyProfile extends i0.DataClass
       ),
       configJson: serializer.fromJson<String>(json['config_json']),
       dnsOverrideJson: serializer.fromJson<String?>(json['dns_override_json']),
+      autostart: serializer.fromJson<bool>(json['autostart']),
       createdAt: serializer.fromJson<DateTime>(json['created_at']),
       updatedAt: serializer.fromJson<DateTime>(json['updated_at']),
     );
@@ -1965,6 +2002,7 @@ class ProxyProfile extends i0.DataClass
       ),
       'config_json': serializer.toJson<String>(configJson),
       'dns_override_json': serializer.toJson<String?>(dnsOverrideJson),
+      'autostart': serializer.toJson<bool>(autostart),
       'created_at': serializer.toJson<DateTime>(createdAt),
       'updated_at': serializer.toJson<DateTime>(updatedAt),
     };
@@ -1976,6 +2014,7 @@ class ProxyProfile extends i0.DataClass
     i2.SingboxProxyProfileType? type,
     String? configJson,
     i0.Value<String?> dnsOverrideJson = const i0.Value.absent(),
+    bool? autostart,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => i1.ProxyProfile(
@@ -1986,6 +2025,7 @@ class ProxyProfile extends i0.DataClass
     dnsOverrideJson: dnsOverrideJson.present
         ? dnsOverrideJson.value
         : this.dnsOverrideJson,
+    autostart: autostart ?? this.autostart,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -2000,6 +2040,7 @@ class ProxyProfile extends i0.DataClass
       dnsOverrideJson: data.dnsOverrideJson.present
           ? data.dnsOverrideJson.value
           : this.dnsOverrideJson,
+      autostart: data.autostart.present ? data.autostart.value : this.autostart,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -2013,6 +2054,7 @@ class ProxyProfile extends i0.DataClass
           ..write('type: $type, ')
           ..write('configJson: $configJson, ')
           ..write('dnsOverrideJson: $dnsOverrideJson, ')
+          ..write('autostart: $autostart, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -2026,6 +2068,7 @@ class ProxyProfile extends i0.DataClass
     type,
     configJson,
     dnsOverrideJson,
+    autostart,
     createdAt,
     updatedAt,
   );
@@ -2038,6 +2081,7 @@ class ProxyProfile extends i0.DataClass
           other.type == this.type &&
           other.configJson == this.configJson &&
           other.dnsOverrideJson == this.dnsOverrideJson &&
+          other.autostart == this.autostart &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -2048,6 +2092,7 @@ class ProxyProfileCompanion extends i0.UpdateCompanion<i1.ProxyProfile> {
   final i0.Value<i2.SingboxProxyProfileType> type;
   final i0.Value<String> configJson;
   final i0.Value<String?> dnsOverrideJson;
+  final i0.Value<bool> autostart;
   final i0.Value<DateTime> createdAt;
   final i0.Value<DateTime> updatedAt;
   final i0.Value<int> rowid;
@@ -2057,6 +2102,7 @@ class ProxyProfileCompanion extends i0.UpdateCompanion<i1.ProxyProfile> {
     this.type = const i0.Value.absent(),
     this.configJson = const i0.Value.absent(),
     this.dnsOverrideJson = const i0.Value.absent(),
+    this.autostart = const i0.Value.absent(),
     this.createdAt = const i0.Value.absent(),
     this.updatedAt = const i0.Value.absent(),
     this.rowid = const i0.Value.absent(),
@@ -2067,6 +2113,7 @@ class ProxyProfileCompanion extends i0.UpdateCompanion<i1.ProxyProfile> {
     required i2.SingboxProxyProfileType type,
     required String configJson,
     this.dnsOverrideJson = const i0.Value.absent(),
+    this.autostart = const i0.Value.absent(),
     this.createdAt = const i0.Value.absent(),
     this.updatedAt = const i0.Value.absent(),
     this.rowid = const i0.Value.absent(),
@@ -2080,6 +2127,7 @@ class ProxyProfileCompanion extends i0.UpdateCompanion<i1.ProxyProfile> {
     i0.Expression<String>? type,
     i0.Expression<String>? configJson,
     i0.Expression<String>? dnsOverrideJson,
+    i0.Expression<bool>? autostart,
     i0.Expression<DateTime>? createdAt,
     i0.Expression<DateTime>? updatedAt,
     i0.Expression<int>? rowid,
@@ -2090,6 +2138,7 @@ class ProxyProfileCompanion extends i0.UpdateCompanion<i1.ProxyProfile> {
       if (type != null) 'type': type,
       if (configJson != null) 'config_json': configJson,
       if (dnsOverrideJson != null) 'dns_override_json': dnsOverrideJson,
+      if (autostart != null) 'autostart': autostart,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -2102,6 +2151,7 @@ class ProxyProfileCompanion extends i0.UpdateCompanion<i1.ProxyProfile> {
     i0.Value<i2.SingboxProxyProfileType>? type,
     i0.Value<String>? configJson,
     i0.Value<String?>? dnsOverrideJson,
+    i0.Value<bool>? autostart,
     i0.Value<DateTime>? createdAt,
     i0.Value<DateTime>? updatedAt,
     i0.Value<int>? rowid,
@@ -2112,6 +2162,7 @@ class ProxyProfileCompanion extends i0.UpdateCompanion<i1.ProxyProfile> {
       type: type ?? this.type,
       configJson: configJson ?? this.configJson,
       dnsOverrideJson: dnsOverrideJson ?? this.dnsOverrideJson,
+      autostart: autostart ?? this.autostart,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -2138,6 +2189,9 @@ class ProxyProfileCompanion extends i0.UpdateCompanion<i1.ProxyProfile> {
     if (dnsOverrideJson.present) {
       map['dns_override_json'] = i0.Variable<String>(dnsOverrideJson.value);
     }
+    if (autostart.present) {
+      map['autostart'] = i0.Variable<bool>(autostart.value);
+    }
     if (createdAt.present) {
       map['created_at'] = i0.Variable<DateTime>(createdAt.value);
     }
@@ -2158,6 +2212,7 @@ class ProxyProfileCompanion extends i0.UpdateCompanion<i1.ProxyProfile> {
           ..write('type: $type, ')
           ..write('configJson: $configJson, ')
           ..write('dnsOverrideJson: $dnsOverrideJson, ')
+          ..write('autostart: $autostart, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
