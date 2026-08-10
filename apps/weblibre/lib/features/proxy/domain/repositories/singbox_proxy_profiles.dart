@@ -105,15 +105,6 @@ class SingboxProxyProfilesRepository extends _$SingboxProxyProfilesRepository {
     }
   }
 
-  /// Flips the "start with WebLibre" flag without touching the profile's
-  /// connection config, so toggling it can't invalidate a running connection.
-  Future<void> setAutostart(String profileId, bool autostart) {
-    return ref
-        .read(userDatabaseProvider)
-        .proxyProfileDao
-        .setAutostart(profileId, autostart);
-  }
-
   Future<void> deleteProfile(String profileId) async {
     await ref.read(userDatabaseProvider).proxyProfileDao.deleteById(profileId);
     await ref

@@ -65,12 +65,6 @@ class ProxyProfileDao extends DatabaseAccessor<UserDatabase>
     );
   }
 
-  Future<void> setAutostart(String id, bool autostart) {
-    return (db.proxyProfile.update()..where((t) => t.id.equals(id))).write(
-      ProxyProfileCompanion(autostart: Value(autostart)),
-    );
-  }
-
   Future<void> deleteById(String id) {
     return (db.proxyProfile.delete()..where((t) => t.id.equals(id))).go();
   }

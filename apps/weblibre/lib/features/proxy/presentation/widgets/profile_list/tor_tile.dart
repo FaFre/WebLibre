@@ -29,12 +29,11 @@ import 'package:weblibre/features/proxy/presentation/widgets/profile_list/profil
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/run_switch.dart';
 import 'package:weblibre/features/tor/domain/extensions/tor_status_x.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
-import 'package:weblibre/features/user/data/models/tor_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
-enum TorAction { edit, testLatency, toggleAutostart }
+enum TorAction { edit, testLatency }
 
 class TorProfileTile extends ConsumerWidget {
   final bool isRunning;
@@ -101,8 +100,6 @@ class TorProfileTile extends ConsumerWidget {
                   await ref
                       .read(proxyLatencyResultsProvider.notifier)
                       .testTor();
-                case TorAction.toggleAutostart:
-                  await _toggleAutostart(context, ref, !autostart);
               }
             },
             itemBuilder: (context) => [
@@ -120,11 +117,6 @@ class TorProfileTile extends ConsumerWidget {
                   label: 'Test connection',
                 ),
               ),
-              CheckedPopupMenuItem(
-                value: TorAction.toggleAutostart,
-                checked: autostart,
-                child: const Text('Start on launch'),
-              ),
             ],
           ),
           RunSwitch(
@@ -136,35 +128,6 @@ class TorProfileTile extends ConsumerWidget {
       ),
       onTap: () => const TorProxyRoute().push(context),
     );
-  }
-
-  Future<void> _toggleAutostart(
-    BuildContext context,
-    WidgetRef ref,
-    bool autostart,
-  ) async {
-    try {
-      await ref
-          .read(torSettingsRepositoryProvider.notifier)
-          .updateSettings((current) => current.copyWith.autostart(autostart));
-      if (context.mounted) {
-        showInfoMessage(
-          context,
-          autostart
-              ? '$torBrand will start with WebLibre'
-              : '$torBrand will no longer start with WebLibre',
-        );
-      }
-    } catch (error, stackTrace) {
-      logger.e(
-        'Failed to toggle Tor autostart',
-        error: error,
-        stackTrace: stackTrace,
-      );
-      if (context.mounted) {
-        showErrorMessage(context, 'Failed to update autostart: $error');
-      }
-    }
   }
 
   Future<void> _toggle(BuildContext context, WidgetRef ref) async {
