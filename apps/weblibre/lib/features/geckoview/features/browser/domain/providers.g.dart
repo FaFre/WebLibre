@@ -1391,14 +1391,18 @@ final class VisibleTabListItemsFamily extends $Family
 /// tab the user sees next to the current one rather than to an unrelated
 /// `order_key` neighbour.
 ///
-/// It spans **all** containers, keeping the boundary-crossing reach the
-/// storage-order walk had: each container contributes the rows its tray would
-/// render, and the containers follow one another in the order the quick tab
-/// switcher lays them out — the unassigned bucket first, then containers by
-/// pinned/`order_key`. Stepping off the end of one container therefore
-/// continues into the next, and selecting that tab moves the selected container
-/// along with it. Named containers holding no tabs are skipped so their tree
-/// query never runs.
+/// With `sequentialTabNavigationCrossContainers` on (the default) it spans
+/// **all** containers, keeping the boundary-crossing reach the storage-order
+/// walk had: each container contributes the rows its tray would render, and the
+/// containers follow one another in the order the quick tab switcher lays them
+/// out — the unassigned bucket first, then containers by pinned/`order_key`.
+/// Stepping off the end of one container therefore continues into the next, and
+/// selecting that tab moves the selected container along with it. Named
+/// containers holding no tabs are skipped so their tree query never runs.
+///
+/// With the setting off the order holds only the selected container's rows, so
+/// navigation stays inside the container the user is looking at and stops at its
+/// edge — the containers themselves are then only switched deliberately.
 ///
 /// "Previous" is a step towards the top of that order and "next" a step
 /// towards its end, so direction follows `tabListDirection` (baked into the
@@ -1437,14 +1441,18 @@ final sequentialTabNavigationOrderProvider =
 /// tab the user sees next to the current one rather than to an unrelated
 /// `order_key` neighbour.
 ///
-/// It spans **all** containers, keeping the boundary-crossing reach the
-/// storage-order walk had: each container contributes the rows its tray would
-/// render, and the containers follow one another in the order the quick tab
-/// switcher lays them out — the unassigned bucket first, then containers by
-/// pinned/`order_key`. Stepping off the end of one container therefore
-/// continues into the next, and selecting that tab moves the selected container
-/// along with it. Named containers holding no tabs are skipped so their tree
-/// query never runs.
+/// With `sequentialTabNavigationCrossContainers` on (the default) it spans
+/// **all** containers, keeping the boundary-crossing reach the storage-order
+/// walk had: each container contributes the rows its tray would render, and the
+/// containers follow one another in the order the quick tab switcher lays them
+/// out — the unassigned bucket first, then containers by pinned/`order_key`.
+/// Stepping off the end of one container therefore continues into the next, and
+/// selecting that tab moves the selected container along with it. Named
+/// containers holding no tabs are skipped so their tree query never runs.
+///
+/// With the setting off the order holds only the selected container's rows, so
+/// navigation stays inside the container the user is looking at and stops at its
+/// edge — the containers themselves are then only switched deliberately.
 ///
 /// "Previous" is a step towards the top of that order and "next" a step
 /// towards its end, so direction follows `tabListDirection` (baked into the
@@ -1487,14 +1495,18 @@ final class SequentialTabNavigationOrderProvider
   /// tab the user sees next to the current one rather than to an unrelated
   /// `order_key` neighbour.
   ///
-  /// It spans **all** containers, keeping the boundary-crossing reach the
-  /// storage-order walk had: each container contributes the rows its tray would
-  /// render, and the containers follow one another in the order the quick tab
-  /// switcher lays them out — the unassigned bucket first, then containers by
-  /// pinned/`order_key`. Stepping off the end of one container therefore
-  /// continues into the next, and selecting that tab moves the selected container
-  /// along with it. Named containers holding no tabs are skipped so their tree
-  /// query never runs.
+  /// With `sequentialTabNavigationCrossContainers` on (the default) it spans
+  /// **all** containers, keeping the boundary-crossing reach the storage-order
+  /// walk had: each container contributes the rows its tray would render, and the
+  /// containers follow one another in the order the quick tab switcher lays them
+  /// out — the unassigned bucket first, then containers by pinned/`order_key`.
+  /// Stepping off the end of one container therefore continues into the next, and
+  /// selecting that tab moves the selected container along with it. Named
+  /// containers holding no tabs are skipped so their tree query never runs.
+  ///
+  /// With the setting off the order holds only the selected container's rows, so
+  /// navigation stays inside the container the user is looking at and stops at its
+  /// edge — the containers themselves are then only switched deliberately.
   ///
   /// "Previous" is a step towards the top of that order and "next" a step
   /// towards its end, so direction follows `tabListDirection` (baked into the
@@ -1556,4 +1568,4 @@ final class SequentialTabNavigationOrderProvider
 }
 
 String _$sequentialTabNavigationOrderHash() =>
-    r'cd8f2337012473028084f2efb1bff540e80abdf4';
+    r'c83869b0cd594aee53656340d21866a12f41aca8';

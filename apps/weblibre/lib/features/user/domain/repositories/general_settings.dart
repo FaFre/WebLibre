@@ -69,6 +69,8 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'backgroundTabOpenAction': DriftSqlType.string,
   'autoHideTabBar': DriftSqlType.bool,
   'tabBarSwipeAction': DriftSqlType.string,
+  'sequentialTabNavigationCrossContainers': DriftSqlType.bool,
+  'sequentialTabNavigationLoop': DriftSqlType.bool,
   'historyAutoCleanInterval': DriftSqlType.int,
   'tabViewBottomSheet': DriftSqlType.bool,
   'tabBarShowContextualBar': DriftSqlType.bool,

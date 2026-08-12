@@ -472,15 +472,22 @@ class TabRepository extends _$TabRepository {
   /// step through the *rendered* order
   /// ([sequentialTabNavigationOrderProvider]) so navigation matches the tabs the
   /// user sees, including the tray's sort type, grouping, filters and
-  /// pinned-first handling. That order spans every populated container, so this
-  /// keeps walking past a container boundary exactly like the storage-order walk
-  /// did. It is authoritative once it exists, and every outcome stays inside it:
+  /// pinned-first handling. That order spans every populated container while
+  /// `sequentialTabNavigationCrossContainers` is on, so this keeps walking past
+  /// a container boundary exactly like the storage-order walk did; with the
+  /// setting off it holds the selected container only and the walk ends there.
+  /// It is authoritative once it exists, and every outcome stays inside it:
   ///
-  /// - current tab in the order: step one row, stopping at either end;
+  /// - current tab in the order: step one row, stopping at either end — or
+  ///   continuing at the opposite end when `sequentialTabNavigationLoop` is on;
   /// - current tab outside it — hidden by the active filter, or folded into a
   ///   collapsed group — enter the visible sequence from the end the step comes
   ///   from, rather than jumping to a tab the filter excludes;
   /// - nothing visible at all: do nothing.
+  ///
+  /// Looping is deliberately confined to this path: the storage-order fallback
+  /// below serves container-scoped stepping and the window before the tree data
+  /// has loaded, where there is no rendered sequence whose ends could be joined.
   ///
   /// The storage-order path is left for calls that scope navigation to a single
   /// container (which the cross-container order cannot answer) and for the brief
@@ -507,10 +514,19 @@ class TabRepository extends _$TabRepository {
           );
         }
 
-        final targetIndex = selectPrevious ? index - 1 : index + 1;
+        var targetIndex = selectPrevious ? index - 1 : index + 1;
 
         if (targetIndex < 0 || targetIndex >= visibleOrder.length) {
-          return false;
+          final loop = ref
+              .read(generalSettingsWithDefaultsProvider)
+              .sequentialTabNavigationLoop;
+
+          // A single visible tab would wrap onto itself, which is not a step.
+          if (!loop || visibleOrder.length < 2) {
+            return false;
+          }
+
+          targetIndex = targetIndex < 0 ? visibleOrder.length - 1 : 0;
         }
 
         return selectTab(visibleOrder[targetIndex]);

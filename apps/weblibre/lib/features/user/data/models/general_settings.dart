@@ -196,6 +196,16 @@ class GeneralSettings with FastEquatable {
   final BackgroundTabOpenAction backgroundTabOpenAction;
   final bool autoHideTabBar;
   final TabBarSwipeAction tabBarSwipeAction;
+
+  /// Whether sequential tab navigation (the tab bar swipe and the
+  /// next/previous tab gestures) walks past the current container into the
+  /// neighbouring one, instead of stopping at the container's own edge.
+  final bool sequentialTabNavigationCrossContainers;
+
+  /// Whether sequential tab navigation wraps around: stepping past the last
+  /// visible tab continues at the first one and vice versa, instead of the
+  /// step doing nothing.
+  final bool sequentialTabNavigationLoop;
   final Duration historyAutoCleanInterval;
   final bool tabViewBottomSheet;
   final bool tabBarShowContextualBar;
@@ -341,6 +351,8 @@ class GeneralSettings with FastEquatable {
     required this.backgroundTabOpenAction,
     required this.autoHideTabBar,
     required this.tabBarSwipeAction,
+    required this.sequentialTabNavigationCrossContainers,
+    required this.sequentialTabNavigationLoop,
     required this.historyAutoCleanInterval,
     required this.tabViewBottomSheet,
     required this.tabBarShowContextualBar,
@@ -420,6 +432,8 @@ class GeneralSettings with FastEquatable {
     BackgroundTabOpenAction? backgroundTabOpenAction,
     bool? autoHideTabBar,
     TabBarSwipeAction? tabBarSwipeAction,
+    bool? sequentialTabNavigationCrossContainers,
+    bool? sequentialTabNavigationLoop,
     Duration? historyAutoCleanInterval,
     bool? tabViewBottomSheet,
     bool? tabBarShowContextualBar,
@@ -500,6 +514,11 @@ class GeneralSettings with FastEquatable {
        autoHideTabBar = autoHideTabBar ?? true,
        tabBarSwipeAction =
            tabBarSwipeAction ?? TabBarSwipeAction.switchLastOpened,
+       // Defaults to the behavior sequential navigation shipped with: stepping
+       // off a container's edge continues in the next one.
+       sequentialTabNavigationCrossContainers =
+           sequentialTabNavigationCrossContainers ?? true,
+       sequentialTabNavigationLoop = sequentialTabNavigationLoop ?? false,
        historyAutoCleanInterval =
            historyAutoCleanInterval ?? const Duration(days: 90),
        tabViewBottomSheet = tabViewBottomSheet ?? false,
@@ -630,6 +649,12 @@ class GeneralSettings with FastEquatable {
     return bookmarkOpenSetting;
   }
 
+  /// Keeping sequential navigation inside one container only means something
+  /// while the user can switch containers at all: with the container UI hidden
+  /// there is no selected container to stay in, so the walk spans everything.
+  bool get effectiveSequentialTabNavigationCrossContainers =>
+      sequentialTabNavigationCrossContainers || !showContainerUi;
+
   /// Container-dependent stacking modes degrade to a single recently-used
   /// row when the container UI is disabled. Two-level stacking additionally
   /// degrades to accordion (the default mode, which has a vertical form) on the
@@ -682,6 +707,8 @@ class GeneralSettings with FastEquatable {
     backgroundTabOpenAction,
     autoHideTabBar,
     tabBarSwipeAction,
+    sequentialTabNavigationCrossContainers,
+    sequentialTabNavigationLoop,
     historyAutoCleanInterval,
     tabViewBottomSheet,
     tabBarShowContextualBar,

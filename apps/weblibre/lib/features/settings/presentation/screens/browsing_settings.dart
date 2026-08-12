@@ -106,6 +106,20 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
         child: _TabBarSwipeBehaviorSection(),
       ),
       SettingsEntryDefinition(
+        title: 'Sequential Tab Navigation',
+        subtitle: 'Choose where stepping through tabs in order ends',
+        keywords: [
+          'gestures',
+          'swipe',
+          'next tab',
+          'previous tab',
+          'containers',
+          'loop',
+          'wrap around',
+        ],
+        child: _SequentialTabNavigationSection(),
+      ),
+      SettingsEntryDefinition(
         title: 'Open Links in Apps',
         subtitle: 'Choose how external app links open',
         keywords: ['app links', 'external apps'],
@@ -865,6 +879,83 @@ class _TabBarSwipeBehaviorSection extends HookConsumerWidget {
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SequentialTabNavigationSection extends HookConsumerWidget {
+  const _SequentialTabNavigationSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final crossContainers = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.sequentialTabNavigationCrossContainers,
+      ),
+    );
+    final loop = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.sequentialTabNavigationLoop,
+      ),
+    );
+    final showContainerUi = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.showContainerUi),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const ListTile(
+            title: Text('Sequential Tab Navigation'),
+            subtitle: Text(
+              'Applies to the tab bar swipe and the next/previous tab gestures',
+            ),
+            leading: Icon(MdiIcons.swapHorizontal),
+            contentPadding: EdgeInsets.zero,
+          ),
+          if (showContainerUi)
+            SwitchListTile.adaptive(
+              title: const Text('Continue Into Next Container'),
+              subtitle: const Text(
+                'Stepping past the first or last tab of a container moves into '
+                'the neighbouring one. When off, navigation stays inside the '
+                'current container.',
+              ),
+              secondary: const Icon(MdiIcons.folderMultipleOutline),
+              contentPadding: EdgeInsets.zero,
+              value: crossContainers,
+              onChanged: (value) async {
+                await ref
+                    .read(saveGeneralSettingsControllerProvider.notifier)
+                    .save(
+                      (currentSettings) => currentSettings.copyWith
+                          .sequentialTabNavigationCrossContainers(value),
+                    );
+              },
+            ),
+          SwitchListTile.adaptive(
+            title: const Text('Loop Around'),
+            subtitle: const Text(
+              'Stepping past the last tab continues at the first one, and the '
+              'other way round.',
+            ),
+            secondary: const Icon(MdiIcons.repeat),
+            contentPadding: EdgeInsets.zero,
+            value: loop,
+            onChanged: (value) async {
+              await ref
+                  .read(saveGeneralSettingsControllerProvider.notifier)
+                  .save(
+                    (currentSettings) => currentSettings.copyWith
+                        .sequentialTabNavigationLoop(value),
+                  );
+            },
           ),
         ],
       ),

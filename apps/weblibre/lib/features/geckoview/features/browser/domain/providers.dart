@@ -1253,14 +1253,18 @@ EquatableValue<List<TabListItemEntity>> visibleTabListItems(
 /// tab the user sees next to the current one rather than to an unrelated
 /// `order_key` neighbour.
 ///
-/// It spans **all** containers, keeping the boundary-crossing reach the
-/// storage-order walk had: each container contributes the rows its tray would
-/// render, and the containers follow one another in the order the quick tab
-/// switcher lays them out — the unassigned bucket first, then containers by
-/// pinned/`order_key`. Stepping off the end of one container therefore
-/// continues into the next, and selecting that tab moves the selected container
-/// along with it. Named containers holding no tabs are skipped so their tree
-/// query never runs.
+/// With `sequentialTabNavigationCrossContainers` on (the default) it spans
+/// **all** containers, keeping the boundary-crossing reach the storage-order
+/// walk had: each container contributes the rows its tray would render, and the
+/// containers follow one another in the order the quick tab switcher lays them
+/// out — the unassigned bucket first, then containers by pinned/`order_key`.
+/// Stepping off the end of one container therefore continues into the next, and
+/// selecting that tab moves the selected container along with it. Named
+/// containers holding no tabs are skipped so their tree query never runs.
+///
+/// With the setting off the order holds only the selected container's rows, so
+/// navigation stays inside the container the user is looking at and stops at its
+/// edge — the containers themselves are then only switched deliberately.
 ///
 /// "Previous" is a step towards the top of that order and "next" a step
 /// towards its end, so direction follows `tabListDirection` (baked into the
@@ -1287,18 +1291,30 @@ EquatableValue<List<TabListItemEntity>> visibleTabListItems(
 /// alive too.
 @Riverpod(keepAlive: true)
 EquatableValue<List<String>?> sequentialTabNavigationOrder(Ref ref) {
-  final containers = ref.watch(
-    watchContainersWithCountProvider.select((value) => value.value),
+  final crossContainers = ref.watch(
+    generalSettingsWithDefaultsProvider.select(
+      (settings) => settings.effectiveSequentialTabNavigationCrossContainers,
+    ),
   );
-  if (containers == null) {
-    return EquatableValue(null);
-  }
 
-  final containerIds = <String?>[
-    null,
-    for (final container in containers)
-      if ((container.tabCount ?? 0) > 0) container.id,
-  ];
+  final List<String?> containerIds;
+
+  if (crossContainers) {
+    final containers = ref.watch(
+      watchContainersWithCountProvider.select((value) => value.value),
+    );
+    if (containers == null) {
+      return EquatableValue(null);
+    }
+
+    containerIds = <String?>[
+      null,
+      for (final container in containers)
+        if ((container.tabCount ?? 0) > 0) container.id,
+    ];
+  } else {
+    containerIds = <String?>[ref.watch(selectedContainerProvider)];
+  }
 
   final order = <String>[];
   for (final containerId in containerIds) {

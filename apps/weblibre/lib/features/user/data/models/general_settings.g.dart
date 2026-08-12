@@ -71,6 +71,12 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings tabBarSwipeAction(TabBarSwipeAction tabBarSwipeAction);
 
+  GeneralSettings sequentialTabNavigationCrossContainers(
+    bool sequentialTabNavigationCrossContainers,
+  );
+
+  GeneralSettings sequentialTabNavigationLoop(bool sequentialTabNavigationLoop);
+
   GeneralSettings historyAutoCleanInterval(Duration historyAutoCleanInterval);
 
   GeneralSettings tabViewBottomSheet(bool tabViewBottomSheet);
@@ -222,6 +228,8 @@ abstract class _$GeneralSettingsCWProxy {
     BackgroundTabOpenAction backgroundTabOpenAction,
     bool autoHideTabBar,
     TabBarSwipeAction tabBarSwipeAction,
+    bool sequentialTabNavigationCrossContainers,
+    bool sequentialTabNavigationLoop,
     Duration historyAutoCleanInterval,
     bool tabViewBottomSheet,
     bool tabBarShowContextualBar,
@@ -394,6 +402,19 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings tabBarSwipeAction(TabBarSwipeAction tabBarSwipeAction) =>
       call(tabBarSwipeAction: tabBarSwipeAction);
+
+  @override
+  GeneralSettings sequentialTabNavigationCrossContainers(
+    bool sequentialTabNavigationCrossContainers,
+  ) => call(
+    sequentialTabNavigationCrossContainers:
+        sequentialTabNavigationCrossContainers,
+  );
+
+  @override
+  GeneralSettings sequentialTabNavigationLoop(
+    bool sequentialTabNavigationLoop,
+  ) => call(sequentialTabNavigationLoop: sequentialTabNavigationLoop);
 
   @override
   GeneralSettings historyAutoCleanInterval(Duration historyAutoCleanInterval) =>
@@ -644,6 +665,9 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? backgroundTabOpenAction = const $CopyWithPlaceholder(),
     Object? autoHideTabBar = const $CopyWithPlaceholder(),
     Object? tabBarSwipeAction = const $CopyWithPlaceholder(),
+    Object? sequentialTabNavigationCrossContainers =
+        const $CopyWithPlaceholder(),
+    Object? sequentialTabNavigationLoop = const $CopyWithPlaceholder(),
     Object? historyAutoCleanInterval = const $CopyWithPlaceholder(),
     Object? tabViewBottomSheet = const $CopyWithPlaceholder(),
     Object? tabBarShowContextualBar = const $CopyWithPlaceholder(),
@@ -851,6 +875,19 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.tabBarSwipeAction
           // ignore: cast_nullable_to_non_nullable
           : tabBarSwipeAction as TabBarSwipeAction,
+      sequentialTabNavigationCrossContainers:
+          sequentialTabNavigationCrossContainers ==
+                  const $CopyWithPlaceholder() ||
+              sequentialTabNavigationCrossContainers == null
+          ? _value.sequentialTabNavigationCrossContainers
+          // ignore: cast_nullable_to_non_nullable
+          : sequentialTabNavigationCrossContainers as bool,
+      sequentialTabNavigationLoop:
+          sequentialTabNavigationLoop == const $CopyWithPlaceholder() ||
+              sequentialTabNavigationLoop == null
+          ? _value.sequentialTabNavigationLoop
+          // ignore: cast_nullable_to_non_nullable
+          : sequentialTabNavigationLoop as bool,
       historyAutoCleanInterval:
           historyAutoCleanInterval == const $CopyWithPlaceholder() ||
               historyAutoCleanInterval == null
@@ -1217,6 +1254,9 @@ GeneralSettings _$GeneralSettingsFromJson(
     _$TabBarSwipeActionEnumMap,
     json['tabBarSwipeAction'],
   ),
+  sequentialTabNavigationCrossContainers:
+      json['sequentialTabNavigationCrossContainers'] as bool?,
+  sequentialTabNavigationLoop: json['sequentialTabNavigationLoop'] as bool?,
   historyAutoCleanInterval: json['historyAutoCleanInterval'] == null
       ? null
       : Duration(
@@ -1349,6 +1389,9 @@ Map<String, dynamic> _$GeneralSettingsToJson(
       _$BackgroundTabOpenActionEnumMap[instance.backgroundTabOpenAction]!,
   'autoHideTabBar': instance.autoHideTabBar,
   'tabBarSwipeAction': _$TabBarSwipeActionEnumMap[instance.tabBarSwipeAction]!,
+  'sequentialTabNavigationCrossContainers':
+      instance.sequentialTabNavigationCrossContainers,
+  'sequentialTabNavigationLoop': instance.sequentialTabNavigationLoop,
   'historyAutoCleanInterval': instance.historyAutoCleanInterval.inMicroseconds,
   'tabViewBottomSheet': instance.tabViewBottomSheet,
   'tabBarShowContextualBar': instance.tabBarShowContextualBar,
