@@ -229,4 +229,104 @@ class PendingAppLinkStoreTest {
         clock.now = 10_001L
         assertFalse(store.isFallbackReentry("https://fallback.example/"))
     }
+
+    @Test
+    fun fallbackIssueIsClaimedOncePerWindow() {
+        val clock = FakeClock()
+        val store = PendingAppLinkStore(clock, fallbackIssueMs = 10_000L)
+        assertTrue(store.claimFallbackIssue("tab1", "https://maps.example/place"))
+        // The page re-fires the same intent on every load of the fallback page: refused, so the
+        // fallback is not loaded again and the tab stops reloading.
+        assertFalse(store.claimFallbackIssue("tab1", "https://maps.example/place"))
+        assertFalse(store.claimFallbackIssue("tab1", "https://maps.example/place"))
+    }
+
+    @Test
+    fun refusedFallbackClaimPushesTheWindowOut() {
+        val clock = FakeClock()
+        val store = PendingAppLinkStore(clock, fallbackIssueMs = 10_000L)
+        assertTrue(store.claimFallbackIssue("tab1", "https://maps.example/place"))
+        // A page firing on a timer just short of the window cannot walk around the guard.
+        clock.now = 9_000L
+        assertFalse(store.claimFallbackIssue("tab1", "https://maps.example/place"))
+        clock.now = 18_000L
+        assertFalse(store.claimFallbackIssue("tab1", "https://maps.example/place"))
+        // Quiet for a full window: a genuinely new attempt may load the fallback again.
+        clock.now = 28_001L
+        assertTrue(store.claimFallbackIssue("tab1", "https://maps.example/place"))
+    }
+
+    @Test
+    fun fallbackClaimsAreScopedPerTabAndPerUrl() {
+        val clock = FakeClock()
+        val store = PendingAppLinkStore(clock, fallbackIssueMs = 10_000L)
+        assertTrue(store.claimFallbackIssue("tab1", "https://maps.example/place"))
+        // The same link opened in another tab still gets its fallback.
+        assertTrue(store.claimFallbackIssue("tab2", "https://maps.example/place"))
+        // A different target in the same tab is a different claim.
+        assertTrue(store.claimFallbackIssue("tab1", "https://maps.example/other"))
+    }
+
+    @Test
+    fun fallbackClaimIgnoresQueryAndFragmentMutation() {
+        val clock = FakeClock()
+        val store = PendingAppLinkStore(clock, fallbackIssueMs = 10_000L)
+        // Google Maps appends one more `coh` entry on every bounce; keying on the exact URL made
+        // each one a fresh claim, so the tab kept reloading until the list saturated.
+        assertTrue(store.claimFallbackIssue("tab1", "https://maps.example/place?coh=1%2C2"))
+        assertFalse(store.claimFallbackIssue("tab1", "https://maps.example/place?coh=1%2C2%2C2"))
+        assertFalse(store.claimFallbackIssue("tab1", "https://maps.example/place?coh=1%2C2%2C2%2C2"))
+        assertFalse(store.claimFallbackIssue("tab1", "https://maps.example/place#anchor"))
+        // A different path is still a different target.
+        assertTrue(store.claimFallbackIssue("tab1", "https://maps.example/other?coh=1%2C2"))
+    }
+
+    @Test
+    fun perTabBudgetBoundsFallbacksWhoseIdentityKeepsChanging() {
+        val clock = FakeClock()
+        val store = PendingAppLinkStore(
+            clock,
+            fallbackIssueMs = 10_000L,
+            fallbackIssueBudget = 3,
+            fallbackBudgetWindowMs = 30_000L,
+        )
+        // A page that mutates the whole path per bounce defeats the identity bound entirely.
+        repeat(3) { assertTrue(store.claimFallbackIssue("tab1", "https://maps.example/place/$it")) }
+        assertFalse(store.claimFallbackIssue("tab1", "https://maps.example/place/3"))
+
+        // Another tab keeps its own allowance.
+        assertTrue(store.claimFallbackIssue("tab2", "https://maps.example/place/3"))
+
+        // Refusals keep the window rolling, so the loop cannot outlast it.
+        clock.now = 29_000L
+        assertFalse(store.claimFallbackIssue("tab1", "https://maps.example/place/4"))
+        clock.now = 55_000L
+        assertFalse(store.claimFallbackIssue("tab1", "https://maps.example/place/5"))
+
+        // A user-initiated navigation is the escape hatch.
+        store.clearFallbackIssuedForTab("tab1")
+        assertTrue(store.claimFallbackIssue("tab1", "https://maps.example/place/6"))
+    }
+
+    @Test
+    fun userInitiatedNavigationAndTabCloseReleaseFallbackClaims() {
+        val clock = FakeClock()
+        val store = PendingAppLinkStore(clock, fallbackIssueMs = 10_000L)
+        assertTrue(store.claimFallbackIssue("tab1", "https://maps.example/place"))
+        assertFalse(store.claimFallbackIssue("tab1", "https://maps.example/place"))
+
+        store.clearFallbackIssuedForTab("tab1")
+        assertTrue(store.claimFallbackIssue("tab1", "https://maps.example/place"))
+
+        store.invalidateTab("tab1")
+        assertTrue(store.claimFallbackIssue("tab1", "https://maps.example/place"))
+    }
+
+    @Test
+    fun fallbackClaimsWithoutASessionAreStillBounded() {
+        val clock = FakeClock()
+        val store = PendingAppLinkStore(clock, fallbackIssueMs = 10_000L)
+        assertTrue(store.claimFallbackIssue(null, "https://maps.example/place"))
+        assertFalse(store.claimFallbackIssue(null, "https://maps.example/place"))
+    }
 }

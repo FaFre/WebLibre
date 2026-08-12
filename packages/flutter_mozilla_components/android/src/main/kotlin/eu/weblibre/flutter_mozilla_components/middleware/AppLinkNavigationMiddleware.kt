@@ -26,8 +26,10 @@ import mozilla.components.lib.state.Store
  * - tab close / Custom Tab removal invalidates the tab's pending requests and suppression, and
  *   tells the owning surface to re-query so no dead prompt is left on screen;
  * - a new user-initiated/direct navigation (omnibar, bookmark, typed URL — which dispatch a
- *   `LoadUrlAction`) clears the tab's suppression. In-page redirects do not dispatch these
- *   actions, so the redirect-loop defence stays intact.
+ *   `LoadUrlAction`) clears the tab's suppression and its fallback-issue claims. In-page
+ *   redirects do not dispatch these actions — nor does the interceptor's own
+ *   `InterceptionResponse.Url`, which the engine session loads directly — so the redirect-loop
+ *   defences stay intact and the user keeps a way to ask for the fallback again.
  *
  * It deliberately does **not** invalidate prompts on navigation: see the [PendingAppLinkStore]
  * KDoc for the three per-document signals that were tried and why none of them can express
@@ -44,10 +46,12 @@ class AppLinkNavigationMiddleware(
         when (action) {
             is EngineAction.LoadUrlAction -> {
                 this.store.clearSuppressionForTab(action.tabId)
+                this.store.clearFallbackIssuedForTab(action.tabId)
             }
 
             is EngineAction.OptimizedLoadUrlTriggeredAction -> {
                 this.store.clearSuppressionForTab(action.tabId)
+                this.store.clearFallbackIssuedForTab(action.tabId)
             }
 
             is TabListAction.RemoveTabAction -> {

@@ -151,7 +151,7 @@ class WebLibreAppLinksInterceptor(
             return if (result == AppLinkLaunchResult.LAUNCHED) {
                 RequestInterceptor.InterceptionResponse.Deny
             } else {
-                safeNonLaunchResponse(pendingStore, resolved)
+                safeNonLaunchResponse(pendingStore, session?.id, resolved)
             }
         }
 
@@ -194,10 +194,8 @@ class WebLibreAppLinksInterceptor(
 
             is AppLinkDecision.DenyKeepPage -> RequestInterceptor.InterceptionResponse.Deny
 
-            is AppLinkDecision.LoadFallback -> {
-                pendingStore.recordFallbackReentry(canonicalReentryKey(decision.url))
-                RequestInterceptor.InterceptionResponse.Url(decision.url)
-            }
+            is AppLinkDecision.LoadFallback ->
+                fallbackResponse(pendingStore, session?.id, decision.url)
 
             is AppLinkDecision.AutoLaunch -> {
                 val result = runtime.launcher.launch(
@@ -223,10 +221,8 @@ class WebLibreAppLinksInterceptor(
                     // engine-supported original and reload it — return null so it loads once.
                     else -> when {
                         resolved.engineSupportsScheme -> null
-                        resolved.fallbackUrl != null -> {
-                            pendingStore.recordFallbackReentry(canonicalReentryKey(resolved.fallbackUrl))
-                            RequestInterceptor.InterceptionResponse.Url(resolved.fallbackUrl)
-                        }
+                        resolved.fallbackUrl != null ->
+                            fallbackResponse(pendingStore, session?.id, resolved.fallbackUrl)
                         else -> RequestInterceptor.InterceptionResponse.Deny
                     }
                 }
@@ -235,7 +231,7 @@ class WebLibreAppLinksInterceptor(
             is AppLinkDecision.Prompt -> {
                 // A missing session cannot host a prompt; the classifier never reaches Prompt in that
                 // case, so `session` is non-null here.
-                val tab = session ?: return safeNonLaunchResponse(pendingStore, resolved)
+                val tab = session ?: return safeNonLaunchResponse(pendingStore, null, resolved)
                 createPrompt(pendingStore, tab, uri, lastUri, input, decision, hasUserGesture)
                 if (decision.kind == AppLinkPromptKind.BANNER) {
                     // Engine-supported: allow the page to load while the non-modal banner is up.
@@ -318,16 +314,48 @@ class WebLibreAppLinksInterceptor(
 
     private fun safeNonLaunchResponse(
         pendingStore: PendingAppLinkStore,
+        tabId: String?,
         resolved: ResolvedAppLink,
     ): RequestInterceptor.InterceptionResponse? {
         return if (resolved.engineSupportsScheme) {
             null
         } else {
-            resolved.fallbackUrl?.let {
-                pendingStore.recordFallbackReentry(canonicalReentryKey(it))
-                RequestInterceptor.InterceptionResponse.Url(it)
-            } ?: RequestInterceptor.InterceptionResponse.Deny
+            resolved.fallbackUrl?.let { fallbackResponse(pendingStore, tabId, it) }
+                ?: RequestInterceptor.InterceptionResponse.Deny
         }
+    }
+
+    /**
+     * Issue [fallbackUrl] as the replacement load, or keep the current page when this tab already
+     * had the same fallback issued inside the window (§2.7,
+     * [PendingAppLinkStore.claimFallbackIssue]).
+     *
+     * Without the claim this is an unbounded reload loop on any page that re-fires its `intent:`
+     * URL every time its own `browser_fallback_url` page loads — Google Maps place links do, so
+     * under `never` (or with the target app absent) the tab reloaded roughly once a second for as
+     * long as it stayed open. The re-entry map cannot catch that: it is keyed on the fallback URL
+     * and consulted for the *fallback's* load, while the load that regenerates it arrives under the
+     * `intent:` URL.
+     *
+     * The claim is keyed on the URL native hands out rather than the one that comes back, so a
+     * fallback rewritten in flight (a redirect dropping a campaign parameter) is still recognised —
+     * and on origin + path rather than the whole URL, because the same page grows a query parameter
+     * on every bounce. See [PendingAppLinkStore.claimFallbackIssue] for both bounds.
+     */
+    private fun fallbackResponse(
+        pendingStore: PendingAppLinkStore,
+        tabId: String?,
+        fallbackUrl: String,
+    ): RequestInterceptor.InterceptionResponse {
+        if (!pendingStore.claimFallbackIssue(tabId, fallbackUrl)) {
+            logger.info("fallback re-issue refused tab=$tabId url=$fallbackUrl")
+            // A fallback is only ever extracted for a non-engine-supported original
+            // (ExternalAppResolver.validateFallback), so there is no original load to allow
+            // instead: deny and leave the fallback page already on screen standing.
+            return RequestInterceptor.InterceptionResponse.Deny
+        }
+        pendingStore.recordFallbackReentry(canonicalReentryKey(fallbackUrl))
+        return RequestInterceptor.InterceptionResponse.Url(fallbackUrl)
     }
 
     /**

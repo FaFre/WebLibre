@@ -150,7 +150,13 @@ class PendingAppLinkStore(
     private val suppressionExpiryMs: Long = SUPPRESSION_EXPIRY_MS,
     private val dedupeWindowMs: Long = DEDUPE_WINDOW_MS,
     private val fallbackReentryMs: Long = FALLBACK_REENTRY_MS,
+    private val fallbackIssueMs: Long = FALLBACK_ISSUE_MS,
+    private val fallbackIssueBudget: Int = FALLBACK_ISSUE_BUDGET,
+    private val fallbackBudgetWindowMs: Long = FALLBACK_BUDGET_WINDOW_MS,
 ) {
+    /** Rolling per-tab allowance of fallback loads; see [claimFallbackIssue]. */
+    private class FallbackBudget(var count: Int, var windowEndsAt: Long)
+
     private val logger = Logger("PendingAppLinkStore")
     private val lock = Any()
     private val idGenerator = AtomicLong(0L)
@@ -158,8 +164,29 @@ class PendingAppLinkStore(
     private val requests = LinkedHashMap<Long, PendingAppLinkRequest>()
     private val suppression = HashMap<String, Long>()
     private val fallbackReentry = HashMap<String, Long>()
+    private val fallbackIssued = HashMap<String, Long>()
+    private val fallbackBudget = HashMap<String, FallbackBudget>()
 
     private fun suppressionKey(tabId: String, fingerprint: String) = "$tabId\u0000$fingerprint"
+
+    // Same tab-scoped composite shape as [suppressionKey]; a sessionless navigation keys under the
+    // empty tab so its fallback is still bounded rather than unguarded.
+    private fun fallbackIssueKey(tabId: String?, fallbackUrl: String) =
+        suppressionKey(tabId.orEmpty(), fallbackIdentity(fallbackUrl))
+
+    /**
+     * The loop-detection identity of a fallback URL: everything before the query and fragment.
+     *
+     * The exact URL cannot serve as the key. Google Maps grows a `coh` query parameter by one
+     * entry on every round trip (`coh=192189,230964` → `…,230964` → …), so an exact key made each
+     * bounce a fresh claim and the tab kept reloading until that list happened to saturate. What
+     * identifies *which* target a page keeps bouncing us to lives in the origin and path; the
+     * query is where such round-trip bookkeeping accumulates.
+     */
+    private fun fallbackIdentity(fallbackUrl: String): String {
+        val cut = fallbackUrl.indexOfFirst { it == '?' || it == '#' }
+        return if (cut >= 0) fallbackUrl.substring(0, cut) else fallbackUrl
+    }
 
     /**
      * Create a request, collapsing a matching non-user-gesture request that arrived
@@ -263,6 +290,8 @@ class PendingAppLinkStore(
                 .mapTo(mutableSetOf()) { it.owner }
             requests.values.removeAll { it.tabId == tabId }
             suppression.keys.removeAll { it.startsWith("$tabId\u0000") }
+            fallbackIssued.keys.removeAll { it.startsWith(fallbackIssueKey(tabId, "")) }
+            fallbackBudget.remove(tabId)
             return owners
         }
     }
@@ -308,6 +337,58 @@ class PendingAppLinkStore(
     }
 
     /**
+     * Claim the right to *issue* [fallbackUrl] as a load in [tabId].
+     *
+     * The sibling of [isFallbackReentry], guarding the other end of the same hop: that map lets an
+     * already-issued fallback load past the app-links tail, this one bounds how often a fallback
+     * may be issued at all. App-promotion pages re-fire their `intent:` URL on every load of their
+     * own `browser_fallback_url` page (Google Maps place links do), so issuing the fallback
+     * unconditionally reloads that page for as long as the tab is open.
+     *
+     * Two independent bounds, because the first one alone assumes more than the web provides:
+     * 1. per [fallbackIdentity]: the first claim in a window wins, repeats are refused;
+     * 2. per tab: at most [fallbackIssueBudget] fallback loads per budget window, whatever their
+     *    identity — this one holds even against a page that mutates its fallback URL on every
+     *    bounce, which is exactly how the identity bound was first defeated.
+     *
+     * A refused claim pushes both windows out, so a page firing on a timer cannot walk around
+     * either by waiting. The escape hatch is a user-initiated navigation
+     * ([clearFallbackIssuedForTab]), not the passage of time.
+     *
+     * @return true when the caller may issue the load; false when it must keep the current page.
+     */
+    fun claimFallbackIssue(tabId: String?, fallbackUrl: String): Boolean {
+        synchronized(lock) {
+            sweepExpiredLocked()
+            val now = clock.elapsedRealtime()
+
+            val key = fallbackIssueKey(tabId, fallbackUrl)
+            val repeat = fallbackIssued[key]?.let { now <= it } ?: false
+            fallbackIssued[key] = now + fallbackIssueMs
+
+            val budget = fallbackBudget[tabId.orEmpty()]
+                ?.takeIf { now <= it.windowEndsAt }
+                ?: FallbackBudget(count = 0, windowEndsAt = now + fallbackBudgetWindowMs)
+            fallbackBudget[tabId.orEmpty()] = budget
+
+            if (repeat || budget.count >= fallbackIssueBudget) {
+                budget.windowEndsAt = now + fallbackBudgetWindowMs
+                return false
+            }
+            budget.count++
+            return true
+        }
+    }
+
+    /** Release a tab's fallback claims on a new user-initiated/direct navigation. */
+    fun clearFallbackIssuedForTab(tabId: String) {
+        synchronized(lock) {
+            fallbackIssued.keys.removeAll { it.startsWith(fallbackIssueKey(tabId, "")) }
+            fallbackBudget.remove(tabId)
+        }
+    }
+
+    /**
      * A banner is a passive offer sitting over a page the user keeps reading, so it is bounded by
      * time rather than by navigation (see the class KDoc). A modal blocks a navigation until it is
      * answered, so it keeps the long window.
@@ -320,6 +401,8 @@ class PendingAppLinkStore(
         requests.values.removeAll { now > it.createdAt + expiryFor(it) }
         suppression.values.removeAll { now > it }
         fallbackReentry.values.removeAll { now > it }
+        fallbackIssued.values.removeAll { now > it }
+        fallbackBudget.values.removeAll { now > it.windowEndsAt }
     }
 
     companion object {
@@ -328,5 +411,14 @@ class PendingAppLinkStore(
         const val SUPPRESSION_EXPIRY_MS = 10 * 60 * 1000L
         const val DEDUPE_WINDOW_MS = 2000L
         const val FALLBACK_REENTRY_MS = 10 * 1000L
+        const val FALLBACK_ISSUE_MS = 10 * 1000L
+
+        /**
+         * Fallback loads one tab may trigger per [FALLBACK_BUDGET_WINDOW_MS]. Set well above what
+         * ordinary browsing reaches (each one needs a distinct app-link target, and a user-initiated
+         * navigation resets the count) and well below what a loop produces in the same window.
+         */
+        const val FALLBACK_ISSUE_BUDGET = 5
+        const val FALLBACK_BUDGET_WINDOW_MS = 30 * 1000L
     }
 }
