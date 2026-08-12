@@ -2,6 +2,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
 import 'package:weblibre/features/user/data/database/database.dart';
 
 void main() {
@@ -51,7 +52,9 @@ void main() {
       () async {
         await expectLater(
           db.toolbarButtonConfigDao.replaceAll(
-            buildDefaultToolbarButtonConfigs(),
+            defaultToolbarButtonConfigsFor(
+              ToolbarConfigLocation.contextual,
+            ).value,
           ),
           completes,
         );
