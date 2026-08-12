@@ -39,6 +39,17 @@ class RemovedParam with FastEquatable {
 }
 
 class UrlCleanerResult with FastEquatable {
+  /// The URL cleaning was requested for, exactly as it was passed in.
+  final String sourceUrl;
+
+  /// The URL [removedParams] were matched against: [sourceUrl] after any
+  /// redirect unwrapping, but before any parameter was stripped.
+  ///
+  /// Rebuilding this URL minus a chosen subset of [removedParams] yields a
+  /// valid partially cleaned URL, which is what the details dialog needs to
+  /// let a parameter be put back.
+  final String paramBaseUrl;
+
   final String cleanedUrl;
   final bool changed;
   final bool blocked;
@@ -47,6 +58,8 @@ class UrlCleanerResult with FastEquatable {
   final String? redirectedFrom;
 
   UrlCleanerResult({
+    required this.sourceUrl,
+    required this.paramBaseUrl,
     required this.cleanedUrl,
     required this.changed,
     required this.blocked,
@@ -57,6 +70,8 @@ class UrlCleanerResult with FastEquatable {
 
   @override
   List<Object?> get hashParameters => [
+    sourceUrl,
+    paramBaseUrl,
     cleanedUrl,
     changed,
     blocked,

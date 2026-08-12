@@ -335,22 +335,14 @@ class OpenSharedContent extends HookConsumerWidget {
                     title: const Text('URL blocked by ClearURLs'),
                     dense: true,
                   )
-                else if (cleaner.result!.removedParams.isNotEmpty)
+                else if (cleaner.showTile)
                   UrlCleanerTile(
-                    result: cleaner.result!,
+                    result: cleaner.details!,
                     currentUrl: currentUrl,
                     allowReferralMarketing:
                         settings.urlCleanerAllowReferralMarketing,
-                    onClean: cleaner.result!.changed ? applyCleanUrl : null,
+                    onClean: applyCleanUrl,
                     onApplySelectedRemovals: applySelectedTrackingRemovals,
-                  )
-                else if (cleaner.applied)
-                  UrlCleanerTile(
-                    result: cleaner.result!,
-                    currentUrl: currentUrl,
-                    allowReferralMarketing:
-                        settings.urlCleanerAllowReferralMarketing,
-                    applied: true,
                   ),
               ],
               // Unshortener UI

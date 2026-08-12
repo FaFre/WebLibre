@@ -1166,5 +1166,276 @@ void main() {
         expect(result.redirectedFrom, isNull);
       });
     });
+
+    group('paramBaseUrl tracking', () {
+      test('is the source URL when no redirection occurs', () {
+        final rules = <UrlCleanerRule>[
+          UrlCleanerRule(
+            name: 'test',
+            data: UrlCleanerRuleData(
+              urlPattern: r'^https?://example\.com',
+              rules: ['utm_source'],
+            ),
+          ),
+        ];
+
+        final result = cleanUrl('https://example.com?utm_source=test', rules);
+
+        expect(result.sourceUrl, 'https://example.com?utm_source=test');
+        expect(result.paramBaseUrl, 'https://example.com?utm_source=test');
+      });
+
+      test('rebuilding paramBaseUrl minus every removedParam yields '
+          'cleanedUrl', () {
+        final rules = <UrlCleanerRule>[
+          UrlCleanerRule(
+            name: 'test',
+            data: UrlCleanerRuleData(
+              urlPattern: r'^https?://example\.com',
+              rules: ['utm_source', 'utm_medium'],
+            ),
+          ),
+        ];
+
+        final result = cleanUrl(
+          'https://example.com/a?utm_source=x&keep=1&utm_medium=y',
+          rules,
+        );
+
+        var rebuilt = result.paramBaseUrl;
+        for (final param in result.removedParams) {
+          rebuilt = removeUrlCleanerMatch(rebuilt, param);
+        }
+
+        expect(rebuilt, result.cleanedUrl);
+      });
+
+      test('keeping one removedParam puts it back', () {
+        final rules = <UrlCleanerRule>[
+          UrlCleanerRule(
+            name: 'test',
+            data: UrlCleanerRuleData(
+              urlPattern: r'^https?://example\.com',
+              rules: ['utm_source', 'utm_medium'],
+            ),
+          ),
+        ];
+
+        final result = cleanUrl(
+          'https://example.com/a?utm_source=x&utm_medium=y',
+          rules,
+        );
+
+        final kept = result.removedParams.firstWhere(
+          (param) => param.param == 'utm_medium',
+        );
+        var rebuilt = result.paramBaseUrl;
+        for (final param in result.removedParams) {
+          if (param != kept) rebuilt = removeUrlCleanerMatch(rebuilt, param);
+        }
+
+        expect(rebuilt, 'https://example.com/a?utm_medium=y');
+      });
+
+      test('moves past a redirection and drops the wrapper params', () {
+        final rules = <UrlCleanerRule>[
+          UrlCleanerRule(
+            name: 'redirect',
+            data: UrlCleanerRuleData(
+              urlPattern: r'^https?://redir\.com',
+              rules: ['wrapper'],
+              redirections: ['url=([^&]+)'],
+            ),
+          ),
+          UrlCleanerRule(
+            name: 'dest',
+            data: UrlCleanerRuleData(
+              urlPattern: r'^https?://dest\.com',
+              rules: ['utm_source'],
+            ),
+          ),
+        ];
+
+        final result = cleanUrl(
+          'https://redir.com?wrapper=1&url=https%3A%2F%2Fdest.com%3Futm_source%3Dx',
+          rules,
+        );
+
+        // The wrapper is gone, so its params can no longer be put back — only
+        // params belonging to the redirect target remain listed.
+        expect(result.paramBaseUrl, 'https://dest.com?utm_source=x');
+        expect(result.removedParams.map((param) => param.param), [
+          'utm_source',
+        ]);
+        expect(result.cleanedUrl, 'https://dest.com');
+      });
+    });
+
+    group('urlCleanerProgress', () {
+      final rules = <UrlCleanerRule>[
+        UrlCleanerRule(
+          name: 'test',
+          data: UrlCleanerRuleData(
+            urlPattern: r'^https?://example\.com',
+            rules: ['utm_source', 'utm_medium'],
+          ),
+        ),
+      ];
+      const source = 'https://example.com/a?utm_source=x&utm_medium=y';
+      final result = cleanUrl(source, rules);
+
+      test('reports nothing removed for the untouched URL', () {
+        final progress = urlCleanerProgress(source, result);
+
+        expect(progress.removed, isEmpty);
+        expect(progress.remaining, hasLength(2));
+        expect(progress.isFullyCleaned, isFalse);
+      });
+
+      test('reports everything removed for the cleaned URL', () {
+        final progress = urlCleanerProgress(result.cleanedUrl, result);
+
+        expect(progress.removed, hasLength(2));
+        expect(progress.remaining, isEmpty);
+        expect(progress.isFullyCleaned, isTrue);
+      });
+
+      test('splits a partially cleaned URL', () {
+        final progress = urlCleanerProgress(
+          'https://example.com/a?utm_medium=y',
+          result,
+        );
+
+        expect(progress.removed.map((param) => param.param), ['utm_source']);
+        expect(progress.remaining.map((param) => param.param), ['utm_medium']);
+        expect(progress.isFullyCleaned, isFalse);
+      });
+
+      test('does not call an un-unwrapped redirect wrapper clean', () {
+        final redirectRules = <UrlCleanerRule>[
+          UrlCleanerRule(
+            name: 'redirect',
+            data: UrlCleanerRuleData(
+              urlPattern: r'^https?://redir\.com',
+              redirections: ['url=([^&]+)'],
+            ),
+          ),
+          UrlCleanerRule(
+            name: 'dest',
+            data: UrlCleanerRuleData(
+              urlPattern: r'^https?://dest\.com',
+              rules: ['utm_source'],
+            ),
+          ),
+        ];
+        const wrapper =
+            'https://redir.com?url=https%3A%2F%2Fdest.com%3Futm_source%3Dx';
+        final redirectResult = cleanUrl(wrapper, redirectRules);
+
+        // The wrapper carries utm_source only percent-encoded, so a literal
+        // match finds nothing — that must not read as "already cleaned".
+        expect(
+          urlCleanerMatchPresent(wrapper, redirectResult.removedParams.single),
+          isFalse,
+        );
+
+        final progress = urlCleanerProgress(wrapper, redirectResult);
+
+        expect(progress.removed, isEmpty);
+        expect(progress.remaining, hasLength(1));
+        expect(progress.isFullyCleaned, isFalse);
+      });
+
+      test('reports the unwrapped redirect target as cleaned', () {
+        final redirectRules = <UrlCleanerRule>[
+          UrlCleanerRule(
+            name: 'redirect',
+            data: UrlCleanerRuleData(
+              urlPattern: r'^https?://redir\.com',
+              redirections: ['url=([^&]+)'],
+            ),
+          ),
+          UrlCleanerRule(
+            name: 'dest',
+            data: UrlCleanerRuleData(
+              urlPattern: r'^https?://dest\.com',
+              rules: ['utm_source'],
+            ),
+          ),
+        ];
+        final redirectResult = cleanUrl(
+          'https://redir.com?url=https%3A%2F%2Fdest.com%3Futm_source%3Dx',
+          redirectRules,
+        );
+
+        final progress = urlCleanerProgress(
+          redirectResult.cleanedUrl,
+          redirectResult,
+        );
+
+        expect(progress.isFullyCleaned, isTrue);
+      });
+
+      test('treats an unrelated URL as untouched', () {
+        final progress = urlCleanerProgress('https://other.com/', result);
+
+        expect(progress.removed, isEmpty);
+        expect(progress.remaining, hasLength(2));
+      });
+    });
+
+    group('urlCleanerMatchPresent', () {
+      final queryParam = RemovedParam(
+        provider: 'test',
+        param: 'utm_source',
+        match: 'utm_source=x',
+        type: UrlCleanerMatchType.queryRule,
+      );
+
+      test('reports a query param that is still in the URL', () {
+        expect(
+          urlCleanerMatchPresent(
+            'https://example.com/a?utm_source=x',
+            queryParam,
+          ),
+          isTrue,
+        );
+      });
+
+      test('reports a query param that was already stripped', () {
+        expect(
+          urlCleanerMatchPresent('https://example.com/a', queryParam),
+          isFalse,
+        );
+      });
+
+      test('does not match a partial parameter name', () {
+        expect(
+          urlCleanerMatchPresent(
+            'https://example.com/a?xutm_source=x',
+            queryParam,
+          ),
+          isFalse,
+        );
+      });
+
+      test('reports a rawRule match', () {
+        final rawParam = RemovedParam(
+          provider: 'test',
+          param: '/ref=[^/?]+',
+          match: '/ref=nav_logo',
+          type: UrlCleanerMatchType.rawRule,
+        );
+
+        expect(
+          urlCleanerMatchPresent('https://example.com/ref=nav_logo', rawParam),
+          isTrue,
+        );
+        expect(
+          urlCleanerMatchPresent('https://example.com', rawParam),
+          isFalse,
+        );
+      });
+    });
   });
 }

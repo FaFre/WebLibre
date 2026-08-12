@@ -101,12 +101,11 @@ class ContextMenuDialog extends HookConsumerWidget {
       children: [
         if (showCleanerTile)
           UrlCleanerTile(
-            result: cleaner.result!,
+            result: cleaner.details!,
             currentUrl: effective.tryGetLink()?.toString() ?? url ?? '',
             allowReferralMarketing: settings.urlCleanerAllowReferralMarketing,
             onClean: applyCleanUrl,
             onApplySelectedRemovals: applySelectedTrackingRemovals,
-            applied: cleaner.applied,
           ),
         if (OpenInNewTab.isSupported(effective))
           OpenInNewTab(hitResult: effective),

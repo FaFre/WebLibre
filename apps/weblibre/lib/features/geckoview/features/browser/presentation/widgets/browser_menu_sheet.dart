@@ -1416,12 +1416,11 @@ class _ShareExpansion extends HookConsumerWidget {
         children: [
           if (showCleanerTile)
             UrlCleanerTile(
-              result: cleaner.result!,
+              result: cleaner.details!,
               currentUrl: effectiveUrl?.toString() ?? '',
               allowReferralMarketing: settings.urlCleanerAllowReferralMarketing,
               onClean: applyCleanUrl,
               onApplySelectedRemovals: applySelectedTrackingRemovals,
-              applied: cleaner.applied,
             ),
 
           // Copy Address

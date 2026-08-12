@@ -33,6 +33,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/entities/url_cleaner_result.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
+import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_service.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/dialogs/tracking_details_dialog.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/hooks/url_cleaner_controller.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
@@ -106,7 +107,6 @@ class ShareBottomSheet extends HookConsumerWidget {
     final effectiveUrl = cleanedUrl.value ?? tabUrl;
     final cleaningHappened = cleanedUrl.value != null;
     final hasActiveTracking = cleaner.result?.removedParams.isNotEmpty ?? false;
-    final urlWasCleaned = cleaningHappened && !hasActiveTracking;
     final trackingStatusTrailing = cleaningHappened
         ? Icon(
             hasActiveTracking
@@ -126,13 +126,9 @@ class ShareBottomSheet extends HookConsumerWidget {
             // Header with URL and tracking status
             _ShareHeader(
               url: effectiveUrl,
-              urlWasCleaned: urlWasCleaned,
-              hasTracking: showCleanerTile && !cleaner.applied,
-              cleanerResult: showCleanerTile ? cleaner.result : null,
+              cleanerResult: showCleanerTile ? cleaner.details : null,
               allowReferralMarketing: settings.urlCleanerAllowReferralMarketing,
-              onClean: showCleanerTile && !cleaner.applied
-                  ? applyCleanUrl
-                  : null,
+              onClean: applyCleanUrl,
               onApplySelectedRemovals: applySelectedTrackingRemovals,
             ),
 
@@ -214,8 +210,6 @@ class ShareBottomSheet extends HookConsumerWidget {
 
 class _ShareHeader extends StatelessWidget {
   final Uri? url;
-  final bool urlWasCleaned;
-  final bool hasTracking;
   final UrlCleanerResult? cleanerResult;
   final bool allowReferralMarketing;
   final VoidCallback? onClean;
@@ -223,8 +217,6 @@ class _ShareHeader extends StatelessWidget {
 
   const _ShareHeader({
     required this.url,
-    required this.urlWasCleaned,
-    required this.hasTracking,
     required this.allowReferralMarketing,
     this.cleanerResult,
     this.onClean,
@@ -234,8 +226,16 @@ class _ShareHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final paramCount = cleanerResult?.removedParams.length ?? 0;
-    final hasTappableDetails = paramCount > 0;
+    final hasTappableDetails = cleanerResult?.removedParams.isNotEmpty ?? false;
+
+    // Mirrors UrlCleanerTile: the header reports what the URL in hand still
+    // carries, so a partially cleaned URL keeps showing the warning.
+    final progress = cleanerResult == null
+        ? null
+        : urlCleanerProgress(url?.toString() ?? '', cleanerResult!);
+    final paramCount = progress?.remaining.length ?? 0;
+    final hasTracking = paramCount > 0;
+    final urlWasCleaned = progress?.isFullyCleaned ?? false;
 
     return InkWell(
       onTap: hasTappableDetails

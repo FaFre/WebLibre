@@ -23,21 +23,29 @@ import 'package:weblibre/features/geckoview/features/open_link_tools/domain/serv
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_service.dart';
 
 class UrlCleanerController {
+  /// Cleaning result for the URL currently held by the caller.
   final UrlCleanerResult? result;
-  final bool applied;
+
+  /// Result the tracking details UI works from.
+  ///
+  /// This stays anchored to the last URL that actually carried tracking
+  /// parameters, so the full parameter list survives a clean — without it a
+  /// cleaned URL reports no removable parameters and the user loses any way
+  /// to put one back.
+  final UrlCleanerResult? details;
+
   final bool Function() _applyCleanUrl;
   final bool Function(String previewUrl) _applyPreviewUrl;
 
   const UrlCleanerController._({
     required this.result,
-    required this.applied,
+    required this.details,
     required bool Function() applyCleanUrl,
     required bool Function(String previewUrl) applyPreviewUrl,
   }) : _applyCleanUrl = applyCleanUrl,
        _applyPreviewUrl = applyPreviewUrl;
 
-  bool get showTile =>
-      result != null && (result!.removedParams.isNotEmpty || applied);
+  bool get showTile => details != null && details!.removedParams.isNotEmpty;
 
   bool applyCleanUrl() => _applyCleanUrl();
 
@@ -54,7 +62,12 @@ UrlCleanerController useUrlCleanerController({
   required void Function(String cleanedUrl) onApplyCleanedUrl,
 }) {
   final cleanerResult = useState<UrlCleanerResult?>(null);
-  final cleanerApplied = useState(false);
+  final detailsResult = useState<UrlCleanerResult?>(null);
+
+  // URLs this controller handed back to the caller. Re-cleaning one of them
+  // would auto-apply over a choice the user just made and shrink [details]
+  // down to whatever is left, so they are treated as settled.
+  final derivedUrls = useRef(<String>{});
 
   final getCurrentUrlRef = useRef(getCurrentUrl);
   getCurrentUrlRef.value = getCurrentUrl;
@@ -65,6 +78,8 @@ UrlCleanerController useUrlCleanerController({
   useEffect(() {
     if (!cleanerEnabled || sourceUrl == null) {
       cleanerResult.value = null;
+      detailsResult.value = null;
+      derivedUrls.value.clear();
       return null;
     }
 
@@ -77,15 +92,18 @@ UrlCleanerController useUrlCleanerController({
     );
     cleanerResult.value = result;
 
-    // Preserve the "already cleaned" state until a new removable parameter
-    // set is detected.
-    if (result.removedParams.isNotEmpty) {
-      cleanerApplied.value = false;
+    if (derivedUrls.value.contains(sourceUrl)) {
+      // Our own output came back around: keep the parameter list anchored to
+      // the URL it was collected from and leave the applied state alone.
+      return null;
     }
 
+    derivedUrls.value.clear();
+    detailsResult.value = result.removedParams.isNotEmpty ? result : null;
+
     if (autoApply && result.changed) {
+      derivedUrls.value.add(result.cleanedUrl);
       onApplyCleanedUrlRef.value(result.cleanedUrl);
-      cleanerApplied.value = true;
     }
 
     return null;
@@ -95,22 +113,22 @@ UrlCleanerController useUrlCleanerController({
     final result = cleanerResult.value;
     if (result == null || !result.changed) return false;
 
+    derivedUrls.value.add(result.cleanedUrl);
     onApplyCleanedUrlRef.value(result.cleanedUrl);
-    cleanerApplied.value = true;
     return true;
   }
 
   bool applyPreviewUrl(String previewUrl) {
     if (previewUrl == getCurrentUrlRef.value()) return false;
 
+    derivedUrls.value.add(previewUrl);
     onApplyCleanedUrlRef.value(previewUrl);
-    cleanerApplied.value = true;
     return true;
   }
 
   return UrlCleanerController._(
     result: cleanerResult.value,
-    applied: cleanerApplied.value,
+    details: detailsResult.value,
     applyCleanUrl: applyCleanUrl,
     applyPreviewUrl: applyPreviewUrl,
   );

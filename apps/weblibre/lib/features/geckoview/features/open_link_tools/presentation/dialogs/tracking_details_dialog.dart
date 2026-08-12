@@ -19,10 +19,11 @@
  */
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/entities/url_cleaner_result.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_service.dart';
 
-class TrackingDetailsDialog extends StatefulWidget {
+class TrackingDetailsDialog extends HookWidget {
   final String currentUrl;
   final UrlCleanerResult result;
   final bool allowReferralMarketing;
@@ -36,34 +37,25 @@ class TrackingDetailsDialog extends StatefulWidget {
     this.onApplySelectedRemovals,
   });
 
-  @override
-  State<TrackingDetailsDialog> createState() => _TrackingDetailsDialogState();
-}
-
-class _TrackingDetailsDialogState extends State<TrackingDetailsDialog> {
-  late final List<RemovedParam> _items;
-  late final List<bool> _selected;
-
-  @override
-  void initState() {
-    super.initState();
-    _items = widget.result.removedParams;
-    _selected = _items.map(_isInitiallySelected).toList();
-  }
-
-  bool _isInitiallySelected(RemovedParam item) {
-    if (!widget.allowReferralMarketing) return true;
-    return item.type != UrlCleanerMatchType.referralRule;
-  }
-
-  String get _previewUrl {
-    var url = widget.currentUrl;
-    for (var i = 0; i < _items.length; i++) {
-      if (_selected[i]) {
-        url = removeUrlCleanerMatch(url, _items[i]);
-      }
+  List<bool> _initialSelection() {
+    // Once a clean has actually been applied, mirror it so the checkboxes
+    // describe the state the user is looking at. Before that — including on a
+    // redirect wrapper, where none of the parameters are literally present —
+    // fall back to recommending removal.
+    final progress = urlCleanerProgress(currentUrl, result);
+    if (progress.removed.isNotEmpty) {
+      return result.removedParams
+          .map((item) => progress.removed.contains(item))
+          .toList();
     }
-    return url;
+
+    return result.removedParams
+        .map(
+          (item) =>
+              !allowReferralMarketing ||
+              item.type != UrlCleanerMatchType.referralRule,
+        )
+        .toList();
   }
 
   ({String key, String? value}) _splitMatch(String match) {
@@ -79,8 +71,24 @@ class _TrackingDetailsDialogState extends State<TrackingDetailsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final canApply = widget.onApplySelectedRemovals != null;
-    final selectedCount = _selected.where((isSelected) => isSelected).length;
+    final items = result.removedParams;
+    final selected = useState(_initialSelection());
+
+    // Always rebuild from the URL the parameters were matched against —
+    // subtracting from [currentUrl] could only ever remove more, so a
+    // deselected parameter that a previous clean already stripped would have
+    // no way back.
+    var previewUrl = result.paramBaseUrl;
+    for (var i = 0; i < items.length; i++) {
+      if (selected.value[i]) {
+        previewUrl = removeUrlCleanerMatch(previewUrl, items[i]);
+      }
+    }
+
+    final canApply = onApplySelectedRemovals != null;
+    final selectedCount = selected.value
+        .where((isSelected) => isSelected)
+        .length;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final subtitleColor = textTheme.bodySmall?.color;
@@ -110,11 +118,11 @@ class _TrackingDetailsDialogState extends State<TrackingDetailsDialog> {
                     return ListView.separated(
                       controller: controller,
                       shrinkWrap: true,
-                      itemCount: _items.length,
+                      itemCount: items.length,
                       separatorBuilder: (context, index) =>
                           Divider(height: 1, color: colorScheme.outlineVariant),
                       itemBuilder: (context, index) {
-                        final item = _items[index];
+                        final item = items[index];
                         final display = _splitMatch(item.match);
 
                         return CheckboxListTile(
@@ -167,12 +175,11 @@ class _TrackingDetailsDialogState extends State<TrackingDetailsDialog> {
                                     ),
                                   ),
                                 ),
-                          value: _selected[index],
+                          value: selected.value[index],
                           onChanged: canApply
                               ? (checked) {
-                                  setState(() {
-                                    _selected[index] = checked ?? false;
-                                  });
+                                  selected.value = [...selected.value]
+                                    ..[index] = checked ?? false;
                                 }
                               : null,
                         );
@@ -184,7 +191,7 @@ class _TrackingDetailsDialogState extends State<TrackingDetailsDialog> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Text(
-                  '$selectedCount of ${_items.length} selected for removal',
+                  '$selectedCount of ${items.length} selected for removal',
                   style: textTheme.bodySmall?.copyWith(
                     fontStyle: FontStyle.italic,
                   ),
@@ -206,7 +213,7 @@ class _TrackingDetailsDialogState extends State<TrackingDetailsDialog> {
                   border: Border.all(color: colorScheme.outlineVariant),
                 ),
                 child: SelectableText(
-                  _previewUrl,
+                  previewUrl,
                   style: textTheme.bodySmall?.copyWith(
                     fontFamily: 'monospace',
                     height: 1.4,
@@ -225,7 +232,7 @@ class _TrackingDetailsDialogState extends State<TrackingDetailsDialog> {
                     const SizedBox(width: 8),
                     ElevatedButton(
                       onPressed: () {
-                        widget.onApplySelectedRemovals!(_previewUrl);
+                        onApplySelectedRemovals!(previewUrl);
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(

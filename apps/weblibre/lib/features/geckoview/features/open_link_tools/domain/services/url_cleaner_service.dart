@@ -27,6 +27,7 @@ UrlCleanerResult cleanUrl(
   bool allowReferral = false,
 }) {
   var currentUrl = url;
+  var paramBaseUrl = url;
   var blocked = false;
   final removedParams = <RemovedParam>[];
   final matchedProviders = <String>[];
@@ -85,6 +86,11 @@ UrlCleanerResult cleanUrl(
         // Restart provider scan so earlier providers also apply on redirected URL.
         ruleIndex = -1;
       }
+      // Anything removed so far belonged to the wrapper URL that was just
+      // discarded, so it can no longer be put back. The restarted scan
+      // re-collects whatever applies to the redirect target.
+      paramBaseUrl = currentUrl;
+      removedParams.clear();
       continue;
     }
     if (redirectionMatched) continue;
@@ -180,6 +186,8 @@ UrlCleanerResult cleanUrl(
   currentUrl = _normalizeUrl(currentUrl);
 
   return UrlCleanerResult(
+    sourceUrl: url,
+    paramBaseUrl: paramBaseUrl,
     cleanedUrl: currentUrl,
     changed: currentUrl != url,
     blocked: blocked,
@@ -194,19 +202,78 @@ String removeUrlCleanerMatch(String url, RemovedParam removedParam) {
 
   switch (removedParam.type) {
     case UrlCleanerMatchType.rawRule:
+      if (!url.contains(removedParam.match)) return url;
       return _normalizeUrl(url.replaceFirst(removedParam.match, ''));
     case UrlCleanerMatchType.queryRule:
     case UrlCleanerMatchType.referralRule:
-      final escapedMatch = RegExp.escape(removedParam.match);
-      final regex = RegExp(
-        '([?&#])$escapedMatch(?=(&|#|\$))',
-        caseSensitive: false,
-      );
-      final match = regex.firstMatch(url);
+      final match = _queryMatchRegex(removedParam.match).firstMatch(url);
       if (match == null) return url;
       final result = url.replaceRange(match.start, match.end, match.group(1)!);
       return _normalizeUrl(result);
   }
+}
+
+/// Whether [url] still carries [removedParam], i.e. whether removing it would
+/// actually change the URL.
+///
+/// Lets callers tell an untouched URL apart from one a previous clean already
+/// stripped, without having to compare against a normalized removal result.
+bool urlCleanerMatchPresent(String url, RemovedParam removedParam) {
+  if (removedParam.match.isEmpty) return false;
+
+  switch (removedParam.type) {
+    case UrlCleanerMatchType.rawRule:
+      return url.contains(removedParam.match);
+    case UrlCleanerMatchType.queryRule:
+    case UrlCleanerMatchType.referralRule:
+      return _queryMatchRegex(removedParam.match).hasMatch(url);
+  }
+}
+
+RegExp _queryMatchRegex(String match) =>
+    RegExp('([?&#])${RegExp.escape(match)}(?=(&|#|\$))', caseSensitive: false);
+
+/// How much of a [UrlCleanerResult]'s cleaning the URL in hand reflects.
+class UrlCleanerProgress {
+  /// Parameters gone from the URL because a clean stripped them.
+  final List<RemovedParam> removed;
+
+  /// Parameters the URL still carries.
+  final List<RemovedParam> remaining;
+
+  const UrlCleanerProgress({required this.removed, required this.remaining});
+
+  bool get isFullyCleaned => remaining.isEmpty && removed.isNotEmpty;
+}
+
+/// Describes how much of [result] the URL [url] already reflects.
+///
+/// Everything counts as still [UrlCleanerProgress.remaining] unless [url] is
+/// [UrlCleanerResult.paramBaseUrl] with some subset of
+/// [UrlCleanerResult.removedParams] taken out. Absence alone is not evidence
+/// of a clean: a redirect wrapper that has not been unwrapped yet literally
+/// contains none of the post-unwrap parameters, and calling it clean would
+/// drop the warning on a URL that is still fully tracked.
+UrlCleanerProgress urlCleanerProgress(String url, UrlCleanerResult result) {
+  final params = result.removedParams;
+  final untouched = UrlCleanerProgress(removed: const [], remaining: params);
+
+  final removed = <RemovedParam>[];
+  final remaining = <RemovedParam>[];
+  for (final param in params) {
+    (urlCleanerMatchPresent(url, param) ? remaining : removed).add(param);
+  }
+
+  if (removed.isEmpty) return untouched;
+
+  var rebuilt = result.paramBaseUrl;
+  for (final param in removed) {
+    rebuilt = removeUrlCleanerMatch(rebuilt, param);
+  }
+
+  return rebuilt == url
+      ? UrlCleanerProgress(removed: removed, remaining: remaining)
+      : untouched;
 }
 
 _QueryParamRemovalResult _removeQueryParamWithRegex(

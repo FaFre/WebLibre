@@ -22,6 +22,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/entities/url_cleaner_result.dart';
+import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_service.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/dialogs/tracking_details_dialog.dart';
 
 class UrlCleanerTile extends StatelessWidget {
@@ -30,7 +31,6 @@ class UrlCleanerTile extends StatelessWidget {
   final bool allowReferralMarketing;
   final VoidCallback? onClean;
   final ValueChanged<String>? onApplySelectedRemovals;
-  final bool applied;
 
   const UrlCleanerTile({
     super.key,
@@ -39,7 +39,6 @@ class UrlCleanerTile extends StatelessWidget {
     required this.allowReferralMarketing,
     this.onClean,
     this.onApplySelectedRemovals,
-    this.applied = false,
   });
 
   @override
@@ -47,25 +46,40 @@ class UrlCleanerTile extends StatelessWidget {
     final paramCount = result.removedParams.length;
     final hasParams = paramCount > 0;
 
+    // Derive the state from the URL in hand rather than from whether an apply
+    // happened: after a partial selection some parameters are back, and the
+    // tile has to keep offering a way in to change that again.
+    final progress = urlCleanerProgress(currentUrl, result);
+    final removedCount = progress.removed.length;
+    final isClean = progress.isFullyCleaned;
+
+    final String title;
     final String subtitle;
-    if (!hasParams) {
-      subtitle = 'Tracking parameters removed';
-    } else if (paramCount == 1) {
-      subtitle = '1 tracking parameter found';
+    if (isClean) {
+      title = 'URL cleaned';
+      subtitle = removedCount == 1
+          ? '1 tracking parameter removed'
+          : '$removedCount tracking parameters removed';
+    } else if (removedCount > 0) {
+      title = 'URL partially cleaned';
+      subtitle = '$removedCount of $paramCount tracking parameters removed';
     } else {
-      subtitle = '$paramCount tracking parameters found';
+      title = 'Tracking detected';
+      subtitle = paramCount == 1
+          ? '1 tracking parameter found'
+          : '$paramCount tracking parameters found';
     }
 
     return ListTile(
       leading: Icon(
-        applied ? MdiIcons.checkCircle : MdiIcons.broom,
-        color: applied
+        isClean ? MdiIcons.checkCircle : MdiIcons.broom,
+        color: isClean
             ? Theme.of(context).colorScheme.primary
             : Theme.of(context).colorScheme.error,
       ),
-      title: Text(applied ? 'URL cleaned' : 'Tracking detected'),
+      title: Text(title),
       subtitle: Text(subtitle),
-      trailing: applied || !hasParams
+      trailing: isClean || !hasParams
           ? null
           : Row(
               mainAxisSize: MainAxisSize.min,
