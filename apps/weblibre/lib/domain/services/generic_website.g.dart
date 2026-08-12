@@ -130,7 +130,7 @@ final class GenericWebsiteServiceProvider
 }
 
 String _$genericWebsiteServiceHash() =>
-    r'189cbd17a06be382859c697221355cd623608123';
+    r'b3be8a8c8474b409f9b3aa855378a4e4055c0cb6';
 
 abstract class _$GenericWebsiteService extends $Notifier<void> {
   void build();

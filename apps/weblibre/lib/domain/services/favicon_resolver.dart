@@ -21,7 +21,8 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:http/io_client.dart';
-import 'package:socks5_proxy/socks_client.dart';
+import 'package:weblibre/features/proxy/domain/services/app_routing_policy.dart';
+import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 
 enum FaviconResolveStatus { hit, missing, error }
 
@@ -42,24 +43,37 @@ class FaviconResolveResult {
 }
 
 abstract class FaviconResolver {
-  Future<FaviconResolveResult> resolve(Uri url, {int? proxyPort});
+  /// Resolves the icon for [url] under [policy].
+  ///
+  /// [policy] is required rather than optional: the lookup tells DuckDuckGo
+  /// every host the user visits, so a caller that forgets to pass routing is
+  /// exactly the bug this signature prevents.
+  Future<FaviconResolveResult> resolve(
+    Uri url, {
+    required AppRoutingPolicy policy,
+  });
 }
 
 final class DdgFaviconResolver implements FaviconResolver {
   static const _timeout = Duration(seconds: 15);
 
   @override
-  Future<FaviconResolveResult> resolve(Uri url, {int? proxyPort}) async {
+  Future<FaviconResolveResult> resolve(
+    Uri url, {
+    required AppRoutingPolicy policy,
+  }) async {
     final host = url.host.trim().toLowerCase();
     if (host.isEmpty) {
       return const FaviconResolveResult.error();
     }
 
     final httpClient = HttpClient();
-    if (proxyPort != null) {
-      SocksTCPClient.assignToHttpClient(httpClient, [
-        ProxySettings(InternetAddress.loopbackIPv4, proxyPort),
-      ]);
+    try {
+      applyRoutingPolicy(httpClient, policy);
+    } on AppRoutingBlockedException {
+      // No icon is worth revealing the host over an unproxied connection.
+      httpClient.close(force: true);
+      return const FaviconResolveResult.error();
     }
 
     final client = IOClient(httpClient);

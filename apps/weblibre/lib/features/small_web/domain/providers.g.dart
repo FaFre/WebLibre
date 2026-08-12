@@ -48,7 +48,7 @@ final class KagiSourceServiceProvider
   }
 }
 
-String _$kagiSourceServiceHash() => r'5e8aef50353b959d681675feba9eba75bb91bdff';
+String _$kagiSourceServiceHash() => r'0c2caca064f45152eb33a66838ca549c06bac685';
 
 @ProviderFor(wanderSourceService)
 final wanderSourceServiceProvider = WanderSourceServiceProvider._();
@@ -96,7 +96,7 @@ final class WanderSourceServiceProvider
 }
 
 String _$wanderSourceServiceHash() =>
-    r'80574ea0c51f56325940edb0fa7e849784ba7421';
+    r'3f6f8a9016fc65e0ead796b250a033f5d6d09c33';
 
 @ProviderFor(smallWebDiscoverService)
 final smallWebDiscoverServiceProvider = SmallWebDiscoverServiceProvider._();

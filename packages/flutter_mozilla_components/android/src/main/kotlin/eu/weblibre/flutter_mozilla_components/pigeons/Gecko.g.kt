@@ -4923,6 +4923,146 @@ data class GeckoProxySettings (
   }
 }
 
+/**
+ * The complete container routing state, as owned by the app.
+ *
+ * The proxy extension's store is memory-only: it dies with the background
+ * script and starts empty, and an empty store routes every request directly.
+ * Incremental mutation messages can therefore never establish routing safely —
+ * they are unacknowledged, and a store that lost them looks identical to one
+ * that was deliberately configured for direct connections. A snapshot replaces
+ * the extension's whole state at once and is acknowledged, so both sides can
+ * agree on what is installed.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class GeckoProxyRoutingSnapshot (
+  /** Monotonic counter identifying this snapshot. Echoed back on acknowledgement. */
+  val generation: Long,
+  /** Every proxy endpoint currently available, keyed by [GeckoProxySettings.id]. */
+  val proxies: List<GeckoProxySettings>,
+  /**
+   * Cookie-store context to the proxy ids it routes through. An empty list is
+   * an explicit direct connection, which is distinct from having no entry.
+   */
+  val relations: Map<String, List<String>>,
+  /**
+   * Scope ids for explicitly-direct contexts, used to decide which direct
+   * contexts count as equivalent for site-assignment purposes.
+   */
+  val directScopes: Map<String, String>,
+  /** Assigned site origin to the context it belongs to. */
+  val siteAssignments: Map<String, String>,
+  /**
+   * Strict-mode enforcement map. Keys are Gecko cookie-store contexts to
+   * enforce (a strict container's base context plus its isolated tabs'
+   * isolation contexts); each value contains the container base contexts that
+   * site assignments are keyed on. Tabs in these contexts may only load
+   * origins assigned to one of the mapped base contexts (exact match, no proxy
+   * equivalence); any other top-level navigation is cancelled and reported
+   * back with `strict = true`.
+   */
+  val strictContexts: Map<String, List<String>>
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): GeckoProxyRoutingSnapshot {
+      val generation = pigeonVar_list[0] as Long
+      val proxies = pigeonVar_list[1] as List<GeckoProxySettings>
+      val relations = pigeonVar_list[2] as Map<String, List<String>>
+      val directScopes = pigeonVar_list[3] as Map<String, String>
+      val siteAssignments = pigeonVar_list[4] as Map<String, String>
+      val strictContexts = pigeonVar_list[5] as Map<String, List<String>>
+      return GeckoProxyRoutingSnapshot(generation, proxies, relations, directScopes, siteAssignments, strictContexts)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      generation,
+      proxies,
+      relations,
+      directScopes,
+      siteAssignments,
+      strictContexts,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as GeckoProxyRoutingSnapshot
+    return GeckoPigeonUtils.deepEquals(this.generation, other.generation) && GeckoPigeonUtils.deepEquals(this.proxies, other.proxies) && GeckoPigeonUtils.deepEquals(this.relations, other.relations) && GeckoPigeonUtils.deepEquals(this.directScopes, other.directScopes) && GeckoPigeonUtils.deepEquals(this.siteAssignments, other.siteAssignments) && GeckoPigeonUtils.deepEquals(this.strictContexts, other.strictContexts)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.generation)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.proxies)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.relations)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.directScopes)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.siteAssignments)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.strictContexts)
+    return result
+  }
+  override fun toString(): String {
+    return "GeckoProxyRoutingSnapshot(generation=$generation, proxies=$proxies, relations=$relations, directScopes=$directScopes, siteAssignments=$siteAssignments, strictContexts=$strictContexts)"
+  }
+}
+
+/**
+ * What the extension is currently known to have installed.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class GeckoProxyRoutingStatus (
+  /**
+   * Whether the extension has acknowledged the most recently pushed snapshot.
+   * While false, the extension blocks every request rather than connecting
+   * directly, so this is the signal for "routing is safe to use".
+   */
+  val ready: Boolean,
+  /** Generation the extension last acknowledged, or null if it never has. */
+  val acknowledgedGeneration: Long? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): GeckoProxyRoutingStatus {
+      val ready = pigeonVar_list[0] as Boolean
+      val acknowledgedGeneration = pigeonVar_list[1] as Long?
+      return GeckoProxyRoutingStatus(ready, acknowledgedGeneration)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      ready,
+      acknowledgedGeneration,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as GeckoProxyRoutingStatus
+    return GeckoPigeonUtils.deepEquals(this.ready, other.ready) && GeckoPigeonUtils.deepEquals(this.acknowledgedGeneration, other.acknowledgedGeneration)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.ready)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.acknowledgedGeneration)
+    return result
+  }
+  override fun toString(): String {
+    return "GeckoProxyRoutingStatus(ready=$ready, acknowledgedGeneration=$acknowledgedGeneration)"
+  }
+}
+
 /** Generated class from Pigeon that represents data sent in messages. */
 data class ContainerSiteAssignment (
   val requestId: String,
@@ -6760,32 +6900,36 @@ private data class GeckoPigeonInternalCodecOverflow (
         
     when (type.toInt()) {
       0 ->
-        return AppLinkPolicySnapshot.fromList(wrapped as List<Any?>)
+        return NativeAppLinkRule.fromList(wrapped as List<Any?>)
       1 ->
-        return AppLinkPromptRequest.fromList(wrapped as List<Any?>)
+        return NativeContextAppLinkPolicy.fromList(wrapped as List<Any?>)
       2 ->
-        return AppLinkResolutionResult.fromList(wrapped as List<Any?>)
+        return AppLinkPolicySnapshot.fromList(wrapped as List<Any?>)
       3 ->
-        return PwaIcon.fromList(wrapped as List<Any?>)
+        return AppLinkPromptRequest.fromList(wrapped as List<Any?>)
       4 ->
-        return ShareTargetFiles.fromList(wrapped as List<Any?>)
+        return AppLinkResolutionResult.fromList(wrapped as List<Any?>)
       5 ->
-        return ShareTargetParams.fromList(wrapped as List<Any?>)
+        return PwaIcon.fromList(wrapped as List<Any?>)
       6 ->
-        return ShareTarget.fromList(wrapped as List<Any?>)
+        return ShareTargetFiles.fromList(wrapped as List<Any?>)
       7 ->
-        return ExternalApplicationResource.fromList(wrapped as List<Any?>)
+        return ShareTargetParams.fromList(wrapped as List<Any?>)
       8 ->
-        return PwaManifest.fromList(wrapped as List<Any?>)
+        return ShareTarget.fromList(wrapped as List<Any?>)
       9 ->
-        return SandboxCaptureEntry.fromList(wrapped as List<Any?>)
+        return ExternalApplicationResource.fromList(wrapped as List<Any?>)
       10 ->
-        return GestureConfig.fromList(wrapped as List<Any?>)
+        return PwaManifest.fromList(wrapped as List<Any?>)
       11 ->
-        return PushDistributor.fromList(wrapped as List<Any?>)
+        return SandboxCaptureEntry.fromList(wrapped as List<Any?>)
       12 ->
-        return PushStatus.fromList(wrapped as List<Any?>)
+        return GestureConfig.fromList(wrapped as List<Any?>)
       13 ->
+        return PushDistributor.fromList(wrapped as List<Any?>)
+      14 ->
+        return PushStatus.fromList(wrapped as List<Any?>)
+      15 ->
         return PushSubscription.fromList(wrapped as List<Any?>)
     }
     return null
@@ -7351,77 +7495,77 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
       }
       240.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ContainerSiteAssignment.fromList(it)
+          GeckoProxyRoutingSnapshot.fromList(it)
         }
       }
       241.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ProxyLoadError.fromList(it)
+          GeckoProxyRoutingStatus.fromList(it)
         }
       }
       242.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoHeader.fromList(it)
+          ContainerSiteAssignment.fromList(it)
         }
       }
       243.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoFetchRequest.fromList(it)
+          ProxyLoadError.fromList(it)
         }
       }
       244.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoFetchResponse.fromList(it)
+          GeckoHeader.fromList(it)
         }
       }
       245.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          BookmarkNode.fromList(it)
+          GeckoFetchRequest.fromList(it)
         }
       }
       246.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          BookmarkImportNode.fromList(it)
+          GeckoFetchResponse.fromList(it)
         }
       }
       247.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          BookmarkInsertTreeResult.fromList(it)
+          BookmarkNode.fromList(it)
         }
       }
       248.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          BookmarkInfo.fromList(it)
+          BookmarkImportNode.fromList(it)
         }
       }
       249.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SitePermissions.fromList(it)
+          BookmarkInsertTreeResult.fromList(it)
         }
       }
       250.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TrackingProtectionException.fromList(it)
+          BookmarkInfo.fromList(it)
         }
       }
       251.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AppLinkTarget.fromList(it)
+          SitePermissions.fromList(it)
         }
       }
       252.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ProtectedTargetPattern.fromList(it)
+          TrackingProtectionException.fromList(it)
         }
       }
       253.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          NativeAppLinkRule.fromList(it)
+          AppLinkTarget.fromList(it)
         }
       }
       254.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          NativeContextAppLinkPolicy.fromList(it)
+          ProtectedTargetPattern.fromList(it)
         }
       }
       255.toByte() -> {
@@ -7878,133 +8022,143 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
         stream.write(239)
         writeValue(stream, value.toList())
       }
-      is ContainerSiteAssignment -> {
+      is GeckoProxyRoutingSnapshot -> {
         stream.write(240)
         writeValue(stream, value.toList())
       }
-      is ProxyLoadError -> {
+      is GeckoProxyRoutingStatus -> {
         stream.write(241)
         writeValue(stream, value.toList())
       }
-      is GeckoHeader -> {
+      is ContainerSiteAssignment -> {
         stream.write(242)
         writeValue(stream, value.toList())
       }
-      is GeckoFetchRequest -> {
+      is ProxyLoadError -> {
         stream.write(243)
         writeValue(stream, value.toList())
       }
-      is GeckoFetchResponse -> {
+      is GeckoHeader -> {
         stream.write(244)
         writeValue(stream, value.toList())
       }
-      is BookmarkNode -> {
+      is GeckoFetchRequest -> {
         stream.write(245)
         writeValue(stream, value.toList())
       }
-      is BookmarkImportNode -> {
+      is GeckoFetchResponse -> {
         stream.write(246)
         writeValue(stream, value.toList())
       }
-      is BookmarkInsertTreeResult -> {
+      is BookmarkNode -> {
         stream.write(247)
         writeValue(stream, value.toList())
       }
-      is BookmarkInfo -> {
+      is BookmarkImportNode -> {
         stream.write(248)
         writeValue(stream, value.toList())
       }
-      is SitePermissions -> {
+      is BookmarkInsertTreeResult -> {
         stream.write(249)
         writeValue(stream, value.toList())
       }
-      is TrackingProtectionException -> {
+      is BookmarkInfo -> {
         stream.write(250)
         writeValue(stream, value.toList())
       }
-      is AppLinkTarget -> {
+      is SitePermissions -> {
         stream.write(251)
         writeValue(stream, value.toList())
       }
-      is ProtectedTargetPattern -> {
+      is TrackingProtectionException -> {
         stream.write(252)
         writeValue(stream, value.toList())
       }
-      is NativeAppLinkRule -> {
+      is AppLinkTarget -> {
         stream.write(253)
         writeValue(stream, value.toList())
       }
-      is NativeContextAppLinkPolicy -> {
+      is ProtectedTargetPattern -> {
         stream.write(254)
         writeValue(stream, value.toList())
       }
-      is AppLinkPolicySnapshot -> {
+      is NativeAppLinkRule -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 0, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is AppLinkPromptRequest -> {
+      is NativeContextAppLinkPolicy -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 1, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is AppLinkResolutionResult -> {
+      is AppLinkPolicySnapshot -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 2, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PwaIcon -> {
+      is AppLinkPromptRequest -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 3, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ShareTargetFiles -> {
+      is AppLinkResolutionResult -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 4, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ShareTargetParams -> {
+      is PwaIcon -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 5, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ShareTarget -> {
+      is ShareTargetFiles -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 6, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ExternalApplicationResource -> {
+      is ShareTargetParams -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 7, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PwaManifest -> {
+      is ShareTarget -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 8, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is SandboxCaptureEntry -> {
+      is ExternalApplicationResource -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 9, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is GestureConfig -> {
+      is PwaManifest -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 10, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PushDistributor -> {
+      is SandboxCaptureEntry -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 11, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PushStatus -> {
+      is GestureConfig -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 12, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PushSubscription -> {
+      is PushDistributor -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 13, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is PushStatus -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 14, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is PushSubscription -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 15, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
@@ -9768,27 +9922,25 @@ interface GeckoBrowserExtensionApi {
 }
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoContainerProxyApi {
-  fun setProxyPort(port: Long)
-  fun addContainerProxy(contextId: String)
-  fun removeContainerProxy(contextId: String)
-  fun upsertProxy(proxy: GeckoProxySettings)
-  fun removeProxy(proxyId: String)
-  fun setContainerProxy(contextId: String, proxyId: String)
-  fun setContainerDirectConnection(contextId: String, scopeId: String)
-  fun clearContainerProxy(contextId: String)
-  fun removeContainerProxyRelation(contextId: String, proxyId: String)
-  fun setSiteAssignments(assignments: Map<String, String>)
   /**
-   * Strict-mode enforcement map. Keys are Gecko cookie-store contexts to
-   * enforce (a strict container's base context plus its isolated tabs'
-   * isolation contexts); each value contains the container base contexts that
-   * site assignments are keyed on. Tabs in these contexts may only load
-   * origins assigned to one of the mapped base contexts (exact match, no proxy
-   * equivalence); any other top-level navigation is cancelled and reported
-   * back with `strict = true`.
+   * Replaces the extension's entire routing state and waits for it to be
+   * acknowledged. Returns the generation the extension applied.
+   *
+   * The snapshot is cached natively and replayed whenever the extension's
+   * native port reconnects, so a background-script restart cannot leave the
+   * extension running with state the app believes it still has.
    */
-  fun setStrictContexts(contexts: Map<String, List<String>>)
+  fun applySnapshot(snapshot: GeckoProxyRoutingSnapshot, callback: (Result<Long>) -> Unit)
+  /**
+   * Liveness only: whether the extension's port answers. Says nothing about
+   * whether routing is configured — use [routingStatus] for that.
+   */
   fun healthcheck(callback: (Result<Boolean>) -> Unit)
+  /**
+   * Locally cached view of what the extension acknowledged. Does not talk to
+   * the extension, so it is safe to call on a hot path.
+   */
+  fun routingStatus(): GeckoProxyRoutingStatus
 
   companion object {
     /** The codec used by GeckoContainerProxyApi. */
@@ -9800,201 +9952,20 @@ interface GeckoContainerProxyApi {
     fun setUp(binaryMessenger: BinaryMessenger, api: GeckoContainerProxyApi?, messageChannelSuffix: String = "") {
       val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.setProxyPort$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.applySnapshot$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val portArg = args[0] as Long
-            val wrapped: List<Any?> = try {
-              api.setProxyPort(portArg)
-              listOf(null)
-            } catch (exception: Throwable) {
-              GeckoPigeonUtils.wrapError(exception)
+            val snapshotArg = args[0] as GeckoProxyRoutingSnapshot
+            api.applySnapshot(snapshotArg) { result: Result<Long> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(GeckoPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(GeckoPigeonUtils.wrapResult(data))
+              }
             }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.addContainerProxy$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val contextIdArg = args[0] as String
-            val wrapped: List<Any?> = try {
-              api.addContainerProxy(contextIdArg)
-              listOf(null)
-            } catch (exception: Throwable) {
-              GeckoPigeonUtils.wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.removeContainerProxy$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val contextIdArg = args[0] as String
-            val wrapped: List<Any?> = try {
-              api.removeContainerProxy(contextIdArg)
-              listOf(null)
-            } catch (exception: Throwable) {
-              GeckoPigeonUtils.wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.upsertProxy$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val proxyArg = args[0] as GeckoProxySettings
-            val wrapped: List<Any?> = try {
-              api.upsertProxy(proxyArg)
-              listOf(null)
-            } catch (exception: Throwable) {
-              GeckoPigeonUtils.wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.removeProxy$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val proxyIdArg = args[0] as String
-            val wrapped: List<Any?> = try {
-              api.removeProxy(proxyIdArg)
-              listOf(null)
-            } catch (exception: Throwable) {
-              GeckoPigeonUtils.wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.setContainerProxy$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val contextIdArg = args[0] as String
-            val proxyIdArg = args[1] as String
-            val wrapped: List<Any?> = try {
-              api.setContainerProxy(contextIdArg, proxyIdArg)
-              listOf(null)
-            } catch (exception: Throwable) {
-              GeckoPigeonUtils.wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.setContainerDirectConnection$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val contextIdArg = args[0] as String
-            val scopeIdArg = args[1] as String
-            val wrapped: List<Any?> = try {
-              api.setContainerDirectConnection(contextIdArg, scopeIdArg)
-              listOf(null)
-            } catch (exception: Throwable) {
-              GeckoPigeonUtils.wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.clearContainerProxy$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val contextIdArg = args[0] as String
-            val wrapped: List<Any?> = try {
-              api.clearContainerProxy(contextIdArg)
-              listOf(null)
-            } catch (exception: Throwable) {
-              GeckoPigeonUtils.wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.removeContainerProxyRelation$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val contextIdArg = args[0] as String
-            val proxyIdArg = args[1] as String
-            val wrapped: List<Any?> = try {
-              api.removeContainerProxyRelation(contextIdArg, proxyIdArg)
-              listOf(null)
-            } catch (exception: Throwable) {
-              GeckoPigeonUtils.wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.setSiteAssignments$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val assignmentsArg = args[0] as Map<String, String>
-            val wrapped: List<Any?> = try {
-              api.setSiteAssignments(assignmentsArg)
-              listOf(null)
-            } catch (exception: Throwable) {
-              GeckoPigeonUtils.wrapError(exception)
-            }
-            reply.reply(wrapped)
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.setStrictContexts$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val contextsArg = args[0] as Map<String, List<String>>
-            val wrapped: List<Any?> = try {
-              api.setStrictContexts(contextsArg)
-              listOf(null)
-            } catch (exception: Throwable) {
-              GeckoPigeonUtils.wrapError(exception)
-            }
-            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)
@@ -10013,6 +9984,21 @@ interface GeckoContainerProxyApi {
                 reply.reply(GeckoPigeonUtils.wrapResult(data))
               }
             }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.routingStatus$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.routingStatus())
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)

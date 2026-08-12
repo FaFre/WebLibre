@@ -6,74 +6,33 @@
 
 package eu.weblibre.flutter_mozilla_components.api
 
-import eu.weblibre.flutter_mozilla_components.feature.BrowserExtensionFeature
 import eu.weblibre.flutter_mozilla_components.feature.ContainerProxyFeature
 import eu.weblibre.flutter_mozilla_components.feature.ResultConsumer
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoContainerProxyApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoProxyRoutingSnapshot
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoProxyRoutingStatus
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoProxySettings
+import org.json.JSONArray
 import org.json.JSONObject
 
 class GeckoContainerProxyApiImpl : GeckoContainerProxyApi {
-    override fun setProxyPort(port: Long) {
-        ContainerProxyFeature.scheduleRequest("setProxyPort", port.toInt())
-    }
+    override fun applySnapshot(
+        snapshot: GeckoProxyRoutingSnapshot,
+        callback: (Result<Long>) -> Unit
+    ) {
+        ContainerProxyFeature.applySnapshot(
+            snapshot.toJson(),
+            snapshot.generation,
+            object : ResultConsumer<JSONObject> {
+                override fun success(result: JSONObject) {
+                    callback(Result.success(snapshot.generation))
+                }
 
-    override fun addContainerProxy(contextId: String) {
-        ContainerProxyFeature.scheduleRequest("addContainerProxy", contextId)
-    }
-
-    override fun removeContainerProxy(contextId: String) {
-        ContainerProxyFeature.scheduleRequest("removeContainerProxy", contextId)
-    }
-
-    override fun upsertProxy(proxy: GeckoProxySettings) {
-        ContainerProxyFeature.scheduleRequest("upsertProxy", proxy.toJson())
-    }
-
-    override fun removeProxy(proxyId: String) {
-        ContainerProxyFeature.scheduleRequest("removeProxy", proxyId)
-    }
-
-    override fun setContainerProxy(contextId: String, proxyId: String) {
-        ContainerProxyFeature.scheduleRequest(
-            "setContainerProxy",
-            JSONObject().apply {
-                put("contextId", contextId)
-                put("proxyId", proxyId)
+                override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
+                    callback(Result.failure(Exception("$errorCode $errorMessage $errorDetails")))
+                }
             }
         )
-    }
-
-    override fun setContainerDirectConnection(contextId: String, scopeId: String) {
-        ContainerProxyFeature.scheduleRequest(
-            "setContainerDirectConnection",
-            JSONObject().apply {
-                put("contextId", contextId)
-                put("scopeId", scopeId)
-            }
-        )
-    }
-
-    override fun clearContainerProxy(contextId: String) {
-        ContainerProxyFeature.scheduleRequest("clearContainerProxy", contextId)
-    }
-
-    override fun removeContainerProxyRelation(contextId: String, proxyId: String) {
-        ContainerProxyFeature.scheduleRequest(
-            "removeContainerProxyRelation",
-            JSONObject().apply {
-                put("contextId", contextId)
-                put("proxyId", proxyId)
-            }
-        )
-    }
-
-    override fun setSiteAssignments(assignments: Map<String, String>) {
-        ContainerProxyFeature.scheduleRequest("setSiteAssignments", JSONObject(assignments))
-    }
-
-    override fun setStrictContexts(contexts: Map<String, List<String>>) {
-        ContainerProxyFeature.scheduleRequest("setStrictContexts", JSONObject(contexts))
     }
 
     override fun healthcheck(callback: (Result<Boolean>) -> Unit) {
@@ -88,6 +47,31 @@ class GeckoContainerProxyApiImpl : GeckoContainerProxyApi {
                 callback(Result.failure(Exception("$errorCode $errorMessage $errorDetails")))
             }
         })
+    }
+
+    override fun routingStatus(): GeckoProxyRoutingStatus {
+        val generation = ContainerProxyFeature.acknowledgedSnapshotGeneration()
+        return GeckoProxyRoutingStatus(
+            ready = generation != null,
+            acknowledgedGeneration = generation,
+        )
+    }
+
+    private fun GeckoProxyRoutingSnapshot.toJson(): JSONObject {
+        return JSONObject().apply {
+            put("generation", generation)
+            put("proxies", JSONArray(proxies.map { it.toJson() }))
+            put("relations", relations.toJsonWithListValues())
+            put("directScopes", JSONObject(directScopes as Map<*, *>))
+            put("siteAssignments", JSONObject(siteAssignments as Map<*, *>))
+            put("strictContexts", strictContexts.toJsonWithListValues())
+        }
+    }
+
+    private fun Map<String, List<String>>.toJsonWithListValues(): JSONObject {
+        return JSONObject().apply {
+            forEach { (key, values) -> put(key, JSONArray(values)) }
+        }
     }
 
     private fun GeckoProxySettings.toJson(): JSONObject {

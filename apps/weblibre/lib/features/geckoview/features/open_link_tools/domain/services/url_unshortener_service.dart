@@ -25,6 +25,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/data/models/unshorten_response_data.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/entities/unshorten_result.dart';
+import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 
 part 'url_unshortener_service.g.dart';
 
@@ -95,28 +96,28 @@ class UrlUnshortenerService extends _$UrlUnshortenerService {
     http.Client? client,
   }) async {
     final encodedUrl = Uri.encodeComponent(url);
-    final httpClient = client ?? http.Client();
+    // Unshortening discloses the link the user is about to open, which is the
+    // selected tab's business, so it follows that tab's routing rather than the
+    // general container's. The shared client is owned by its provider.
+    final http.Client httpClient =
+        client ?? ref.read(selectedTabRoutedHttpClientProvider);
 
     final http.Response response;
     final bool authenticated = token.isNotEmpty;
 
-    try {
-      if (authenticated) {
-        response = await httpClient
-            .get(
-              Uri.parse(
-                'https://unshorten.me/api/v2/unshorten?url=$encodedUrl',
-              ),
-              headers: {'Authorization': 'Token $token'},
-            )
-            .timeout(const Duration(seconds: 15));
-      } else {
-        response = await httpClient
-            .get(Uri.parse('https://unshorten.me/json/$encodedUrl'))
-            .timeout(const Duration(seconds: 15));
-      }
-    } finally {
-      if (client == null) httpClient.close();
+    // Nothing is closed here either way: the shared client belongs to its
+    // provider, and an injected one belongs to whoever passed it in.
+    if (authenticated) {
+      response = await httpClient
+          .get(
+            Uri.parse('https://unshorten.me/api/v2/unshorten?url=$encodedUrl'),
+            headers: {'Authorization': 'Token $token'},
+          )
+          .timeout(const Duration(seconds: 15));
+    } else {
+      response = await httpClient
+          .get(Uri.parse('https://unshorten.me/json/$encodedUrl'))
+          .timeout(const Duration(seconds: 15));
     }
 
     if (response.statusCode != 200) {

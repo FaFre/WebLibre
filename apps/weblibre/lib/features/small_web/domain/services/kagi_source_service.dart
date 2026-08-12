@@ -17,16 +17,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:drift/drift.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 import 'package:rss_dart/dart_rss.dart';
 import 'package:uuid/enums.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/uuid.dart';
 import 'package:weblibre/extensions/http_encoding.dart';
+import 'package:weblibre/features/proxy/domain/services/app_routing_policy.dart';
+import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 import 'package:weblibre/features/small_web/data/database/database.dart';
 import 'package:weblibre/features/small_web/data/database/definitions.drift.dart';
 import 'package:weblibre/features/small_web/data/models/kagi_feed_entry.dart';
@@ -40,13 +43,18 @@ typedef _KagiFeedFetchRequest = ({
   String url,
   String mode,
   Map<String, String> categoryRemap,
+  AppRoutingPolicy policy,
 });
 
 class KagiSourceService {
   final SmallWebDatabase _db;
   final Map<String, String> _categoryRemap;
 
-  KagiSourceService(this._db, this._categoryRemap);
+  /// Resolved per fetch rather than captured once, so a proxy that starts or
+  /// stops takes effect on the next feed fetch.
+  final Future<AppRoutingPolicy> Function() _resolvePolicy;
+
+  KagiSourceService(this._db, this._categoryRemap, this._resolvePolicy);
 
   Future<bool> needsRefresh(KagiSmallWebMode mode) async {
     final latestFetch = await _db.smallWebItemDao
@@ -64,6 +72,7 @@ class KagiSourceService {
       url: mode.feedUrl.toString(),
       mode: mode.name,
       categoryRemap: Map<String, String>.from(_categoryRemap),
+      policy: await _resolvePolicy(),
     );
 
     final List<KagiFeedEntry> entries;
@@ -157,6 +166,7 @@ Future<List<KagiFeedEntry>> Function() _createKagiFeedFetchTask(
     Uri.parse(request.url),
     request.mode,
     request.categoryRemap,
+    request.policy,
   );
 }
 
@@ -165,10 +175,13 @@ Future<List<KagiFeedEntry>> _fetchAndParseFeed(
   Uri url,
   String mode,
   Map<String, String> categoryRemap,
+  AppRoutingPolicy policy,
 ) async {
   BackgroundIsolateBinaryMessenger.ensureInitialized(token);
 
-  final client = http.Client();
+  final httpClient = HttpClient();
+  applyRoutingPolicy(httpClient, policy);
+  final client = IOClient(httpClient);
   try {
     final response = await client.get(url).timeout(const Duration(seconds: 30));
 

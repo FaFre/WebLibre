@@ -8,12 +8,36 @@ part of 'container_proxy.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Pushes the app's routing state into Gecko's proxy extension.
+///
+/// Snapshots are the only way state reaches the extension, and each carries a
+/// generation the extension echoes back. Nothing is recorded as applied until
+/// that acknowledgement arrives, so a push that fails leaves the repository
+/// out-of-sync on purpose and the next recompute retries it. While out of sync
+/// the extension blocks rather than connecting directly, so the failure mode is
+/// lost connectivity, never unproxied traffic.
 
 @ProviderFor(ContainerProxyRepository)
 final containerProxyRepositoryProvider = ContainerProxyRepositoryProvider._();
 
+/// Pushes the app's routing state into Gecko's proxy extension.
+///
+/// Snapshots are the only way state reaches the extension, and each carries a
+/// generation the extension echoes back. Nothing is recorded as applied until
+/// that acknowledgement arrives, so a push that fails leaves the repository
+/// out-of-sync on purpose and the next recompute retries it. While out of sync
+/// the extension blocks rather than connecting directly, so the failure mode is
+/// lost connectivity, never unproxied traffic.
 final class ContainerProxyRepositoryProvider
     extends $NotifierProvider<ContainerProxyRepository, void> {
+  /// Pushes the app's routing state into Gecko's proxy extension.
+  ///
+  /// Snapshots are the only way state reaches the extension, and each carries a
+  /// generation the extension echoes back. Nothing is recorded as applied until
+  /// that acknowledgement arrives, so a push that fails leaves the repository
+  /// out-of-sync on purpose and the next recompute retries it. While out of sync
+  /// the extension blocks rather than connecting directly, so the failure mode is
+  /// lost connectivity, never unproxied traffic.
   ContainerProxyRepositoryProvider._()
     : super(
         from: null,
@@ -42,7 +66,16 @@ final class ContainerProxyRepositoryProvider
 }
 
 String _$containerProxyRepositoryHash() =>
-    r'9d9190edcb06eb1335318172183e354a66626f57';
+    r'4a3768388ca29c473f9ad40712e940955967299f';
+
+/// Pushes the app's routing state into Gecko's proxy extension.
+///
+/// Snapshots are the only way state reaches the extension, and each carries a
+/// generation the extension echoes back. Nothing is recorded as applied until
+/// that acknowledgement arrives, so a push that fails leaves the repository
+/// out-of-sync on purpose and the next recompute retries it. While out of sync
+/// the extension blocks rather than connecting directly, so the failure mode is
+/// lost connectivity, never unproxied traffic.
 
 abstract class _$ContainerProxyRepository extends $Notifier<void> {
   void build();

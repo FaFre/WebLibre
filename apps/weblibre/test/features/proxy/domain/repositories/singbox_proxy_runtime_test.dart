@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -11,7 +10,6 @@ import 'package:weblibre/features/proxy/domain/repositories/container_proxy.dart
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_credentials.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
-import 'package:weblibre/features/proxy/domain/services/singbox_proxy_endpoint_sync.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ProxyProfile;
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
@@ -90,7 +88,7 @@ void main() {
     },
   );
 
-  test('stopProfiles unregisters removed Gecko proxy endpoints', () async {
+  test('stopProfiles drops the stopped profile from the runtime', () async {
     final profile1 = _profile(id: 'profile-1', name: 'First');
     final profile2 = _profile(id: 'profile-2', name: 'Second');
     final client =
@@ -118,9 +116,14 @@ void main() {
     await _drainSync();
 
     expect(client.stopCalls, [profile2.proxyConnectionId]);
-    expect(containerProxyRepository.removedProxyIds, [
-      profile2.proxyConnectionId,
-    ]);
+    expect(
+      container
+          .read(singboxProxyRuntimeRepositoryProvider)
+          .requireValue
+          .endpoints
+          .map((endpoint) => endpoint.profileId),
+      [profile1.proxyConnectionId],
+    );
   });
 
   test(
@@ -169,32 +172,6 @@ void main() {
       expect(profilesRepository.deletedProfileIds, [profile.id]);
     },
   );
-
-  test('runtime stream sync removes stale Gecko proxy registrations', () async {
-    final profile1 = _profile(id: 'profile-1', name: 'First');
-    final profile2 = _profile(id: 'profile-2', name: 'Second');
-    final client = _FakeSingboxProxyClient(
-      _state([
-        _endpoint(profile1.proxyConnectionId, port: 12080),
-        _endpoint(profile2.proxyConnectionId, port: 12081),
-      ]),
-    );
-    final containerProxyRepository = _FakeContainerProxyRepository();
-    final container = _container(
-      client: client,
-      profilesRepository: _FakeProfilesRepository([profile1, profile2]),
-      containerProxyRepository: containerProxyRepository,
-    );
-    addTearDown(container.dispose);
-
-    await container.read(singboxProxyRuntimeRepositoryProvider.future);
-    client.emit(_state([_endpoint(profile2.proxyConnectionId, port: 12081)]));
-    await _drainSync();
-
-    expect(containerProxyRepository.removedProxyIds, [
-      profile1.proxyConnectionId,
-    ]);
-  });
 }
 
 ProviderContainer _container({
@@ -229,17 +206,11 @@ ProviderContainer _container({
     ],
   );
 
-  // Activate the endpoint sync notifier so runtime state changes propagate
-  // into the fake container proxy repository. Production wires this in
-  // main.dart; tests have to ask for it explicitly.
-  container.read(singboxProxyEndpointSyncProvider);
-
   return container;
 }
 
-/// Drains all currently-pending microtasks/futures so the endpoint-sync
-/// `ref.listen` callback (chained off the runtime state stream listener)
-/// has time to apply its registrations against the fake Gecko repo.
+/// Drains all currently-pending microtasks/futures so listeners chained off
+/// the runtime state stream have time to settle.
 Future<void> _drainSync() => pumpEventQueue();
 
 ProxyProfile _profile({required String id, required String name}) {
@@ -375,19 +346,6 @@ class _FakeEngineSettingsRepository extends EngineSettingsRepository {
 }
 
 class _FakeContainerProxyRepository extends ContainerProxyRepository {
-  final upsertedProxies = <GeckoProxySettings>[];
-  final removedProxyIds = <String>[];
-
-  @override
-  Future<void> upsertProxy(GeckoProxySettings proxy) async {
-    upsertedProxies.add(proxy);
-  }
-
-  @override
-  Future<void> removeProxy(String proxyId) async {
-    removedProxyIds.add(proxyId);
-  }
-
   @override
   void build() {}
 }

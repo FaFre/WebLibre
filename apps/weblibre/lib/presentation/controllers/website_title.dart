@@ -26,30 +26,10 @@ import 'package:weblibre/extensions/ref_cache.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:weblibre/features/proxy/data/proxy_connection.dart';
-import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
-import 'package:weblibre/features/user/data/models/proxy_routing_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/proxy_routing_settings.dart';
+import 'package:weblibre/features/proxy/domain/services/app_routing_context.dart';
+import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 
 part 'website_title.g.dart';
-
-sealed class _PageInfoProxyAssignment {
-  const _PageInfoProxyAssignment();
-}
-
-final class _PageInfoDirectAssignment extends _PageInfoProxyAssignment {
-  const _PageInfoDirectAssignment();
-}
-
-final class _PageInfoExplicitProxyAssignment extends _PageInfoProxyAssignment {
-  final ProxyConnectionId proxyConnectionId;
-
-  const _PageInfoExplicitProxyAssignment(this.proxyConnectionId);
-}
 
 @Riverpod()
 class CompletePageInfo extends _$CompletePageInfo {
@@ -97,115 +77,23 @@ Future<WebPageInfo> pageInfo(
 
   final tabState = ref.read(selectedTabStateProvider);
 
-  int? proxyPort;
-  if (tabState?.id != null) {
-    final containerData = await ref
-        .read(tabDataRepositoryProvider.notifier)
-        .getTabContainerData(tabState!.id);
-
-    final proxyRoutingSettings = ref.read(
-      proxyRoutingSettingsWithDefaultsProvider,
-    );
-
-    final isolatedAssignment = tabState.isolationContextId != null
-        ? await _pageInfoAssignmentForIsolationContext(
-            ref,
-            tabState.isolationContextId!,
-          )
-        : null;
-
-    final effectiveContainerProxyConnectionId = switch (isolatedAssignment) {
-      _PageInfoExplicitProxyAssignment(:final proxyConnectionId) =>
-        proxyConnectionId,
-      _PageInfoDirectAssignment() => null,
-      null => containerData?.metadata.proxyConnectionId,
-    };
-    final bypassesGlobalProxy =
-        isolatedAssignment is _PageInfoDirectAssignment ||
-        (isolatedAssignment == null &&
-            containerData?.metadata.bypassGlobalProxy == true);
-    final usesGlobalRegularTor =
-        tabState.tabMode is! PrivateTabMode &&
-        effectiveContainerProxyConnectionId == null &&
-        !bypassesGlobalProxy &&
-        proxyRoutingSettings.regularTabsMode ==
-            ProxyRegularTabRoutingMode.all &&
-        proxyRoutingSettings.regularTabsProxyConnectionId
-            is TorProxyConnectionId;
-
-    if (effectiveContainerProxyConnectionId is TorProxyConnectionId ||
-        usesGlobalRegularTor ||
-        (tabState.tabMode is PrivateTabMode &&
-            proxyRoutingSettings.privateTabsProxyConnectionId
-                is TorProxyConnectionId)) {
-      proxyPort = await ref.read(
-        torProxyServiceProvider.selectAsync((value) => value.socksPort),
-      );
-
-      if (proxyPort == null) {
-        throw Exception('Could not proxy request');
-      }
-    }
-  }
+  // Fetching page info requests the page itself, so it must travel the same
+  // route the tab would. The context id is resolved here and the routing
+  // decision is left to the snapshot — re-deriving it from container settings
+  // is how this path used to honour Tor but silently go direct for every
+  // sing-box connection.
+  final contextId = await routingContextIdForTab(ref, tabState);
+  final policy = await resolveAppRoutingPolicy(ref, contextId);
 
   final result = await ref
       .watch(genericWebsiteServiceProvider.notifier)
-      .fetchPageInfo(
-        url: url,
-        isImageRequest: isImageRequest,
-        proxyPort: proxyPort,
-      );
+      .fetchPageInfo(url: url, isImageRequest: isImageRequest, policy: policy);
 
   if (!result.isSuccess) {
     link.close();
   }
 
   return result.value;
-}
-
-Future<_PageInfoProxyAssignment?> _pageInfoAssignmentForIsolationContext(
-  Ref ref,
-  String contextId,
-) async {
-  final db = ref.read(tabDatabaseProvider);
-  final pairs = await db.tabDao.isolatedContextContainerPairs().get();
-  final containerIds = pairs
-      .where((pair) => pair.isolationContextId == contextId)
-      .map((pair) => pair.containerId)
-      .nonNulls
-      .toSet();
-
-  if (containerIds.isEmpty) return null;
-
-  final containers = await ref
-      .read(containerRepositoryProvider.notifier)
-      .getAllContainersWithCount();
-  final matchedContainers = containers.where(
-    (container) => containerIds.contains(container.id),
-  );
-  final proxyIds =
-      matchedContainers
-          .map((container) => container.metadata.proxyConnectionId?.encode())
-          .nonNulls
-          .toSet()
-          .toList()
-        ..sort();
-
-  if (proxyIds.isNotEmpty) {
-    final proxyConnectionId = ProxyConnectionId.decode(proxyIds.first);
-    return proxyConnectionId != null
-        ? _PageInfoExplicitProxyAssignment(proxyConnectionId)
-        : null;
-  }
-  final matchedContainerList = matchedContainers.toList();
-  if (matchedContainerList.isNotEmpty &&
-      matchedContainerList.every(
-        (container) => container.metadata.bypassGlobalProxy,
-      )) {
-    return const _PageInfoDirectAssignment();
-  }
-
-  return null;
 }
 
 @Riverpod()

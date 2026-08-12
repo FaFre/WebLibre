@@ -81,10 +81,70 @@ interface WildcardAssignment {
   contextId: string
 }
 
+/**
+ * The complete routing state, as owned by the app. The extension's store is
+ * memory-only and dies with the background script, so routing can never be
+ * reconstructed from the incremental mutation messages alone — a restarted
+ * background script would sit with an empty store while believing itself
+ * configured, and an empty store means "direct" for every request.
+ *
+ * A snapshot is therefore the only way the store becomes usable: it replaces
+ * every field at once and stamps a generation, and until one arrives the store
+ * reports itself unready so requests fail closed instead of leaking.
+ */
+export interface RoutingSnapshot {
+  generation: number
+  proxies: ProxyDao[]
+  relations: { [key: string]: string[] }
+  directScopes: { [key: string]: string }
+  siteAssignments: { [key: string]: string }
+  strictContexts: { [key: string]: string[] }
+}
+
 export class Store {
   private proxies: ProxyDao[] = []
   private relations: { [key: string]: string[] } = {}
   private directRelationScopes: { [key: string]: string } = {}
+
+  /**
+   * Generation of the last applied snapshot, or null while no snapshot has
+   * been applied. Null is the fail-closed state: it is not "no proxies
+   * configured", it is "routing is unknown".
+   */
+  private generation: number | null = null
+
+  /**
+   * Whether an authoritative snapshot has been applied. Callers must treat a
+   * false answer as "block", never as "direct".
+   */
+  isReady(): boolean {
+    return this.generation !== null
+  }
+
+  getGeneration(): number | null {
+    return this.generation
+  }
+
+  /**
+   * Atomically replaces the whole routing state and marks the store ready.
+   * Every field is overwritten, so state left over from a previous generation
+   * cannot survive into the new one.
+   */
+  applySnapshot(snapshot: RoutingSnapshot): void {
+    this.proxies = snapshot.proxies.map(p => ({ ...p }))
+
+    const relations: { [key: string]: string[] } = {}
+    for (const [contextId, proxyIds] of Object.entries(snapshot.relations)) {
+      relations[contextId] = [...proxyIds]
+    }
+    this.relations = relations
+    this.directRelationScopes = { ...snapshot.directScopes }
+
+    this.setSiteAssignments(new Map(Object.entries(snapshot.siteAssignments)))
+    this.setStrictContexts(new Map(Object.entries(snapshot.strictContexts)))
+
+    this.generation = snapshot.generation
+  }
 
   private siteAssignments: Map<string, string> = new Map<string, string>()
   private wildcardAssignments: WildcardAssignment[] = []

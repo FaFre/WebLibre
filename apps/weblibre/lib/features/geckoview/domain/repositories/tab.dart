@@ -549,12 +549,22 @@ class TabRepository extends _$TabRepository {
 
     if (containerData != null) {
       if (containerData.metadata.proxyConnectionId != null) {
-        final proxyPluginHealthy = await GeckoContainerProxyService()
-            .healthcheck();
+        // Routing has to be *installed*, not merely answering: an extension
+        // that responds but holds no snapshot blocks this container's traffic,
+        // so opening the tab would only show a broken page.
+        //
+        // Waited on rather than sampled, because the install window is a normal
+        // part of a cold start and a tap that lands inside it should open the
+        // tab a moment later instead of doing nothing at all.
+        final routingReady = await ref
+            .read(containerProxyRepositoryProvider.notifier)
+            .waitUntilRoutingReady();
 
-        if (!proxyPluginHealthy) {
+        if (!ref.mounted) return false;
+
+        if (!routingReady) {
           logger.w(
-            'Tried to open proxied tab $tabId but proxy plugin not responding',
+            'Tried to open proxied tab $tabId before container routing was installed',
           );
           return false;
         }
@@ -889,18 +899,9 @@ class TabRepository extends _$TabRepository {
       );
     }
 
-    // Best-effort: remove proxy alias (no-op if never set)
-    try {
-      await ref
-          .read(containerProxyRepositoryProvider.notifier)
-          .clearContainerProxy(contextId);
-    } catch (e, st) {
-      logger.e(
-        'Failed to remove proxy for isolation context $contextId',
-        error: e,
-        stackTrace: st,
-      );
-    }
+    // The isolation context's routing alias needs no explicit teardown: it is
+    // derived from the tabs that reference the context, so dropping those tabs
+    // removes it from the next routing snapshot.
   }
 
   Future<void> _drainPendingIsolationCleanup() async {

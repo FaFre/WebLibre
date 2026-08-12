@@ -34,7 +34,7 @@ final class UrlUnshortenerServiceProvider
 }
 
 String _$urlUnshortenerServiceHash() =>
-    r'19dae758ed0c48cb183e3da814d01039548fae40';
+    r'a04853170e21bc7f378ef97a03cb16bf2adc74d6';
 
 abstract class _$UrlUnshortenerService extends $AsyncNotifier<Set<String>> {
   FutureOr<Set<String>> build();

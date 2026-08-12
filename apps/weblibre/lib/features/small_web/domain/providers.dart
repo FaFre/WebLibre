@@ -19,6 +19,8 @@
  */
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:weblibre/features/proxy/domain/services/container_routing_snapshot.dart';
+import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 import 'package:weblibre/features/small_web/data/database/definitions.drift.dart';
 import 'package:weblibre/features/small_web/data/models/kagi_small_web_mode.dart';
 import 'package:weblibre/features/small_web/data/models/small_web_source_kind.dart';
@@ -33,12 +35,19 @@ part 'providers.g.dart';
 Future<KagiSourceService> kagiSourceService(Ref ref) async {
   final db = ref.watch(smallWebDatabaseProvider);
   final categories = await ref.watch(kagiCategoriesProvider.future);
-  return KagiSourceService(db, categories.remap);
+  return KagiSourceService(
+    db,
+    categories.remap,
+    () => resolveAppRoutingPolicy(ref, generalContextId),
+  );
 }
 
 @Riverpod(keepAlive: true)
 WanderSourceService wanderSourceService(Ref ref) {
-  return WanderSourceService(ref.watch(smallWebDatabaseProvider));
+  return WanderSourceService(
+    ref.watch(smallWebDatabaseProvider),
+    () => resolveAppRoutingPolicy(ref, generalContextId),
+  );
 }
 
 @Riverpod(keepAlive: true)

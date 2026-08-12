@@ -1911,18 +1911,32 @@ class GeckoProxySettings {
   });
 }
 
-@HostApi()
-abstract class GeckoContainerProxyApi {
-  void setProxyPort(int port);
-  void addContainerProxy(String contextId);
-  void removeContainerProxy(String contextId);
-  void upsertProxy(GeckoProxySettings proxy);
-  void removeProxy(String proxyId);
-  void setContainerProxy(String contextId, String proxyId);
-  void setContainerDirectConnection(String contextId, String scopeId);
-  void clearContainerProxy(String contextId);
-  void removeContainerProxyRelation(String contextId, String proxyId);
-  void setSiteAssignments(Map<String, String> assignments);
+/// The complete container routing state, as owned by the app.
+///
+/// The proxy extension's store is memory-only: it dies with the background
+/// script and starts empty, and an empty store routes every request directly.
+/// Incremental mutation messages can therefore never establish routing safely —
+/// they are unacknowledged, and a store that lost them looks identical to one
+/// that was deliberately configured for direct connections. A snapshot replaces
+/// the extension's whole state at once and is acknowledged, so both sides can
+/// agree on what is installed.
+class GeckoProxyRoutingSnapshot {
+  /// Monotonic counter identifying this snapshot. Echoed back on acknowledgement.
+  final int generation;
+
+  /// Every proxy endpoint currently available, keyed by [GeckoProxySettings.id].
+  final List<GeckoProxySettings> proxies;
+
+  /// Cookie-store context to the proxy ids it routes through. An empty list is
+  /// an explicit direct connection, which is distinct from having no entry.
+  final Map<String, List<String>> relations;
+
+  /// Scope ids for explicitly-direct contexts, used to decide which direct
+  /// contexts count as equivalent for site-assignment purposes.
+  final Map<String, String> directScopes;
+
+  /// Assigned site origin to the context it belongs to.
+  final Map<String, String> siteAssignments;
 
   /// Strict-mode enforcement map. Keys are Gecko cookie-store contexts to
   /// enforce (a strict container's base context plus its isolated tabs'
@@ -1931,10 +1945,53 @@ abstract class GeckoContainerProxyApi {
   /// origins assigned to one of the mapped base contexts (exact match, no proxy
   /// equivalence); any other top-level navigation is cancelled and reported
   /// back with `strict = true`.
-  void setStrictContexts(Map<String, List<String>> contexts);
+  final Map<String, List<String>> strictContexts;
 
+  const GeckoProxyRoutingSnapshot({
+    required this.generation,
+    required this.proxies,
+    required this.relations,
+    required this.directScopes,
+    required this.siteAssignments,
+    required this.strictContexts,
+  });
+}
+
+/// What the extension is currently known to have installed.
+class GeckoProxyRoutingStatus {
+  /// Whether the extension has acknowledged the most recently pushed snapshot.
+  /// While false, the extension blocks every request rather than connecting
+  /// directly, so this is the signal for "routing is safe to use".
+  final bool ready;
+
+  /// Generation the extension last acknowledged, or null if it never has.
+  final int? acknowledgedGeneration;
+
+  const GeckoProxyRoutingStatus({
+    required this.ready,
+    this.acknowledgedGeneration,
+  });
+}
+
+@HostApi()
+abstract class GeckoContainerProxyApi {
+  /// Replaces the extension's entire routing state and waits for it to be
+  /// acknowledged. Returns the generation the extension applied.
+  ///
+  /// The snapshot is cached natively and replayed whenever the extension's
+  /// native port reconnects, so a background-script restart cannot leave the
+  /// extension running with state the app believes it still has.
+  @async
+  int applySnapshot(GeckoProxyRoutingSnapshot snapshot);
+
+  /// Liveness only: whether the extension's port answers. Says nothing about
+  /// whether routing is configured — use [routingStatus] for that.
   @async
   bool healthcheck();
+
+  /// Locally cached view of what the extension acknowledged. Does not talk to
+  /// the extension, so it is safe to call on a hot path.
+  GeckoProxyRoutingStatus routingStatus();
 }
 
 @HostApi()

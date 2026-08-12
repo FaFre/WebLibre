@@ -17,11 +17,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/extensions/http_encoding.dart';
+import 'package:weblibre/features/proxy/domain/services/app_routing_policy.dart';
+import 'package:weblibre/features/proxy/domain/services/container_routing_snapshot.dart';
+import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_parse_result.dart';
 import 'package:weblibre/features/web_feed/utils/feed_parser.dart';
 
@@ -32,13 +37,19 @@ class FeedReader extends _$FeedReader {
   Future<FeedParseResult> parseFeed(Uri url) async {
     final rootIsolateToken = ServicesBinding.rootIsolateToken!;
 
+    // Which feeds are fetched, and when, is as revealing as browsing history,
+    // so feed fetches follow global routing like any other request.
+    final policy = await resolveAppRoutingPolicy(ref, generalContextId);
+
     final result = await compute((args) async {
       // Initialize BackgroundIsolateBinaryMessenger with the token
       BackgroundIsolateBinaryMessenger.ensureInitialized(
         args['token']! as RootIsolateToken,
       );
 
-      final client = http.Client();
+      final httpClient = HttpClient();
+      applyRoutingPolicy(httpClient, args['policy']! as AppRoutingPolicy);
+      final client = IOClient(httpClient);
       try {
         final url = Uri.parse(args['url']! as String);
         final response = await client
@@ -58,7 +69,7 @@ class FeedReader extends _$FeedReader {
       } finally {
         client.close();
       }
-    }, {'token': rootIsolateToken, 'url': url.toString()});
+    }, {'token': rootIsolateToken, 'url': url.toString(), 'policy': policy});
 
     return FeedParseResult.fromJson(result);
   }

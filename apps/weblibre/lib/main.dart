@@ -51,6 +51,7 @@ import 'package:weblibre/domain/services/app_initialization.dart';
 import 'package:weblibre/domain/services/display_mode.dart';
 import 'package:weblibre/features/account/domain/services/account_callback_handler.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/engine_settings_replication.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/services/proxy_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/services/history_exclusion_replication.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/services/visit_container_recorder.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
@@ -60,7 +61,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_settings_sync.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_logs.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_autostart.dart';
-import 'package:weblibre/features/proxy/domain/services/singbox_proxy_endpoint_sync.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_feed/presentation/controllers/fetch_articles.dart';
@@ -272,6 +272,13 @@ class _MainWidget extends HookConsumerWidget {
       // relations.
       ref.read(visitContainerRecorderProvider);
 
+      // Start assembling the container routing snapshot BEFORE the engine, so
+      // the push is already queued when the proxy extension comes up. The
+      // extension blocks every request until it has one, so the sooner this is
+      // installed the shorter the window in which protected containers cannot
+      // load — and it is a barrier, never a leak, if it is late.
+      ref.read(proxySettingsReplicationProvider);
+
       try {
         await GeckoBrowserService().initialize(
           filesystem.relativeProfilePath,
@@ -347,15 +354,11 @@ class _MainWidget extends HookConsumerWidget {
       // Activate account callback deep link handler
       ref.read(accountCallbackHandlerProvider);
 
-      // Mirror the sing-box runtime's SOCKS endpoints into Gecko's
-      // container-proxy registry. Side-effect-only notifier.
-      ref.read(singboxProxyEndpointSyncProvider);
-
-      // Bring up the proxy connections flagged for autostart. Registered after
-      // the endpoint sync so their SOCKS endpoints reach Gecko, and left
-      // unawaited so a slow Tor bootstrap can't stall startup — tabs that need
-      // one of these connections wait on the pending start instead of
-      // prompting.
+      // Bring up the proxy connections flagged for autostart. Their SOCKS
+      // endpoints reach Gecko through the routing snapshot mounted above, and
+      // this is left unawaited so a slow Tor bootstrap can't stall startup —
+      // tabs that need one of these connections wait on the pending start
+      // instead of prompting, and stay blocked until it resolves.
       unawaited(ref.read(proxyAutostartServiceProvider.notifier).run());
 
       if (!kDebugMode) {

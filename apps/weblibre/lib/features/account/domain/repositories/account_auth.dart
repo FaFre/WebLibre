@@ -32,6 +32,7 @@ import 'package:weblibre/features/account/data/models/persisted_session.dart';
 import 'package:weblibre/features/account/data/supabase_config.dart';
 import 'package:weblibre/features/account/domain/services/handoff_redeem_client.dart';
 import 'package:weblibre/features/account/domain/utils/pkce.dart';
+import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 
 // Re-export so call sites that already imported AccountAuthFlowException from
 // this repository keep compiling after the redeem client split.
@@ -170,6 +171,20 @@ class AccountAuthRepository extends _$AccountAuthRepository {
     return SupabaseClient(
       SupabaseConfig.supabaseUrl,
       SupabaseConfig.supabaseAnonKey,
+      // Without this the client builds its own `http.Client`, and every call it
+      // makes — session restore and the token refreshes its own timer schedules,
+      // sync documents, subscription and credit lookups — opens a direct socket
+      // to the account backend past whatever the user's routing says. It is
+      // also the traffic that most identifies them, since it carries their
+      // account's tokens.
+      //
+      // The general container's route rather than the selected tab's: none of
+      // these requests describe what is being browsed, and the account is the
+      // same account whichever tab happens to be in front.
+      //
+      // Not closed by `SupabaseClient.dispose()` — it only closes the transport
+      // it created itself — which is what this shared, app-wide client needs.
+      httpClient: ref.read(routedHttpClientProvider),
     );
   }
 

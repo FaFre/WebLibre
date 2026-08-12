@@ -35,7 +35,7 @@ final class UrlCleanerCatalogServiceProvider
 }
 
 String _$urlCleanerCatalogServiceHash() =>
-    r'5ee38420014da6f250a3dc25d85d4f1116a4f1c3';
+    r'f71af004040ac7c00939703d5240c781656a6137';
 
 abstract class _$UrlCleanerCatalogService
     extends $AsyncNotifier<List<UrlCleanerRule>> {

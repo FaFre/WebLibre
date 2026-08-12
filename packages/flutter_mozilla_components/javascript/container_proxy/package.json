@@ -7,7 +7,7 @@
     "bundle": "web-ext -s dist build --overwrite-dest",
     "bundle:src": "V=$(cat src/manifest.json | jq -r .version) && zip -r -X source-artifacts/container-proxy-v${V}.zip src babel.config.js LICENSE package.json package-lock.json README.md tsconfig.json webpack.config.js",
     "test:func": "pnpm run build && mocha test/functional/",
-    "test:unit": "ts-mocha --require ts-node/register test/unit/**/*.test.ts",
+    "test:unit": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' mocha --require ts-node/register test/unit/**/*.test.ts",
     "codeStyle:check": "standardx && ts-standard",
     "codeStyle:fix": "standardx --fix && ts-standard --fix",
     "lint": "addons-linter dist",

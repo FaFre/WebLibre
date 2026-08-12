@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'kagi.dart';
+part of 'proxy_pref_baseline.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -8,29 +8,32 @@ part of 'kagi.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Keeps the fail-closed proxy prefs in sync with whether routing needs them.
 
-@ProviderFor(KagiAutosuggestService)
-final kagiAutosuggestServiceProvider = KagiAutosuggestServiceProvider._();
+@ProviderFor(ProxyPrefBaseline)
+final proxyPrefBaselineProvider = ProxyPrefBaselineProvider._();
 
-final class KagiAutosuggestServiceProvider
-    extends $NotifierProvider<KagiAutosuggestService, void> {
-  KagiAutosuggestServiceProvider._()
+/// Keeps the fail-closed proxy prefs in sync with whether routing needs them.
+final class ProxyPrefBaselineProvider
+    extends $NotifierProvider<ProxyPrefBaseline, void> {
+  /// Keeps the fail-closed proxy prefs in sync with whether routing needs them.
+  ProxyPrefBaselineProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'kagiAutosuggestServiceProvider',
+        name: r'proxyPrefBaselineProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$kagiAutosuggestServiceHash();
+  String debugGetCreateSourceHash() => _$proxyPrefBaselineHash();
 
   @$internal
   @override
-  KagiAutosuggestService create() => KagiAutosuggestService();
+  ProxyPrefBaseline create() => ProxyPrefBaseline();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(void value) {
@@ -41,10 +44,11 @@ final class KagiAutosuggestServiceProvider
   }
 }
 
-String _$kagiAutosuggestServiceHash() =>
-    r'e45eea8358ab27cc972475c8c5e2b1276c8145e8';
+String _$proxyPrefBaselineHash() => r'4ef527c07ff6a07f8ba2b651acfe2ced839cf668';
 
-abstract class _$KagiAutosuggestService extends $Notifier<void> {
+/// Keeps the fail-closed proxy prefs in sync with whether routing needs them.
+
+abstract class _$ProxyPrefBaseline extends $Notifier<void> {
   void build();
   @$mustCallSuper
   @override

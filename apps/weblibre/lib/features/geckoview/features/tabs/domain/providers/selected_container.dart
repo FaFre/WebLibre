@@ -20,7 +20,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -33,6 +32,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/proxy/domain/repositories/container_proxy.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 
 part 'selected_container.g.dart';
@@ -63,10 +63,15 @@ class SelectedContainer extends _$SelectedContainer {
 
     if (ref.mounted && container != null && canApply()) {
       if (container.metadata.proxyConnectionId != null) {
-        final proxyPluginHealthy = await GeckoContainerProxyService()
-            .healthcheck();
+        // The extension answering is not the same as it holding the routing
+        // snapshot; only the latter means this container is actually proxied.
+        // Waited on, so selecting a container during the cold-start install
+        // window is delayed by it rather than silently refused.
+        final routingReady = await ref
+            .read(containerProxyRepositoryProvider.notifier)
+            .waitUntilRoutingReady();
 
-        if (ref.mounted && proxyPluginHealthy && canApply()) {
+        if (ref.mounted && routingReady && canApply()) {
           state = id;
           return SetContainerResult.success;
         }

@@ -17,14 +17,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:drift/drift.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 import 'package:uuid/enums.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/uuid.dart';
+import 'package:weblibre/features/proxy/domain/services/app_routing_policy.dart';
+import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 import 'package:weblibre/features/small_web/data/database/database.dart';
 import 'package:weblibre/features/small_web/data/database/definitions.drift.dart';
 import 'package:weblibre/features/small_web/data/models/small_web_source_kind.dart';
@@ -35,12 +38,20 @@ import 'package:weblibre/features/small_web/domain/services/wander_js_parser.dar
 const _staleDuration = Duration(hours: 3);
 const _retryAfterError = Duration(minutes: 30);
 
-typedef _WanderJsFetchRequest = ({RootIsolateToken token, String url});
+typedef _WanderJsFetchRequest = ({
+  RootIsolateToken token,
+  String url,
+  AppRoutingPolicy policy,
+});
 
 class WanderSourceService {
   final SmallWebDatabase _db;
 
-  WanderSourceService(this._db);
+  /// Resolved per fetch rather than captured once, so a proxy that starts or
+  /// stops takes effect on the next console fetch.
+  final Future<AppRoutingPolicy> Function() _resolvePolicy;
+
+  WanderSourceService(this._db, this._resolvePolicy);
 
   Future<bool> shouldRefreshConsole(
     Uri consoleUrl, {
@@ -90,6 +101,7 @@ class WanderSourceService {
       final result = await _runWanderJsFetch((
         token: ServicesBinding.rootIsolateToken!,
         url: wanderJsUrl.toString(),
+        policy: await _resolvePolicy(),
       ));
 
       if (result == null) {
@@ -245,6 +257,7 @@ class WanderSourceService {
     final result = await _runWanderJsFetch((
       token: ServicesBinding.rootIsolateToken!,
       url: wanderJsUrl.toString(),
+      policy: await _resolvePolicy(),
     ));
 
     if (result == null) {
@@ -319,16 +332,23 @@ Future<WanderJsResult?> _runWanderJsFetch(_WanderJsFetchRequest request) {
 Future<WanderJsResult?> Function() _createWanderJsFetchTask(
   _WanderJsFetchRequest request,
 ) {
-  return () => _fetchAndParseWanderJs(request.token, Uri.parse(request.url));
+  return () => _fetchAndParseWanderJs(
+    request.token,
+    Uri.parse(request.url),
+    request.policy,
+  );
 }
 
 Future<WanderJsResult?> _fetchAndParseWanderJs(
   RootIsolateToken token,
   Uri url,
+  AppRoutingPolicy policy,
 ) async {
   BackgroundIsolateBinaryMessenger.ensureInitialized(token);
 
-  final client = http.Client();
+  final httpClient = HttpClient();
+  applyRoutingPolicy(httpClient, policy);
+  final client = IOClient(httpClient);
   try {
     final response = await client.get(url).timeout(const Duration(seconds: 15));
 

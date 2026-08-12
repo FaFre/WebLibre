@@ -85,6 +85,8 @@ export 'src/pigeons/gecko.g.dart'
         GeckoFetchResponse,
         GeckoHistoryEvents,
         GeckoPref,
+        GeckoProxyRoutingSnapshot,
+        GeckoProxyRoutingStatus,
         GeckoProxySettings,
         GeckoPublicSuffixListApi,
         GeckoPwaApi,

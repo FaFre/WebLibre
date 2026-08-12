@@ -22,6 +22,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/account/data/supabase_config.dart';
+import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 
 part 'handoff_redeem_client.g.dart';
 
@@ -57,7 +58,9 @@ class HandoffRedeemClient {
   HandoffRedeemClient({http.Client? client})
     : _client = client ?? http.Client();
 
-  void close() => _client.close();
+  // Deliberately not closable: the client it is handed is the app-wide routed
+  // one, so closing it here would take every app-originated request down with
+  // it for the rest of the session.
 
   /// Exchange a one-time `handoff_code` plus the matching PKCE
   /// `code_verifier` for a Supabase session. Throws
@@ -108,7 +111,7 @@ class HandoffRedeemClient {
 
 @Riverpod(keepAlive: true)
 HandoffRedeemClient handoffRedeemClient(Ref ref) {
-  final client = HandoffRedeemClient();
-  ref.onDispose(client.close);
-  return client;
+  // Shares the routed client, whose lifetime its own provider owns — so this
+  // one deliberately does not close it on dispose.
+  return HandoffRedeemClient(client: ref.watch(routedHttpClientProvider));
 }

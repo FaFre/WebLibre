@@ -42,7 +42,7 @@ final class BraveAutosuggestServiceProvider
 }
 
 String _$braveAutosuggestServiceHash() =>
-    r'3b2f465dcf4b44b0450975d3909fc7066d171bf2';
+    r'bb75ed97e391d043cb405cd3389d890b768d0d1d';
 
 abstract class _$BraveAutosuggestService extends $Notifier<void> {
   void build();

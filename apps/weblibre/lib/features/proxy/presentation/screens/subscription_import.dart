@@ -23,6 +23,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/proxy/data/forms/singbox_form_specs.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
+import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 import 'package:weblibre/features/proxy/domain/services/subscription_importer.dart';
 import 'package:weblibre/presentation/widgets/button_spinner.dart';
 import 'package:weblibre/utils/ui_helper.dart';
@@ -55,7 +56,10 @@ class SubscriptionImportScreen extends HookConsumerWidget {
       fetching.value = true;
       fetchError.value = null;
       try {
-        final outcome = await fetchSubscription(uri);
+        final outcome = await fetchSubscription(
+          uri,
+          client: ref.read(routedHttpClientProvider),
+        );
         result.value = outcome;
         selection.value = {
           for (final (index, entry) in outcome.entries.indexed)

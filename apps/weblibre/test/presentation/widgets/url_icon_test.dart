@@ -10,6 +10,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
 import 'package:weblibre/domain/services/favicon_resolver.dart';
 import 'package:weblibre/domain/services/generic_website.dart';
+import 'package:weblibre/features/proxy/domain/services/app_routing_policy.dart';
 import 'package:weblibre/features/user/data/database/database.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
@@ -128,7 +129,10 @@ void main() {
 
 final class _NeverCalledResolver implements FaviconResolver {
   @override
-  Future<FaviconResolveResult> resolve(Uri url, {int? proxyPort}) {
+  Future<FaviconResolveResult> resolve(
+    Uri url, {
+    required AppRoutingPolicy policy,
+  }) {
     throw UnimplementedError('cacheOnly should not hit the resolver');
   }
 }

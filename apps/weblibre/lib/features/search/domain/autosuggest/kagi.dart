@@ -23,6 +23,7 @@ import 'package:exceptions/exceptions.dart';
 import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/http_error_handler.dart';
+import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
 
 part 'kagi.g.dart';
@@ -36,11 +37,10 @@ class KagiAutosuggestService extends _$KagiAutosuggestService
 
   @override
   void build() {
-    _client = http.Client();
-
-    ref.onDispose(() {
-      _client.close();
-    });
+    // Suggestions reveal what the user is typing into the selected tab, so they
+    // follow that tab's routing rather than the general container's. The
+    // provider owns the client's lifetime.
+    _client = ref.watch(selectedTabRoutedHttpClientProvider);
   }
 
   @override

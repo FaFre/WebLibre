@@ -10,6 +10,10 @@ import 'package:riverpod/riverpod.dart';
 import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
 import 'package:weblibre/domain/services/favicon_resolver.dart';
 import 'package:weblibre/domain/services/generic_website.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/services/proxy_settings_replication.dart';
+import 'package:weblibre/features/proxy/domain/services/app_routing_policy.dart';
+import 'package:weblibre/features/proxy/domain/services/container_routing_snapshot.dart';
+import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 import 'package:weblibre/features/user/data/database/database.dart';
 import 'package:weblibre/features/user/data/icon_cache_marker.dart';
 import 'package:weblibre/features/user/data/providers.dart';
@@ -38,6 +42,23 @@ void main() {
     container = ProviderContainer(
       overrides: [
         userDatabaseProvider.overrideWith((ref) => db),
+        // Routing is exercised in app_routing_policy_test; here it just needs
+        // to resolve without the snapshot pipeline behind it.
+        containerRoutingSnapshotProvider.overrideWith(
+          (ref) => ContainerRoutingSnapshot(
+            proxies: const [],
+            relations: const {},
+            directScopes: const {},
+            siteAssignments: const {},
+            strictContexts: const {},
+          ),
+        ),
+        // Icon lookups route as the selected tab does. Overridden so this stays
+        // a unit test of the icon cache: resolving the real thing would stand up
+        // the tab and engine graph behind the selected tab.
+        selectedTabRoutingPolicyProvider.overrideWithValue(
+          () async => DirectAppRouting(),
+        ),
         faviconResolverProvider.overrideWithValue(resolver),
         geckoIconServiceProvider.overrideWithValue(geckoIcons),
       ],
@@ -180,7 +201,10 @@ final class FakeFaviconResolver implements FaviconResolver {
   }
 
   @override
-  Future<FaviconResolveResult> resolve(Uri url, {int? proxyPort}) async {
+  Future<FaviconResolveResult> resolve(
+    Uri url, {
+    required AppRoutingPolicy policy,
+  }) async {
     callCount += 1;
     if (_results.isEmpty) {
       return const FaviconResolveResult.error();

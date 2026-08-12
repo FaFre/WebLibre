@@ -49,7 +49,6 @@ import 'package:weblibre/features/geckoview/features/browser/domain/providers/in
 import 'package:weblibre/features/geckoview/features/browser/domain/providers/lifecycle.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/engine_settings_replication.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/services/proxy_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_home.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/services/history_exclusion_replication.dart';
@@ -694,19 +693,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       onError: (error, stackTrace) {
         logger.e(
           'Error listening to gestureControlServiceProvider',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      },
-    );
-
-    ref.listenManual(
-      fireImmediately: true,
-      proxySettingsReplicationProvider,
-      (previous, next) {},
-      onError: (error, stackTrace) {
-        logger.e(
-          'Error listening to proxySettingsReplicationProvider',
           error: error,
           stackTrace: stackTrace,
         );
