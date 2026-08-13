@@ -39,7 +39,7 @@ final class ProxyRoutingSettingsRepositoryProvider
 }
 
 String _$proxyRoutingSettingsRepositoryHash() =>
-    r'10c46172bad7426bb639cf3bc769ba150bdb30c3';
+    r'2b5ff0cea0c738f6f45f143c5833fce1d783a34c';
 
 abstract class _$ProxyRoutingSettingsRepository
     extends $StreamNotifier<ProxyRoutingSettings> {

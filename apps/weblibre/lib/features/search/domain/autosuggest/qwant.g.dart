@@ -42,7 +42,7 @@ final class QwantAutosuggestServiceProvider
 }
 
 String _$qwantAutosuggestServiceHash() =>
-    r'a942cd073289d20d43647de5c0f43fb08790045f';
+    r'1302c4076f746bf971e8f3658832c5c1684cb319';
 
 abstract class _$QwantAutosuggestService extends $Notifier<void> {
   void build();

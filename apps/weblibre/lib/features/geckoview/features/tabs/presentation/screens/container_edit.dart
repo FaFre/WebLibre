@@ -41,6 +41,7 @@ import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
+import 'package:weblibre/features/proxy/presentation/widgets/proxy_connection_picker_sheet.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
@@ -530,26 +531,11 @@ class ContainerEditScreen extends HookConsumerWidget {
                                         uuid.v4();
                                   }
 
-                                  final optionsLoaded = ref
-                                      .read(
-                                        singboxProxyProfilesRepositoryProvider,
-                                      )
-                                      .hasValue;
-
                                   final outcome =
-                                      await showModalBottomSheet<
-                                        _ProxyPickerOutcome
-                                      >(
-                                        context: context,
-                                        showDragHandle: true,
-                                        builder: (context) {
-                                          return _ProxyConnectionPickerSheet(
-                                            options: proxyOptions,
-                                            optionsLoaded: optionsLoaded,
-                                            selectedProxyConnectionId:
-                                                proxyConnectionId.value,
-                                          );
-                                        },
+                                      await showProxyConnectionPicker(
+                                        context,
+                                        selectedProxyConnectionId:
+                                            proxyConnectionId.value,
                                       );
 
                                   switch (outcome) {
@@ -560,15 +546,21 @@ class ContainerEditScreen extends HookConsumerWidget {
                                       if (createdTemporaryIdentity) {
                                         contextualIdentity.value = null;
                                       }
-                                    case _ProxyPickerCleared():
+                                    case ProxyPickerCleared():
                                       proxyConnectionId.value = null;
                                       if (createdTemporaryIdentity) {
                                         contextualIdentity.value = null;
                                         bypassGlobalProxy.value = false;
                                       }
-                                    case _ProxyPickerSelected(:final id):
+                                    case ProxyPickerSelected(:final id):
                                       proxyConnectionId.value = id;
                                       bypassGlobalProxy.value = false;
+                                    case ProxyPickerDirect():
+                                      // Not offered here — this screen has its
+                                      // own bypass switch below — but the
+                                      // mapping is the same one it performs.
+                                      proxyConnectionId.value = null;
+                                      bypassGlobalProxy.value = true;
                                   }
                                 }
                               : null,
@@ -846,97 +838,6 @@ class ContainerEditScreen extends HookConsumerWidget {
           icon: const Icon(MdiIcons.creation),
         );
       },
-    );
-  }
-}
-
-/// Result of the proxy picker sheet. `null` (sheet dismissed) is distinct
-/// from `_ProxyPickerCleared` (user explicitly picked None) so the caller can
-/// avoid clobbering the previously-selected proxy on a stray swipe-down.
-sealed class _ProxyPickerOutcome {
-  const _ProxyPickerOutcome();
-}
-
-class _ProxyPickerCleared extends _ProxyPickerOutcome {
-  const _ProxyPickerCleared();
-}
-
-class _ProxyPickerSelected extends _ProxyPickerOutcome {
-  final ProxyConnectionId id;
-
-  const _ProxyPickerSelected(this.id);
-}
-
-class _ProxyConnectionPickerSheet extends StatelessWidget {
-  final List<ProxyConnectionOption> options;
-  final bool optionsLoaded;
-  final ProxyConnectionId? selectedProxyConnectionId;
-
-  const _ProxyConnectionPickerSheet({
-    required this.options,
-    required this.optionsLoaded,
-    required this.selectedProxyConnectionId,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final hasUnknownSelectedProxy =
-        selectedProxyConnectionId != null &&
-        optionsLoaded &&
-        !proxyConnectionOptionExists(options, selectedProxyConnectionId!);
-
-    return SafeArea(
-      child: RadioGroup<ProxyConnectionId?>(
-        groupValue: selectedProxyConnectionId,
-        onChanged: (value) {
-          Navigator.pop(
-            context,
-            value == null
-                ? const _ProxyPickerCleared()
-                : _ProxyPickerSelected(value),
-          );
-        },
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 4, 24, 12),
-              child: Text(
-                'Proxy Connection',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ),
-            const RadioListTile<ProxyConnectionId?>(
-              value: null,
-              title: Text('None'),
-              subtitle: Text('Use the normal browser connection'),
-              secondary: Icon(Icons.public),
-            ),
-            if (hasUnknownSelectedProxy)
-              ListTile(
-                leading: Icon(
-                  Icons.warning_amber_outlined,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                title: const Text('Unknown proxy'),
-                subtitle: const Text('This proxy profile no longer exists'),
-                trailing: TextButton(
-                  onPressed: () =>
-                      Navigator.pop(context, const _ProxyPickerCleared()),
-                  child: const Text('Clear'),
-                ),
-              ),
-            for (final option in options)
-              RadioListTile<ProxyConnectionId?>(
-                value: option.id,
-                title: Text(option.title),
-                subtitle: Text(option.subtitle),
-                secondary: const Icon(Icons.route_outlined),
-              ),
-            const SizedBox(height: 12),
-          ],
-        ),
-      ),
     );
   }
 }

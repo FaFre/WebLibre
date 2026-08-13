@@ -19,6 +19,10 @@ abstract class _$ProxyRoutingSettingsCWProxy {
     ProxyConnectionId? privateTabsProxyConnectionId,
   );
 
+  ProxyRoutingSettings isolationContextRoutes(
+    Map<String, ProxyConnectionId?> isolationContextRoutes,
+  );
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ProxyRoutingSettings(...).copyWith.fieldName(value)`.
   ///
@@ -30,6 +34,7 @@ abstract class _$ProxyRoutingSettingsCWProxy {
     ProxyRegularTabRoutingMode regularTabsMode,
     ProxyConnectionId? regularTabsProxyConnectionId,
     ProxyConnectionId? privateTabsProxyConnectionId,
+    Map<String, ProxyConnectionId?> isolationContextRoutes,
   });
 }
 
@@ -57,6 +62,11 @@ class _$ProxyRoutingSettingsCWProxyImpl
   ) => call(privateTabsProxyConnectionId: privateTabsProxyConnectionId);
 
   @override
+  ProxyRoutingSettings isolationContextRoutes(
+    Map<String, ProxyConnectionId?> isolationContextRoutes,
+  ) => call(isolationContextRoutes: isolationContextRoutes);
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ProxyRoutingSettings(...).copyWith.fieldName(value)`.
   ///
@@ -68,6 +78,7 @@ class _$ProxyRoutingSettingsCWProxyImpl
     Object? regularTabsMode = const $CopyWithPlaceholder(),
     Object? regularTabsProxyConnectionId = const $CopyWithPlaceholder(),
     Object? privateTabsProxyConnectionId = const $CopyWithPlaceholder(),
+    Object? isolationContextRoutes = const $CopyWithPlaceholder(),
   }) {
     return ProxyRoutingSettings(
       regularTabsMode:
@@ -86,6 +97,12 @@ class _$ProxyRoutingSettingsCWProxyImpl
           ? _value.privateTabsProxyConnectionId
           // ignore: cast_nullable_to_non_nullable
           : privateTabsProxyConnectionId as ProxyConnectionId?,
+      isolationContextRoutes:
+          isolationContextRoutes == const $CopyWithPlaceholder() ||
+              isolationContextRoutes == null
+          ? _value.isolationContextRoutes
+          // ignore: cast_nullable_to_non_nullable
+          : isolationContextRoutes as Map<String, ProxyConnectionId?>,
     );
   }
 }
@@ -115,6 +132,9 @@ ProxyRoutingSettings _$ProxyRoutingSettingsFromJson(
   privateTabsProxyConnectionId: _proxyConnectionIdFromJson(
     json['privateTabsProxyConnectionId'] as String?,
   ),
+  isolationContextRoutes: parseIsolationContextRoutes(
+    json['isolationContextRoutes'] as Map<String, dynamic>?,
+  ),
 );
 
 Map<String, dynamic> _$ProxyRoutingSettingsToJson(
@@ -127,6 +147,9 @@ Map<String, dynamic> _$ProxyRoutingSettingsToJson(
   ),
   'privateTabsProxyConnectionId': _proxyConnectionIdToJson(
     instance.privateTabsProxyConnectionId,
+  ),
+  'isolationContextRoutes': _isolationContextRoutesToJson(
+    instance.isolationContextRoutes,
   ),
 };
 

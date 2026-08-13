@@ -94,6 +94,25 @@ class ContainerRoutingSnapshot with FastEquatable {
   }
 }
 
+/// The proxy ids that carry [contextId], mirroring the extension's
+/// `Store.getEffectiveRelation`: an explicit relation wins, every context
+/// except `private` inherits the general one, and no relation at all resolves
+/// to no proxies — a direct connection.
+///
+/// An empty result therefore means "direct", never "blocked": whether a named
+/// proxy is actually running is a separate question, answered against
+/// [ContainerRoutingSnapshot.proxies] by the caller.
+List<String> effectiveRelationFor(
+  ContainerRoutingSnapshot snapshot,
+  String contextId,
+) {
+  return snapshot.relations[contextId] ??
+      (contextId != privateContextId
+          ? snapshot.relations[generalContextId]
+          : null) ??
+      const <String>[];
+}
+
 /// Assemble the routing snapshot from every input that feeds it.
 ///
 /// Pure, so the whole of routing resolution — global mode, per-container
@@ -109,6 +128,7 @@ ContainerRoutingSnapshot computeContainerRoutingSnapshot({
   required Map<String, Set<String>> isolationContextContainers,
   required List<SiteAssignment> siteAssignments,
   required Map<String, List<String>> strictContexts,
+  Map<String, ProxyConnectionId?> isolationContextRoutes = const {},
   void Function(String message)? onConflict,
 }) {
   final proxies = <GeckoProxySettings>[
@@ -203,6 +223,24 @@ ContainerRoutingSnapshot computeContainerRoutingSnapshot({
         '(${routing.assignmentLabels.join(', ')}); using ${routing.chosenLabel}',
       );
     }
+  }
+
+  // Applied last, so an isolation group the user routed explicitly wins over
+  // the assignment derived from its container above — including over the
+  // conflict collapse, which is a guess where this is a decision.
+  //
+  // Entries for contexts no tab uses any more are applied too rather than
+  // filtered: the set of live isolation contexts is not among the inputs this
+  // snapshot waits on, and an inert relation routes nothing. They are pruned
+  // when the group's last tab closes.
+  for (final MapEntry(key: isolationContextId, value: proxyConnectionId)
+      in isolationContextRoutes.entries) {
+    applyAssignment(isolationContextId, switch (proxyConnectionId) {
+      final proxy? => ProxyAssignment.explicit(proxy.encode()),
+      // An explicit direct connection, scoped to the group itself so it
+      // shares site assignments with no other direct context.
+      null => ProxyAssignment.direct(isolationContextId),
+    });
   }
 
   return ContainerRoutingSnapshot(

@@ -42,6 +42,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/services/proxy_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/keep_tab_dialog.dart';
@@ -62,19 +63,16 @@ import 'package:weblibre/features/geckoview/features/find_in_page/presentation/w
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_autofocus.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
+import 'package:weblibre/features/proxy/domain/services/container_routing_snapshot.dart';
+import 'package:weblibre/features/proxy/domain/services/tab_routing.dart';
 import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/features/small_web/presentation/controllers/small_web_mode_controller.dart';
 import 'package:weblibre/features/small_web/presentation/widgets/small_web_browser_overlay.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/data/models/proxy_routing_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/proxy_routing_settings.dart';
 import 'package:weblibre/presentation/hooks/keyed_state.dart';
 import 'package:weblibre/utils/move_to_background.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -280,104 +278,42 @@ class _TabBar extends HookConsumerWidget {
   }
 }
 
-Future<ProxyConnectionId?> _proxyConnectionIdForLoadError(
+/// Which proxy this tab's traffic needs, so a failed load can offer to start
+/// it. Null when the tab connects directly, or while routing is unresolved.
+///
+/// Read off the acknowledged routing snapshot rather than re-derived from
+/// settings and container rows. The snapshot already holds the resolved
+/// relation for every scope — private, global, per-container, per-isolation
+/// group, and the isolation-context aliases — so this asks the same question
+/// the extension answered when it blocked the request. Re-deriving it here is
+/// how an isolated tab ended up with no prompt at all while the route that was
+/// down was its own.
+ProxyConnectionId? _proxyConnectionIdForLoadError(
   WidgetRef ref, {
   required String tabId,
   required String? contextId,
-}) async {
-  final routing = ref.read(proxyRoutingSettingsWithDefaultsProvider);
+}) {
+  final snapshot = ref.read(containerRoutingSnapshotProvider);
+  if (snapshot == null) return null;
+
   final tabState = ref.read(tabStateProvider(tabId));
+  // The failing load reports the cookie store it ran under; the tab's own is
+  // the fallback for events that carry none.
+  final loadContextId = (contextId != null && contextId.isNotEmpty)
+      ? contextId
+      : tabState?.contextId;
 
-  if (contextId == 'private' || tabState?.tabMode is PrivateTabMode) {
-    return routing.privateTabsProxyConnectionId;
-  }
-
-  if (contextId != null && contextId.isNotEmpty && contextId != 'general') {
-    final isolatedContextProxyConnectionId =
-        await _isolatedContextProxyAssignment(ref, contextId);
-    if (isolatedContextProxyConnectionId != null) {
-      return isolatedContextProxyConnectionId.proxyConnectionId;
-    }
-
-    final contextContainer = await ref
-        .read(containerRepositoryProvider.notifier)
-        .getContainerByContextualIdentity(contextId);
-    final contextProxyConnectionId =
-        contextContainer?.metadata.proxyConnectionId;
-    if (contextProxyConnectionId != null) {
-      return contextProxyConnectionId;
-    }
-    if (contextContainer?.metadata.bypassGlobalProxy == true) {
-      return null;
-    }
-  }
-
-  final tabContainer = await ref
-      .read(tabDataRepositoryProvider.notifier)
-      .getTabContainerData(tabId);
-  final tabProxyConnectionId = tabContainer?.metadata.proxyConnectionId;
-  if (tabProxyConnectionId != null) {
-    return tabProxyConnectionId;
-  }
-  if (tabContainer?.metadata.bypassGlobalProxy == true) {
-    return null;
-  }
-
-  if (routing.regularTabsMode == ProxyRegularTabRoutingMode.all) {
-    return routing.regularTabsProxyConnectionId;
-  }
-
-  return null;
-}
-
-typedef _LoadErrorProxyAssignment = ({
-  bool direct,
-  ProxyConnectionId? proxyConnectionId,
-});
-
-Future<_LoadErrorProxyAssignment?> _isolatedContextProxyAssignment(
-  WidgetRef ref,
-  String contextId,
-) async {
-  final db = ref.read(tabDatabaseProvider);
-  final pairs = await db.tabDao.isolatedContextContainerPairs().get();
-  final containerIds = pairs
-      .where((pair) => pair.isolationContextId == contextId)
-      .map((pair) => pair.containerId)
-      .nonNulls
-      .toSet();
-
-  if (containerIds.isEmpty) return null;
-
-  final containers = await ref
-      .read(containerRepositoryProvider.notifier)
-      .getAllContainersWithCount();
-  final matchedContainers = containers.where(
-    (container) => containerIds.contains(container.id),
+  final relation = effectiveRelationFor(
+    snapshot,
+    tabRoutingContextId(
+      contextId: loadContextId,
+      isPrivate: tabState?.tabMode is PrivateTabMode,
+    ),
   );
-  final proxyIds =
-      matchedContainers
-          .map((container) => container.metadata.proxyConnectionId?.encode())
-          .nonNulls
-          .toSet()
-          .toList()
-        ..sort();
 
-  if (proxyIds.isNotEmpty) {
-    return (
-      direct: false,
-      proxyConnectionId: ProxyConnectionId.decode(proxyIds.first),
-    );
-  }
-  final matchedContainerList = matchedContainers.toList();
-  if (matchedContainerList.isNotEmpty &&
-      matchedContainerList.every(
-        (container) => container.metadata.bypassGlobalProxy,
-      )) {
-    return (direct: true, proxyConnectionId: null);
-  }
-
-  return null;
+  // Empty is an explicit direct connection: there is nothing to start, and the
+  // load failed for some other reason.
+  return relation.isEmpty ? null : ProxyConnectionId.decode(relation.first);
 }
 
 typedef _PendingProxyLoadError = ({
@@ -1010,7 +946,7 @@ class BrowserScreen extends HookConsumerWidget {
       if (!activeProxyPromptKeys.value.add(promptKey)) return;
 
       try {
-        final proxyConnectionId = await _proxyConnectionIdForLoadError(
+        final proxyConnectionId = _proxyConnectionIdForLoadError(
           ref,
           tabId: tabId,
           contextId: contextId,

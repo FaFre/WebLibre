@@ -85,6 +85,10 @@ ContainerRoutingSnapshot? containerRoutingSnapshot(Ref ref) {
   final singboxProfiles =
       ref.watch(singboxProxyProfilesRepositoryProvider).value ?? const [];
 
+  final resolvedRoutingSettings = ref.watch(
+    proxyRoutingSettingsWithDefaultsProvider,
+  );
+
   return computeContainerRoutingSnapshot(
     torSocksPort: ref.watch(torProxyServiceProvider).value?.socksPort,
     singboxEndpoints:
@@ -94,7 +98,10 @@ ContainerRoutingSnapshot? containerRoutingSnapshot(Ref ref) {
       for (final profile in singboxProfiles)
         profile.proxyConnectionId: profile.name,
     },
-    routingSettings: ref.watch(proxyRoutingSettingsWithDefaultsProvider),
+    routingSettings: resolvedRoutingSettings,
+    // Carried by the same settings partition as the rest of routing, so it is
+    // already covered by the gate above.
+    isolationContextRoutes: resolvedRoutingSettings.isolationContextRoutes,
     containers: containers.requireValue,
     isolationContextContainers: isolationContexts.requireValue,
     siteAssignments: siteAssignments.requireValue,

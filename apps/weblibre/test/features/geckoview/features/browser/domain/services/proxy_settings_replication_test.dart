@@ -212,6 +212,97 @@ void main() {
     },
   );
 
+  test('an isolation route reaches the snapshot as its own relation', () async {
+    final harness = await _harness(
+      containers: const [],
+      routingSettings: ProxyRoutingSettings.withDefaults(
+        isolationContextRoutes: const {'iso1_a': TorProxyConnectionId()},
+      ),
+    );
+
+    final snapshot = await harness.awaitSnapshot();
+
+    expect(snapshot.relations['iso1_a'], [
+      const TorProxyConnectionId().encode(),
+    ]);
+  });
+
+  test('an isolation route overrides the route of its container', () async {
+    const profileId = SingboxProxyConnectionId('profile-1');
+    final harness = await _harness(
+      containers: [
+        _container(
+          id: 'container-1',
+          contextId: 'context-a',
+          proxyConnectionId: profileId,
+        ),
+      ],
+      isolationContexts: const {
+        'iso1_a': {'container-1'},
+      },
+      seedIsolatedTabs: true,
+      routingSettings: ProxyRoutingSettings.withDefaults(
+        isolationContextRoutes: const {'iso1_a': TorProxyConnectionId()},
+      ),
+    );
+
+    final snapshot = await harness.awaitSnapshot();
+
+    // The container keeps its own route; only the isolation group departs from
+    // it.
+    expect(snapshot.relations['context-a'], [profileId.encode()]);
+    expect(snapshot.relations['iso1_a'], [
+      const TorProxyConnectionId().encode(),
+    ]);
+  });
+
+  test('an explicitly direct isolation route beats its container', () async {
+    final harness = await _harness(
+      containers: [
+        _container(
+          id: 'container-1',
+          contextId: 'context-a',
+          proxyConnectionId: const TorProxyConnectionId(),
+        ),
+      ],
+      isolationContexts: const {
+        'iso1_a': {'container-1'},
+      },
+      seedIsolatedTabs: true,
+      routingSettings: ProxyRoutingSettings.withDefaults(
+        isolationContextRoutes: const {'iso1_a': null},
+      ),
+    );
+
+    final snapshot = await harness.awaitSnapshot();
+
+    // Empty, not absent: absent would inherit the general relation instead of
+    // connecting directly.
+    expect(snapshot.relations['iso1_a'], isEmpty);
+    expect(snapshot.directScopes['iso1_a'], 'iso1_a');
+  });
+
+  test('a group without a route still follows its container', () async {
+    const profileId = SingboxProxyConnectionId('profile-1');
+    final harness = await _harness(
+      containers: [
+        _container(
+          id: 'container-1',
+          contextId: 'context-a',
+          proxyConnectionId: profileId,
+        ),
+      ],
+      isolationContexts: const {
+        'iso1_a': {'container-1'},
+      },
+      seedIsolatedTabs: true,
+    );
+
+    final snapshot = await harness.awaitSnapshot();
+
+    expect(snapshot.relations['iso1_a'], [profileId.encode()]);
+  });
+
   test(
     'no snapshot is produced while routing inputs are still loading',
     () async {

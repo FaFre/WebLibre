@@ -167,6 +167,17 @@ class ContainerMetadata with FastEquatable {
     if (result.isolatedAppLinkSettings && result.contextualIdentity == null) {
       result = result.copyWith(isolatedAppLinkSettings: false);
     }
+    // Routing is keyed on the cookie-store context too: the snapshot skips a
+    // container without one, so a proxy or bypass kept here is a setting the
+    // user can see but nothing applies — the container's tabs run in the
+    // general context and follow the global route regardless.
+    if (result.contextualIdentity == null &&
+        (result.proxyConnectionId != null || result.bypassGlobalProxy)) {
+      result = result.copyWith(
+        proxyConnectionId: null,
+        bypassGlobalProxy: false,
+      );
+    }
     return result;
   }
 

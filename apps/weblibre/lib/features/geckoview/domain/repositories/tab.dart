@@ -53,6 +53,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/ta
 import 'package:weblibre/features/proxy/domain/repositories/container_proxy.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/proxy_routing_settings.dart';
 import 'package:weblibre/utils/debouncer.dart';
 
 part 'tab.g.dart';
@@ -386,6 +387,20 @@ class TabRepository extends _$TabRepository {
       containerId: Value(containerData?.id),
       tabMode: Value(duplicateTabMode),
     );
+
+    // The duplicate is a new isolation group, so it starts with no route of its
+    // own — carry the source's over, or the copy silently falls back to its
+    // container's routing.
+    if (sourceTabMode case IsolatedTabMode(
+      :final isolationContextId,
+    ) when ref.mounted) {
+      await ref
+          .read(proxyRoutingSettingsRepositoryProvider.notifier)
+          .copyIsolationContextRoute(
+            isolationContextId,
+            duplicateIsolationContextId!,
+          );
+    }
 
     if (selectTab && ref.mounted) {
       _clearForceBrowserHome();
@@ -915,9 +930,23 @@ class TabRepository extends _$TabRepository {
       );
     }
 
-    // The isolation context's routing alias needs no explicit teardown: it is
-    // derived from the tabs that reference the context, so dropping those tabs
-    // removes it from the next routing snapshot.
+    // The alias derived from the group's container needs no teardown: it is
+    // computed from the tabs that reference the context, so dropping those tabs
+    // removes it from the next routing snapshot. A route the *user* set on the
+    // group is stored, though, and would outlive every tab that could use it.
+    if (!ref.mounted) return;
+
+    try {
+      await ref
+          .read(proxyRoutingSettingsRepositoryProvider.notifier)
+          .clearIsolationContextRoute(contextId);
+    } catch (e, st) {
+      logger.e(
+        'Failed to drop the isolation route for $contextId',
+        error: e,
+        stackTrace: st,
+      );
+    }
   }
 
   Future<void> _drainPendingIsolationCleanup() async {

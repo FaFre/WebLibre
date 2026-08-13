@@ -140,6 +140,7 @@ void main() {
           regularTabsMode: ProxyRegularTabRoutingMode.all,
           regularTabsProxyConnectionId: profile.proxyConnection,
           privateTabsProxyConnectionId: profile.proxyConnection,
+          isolationContextRoutes: const {},
         ),
       );
       final container = _container(

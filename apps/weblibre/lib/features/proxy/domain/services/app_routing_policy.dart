@@ -107,12 +107,7 @@ AppRoutingPolicy resolveAppRoutingPolicyForContext(
     return BlockedAppRouting('container routing has not resolved yet');
   }
 
-  final proxyIds =
-      snapshot.relations[contextId] ??
-      (contextId != privateContextId
-          ? snapshot.relations[generalContextId]
-          : null) ??
-      const <String>[];
+  final proxyIds = effectiveRelationFor(snapshot, contextId);
 
   if (proxyIds.isEmpty) {
     return DirectAppRouting();

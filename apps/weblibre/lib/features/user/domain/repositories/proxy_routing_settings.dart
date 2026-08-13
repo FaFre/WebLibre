@@ -17,9 +17,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/user/data/models/proxy_routing_settings.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 
@@ -48,7 +52,49 @@ class ProxyRoutingSettingsRepository extends _$ProxyRoutingSettingsRepository {
           ?.readAs(DriftSqlType.string, db.typeMapping),
       'privateTabsProxyConnectionId': settings['privateTabsProxyConnectionId']
           ?.readAs(DriftSqlType.string, db.typeMapping),
+      // Stored as a JSON document in a TEXT column (the setting DAO encodes
+      // maps on write), so it has to be decoded before `fromJson`, which
+      // expects the parsed map. A key added here and not below writes fine and
+      // never reads back.
+      'isolationContextRoutes': _decodeJsonMapSetting(
+        settings['isolationContextRoutes']?.readAs(
+          DriftSqlType.string,
+          db.typeMapping,
+        ),
+      ),
     });
+  }
+
+  /// Decode a settings row holding a JSON object, or null if it does not.
+  ///
+  /// Every other value in this partition is a scalar the type mapping can be
+  /// trusted with; this one is free-form text that only *this* app is supposed
+  /// to write. A truncated or hand-edited row would otherwise throw out of
+  /// `jsonDecode` — or out of the generated `fromJson` cast, when it decodes to
+  /// something that is not an object — before [parseIsolationContextRoutes]
+  /// gets its chance to drop bad entries. That throw lands in the settings
+  /// stream that gates the routing snapshot, which then never resolves and
+  /// leaves the extension blocking every request. Falling back to no routes
+  /// costs the user their isolation overrides; throwing costs them the browser.
+  Map<String, dynamic>? _decodeJsonMapSetting(String? raw) {
+    if (raw == null) return null;
+
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+
+      logger.w('Discarding a routing settings value that is not a JSON object');
+    } catch (error, stackTrace) {
+      logger.w(
+        'Discarding an unreadable routing settings value',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return null;
   }
 
   //Eager fetch, when up to date settings are required
@@ -77,6 +123,59 @@ class ProxyRoutingSettingsRepository extends _$ProxyRoutingSettingsRepository {
           await db.settingDao.updateSetting(key, _partitionKey, value);
         }
       }
+    });
+  }
+
+  /// Route the isolation group [isolationContextId] through
+  /// [proxyConnectionId], or connect it directly when that is null.
+  ///
+  /// Overrides whatever the group's container would route it through; use
+  /// [clearIsolationContextRoute] to go back to following the container.
+  Future<void> setIsolationContextRoute(
+    String isolationContextId,
+    ProxyConnectionId? proxyConnectionId,
+  ) {
+    return updateSettings(
+      (current) => current.copyWith(
+        isolationContextRoutes: {
+          ...current.isolationContextRoutes,
+          isolationContextId: proxyConnectionId,
+        },
+      ),
+    );
+  }
+
+  /// Drop [isolationContextId]'s override so the group follows its container
+  /// again (or the global route, when it has no container).
+  Future<void> clearIsolationContextRoute(String isolationContextId) {
+    return updateSettings((current) {
+      if (!current.isolationContextRoutes.containsKey(isolationContextId)) {
+        return current;
+      }
+
+      return current.copyWith(
+        isolationContextRoutes: {...current.isolationContextRoutes}
+          ..remove(isolationContextId),
+      );
+    });
+  }
+
+  /// Carry [from]'s override over to [to].
+  ///
+  /// Duplicating an isolated tab mints a fresh isolation context; without this
+  /// the copy would silently fall back to its container's route.
+  Future<void> copyIsolationContextRoute(String from, String to) {
+    return updateSettings((current) {
+      if (!current.isolationContextRoutes.containsKey(from)) {
+        return current;
+      }
+
+      return current.copyWith(
+        isolationContextRoutes: {
+          ...current.isolationContextRoutes,
+          to: current.isolationContextRoutes[from],
+        },
+      );
     });
   }
 
