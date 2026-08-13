@@ -137,7 +137,7 @@ final class EffectiveTabRoutingProvider
 }
 
 String _$effectiveTabRoutingHash() =>
-    r'666811dc7279aea27a76bdc3d75e10612ed53bb1';
+    r'72bde56f573d04cdef5dfea6f4e1280743e047e3';
 
 /// How the tab identified by [tabId] is routed right now.
 ///

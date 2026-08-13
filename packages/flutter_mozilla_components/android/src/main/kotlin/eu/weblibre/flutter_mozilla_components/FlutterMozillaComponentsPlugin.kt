@@ -28,10 +28,10 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     SandboxCaptureFeature.wireFlutterEvents(flutterPluginBinding.binaryMessenger)
 
     // Register the engine-settings API at attach time (before GeckoBrowserService
-    // .initialize) so Dart can push the history-exclusion contextId set to native
+    // .initialize) so Dart can push the history-exclusion snapshot to native
     // *before* the engine starts recording restored-tab visits, closing the
     // startup window where an excluded container could leak to Places.
-    // setExcludedHistoryContextIds only writes GlobalComponents state and needs
+    // setHistoryExclusions only writes HistoryExclusions state and needs
     // no initialized components; the remaining settings methods resolve
     // components lazily and are not invoked until after initialize. The same
     // instance is reused by GeckoBrowserApiImpl.initialize.

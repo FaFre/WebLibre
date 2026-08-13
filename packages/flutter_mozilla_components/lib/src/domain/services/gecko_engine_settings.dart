@@ -233,7 +233,15 @@ class GeckoEngineSettingsService {
     return _api.setReaderViewPureBlack(enabled);
   }
 
-  Future<void> setExcludedHistoryContextIds(List<String> contextIds) {
-    return _api.setExcludedHistoryContextIds(contextIds);
+  Future<void> setHistoryExclusions({
+    required List<String> excludedTabIds,
+    required List<String> knownTabIds,
+    required List<String> excludedContextIds,
+  }) {
+    return _api.setHistoryExclusions(
+      excludedTabIds,
+      knownTabIds,
+      excludedContextIds,
+    );
   }
 }

@@ -9,38 +9,41 @@ part of 'visit_container_recorder.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// Records the visit→container relation. Mozilla Places owns the visit itself;
-/// on each Places visit the native [WebLibreHistoryDelegate] forwards the
-/// producing tab's Gecko contextId, which this service maps to a WebLibre
+/// on each Places visit the tab's native history delegate forwards the id of the
+/// session that produced it, which this service maps to that tab's WebLibre
 /// container and persists as a `visit_container` row (keyed on the visit's
 /// canonical URL + time so the history UI can join it back to Places).
 ///
-/// Graceful absence: a visit that resolves to no container — uncontained, or a
-/// container without a Gecko contextId (cookie isolation off) — writes no row
-/// and simply appears untagged. Activated eagerly at startup.
+/// Graceful absence: a visit from a tab with no container — or from one WebLibre
+/// holds no row for even after [VisitContainerRecorder._resolveAttempts], e.g. a
+/// custom tab — writes no row and simply appears untagged. Activated eagerly at
+/// startup.
 
 @ProviderFor(VisitContainerRecorder)
 final visitContainerRecorderProvider = VisitContainerRecorderProvider._();
 
 /// Records the visit→container relation. Mozilla Places owns the visit itself;
-/// on each Places visit the native [WebLibreHistoryDelegate] forwards the
-/// producing tab's Gecko contextId, which this service maps to a WebLibre
+/// on each Places visit the tab's native history delegate forwards the id of the
+/// session that produced it, which this service maps to that tab's WebLibre
 /// container and persists as a `visit_container` row (keyed on the visit's
 /// canonical URL + time so the history UI can join it back to Places).
 ///
-/// Graceful absence: a visit that resolves to no container — uncontained, or a
-/// container without a Gecko contextId (cookie isolation off) — writes no row
-/// and simply appears untagged. Activated eagerly at startup.
+/// Graceful absence: a visit from a tab with no container — or from one WebLibre
+/// holds no row for even after [VisitContainerRecorder._resolveAttempts], e.g. a
+/// custom tab — writes no row and simply appears untagged. Activated eagerly at
+/// startup.
 final class VisitContainerRecorderProvider
     extends $NotifierProvider<VisitContainerRecorder, void> {
   /// Records the visit→container relation. Mozilla Places owns the visit itself;
-  /// on each Places visit the native [WebLibreHistoryDelegate] forwards the
-  /// producing tab's Gecko contextId, which this service maps to a WebLibre
+  /// on each Places visit the tab's native history delegate forwards the id of the
+  /// session that produced it, which this service maps to that tab's WebLibre
   /// container and persists as a `visit_container` row (keyed on the visit's
   /// canonical URL + time so the history UI can join it back to Places).
   ///
-  /// Graceful absence: a visit that resolves to no container — uncontained, or a
-  /// container without a Gecko contextId (cookie isolation off) — writes no row
-  /// and simply appears untagged. Activated eagerly at startup.
+  /// Graceful absence: a visit from a tab with no container — or from one WebLibre
+  /// holds no row for even after [VisitContainerRecorder._resolveAttempts], e.g. a
+  /// custom tab — writes no row and simply appears untagged. Activated eagerly at
+  /// startup.
   VisitContainerRecorderProvider._()
     : super(
         from: null,
@@ -69,17 +72,18 @@ final class VisitContainerRecorderProvider
 }
 
 String _$visitContainerRecorderHash() =>
-    r'13ed2d5a188efd2a4419585f4989e782263884aa';
+    r'2d2cd20544a40e59b370f77988340f441a7ce9b4';
 
 /// Records the visit→container relation. Mozilla Places owns the visit itself;
-/// on each Places visit the native [WebLibreHistoryDelegate] forwards the
-/// producing tab's Gecko contextId, which this service maps to a WebLibre
+/// on each Places visit the tab's native history delegate forwards the id of the
+/// session that produced it, which this service maps to that tab's WebLibre
 /// container and persists as a `visit_container` row (keyed on the visit's
 /// canonical URL + time so the history UI can join it back to Places).
 ///
-/// Graceful absence: a visit that resolves to no container — uncontained, or a
-/// container without a Gecko contextId (cookie isolation off) — writes no row
-/// and simply appears untagged. Activated eagerly at startup.
+/// Graceful absence: a visit from a tab with no container — or from one WebLibre
+/// holds no row for even after [VisitContainerRecorder._resolveAttempts], e.g. a
+/// custom tab — writes no row and simply appears untagged. Activated eagerly at
+/// startup.
 
 abstract class _$VisitContainerRecorder extends $Notifier<void> {
   void build();

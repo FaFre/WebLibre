@@ -263,6 +263,10 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
     return db.definitionsDrift.strictContextAssignments();
   }
 
+  Selectable<String?> excludedHistoryContextIds() {
+    return db.definitionsDrift.excludedHistoryContextIds();
+  }
+
   SingleOrNullSelectable<ContainerData> getContainerByContextualIdentity(
     String contextId,
   ) {

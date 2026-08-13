@@ -70,6 +70,7 @@ class GeckoTabService {
     bool private = false,
     HistoryMetadataKey? historyMetadata,
     Map<String, String>? additionalHeaders,
+    bool excludeFromHistory = false,
   }) {
     return _api.addTab(
       url: (url ?? Uri.parse('about:blank')).toString(),
@@ -82,6 +83,7 @@ class GeckoTabService {
       private: private,
       historyMetadata: historyMetadata,
       additionalHeaders: additionalHeaders,
+      excludeFromHistory: excludeFromHistory,
     );
   }
 
@@ -154,11 +156,13 @@ class GeckoTabService {
     required String? selectTabId,
     required String? newContextId,
     bool selectNewTab = true,
+    bool excludeFromHistory = false,
   }) {
     return _api.duplicateTab(
       selectTabId: selectTabId,
       selectNewTab: selectNewTab,
       newContextId: newContextId,
+      excludeFromHistory: excludeFromHistory,
     );
   }
 
@@ -187,7 +191,12 @@ class GeckoTabService {
   Future<List<String>> addMultipleTabs({
     required List<AddTabParams> tabs,
     String? selectTabId,
+    bool excludeFromHistory = false,
   }) {
-    return _api.addMultipleTabs(tabs: tabs, selectTabId: selectTabId);
+    return _api.addMultipleTabs(
+      tabs: tabs,
+      selectTabId: selectTabId,
+      excludeFromHistory: excludeFromHistory,
+    );
   }
 }

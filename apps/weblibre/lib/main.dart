@@ -56,7 +56,7 @@ import 'package:weblibre/features/geckoview/features/history/domain/services/his
 import 'package:weblibre/features/geckoview/features/history/domain/services/visit_container_recorder.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_pruner.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_settings_sync.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_logs.dart';
@@ -243,18 +243,20 @@ class _MainWidget extends HookConsumerWidget {
       final clearStartupUBlockFilterListsPref =
           !engineSettings.ublockFilterListSettings.enabled;
 
-      // Push the hard exclude-from-history contextId set to native BEFORE the
-      // engine starts — it records visits as soon as restored tabs load, so an
-      // excluded ("incognito") container could otherwise leak to Places during
-      // the startup window. Best-effort: on failure the keepAlive provider still
-      // pushes once containers are available.
+      // Push the hard exclude-from-history snapshot to native BEFORE the engine
+      // starts — it records visits as soon as restored tabs load, so an excluded
+      // ("incognito") container could otherwise leak to Places during the
+      // startup window. Best-effort: on failure the keepAlive provider still
+      // pushes once the databases are readable.
       try {
-        final availableContainers = await ref
-            .read(containerRepositoryProvider.notifier)
-            .getAllContainersWithCount();
+        final snapshot = await readHistoryExclusionSnapshot(
+          ref.read(tabDatabaseProvider),
+        );
 
-        await GeckoEngineSettingsService().setExcludedHistoryContextIds(
-          excludedHistoryContextIds(availableContainers),
+        await GeckoEngineSettingsService().setHistoryExclusions(
+          excludedTabIds: snapshot.excludedTabIds,
+          knownTabIds: snapshot.knownTabIds,
+          excludedContextIds: snapshot.excludedContextIds,
         );
       } catch (e, s) {
         logger.w(
@@ -263,6 +265,26 @@ class _MainWidget extends HookConsumerWidget {
           stackTrace: s,
         );
       }
+
+      // Keep that snapshot current for the rest of the session. Activated here,
+      // at app scope, and never from a screen: the setting is edited from the
+      // container editor and the tab set changes from everywhere, so a
+      // replication tied to the browser view would stop pushing whenever that
+      // view is gone — leaking visits after the toggle is enabled, or suppressing
+      // them after it is disabled. keepAlive, so this single activation holds for
+      // the whole session.
+      ref.listenManual(
+        fireImmediately: true,
+        historyExclusionReplicationProvider,
+        (previous, next) {},
+        onError: (error, stackTrace) {
+          logger.e(
+            'Error listening to historyExclusionReplicationProvider',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        },
+      );
 
       // Register the visit→container recorder BEFORE the engine starts. It only
       // installs a Dart-side GeckoHistoryEvents handler (no native dependency),

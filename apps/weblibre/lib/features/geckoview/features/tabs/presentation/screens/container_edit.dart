@@ -161,11 +161,7 @@ class ContainerEditScreen extends HookConsumerWidget {
               clearDataOnExit:
                   clearDataOnExit.value && contextualIdentity.value != null,
               excludeFromIndex: excludeFromIndex.value,
-              // Requires a Gecko contextId: the native delegate can't hard-exclude
-              // a container's visits without one. sanitized() enforces the same
-              // invariant defensively on write.
-              excludeFromHistory:
-                  excludeFromHistory.value && contextualIdentity.value != null,
+              excludeFromHistory: excludeFromHistory.value,
               bypassGlobalProxy:
                   contextualIdentity.value != null &&
                   proxyConnectionId.value == null &&
@@ -610,23 +606,17 @@ class ContainerEditScreen extends HookConsumerWidget {
                         ),
                         const Divider(height: 1, indent: 56),
                         SwitchListTile.adaptive(
-                          value:
-                              contextualIdentity.value != null &&
-                              excludeFromHistory.value,
+                          value: excludeFromHistory.value,
                           title: const Text('Exclude from History'),
-                          subtitle: Text(
-                            contextualIdentity.value != null
-                                ? "Don't record new visits from this container's "
-                                      'regular tabs. Existing history is kept; '
-                                      'isolated tabs track separately.'
-                                : 'Requires cookie isolation to be enabled',
+                          subtitle: const Text(
+                            "Don't record new visits from this container's "
+                            'tabs, and drop its pages from local search. '
+                            'Existing browsing history is kept.',
                           ),
                           secondary: const Icon(MdiIcons.incognito),
-                          onChanged: (contextualIdentity.value != null)
-                              ? (value) {
-                                  excludeFromHistory.value = value;
-                                }
-                              : null,
+                          onChanged: (value) {
+                            excludeFromHistory.value = value;
+                          },
                         ),
                       ],
                     ),

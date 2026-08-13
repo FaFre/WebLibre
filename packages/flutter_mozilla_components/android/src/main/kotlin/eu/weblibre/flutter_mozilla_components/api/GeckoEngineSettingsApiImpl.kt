@@ -10,6 +10,7 @@ import android.content.Context
 import eu.weblibre.flutter_mozilla_components.ColorSchemePreference
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.feature.ReaderViewAppearanceFeature
+import eu.weblibre.flutter_mozilla_components.history.HistoryExclusions
 import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMode as PigeonBounceTrackingProtectionMode
 import eu.weblibre.flutter_mozilla_components.pigeons.ColorScheme
 import eu.weblibre.flutter_mozilla_components.pigeons.CookieBannerHandlingMode
@@ -492,7 +493,16 @@ class GeckoEngineSettingsApiImpl(
         )
     }
 
-    override fun setExcludedHistoryContextIds(contextIds: List<String>) {
-        GlobalComponents.setExcludedHistoryContextIds(applicationContext, contextIds)
+    override fun setHistoryExclusions(
+        excludedTabIds: List<String>,
+        knownTabIds: List<String>,
+        excludedContextIds: List<String>,
+    ) {
+        HistoryExclusions.update(
+            context = applicationContext,
+            excludedTabIds = excludedTabIds,
+            knownTabIds = knownTabIds,
+            excludedContextIds = excludedContextIds,
+        )
     }
 }

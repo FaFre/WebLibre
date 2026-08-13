@@ -18,7 +18,8 @@ import eu.weblibre.flutter_mozilla_components.services.DownloadService
 import eu.weblibre.flutter_mozilla_components.EngineProvider
 import eu.weblibre.flutter_mozilla_components.EngineProvider.getOrCreateRuntime
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.history.WebLibreHistoryDelegate
+import eu.weblibre.flutter_mozilla_components.history.FallbackHistoryDelegate
+import eu.weblibre.flutter_mozilla_components.middleware.HistoryDelegateBindingMiddleware
 import eu.weblibre.flutter_mozilla_components.PermissionStorage
 import eu.weblibre.flutter_mozilla_components.services.MediaSessionService
 import eu.weblibre.flutter_mozilla_components.activities.NotificationActivity
@@ -29,7 +30,6 @@ import eu.weblibre.flutter_mozilla_components.middleware.AppLinkNavigationMiddle
 import eu.weblibre.flutter_mozilla_components.middleware.FlutterEventMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataService
-import eu.weblibre.flutter_mozilla_components.middleware.HistoryVisitCorrelationMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.SandboxCaptureMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.SaveToPDFMiddleware
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
@@ -70,6 +70,7 @@ import mozilla.components.feature.prompts.PromptMiddleware
 import mozilla.components.feature.prompts.file.FileUploadsDirCleaner
 import mozilla.components.feature.prompts.file.FileUploadsDirCleanerMiddleware
 import mozilla.components.feature.readerview.ReaderViewMiddleware
+import mozilla.components.concept.engine.history.HistoryTrackingDelegate
 import mozilla.components.feature.session.HistoryDelegate
 import mozilla.components.feature.session.middleware.LastAccessMiddleware
 import mozilla.components.feature.session.middleware.undo.UndoMiddleware
@@ -105,13 +106,13 @@ class Core(
     val engineSettings by lazy {
         DefaultSettings(
             requestInterceptor = requestInterceptor,
-            // Wrap the Places-feeding delegate so WebLibre can hard-exclude
-            // container visits even on the headless external path. When Flutter
-            // is available, the wrapper also emits visit→container relations.
-            historyTrackingDelegate = WebLibreHistoryDelegate(
-                HistoryDelegate(lazyHistoryStorage),
-                GlobalComponents.historyEvents,
-            ),
+            // Engine-wide fallback only. Every session in the store is given its
+            // own TabScopedHistoryDelegate by HistoryDelegateBindingMiddleware,
+            // which is what enforces exclude-from-history and tags visits with
+            // their container. The fallback covers sessions that have no binding
+            // (yet) and, unable to identify them, refuses to record while any
+            // exclusion is active — see FallbackHistoryDelegate.
+            historyTrackingDelegate = FallbackHistoryDelegate(historyStorageDelegate),
             testingModeEnabled = false,
             remoteDebuggingEnabled = false,
             automaticFontSizeAdjustment = true,
@@ -246,9 +247,10 @@ class Core(
                     ),
                 ),
                 HistoryMetadataMiddleware(historyMetadataService),
-                // Correlates url -> contextId so WebLibreHistoryDelegate can
-                // resolve a visit's container at record time.
-                HistoryVisitCorrelationMiddleware(),
+                // Must run before the engine middleware: it swaps each session's
+                // history delegate for a tab-scoped one before that session is
+                // linked and starts loading.
+                HistoryDelegateBindingMiddleware(historyStorageDelegate),
                 FlutterEventMiddleware(flutterEvents),
                 DownloadMiddleware(
                     applicationContext = context,
@@ -337,6 +339,16 @@ class Core(
      * private sessions).
      */
     val lazyHistoryStorage = lazy { PlacesHistoryStorage(context) }
+
+    /**
+     * Writes visits to Places. Wrapped per session by [TabScopedHistoryDelegate]
+     * so exclude-from-history and container tagging can be decided from the tab
+     * that produced the visit.
+     */
+    val historyStorageDelegate: HistoryTrackingDelegate by lazy {
+        HistoryDelegate(lazyHistoryStorage)
+    }
+
     val lazyBookmarksStorage = lazy { PlacesBookmarksStorage(context) }
     val lazyRemoteTabsStorage = lazy { RemoteTabsStorage(context, noOpCrashReporter) }
 

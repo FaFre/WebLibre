@@ -21,9 +21,8 @@ import 'dart:async';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/history/domain/services/history_exclusion_replication.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/utils/url_canonical.dart';
 
 part 'visit_container_recorder.g.dart';
@@ -31,77 +30,99 @@ part 'visit_container_recorder.g.dart';
 class _HistoryEventsReceiver extends GeckoHistoryEvents {
   _HistoryEventsReceiver(this._onVisit);
 
-  final void Function(String url, int visitTime, String? contextId) _onVisit;
+  final void Function(String url, int visitTime, String tabId) _onVisit;
 
   @override
-  void onVisitRecorded(String url, int visitTime, String? contextId) {
-    _onVisit(url, visitTime, contextId);
+  void onVisitRecorded(String url, int visitTime, String tabId) {
+    _onVisit(url, visitTime, tabId);
   }
 }
 
 /// Records the visit→container relation. Mozilla Places owns the visit itself;
-/// on each Places visit the native [WebLibreHistoryDelegate] forwards the
-/// producing tab's Gecko contextId, which this service maps to a WebLibre
+/// on each Places visit the tab's native history delegate forwards the id of the
+/// session that produced it, which this service maps to that tab's WebLibre
 /// container and persists as a `visit_container` row (keyed on the visit's
 /// canonical URL + time so the history UI can join it back to Places).
 ///
-/// Graceful absence: a visit that resolves to no container — uncontained, or a
-/// container without a Gecko contextId (cookie isolation off) — writes no row
-/// and simply appears untagged. Activated eagerly at startup.
+/// Graceful absence: a visit from a tab with no container — or from one WebLibre
+/// holds no row for even after [VisitContainerRecorder._resolveAttempts], e.g. a
+/// custom tab — writes no row and simply appears untagged. Activated eagerly at
+/// startup.
 @Riverpod(keepAlive: true)
 class VisitContainerRecorder extends _$VisitContainerRecorder {
+  /// A tab created by the engine (`window.open`) is persisted by WebLibre only
+  /// after the fact, so its first visit can arrive before the row exists. Retry
+  /// briefly rather than dropping the tag; a tab still absent after the whole
+  /// budget is one WebLibre does not track at all (a custom tab), and is not
+  /// asked about again — see [_unresolvedTabIds].
+  static const _resolveAttempts = 4;
+  static const _resolveRetryDelay = Duration(milliseconds: 150);
+
+  /// Cap on the give-up set below. Only ever reached by a session that opens an
+  /// implausible number of untracked tabs; clearing simply costs those tabs one
+  /// more resolve attempt.
+  static const _unresolvedTabIdsLimit = 256;
+
   @override
   void build() {
-    // Cache contextId → container id so each visit event is an O(1) lookup
-    // instead of a linear scan of all containers. Kept fresh via ref.listen.
-    final contextIdToContainerId = <String, String>{};
-    void applyContainers(Iterable<ContainerDataWithCount>? containers) {
-      contextIdToContainerId.clear();
-      if (containers != null) {
-        for (final container in containers) {
-          final contextId = container.metadata.contextualIdentity;
-          if (contextId != null) {
-            contextIdToContainerId[contextId] = container.id;
-          }
+    // Resolved at the instant the visit is reported: a container reassignment
+    // landing while the write is in flight must not retag the visit that
+    // happened before it. Absent key = tab unknown, null value = uncontained.
+    var tabContainerIds = ref.read(tabContainerIdsProvider);
+
+    // Tabs the retry budget already gave up on. A custom tab is never in the tab
+    // table, yet reports a visit on every page load, so without this each of
+    // those loads would re-run the full budget: 4 queries spread over 450 ms.
+    // An id is dropped again the moment a snapshot does cover it, so a row that
+    // merely arrived late is not written off for good.
+    final unresolvedTabIds = <String>{};
+
+    ref.listen(tabContainerIdsProvider, (_, next) {
+      tabContainerIds = next;
+      unresolvedTabIds.removeWhere(next.containsKey);
+    });
+
+    /// Waits for the tab's row to appear. Distinguishes "no row yet" from "row
+    /// with no container": the row existing at all ends the wait, so an
+    /// uncontained tab does not sit through the whole retry budget.
+    Future<String?> awaitTabRow(String tabId) async {
+      if (unresolvedTabIds.contains(tabId)) return null;
+
+      final db = ref.read(tabDatabaseProvider);
+
+      for (var attempt = 0; attempt < _resolveAttempts; attempt++) {
+        final rows = await db.tabDao.getTabsContainerId([tabId]).get();
+        if (rows.isNotEmpty) return rows.single.value;
+
+        if (attempt == _resolveAttempts - 1) break;
+        await Future<void>.delayed(_resolveRetryDelay);
+        if (!ref.mounted) return null;
+
+        // The in-memory map may have caught up in the meantime.
+        if (tabContainerIds.containsKey(tabId)) {
+          return tabContainerIds[tabId];
         }
       }
+
+      if (unresolvedTabIds.length >= _unresolvedTabIdsLimit) {
+        unresolvedTabIds.clear();
+      }
+      unresolvedTabIds.add(tabId);
+
+      return null;
     }
 
-    // Seed from the stream's current value (may still be empty during startup —
-    // watchContainersWithCount is async and often hasn't emitted yet) and keep
-    // it fresh on every change.
-    applyContainers(ref.read(watchContainersWithCountProvider).value);
-    ref.listen(
-      watchContainersWithCountProvider,
-      (_, next) => applyContainers(next.value),
-    );
-
-    Future<void> recordVisit(
-      String url,
-      int visitTime,
-      String contextId,
-    ) async {
-      var containerId = contextIdToContainerId[contextId];
-
-      // Empty cache means the container stream hasn't emitted yet (the startup
-      // window — restored tabs can fire visits before the first emission). A
-      // visit carrying a contextId implies a container with that contextId
-      // exists, so pull the containers directly rather than dropping the visit
-      // permanently. A genuine miss (deleted container) leaves the cache
-      // non-empty, so this fallback does not fire repeatedly in steady state.
-      if (containerId == null && contextIdToContainerId.isEmpty) {
-        applyContainers(
-          await ref.read(watchContainersWithCountProvider.future),
-        );
-        containerId = contextIdToContainerId[contextId];
-      }
-
-      // Resolved to a contextId that maps to no known container (deleted or not
-      // yet synced) → skip rather than write a dangling relation.
-      if (containerId == null) return;
-
+    Future<void> recordVisit(String url, int visitTime, String tabId) async {
       final canonical = canonicalizeUrl(url);
       if (canonical == null) return;
+
+      final containerId = tabContainerIds.containsKey(tabId)
+          ? tabContainerIds[tabId]
+          : await awaitTabRow(tabId);
+
+      // Uncontained tab, or one WebLibre has no row for → nothing to tag.
+      if (containerId == null) return;
+      if (!ref.mounted) return;
 
       await ref
           .read(tabDatabaseProvider)
@@ -114,11 +135,8 @@ class VisitContainerRecorder extends _$VisitContainerRecorder {
           );
     }
 
-    final receiver = _HistoryEventsReceiver((url, visitTime, contextId) {
-      // No contextId (uncontained / non-isolated / unresolved) → no relation.
-      if (contextId == null) return;
-
-      unawaited(recordVisit(url, visitTime, contextId));
+    final receiver = _HistoryEventsReceiver((url, visitTime, tabId) {
+      unawaited(recordVisit(url, visitTime, tabId));
     });
 
     GeckoHistoryEvents.setUp(receiver);

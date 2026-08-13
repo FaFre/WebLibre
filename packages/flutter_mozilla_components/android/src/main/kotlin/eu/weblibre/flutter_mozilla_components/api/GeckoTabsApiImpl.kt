@@ -6,6 +6,7 @@
 
 package eu.weblibre.flutter_mozilla_components.api
 
+import eu.weblibre.flutter_mozilla_components.history.HistoryExclusions
 import eu.weblibre.flutter_mozilla_components.pigeons.AddTabParams
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.HistoryMetadataKey as PigeonHistoryMetadataKey
@@ -511,18 +512,26 @@ class GeckoTabsApiImpl : GeckoTabsApi {
         source: SourceValue,
         private: Boolean,
         historyMetadata: PigeonHistoryMetadataKey?,
-        additionalHeaders: Map<String, String>?
+        additionalHeaders: Map<String, String>?,
+        excludeFromHistory: Boolean
     ): String {
         try {
-            return components.useCases.tabsUseCases.addTab(
+            val loadFlags = EngineSession.LoadUrlFlags.select(flags.value.toInt())
+
+            // Inlined from TabsUseCases.AddNewTabUseCase so the exclusion can be
+            // marked *between* creating the tab and dispatching it, exactly as
+            // addMultipleTabs does. `Store.dispatch` runs the middleware chain
+            // synchronously on the calling thread, so by the time the use case
+            // returned an id, HistoryMetadataMiddleware had already observed
+            // AddTabAction and written the tab's first Places metadata — and with
+            // the id still unmarked, a container without cookie isolation has no
+            // contextId to be recognised by either.
+            val tab = createTab(
                 url = url,
-                selectTab = selectTab,
-                startLoading = startLoading,
-                parentId = parentId,
-                flags = EngineSession.LoadUrlFlags.select(flags.value.toInt()),
-                contextId = contextId,
-                source = restoreSource(source),
                 private = private,
+                source = restoreSource(source),
+                contextId = contextId,
+                parent = parentId?.let { components.core.store.state.findTab(it) },
                 historyMetadata = historyMetadata?.let { metadata ->
                     HistoryMetadataKey(
                         url = metadata.url,
@@ -530,10 +539,33 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                         referrerUrl = metadata.referrerUrl
                     )
                 },
-                additionalHeaders = additionalHeaders
-            ).also {
-                logger.debug("$TAG: Added new tab with ID $it")
+                initialLoadFlags = loadFlags,
+                initialAdditionalHeaders = additionalHeaders,
+                desktopMode = components.core.store.state.desktopMode,
+            )
+
+            if (excludeFromHistory) {
+                HistoryExclusions.markProvisional(tab.id)
             }
+
+            components.core.store.dispatch(
+                TabListAction.AddTabAction(tab, select = selectTab)
+            )
+
+            if (startLoading) {
+                components.core.store.dispatch(
+                    EngineAction.LoadUrlAction(
+                        tabId = tab.id,
+                        url = url,
+                        flags = loadFlags,
+                        additionalHeaders = additionalHeaders,
+                        includeParent = true
+                    )
+                )
+            }
+
+            logger.debug("$TAG: Added new tab with ID ${tab.id}")
+            return tab.id
         } catch (e: Exception) {
             logger.error("$TAG: Failed to add tab", e)
             throw e
@@ -608,6 +640,18 @@ class GeckoTabsApiImpl : GeckoTabsApi {
         }
     }
 
+    // The two selectOrAddTab entry points below deliberately carry no
+    // excludeFromHistory flag, unlike addTab/addMultipleTabs/duplicateTab. Neither
+    // this API nor AC's SelectOrAddUseCase takes a contextId, so a tab created
+    // here has none — and Dart's `syncTabs` inserts the row it discovers with no
+    // container_id. The tab is therefore uncontained in both stores and correctly
+    // records history; there is no exclusion to mark, provisional or otherwise.
+    //
+    // If a contextId or container is ever threaded through either method, that
+    // stops being true and they need the same createTab → markProvisional →
+    // dispatch shape as addTab: a tab is always absent from `knownTabIds` when
+    // AddTabAction is observed, so the provisional mark is the only thing that can
+    // identify it as excluded to HistoryMetadataMiddleware.
     override fun selectOrAddTabByHistory(
         url: String,
         historyMetadata: PigeonHistoryMetadataKey
@@ -655,7 +699,8 @@ class GeckoTabsApiImpl : GeckoTabsApi {
     override fun duplicateTab(
         selectTabId: String?,
         selectNewTab: Boolean,
-        newContextId: String?
+        newContextId: String?,
+        excludeFromHistory: Boolean
     ): String {
         try {
             val tabState = selectTabId?.let { components.core.store.state.findTab(it) }
@@ -668,6 +713,13 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                 parent = tabState,
                 engineSessionState = tabState.engineState.engineSessionState,
             )
+
+            // Before dispatching: the duplicate carries the source's URL, so
+            // HistoryMetadataMiddleware writes its Places metadata while handling
+            // AddTabAction — synchronously, inside the dispatch below. See addTab.
+            if (excludeFromHistory) {
+                HistoryExclusions.markProvisional(duplicate.id)
+            }
 
             components.core.store.dispatch(
                 TabListAction.AddTabAction(
@@ -713,7 +765,11 @@ class GeckoTabsApiImpl : GeckoTabsApi {
         }
     }
 
-    override fun addMultipleTabs(tabs: List<AddTabParams>, selectTabId: String?): List<String> {
+    override fun addMultipleTabs(
+        tabs: List<AddTabParams>,
+        selectTabId: String?,
+        excludeFromHistory: Boolean
+    ): List<String> {
         try {
             val tabSessionStates = tabs.map { params ->
                 createTab(
@@ -732,6 +788,12 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                     },
                     desktopMode = components.core.store.state.desktopMode
                 )
+            }
+
+            // Before the tabs are dispatched (and therefore before any of them can
+            // load): see addTab.
+            if (excludeFromHistory) {
+                tabSessionStates.forEach { HistoryExclusions.markProvisional(it.id) }
             }
 
             components.core.store.dispatch(

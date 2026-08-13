@@ -200,6 +200,10 @@ class TabRepository extends _$TabRepository {
           private: tabMode is PrivateTabMode,
           historyMetadata: historyMetadata,
           additionalHeaders: additionalHeaders,
+          // Carried into the engine so the exclusion is in place before the tab
+          // loads; the replicated snapshot only follows once its row is written.
+          excludeFromHistory:
+              assignedContainer?.metadata.excludeFromHistory ?? false,
         );
       },
       parentId: Value(validatedParentId),
@@ -278,6 +282,11 @@ class TabRepository extends _$TabRepository {
       final createdTabIds = await _tabsService.addMultipleTabs(
         tabs: tabs,
         selectTabId: selectTabId,
+        // Carried into the engine so the exclusion is in place before these tabs
+        // load; the replicated snapshot only follows once their rows are
+        // written. One value for the batch — they all land in this container.
+        excludeFromHistory:
+            assignedContainer?.metadata.excludeFromHistory ?? false,
       );
       // Build sets for validation
       final creatingTabIds = createdTabIds.toSet();
@@ -380,6 +389,8 @@ class TabRepository extends _$TabRepository {
           selectTabId: selectTabId,
           newContextId: effectiveContextId,
           selectNewTab: selectTab,
+          excludeFromHistory:
+              containerData?.metadata.excludeFromHistory ?? false,
         );
       },
       parentId: Value(sourceParentId),

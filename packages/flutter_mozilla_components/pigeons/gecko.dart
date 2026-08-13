@@ -1584,11 +1584,22 @@ abstract class GeckoEngineSettingsApi {
   /// cold-started reader view resolves the right value before Flutter runs.
   void setReaderViewPureBlack(bool enabled);
 
-  /// The set of Gecko contextual-identity ids ("container" contextIds) whose
-  /// browsing history must NOT be written to Mozilla Places (hard
-  /// exclude-from-history / "incognito container"). WebLibreHistoryDelegate
-  /// skips the Places write for a visit resolved to one of these containers.
-  void setExcludedHistoryContextIds(List<String> contextIds);
+  /// Snapshot of which sessions must NOT write to Mozilla Places (hard
+  /// exclude-from-history / "incognito container"). Every engine session runs a
+  /// tab-scoped history delegate that consults this snapshot, so the decision is
+  /// made per tab rather than guessed from the visited URL.
+  ///
+  /// [excludedTabIds] are the tabs whose container has exclude-from-history on.
+  /// [knownTabIds] is every tab WebLibre has a row for: a tab outside this set is
+  /// one Dart hasn't seen yet (e.g. a `window.open` child), for which native
+  /// falls back to inheriting the opener's exclusion. [excludedContextIds] are
+  /// the Gecko contextual identities of excluded containers, used as a
+  /// fallback before the first snapshot arrives (cold start / headless path).
+  void setHistoryExclusions(
+    List<String> excludedTabIds,
+    List<String> knownTabIds,
+    List<String> excludedContextIds,
+  );
 }
 
 @HostApi()
@@ -1713,11 +1724,21 @@ abstract class GeckoTabsApi {
     //isSearch: Boolean = false,
     //searchEngineName: String? = null,
     required Map<String, String>? additionalHeaders,
+
+    /// Whether the container this tab is being created in is excluded from
+    /// history. Applied before the tab starts loading, so the first visit can't
+    /// outrun the exclusion snapshot Dart pushes once the tab is persisted.
+    required bool excludeFromHistory,
   });
 
   List<String> addMultipleTabs({
     required List<AddTabParams> tabs,
     required String? selectTabId,
+
+    /// Whether the container these tabs are being created in is excluded from
+    /// history. One value for the batch: they all land in the same container.
+    /// See `addTab`.
+    required bool excludeFromHistory,
   });
 
   void removeAllTabs({required bool recoverable});
@@ -1759,6 +1780,11 @@ abstract class GeckoTabsApi {
     required String? selectTabId,
     required bool selectNewTab,
     required String? newContextId,
+
+    /// Whether the container the duplicate is being created in is excluded from
+    /// history. Cannot be inherited from the source tab: a duplicate can be sent
+    /// to a different container than the one it was copied from. See `addTab`.
+    required bool excludeFromHistory,
   });
 
   void moveTabs({
@@ -2306,18 +2332,18 @@ enum ClearDataType {
   onlyCaches,
 }
 
-/// Native -> Dart history visit notifications. Fired from WebLibreHistoryDelegate
-/// on each recorded Mozilla Places visit so WebLibre can persist the one thing
-/// Places can't store: which container the visit belonged to. The visit itself
-/// (title, visit type, exact time) stays owned by Places.
+/// Native -> Dart history visit notifications. Fired from the tab-scoped history
+/// delegate on each recorded Mozilla Places visit so WebLibre can persist the one
+/// thing Places can't store: which container the visit belonged to. The visit
+/// itself (title, visit type, exact time) stays owned by Places.
 @FlutterApi()
 abstract class GeckoHistoryEvents {
-  /// [contextId] is the Gecko contextual identity of the tab that produced the
-  /// visit, resolved via the URL→contextId correlation cache (null when it
-  /// couldn't be resolved / the tab was uncontained). Dart maps it to a
-  /// WebLibre container and writes the visit→container relation, keyed on
-  /// ([url], [visitTime]) to join back to the Places visit.
-  void onVisitRecorded(String url, int visitTime, String? contextId);
+  /// [tabId] is the session that produced the visit — the engine session's own
+  /// history delegate reports it, so it is exact rather than inferred. Dart maps
+  /// the tab to its WebLibre container and writes the visit→container relation,
+  /// keyed on ([url], [visitTime]) to join back to the Places visit. A tab
+  /// WebLibre has no row for (custom tab, not yet synced) simply stays untagged.
+  void onVisitRecorded(String url, int visitTime, String tabId);
 }
 
 @HostApi()

@@ -1453,6 +1453,10 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     return db.definitionsDrift.isolatedContextContainerPairs();
   }
 
+  Selectable<HistoryExclusionTabsResult> historyExclusionTabs() {
+    return db.definitionsDrift.historyExclusionTabs();
+  }
+
   Future<void> setPinned(String id, {required bool pinned}) {
     final statement = _updateByIdStatement(id);
     return statement.write(TabCompanion(isPinned: Value(pinned)));

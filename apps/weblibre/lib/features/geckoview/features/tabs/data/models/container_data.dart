@@ -51,14 +51,14 @@ class ContainerMetadata with FastEquatable {
   final bool excludeFromIndex;
 
   // When true, this container's browsing history is not recorded at all: the
-  // native WebLibreHistoryDelegate skips the Mozilla Places write for its
-  // visits (hard exclude / "incognito container"), and no visit→container
-  // relation row is written. Gates history recording independently of
-  // `excludeFromIndex` (which only gates the local FTS search index).
+  // history delegate of each of its tabs skips the Mozilla Places write (hard
+  // exclude / "incognito container"), and no visit→container relation row is
+  // written. Gates history recording independently of `excludeFromIndex` (which
+  // only gates the local FTS search index).
   //
-  // Invariant: requires a Gecko contextId — without one the native delegate
-  // can't distinguish the container's visits to skip them. Enforced by
-  // [sanitized] on write and normalized on read below.
+  // Applies to every container: the exclusion is replicated to native per tab,
+  // not per Gecko contextId, so it works with cookie isolation off — where all
+  // of the container's tabs share the default context — just as well as on.
   @JsonKey(defaultValue: false)
   final bool excludeFromHistory;
 
@@ -125,14 +125,7 @@ class ContainerMetadata with FastEquatable {
          proxyConnectionId: proxyConnectionId,
          clearDataOnExit: clearDataOnExit ?? false,
          excludeFromIndex: excludeFromIndex ?? false,
-         // Invariant: exclude-from-history requires a Gecko contextId (cookie
-         // isolation). Without one there is no way to hard-exclude the
-         // container from Places — the native delegate can't tell its visits
-         // apart. This is the deserialization path, so a legacy/foreign record
-         // with the bad combination is normalized on read; writers re-apply it
-         // via [sanitized].
-         excludeFromHistory:
-             (excludeFromHistory ?? false) && contextualIdentity != null,
+         excludeFromHistory: excludeFromHistory ?? false,
          bypassGlobalProxy: bypassGlobalProxy ?? false,
          useCustomColor: useCustomColor ?? false,
          assignedSites: assignedSites,
@@ -147,16 +140,15 @@ class ContainerMetadata with FastEquatable {
              (isolatedAppLinkSettings ?? false) && contextualIdentity != null,
        );
 
-  /// Enforce the [excludeFromHistory] invariant before persistence: it can only
-  /// be true for a cookie-isolated (contextId-bearing) container, since the
-  /// native delegate needs the contextId to hard-exclude visits from Places.
-  /// The primary constructor can't normalize (copy_with_extension_gen requires
-  /// params to map 1:1 to fields), so writers route through this.
+  /// Enforce the settings that only mean something for a cookie-isolated
+  /// (contextId-bearing) container before persistence. The primary constructor
+  /// can't normalize (copy_with_extension_gen requires params to map 1:1 to
+  /// fields), so writers route through this.
+  ///
+  /// [excludeFromHistory] is deliberately absent: it is keyed on tabs natively
+  /// and applies to every container.
   ContainerMetadata sanitized() {
     var result = this;
-    if (result.excludeFromHistory && result.contextualIdentity == null) {
-      result = result.copyWith(excludeFromHistory: false);
-    }
     // Strict mode is meaningless without a contextId: the extension keys
     // strictness on the tab's cookieStoreId.
     if (result.strictMode && result.contextualIdentity == null) {

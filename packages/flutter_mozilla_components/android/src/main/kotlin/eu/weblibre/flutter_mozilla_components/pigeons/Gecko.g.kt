@@ -8649,12 +8649,19 @@ interface GeckoEngineSettingsApi {
    */
   fun setReaderViewPureBlack(enabled: Boolean)
   /**
-   * The set of Gecko contextual-identity ids ("container" contextIds) whose
-   * browsing history must NOT be written to Mozilla Places (hard
-   * exclude-from-history / "incognito container"). WebLibreHistoryDelegate
-   * skips the Places write for a visit resolved to one of these containers.
+   * Snapshot of which sessions must NOT write to Mozilla Places (hard
+   * exclude-from-history / "incognito container"). Every engine session runs a
+   * tab-scoped history delegate that consults this snapshot, so the decision is
+   * made per tab rather than guessed from the visited URL.
+   *
+   * [excludedTabIds] are the tabs whose container has exclude-from-history on.
+   * [knownTabIds] is every tab WebLibre has a row for: a tab outside this set is
+   * one Dart hasn't seen yet (e.g. a `window.open` child), for which native
+   * falls back to inheriting the opener's exclusion. [excludedContextIds] are
+   * the Gecko contextual identities of excluded containers, used as a
+   * fallback before the first snapshot arrives (cold start / headless path).
    */
-  fun setExcludedHistoryContextIds(contextIds: List<String>)
+  fun setHistoryExclusions(excludedTabIds: List<String>, knownTabIds: List<String>, excludedContextIds: List<String>)
 
   companion object {
     /** The codec used by GeckoEngineSettingsApi. */
@@ -8808,13 +8815,15 @@ interface GeckoEngineSettingsApi {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setExcludedHistoryContextIds$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setHistoryExclusions$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val contextIdsArg = args[0] as List<String>
+            val excludedTabIdsArg = args[0] as List<String>
+            val knownTabIdsArg = args[1] as List<String>
+            val excludedContextIdsArg = args[2] as List<String>
             val wrapped: List<Any?> = try {
-              api.setExcludedHistoryContextIds(contextIdsArg)
+              api.setHistoryExclusions(excludedTabIdsArg, knownTabIdsArg, excludedContextIdsArg)
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
@@ -9205,8 +9214,8 @@ interface GeckoTabsApi {
   fun syncEvents(onSelectedTabChange: Boolean, onTabListChange: Boolean, onRestoreComplete: Boolean, onTabContentStateChange: Boolean, onIconChange: Boolean, onSecurityInfoStateChange: Boolean, onReaderableStateChange: Boolean, onHistoryStateChange: Boolean, onFindResults: Boolean, onThumbnailChange: Boolean, onBrowserExtensionsChange: Boolean, onPageExtensionsChange: Boolean, onBrowserExtensionIcons: Boolean, onPageExtensionIcons: Boolean, onTranslationStateChange: Boolean)
   fun selectTab(tabId: String)
   fun removeTab(tabId: String)
-  fun addTab(url: String, selectTab: Boolean, startLoading: Boolean, parentId: String?, flags: LoadUrlFlagsValue, contextId: String?, source: SourceValue, private: Boolean, historyMetadata: HistoryMetadataKey?, additionalHeaders: Map<String, String>?): String
-  fun addMultipleTabs(tabs: List<AddTabParams>, selectTabId: String?): List<String>
+  fun addTab(url: String, selectTab: Boolean, startLoading: Boolean, parentId: String?, flags: LoadUrlFlagsValue, contextId: String?, source: SourceValue, private: Boolean, historyMetadata: HistoryMetadataKey?, additionalHeaders: Map<String, String>?, excludeFromHistory: Boolean): String
+  fun addMultipleTabs(tabs: List<AddTabParams>, selectTabId: String?, excludeFromHistory: Boolean): List<String>
   fun removeAllTabs(recoverable: Boolean)
   fun removeTabs(ids: List<String>)
   fun removeNormalTabs()
@@ -9220,7 +9229,7 @@ interface GeckoTabsApi {
   fun selectOrAddTabByHistory(url: String, historyMetadata: HistoryMetadataKey): String
   /** Selects an already existing tab displaying [url] or otherwise creates a new tab. */
   fun selectOrAddTabByUrl(url: String, private: Boolean, source: SourceValue, flags: LoadUrlFlagsValue, ignoreFragment: Boolean): String
-  fun duplicateTab(selectTabId: String?, selectNewTab: Boolean, newContextId: String?): String
+  fun duplicateTab(selectTabId: String?, selectNewTab: Boolean, newContextId: String?, excludeFromHistory: Boolean): String
   fun moveTabs(tabIds: List<String>, targetTabId: String, placeAfter: Boolean)
   fun migratePrivateTabUseCase(tabId: String, alternativeUrl: String?): String
 
@@ -9316,8 +9325,9 @@ interface GeckoTabsApi {
             val privateArg = args[7] as Boolean
             val historyMetadataArg = args[8] as HistoryMetadataKey?
             val additionalHeadersArg = args[9] as Map<String, String>?
+            val excludeFromHistoryArg = args[10] as Boolean
             val wrapped: List<Any?> = try {
-              listOf(api.addTab(urlArg, selectTabArg, startLoadingArg, parentIdArg, flagsArg, contextIdArg, sourceArg, privateArg, historyMetadataArg, additionalHeadersArg))
+              listOf(api.addTab(urlArg, selectTabArg, startLoadingArg, parentIdArg, flagsArg, contextIdArg, sourceArg, privateArg, historyMetadataArg, additionalHeadersArg, excludeFromHistoryArg))
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
             }
@@ -9334,8 +9344,9 @@ interface GeckoTabsApi {
             val args = message as List<Any?>
             val tabsArg = args[0] as List<AddTabParams>
             val selectTabIdArg = args[1] as String?
+            val excludeFromHistoryArg = args[2] as Boolean
             val wrapped: List<Any?> = try {
-              listOf(api.addMultipleTabs(tabsArg, selectTabIdArg))
+              listOf(api.addMultipleTabs(tabsArg, selectTabIdArg, excludeFromHistoryArg))
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
             }
@@ -9496,8 +9507,9 @@ interface GeckoTabsApi {
             val selectTabIdArg = args[0] as String?
             val selectNewTabArg = args[1] as Boolean
             val newContextIdArg = args[2] as String?
+            val excludeFromHistoryArg = args[3] as Boolean
             val wrapped: List<Any?> = try {
-              listOf(api.duplicateTab(selectTabIdArg, selectNewTabArg, newContextIdArg))
+              listOf(api.duplicateTab(selectTabIdArg, selectNewTabArg, newContextIdArg, excludeFromHistoryArg))
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
             }
@@ -11510,10 +11522,10 @@ interface GeckoDeleteBrowsingDataController {
   }
 }
 /**
- * Native -> Dart history visit notifications. Fired from WebLibreHistoryDelegate
- * on each recorded Mozilla Places visit so WebLibre can persist the one thing
- * Places can't store: which container the visit belonged to. The visit itself
- * (title, visit type, exact time) stays owned by Places.
+ * Native -> Dart history visit notifications. Fired from the tab-scoped history
+ * delegate on each recorded Mozilla Places visit so WebLibre can persist the one
+ * thing Places can't store: which container the visit belonged to. The visit
+ * itself (title, visit type, exact time) stays owned by Places.
  *
  * Generated class from Pigeon that represents Flutter messages that can be called from Kotlin.
  */
@@ -11525,18 +11537,18 @@ class GeckoHistoryEvents(private val binaryMessenger: BinaryMessenger, private v
     }
   }
   /**
-   * [contextId] is the Gecko contextual identity of the tab that produced the
-   * visit, resolved via the URL→contextId correlation cache (null when it
-   * couldn't be resolved / the tab was uncontained). Dart maps it to a
-   * WebLibre container and writes the visit→container relation, keyed on
-   * ([url], [visitTime]) to join back to the Places visit.
+   * [tabId] is the session that produced the visit — the engine session's own
+   * history delegate reports it, so it is exact rather than inferred. Dart maps
+   * the tab to its WebLibre container and writes the visit→container relation,
+   * keyed on ([url], [visitTime]) to join back to the Places visit. A tab
+   * WebLibre has no row for (custom tab, not yet synced) simply stays untagged.
    */
-  fun onVisitRecorded(urlArg: String, visitTimeArg: Long, contextIdArg: String?, callback: (Result<Unit>) -> Unit)
+  fun onVisitRecorded(urlArg: String, visitTimeArg: Long, tabIdArg: String, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryEvents.onVisitRecorded$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(urlArg, visitTimeArg, contextIdArg)) {
+    channel.send(listOf(urlArg, visitTimeArg, tabIdArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))

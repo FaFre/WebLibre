@@ -9236,20 +9236,31 @@ class GeckoEngineSettingsApi {
     );
   }
 
-  /// The set of Gecko contextual-identity ids ("container" contextIds) whose
-  /// browsing history must NOT be written to Mozilla Places (hard
-  /// exclude-from-history / "incognito container"). WebLibreHistoryDelegate
-  /// skips the Places write for a visit resolved to one of these containers.
-  Future<void> setExcludedHistoryContextIds(List<String> contextIds) async {
+  /// Snapshot of which sessions must NOT write to Mozilla Places (hard
+  /// exclude-from-history / "incognito container"). Every engine session runs a
+  /// tab-scoped history delegate that consults this snapshot, so the decision is
+  /// made per tab rather than guessed from the visited URL.
+  ///
+  /// [excludedTabIds] are the tabs whose container has exclude-from-history on.
+  /// [knownTabIds] is every tab WebLibre has a row for: a tab outside this set is
+  /// one Dart hasn't seen yet (e.g. a `window.open` child), for which native
+  /// falls back to inheriting the opener's exclusion. [excludedContextIds] are
+  /// the Gecko contextual identities of excluded containers, used as a
+  /// fallback before the first snapshot arrives (cold start / headless path).
+  Future<void> setHistoryExclusions(
+    List<String> excludedTabIds,
+    List<String> knownTabIds,
+    List<String> excludedContextIds,
+  ) async {
     final pigeonVar_channelName =
-        'dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setExcludedHistoryContextIds$pigeonVar_messageChannelSuffix';
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setHistoryExclusions$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[contextIds],
+      <Object?>[excludedTabIds, knownTabIds, excludedContextIds],
     );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
@@ -9790,6 +9801,7 @@ class GeckoTabsApi {
     required bool private,
     required HistoryMetadataKey? historyMetadata,
     required Map<String, String>? additionalHeaders,
+    required bool excludeFromHistory,
   }) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.addTab$pigeonVar_messageChannelSuffix';
@@ -9810,6 +9822,7 @@ class GeckoTabsApi {
           private,
           historyMetadata,
           additionalHeaders,
+          excludeFromHistory,
         ]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
@@ -9824,6 +9837,7 @@ class GeckoTabsApi {
   Future<List<String>> addMultipleTabs({
     required List<AddTabParams> tabs,
     required String? selectTabId,
+    required bool excludeFromHistory,
   }) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.addMultipleTabs$pigeonVar_messageChannelSuffix';
@@ -9833,7 +9847,7 @@ class GeckoTabsApi {
       binaryMessenger: pigeonVar_binaryMessenger,
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[tabs, selectTabId],
+      <Object?>[tabs, selectTabId, excludeFromHistory],
     );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
@@ -10021,6 +10035,7 @@ class GeckoTabsApi {
     required String? selectTabId,
     required bool selectNewTab,
     required String? newContextId,
+    required bool excludeFromHistory,
   }) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.duplicateTab$pigeonVar_messageChannelSuffix';
@@ -10030,7 +10045,7 @@ class GeckoTabsApi {
       binaryMessenger: pigeonVar_binaryMessenger,
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[selectTabId, selectNewTab, newContextId],
+      <Object?>[selectTabId, selectNewTab, newContextId, excludeFromHistory],
     );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
@@ -12646,19 +12661,19 @@ class GeckoDeleteBrowsingDataController {
   }
 }
 
-/// Native -> Dart history visit notifications. Fired from WebLibreHistoryDelegate
-/// on each recorded Mozilla Places visit so WebLibre can persist the one thing
-/// Places can't store: which container the visit belonged to. The visit itself
-/// (title, visit type, exact time) stays owned by Places.
+/// Native -> Dart history visit notifications. Fired from the tab-scoped history
+/// delegate on each recorded Mozilla Places visit so WebLibre can persist the one
+/// thing Places can't store: which container the visit belonged to. The visit
+/// itself (title, visit type, exact time) stays owned by Places.
 abstract class GeckoHistoryEvents {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
-  /// [contextId] is the Gecko contextual identity of the tab that produced the
-  /// visit, resolved via the URL→contextId correlation cache (null when it
-  /// couldn't be resolved / the tab was uncontained). Dart maps it to a
-  /// WebLibre container and writes the visit→container relation, keyed on
-  /// ([url], [visitTime]) to join back to the Places visit.
-  void onVisitRecorded(String url, int visitTime, String? contextId);
+  /// [tabId] is the session that produced the visit — the engine session's own
+  /// history delegate reports it, so it is exact rather than inferred. Dart maps
+  /// the tab to its WebLibre container and writes the visit→container relation,
+  /// keyed on ([url], [visitTime]) to join back to the Places visit. A tab
+  /// WebLibre has no row for (custom tab, not yet synced) simply stays untagged.
+  void onVisitRecorded(String url, int visitTime, String tabId);
 
   static void setUp(
     GeckoHistoryEvents? api, {
@@ -12681,9 +12696,9 @@ abstract class GeckoHistoryEvents {
           final List<Object?> args = message! as List<Object?>;
           final String arg_url = args[0]! as String;
           final int arg_visitTime = args[1]! as int;
-          final String? arg_contextId = args[2] as String?;
+          final String arg_tabId = args[2]! as String;
           try {
-            api.onVisitRecorded(arg_url, arg_visitTime, arg_contextId);
+            api.onVisitRecorded(arg_url, arg_visitTime, arg_tabId);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

@@ -41,7 +41,7 @@ import 'package:weblibre/features/search/domain/fts_tokenizer.dart';
 )
 class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
   @override
-  final int schemaVersion = 15;
+  final int schemaVersion = 16;
 
   @override
   final int ftsTokenLimit = 10;
@@ -255,6 +255,34 @@ class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
       await m.create(schema.visitContainer);
       await m.create(schema.idxVcCanonical);
       await m.create(schema.idxVcContainer);
+    },
+    from15To16: (m, schema) async {
+      // Exclude-from-history now also keeps a container out of the local
+      // search index: recording nothing in Places is pointless while the same
+      // pages stay searchable locally (and reachable from any other tab that
+      // opens the same URL). Every fan-out trigger gained the second flag.
+      await m.drop(schema.tabToHistoryOnInsert);
+      await m.create(schema.tabToHistoryOnInsert);
+      await m.drop(schema.tabToHistoryOnUpdate);
+      await m.create(schema.tabToHistoryOnUpdate);
+      await m.drop(schema.tabToHistoryOnContainerUpdate);
+      await m.create(schema.tabToHistoryOnContainerUpdate);
+      await m.drop(schema.containerToHistoryOnMetadataUpdate);
+      await m.create(schema.containerToHistoryOnMetadataUpdate);
+
+      // Re-evaluate what the old predicate already let in, exactly as
+      // container_to_history_on_metadata_update does — DELETE, then re-INSERT
+      // the best remaining candidate — applied to every excluded container at
+      // once. Both halves are needed: the DELETE spares a URL that some other
+      // eligible tab still holds, and that spared row would otherwise keep the
+      // *excluded* tab's title and content (in `history` and in `history_fts`)
+      // until something touched that tab again.
+      //
+      // The SQL lives in definitions.drift so the analyzer checks it against
+      // the schema; see the note there about pinning it if these tables change.
+      final database = m.database as TabDatabase;
+      await database.definitionsDrift.evictExcludedHistoryPages();
+      await database.definitionsDrift.reindexAfterExcludedHistoryEviction();
     },
   );
 }
