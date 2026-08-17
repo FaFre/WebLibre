@@ -51,6 +51,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/ta
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/presentation/widgets/reorderable_hold_drag.dart';
 
 /// Build the hierarchy toggle injected into [ListTabPreview.groupToggle].
 ///
@@ -415,6 +416,10 @@ class _TabListView extends HookConsumerWidget {
               padding: const EdgeInsets.only(bottom: 56),
               itemCount: displayItemCount,
               itemExtent: _itemHeight,
+              // Drag handles are supplied per item so the drag arms later than
+              // the long-press context menu, and so the non-reorderable
+              // suggestion rows don't get one at all.
+              buildDefaultDragHandles: false,
               onReorderStart: (index) {
                 ref.read(willAcceptDropProvider.notifier).clear();
               },
@@ -453,17 +458,20 @@ class _TabListView extends HookConsumerWidget {
                   return CustomDraggable(
                     key: Key(row.tabId),
                     data: TabDragData(row.tabId),
-                    child: TabContextMenuDraggable(
-                      tabId: row.tabId,
-                      feedbackSize: Size.zero,
-                      externalDrag: true,
-                      child: _TabDraggable(
+                    child: ReorderableHoldDragListener(
+                      index: index,
+                      child: TabContextMenuDraggable(
                         tabId: row.tabId,
-                        onClose: onClose,
-                        sourceSearchQuery: row.sourceSearchQuery,
-                        height: _itemHeight,
-                        groupToggle: _listGroupToggleFor(row),
-                        depth: _depthFor(row),
+                        feedbackSize: Size.zero,
+                        externalDrag: true,
+                        child: _TabDraggable(
+                          tabId: row.tabId,
+                          onClose: onClose,
+                          sourceSearchQuery: row.sourceSearchQuery,
+                          height: _itemHeight,
+                          groupToggle: _listGroupToggleFor(row),
+                          depth: _depthFor(row),
+                        ),
                       ),
                     ),
                   );

@@ -63,6 +63,7 @@ import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/scroll_to_active_chip.dart';
+import 'package:weblibre/presentation/widgets/reorderable_hold_drag.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -1225,7 +1226,9 @@ class QuickTabSwitcherView extends StatelessWidget {
       key: scrollKey,
       scrollController: scrollController,
       scrollDirection: axis,
-      buildDefaultDragHandles: true,
+      // Drag handles are supplied per item so the drag arms later than the
+      // long-press context menu (see [ReorderableHoldDragListener]).
+      buildDefaultDragHandles: false,
       scrollCacheExtent: const ScrollCacheExtent.pixels(500),
       itemCount: reorderableCount,
       itemBuilder: (context, index) {
@@ -1245,12 +1248,18 @@ class QuickTabSwitcherView extends StatelessWidget {
             : chip;
         return KeyedSubtree(
           key: ValueKey(item.id),
-          child: TabContextMenuDraggable(
-            tabId: item.id,
-            externalDrag: true,
-            enableCloseTab: true,
-            feedbackSize: Size.zero,
-            child: keyedForActive,
+          child: ReorderableHoldDragListener(
+            index: index,
+            // Placeholders aren't backed by a native session yet, so they
+            // can't be reordered.
+            enabled: !item.isPlaceholder,
+            child: TabContextMenuDraggable(
+              tabId: item.id,
+              externalDrag: true,
+              enableCloseTab: true,
+              feedbackSize: Size.zero,
+              child: keyedForActive,
+            ),
           ),
         );
       },

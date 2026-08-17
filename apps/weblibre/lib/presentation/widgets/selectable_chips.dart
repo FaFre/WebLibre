@@ -23,6 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/presentation/widgets/reorderable_hold_drag.dart';
 
 class _BadgeWrapper extends StatelessWidget {
   final Widget child;
@@ -49,10 +50,10 @@ class _GestureWrapper extends HookWidget {
 
   /// When true, long-press detection is done via a passive [Listener] so it
   /// doesn't claim the gesture from the surrounding
-  /// `ReorderableDelayedDragStartListener`. The callback fires only on pointer
-  /// release if the touch was held longer than [kLongPressTimeout] without
-  /// moving more than [kTouchSlop]. Any movement above slop arms the drag and
-  /// suppresses the callback.
+  /// [ReorderableHoldDragListener]. The callback fires only on pointer release
+  /// if the touch was held longer than [kItemLongPressDelay] without moving
+  /// more than [kTouchSlop]. Any movement above slop starts the reorder drag
+  /// instead and suppresses the callback.
   final bool reorderMode;
 
   const _GestureWrapper({
@@ -91,7 +92,7 @@ class _GestureWrapper extends HookWidget {
         final start = pressStart.value;
         pressStart.value = null;
         if (start == null || moved.value) return;
-        if (event.timeStamp - start >= kLongPressTimeout) {
+        if (event.timeStamp - start >= kItemLongPressDelay) {
           onLongPress!();
         }
       },
@@ -299,7 +300,7 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
         child: wrappedChild,
       );
       return onReorder != null
-          ? ReorderableDelayedDragStartListener(
+          ? ReorderableHoldDragListener(
               key: ValueKey('__selectable_chips_item_${itemId(item)}'),
               index: prefixCount + index,
               child: keyed,

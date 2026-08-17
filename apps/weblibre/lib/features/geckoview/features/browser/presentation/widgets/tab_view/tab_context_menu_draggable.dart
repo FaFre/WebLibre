@@ -26,6 +26,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/data/models/drag_data.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
+import 'package:weblibre/presentation/widgets/reorderable_hold_drag.dart';
 
 /// Chrome-like tab context menu + drag coordination.
 ///
@@ -34,7 +35,10 @@ import 'package:weblibre/presentation/hooks/menu_controller.dart';
 /// If user releases without moving: menu persists.
 ///
 /// For non-reorderable mode: wraps with [LongPressDraggable].
-/// For reorderable mode: uses manual long-press timer (drag handled externally).
+/// For reorderable mode: uses manual long-press timer (drag handled externally
+/// by [ReorderableHoldDragListener], which picks the item up after the same
+/// [kItemLongPressDelay] and starts moving it on the same finger movement that
+/// closes the menu here).
 class TabContextMenuDraggable extends HookConsumerWidget {
   final String tabId;
   final TabDragData? data;
@@ -73,6 +77,11 @@ class TabContextMenuDraggable extends HookConsumerWidget {
 
     // Clean up ValueNotifier
     useEffect(() => isDragMoving.dispose, [isDragMoving]);
+    useEffect(
+      () =>
+          () => longPressTimer.value?.cancel(),
+      const [],
+    );
 
     if (externalDrag) {
       return _buildReorderableMode(
@@ -191,38 +200,41 @@ class TabContextMenuDraggable extends HookConsumerWidget {
   }
 
   /// Reorderable mode: Listener + TabMenu (drag handled externally)
+  ///
+  /// The menu opens after [kItemLongPressDelay]; the same finger movement that
+  /// closes it again is what makes the enclosing [ReorderableHoldDragListener]
+  /// start the reorder drag.
   Widget _buildReorderableMode(
     BuildContext context, {
     required MenuController menuController,
     required ObjectRef<Offset> startPosition,
     required ObjectRef<Timer?> longPressTimer,
   }) {
+    void cancelTimer() {
+      longPressTimer.value?.cancel();
+      longPressTimer.value = null;
+    }
+
     return Listener(
       onPointerDown: (event) {
         startPosition.value = event.position;
-        longPressTimer.value?.cancel();
-        longPressTimer.value = Timer(kLongPressTimeout, () {
+        cancelTimer();
+        longPressTimer.value = Timer(kItemLongPressDelay, () {
+          longPressTimer.value = null;
           menuController.open();
         });
       },
       onPointerMove: (event) {
         if ((event.position - startPosition.value).distance > kTouchSlop) {
           // User started moving - cancel menu timer and close menu if open
-          longPressTimer.value?.cancel();
-          longPressTimer.value = null;
+          cancelTimer();
           if (menuController.isOpen) {
             menuController.close();
           }
         }
       },
-      onPointerUp: (_) {
-        longPressTimer.value?.cancel();
-        longPressTimer.value = null;
-      },
-      onPointerCancel: (_) {
-        longPressTimer.value?.cancel();
-        longPressTimer.value = null;
-      },
+      onPointerUp: (_) => cancelTimer(),
+      onPointerCancel: (_) => cancelTimer(),
       child: _buildTabMenu(
         menuController: menuController,
         builder: (context, controller, _) => child,
