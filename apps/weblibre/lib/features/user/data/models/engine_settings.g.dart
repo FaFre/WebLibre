@@ -6,6 +6,67 @@ part of 'engine_settings.dart';
 // CopyWithGenerator
 // **************************************************************************
 
+abstract class _$CustomDohProviderCWProxy {
+  CustomDohProvider url(String url);
+
+  CustomDohProvider name(String? name);
+
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `CustomDohProvider(...).copyWith.fieldName(value)`.
+  ///
+  /// Example:
+  /// ```dart
+  /// CustomDohProvider(...).copyWith(id: 12, name: "My name")
+  /// ```
+  CustomDohProvider call({String url, String? name});
+}
+
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfCustomDohProvider.copyWith(...)` or call `instanceOfCustomDohProvider.copyWith.fieldName(value)` for a single field.
+class _$CustomDohProviderCWProxyImpl implements _$CustomDohProviderCWProxy {
+  const _$CustomDohProviderCWProxyImpl(this._value);
+
+  final CustomDohProvider _value;
+
+  @override
+  CustomDohProvider url(String url) => call(url: url);
+
+  @override
+  CustomDohProvider name(String? name) => call(name: name);
+
+  @override
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `CustomDohProvider(...).copyWith.fieldName(value)`.
+  ///
+  /// Example:
+  /// ```dart
+  /// CustomDohProvider(...).copyWith(id: 12, name: "My name")
+  /// ```
+  CustomDohProvider call({
+    Object? url = const $CopyWithPlaceholder(),
+    Object? name = const $CopyWithPlaceholder(),
+  }) {
+    return CustomDohProvider(
+      url: url == const $CopyWithPlaceholder() || url == null
+          ? _value.url
+          // ignore: cast_nullable_to_non_nullable
+          : url as String,
+      name: name == const $CopyWithPlaceholder()
+          ? _value.name
+          // ignore: cast_nullable_to_non_nullable
+          : name as String?,
+    );
+  }
+}
+
+extension $CustomDohProviderCopyWith on CustomDohProvider {
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfCustomDohProvider.copyWith(...)` or `instanceOfCustomDohProvider.copyWith.fieldName(...)`.
+  // ignore: library_private_types_in_public_api
+  _$CustomDohProviderCWProxy get copyWith =>
+      _$CustomDohProviderCWProxyImpl(this);
+}
+
 abstract class _$EngineSettingsCWProxy {
   EngineSettings javascriptEnabled(bool? javascriptEnabled);
 
@@ -64,6 +125,8 @@ abstract class _$EngineSettingsCWProxy {
   EngineSettings dohDefaultProviderUrl(String dohDefaultProviderUrl);
 
   EngineSettings dohExceptionsList(List<String> dohExceptionsList);
+
+  EngineSettings customDohProviders(List<CustomDohProvider> customDohProviders);
 
   EngineSettings fingerprintingProtectionOverrides(
     String? fingerprintingProtectionOverrides,
@@ -169,6 +232,7 @@ abstract class _$EngineSettingsCWProxy {
     String dohProviderUrl,
     String dohDefaultProviderUrl,
     List<String> dohExceptionsList,
+    List<CustomDohProvider> customDohProviders,
     String? fingerprintingProtectionOverrides,
     bool enablePdfJs,
     bool safeBrowsingMalwareEnabled,
@@ -307,6 +371,11 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
   @override
   EngineSettings dohExceptionsList(List<String> dohExceptionsList) =>
       call(dohExceptionsList: dohExceptionsList);
+
+  @override
+  EngineSettings customDohProviders(
+    List<CustomDohProvider> customDohProviders,
+  ) => call(customDohProviders: customDohProviders);
 
   @override
   EngineSettings fingerprintingProtectionOverrides(
@@ -481,6 +550,7 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? dohProviderUrl = const $CopyWithPlaceholder(),
     Object? dohDefaultProviderUrl = const $CopyWithPlaceholder(),
     Object? dohExceptionsList = const $CopyWithPlaceholder(),
+    Object? customDohProviders = const $CopyWithPlaceholder(),
     Object? fingerprintingProtectionOverrides = const $CopyWithPlaceholder(),
     Object? enablePdfJs = const $CopyWithPlaceholder(),
     Object? safeBrowsingMalwareEnabled = const $CopyWithPlaceholder(),
@@ -622,6 +692,12 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.dohExceptionsList
           // ignore: cast_nullable_to_non_nullable
           : dohExceptionsList as List<String>,
+      customDohProviders:
+          customDohProviders == const $CopyWithPlaceholder() ||
+              customDohProviders == null
+          ? _value.customDohProviders
+          // ignore: cast_nullable_to_non_nullable
+          : customDohProviders as List<CustomDohProvider>,
       fingerprintingProtectionOverrides:
           fingerprintingProtectionOverrides == const $CopyWithPlaceholder()
           ? _value.fingerprintingProtectionOverrides
@@ -790,6 +866,15 @@ extension $EngineSettingsCopyWith on EngineSettings {
 // JsonSerializableGenerator
 // **************************************************************************
 
+CustomDohProvider _$CustomDohProviderFromJson(Map<String, dynamic> json) =>
+    CustomDohProvider(
+      url: json['url'] as String,
+      name: json['name'] as String?,
+    );
+
+Map<String, dynamic> _$CustomDohProviderToJson(CustomDohProvider instance) =>
+    <String, dynamic>{'url': instance.url, 'name': ?instance.name};
+
 EngineSettings _$EngineSettingsFromJson(
   Map<String, dynamic> json,
 ) => EngineSettings.withDefaults(
@@ -847,6 +932,9 @@ EngineSettings _$EngineSettingsFromJson(
   dohDefaultProviderUrl: json['dohDefaultProviderUrl'] as String?,
   dohExceptionsList: (json['dohExceptionsList'] as List<dynamic>?)
       ?.map((e) => e as String)
+      .toList(),
+  customDohProviders: (json['customDohProviders'] as List<dynamic>?)
+      ?.map((e) => CustomDohProvider.fromJson(e as Map<String, dynamic>))
       .toList(),
   fingerprintingProtectionOverrides:
       json['fingerprintingProtectionOverrides'] as String?,
@@ -969,6 +1057,9 @@ Map<String, dynamic> _$EngineSettingsToJson(
   'dohProviderUrl': instance.dohProviderUrl,
   'dohDefaultProviderUrl': instance.dohDefaultProviderUrl,
   'dohExceptionsList': instance.dohExceptionsList,
+  'customDohProviders': instance.customDohProviders
+      .map((e) => e.toJson())
+      .toList(),
   'enablePdfJs': instance.enablePdfJs,
   'safeBrowsingMalwareEnabled': instance.safeBrowsingMalwareEnabled,
   'safeBrowsingPhishingEnabled': instance.safeBrowsingPhishingEnabled,

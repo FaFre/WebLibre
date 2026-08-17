@@ -119,6 +119,9 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
       'dohExceptionsList': settings['dohExceptionsList']
           ?.readAs(DriftSqlType.string, db.typeMapping)
           .mapNotNull(jsonDecode),
+      'customDohProviders': settings['customDohProviders']
+          ?.readAs(DriftSqlType.string, db.typeMapping)
+          .mapNotNull(jsonDecode),
       'fingerprintingProtectionOverrides':
           settings['fingerprintingProtectionOverrides']?.readAs(
             DriftSqlType.string,

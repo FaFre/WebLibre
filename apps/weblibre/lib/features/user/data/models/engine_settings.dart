@@ -45,6 +45,62 @@ enum BuiltInDohProviders {
   const BuiltInDohProviders(this.name, this.url);
 }
 
+const kMaxCustomDohProviders = 16;
+
+/// A user-added DoH resolver. Rendered next to [BuiltInDohProviders] so that
+/// selecting one is a plain radio tap instead of a free-text field that has to
+/// be committed through the keyboard.
+@CopyWith()
+@JsonSerializable(includeIfNull: true)
+class CustomDohProvider with FastEquatable {
+  final String url;
+
+  @JsonKey(includeIfNull: false)
+  final String? name;
+
+  CustomDohProvider({required this.url, this.name});
+
+  /// Falls back to the host so an unnamed resolver still reads as a label.
+  String get displayName {
+    final trimmed = name?.trim();
+    if (trimmed != null && trimmed.isNotEmpty) {
+      return trimmed;
+    }
+
+    final host = Uri.tryParse(url)?.host;
+
+    return (host != null && host.isNotEmpty) ? host : url;
+  }
+
+  factory CustomDohProvider.fromJson(Map<String, dynamic> json) =>
+      _$CustomDohProviderFromJson(json);
+
+  Map<String, dynamic> toJson() => _$CustomDohProviderToJson(this);
+
+  /// Adopts a resolver that only exists as the selected [dohProviderUrl] into
+  /// the saved list. Before saved resolvers existed, a custom resolver lived
+  /// nowhere else — without this it would disappear the moment the user picked
+  /// a built-in provider instead.
+  ///
+  /// Runs on every deserialization, so the adopted entry is part of the model
+  /// before anything can read it, and reaches the database with the next
+  /// settings write. Covered end to end by `engine_settings_doh_test.dart`.
+  static List<CustomDohProvider> adoptSelected(
+    List<CustomDohProvider> providers,
+    String dohProviderUrl,
+  ) {
+    if (BuiltInDohProviders.isBuiltin(dohProviderUrl) ||
+        providers.any((provider) => provider.url == dohProviderUrl)) {
+      return providers;
+    }
+
+    return [...providers, CustomDohProvider(url: dohProviderUrl)];
+  }
+
+  @override
+  List<Object?> get hashParameters => [url, name];
+}
+
 @CopyWith()
 @JsonSerializable(includeIfNull: true, constructor: 'withDefaults')
 class EngineSettings extends GeckoEngineSettings with FastEquatable {
@@ -153,6 +209,8 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   final String dohDefaultProviderUrl;
   final List<String> dohExceptionsList;
 
+  final List<CustomDohProvider> customDohProviders;
+
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   DohSettings get dohSettings => DohSettings(
@@ -199,6 +257,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required this.dohProviderUrl,
     required this.dohDefaultProviderUrl,
     required this.dohExceptionsList,
+    required this.customDohProviders,
     required super.fingerprintingProtectionOverrides,
     required this.enablePdfJs,
     required this.safeBrowsingMalwareEnabled,
@@ -256,6 +315,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     String? dohProviderUrl,
     String? dohDefaultProviderUrl,
     List<String>? dohExceptionsList,
+    List<CustomDohProvider>? customDohProviders,
     String? fingerprintingProtectionOverrides,
     bool? enablePdfJs,
     bool? safeBrowsingMalwareEnabled,
@@ -301,6 +361,10 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
        dohDefaultProviderUrl =
            dohDefaultProviderUrl ?? BuiltInDohProviders.quad9.url,
        dohExceptionsList = dohExceptionsList ?? [],
+       customDohProviders = CustomDohProvider.adoptSelected(
+         customDohProviders ?? [],
+         dohProviderUrl ?? BuiltInDohProviders.quad9.url,
+       ),
        enablePdfJs = enablePdfJs ?? true,
        safeBrowsingMalwareEnabled = safeBrowsingMalwareEnabled ?? true,
        safeBrowsingPhishingEnabled = safeBrowsingPhishingEnabled ?? true,
@@ -411,6 +475,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     dohProviderUrl,
     dohDefaultProviderUrl,
     dohExceptionsList,
+    customDohProviders,
     fingerprintingProtectionOverrides,
     enablePdfJs,
     safeBrowsingMalwareEnabled,

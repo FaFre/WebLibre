@@ -28,8 +28,9 @@ const List<SettingsSectionDefinition> dohSettingsSections = [
     entries: [
       SettingsEntryDefinition(
         title: 'DNS over HTTPS',
-        subtitle: 'Protection level, provider choice, and custom resolver URL',
-        keywords: ['doh', 'resolver', 'dns provider'],
+        subtitle:
+            'Protection level, provider choice, and saved custom resolvers',
+        keywords: ['doh', 'resolver', 'dns provider', 'custom resolver'],
         child: DohSettingsContent(),
       ),
     ],
