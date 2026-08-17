@@ -782,7 +782,7 @@ class _CloseTabToolbarButton extends HookConsumerWidget {
             if (tabId == null) return;
             final descendants = await ref
                 .read(tabDataRepositoryProvider.notifier)
-                .getTabDescendants(tabId);
+                .getContainerTabDescendants(tabId);
             if (!context.mounted) return;
 
             final subtreeIds = descendants.keys.toList();

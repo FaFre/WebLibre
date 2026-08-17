@@ -92,9 +92,22 @@ Future<int> containerTabCount(Ref ref, ContainerFilter containerFilter) {
 }
 
 @Riverpod()
-Stream<List<TabTreesResult>> watchTabTrees(Ref ref) {
+Stream<List<TabTreesResult>> watchTabTrees(
+  Ref ref,
+  ContainerFilter containerFilter,
+) {
   final db = ref.watch(tabDatabaseProvider);
-  return db.definitionsDrift.tabTrees().watch();
+
+  return switch (containerFilter) {
+    ContainerFilterById(:final containerId) =>
+      db.definitionsDrift
+          .tabTrees(containerId: containerId, skipContainerCheck: false)
+          .watch(),
+    ContainerFilterDisabled() =>
+      db.definitionsDrift
+          .tabTrees(containerId: null, skipContainerCheck: true)
+          .watch(),
+  };
 }
 
 @Riverpod()

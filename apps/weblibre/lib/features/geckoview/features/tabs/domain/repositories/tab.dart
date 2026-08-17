@@ -89,6 +89,17 @@ class TabDataRepository extends _$TabDataRepository {
           .assignContainer(tabId, containerId: targetContainer.id);
     } else {
       if (tabState != null) {
+        // Resolved before the close, while the row is still around.
+        //
+        // A tab that survives the move is itself the opener of the replacement:
+        // the user navigated from it into a site that belongs elsewhere, so
+        // closing the replacement has to lead back to it — across the container
+        // boundary (#530). When the old tab goes away instead, the replacement
+        // takes over its place in the hierarchy.
+        final parentId = closeOldTab
+            ? (await getTabDataById(tabId))?.parentId
+            : tabId;
+
         if (closeOldTab) {
           await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
         }
@@ -101,7 +112,7 @@ class TabDataRepository extends _$TabDataRepository {
               containerSelection: TabContainerSelection.specific(
                 targetContainer,
               ),
-              // parentId defaults to null - breaks parent chain when changing contextual identity
+              parentId: parentId,
               selectTab: selectedTabId == tabState.id,
               // Assignment-driven navigation is classified in its assigned context
               // like any other load; the app-links fallback re-entry map (§2.7)
@@ -134,6 +145,10 @@ class TabDataRepository extends _$TabDataRepository {
           .assignContainer(tabId, containerId: null);
     } else {
       if (tabState != null) {
+        // The replacement stands in for the tab being retired, so it inherits
+        // its place in the hierarchy — read before the row disappears.
+        final parentId = (await getTabDataById(tabId))?.parentId;
+
         await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
 
         await ref
@@ -142,7 +157,7 @@ class TabDataRepository extends _$TabDataRepository {
               url: tabState.url,
               tabMode: tabState.tabMode,
               containerSelection: const TabContainerSelection.unassigned(),
-              // parentId defaults to null - breaks parent chain when removing contextual identity
+              parentId: parentId,
               selectTab: selectedTabId == tabState.id,
             );
       }
@@ -316,6 +331,23 @@ class TabDataRepository extends _$TabDataRepository {
         .read(tabDatabaseProvider)
         .definitionsDrift
         .unorderedTabDescendants(tabId: tabId)
+        .get();
+
+    return Map.fromEntries(
+      results.map((pair) => MapEntry(pair.id, pair.parentId)),
+    );
+  }
+
+  /// [getTabDescendants] stopped at the seed tab's container boundary.
+  ///
+  /// What the bulk-close actions operate on: they are offered from a
+  /// container-scoped view whose counts exclude a child that was reopened in
+  /// another container, so closing must exclude it too.
+  Future<Map<String, String?>> getContainerTabDescendants(String tabId) async {
+    final results = await ref
+        .read(tabDatabaseProvider)
+        .definitionsDrift
+        .unorderedContainerTabDescendants(tabId: tabId)
         .get();
 
     return Map.fromEntries(

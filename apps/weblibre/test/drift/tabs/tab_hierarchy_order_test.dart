@@ -52,6 +52,62 @@ void main() {
     ]);
   });
 
+  test('setTabParent leaves cross-container descendants in place', () async {
+    await _insertContainers(db, const [
+      _ContainerFixture('home', 'home-context'),
+      _ContainerFixture('work', 'work-context'),
+    ]);
+    await _insertTabs(db, const [
+      _TabFixture('parent', containerId: 'home'),
+      _TabFixture('moving', containerId: 'home'),
+      _TabFixture('moving-child', parentId: 'moving', containerId: 'home'),
+      _TabFixture('foreign-child', parentId: 'moving', containerId: 'work'),
+      _TabFixture('work-root', containerId: 'work'),
+    ]);
+    final foreignOrderKey = await _orderKeyOf(db, 'foreign-child');
+
+    final moved = await db.tabDao.setTabParent(
+      tabId: 'moving',
+      newParentId: 'parent',
+    );
+
+    expect(moved, isTrue);
+    expect(await _orderedTabIdsInContainer(db, 'home'), [
+      'parent',
+      'moving',
+      'moving-child',
+    ]);
+    final foreignChild = await db.tabDao
+        .getTabDataById('foreign-child')
+        .getSingleOrNull();
+    expect(foreignChild, isNotNull);
+    expect(foreignChild!.parentId, 'moving');
+    expect(foreignChild.containerId, 'work');
+    expect(foreignChild.orderKey, foreignOrderKey);
+  });
+
+  test('setTabParent detects cycles through another container', () async {
+    await _insertContainers(db, const [
+      _ContainerFixture('home', 'home-context'),
+      _ContainerFixture('work', 'work-context'),
+    ]);
+    await _insertTabs(db, const [
+      _TabFixture('moving', containerId: 'home'),
+      _TabFixture('foreign-child', parentId: 'moving', containerId: 'work'),
+    ]);
+
+    final moved = await db.tabDao.setTabParent(
+      tabId: 'moving',
+      newParentId: 'foreign-child',
+    );
+
+    expect(moved, isFalse);
+    final moving = await db.tabDao.getTabDataById('moving').getSingleOrNull();
+    expect(moving, isNotNull);
+    expect(moving!.parentId, isNull);
+    expect(moving.containerId, 'home');
+  });
+
   test(
     'promoteChildToParent demotes after the promoted child subtree',
     () async {
@@ -95,6 +151,43 @@ void main() {
         'first',
         'first-child',
       ]);
+    },
+  );
+
+  test(
+    'moveTabAmongSiblings uses the rendered cross-container root scope',
+    () async {
+      await _insertContainers(db, const [
+        _ContainerFixture('home', 'home-context'),
+        _ContainerFixture('work', 'work-context'),
+      ]);
+      await _insertTabs(db, const [
+        _TabFixture('opener', containerId: 'home'),
+        _TabFixture('work-first', containerId: 'work'),
+        _TabFixture('reopened', parentId: 'opener', containerId: 'work'),
+        _TabFixture(
+          'reopened-child',
+          parentId: 'reopened',
+          containerId: 'work',
+        ),
+        _TabFixture('work-last', containerId: 'work'),
+        _TabFixture('foreign-child', parentId: 'reopened', containerId: 'home'),
+      ]);
+      final foreignOrderKey = await _orderKeyOf(db, 'foreign-child');
+
+      final moved = await db.tabDao.moveTabAmongSiblings(
+        'reopened',
+        down: true,
+      );
+
+      expect(moved, isTrue);
+      expect(await _orderedTabIdsInContainer(db, 'work'), [
+        'work-first',
+        'work-last',
+        'reopened',
+        'reopened-child',
+      ]);
+      expect(await _orderKeyOf(db, 'foreign-child'), foreignOrderKey);
     },
   );
 
@@ -151,7 +244,7 @@ void main() {
     expect(tab.source, TabSource.addedEvent);
   });
 
-  test('engine parent seeding rejects cross-container parents', () async {
+  test('engine parent seeding keeps cross-container parents', () async {
     await _insertContainers(db, const [
       _ContainerFixture('parent-container', 'parent-context'),
       _ContainerFixture('child-container', 'child-context'),
@@ -176,10 +269,109 @@ void main() {
     );
 
     final child = await db.tabDao.getTabDataById('child').getSingleOrNull();
-    expect(seeded, isFalse);
+    expect(seeded, isTrue);
     expect(child, isNotNull);
-    expect(child!.parentId, isNull);
-    expect(child.source, TabSource.addedEvent);
+    expect(child!.parentId, 'gecko-parent');
+    expect(child.containerId, 'child-container');
+    expect(child.source, TabSource.manual);
+  });
+
+  test('content-state sync keeps cross-container parents', () async {
+    await _insertContainers(db, const [
+      _ContainerFixture('parent-container', 'parent-context'),
+      _ContainerFixture('child-container', 'child-context'),
+    ]);
+    await _insertTabs(db, const [
+      _TabFixture(
+        'gecko-parent',
+        source: TabSource.addedEvent,
+        containerId: 'parent-container',
+      ),
+      _TabFixture(
+        'child',
+        source: TabSource.addedEvent,
+        containerId: 'child-container',
+      ),
+    ]);
+
+    await db.tabDao.updateTabs(null, {
+      'child': _tabState(
+        'child',
+        parentId: 'gecko-parent',
+        contextId: 'child-context',
+      ),
+    });
+
+    final child = await db.tabDao.getTabDataById('child').getSingleOrNull();
+    expect(child, isNotNull);
+    expect(child!.parentId, 'gecko-parent');
+    expect(child.containerId, 'child-container');
+    expect(child.source, TabSource.manual);
+  });
+
+  test(
+    'a cross-container child is a local root in its own container view',
+    () async {
+      await _insertContainers(db, const [
+        _ContainerFixture('parent-container', 'parent-context'),
+        _ContainerFixture('child-container', 'child-context'),
+      ]);
+      await _insertTabs(db, const [
+        _TabFixture('opener', containerId: 'parent-container'),
+        _TabFixture(
+          'reopened',
+          parentId: 'opener',
+          containerId: 'child-container',
+        ),
+      ]);
+
+      final childContainerRows = await db.definitionsDrift
+          .tabsWithRootAndDepth(containerId: 'child-container')
+          .get();
+
+      expect(childContainerRows.map((row) => row.id), ['reopened']);
+      expect(childContainerRows.single.rootId, 'reopened');
+      expect(childContainerRows.single.depth, 0);
+
+      // The opener's own container keeps its tree — the tab that was pulled
+      // into another container neither joins it nor takes it over.
+      final openerTrees = await db.definitionsDrift
+          .tabTrees(containerId: 'parent-container', skipContainerCheck: false)
+          .get();
+
+      expect(openerTrees.map((tree) => tree.rootTabId), ['opener']);
+      expect(openerTrees.single.latestTabId, 'opener');
+      expect(openerTrees.single.totalTabs, 1);
+
+      final reopenedTrees = await db.definitionsDrift
+          .tabTrees(containerId: 'child-container', skipContainerCheck: false)
+          .get();
+
+      expect(reopenedTrees.map((tree) => tree.rootTabId), ['reopened']);
+      expect(reopenedTrees.single.totalTabs, 1);
+    },
+  );
+
+  test('unscoped tab trees still span every container', () async {
+    await _insertContainers(db, const [
+      _ContainerFixture('parent-container', 'parent-context'),
+      _ContainerFixture('child-container', 'child-context'),
+    ]);
+    await _insertTabs(db, const [
+      _TabFixture('opener', containerId: 'parent-container'),
+      _TabFixture(
+        'reopened',
+        parentId: 'opener',
+        containerId: 'child-container',
+      ),
+    ]);
+
+    final trees = await db.definitionsDrift
+        .tabTrees(containerId: null, skipContainerCheck: true)
+        .get();
+
+    expect(trees.map((tree) => tree.rootTabId).toSet(), {'opener'});
+    expect(trees.map((tree) => tree.totalTabs).toSet(), {2});
   });
 
   test(
@@ -428,6 +620,210 @@ void main() {
     expect(child, isNotNull);
     expect(child!.parentId, 'grandparent');
   });
+
+  test(
+    'deleting the throwaway tab of a container hand-off keeps the opener reachable',
+    () async {
+      await _insertContainers(db, const [
+        _ContainerFixture('parent-container', 'parent-context'),
+        _ContainerFixture('child-container', 'child-context'),
+      ]);
+      // The shape the site-assignment listener produces: a link is followed
+      // into a container-assigned site, the blocked tab is thrown away and the
+      // site is reopened in its own container.
+      await _insertTabs(db, const [
+        _TabFixture('opener', containerId: 'parent-container'),
+        _TabFixture(
+          'blocked',
+          parentId: 'opener',
+          containerId: 'parent-container',
+        ),
+        _TabFixture(
+          'reopened',
+          parentId: 'blocked',
+          containerId: 'child-container',
+        ),
+      ]);
+
+      await db.customStatement("DELETE FROM tab WHERE id = 'blocked'");
+
+      final reopened = await db.tabDao
+          .getTabDataById('reopened')
+          .getSingleOrNull();
+      expect(reopened, isNotNull);
+      expect(reopened!.parentId, 'opener');
+      expect(reopened.containerId, 'child-container');
+    },
+  );
+
+  test('subtree collection stops at the container boundary', () async {
+    await _insertContainers(db, const [
+      _ContainerFixture('parent-container', 'parent-context'),
+      _ContainerFixture('child-container', 'child-context'),
+    ]);
+    await _insertTabs(db, const [
+      _TabFixture('opener', containerId: 'parent-container'),
+      _TabFixture(
+        'local-child',
+        parentId: 'opener',
+        containerId: 'parent-container',
+      ),
+      _TabFixture(
+        'reopened',
+        parentId: 'opener',
+        containerId: 'child-container',
+      ),
+      _TabFixture(
+        'reopened-child',
+        parentId: 'reopened',
+        containerId: 'child-container',
+      ),
+    ]);
+
+    final scoped = await db.definitionsDrift
+        .unorderedContainerTabDescendants(tabId: 'opener')
+        .get();
+
+    expect(scoped.map((row) => row.id).toSet(), {'opener', 'local-child'});
+
+    // The seed's own container is what bounds the walk, so starting at the
+    // reopened tab still yields its whole subtree over there.
+    final scopedFromReopened = await db.definitionsDrift
+        .unorderedContainerTabDescendants(tabId: 'reopened')
+        .get();
+
+    expect(scopedFromReopened.map((row) => row.id).toSet(), {
+      'reopened',
+      'reopened-child',
+    });
+
+    // Cycle detection and the hierarchy pickers still see everything.
+    final unscoped = await db.definitionsDrift
+        .unorderedTabDescendants(tabId: 'opener')
+        .get();
+
+    expect(unscoped.map((row) => row.id).toSet(), {
+      'opener',
+      'local-child',
+      'reopened',
+      'reopened-child',
+    });
+  });
+
+  test(
+    'closing a parent leaves a cross-container child in its own order',
+    () async {
+      await _insertContainers(db, const [
+        _ContainerFixture('parent-container', 'parent-context'),
+        _ContainerFixture('child-container', 'child-context'),
+      ]);
+      await _insertTabs(db, const [
+        _TabFixture('closing', containerId: 'parent-container'),
+        _TabFixture(
+          'foreign-child',
+          parentId: 'closing',
+          containerId: 'child-container',
+        ),
+        _TabFixture('foreign-sibling', containerId: 'child-container'),
+      ]);
+
+      final orderKeyBefore = await _orderKeyOf(db, 'foreign-child');
+
+      await db.tabDao.preservePromotedChildOrderOnClose(const ['closing']);
+
+      // `order_key` only orders tabs within one container; re-slotting the
+      // child into the closing tab's list would drop a foreign rank into it.
+      expect(await _orderKeyOf(db, 'foreign-child'), orderKeyBefore);
+    },
+  );
+
+  test(
+    'closing a tab with an out-of-container parent hands its slot to its child',
+    () async {
+      await _insertContainers(db, const [
+        _ContainerFixture('home', 'home-context'),
+        _ContainerFixture('work', 'work-context'),
+      ]);
+      // `reopened` stores a parent in `home` but is drawn as a root of `work`,
+      // between the two plain roots — that rendered scope is the slot its
+      // promoted child has to inherit.
+      await _insertTabs(db, const [
+        _TabFixture('opener', containerId: 'home'),
+        _TabFixture('work-first', containerId: 'work'),
+        _TabFixture('reopened', parentId: 'opener', containerId: 'work'),
+        _TabFixture(
+          'reopened-child',
+          parentId: 'reopened',
+          containerId: 'work',
+        ),
+        _TabFixture('work-last', containerId: 'work'),
+      ]);
+
+      await db.tabDao.preservePromotedChildOrderOnClose(const ['reopened']);
+      await db.customStatement("DELETE FROM tab WHERE id = 'reopened'");
+
+      expect(await _orderedTabIdsInContainer(db, 'work'), [
+        'work-first',
+        'reopened-child',
+        'work-last',
+      ]);
+    },
+  );
+
+  test(
+    'a closing parent in another container does not swallow the local pass',
+    () async {
+      await _insertContainers(db, const [
+        _ContainerFixture('home', 'home-context'),
+        _ContainerFixture('work', 'work-context'),
+      ]);
+      // The child trails `work-last` in storage, so only an actual re-ranking
+      // pass over `work` can put it back into the slot `reopened` vacates.
+      await _insertTabs(db, const [
+        _TabFixture('opener', containerId: 'home'),
+        _TabFixture('work-first', containerId: 'work'),
+        _TabFixture('reopened', parentId: 'opener', containerId: 'work'),
+        _TabFixture('work-last', containerId: 'work'),
+        _TabFixture(
+          'reopened-child',
+          parentId: 'reopened',
+          containerId: 'work',
+        ),
+      ]);
+
+      // The opener closes too. Its pass only re-ranks `home`, so `reopened`
+      // still has to stand in for its own scope rather than be absorbed.
+      await db.tabDao.preservePromotedChildOrderOnClose(const [
+        'opener',
+        'reopened',
+      ]);
+      await db.customStatement(
+        "DELETE FROM tab WHERE id IN ('opener', 'reopened')",
+      );
+
+      expect(await _orderedTabIdsInContainer(db, 'work'), [
+        'work-first',
+        'reopened-child',
+        'work-last',
+      ]);
+    },
+  );
+}
+
+Future<String> _orderKeyOf(TabDatabase db, String tabId) async {
+  final tab = await db.tabDao.getTabDataById(tabId).getSingleOrNull();
+  return tab!.orderKey;
+}
+
+Future<List<String>> _orderedTabIdsInContainer(
+  TabDatabase db,
+  String containerId,
+) async {
+  final tabs = await db.containerDao.getContainerTabsData(containerId).get();
+
+  return (tabs.toList()..sort((a, b) => a.orderKey.compareTo(b.orderKey)))
+      .map((tab) => tab.id)
+      .toList();
 }
 
 Future<void> _insertTabs(TabDatabase db, List<_TabFixture> tabs) async {

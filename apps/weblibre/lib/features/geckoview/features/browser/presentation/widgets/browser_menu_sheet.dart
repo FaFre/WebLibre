@@ -379,7 +379,7 @@ class _NavigationRow extends HookConsumerWidget {
               onPressed: () async {
                 final descendants = await ref
                     .read(tabDataRepositoryProvider.notifier)
-                    .getTabDescendants(selectedTabId);
+                    .getContainerTabDescendants(selectedTabId);
                 if (!context.mounted) return;
 
                 final subtreeIds = descendants.keys.toList();

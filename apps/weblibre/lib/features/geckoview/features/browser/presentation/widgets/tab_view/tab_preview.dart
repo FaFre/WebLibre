@@ -866,7 +866,7 @@ class SingleGridTabPreview extends HookConsumerWidget {
         onCloseSubtree: () async {
           final subtreeIds = await ref
               .read(tabDataRepositoryProvider.notifier)
-              .getTabDescendants(tabId)
+              .getContainerTabDescendants(tabId)
               .then((descendants) => descendants.keys.toList());
           if (!context.mounted) return;
 
@@ -1031,7 +1031,7 @@ class SingleListTabPreview extends HookConsumerWidget {
         onCloseSubtree: () async {
           final subtreeIds = await ref
               .read(tabDataRepositoryProvider.notifier)
-              .getTabDescendants(tabId)
+              .getContainerTabDescendants(tabId)
               .then((descendants) => descendants.keys.toList());
           if (!context.mounted) return;
 

@@ -911,27 +911,45 @@ queryTabsFullContent WITH TabQueryResult:
       t.timestamp DESC
     LIMIT :limit;
 
-tabTrees:
+-- Trees rooted in the requested scope, used by the tree tab view. Pass
+-- :skip_container_check to build them across every container instead.
+--
+-- Scoped mode draws the same boundary as `tabsWithRootAndDepth`: a tab whose
+-- parent lives in another container starts a tree of its own. A parent may keep
+-- children elsewhere (a link followed into a container-assigned site keeps
+-- pointing at its opener), and without the boundary such a child would both
+-- inflate the opener's tree and — being the newer tab — take over as its
+-- `latest_tab_id`, hiding the opener's tree from its own container's view.
+tabTrees(REQUIRED :container_id AS TEXT OR NULL, :skip_container_check AS BOOL):
   WITH RECURSIVE descendants AS (
-    -- Base case: all root tabs (no parent)
-    SELECT 
-      id, 
-      parent_id, 
-      timestamp, 
-      id AS root_id
-    FROM tab 
-    WHERE parent_id IS NULL
+    -- Base case: every in-scope tab whose parent is not also in scope
+    SELECT
+      t.id,
+      t.parent_id,
+      t.timestamp,
+      t.id AS root_id
+    FROM tab t
+    WHERE (:skip_container_check OR t.container_id IS :container_id)
+      AND (
+        t.parent_id IS NULL
+        OR NOT EXISTS (
+          SELECT 1 FROM tab p
+          WHERE p.id = t.parent_id
+            AND (:skip_container_check OR p.container_id IS :container_id)
+        )
+      )
 
     UNION ALL
 
     -- Recursive case: find all descendants
-    SELECT 
-      t.id, 
-      t.parent_id, 
-      t.timestamp, 
+    SELECT
+      t.id,
+      t.parent_id,
+      t.timestamp,
       d.root_id
     FROM tab t
     JOIN descendants d ON t.parent_id = d.id
+    WHERE :skip_container_check OR t.container_id IS :container_id
 ),
 root_stats AS (
     -- Calculate stats for each root
@@ -1010,10 +1028,41 @@ lastSubtreeTabIdByOrderKey(
   )
   SELECT id FROM subtree ORDER BY order_key DESC LIMIT 1;
 
+-- The tabs that render as siblings of :parent_id inside :container_id, in
+-- storage order. Pass a null :parent_id for the container's root scope.
+--
+-- "Render as" is the point. A tab whose stored parent lives in another
+-- container is drawn as a local root by `tabsWithRootAndDepth`, so it competes
+-- for a slot among its own container's roots even though `parent_id` is set.
+-- Matching `parent_id` raw would file it under a scope nothing else belongs to
+-- and leave the root scope it is actually drawn in short of members — which is
+-- how `preservePromotedChildOrderOnClose` ends up with no anchors to rank
+-- promoted children against.
+containerScopeSiblings(
+  REQUIRED :container_id AS TEXT OR NULL,
+  REQUIRED :parent_id AS TEXT OR NULL
+):
+  SELECT t.id, t.order_key
+  FROM tab t
+  WHERE t.container_id IS :container_id
+    AND (
+      CASE
+        WHEN EXISTS (
+          SELECT 1 FROM tab p
+          WHERE p.id = t.parent_id AND p.container_id IS t.container_id
+        ) THEN t.parent_id
+        ELSE NULL
+      END
+    ) IS :parent_id
+  ORDER BY t.order_key ASC;
+
+-- Every descendant of :tab_id, wherever it lives. Cycle detection and the
+-- hierarchy pickers need the whole picture; anything that *closes* a subtree
+-- wants `unorderedContainerTabDescendants` instead.
 unorderedTabDescendants:
   WITH RECURSIVE descendants AS (
       SELECT id, parent_id
-      FROM tab 
+      FROM tab
       WHERE id = :tab_id
 
       UNION ALL
@@ -1022,6 +1071,26 @@ unorderedTabDescendants:
       SELECT t.id, t.parent_id
       FROM tab t
       JOIN descendants d ON t.parent_id = d.id
+  )
+  SELECT id, parent_id
+  FROM descendants;
+
+-- As `unorderedTabDescendants`, but the walk stops at the container the seed
+-- tab lives in. Bulk-close actions are offered from a container-scoped view and
+-- count what that view shows, so they must not reach into a tab that a site
+-- assignment moved to another container — that tab is a root of its own there.
+unorderedContainerTabDescendants:
+  WITH RECURSIVE descendants AS (
+      SELECT id, parent_id, container_id
+      FROM tab
+      WHERE id = :tab_id
+
+      UNION ALL
+
+      SELECT t.id, t.parent_id, t.container_id
+      FROM tab t
+      JOIN descendants d ON t.parent_id = d.id
+      WHERE t.container_id IS d.container_id
   )
   SELECT id, parent_id
   FROM descendants;

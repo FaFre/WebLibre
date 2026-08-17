@@ -6550,10 +6550,16 @@ class DefinitionsDrift extends i9.ModularAccessor {
     );
   }
 
-  i0.Selectable<TabTreesResult> tabTrees() {
+  i0.Selectable<TabTreesResult> tabTrees({
+    required bool skipContainerCheck,
+    required String? containerId,
+  }) {
     return customSelect(
-      'WITH RECURSIVE descendants AS (SELECT id, parent_id, timestamp, id AS root_id FROM tab WHERE parent_id IS NULL UNION ALL SELECT t.id, t.parent_id, t.timestamp, d.root_id FROM tab AS t JOIN descendants AS d ON t.parent_id = d.id), root_stats AS (SELECT root_id, MAX(timestamp) AS max_timestamp, COUNT(*) AS total_children FROM descendants GROUP BY root_id) SELECT d.root_id AS root_tab_id, d.id AS latest_tab_id, d.timestamp AS latest_timestamp, rs.total_children AS total_tabs FROM descendants AS d JOIN root_stats AS rs ON d.root_id = rs.root_id AND d.timestamp = rs.max_timestamp ORDER BY d.timestamp DESC',
-      variables: [],
+      'WITH RECURSIVE descendants AS (SELECT t.id, t.parent_id, t.timestamp, t.id AS root_id FROM tab AS t WHERE(?1 OR t.container_id IS ?2)AND(t.parent_id IS NULL OR NOT EXISTS (SELECT 1 AS _c0 FROM tab AS p WHERE p.id = t.parent_id AND(?1 OR p.container_id IS ?2)))UNION ALL SELECT t.id, t.parent_id, t.timestamp, d.root_id FROM tab AS t JOIN descendants AS d ON t.parent_id = d.id WHERE ?1 OR t.container_id IS ?2), root_stats AS (SELECT root_id, MAX(timestamp) AS max_timestamp, COUNT(*) AS total_children FROM descendants GROUP BY root_id) SELECT d.root_id AS root_tab_id, d.id AS latest_tab_id, d.timestamp AS latest_timestamp, rs.total_children AS total_tabs FROM descendants AS d JOIN root_stats AS rs ON d.root_id = rs.root_id AND d.timestamp = rs.max_timestamp ORDER BY d.timestamp DESC',
+      variables: [
+        i0.Variable<bool>(skipContainerCheck),
+        i0.Variable<String>(containerId),
+      ],
       readsFrom: {tab},
     ).map(
       (i0.QueryRow row) => TabTreesResult(
@@ -6594,6 +6600,25 @@ class DefinitionsDrift extends i9.ModularAccessor {
     ).map((i0.QueryRow row) => row.read<String>('id'));
   }
 
+  i0.Selectable<ContainerScopeSiblingsResult> containerScopeSiblings({
+    required String? containerId,
+    required String? parentId,
+  }) {
+    return customSelect(
+      'SELECT t.id, t.order_key FROM tab AS t WHERE t.container_id IS ?1 AND(CASE WHEN EXISTS (SELECT 1 AS _c0 FROM tab AS p WHERE p.id = t.parent_id AND p.container_id IS t.container_id) THEN t.parent_id ELSE NULL END)IS ?2 ORDER BY t.order_key ASC',
+      variables: [
+        i0.Variable<String>(containerId),
+        i0.Variable<String>(parentId),
+      ],
+      readsFrom: {tab},
+    ).map(
+      (i0.QueryRow row) => ContainerScopeSiblingsResult(
+        id: row.read<String>('id'),
+        orderKey: row.read<String>('order_key'),
+      ),
+    );
+  }
+
   i0.Selectable<UnorderedTabDescendantsResult> unorderedTabDescendants({
     required String tabId,
   }) {
@@ -6603,6 +6628,20 @@ class DefinitionsDrift extends i9.ModularAccessor {
       readsFrom: {tab},
     ).map(
       (i0.QueryRow row) => UnorderedTabDescendantsResult(
+        id: row.read<String>('id'),
+        parentId: row.readNullable<String>('parent_id'),
+      ),
+    );
+  }
+
+  i0.Selectable<UnorderedContainerTabDescendantsResult>
+  unorderedContainerTabDescendants({required String tabId}) {
+    return customSelect(
+      'WITH RECURSIVE descendants AS (SELECT id, parent_id, container_id FROM tab WHERE id = ?1 UNION ALL SELECT t.id, t.parent_id, t.container_id FROM tab AS t JOIN descendants AS d ON t.parent_id = d.id WHERE t.container_id IS d.container_id) SELECT id, parent_id FROM descendants',
+      variables: [i0.Variable<String>(tabId)],
+      readsFrom: {tab},
+    ).map(
+      (i0.QueryRow row) => UnorderedContainerTabDescendantsResult(
         id: row.read<String>('id'),
         parentId: row.readNullable<String>('parent_id'),
       ),
@@ -6826,10 +6865,22 @@ class TabsWithRootAndDepthResult {
   });
 }
 
+class ContainerScopeSiblingsResult {
+  final String id;
+  final String orderKey;
+  ContainerScopeSiblingsResult({required this.id, required this.orderKey});
+}
+
 class UnorderedTabDescendantsResult {
   final String id;
   final String? parentId;
   UnorderedTabDescendantsResult({required this.id, this.parentId});
+}
+
+class UnorderedContainerTabDescendantsResult {
+  final String id;
+  final String? parentId;
+  UnorderedContainerTabDescendantsResult({required this.id, this.parentId});
 }
 
 class ContainerIdsByContextualIdentitiesResult {

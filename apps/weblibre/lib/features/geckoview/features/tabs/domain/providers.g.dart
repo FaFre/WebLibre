@@ -330,7 +330,7 @@ final class ContainerTabCountFamily extends $Family
 }
 
 @ProviderFor(watchTabTrees)
-final watchTabTreesProvider = WatchTabTreesProvider._();
+final watchTabTreesProvider = WatchTabTreesFamily._();
 
 final class WatchTabTreesProvider
     extends
@@ -342,19 +342,26 @@ final class WatchTabTreesProvider
     with
         $FutureModifier<List<TabTreesResult>>,
         $StreamProvider<List<TabTreesResult>> {
-  WatchTabTreesProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'watchTabTreesProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  WatchTabTreesProvider._({
+    required WatchTabTreesFamily super.from,
+    required ContainerFilter super.argument,
+  }) : super(
+         retry: null,
+         name: r'watchTabTreesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
   @override
   String debugGetCreateSourceHash() => _$watchTabTreesHash();
+
+  @override
+  String toString() {
+    return r'watchTabTreesProvider'
+        ''
+        '($argument)';
+  }
 
   @$internal
   @override
@@ -364,11 +371,44 @@ final class WatchTabTreesProvider
 
   @override
   Stream<List<TabTreesResult>> create(Ref ref) {
-    return watchTabTrees(ref);
+    final argument = this.argument as ContainerFilter;
+    return watchTabTrees(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WatchTabTreesProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
   }
 }
 
-String _$watchTabTreesHash() => r'a2be591acb6818ea8675a12d90e6c4684a0448a8';
+String _$watchTabTreesHash() => r'7565b7c2d8e8128a0a49241200d64f2cf5ece0ca';
+
+final class WatchTabTreesFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          Stream<List<TabTreesResult>>,
+          ContainerFilter
+        > {
+  WatchTabTreesFamily._()
+    : super(
+        retry: null,
+        name: r'watchTabTreesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  WatchTabTreesProvider call(ContainerFilter containerFilter) =>
+      WatchTabTreesProvider._(argument: containerFilter, from: this);
+
+  @override
+  String toString() => r'watchTabTreesProvider';
+}
 
 @ProviderFor(watchTabsWithRootAndDepth)
 final watchTabsWithRootAndDepthProvider = WatchTabsWithRootAndDepthFamily._();

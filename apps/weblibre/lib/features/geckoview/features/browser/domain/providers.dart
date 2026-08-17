@@ -754,7 +754,7 @@ EquatableValue<List<TabEntity>> seamlessFilteredTabEntities(
   // Tree mode: no filtering/sorting, return as-is
   if (groupTrees && tabSearchResults == null) {
     final trees = ref.watch(
-      watchTabTreesProvider.select(
+      watchTabTreesProvider(containerFilter).select(
         (value) => EquatableValue(
           value.value?.map((tree) {
                 // Find the container ID for the latest tab

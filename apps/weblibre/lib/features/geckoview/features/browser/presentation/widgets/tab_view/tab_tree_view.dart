@@ -139,7 +139,7 @@ class _TabTreePreview extends HookConsumerWidget {
               onDelete: () async {
                 final tabs = await ref
                     .read(tabDataRepositoryProvider.notifier)
-                    .getTabDescendants(entity.rootId);
+                    .getContainerTabDescendants(entity.rootId);
                 if (!context.mounted) return;
 
                 if (!await confirmBulkTabCloseIfNeeded(
