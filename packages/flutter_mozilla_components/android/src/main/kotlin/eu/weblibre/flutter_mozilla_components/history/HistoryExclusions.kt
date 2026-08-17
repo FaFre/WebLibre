@@ -9,9 +9,7 @@ package eu.weblibre.flutter_mozilla_components.history
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import androidx.preference.PreferenceManager
-import eu.weblibre.flutter_mozilla_components.ActiveProfile
-import eu.weblibre.flutter_mozilla_components.ProfileContext
+import eu.weblibre.flutter_mozilla_components.ProfilePrefs
 import java.util.concurrent.ConcurrentHashMap
 
 private const val EXCLUDED_TAB_IDS_PREF = "browser.weblibre.excludedHistoryTabIds"
@@ -179,25 +177,15 @@ object HistoryExclusions {
 
     /**
      * Always the app-wide default preferences, whichever context a caller hands
-     * in. The snapshot is pushed from Dart before any [ProfileContext] exists, so
-     * the writer can only ever hold the raw application context — while callers on
-     * the profile-switch path naturally hold a [ProfileContext], which renames the
-     * underlying prefs file and would otherwise read a different store than the
-     * one written. The profile is carried by [profileKey] instead.
+     * in, and always keyed to the active profile — see [ProfilePrefs] for why
+     * both are load-bearing.
      */
-    private fun prefs(context: Context): SharedPreferences =
-        PreferenceManager.getDefaultSharedPreferences(
-            (context as? ProfileContext)?.rootApplicationContext ?: context.applicationContext,
-        )
+    private fun prefs(context: Context): SharedPreferences = ProfilePrefs.of(context)
 
     /**
      * Scope a pref key to the active profile, so a headless start under profile B
      * does not restore profile A's excluded ids.
      */
-    private fun profileKey(context: Context, base: String): String {
-        if (ActiveProfile.prefix == null) {
-            ActiveProfile.resolveFromDisk(context.applicationContext)
-        }
-        return ActiveProfile.prefix?.let { "$base.$it" } ?: base
-    }
+    private fun profileKey(context: Context, base: String): String =
+        ProfilePrefs.key(context, base)
 }

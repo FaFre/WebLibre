@@ -35,6 +35,7 @@ import eu.weblibre.flutter_mozilla_components.services.PrivateTabsNotificationSe
 import eu.weblibre.flutter_mozilla_components.addons.AddonPrefs
 import eu.weblibre.flutter_mozilla_components.api.GeckoViewportApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
+import eu.weblibre.flutter_mozilla_components.feature.ContainerProxyFeature
 import eu.weblibre.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
 import eu.weblibre.flutter_mozilla_components.feature.GeckoBookmarksExtensionBridge
 import eu.weblibre.flutter_mozilla_components.push.Push
@@ -383,6 +384,22 @@ object GlobalComponents {
                 previousPush.close()
             }
         }
+
+        // Restore this profile's last routing before the engine — and with it the
+        // proxy extension — exists. Unlike the exclusions above this is loaded on
+        // every setup, not only on a profile change: the extension blocks every
+        // request until it holds a snapshot, and on the headless paths (external
+        // mode, no Flutter engine) Dart is never there to push one. It only ever
+        // takes effect while nothing has been pushed, so a full start still runs
+        // on the live snapshot the moment Dart produces it.
+        //
+        // Only a full setup carries the Dart listener that reopens an assigned
+        // site in the container it belongs to, so only a full setup may be
+        // seeded with the assignments that cancel those navigations.
+        ContainerProxyFeature.loadPersisted(
+            applicationContext,
+            canReopenAssignedSites = mode == ComponentsMode.FULL,
+        )
 
         val newComponents = Components(
             applicationContext,

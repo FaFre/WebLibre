@@ -10,27 +10,45 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.json.JSONObject
 
 class ContainerProxyFeatureTest {
     private val sentMessages = mutableListOf<JSONObject>()
+    private val persisted = mutableListOf<Pair<JSONObject, String>>()
     private lateinit var originalSend: (JSONObject) -> Unit
+    private lateinit var originalPersist: (JSONObject, String) -> Unit
+    private lateinit var originalProfileKey: () -> String?
+
+    /** Stands in for the profile the snapshot store is bound to. */
+    @Volatile
+    private var profileKey: String? = "profile-a"
 
     @BeforeTest
     fun setUp() {
         originalSend = ContainerProxyFeature.sendToExtension
+        originalPersist = ContainerProxyFeature.persistSeed
+        originalProfileKey = ContainerProxyFeature.currentProfileKey
         sentMessages.clear()
+        persisted.clear()
+        profileKey = "profile-a"
 
         ContainerProxyFeature.sendToExtension = { message ->
             synchronized(sentMessages) { sentMessages.add(message) }
         }
+        ContainerProxyFeature.persistSeed = { snapshot, key ->
+            synchronized(persisted) { persisted.add(snapshot to key) }
+        }
+        ContainerProxyFeature.currentProfileKey = { profileKey }
     }
 
     @AfterTest
     fun tearDown() {
         ContainerProxyFeature.resetForTesting()
         ContainerProxyFeature.sendToExtension = originalSend
+        ContainerProxyFeature.persistSeed = originalPersist
+        ContainerProxyFeature.currentProfileKey = originalProfileKey
     }
 
     /**
@@ -223,12 +241,267 @@ class ContainerProxyFeatureTest {
         assertEquals(generationCount, generations.last())
     }
 
+    /**
+     * The headless paths — a Custom Tab or PWA cold start — never attach a
+     * Flutter engine, so nothing ever pushes. Without the seed the extension
+     * holds no snapshot for the life of that process and blocks every request in
+     * it, which is what made external links and PWAs unusable in #571.
+     */
+    @Test
+    fun theSeedIsInstalledWhenNothingEverPushes() {
+        ContainerProxyFeature.seedSnapshot = seed()
+
+        ContainerProxyFeature.onPortConnected()
+        awaitMessages(1)
+
+        val sent = messageAt(0)
+        assertEquals("applySnapshot", sent.getString("action"))
+        assertEquals(
+            "container",
+            sent.getJSONObject("args").getJSONObject("relations").getJSONArray("work")
+                .getString(0),
+            "the persisted routing must reach the extension",
+        )
+    }
+
+    /**
+     * A seed is last-known routing, not routing this process asked for. Counting
+     * it as installed would let the gates that wait for routing before opening a
+     * proxied tab proceed on it.
+     */
+    @Test
+    fun anInstalledSeedIsNotReportedAsRoutingReady() {
+        ContainerProxyFeature.seedSnapshot = seed()
+
+        ContainerProxyFeature.onPortConnected()
+        awaitMessages(1)
+        ContainerProxyFeature.onExtensionReply(reply(messageAt(0).getInt("id")))
+
+        assertNull(
+            ContainerProxyFeature.acknowledgedSnapshotGeneration(),
+            "a seed must not answer for a snapshot the app never pushed",
+        )
+    }
+
+    /** Whatever the app pushed wins over the seed, and the seed is not resent. */
+    @Test
+    fun theSeedIsSkippedOnceTheAppHasPushed() {
+        ContainerProxyFeature.seedSnapshot = seed()
+        ContainerProxyFeature.applySnapshot(snapshot(4), 4L, noopConsumer())
+        awaitMessages(1)
+
+        ContainerProxyFeature.onPortConnected()
+        awaitMessages(2)
+
+        assertEquals(
+            4L,
+            messageAt(1).getJSONObject("args").getLong("generation"),
+            "a connect after a push must replay the push, not the seed",
+        )
+    }
+
+    /**
+     * A proxy's address is only valid while its backend runs — sing-box binds a
+     * random port per run — so a remembered endpoint would point at a dead port
+     * or at whatever else has since taken it. Relations are kept: without a live
+     * endpoint the extension blocks them, which is the right answer for a
+     * process that has not started any proxy.
+     */
+    @Test
+    fun thePersistedSnapshotKeepsRelationsButDropsEndpoints() {
+        ContainerProxyFeature.applySnapshot(routedSnapshot(9), 9L, noopConsumer())
+        awaitMessages(1)
+
+        ContainerProxyFeature.onExtensionReply(reply(messageAt(0).getInt("id")))
+
+        val (stored, storedKey) = synchronized(persisted) { persisted.single() }
+        assertEquals("profile-a", storedKey, "it belongs to the profile that pushed it")
+        assertEquals(0, stored.getJSONArray("proxies").length(), "endpoints must not be persisted")
+        assertEquals(
+            0L,
+            stored.getLong("generation"),
+            "a generation means nothing across processes",
+        )
+        assertEquals(
+            "container",
+            stored.getJSONObject("relations").getJSONArray("work").getString(0),
+            "the relation that decides what to block must survive",
+        )
+    }
+
+    /**
+     * A seeded site assignment cancels the navigation it does not like, and the
+     * half of that feature which reopens the URL in the container it belongs to
+     * lives in Dart. The headless paths have no Dart, so an assignment seeded
+     * there is a navigation cancelled with nothing to carry it anywhere — a
+     * blank page the user cannot get past on a profile that has assignments but
+     * no proxies at all.
+     */
+    @Test
+    fun aSeedDropsWhatCancelsNavigationsWhereNothingCanReopenThem() {
+        ContainerProxyFeature.installPersistedRouting(
+            routedSnapshot(4),
+            profileChanged = false,
+            canReopenAssignedSites = false,
+        )
+
+        ContainerProxyFeature.onPortConnected()
+        awaitMessages(1)
+
+        val seeded = messageAt(0).getJSONObject("args")
+        assertEquals(
+            0,
+            seeded.getJSONObject("siteAssignments").length(),
+            "an assignment nothing can act on must not block the load",
+        )
+        assertEquals(
+            0,
+            seeded.getJSONObject("strictContexts").length(),
+            "a strict context nothing can act on must not block the load",
+        )
+        assertEquals(
+            "container",
+            seeded.getJSONObject("relations").getJSONArray("work").getString(0),
+            "the relation the seed exists for must survive",
+        )
+    }
+
+    /** Where Dart is there to reopen them, the assignment still holds. */
+    @Test
+    fun aSeedKeepsSiteAssignmentsWhereDartCanReopenThem() {
+        ContainerProxyFeature.installPersistedRouting(
+            routedSnapshot(4),
+            profileChanged = false,
+            canReopenAssignedSites = true,
+        )
+
+        ContainerProxyFeature.onPortConnected()
+        awaitMessages(1)
+
+        assertEquals(
+            "work",
+            messageAt(0).getJSONObject("args")
+                .getJSONObject("siteAssignments")
+                .getString("https://example.com"),
+            "the window before the first push must still enforce assignments",
+        )
+    }
+
+    /**
+     * Components are rebuilt for the incoming profile in the same process, so an
+     * acknowledgement for the outgoing profile's snapshot can still be in
+     * flight. Filing it would write profile A's routing under profile B's key,
+     * and B would come up on it on its next headless start.
+     */
+    @Test
+    fun aSnapshotIsNotPersistedUnderTheProfileThatReplacedIt() {
+        profileKey = "profile-a"
+        ContainerProxyFeature.applySnapshot(routedSnapshot(1), 1L, noopConsumer())
+        awaitMessages(1)
+
+        profileKey = "profile-b"
+        ContainerProxyFeature.onExtensionReply(reply(messageAt(0).getInt("id")))
+
+        assertTrue(
+            synchronized(persisted) { persisted.isEmpty() },
+            "the outgoing profile's routing must not become the incoming one's",
+        )
+        assertNull(
+            ContainerProxyFeature.acknowledgedSnapshotGeneration(),
+            "routing the incoming profile never pushed must not read as installed",
+        )
+    }
+
+    /**
+     * The same staleness on the live side: what the extension is put back on
+     * after a reconnect must be the incoming profile's routing, never the
+     * outgoing profile's — endpoints and all.
+     */
+    @Test
+    fun aProfileSwitchDropsTheOutgoingProfilesRouting() {
+        profileKey = "profile-a"
+        ContainerProxyFeature.applySnapshot(routedSnapshot(1), 1L, noopConsumer())
+        awaitMessages(1)
+        ContainerProxyFeature.onExtensionReply(reply(messageAt(0).getInt("id")))
+
+        profileKey = "profile-b"
+        ContainerProxyFeature.installPersistedRouting(seed(), profileChanged = true)
+
+        ContainerProxyFeature.onPortConnected()
+        awaitMessages(2)
+
+        assertEquals(
+            0L,
+            messageAt(1).getJSONObject("args").getLong("generation"),
+            "a reconnect after a switch must install the seed, not the old push",
+        )
+        assertEquals(
+            0,
+            messageAt(1).getJSONObject("args").getJSONArray("proxies").length(),
+            "the outgoing profile's endpoints must not be replayed",
+        )
+        assertNull(
+            ContainerProxyFeature.acknowledgedSnapshotGeneration(),
+            "the outgoing profile's acknowledgement must not answer for the new one",
+        )
+    }
+
+    /** Nothing is filed until the extension confirms it holds the routing. */
+    @Test
+    fun anUnacknowledgedSnapshotIsNotPersisted() {
+        ContainerProxyFeature.applySnapshot(routedSnapshot(1), 1L, noopConsumer())
+        awaitMessages(1)
+
+        assertTrue(
+            synchronized(persisted) { persisted.isEmpty() },
+            "a snapshot that never installed must not become the next start's routing",
+        )
+    }
+
     private fun snapshot(generation: Long): JSONObject {
         return JSONObject().apply {
             put("generation", generation)
             put("proxies", org.json.JSONArray())
             put("relations", JSONObject())
         }
+    }
+
+    /**
+     * A snapshot routing the `work` context through a live proxy endpoint, with
+     * `example.com` assigned to it and the context marked strict.
+     */
+    private fun routedSnapshot(generation: Long): JSONObject {
+        return JSONObject().apply {
+            put("generation", generation)
+            put(
+                "proxies",
+                org.json.JSONArray().put(
+                    JSONObject().apply {
+                        put("id", "container")
+                        put("type", "socks")
+                        put("host", "127.0.0.1")
+                        put("port", 41234)
+                    },
+                ),
+            )
+            put(
+                "relations",
+                JSONObject().put("work", org.json.JSONArray().put("container")),
+            )
+            put(
+                "siteAssignments",
+                JSONObject().put("https://example.com", "work"),
+            )
+            put(
+                "strictContexts",
+                JSONObject().put("work", org.json.JSONArray().put("https://example.com")),
+            )
+        }
+    }
+
+    /** What [routedSnapshot] looks like after a process restart. */
+    private fun seed(): JSONObject {
+        return routedSnapshot(0).apply { put("proxies", org.json.JSONArray()) }
     }
 
     private fun reply(requestId: Int): JSONObject {

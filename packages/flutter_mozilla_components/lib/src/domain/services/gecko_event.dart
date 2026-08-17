@@ -46,7 +46,22 @@ class GeckoEventService extends GeckoStateEvents {
   // final _scrollEventSubject = PublishSubject<ScrollEvent>();
   final _prefUpdateSubject = PublishSubject<GeckoPref>();
   final _siteAssignementSubject = PublishSubject<ContainerSiteAssignment>();
-  final _proxyLoadErrorSubject = PublishSubject<ProxyLoadError>();
+
+  /// Proxy load errors that fired before anything was listening, newest per tab.
+  ///
+  /// A cold start is when these are most likely — the proxy extension blocks
+  /// every request until routing is installed — and it is also the one moment
+  /// where the browser screen has not subscribed yet, so a plain
+  /// [PublishSubject] drops exactly the errors the recovery exists to handle.
+  /// Only held until the first subscriber arrives: after that a dropped event
+  /// means nobody is displaying tabs, and an error resurfacing later would
+  /// reload a page that has long since loaded fine.
+  final _bufferedProxyLoadErrors = <String?, (int, ProxyLoadError)>{};
+  var _proxyLoadErrorsObserved = false;
+
+  late final _proxyLoadErrorSubject = PublishSubject<ProxyLoadError>(
+    onListen: _flushProxyLoadErrors,
+  );
 
   final _tabAddedSubject = PublishSubject<String>();
   final _mlProgressSubject = PublishSubject<MlProgressData>();
@@ -221,7 +236,44 @@ class GeckoEventService extends GeckoStateEvents {
 
   @override
   void onProxyLoadError(int sequence, ProxyLoadError details) {
+    if (!_proxyLoadErrorsObserved) {
+      // Same ordering rule the subject itself applies: these arrive over a
+      // platform channel that does not promise delivery order, which is what
+      // the sequence exists for. Overwriting blindly would let a late-delivered
+      // older error be the one replayed.
+      final buffered = _bufferedProxyLoadErrors[details.tabId];
+      if (buffered != null && buffered.$1 >= sequence) return;
+
+      _bufferedProxyLoadErrors[details.tabId] = (sequence, details);
+      return;
+    }
+
     _proxyLoadErrorSubject.addWhenMoreRecent(sequence, details.tabId, details);
+  }
+
+  /// Hands the first subscriber whatever it missed.
+  ///
+  /// Replayed through [SubjectAddRecent.addWhenMoreRecent] like any other event,
+  /// so a buffered error a newer one has already superseded stays dropped. The
+  /// delivery itself is deferred: this runs from inside `listen()`, before the
+  /// subscription it belongs to exists.
+  void _flushProxyLoadErrors() {
+    _proxyLoadErrorsObserved = true;
+    if (_bufferedProxyLoadErrors.isEmpty) return;
+
+    final buffered = _bufferedProxyLoadErrors.values.toList();
+    _bufferedProxyLoadErrors.clear();
+
+    scheduleMicrotask(() {
+      for (final (sequence, details) in buffered) {
+        if (_proxyLoadErrorSubject.isClosed) return;
+        _proxyLoadErrorSubject.addWhenMoreRecent(
+          sequence,
+          details.tabId,
+          details,
+        );
+      }
+    });
   }
 
   @override

@@ -6,6 +6,7 @@
 
 package eu.weblibre.flutter_mozilla_components.feature
 
+import android.content.Context
 import androidx.annotation.VisibleForTesting
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
@@ -27,6 +28,7 @@ import mozilla.components.concept.engine.webextension.WebExtensionRuntime
 import mozilla.components.support.base.log.logger.Logger
 import mozilla.components.support.ktx.android.org.json.tryGetString
 import mozilla.components.support.webextensions.BuiltInWebExtensionController
+import org.json.JSONArray
 import org.json.JSONObject
 import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
 
@@ -103,7 +105,168 @@ object ContainerProxyFeature {
     @Volatile
     private var acknowledged: Acknowledgement? = null
 
+    /**
+     * The routing this profile had last time it ran, restored by [loadPersisted].
+     *
+     * Only ever used before [lastSnapshot] exists, i.e. before anything in this
+     * process has pushed. It is what keeps the headless paths usable: a Custom
+     * Tab or PWA cold start never attaches a Flutter engine, so without it the
+     * extension would hold no snapshot for the whole life of the process and
+     * block every request in it.
+     */
+    @Volatile
+    @VisibleForTesting
+    internal var seedSnapshot: JSONObject? = null
+
+    /**
+     * The profile [lastSnapshot] was pushed for, as [RoutingSnapshotStore]
+     * identifies profiles.
+     *
+     * Everything else here is process-global while a profile is not: components
+     * are rebuilt for the incoming profile in the same process, and an
+     * acknowledgement for the outgoing profile's snapshot can still be in flight
+     * when they are. Persisting that would file profile A's routing as profile
+     * B's, and B would come up on it on its next headless start.
+     *
+     * Stamped at the push rather than carried in it, which is only sound
+     * because a push cannot straddle a rebind: [applySnapshot] and
+     * [RoutingSnapshotStore.bind] both run on the platform thread — the first
+     * from its Pigeon handler, the second under `GlobalComponents.setUp`, which
+     * has one of its own — and [applySnapshot] blocks that thread until it has
+     * stamped. Were a push ever stamped from another thread it could be one
+     * Dart computed for the outgoing profile, and nothing here could tell:
+     * saying whose routing a snapshot *is* would take a profile tag in the push
+     * itself.
+     */
+    @Volatile
+    private var lastSnapshotProfileKey: String? = null
+
+    /**
+     * Where an acknowledged snapshot is filed for the next process. Replaceable
+     * so tests can observe it without a [Context].
+     */
+    @VisibleForTesting
+    internal var persistSeed: (JSONObject, String) -> Unit = { snapshot, profileKey ->
+        RoutingSnapshotStore.write(snapshot, profileKey)
+    }
+
+    /**
+     * Which profile is current, i.e. the one a snapshot acknowledged now would
+     * be filed under. Replaceable for the same reason as [persistSeed].
+     */
+    @VisibleForTesting
+    internal var currentProfileKey: () -> String? = { RoutingSnapshotStore.currentKey() }
+
     fun acknowledgedSnapshotGeneration(): Long? = acknowledged?.generation
+
+    /**
+     * Restores this profile's last routing, so the extension can be seeded
+     * before — or without — anything pushing to it.
+     *
+     * Called while components are created, which is early enough: the extension
+     * is installed with the engine, and nothing it filters exists before that.
+     *
+     * [canReopenAssignedSites] says whether this process has the Dart half of
+     * container site assignments — see [installPersistedRouting].
+     */
+    fun loadPersisted(context: Context, canReopenAssignedSites: Boolean) {
+        val profileChanged = RoutingSnapshotStore.bind(context)
+        installPersistedRouting(
+            RoutingSnapshotStore.read(),
+            profileChanged,
+            canReopenAssignedSites,
+        )
+    }
+
+    /**
+     * Takes [seed] as the routing to fall back on, dropping what the outgoing
+     * profile left behind when [profileChanged].
+     *
+     * The drop is what stops a port reconnect from replaying profile A's
+     * routing — endpoints and all — into profile B. It deliberately does not
+     * take [mutex]: this runs on the main thread while components are built, and
+     * blocking it on a lock other threads hold while posting to the extension is
+     * how a startup deadlocks. Unlocked is sound here because every interleaving
+     * a concurrent replay can see is answered:
+     *
+     *  - generation cleared first, so an acknowledgement for the outgoing
+     *    profile no longer matches and is ignored — including for persistence;
+     *  - a replay that samples a half-cleared pair finds no generation and sends
+     *    the seed, which is the incoming profile's own routing;
+     *  - a replay that samples both before the drop replays what the extension
+     *    already holds, which is where the switch found it.
+     *
+     * Site assignments are kept out of the seed unless
+     * [canReopenAssignedSites]. They are the one part of a snapshot the
+     * extension enforces by *cancelling* a navigation, and it does so without
+     * consulting `store.isReady()` — so a seed carrying them blocks loads from
+     * the first request. Cancelling is only half of that feature; the other
+     * half is Dart reopening the URL in the container it belongs to, off
+     * `onContainerSiteAssignment`. Where that half is missing — the headless
+     * paths, which run `ensureExternalComponents` with a `NoopBinaryMessenger`
+     * — the cancel is a navigation with nothing left to carry it anywhere, i.e.
+     * a blank page the user cannot get past on a profile that has assignments
+     * but no proxies at all. A process that does have Dart keeps enforcing
+     * them, so the assignment still holds through the window before the first
+     * push.
+     */
+    @VisibleForTesting
+    internal fun installPersistedRouting(
+        seed: JSONObject?,
+        profileChanged: Boolean,
+        canReopenAssignedSites: Boolean = true,
+    ) {
+        if (profileChanged) {
+            lastSnapshotGeneration = null
+            lastSnapshot = null
+            lastSnapshotProfileKey = null
+            acknowledged = null
+        }
+
+        seedSnapshot = seed?.let {
+            if (canReopenAssignedSites) it else withoutSiteAssignments(it)
+        }
+    }
+
+    /**
+     * [snapshot] with everything the extension answers by cancelling a
+     * navigation taken out, leaving only what it answers by choosing a proxy or
+     * blocking a connection.
+     */
+    private fun withoutSiteAssignments(snapshot: JSONObject): JSONObject {
+        return JSONObject(snapshot.toString()).apply {
+            put("siteAssignments", JSONObject())
+            put("strictContexts", JSONObject())
+        }
+    }
+
+    /**
+     * The form of [snapshot] that is safe to restore in a later process.
+     *
+     * Endpoints are dropped rather than persisted. A proxy's address is only
+     * valid while its backend is running — sing-box binds a random port per run
+     * — so a remembered endpoint would either be dead or, worse, be whatever
+     * else has since taken that loopback port. Without endpoints the relations
+     * still say which contexts must not connect directly, and the extension
+     * blocks those (a relation whose proxies do not resolve is a block, not a
+     * fallback), while contexts that route directly work from the first request.
+     * That is the whole point: fail closed exactly where the profile asked for a
+     * proxy, and nowhere else.
+     *
+     * Site assignments are kept: a process that can act on them enforces them
+     * from its first request, and one that cannot drops them when it installs
+     * the seed rather than when it files it (see [installPersistedRouting]).
+     *
+     * The generation is zeroed because it means nothing across processes — Dart
+     * starts counting from zero again — and a seed is never acknowledged as an
+     * installed generation anyway.
+     */
+    private fun toSeed(snapshot: JSONObject): JSONObject {
+        return JSONObject(snapshot.toString()).apply {
+            put("proxies", JSONArray())
+            put("generation", 0)
+        }
+    }
 
     private val components by lazy {
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
@@ -234,7 +397,39 @@ object ContainerProxyFeature {
             return
         }
 
+        val profileKey = lastSnapshotProfileKey
+        if (currentProfileKey() != profileKey) {
+            // The profile was switched while this was in flight. Recording it
+            // would report the incoming profile's routing as installed when what
+            // the extension holds is the outgoing profile's, and filing it would
+            // write that routing under the incoming profile's key — which is
+            // what it would then come up on.
+            logger.debug(
+                "Ignoring acknowledgement for a snapshot pushed under another profile"
+            )
+            return
+        }
+
         acknowledged = Acknowledgement(generation, epoch)
+
+        // No profile is bound yet, so there is nowhere this could be filed that
+        // some profile would not later restore as its own.
+        if (profileKey == null) return
+
+        // Filed only once the extension confirms it, so what a later process
+        // restores is routing that was actually in force and not one that failed
+        // to install. Filed under the key this snapshot was pushed for, not the
+        // one bound now — a switch can land between the check above and the
+        // write, and [RoutingSnapshotStore.write] cannot re-derive it.
+        lastSnapshot?.let { snapshot ->
+            try {
+                persistSeed(toSeed(snapshot), profileKey)
+            } catch (e: Exception) {
+                // Losing the seed costs the next headless start its routing; it
+                // must not cost this one its acknowledgement.
+                logger.error("Failed to persist routing snapshot", e)
+            }
+        }
     }
 
     /**
@@ -259,6 +454,9 @@ object ContainerProxyFeature {
                 mutex.withLock {
                     lastSnapshot = snapshot
                     lastSnapshotGeneration = generation
+                    // Stamped with the push, so an acknowledgement that arrives
+                    // after a profile switch can tell whose routing it confirms.
+                    lastSnapshotProfileKey = currentProfileKey()
                     // The extension drops its store when it restarts, so nothing
                     // is acknowledged again until it answers this push.
                     acknowledged = null
@@ -286,7 +484,9 @@ object ContainerProxyFeature {
     }
 
     /**
-     * Reinstalls the cached snapshot after the extension's port (re)connects.
+     * Puts routing back on the extension after its port (re)connects: the
+     * snapshot this process pushed if there is one, the persisted seed if there
+     * is not.
      *
      * Reads the cache under the same lock that installs it, so what it sends is
      * by construction the newest snapshot — a replay racing an app-driven push
@@ -308,8 +508,15 @@ object ContainerProxyFeature {
                     return@withLock
                 }
 
-                val snapshot = lastSnapshot ?: return@withLock
-                val generation = lastSnapshotGeneration ?: return@withLock
+                val snapshot = lastSnapshot
+                val generation = lastSnapshotGeneration
+                if (snapshot == null || generation == null) {
+                    // Nothing pushed in this process yet. On the headless paths
+                    // nothing ever will be, so this is the only routing the
+                    // extension is going to get.
+                    sendSeedLocked()
+                    return@withLock
+                }
 
                 logger.debug("Replaying routing snapshot generation $generation")
                 acknowledged = null
@@ -335,6 +542,41 @@ object ContainerProxyFeature {
                 )
             }
         }
+    }
+
+    /**
+     * Installs the persisted routing, assuming [mutex] is already held.
+     *
+     * Deliberately does not touch [lastSnapshot], [lastSnapshotGeneration] or
+     * [acknowledged]: a seed is last-known routing, not routing this process
+     * asked for. Leaving it out of that bookkeeping is what keeps
+     * `routingStatus()` answering "not installed" until Dart really has pushed —
+     * so the gates that wait for routing before opening a proxied tab still wait
+     * — and what lets the first real push replace it unconditionally.
+     */
+    private fun sendSeedLocked() {
+        val seed = seedSnapshot ?: return
+
+        logger.debug("Seeding routing from the persisted snapshot")
+
+        sendRequestWithResponseLocked(
+            snapshotMessage(seed),
+            object : ResultConsumer<JSONObject> {
+                override fun success(result: JSONObject) {
+                    logger.debug("Extension applied the persisted routing seed")
+                }
+
+                override fun error(
+                    errorCode: String,
+                    errorMessage: String?,
+                    errorDetails: Any?
+                ) {
+                    logger.error(
+                        "Failed to seed routing snapshot: $errorCode $errorMessage"
+                    )
+                }
+            },
+        )
     }
 
     /**
@@ -438,7 +680,9 @@ object ContainerProxyFeature {
                 nextRequestId = 0
                 lastSnapshot = null
                 lastSnapshotGeneration = null
+                lastSnapshotProfileKey = null
                 acknowledged = null
+                seedSnapshot = null
                 connectionEpoch.set(0)
                 requestTimeoutMs = 60_000L
             }

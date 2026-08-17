@@ -65,6 +65,7 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/sea
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
+import 'package:weblibre/features/proxy/domain/repositories/container_proxy.dart';
 import 'package:weblibre/features/proxy/domain/services/container_routing_snapshot.dart';
 import 'package:weblibre/features/proxy/domain/services/tab_routing.dart';
 import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
@@ -945,14 +946,76 @@ class BrowserScreen extends HookConsumerWidget {
       final promptKey = '$tabId:${url ?? errorType}';
       if (!activeProxyPromptKeys.value.add(promptKey)) return;
 
+      // Set once this tab starts a load of its own while the waits below run.
+      // The unattended reload is only ever meant to get a tab past the load
+      // that failed in the routing-install window; a tab that has started
+      // loading again since — because the user retried, or because the engine
+      // did — is no longer sitting on that failure, and reloading it would
+      // throw away the page and the scroll position they now have.
+      var tabReloadedMeanwhile = false;
+      final tabLoadSubscription = ref.listenManual(
+        tabStateProvider(tabId).select((state) => state?.isLoading ?? false),
+        (previous, isLoading) {
+          if (isLoading) tabReloadedMeanwhile = true;
+        },
+      );
+
       try {
+        Future<void> reloadTab() async {
+          if (!context.mounted || ref.read(selectedTabProvider) != tabId) {
+            return;
+          }
+          await ref.read(tabSessionProvider(tabId: tabId).notifier).reload();
+        }
+
+        // The extension blocks *every* request until routing is installed, so a
+        // load that lands in that window fails this way whether or not the tab
+        // routes through a proxy at all — which is what a cold start, and the
+        // first navigation of one, most often is. Wait the install out and
+        // reload, instead of leaving a page the user has to retry by hand.
+        final containerProxy = ref.read(
+          containerProxyRepositoryProvider.notifier,
+        );
+        final routingWasPending = !await containerProxy.isRoutingReady();
+        // Every read past this point goes through `ref`, which throws once the
+        // screen is gone — and the throw is swallowed by the catch below, so
+        // the recovery would be lost silently rather than loudly.
+        if (!context.mounted) return;
+
+        if (routingWasPending) {
+          final routingReady = await containerProxy.waitUntilRoutingReady();
+          // Routing that never arrives is a broken browser, not a proxy that
+          // needs starting: there is no snapshot to say what this tab needs, so
+          // the error page stands and the repair loop keeps retrying behind it.
+          if (!routingReady || !context.mounted) return;
+        }
+
         final proxyConnectionId = _proxyConnectionIdForLoadError(
           ref,
           tabId: tabId,
           contextId: contextId,
         );
 
-        if (!context.mounted || proxyConnectionId == null) return;
+        if (proxyConnectionId == null) {
+          // Nothing to start — this context connects directly, so the block was
+          // the install window itself and it is over.
+          if (routingWasPending && !tabReloadedMeanwhile) await reloadTab();
+          return;
+        }
+
+        // Starting a proxy asks the user about *a tab*, and the wait above can
+        // run for seconds. If they have moved on since, hand the error back to
+        // the queue that defers it until this tab is on screen again — the same
+        // route an error for an unselected tab takes in the first place —
+        // instead of prompting over whatever they are looking at now.
+        if (ref.read(selectedTabProvider) != tabId) {
+          pendingProxyLoadErrors.value[tabId] = (
+            contextId: contextId,
+            errorType: errorType,
+            url: url,
+          );
+          return;
+        }
 
         final isProxyStarted = await ensureProxyStartedForConnection(
           context,
@@ -960,10 +1023,8 @@ class BrowserScreen extends HookConsumerWidget {
           proxyConnectionId,
         );
 
-        if (isProxyStarted &&
-            context.mounted &&
-            ref.read(selectedTabProvider) == tabId) {
-          await ref.read(tabSessionProvider(tabId: tabId).notifier).reload();
+        if (isProxyStarted) {
+          await reloadTab();
         }
       } catch (error, stackTrace) {
         logger.e(
@@ -972,6 +1033,7 @@ class BrowserScreen extends HookConsumerWidget {
           stackTrace: stackTrace,
         );
       } finally {
+        tabLoadSubscription.close();
         activeProxyPromptKeys.value.remove(promptKey);
       }
     }
