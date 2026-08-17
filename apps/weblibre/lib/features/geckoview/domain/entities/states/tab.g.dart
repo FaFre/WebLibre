@@ -94,7 +94,6 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
   TabState readerableState(ReaderableState readerableState) =>
       call(readerableState: readerableState);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TabState(...).copyWith.fieldName(value)`.
   ///
@@ -102,6 +101,7 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
   /// ```dart
   /// TabState(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   TabState call({
     Object? parentId = const $CopyWithPlaceholder(),
     Object? contextId = const $CopyWithPlaceholder(),

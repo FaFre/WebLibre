@@ -44,7 +44,6 @@ class _$BrowserViewportToolbarInsetsStateCWProxyImpl
     int verticalClippingPx,
   ) => call(verticalClippingPx: verticalClippingPx);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `BrowserViewportToolbarInsetsState(...).copyWith.fieldName(value)`.
   ///
@@ -52,6 +51,7 @@ class _$BrowserViewportToolbarInsetsStateCWProxyImpl
   /// ```dart
   /// BrowserViewportToolbarInsetsState(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   BrowserViewportToolbarInsetsState call({
     Object? dynamicToolbarMaxHeightPx = const $CopyWithPlaceholder(),
     Object? verticalClippingPx = const $CopyWithPlaceholder(),

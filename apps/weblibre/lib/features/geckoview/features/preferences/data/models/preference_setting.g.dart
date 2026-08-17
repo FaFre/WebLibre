@@ -40,7 +40,6 @@ class _$PreferenceSettingGroupCWProxyImpl
   PreferenceSettingGroup settings(Map<String, PreferenceSetting> settings) =>
       call(settings: settings);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `PreferenceSettingGroup(...).copyWith.fieldName(value)`.
   ///
@@ -48,6 +47,7 @@ class _$PreferenceSettingGroupCWProxyImpl
   /// ```dart
   /// PreferenceSettingGroup(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   PreferenceSettingGroup call({
     Object? description = const $CopyWithPlaceholder(),
     Object? settings = const $CopyWithPlaceholder(),
@@ -137,7 +137,6 @@ class _$PreferenceSettingCWProxyImpl implements _$PreferenceSettingCWProxy {
   PreferenceSetting enforceOnStartup(bool enforceOnStartup) =>
       call(enforceOnStartup: enforceOnStartup);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `PreferenceSetting(...).copyWith.fieldName(value)`.
   ///
@@ -145,6 +144,7 @@ class _$PreferenceSettingCWProxyImpl implements _$PreferenceSettingCWProxy {
   /// ```dart
   /// PreferenceSetting(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   PreferenceSetting call({
     Object? value = const $CopyWithPlaceholder(),
     Object? title = const $CopyWithPlaceholder(),

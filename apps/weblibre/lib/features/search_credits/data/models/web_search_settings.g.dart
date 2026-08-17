@@ -65,7 +65,6 @@ class _$WebSearchSettingsCWProxyImpl implements _$WebSearchSettingsCWProxy {
   WebSearchSettings timeRange(TimeRange? timeRange) =>
       call(timeRange: timeRange);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `WebSearchSettings(...).copyWith.fieldName(value)`.
   ///
@@ -73,6 +72,7 @@ class _$WebSearchSettingsCWProxyImpl implements _$WebSearchSettingsCWProxy {
   /// ```dart
   /// WebSearchSettings(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   WebSearchSettings call({
     Object? routeThroughTor = const $CopyWithPlaceholder(),
     Object? searchMode = const $CopyWithPlaceholder(),

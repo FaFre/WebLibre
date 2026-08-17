@@ -44,7 +44,6 @@ class _$GestureStrokeCWProxyImpl implements _$GestureStrokeCWProxy {
   @override
   GestureStroke arrows(List<GestureArrow> arrows) => call(arrows: arrows);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GestureStroke(...).copyWith.fieldName(value)`.
   ///
@@ -52,6 +51,7 @@ class _$GestureStrokeCWProxyImpl implements _$GestureStrokeCWProxy {
   /// ```dart
   /// GestureStroke(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   GestureStroke call({
     Object? startPosition = const $CopyWithPlaceholder(),
     Object? fingers = const $CopyWithPlaceholder(),

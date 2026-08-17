@@ -35,7 +35,6 @@ class _$FindInPageStateCWProxyImpl implements _$FindInPageStateCWProxy {
   FindInPageState lastSearchText(String? lastSearchText) =>
       call(lastSearchText: lastSearchText);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `FindInPageState(...).copyWith.fieldName(value)`.
   ///
@@ -43,6 +42,7 @@ class _$FindInPageStateCWProxyImpl implements _$FindInPageStateCWProxy {
   /// ```dart
   /// FindInPageState(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   FindInPageState call({
     Object? visible = const $CopyWithPlaceholder(),
     Object? lastSearchText = const $CopyWithPlaceholder(),

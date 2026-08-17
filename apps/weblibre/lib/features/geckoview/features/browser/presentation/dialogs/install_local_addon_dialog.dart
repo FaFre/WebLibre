@@ -47,8 +47,8 @@ class _InstallLocalAddonSheet extends HookConsumerWidget {
       try {
         final result = await FilePicker.pickFiles();
 
-        if (result != null && result.files.isNotEmpty) {
-          final path = result.files.single.path;
+        if (result.isNotEmpty) {
+          final path = result.single.path;
           if (path != null) {
             final extension = p.extension(path).toLowerCase();
             if (extension == '.xpi') {

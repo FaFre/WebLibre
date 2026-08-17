@@ -70,7 +70,6 @@ class _$WebExtensionStateCWProxyImpl implements _$WebExtensionStateCWProxy {
   @override
   WebExtensionState icon(EquatableImage? icon) => call(icon: icon);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `WebExtensionState(...).copyWith.fieldName(value)`.
   ///
@@ -78,6 +77,7 @@ class _$WebExtensionStateCWProxyImpl implements _$WebExtensionStateCWProxy {
   /// ```dart
   /// WebExtensionState(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   WebExtensionState call({
     Object? extensionId = const $CopyWithPlaceholder(),
     Object? enabled = const $CopyWithPlaceholder(),

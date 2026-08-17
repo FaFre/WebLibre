@@ -100,7 +100,6 @@ class _$CapturedPageStateCWProxyImpl implements _$CapturedPageStateCWProxy {
   CapturedPageState errorMessage(String? errorMessage) =>
       call(errorMessage: errorMessage);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `CapturedPageState(...).copyWith.fieldName(value)`.
   ///
@@ -108,6 +107,7 @@ class _$CapturedPageStateCWProxyImpl implements _$CapturedPageStateCWProxy {
   /// ```dart
   /// CapturedPageState(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   CapturedPageState call({
     Object? sourceUrl = const $CopyWithPlaceholder(),
     Object? status = const $CopyWithPlaceholder(),

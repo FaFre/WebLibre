@@ -1135,9 +1135,9 @@ class BookmarkListScreen extends HookConsumerWidget {
             : ['html', 'htm'],
       );
 
-      if (result == null || result.files.isEmpty) return;
+      if (result.isEmpty) return;
 
-      final file = result.files.first;
+      final file = result.first;
       if (file.path == null) {
         if (context.mounted) {
           showErrorMessage(context, 'Failed to read file');

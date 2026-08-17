@@ -67,7 +67,6 @@ class _$SyncRepositoryStateCWProxyImpl implements _$SyncRepositoryStateCWProxy {
   SyncRepositoryState lastSyncError(String? lastSyncError) =>
       call(lastSyncError: lastSyncError);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `SyncRepositoryState(...).copyWith.fieldName(value)`.
   ///
@@ -75,6 +74,7 @@ class _$SyncRepositoryStateCWProxyImpl implements _$SyncRepositoryStateCWProxy {
   /// ```dart
   /// SyncRepositoryState(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   SyncRepositoryState call({
     Object? account = const $CopyWithPlaceholder(),
     Object? remoteTabs = const $CopyWithPlaceholder(),

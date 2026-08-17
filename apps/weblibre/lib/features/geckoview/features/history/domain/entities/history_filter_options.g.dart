@@ -47,7 +47,6 @@ class _$HistoryFilterOptionsCWProxyImpl
   HistoryFilterOptions containerId(String? containerId) =>
       call(containerId: containerId);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `HistoryFilterOptions(...).copyWith.fieldName(value)`.
   ///
@@ -55,6 +54,7 @@ class _$HistoryFilterOptionsCWProxyImpl
   /// ```dart
   /// HistoryFilterOptions(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   HistoryFilterOptions call({
     Object? dateRange = const $CopyWithPlaceholder(),
     Object? visitTypes = const $CopyWithPlaceholder(),

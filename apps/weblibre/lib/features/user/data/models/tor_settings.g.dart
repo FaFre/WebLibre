@@ -65,7 +65,6 @@ class _$TorSettingsCWProxyImpl implements _$TorSettingsCWProxy {
   @override
   TorSettings autostart(bool autostart) => call(autostart: autostart);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TorSettings(...).copyWith.fieldName(value)`.
   ///
@@ -73,6 +72,7 @@ class _$TorSettingsCWProxyImpl implements _$TorSettingsCWProxy {
   /// ```dart
   /// TorSettings(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   TorSettings call({
     Object? config = const $CopyWithPlaceholder(),
     Object? requireBridge = const $CopyWithPlaceholder(),

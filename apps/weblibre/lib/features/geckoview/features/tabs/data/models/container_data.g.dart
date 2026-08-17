@@ -100,7 +100,6 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
   ContainerMetadata isolatedAppLinkSettings(bool isolatedAppLinkSettings) =>
       call(isolatedAppLinkSettings: isolatedAppLinkSettings);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContainerMetadata(...).copyWith.fieldName(value)`.
   ///
@@ -108,6 +107,7 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
   /// ```dart
   /// ContainerMetadata(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   ContainerMetadata call({
     Object? iconData = const $CopyWithPlaceholder(),
     Object? contextualIdentity = const $CopyWithPlaceholder(),
@@ -247,7 +247,6 @@ class _$ContainerDataCWProxyImpl implements _$ContainerDataCWProxy {
   ContainerData metadata(ContainerMetadata? metadata) =>
       call(metadata: metadata);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContainerData(...).copyWith.fieldName(value)`.
   ///
@@ -255,6 +254,7 @@ class _$ContainerDataCWProxyImpl implements _$ContainerDataCWProxy {
   /// ```dart
   /// ContainerData(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   ContainerData call({
     Object? id = const $CopyWithPlaceholder(),
     Object? name = const $CopyWithPlaceholder(),

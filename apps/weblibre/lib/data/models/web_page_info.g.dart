@@ -49,7 +49,6 @@ class _$WebPageInfoCWProxyImpl implements _$WebPageInfoCWProxy {
   @override
   WebPageInfo feeds(Set<Uri>? feeds) => call(feeds: feeds);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `WebPageInfo(...).copyWith.fieldName(value)`.
   ///
@@ -57,6 +56,7 @@ class _$WebPageInfoCWProxyImpl implements _$WebPageInfoCWProxy {
   /// ```dart
   /// WebPageInfo(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   WebPageInfo call({
     Object? url = const $CopyWithPlaceholder(),
     Object? title = const $CopyWithPlaceholder(),

@@ -34,7 +34,6 @@ class _$CustomDohProviderCWProxyImpl implements _$CustomDohProviderCWProxy {
   @override
   CustomDohProvider name(String? name) => call(name: name);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `CustomDohProvider(...).copyWith.fieldName(value)`.
   ///
@@ -42,6 +41,7 @@ class _$CustomDohProviderCWProxyImpl implements _$CustomDohProviderCWProxy {
   /// ```dart
   /// CustomDohProvider(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   CustomDohProvider call({
     Object? url = const $CopyWithPlaceholder(),
     Object? name = const $CopyWithPlaceholder(),
@@ -519,7 +519,6 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
   @override
   EngineSettings lnaEnabled(bool? lnaEnabled) => call(lnaEnabled: lnaEnabled);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
   ///
@@ -527,6 +526,7 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
   /// ```dart
   /// EngineSettings(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   EngineSettings call({
     Object? javascriptEnabled = const $CopyWithPlaceholder(),
     Object? trackingProtectionPolicy = const $CopyWithPlaceholder(),

@@ -35,7 +35,6 @@ class _$UBlockExternalListCWProxyImpl implements _$UBlockExternalListCWProxy {
   UBlockExternalList description(String? description) =>
       call(description: description);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `UBlockExternalList(...).copyWith.fieldName(value)`.
   ///
@@ -43,6 +42,7 @@ class _$UBlockExternalListCWProxyImpl implements _$UBlockExternalListCWProxy {
   /// ```dart
   /// UBlockExternalList(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   UBlockExternalList call({
     Object? url = const $CopyWithPlaceholder(),
     Object? description = const $CopyWithPlaceholder(),
@@ -134,7 +134,6 @@ class _$UBlockFilterListSettingsCWProxyImpl
     List<UBlockExternalList> externalFilterLists,
   ) => call(externalFilterLists: externalFilterLists);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `UBlockFilterListSettings(...).copyWith.fieldName(value)`.
   ///
@@ -142,6 +141,7 @@ class _$UBlockFilterListSettingsCWProxyImpl
   /// ```dart
   /// UBlockFilterListSettings(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   UBlockFilterListSettings call({
     Object? enabled = const $CopyWithPlaceholder(),
     Object? enabledStockListTokens = const $CopyWithPlaceholder(),

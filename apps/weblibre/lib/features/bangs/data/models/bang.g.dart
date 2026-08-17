@@ -92,7 +92,6 @@ class _$BangCWProxyImpl implements _$BangCWProxy {
   @override
   Bang snapDomain(String? snapDomain) => call(snapDomain: snapDomain);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `Bang(...).copyWith.fieldName(value)`.
   ///
@@ -100,6 +99,7 @@ class _$BangCWProxyImpl implements _$BangCWProxy {
   /// ```dart
   /// Bang(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   Bang call({
     Object? websiteName = const $CopyWithPlaceholder(),
     Object? domain = const $CopyWithPlaceholder(),

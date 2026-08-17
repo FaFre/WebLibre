@@ -68,7 +68,6 @@ class _$TabViewFilterOptionsCWProxyImpl
   TabViewFilterOptions quickInterval(TabQuickInterval? quickInterval) =>
       call(quickInterval: quickInterval);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TabViewFilterOptions(...).copyWith.fieldName(value)`.
   ///
@@ -76,6 +75,7 @@ class _$TabViewFilterOptionsCWProxyImpl
   /// ```dart
   /// TabViewFilterOptions(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   TabViewFilterOptions call({
     Object? tabTypeFilter = const $CopyWithPlaceholder(),
     Object? sortType = const $CopyWithPlaceholder(),

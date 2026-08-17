@@ -107,7 +107,6 @@ class _$ProxyProfileDraftStateCWProxyImpl
   ProxyProfileDraftState secretLoaded(bool secretLoaded) =>
       call(secretLoaded: secretLoaded);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ProxyProfileDraftState(...).copyWith.fieldName(value)`.
   ///
@@ -115,6 +114,7 @@ class _$ProxyProfileDraftStateCWProxyImpl
   /// ```dart
   /// ProxyProfileDraftState(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   ProxyProfileDraftState call({
     Object? profileId = const $CopyWithPlaceholder(),
     Object? existingProfile = const $CopyWithPlaceholder(),

@@ -53,7 +53,6 @@ class _$BookmarkListUiStateCWProxyImpl implements _$BookmarkListUiStateCWProxy {
   BookmarkListUiState foldersOnly(bool foldersOnly) =>
       call(foldersOnly: foldersOnly);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `BookmarkListUiState(...).copyWith.fieldName(value)`.
   ///
@@ -61,6 +60,7 @@ class _$BookmarkListUiStateCWProxyImpl implements _$BookmarkListUiStateCWProxy {
   /// ```dart
   /// BookmarkListUiState(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   BookmarkListUiState call({
     Object? selectionMode = const $CopyWithPlaceholder(),
     Object? selectedGuids = const $CopyWithPlaceholder(),

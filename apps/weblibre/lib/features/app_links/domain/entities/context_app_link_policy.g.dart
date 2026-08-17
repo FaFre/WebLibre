@@ -39,7 +39,6 @@ class _$ContextAppLinkPolicyCWProxyImpl
   ContextAppLinkPolicy rules(Map<String, PersistedAppLinkRule> rules) =>
       call(rules: rules);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContextAppLinkPolicy(...).copyWith.fieldName(value)`.
   ///
@@ -47,6 +46,7 @@ class _$ContextAppLinkPolicyCWProxyImpl
   /// ```dart
   /// ContextAppLinkPolicy(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   ContextAppLinkPolicy call({
     Object? mode = const $CopyWithPlaceholder(),
     Object? rules = const $CopyWithPlaceholder(),

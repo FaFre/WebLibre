@@ -104,7 +104,6 @@ class _$BangDataCWProxyImpl implements _$BangDataCWProxy {
   @override
   BangData icon(BrowserIcon? icon) => call(icon: icon);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `BangData(...).copyWith.fieldName(value)`.
   ///
@@ -112,6 +111,7 @@ class _$BangDataCWProxyImpl implements _$BangDataCWProxy {
   /// ```dart
   /// BangData(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   BangData call({
     Object? websiteName = const $CopyWithPlaceholder(),
     Object? domain = const $CopyWithPlaceholder(),

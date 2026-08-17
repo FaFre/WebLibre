@@ -24,6 +24,7 @@ List<RouteBase> get $appRoutes => [
 RouteBase get $aboutRoute => GoRouteData.$route(
   path: '/about',
   name: 'AboutRoute',
+  hasOverriddenOnExit: false,
   factory: $AboutRoute._fromState,
 );
 
@@ -50,6 +51,7 @@ mixin $AboutRoute on GoRouteData {
 RouteBase get $onboardingRoute => GoRouteData.$route(
   path: '/onboarding/:currentRevision/:targetRevision',
   name: 'OnboardingRoute',
+  hasOverriddenOnExit: false,
   factory: $OnboardingRoute._fromState,
 );
 
@@ -83,6 +85,7 @@ mixin $OnboardingRoute on GoRouteData {
 RouteBase get $lockRoute => GoRouteData.$route(
   path: '/lock',
   name: 'LockRoute',
+  hasOverriddenOnExit: false,
   factory: $LockRoute._fromState,
 );
 
@@ -109,21 +112,25 @@ mixin $LockRoute on GoRouteData {
 RouteBase get $bangMenuRoute => GoRouteData.$route(
   path: '/bangs',
   name: 'BangRoute',
+  hasOverriddenOnExit: false,
   factory: $BangMenuRoute._fromState,
   routes: [
     GoRouteData.$route(
       path: 'user',
       name: 'UserBangsRoute',
+      hasOverriddenOnExit: false,
       factory: $UserBangsRoute._fromState,
       routes: [
         GoRouteData.$route(
           path: 'new',
           name: 'NewUserBangRoute',
+          hasOverriddenOnExit: false,
           factory: $NewUserBangRoute._fromState,
         ),
         GoRouteData.$route(
           path: 'edit',
           name: 'EditUserBangRoute',
+          hasOverriddenOnExit: false,
           factory: $EditUserBangRoute._fromState,
         ),
       ],
@@ -131,21 +138,25 @@ RouteBase get $bangMenuRoute => GoRouteData.$route(
     GoRouteData.$route(
       path: 'search/:searchText',
       name: 'BangSearchRoute',
+      hasOverriddenOnExit: false,
       factory: $BangSearchRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'categories',
       name: 'BangCategoriesRoute',
+      hasOverriddenOnExit: false,
       factory: $BangCategoriesRoute._fromState,
       routes: [
         GoRouteData.$route(
           path: 'category/:category',
           name: 'BangCategoryRoute',
+          hasOverriddenOnExit: false,
           factory: $BangCategoryRoute._fromState,
           routes: [
             GoRouteData.$route(
               path: ':subCategory',
               name: 'BangSubCategoryRoute',
+              hasOverriddenOnExit: false,
               factory: $BangSubCategoryRoute._fromState,
             ),
           ],
@@ -348,31 +359,37 @@ mixin $BangSubCategoryRoute on GoRouteData {
 RouteBase get $bookmarksRoute => GoRouteData.$route(
   path: '/bookmarks',
   name: 'BookmarksRoute',
+  hasOverriddenOnExit: false,
   factory: $BookmarksRoute._fromState,
   routes: [
     GoRouteData.$route(
       path: 'list/:entryGuid',
       name: 'BookmarkListRoute',
+      hasOverriddenOnExit: false,
       factory: $BookmarkListRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'createFolder',
       name: 'BookmarkFolderAddRoute',
+      hasOverriddenOnExit: false,
       factory: $BookmarkFolderAddRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'editFolder',
       name: 'BookmarkFolderEditRoute',
+      hasOverriddenOnExit: false,
       factory: $BookmarkFolderEditRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'createEntry',
       name: 'BookmarkEntryAddRoute',
+      hasOverriddenOnExit: false,
       factory: $BookmarkEntryAddRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'editEntry',
       name: 'BookmarkEntryEditRoute',
+      hasOverriddenOnExit: false,
       factory: $BookmarkEntryEditRoute._fromState,
     ),
   ],
@@ -538,41 +555,49 @@ mixin $BookmarkEntryEditRoute on GoRouteData {
 RouteBase get $browserRoute => GoRouteData.$route(
   path: '/browser',
   name: 'BrowserRoute',
+  hasOverriddenOnExit: false,
   factory: $BrowserRoute._fromState,
   routes: [
     GoRouteData.$route(
       path: 'search/:tabType/:searchText',
       name: 'SearchRoute',
+      hasOverriddenOnExit: false,
       factory: $SearchRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'tab_view',
       name: 'TabViewRoute',
+      hasOverriddenOnExit: false,
       factory: $TabViewRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'context_menu',
       name: 'ContextMenuRoute',
+      hasOverriddenOnExit: false,
       factory: $ContextMenuRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'container_draft',
       name: 'ContainerDraftRoute',
+      hasOverriddenOnExit: false,
       factory: $ContainerDraftRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'containers',
       name: 'ContainerListRoute',
+      hasOverriddenOnExit: false,
       factory: $ContainerListRoute._fromState,
       routes: [
         GoRouteData.$route(
           path: 'create/:containerData',
           name: 'ContainerCreateRoute',
+          hasOverriddenOnExit: false,
           factory: $ContainerCreateRoute._fromState,
         ),
         GoRouteData.$route(
           path: 'edit/:containerData',
           name: 'ContainerEditRoute',
+          hasOverriddenOnExit: false,
           factory: $ContainerEditRoute._fromState,
         ),
       ],
@@ -580,21 +605,25 @@ RouteBase get $browserRoute => GoRouteData.$route(
     GoRouteData.$route(
       path: 'select_container',
       name: 'ContainerSelectionRoute',
+      hasOverriddenOnExit: false,
       factory: $ContainerSelectionRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'tab_tree/:rootTabId',
       name: 'TabTreeRoute',
+      hasOverriddenOnExit: false,
       factory: $TabTreeRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'open_content',
       name: 'OpenSharedContentRoute',
+      hasOverriddenOnExit: false,
       factory: $OpenSharedContentRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'profile',
       name: 'SelectProfileRoute',
+      hasOverriddenOnExit: false,
       factory: $SelectProfileRoute._fromState,
     ),
   ],
@@ -948,26 +977,31 @@ extension<T extends Enum> on Map<T, String> {
 RouteBase get $addonManagerRoute => GoRouteData.$route(
   path: '/addons',
   name: 'AddonManagerRoute',
+  hasOverriddenOnExit: false,
   factory: $AddonManagerRoute._fromState,
   routes: [
     GoRouteData.$route(
       path: 'details/:addonId',
       name: 'AddonDetailsRoute',
+      hasOverriddenOnExit: false,
       factory: $AddonDetailsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'listing/:addonId',
       name: 'AddonListingDetailsRoute',
+      hasOverriddenOnExit: false,
       factory: $AddonListingDetailsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'permissions/:addonId',
       name: 'AddonPermissionsRoute',
+      hasOverriddenOnExit: false,
       factory: $AddonPermissionsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'settings/:addonId',
       name: 'AddonInternalSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $AddonInternalSettingsRoute._fromState,
     ),
   ],
@@ -1102,36 +1136,43 @@ mixin $AddonInternalSettingsRoute on GoRouteData {
 RouteBase get $feedListRoute => GoRouteData.$route(
   path: '/feeds',
   name: 'FeedListRoute',
+  hasOverriddenOnExit: false,
   factory: $FeedListRoute._fromState,
   routes: [
     GoRouteData.$route(
       path: 'add',
       name: 'FeedAddRoute',
+      hasOverriddenOnExit: false,
       factory: $FeedAddRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'articles/:feedId',
       name: 'FeedArticleListRoute',
+      hasOverriddenOnExit: false,
       factory: $FeedArticleListRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'article/:articleId',
       name: 'FeedArticleRoute',
+      hasOverriddenOnExit: false,
       factory: $FeedArticleRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'create/:feedId',
       name: 'FeedCreateRoute',
+      hasOverriddenOnExit: false,
       factory: $FeedCreateRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'available/:feedsJson',
       name: 'SelectFeedDialogRoute',
+      hasOverriddenOnExit: false,
       factory: $SelectFeedDialogRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'edit/:feedId',
       name: 'FeedEditRoute',
+      hasOverriddenOnExit: false,
       factory: $FeedEditRoute._fromState,
     ),
   ],
@@ -1311,11 +1352,13 @@ mixin $FeedEditRoute on GoRouteData {
 RouteBase get $historyRoute => GoRouteData.$route(
   path: '/history',
   name: 'HistoryRoute',
+  hasOverriddenOnExit: false,
   factory: $HistoryRoute._fromState,
   routes: [
     GoRouteData.$route(
       path: 'downloads',
       name: 'HistoryDownloadsRoute',
+      hasOverriddenOnExit: false,
       factory: $HistoryDownloadsRoute._fromState,
     ),
   ],
@@ -1365,31 +1408,37 @@ mixin $HistoryDownloadsRoute on GoRouteData {
 RouteBase get $profileListRoute => GoRouteData.$route(
   path: '/profiles',
   name: 'ProfileListRoute',
+  hasOverriddenOnExit: false,
   factory: $ProfileListRoute._fromState,
   routes: [
     GoRouteData.$route(
       path: 'edit',
       name: 'ProfileEditRoute',
+      hasOverriddenOnExit: false,
       factory: $EditProfileRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'backup_list',
       name: 'ProfileBackupListRoute',
+      hasOverriddenOnExit: false,
       factory: $ProfileBackupListRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'restore',
       name: 'RestoreProfileRoute',
+      hasOverriddenOnExit: false,
       factory: $RestoreProfileRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'backup',
       name: 'BackupProfileRoute',
+      hasOverriddenOnExit: false,
       factory: $BackupProfileRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'create',
       name: 'CreateProfileRoute',
+      hasOverriddenOnExit: false,
       factory: $CreateProfileRoute._fromState,
     ),
   ],
@@ -1540,76 +1589,91 @@ mixin $CreateProfileRoute on GoRouteData {
 RouteBase get $settingsRoute => GoRouteData.$route(
   path: '/settings',
   name: 'SettingsRoute',
+  hasOverriddenOnExit: false,
   factory: $SettingsRoute._fromState,
   routes: [
     GoRouteData.$route(
       path: 'general',
       name: 'GeneralSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $GeneralSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'browsing',
       name: 'BrowsingSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $BrowsingSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'gestures',
       name: 'GestureSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $GestureSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'privacy_security',
       name: 'PrivacySecuritySettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $PrivacySecuritySettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'toolbar_layout',
       name: 'ToolbarLayoutSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $ToolbarLayoutSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'web_content',
       name: 'WebContentSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $WebContentSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'search',
       name: 'SearchSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $SearchSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'extensions',
       name: 'ExtensionsSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $ExtensionsSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'advanced',
       name: 'AdvancedSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $AdvancedSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'experimental',
       name: 'ExperimentalSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $ExperimentalSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'push',
       name: 'WebPushSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $WebPushSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'bang',
       name: 'BangSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $BangSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'hardening',
       name: 'WebEngineHardeningRoute',
+      hasOverriddenOnExit: false,
       factory: $WebEngineHardeningRoute._fromState,
       routes: [
         GoRouteData.$route(
           path: 'group/:group',
           name: 'WebEngineHardeningGroupRoute',
+          hasOverriddenOnExit: false,
           factory: $WebEngineHardeningGroupRoute._fromState,
         ),
       ],
@@ -1617,111 +1681,133 @@ RouteBase get $settingsRoute => GoRouteData.$route(
     GoRouteData.$route(
       path: 'doh',
       name: 'DohSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $DohSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'fingerprint',
       name: 'FingerprintSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $FingerprintSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'locales',
       name: 'LocaleSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $LocaleSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'addon_collection',
       name: 'AddonCollectionRoute',
+      hasOverriddenOnExit: false,
       factory: $AddonCollectionRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'ublock_filter_lists',
       name: 'UBlockFilterListsRoute',
+      hasOverriddenOnExit: false,
       factory: $UBlockFilterListsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'tracking_protection_exceptions',
       name: 'TrackingProtectionExceptionsRoute',
+      hasOverriddenOnExit: false,
       factory: $TrackingProtectionExceptionsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'custom_tracking_protection',
       name: 'CustomTrackingProtectionRoute',
+      hasOverriddenOnExit: false,
       factory: $CustomTrackingProtectionRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'error_logs',
       name: 'ErrorLogsRoute',
+      hasOverriddenOnExit: false,
       factory: $ErrorLogsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'account',
       name: 'AccountSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $AccountSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'sync',
       name: 'SyncSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $SyncSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'url_cleaner',
       name: 'UrlCleanerSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $UrlCleanerSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'unshortener',
       name: 'UnshortenerSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $UnshortenerSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'home',
       name: 'HomeSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $HomeSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'home_modules',
       name: 'HomeModulesSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $HomeModulesSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'new_tab_modules',
       name: 'NewTabModulesSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $NewTabModulesSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'contextual_toolbar',
       name: 'ContextualToolbarSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $ContextualToolbarSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'quick_switcher_toolbar',
       name: 'QuickSwitcherToolbarSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $QuickSwitcherToolbarSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'desktop_mode_sites',
       name: 'DesktopModeSitesRoute',
+      hasOverriddenOnExit: false,
       factory: $DesktopModeSitesRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'singbox_proxy_profiles',
       name: 'SingboxProxyProfilesRoute',
+      hasOverriddenOnExit: false,
       factory: $SingboxProxyProfilesRoute._fromState,
       routes: [
         GoRouteData.$route(
           path: 'editor',
           name: 'SingboxProxyProfileEditorRoute',
+          hasOverriddenOnExit: false,
           factory: $SingboxProxyProfileEditorRoute._fromState,
         ),
         GoRouteData.$route(
           path: 'logs',
           name: 'SingboxProxyLogsRoute',
+          hasOverriddenOnExit: false,
           factory: $SingboxProxyLogsRoute._fromState,
         ),
         GoRouteData.$route(
           path: 'subscription',
           name: 'SubscriptionImportRoute',
+          hasOverriddenOnExit: false,
           factory: $SubscriptionImportRoute._fromState,
         ),
       ],
@@ -1729,11 +1815,13 @@ RouteBase get $settingsRoute => GoRouteData.$route(
     GoRouteData.$route(
       path: 'proxy_routing',
       name: 'ProxyRoutingSettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $ProxyRoutingSettingsRoute._fromState,
     ),
     GoRouteData.$route(
       path: 'proxy',
       name: 'ProxySettingsRoute',
+      hasOverriddenOnExit: false,
       factory: $ProxySettingsRoute._fromState,
     ),
   ],
@@ -2580,11 +2668,13 @@ mixin $ProxySettingsRoute on GoRouteData {
 RouteBase get $torProxyRoute => GoRouteData.$route(
   path: '/tor',
   name: 'TorProxyRoute',
+  hasOverriddenOnExit: false,
   factory: $TorProxyRoute._fromState,
   routes: [
     GoRouteData.$route(
       path: 'country_picker',
       name: 'TorCountryPickerRoute',
+      hasOverriddenOnExit: false,
       factory: $TorCountryPickerRoute._fromState,
     ),
   ],

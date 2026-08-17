@@ -46,7 +46,6 @@ class _$PersistedAppLinkRuleCWProxyImpl
   PersistedAppLinkRule packageName(String? packageName) =>
       call(packageName: packageName);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `PersistedAppLinkRule(...).copyWith.fieldName(value)`.
   ///
@@ -54,6 +53,7 @@ class _$PersistedAppLinkRuleCWProxyImpl
   /// ```dart
   /// PersistedAppLinkRule(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   PersistedAppLinkRule call({
     Object? decision = const $CopyWithPlaceholder(),
     Object? scope = const $CopyWithPlaceholder(),

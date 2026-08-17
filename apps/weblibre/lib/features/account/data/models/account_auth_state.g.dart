@@ -68,7 +68,6 @@ class _$AccountAuthStateCWProxyImpl implements _$AccountAuthStateCWProxy {
   @override
   AccountAuthState client(SupabaseClient? client) => call(client: client);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `AccountAuthState(...).copyWith.fieldName(value)`.
   ///
@@ -76,6 +75,7 @@ class _$AccountAuthStateCWProxyImpl implements _$AccountAuthStateCWProxy {
   /// ```dart
   /// AccountAuthState(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   AccountAuthState call({
     Object? status = const $CopyWithPlaceholder(),
     Object? email = const $CopyWithPlaceholder(),

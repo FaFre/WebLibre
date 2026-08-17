@@ -103,7 +103,6 @@ class _$GestureSettingsCWProxyImpl implements _$GestureSettingsCWProxy {
   GestureSettings bindings(Map<String, GestureAction> bindings) =>
       call(bindings: bindings);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GestureSettings(...).copyWith.fieldName(value)`.
   ///
@@ -111,6 +110,7 @@ class _$GestureSettingsCWProxyImpl implements _$GestureSettingsCWProxy {
   /// ```dart
   /// GestureSettings(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   GestureSettings call({
     Object? enabled = const $CopyWithPlaceholder(),
     Object? active = const $CopyWithPlaceholder(),

@@ -66,7 +66,6 @@ class _$ProxyRoutingSettingsCWProxyImpl
     Map<String, ProxyConnectionId?> isolationContextRoutes,
   ) => call(isolationContextRoutes: isolationContextRoutes);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ProxyRoutingSettings(...).copyWith.fieldName(value)`.
   ///
@@ -74,6 +73,7 @@ class _$ProxyRoutingSettingsCWProxyImpl
   /// ```dart
   /// ProxyRoutingSettings(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   ProxyRoutingSettings call({
     Object? regularTabsMode = const $CopyWithPlaceholder(),
     Object? regularTabsProxyConnectionId = const $CopyWithPlaceholder(),

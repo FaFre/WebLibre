@@ -68,7 +68,6 @@ class _$BookmarkEntryCWProxyImpl implements _$BookmarkEntryCWProxy {
   @override
   BookmarkEntry dateAdded(int dateAdded) => call(dateAdded: dateAdded);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `BookmarkEntry(...).copyWith.fieldName(value)`.
   ///
@@ -76,6 +75,7 @@ class _$BookmarkEntryCWProxyImpl implements _$BookmarkEntryCWProxy {
   /// ```dart
   /// BookmarkEntry(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   BookmarkEntry call({
     Object? guid = const $CopyWithPlaceholder(),
     Object? parentGuid = const $CopyWithPlaceholder(),
@@ -183,7 +183,6 @@ class _$BookmarkFolderCWProxyImpl implements _$BookmarkFolderCWProxy {
   BookmarkFolder children(List<BookmarkItem>? children) =>
       call(children: children);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `BookmarkFolder(...).copyWith.fieldName(value)`.
   ///
@@ -191,6 +190,7 @@ class _$BookmarkFolderCWProxyImpl implements _$BookmarkFolderCWProxy {
   /// ```dart
   /// BookmarkFolder(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   BookmarkFolder call({
     Object? guid = const $CopyWithPlaceholder(),
     Object? parentGuid = const $CopyWithPlaceholder(),

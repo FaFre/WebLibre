@@ -45,7 +45,6 @@ class _$AuthSettingsCWProxyImpl implements _$AuthSettingsCWProxy {
   @override
   AuthSettings timeout(Duration timeout) => call(timeout: timeout);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `AuthSettings(...).copyWith.fieldName(value)`.
   ///
@@ -53,6 +52,7 @@ class _$AuthSettingsCWProxyImpl implements _$AuthSettingsCWProxy {
   /// ```dart
   /// AuthSettings(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   AuthSettings call({
     Object? authenticationRequired = const $CopyWithPlaceholder(),
     Object? autoLockMode = const $CopyWithPlaceholder(),

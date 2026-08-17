@@ -65,7 +65,6 @@ class _$AccountPersistedDataCWProxyImpl
   @override
   AccountPersistedData syncKey(String? syncKey) => call(syncKey: syncKey);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `AccountPersistedData(...).copyWith.fieldName(value)`.
   ///
@@ -73,6 +72,7 @@ class _$AccountPersistedDataCWProxyImpl
   /// ```dart
   /// AccountPersistedData(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   AccountPersistedData call({
     Object? session = const $CopyWithPlaceholder(),
     Object? userId = const $CopyWithPlaceholder(),

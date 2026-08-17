@@ -35,7 +35,6 @@ class _$ProfileCWProxyImpl implements _$ProfileCWProxy {
   Profile authSettings(AuthSettings? authSettings) =>
       call(authSettings: authSettings);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `Profile(...).copyWith.fieldName(value)`.
   ///
@@ -43,6 +42,7 @@ class _$ProfileCWProxyImpl implements _$ProfileCWProxy {
   /// ```dart
   /// Profile(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   Profile call({
     Object? name = const $CopyWithPlaceholder(),
     Object? authSettings = const $CopyWithPlaceholder(),
