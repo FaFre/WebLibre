@@ -19,6 +19,12 @@ analyzer:
     - "**.drift.dart"
     - "test/drift/**"
     - "build/**"
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 plugins:
   fast_equatable_lint: ^1.0.0

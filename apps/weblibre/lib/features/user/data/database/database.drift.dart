@@ -69,6 +69,34 @@ abstract class $UserDatabase extends i0.GeneratedDatabase {
     i1.idxSearchTokensInsertedAt,
     i1.idxSearchTokensReservedAt,
   ];
+  @override
+  i0.StreamQueryUpdateRules get streamUpdateRules =>
+      const i0.StreamQueryUpdateRules([
+        i0.WritePropagation(
+          on: i0.TableUpdateQuery.onTableName(
+            'toolbar_button_configs',
+            limitUpdateKind: i0.UpdateKind.delete,
+          ),
+          result: [
+            i0.TableUpdate(
+              'toolbar_button_configs',
+              kind: i0.UpdateKind.update,
+            ),
+          ],
+        ),
+        i0.WritePropagation(
+          on: i0.TableUpdateQuery.onTableName(
+            'quick_switcher_button_configs',
+            limitUpdateKind: i0.UpdateKind.delete,
+          ),
+          result: [
+            i0.TableUpdate(
+              'quick_switcher_button_configs',
+              kind: i0.UpdateKind.update,
+            ),
+          ],
+        ),
+      ]);
 }
 
 class $UserDatabaseManager {

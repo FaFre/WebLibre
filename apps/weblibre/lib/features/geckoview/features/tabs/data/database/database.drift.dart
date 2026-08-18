@@ -85,6 +85,13 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
       const i0.StreamQueryUpdateRules([
         i0.WritePropagation(
           on: i0.TableUpdateQuery.onTableName(
+            'tab',
+            limitUpdateKind: i0.UpdateKind.delete,
+          ),
+          result: [i0.TableUpdate('tab', kind: i0.UpdateKind.update)],
+        ),
+        i0.WritePropagation(
+          on: i0.TableUpdateQuery.onTableName(
             'container',
             limitUpdateKind: i0.UpdateKind.delete,
           ),

@@ -966,6 +966,46 @@ typedef $ToolbarButtonConfigsUpdateCompanionBuilder =
       i0.Value<int> rowid,
     });
 
+final class $ToolbarButtonConfigsReferences
+    extends
+        i0.BaseReferences<
+          i0.GeneratedDatabase,
+          i1.ToolbarButtonConfigs,
+          i1.ToolbarButtonConfig
+        > {
+  $ToolbarButtonConfigsReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static i1.ToolbarButtonConfigs _fallbackIdTable(
+    i0.GeneratedDatabase db,
+  ) => i4.ReadDatabaseContainer(db)
+      .resultSet<i1.ToolbarButtonConfigs>('toolbar_button_configs')
+      .createAlias(
+        'toolbar_button_configs__fallback_id__toolbar_button_configs__button_id',
+      );
+
+  i1.$ToolbarButtonConfigsProcessedTableManager? get fallbackId {
+    final $_column = $_itemColumn<String>('fallback_id');
+    if ($_column == null) return null;
+    final manager = i1
+        .$ToolbarButtonConfigsTableManager(
+          $_db,
+          i4.ReadDatabaseContainer(
+            $_db,
+          ).resultSet<i1.ToolbarButtonConfigs>('toolbar_button_configs'),
+        )
+        .filter((f) => f.buttonId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_fallbackIdTable($_db));
+    if (item == null) return manager;
+    return i0.ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
 class $ToolbarButtonConfigsFilterComposer
     extends i0.Composer<i0.GeneratedDatabase, i1.ToolbarButtonConfigs> {
   $ToolbarButtonConfigsFilterComposer({
@@ -990,10 +1030,32 @@ class $ToolbarButtonConfigsFilterComposer
     builder: (column) => i0.ColumnFilters(column),
   );
 
-  i0.ColumnFilters<String> get fallbackId => $composableBuilder(
-    column: $table.fallbackId,
-    builder: (column) => i0.ColumnFilters(column),
-  );
+  i1.$ToolbarButtonConfigsFilterComposer get fallbackId {
+    final i1.$ToolbarButtonConfigsFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.fallbackId,
+      referencedTable: i4.ReadDatabaseContainer(
+        $db,
+      ).resultSet<i1.ToolbarButtonConfigs>('toolbar_button_configs'),
+      getReferencedColumn: (t) => t.buttonId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => i1.$ToolbarButtonConfigsFilterComposer(
+            $db: $db,
+            $table: i4.ReadDatabaseContainer(
+              $db,
+            ).resultSet<i1.ToolbarButtonConfigs>('toolbar_button_configs'),
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $ToolbarButtonConfigsOrderingComposer
@@ -1020,10 +1082,32 @@ class $ToolbarButtonConfigsOrderingComposer
     builder: (column) => i0.ColumnOrderings(column),
   );
 
-  i0.ColumnOrderings<String> get fallbackId => $composableBuilder(
-    column: $table.fallbackId,
-    builder: (column) => i0.ColumnOrderings(column),
-  );
+  i1.$ToolbarButtonConfigsOrderingComposer get fallbackId {
+    final i1.$ToolbarButtonConfigsOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.fallbackId,
+      referencedTable: i4.ReadDatabaseContainer(
+        $db,
+      ).resultSet<i1.ToolbarButtonConfigs>('toolbar_button_configs'),
+      getReferencedColumn: (t) => t.buttonId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => i1.$ToolbarButtonConfigsOrderingComposer(
+            $db: $db,
+            $table: i4.ReadDatabaseContainer(
+              $db,
+            ).resultSet<i1.ToolbarButtonConfigs>('toolbar_button_configs'),
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $ToolbarButtonConfigsAnnotationComposer
@@ -1044,10 +1128,33 @@ class $ToolbarButtonConfigsAnnotationComposer
   i0.GeneratedColumn<bool> get isVisible =>
       $composableBuilder(column: $table.isVisible, builder: (column) => column);
 
-  i0.GeneratedColumn<String> get fallbackId => $composableBuilder(
-    column: $table.fallbackId,
-    builder: (column) => column,
-  );
+  i1.$ToolbarButtonConfigsAnnotationComposer get fallbackId {
+    final i1.$ToolbarButtonConfigsAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.fallbackId,
+          referencedTable: i4.ReadDatabaseContainer(
+            $db,
+          ).resultSet<i1.ToolbarButtonConfigs>('toolbar_button_configs'),
+          getReferencedColumn: (t) => t.buttonId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => i1.$ToolbarButtonConfigsAnnotationComposer(
+                $db: $db,
+                $table: i4.ReadDatabaseContainer(
+                  $db,
+                ).resultSet<i1.ToolbarButtonConfigs>('toolbar_button_configs'),
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
 }
 
 class $ToolbarButtonConfigsTableManager
@@ -1061,16 +1168,9 @@ class $ToolbarButtonConfigsTableManager
           i1.$ToolbarButtonConfigsAnnotationComposer,
           $ToolbarButtonConfigsCreateCompanionBuilder,
           $ToolbarButtonConfigsUpdateCompanionBuilder,
-          (
-            i1.ToolbarButtonConfig,
-            i0.BaseReferences<
-              i0.GeneratedDatabase,
-              i1.ToolbarButtonConfigs,
-              i1.ToolbarButtonConfig
-            >,
-          ),
+          (i1.ToolbarButtonConfig, i1.$ToolbarButtonConfigsReferences),
           i1.ToolbarButtonConfig,
-          i0.PrefetchHooks Function()
+          i0.PrefetchHooks Function({bool fallbackId})
         > {
   $ToolbarButtonConfigsTableManager(
     i0.GeneratedDatabase db,
@@ -1114,9 +1214,56 @@ class $ToolbarButtonConfigsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  i1.$ToolbarButtonConfigsReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({fallbackId = false}) {
+            return i0.PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends i0.TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (fallbackId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.fallbackId,
+                                referencedTable: i1
+                                    .$ToolbarButtonConfigsReferences
+                                    ._fallbackIdTable(db),
+                                referencedColumn: i1
+                                    .$ToolbarButtonConfigsReferences
+                                    ._fallbackIdTable(db)
+                                    .buttonId,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
         ),
       );
 }
@@ -1131,16 +1278,9 @@ typedef $ToolbarButtonConfigsProcessedTableManager =
       i1.$ToolbarButtonConfigsAnnotationComposer,
       $ToolbarButtonConfigsCreateCompanionBuilder,
       $ToolbarButtonConfigsUpdateCompanionBuilder,
-      (
-        i1.ToolbarButtonConfig,
-        i0.BaseReferences<
-          i0.GeneratedDatabase,
-          i1.ToolbarButtonConfigs,
-          i1.ToolbarButtonConfig
-        >,
-      ),
+      (i1.ToolbarButtonConfig, i1.$ToolbarButtonConfigsReferences),
       i1.ToolbarButtonConfig,
-      i0.PrefetchHooks Function()
+      i0.PrefetchHooks Function({bool fallbackId})
     >;
 typedef $QuickSwitcherButtonConfigsCreateCompanionBuilder =
     i1.QuickSwitcherButtonConfigsCompanion Function({
@@ -1158,6 +1298,48 @@ typedef $QuickSwitcherButtonConfigsUpdateCompanionBuilder =
       i0.Value<String?> fallbackId,
       i0.Value<int> rowid,
     });
+
+final class $QuickSwitcherButtonConfigsReferences
+    extends
+        i0.BaseReferences<
+          i0.GeneratedDatabase,
+          i1.QuickSwitcherButtonConfigs,
+          i1.QuickSwitcherButtonConfig
+        > {
+  $QuickSwitcherButtonConfigsReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static i1.QuickSwitcherButtonConfigs _fallbackIdTable(
+    i0.GeneratedDatabase db,
+  ) => i4.ReadDatabaseContainer(db)
+      .resultSet<i1.QuickSwitcherButtonConfigs>('quick_switcher_button_configs')
+      .createAlias(
+        'quick_switcher_button_configs__fallback_id__quick_switcher_button_configs__button_id',
+      );
+
+  i1.$QuickSwitcherButtonConfigsProcessedTableManager? get fallbackId {
+    final $_column = $_itemColumn<String>('fallback_id');
+    if ($_column == null) return null;
+    final manager = i1
+        .$QuickSwitcherButtonConfigsTableManager(
+          $_db,
+          i4.ReadDatabaseContainer(
+            $_db,
+          ).resultSet<i1.QuickSwitcherButtonConfigs>(
+            'quick_switcher_button_configs',
+          ),
+        )
+        .filter((f) => f.buttonId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_fallbackIdTable($_db));
+    if (item == null) return manager;
+    return i0.ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
 
 class $QuickSwitcherButtonConfigsFilterComposer
     extends i0.Composer<i0.GeneratedDatabase, i1.QuickSwitcherButtonConfigs> {
@@ -1183,10 +1365,35 @@ class $QuickSwitcherButtonConfigsFilterComposer
     builder: (column) => i0.ColumnFilters(column),
   );
 
-  i0.ColumnFilters<String> get fallbackId => $composableBuilder(
-    column: $table.fallbackId,
-    builder: (column) => i0.ColumnFilters(column),
-  );
+  i1.$QuickSwitcherButtonConfigsFilterComposer get fallbackId {
+    final i1.$QuickSwitcherButtonConfigsFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.fallbackId,
+          referencedTable: i4.ReadDatabaseContainer($db)
+              .resultSet<i1.QuickSwitcherButtonConfigs>(
+                'quick_switcher_button_configs',
+              ),
+          getReferencedColumn: (t) => t.buttonId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => i1.$QuickSwitcherButtonConfigsFilterComposer(
+                $db: $db,
+                $table: i4.ReadDatabaseContainer($db)
+                    .resultSet<i1.QuickSwitcherButtonConfigs>(
+                      'quick_switcher_button_configs',
+                    ),
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
 }
 
 class $QuickSwitcherButtonConfigsOrderingComposer
@@ -1213,10 +1420,35 @@ class $QuickSwitcherButtonConfigsOrderingComposer
     builder: (column) => i0.ColumnOrderings(column),
   );
 
-  i0.ColumnOrderings<String> get fallbackId => $composableBuilder(
-    column: $table.fallbackId,
-    builder: (column) => i0.ColumnOrderings(column),
-  );
+  i1.$QuickSwitcherButtonConfigsOrderingComposer get fallbackId {
+    final i1.$QuickSwitcherButtonConfigsOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.fallbackId,
+          referencedTable: i4.ReadDatabaseContainer($db)
+              .resultSet<i1.QuickSwitcherButtonConfigs>(
+                'quick_switcher_button_configs',
+              ),
+          getReferencedColumn: (t) => t.buttonId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => i1.$QuickSwitcherButtonConfigsOrderingComposer(
+                $db: $db,
+                $table: i4.ReadDatabaseContainer($db)
+                    .resultSet<i1.QuickSwitcherButtonConfigs>(
+                      'quick_switcher_button_configs',
+                    ),
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
 }
 
 class $QuickSwitcherButtonConfigsAnnotationComposer
@@ -1237,10 +1469,35 @@ class $QuickSwitcherButtonConfigsAnnotationComposer
   i0.GeneratedColumn<bool> get isVisible =>
       $composableBuilder(column: $table.isVisible, builder: (column) => column);
 
-  i0.GeneratedColumn<String> get fallbackId => $composableBuilder(
-    column: $table.fallbackId,
-    builder: (column) => column,
-  );
+  i1.$QuickSwitcherButtonConfigsAnnotationComposer get fallbackId {
+    final i1.$QuickSwitcherButtonConfigsAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.fallbackId,
+          referencedTable: i4.ReadDatabaseContainer($db)
+              .resultSet<i1.QuickSwitcherButtonConfigs>(
+                'quick_switcher_button_configs',
+              ),
+          getReferencedColumn: (t) => t.buttonId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => i1.$QuickSwitcherButtonConfigsAnnotationComposer(
+                $db: $db,
+                $table: i4.ReadDatabaseContainer($db)
+                    .resultSet<i1.QuickSwitcherButtonConfigs>(
+                      'quick_switcher_button_configs',
+                    ),
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
 }
 
 class $QuickSwitcherButtonConfigsTableManager
@@ -1256,14 +1513,10 @@ class $QuickSwitcherButtonConfigsTableManager
           $QuickSwitcherButtonConfigsUpdateCompanionBuilder,
           (
             i1.QuickSwitcherButtonConfig,
-            i0.BaseReferences<
-              i0.GeneratedDatabase,
-              i1.QuickSwitcherButtonConfigs,
-              i1.QuickSwitcherButtonConfig
-            >,
+            i1.$QuickSwitcherButtonConfigsReferences,
           ),
           i1.QuickSwitcherButtonConfig,
-          i0.PrefetchHooks Function()
+          i0.PrefetchHooks Function({bool fallbackId})
         > {
   $QuickSwitcherButtonConfigsTableManager(
     i0.GeneratedDatabase db,
@@ -1316,9 +1569,56 @@ class $QuickSwitcherButtonConfigsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  i1.$QuickSwitcherButtonConfigsReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({fallbackId = false}) {
+            return i0.PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends i0.TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (fallbackId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.fallbackId,
+                                referencedTable: i1
+                                    .$QuickSwitcherButtonConfigsReferences
+                                    ._fallbackIdTable(db),
+                                referencedColumn: i1
+                                    .$QuickSwitcherButtonConfigsReferences
+                                    ._fallbackIdTable(db)
+                                    .buttonId,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
         ),
       );
 }
@@ -1333,16 +1633,9 @@ typedef $QuickSwitcherButtonConfigsProcessedTableManager =
       i1.$QuickSwitcherButtonConfigsAnnotationComposer,
       $QuickSwitcherButtonConfigsCreateCompanionBuilder,
       $QuickSwitcherButtonConfigsUpdateCompanionBuilder,
-      (
-        i1.QuickSwitcherButtonConfig,
-        i0.BaseReferences<
-          i0.GeneratedDatabase,
-          i1.QuickSwitcherButtonConfigs,
-          i1.QuickSwitcherButtonConfig
-        >,
-      ),
+      (i1.QuickSwitcherButtonConfig, i1.$QuickSwitcherButtonConfigsReferences),
       i1.QuickSwitcherButtonConfig,
-      i0.PrefetchHooks Function()
+      i0.PrefetchHooks Function({bool fallbackId})
     >;
 typedef $SearchTokensCreateCompanionBuilder =
     i1.SearchTokensCompanion Function({

@@ -509,6 +509,27 @@ final class $TabReferences
     extends i0.BaseReferences<i0.GeneratedDatabase, i3.Tab, i3.TabData> {
   $TabReferences(super.$_db, super.$_table, super.$_typedResult);
 
+  static i3.Tab _parentIdTable(i0.GeneratedDatabase db) =>
+      i9.ReadDatabaseContainer(
+        db,
+      ).resultSet<i3.Tab>('tab').createAlias('tab__parent_id__tab__id');
+
+  i3.$TabProcessedTableManager? get parentId {
+    final $_column = $_itemColumn<String>('parent_id');
+    if ($_column == null) return null;
+    final manager = i3
+        .$TabTableManager(
+          $_db,
+          i9.ReadDatabaseContainer($_db).resultSet<i3.Tab>('tab'),
+        )
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_parentIdTable($_db));
+    if (item == null) return manager;
+    return i0.ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
   static i3.Container _containerIdTable(i0.GeneratedDatabase db) =>
       i9.ReadDatabaseContainer(db)
           .resultSet<i3.Container>('container')
@@ -571,11 +592,6 @@ class $TabFilterComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
   get source => $composableBuilder(
     column: $table.source,
     builder: (column) => i0.ColumnWithTypeConverterFilters(column),
-  );
-
-  i0.ColumnFilters<String> get parentId => $composableBuilder(
-    column: $table.parentId,
-    builder: (column) => i0.ColumnFilters(column),
   );
 
   i0.ColumnFilters<String> get orderKey => $composableBuilder(
@@ -644,6 +660,29 @@ class $TabFilterComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
     column: $table.contentHash,
     builder: (column) => i0.ColumnFilters(column),
   );
+
+  i3.$TabFilterComposer get parentId {
+    final i3.$TabFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.parentId,
+      referencedTable: i9.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => i3.$TabFilterComposer(
+            $db: $db,
+            $table: i9.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 
   i3.$ContainerFilterComposer get containerId {
     final i3.$ContainerFilterComposer composer = $composerBuilder(
@@ -720,11 +759,6 @@ class $TabOrderingComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
     builder: (column) => i0.ColumnOrderings(column),
   );
 
-  i0.ColumnOrderings<String> get parentId => $composableBuilder(
-    column: $table.parentId,
-    builder: (column) => i0.ColumnOrderings(column),
-  );
-
   i0.ColumnOrderings<String> get orderKey => $composableBuilder(
     column: $table.orderKey,
     builder: (column) => i0.ColumnOrderings(column),
@@ -790,6 +824,29 @@ class $TabOrderingComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
     builder: (column) => i0.ColumnOrderings(column),
   );
 
+  i3.$TabOrderingComposer get parentId {
+    final i3.$TabOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.parentId,
+      referencedTable: i9.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => i3.$TabOrderingComposer(
+            $db: $db,
+            $table: i9.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
   i3.$ContainerOrderingComposer get containerId {
     final i3.$ContainerOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -831,9 +888,6 @@ class $TabAnnotationComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
 
   i0.GeneratedColumnWithTypeConverter<i6.TabSource, int> get source =>
       $composableBuilder(column: $table.source, builder: (column) => column);
-
-  i0.GeneratedColumn<String> get parentId =>
-      $composableBuilder(column: $table.parentId, builder: (column) => column);
 
   i0.GeneratedColumn<String> get orderKey =>
       $composableBuilder(column: $table.orderKey, builder: (column) => column);
@@ -887,6 +941,29 @@ class $TabAnnotationComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
     column: $table.contentHash,
     builder: (column) => column,
   );
+
+  i3.$TabAnnotationComposer get parentId {
+    final i3.$TabAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.parentId,
+      referencedTable: i9.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => i3.$TabAnnotationComposer(
+            $db: $db,
+            $table: i9.ReadDatabaseContainer($db).resultSet<i3.Tab>('tab'),
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 
   i3.$ContainerAnnotationComposer get containerId {
     final i3.$ContainerAnnotationComposer composer = $composerBuilder(
@@ -958,7 +1035,11 @@ class $TabTableManager
           $TabUpdateCompanionBuilder,
           (i3.TabData, i3.$TabReferences),
           i3.TabData,
-          i0.PrefetchHooks Function({bool containerId, bool captureTabRefs})
+          i0.PrefetchHooks Function({
+            bool parentId,
+            bool containerId,
+            bool captureTabRefs,
+          })
         > {
   $TabTableManager(i0.GeneratedDatabase db, i3.Tab table)
     : super(
@@ -1055,7 +1136,11 @@ class $TabTableManager
               .map((e) => (e.readTable(table), i3.$TabReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback:
-              ({containerId = false, captureTabRefs = false}) {
+              ({
+                parentId = false,
+                containerId = false,
+                captureTabRefs = false,
+              }) {
                 return i0.PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
@@ -1080,6 +1165,19 @@ class $TabTableManager
                           dynamic
                         >
                       >(state) {
+                        if (parentId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.parentId,
+                                    referencedTable: i3.$TabReferences
+                                        ._parentIdTable(db),
+                                    referencedColumn: i3.$TabReferences
+                                        ._parentIdTable(db)
+                                        .id,
+                                  )
+                                  as T;
+                        }
                         if (containerId) {
                           state =
                               state.withJoin(
@@ -1135,7 +1233,11 @@ typedef $TabProcessedTableManager =
       $TabUpdateCompanionBuilder,
       (i3.TabData, i3.$TabReferences),
       i3.TabData,
-      i0.PrefetchHooks Function({bool containerId, bool captureTabRefs})
+      i0.PrefetchHooks Function({
+        bool parentId,
+        bool containerId,
+        bool captureTabRefs,
+      })
     >;
 typedef $ClosedTabTombstoneCreateCompanionBuilder =
     i3.ClosedTabTombstoneCompanion Function({
