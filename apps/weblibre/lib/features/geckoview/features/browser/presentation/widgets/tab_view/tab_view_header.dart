@@ -18,38 +18,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:weblibre/core/design/app_colors.dart';
-import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/persisted_bool.dart';
-import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/bookmark_all_dialog.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/select_folder_dialog.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/clear_container_data_dialog.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/close_all_private_tabs_dialog.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/close_all_tabs_dialog.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/container_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/enable_ai_tab_suggestions_dialog.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
 import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
@@ -122,11 +105,7 @@ class _TabFilters extends ConsumerWidget {
             ref.read(tabsTrayScopeControllerProvider.notifier).showLocal();
             ref.read(selectedContainerProvider.notifier).clearContainer();
           },
-          onLongPress: (container) async {
-            await ContainerEditRoute(
-              containerData: jsonEncode(container.toJson()),
-            ).push(context);
-          },
+          enableContextMenu: true,
         ),
         if (isSyncedScope) ...[
           const SizedBox(height: 8),
@@ -223,13 +202,6 @@ class TabViewHeader extends HookConsumerWidget {
         (settings) => settings.showContainerUi,
       ),
     );
-    final showIsolatedTabUi = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.showIsolatedTabUi,
-      ),
-    );
-
-    final selectedContainerId = ref.watch(selectedContainerProvider);
     final isSyncedScope = ref.watch(
       effectiveTabsTrayScopeProvider.select(
         (scope) => scope == TabsTrayScope.synced,
@@ -712,427 +684,48 @@ class TabViewHeader extends HookConsumerWidget {
                               }
                             : null,
                       ),
-                    MenuAnchor(
-                      controller: tabsActionMenuController,
-                      menuChildren: [
-                        SubmenuButton(
-                          leadingIcon: const Icon(MdiIcons.closeCircle),
-                          menuChildren: [
-                            MenuItemButton(
-                              leadingIcon: const Icon(MdiIcons.closeCircle),
-                              onPressed: isSyncedScope
-                                  ? null
-                                  : () async {
-                                      final result =
-                                          await showCloseAllTabsDialog(context);
+                    Consumer(
+                      builder: (context, ref, child) {
+                        // The id is known synchronously; the row it points at
+                        // loads asynchronously. Scope the tab-bulk actions to
+                        // the id, or they would fall back to "unassigned"
+                        // during that window.
+                        final selectedContainerId = ref.watch(
+                          selectedContainerProvider,
+                        );
+                        final selectedContainer = ref.watch(
+                          selectedContainerDataProvider.select(
+                            (value) => value.value,
+                          ),
+                        );
 
-                                      if (result == true) {
-                                        final count = await ref
-                                            .read(
-                                              tabDataRepositoryProvider
-                                                  .notifier,
-                                            )
-                                            .closeContainerTabs(
-                                              selectedContainerId,
-                                            );
-
-                                        if (context.mounted) {
-                                          ui_helper.showTabUndoClose(
-                                            context,
-                                            ref
-                                                .read(
-                                                  tabRepositoryProvider
-                                                      .notifier,
-                                                )
-                                                .undoClose,
-                                            count: count.length,
-                                          );
-                                        }
-                                      }
-                                    },
-                              child: const Text('All Tabs'),
-                            ),
-                            MenuItemButton(
-                              leadingIcon: Icon(
-                                MdiIcons.dominoMask,
-                                color: AppColors.of(context).privateTabPurple,
-                              ),
-                              onPressed: isSyncedScope
-                                  ? null
-                                  : () async {
-                                      final result =
-                                          await showCloseAllPrivateTabsDialog(
-                                            context,
-                                          );
-
-                                      if (result == true) {
-                                        final count = await ref
-                                            .read(
-                                              tabDataRepositoryProvider
-                                                  .notifier,
-                                            )
-                                            .closeContainerTabs(
-                                              selectedContainerId,
-                                              includeRegular: false,
-                                              includeIsolated: false,
-                                            );
-
-                                        if (context.mounted) {
-                                          ui_helper.showTabUndoClose(
-                                            context,
-                                            ref
-                                                .read(
-                                                  tabRepositoryProvider
-                                                      .notifier,
-                                                )
-                                                .undoClose,
-                                            count: count.length,
-                                          );
-                                        }
-                                      }
-                                    },
-                              child: const Text('Private Tabs'),
-                            ),
-                            if (showIsolatedTabUi)
-                              MenuItemButton(
-                                leadingIcon: Icon(
-                                  MdiIcons.snowflake,
-                                  color: AppColors.of(context).isolatedTabTeal,
-                                ),
-                                onPressed: isSyncedScope
-                                    ? null
-                                    : () async {
-                                        // Count distinct isolation groups that will be destroyed
-                                        final allStates = ref.read(
-                                          tabStatesProvider,
-                                        );
-                                        final isolatedContextIds = allStates
-                                            .values
-                                            .where(
-                                              (s) =>
-                                                  s.tabMode
-                                                      is IsolatedTabMode &&
-                                                  s.isolationContextId != null,
-                                            )
-                                            .map((s) => s.isolationContextId!)
-                                            .toSet();
-
-                                        if (isolatedContextIds.isNotEmpty &&
-                                            context.mounted) {
-                                          final confirmed = await ui_helper
-                                              .confirmIsolatedTabClose(
-                                                context,
-                                                groupCount:
-                                                    isolatedContextIds.length,
-                                              );
-                                          if (!confirmed) return;
-                                        }
-
-                                        final count = await ref
-                                            .read(
-                                              tabDataRepositoryProvider
-                                                  .notifier,
-                                            )
-                                            .closeContainerTabs(
-                                              selectedContainerId,
-                                              includeRegular: false,
-                                              includePrivate: false,
-                                            );
-
-                                        if (context.mounted) {
-                                          ui_helper.showTabUndoClose(
-                                            context,
-                                            ref
-                                                .read(
-                                                  tabRepositoryProvider
-                                                      .notifier,
-                                                )
-                                                .undoClose,
-                                            count: count.length,
-                                          );
-                                        }
-                                      },
-                                child: const Text('Isolated Tabs'),
-                              ),
-                            if (tabsViewMode != TabsViewMode.tree)
-                              MenuItemButton(
-                                leadingIcon: const Icon(MdiIcons.filterOutline),
-                                onPressed:
-                                    isSyncedScope ||
-                                        !ref
-                                            .read(
-                                              tabViewFilterControllerProvider,
-                                            )
-                                            .hasActiveFilter
-                                    ? null
-                                    : () async {
-                                        final filteredIds = await ref
-                                            .read(
-                                              tabDataRepositoryProvider
-                                                  .notifier,
-                                            )
-                                            .getFilteredTabIds(
-                                              selectedContainerId,
-                                            );
-                                        if (!context.mounted) return;
-
-                                        if (filteredIds.isEmpty) return;
-
-                                        // Check for isolated tabs
-                                        if (!await confirmBulkTabCloseIfNeeded(
-                                          context,
-                                          ref,
-                                          filteredIds,
-                                        )) {
-                                          return;
-                                        }
-
-                                        await ref
-                                            .read(
-                                              tabRepositoryProvider.notifier,
-                                            )
-                                            .closeTabs(filteredIds);
-
-                                        if (context.mounted) {
-                                          ui_helper.showTabUndoClose(
-                                            context,
-                                            ref
-                                                .read(
-                                                  tabRepositoryProvider
-                                                      .notifier,
-                                                )
-                                                .undoClose,
-                                            count: filteredIds.length,
-                                          );
-                                        }
-                                      },
-                                child: const Text('Filtered Tabs'),
-                              ),
-                          ],
-                          child: const Text('Close Tabs'),
-                        ),
-                        MenuItemButton(
-                          leadingIcon: const Icon(MdiIcons.bookmarkPlusOutline),
-                          onPressed: isSyncedScope
-                              ? null
-                              : () async {
-                                  final choice = await showBookmarkAllDialog(
-                                    context,
-                                  );
-                                  if (choice == null || !context.mounted) {
-                                    return;
-                                  }
-
-                                  final tabData = await ref
-                                      .read(tabDataRepositoryProvider.notifier)
-                                      .getContainerTabsData(
-                                        selectedContainerId,
-                                      );
-
-                                  if (choice == BookmarkAllChoice.fast) {
-                                    if (!context.mounted) return;
-                                    final folderGuid =
-                                        await showSelectFolderDialog(context);
-                                    if (folderGuid == null) return;
-
-                                    final repo = ref.read(
-                                      bookmarksRepositoryProvider.notifier,
-                                    );
-                                    for (final tab in tabData) {
-                                      if (tab.url != null) {
-                                        await repo.addBookmark(
-                                          parentGuid: folderGuid,
-                                          url: tab.url!,
-                                          title:
-                                              tab.title ?? tab.url.toString(),
-                                        );
-                                      }
-                                    }
-
-                                    if (context.mounted) {
-                                      ui_helper.showInfoMessage(
-                                        context,
-                                        '${tabData.length} bookmark(s) added',
-                                      );
-                                    }
-                                  } else {
-                                    for (final tab in tabData) {
-                                      if (context.mounted) {
-                                        await BookmarkEntryAddRoute(
-                                          bookmarkInfo: jsonEncode(
-                                            BookmarkInfo(
-                                              title: tab.title,
-                                              url: tab.url.toString(),
-                                            ).encode(),
-                                          ),
-                                        ).push(context);
-                                      }
-                                    }
-                                  }
-                                },
-                          child: const Text('Bookmark all'),
-                        ),
-                        Consumer(
-                          builder: (context, ref, child) {
-                            final selectedContainer = ref.watch(
-                              selectedContainerDataProvider.select(
-                                (value) => value.value,
-                              ),
-                            );
-
-                            // Only show if container has cookie isolation
-                            if (selectedContainer
-                                    ?.metadata
-                                    .contextualIdentity ==
-                                null) {
-                              return const SizedBox.shrink();
-                            }
-
-                            return Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Divider(),
-                                MenuItemButton(
-                                  closeOnActivate: false,
-                                  leadingIcon: const Icon(
-                                    MdiIcons.databaseRemove,
-                                  ),
-                                  child: const Text('Clear Container Data'),
-                                  onPressed: () async {
-                                    final containerId = selectedContainer!.id;
-                                    final tabs = await ref
-                                        .read(
-                                          tabDataRepositoryProvider.notifier,
-                                        )
-                                        .getContainerTabsData(containerId);
-
-                                    if (!context.mounted) return;
-
-                                    final result =
-                                        await showClearContainerDataDialog(
-                                          context,
-                                          tabs.length,
-                                        );
-
-                                    if (result?.confirmed == true) {
-                                      final shouldReopenTabs =
-                                          result!.reopenTabs;
-
-                                      try {
-                                        final closedTabIds = await ref
-                                            .read(
-                                              tabDataRepositoryProvider
-                                                  .notifier,
-                                            )
-                                            .closeContainerTabs(containerId);
-
-                                        await ref
-                                            .read(
-                                              browserDataServiceProvider
-                                                  .notifier,
-                                            )
-                                            .clearDataForContext(
-                                              selectedContainer
-                                                  .metadata
-                                                  .contextualIdentity!,
-                                            );
-
-                                        if (shouldReopenTabs) {
-                                          await ref
-                                              .read(
-                                                tabRepositoryProvider.notifier,
-                                              )
-                                              .addMultipleTabs(
-                                                tabs: tabs.map((tab) {
-                                                  var parentId = tab.parentId;
-                                                  while (parentId != null &&
-                                                      closedTabIds.contains(
-                                                        parentId,
-                                                      )) {
-                                                    parentId = tabs
-                                                        .firstWhereOrNull(
-                                                          (old) =>
-                                                              old.id ==
-                                                              parentId,
-                                                        )
-                                                        ?.parentId;
-                                                  }
-
-                                                  return AddTabParams(
-                                                    url: tab.url.toString(),
-                                                    startLoading: true,
-                                                    parentId: parentId,
-                                                    private:
-                                                        tab.tabMode ==
-                                                        TabModeDbValue.private,
-                                                    flags: LoadUrlFlags.NONE
-                                                        .toValue(),
-                                                    source: Internal.newTab
-                                                        .toValue(),
-                                                    contextId:
-                                                        tab.tabMode ==
-                                                            TabModeDbValue
-                                                                .isolated
-                                                        ? tab.isolationContextId ??
-                                                              selectedContainer
-                                                                  .metadata
-                                                                  .contextualIdentity
-                                                        : selectedContainer
-                                                              .metadata
-                                                              .contextualIdentity,
-                                                  );
-                                                }).toList(),
-                                                containerSelection:
-                                                    TabContainerSelection.specific(
-                                                      selectedContainer,
-                                                    ),
-                                              );
-                                        }
-
-                                        if (context.mounted) {
-                                          ui_helper.showInfoMessage(
-                                            context,
-                                            shouldReopenTabs
-                                                ? 'Container data cleared successfully'
-                                                : 'Container data cleared. ${tabs.length} tab(s) closed.',
-                                          );
-                                        }
-                                      } catch (e, s) {
-                                        logger.e(
-                                          'Failed to clear container data',
-                                          error: e,
-                                          stackTrace: s,
-                                        );
-                                        if (context.mounted) {
-                                          ui_helper.showErrorMessage(
-                                            context,
-                                            'Error clearing data: $e',
-                                          );
-                                        }
-                                      }
-                                    }
-
-                                    if (context.mounted) {
-                                      MenuController.maybeOf(context)?.close();
-                                    }
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      ],
-                      child: IconButton(
-                        tooltip: 'Tab actions',
-                        onPressed: () {
-                          if (tabsActionMenuController.isOpen) {
-                            tabsActionMenuController.close();
-                          } else {
-                            tabsActionMenuController.open();
-                          }
-                        },
-                        icon: const Icon(MdiIcons.dotsVertical),
-                      ),
+                        // Tab-bulk actions scoped to the container currently in
+                        // view. The container's own actions (edit, pin, assigned
+                        // sites, delete) hang off the chip's long-press menu,
+                        // which is the same [ContainerMenu] with more items
+                        // enabled.
+                        return ContainerMenu(
+                          controller: tabsActionMenuController,
+                          container: selectedContainer,
+                          scopeContainerId: selectedContainerId,
+                          // The synced scope lists tabs from other devices;
+                          // none of these act on them.
+                          enabled: !isSyncedScope,
+                          enableCloseFilteredTabs:
+                              tabsViewMode != TabsViewMode.tree,
+                          builder: (context, controller, _) => IconButton(
+                            tooltip: 'Tab actions',
+                            onPressed: () {
+                              if (controller.isOpen) {
+                                controller.close();
+                              } else {
+                                controller.open();
+                              }
+                            },
+                            icon: const Icon(MdiIcons.dotsVertical),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 )

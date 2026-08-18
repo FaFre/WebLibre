@@ -18,10 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:fading_scroll/fading_scroll.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/presentation/widgets/reorderable_hold_drag.dart';
 
@@ -41,66 +39,6 @@ class _BadgeWrapper extends StatelessWidget {
             child: child,
           )
         : child;
-  }
-}
-
-class _GestureWrapper extends HookWidget {
-  final Widget child;
-  final GestureLongPressCallback? onLongPress;
-
-  /// When true, long-press detection is done via a passive [Listener] so it
-  /// doesn't claim the gesture from the surrounding
-  /// [ReorderableHoldDragListener]. The callback fires only on pointer release
-  /// if the touch was held longer than [kItemLongPressDelay] without moving
-  /// more than [kTouchSlop]. Any movement above slop starts the reorder drag
-  /// instead and suppresses the callback.
-  final bool reorderMode;
-
-  const _GestureWrapper({
-    required this.child,
-    this.onLongPress,
-    this.reorderMode = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final startPosition = useRef(Offset.zero);
-    final pressStart = useRef<Duration?>(null);
-    final moved = useRef(false);
-
-    if (onLongPress == null) {
-      return child;
-    }
-
-    if (!reorderMode) {
-      return InkWell(onLongPress: onLongPress, child: child);
-    }
-
-    return Listener(
-      onPointerDown: (event) {
-        startPosition.value = event.position;
-        pressStart.value = event.timeStamp;
-        moved.value = false;
-      },
-      onPointerMove: (event) {
-        if (!moved.value &&
-            (event.position - startPosition.value).distance > kTouchSlop) {
-          moved.value = true;
-        }
-      },
-      onPointerUp: (event) {
-        final start = pressStart.value;
-        pressStart.value = null;
-        if (start == null || moved.value) return;
-        if (event.timeStamp - start >= kItemLongPressDelay) {
-          onLongPress!();
-        }
-      },
-      onPointerCancel: (_) {
-        pressStart.value = null;
-      },
-      child: child,
-    );
   }
 }
 
@@ -163,11 +101,12 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
   final Color? selectedBorderColor;
   final SelectableChipDecoration<T>? decoration;
 
-  final Widget Function(Widget child, S item)? itemWrap;
+  /// Wraps each main item. Applied inside the reorder drag handle, so wrappers
+  /// may install their own gesture handling.
+  final Widget Function(Widget child, T item)? itemWrap;
 
   final void Function(T item)? onSelected;
   final void Function(T item)? onDeleted;
-  final void Function(T item)? onLongPress;
 
   /// Long-press-to-drag reorder among the main items. Indices are
   /// passed in the same coordinate space as [availableItems] (prefix
@@ -191,7 +130,6 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
     this.enableDelete = true,
     this.onSelected,
     this.onDeleted,
-    this.onLongPress,
     this.onReorder,
     this.sortSelectedFirst = true,
     this.scrollController,
@@ -253,41 +191,34 @@ class SelectableChips<T extends S, S, K> extends StatelessWidget {
             : const EdgeInsets.only(right: 8.0, top: 4.0),
         child: _BadgeWrapper(
           count: itemBadgeCount?.call(item),
-          child: _GestureWrapper(
-            reorderMode: onReorder != null,
-            onLongPress: onLongPress.mapNotNull(
-              (callback) =>
-                  () => callback(item),
-            ),
-            child: FilterChip(
-              color: itemColorValue != null
-                  ? WidgetStatePropertyAll(itemColorValue)
-                  : null,
-              selected: selectedBorderColor == null && isSelected,
-              showCheckmark: false,
-              labelPadding: deco?.labelPadding?.call(item),
-              deleteIcon: deco?.deleteIcon?.call(item),
-              onSelected: (value) {
-                if (value) {
-                  onSelected?.call(item);
-                } else {
-                  onDeleted?.call(item);
-                }
-              },
-              onDeleted: canDeleteItem
-                  ? () {
-                      onDeleted?.call(item);
-                    }
-                  : null,
-              label: itemLabel.call(item),
-              avatar: itemAvatar?.call(item),
-              tooltip: itemTooltip?.call(item),
-              side:
-                  deco?.side?.call(item, isSelected) ??
-                  (isSelected && selectedBorderColor != null
-                      ? BorderSide(color: selectedBorderColor!, width: 2.0)
-                      : null),
-            ),
+          child: FilterChip(
+            color: itemColorValue != null
+                ? WidgetStatePropertyAll(itemColorValue)
+                : null,
+            selected: selectedBorderColor == null && isSelected,
+            showCheckmark: false,
+            labelPadding: deco?.labelPadding?.call(item),
+            deleteIcon: deco?.deleteIcon?.call(item),
+            onSelected: (value) {
+              if (value) {
+                onSelected?.call(item);
+              } else {
+                onDeleted?.call(item);
+              }
+            },
+            onDeleted: canDeleteItem
+                ? () {
+                    onDeleted?.call(item);
+                  }
+                : null,
+            label: itemLabel.call(item),
+            avatar: itemAvatar?.call(item),
+            tooltip: itemTooltip?.call(item),
+            side:
+                deco?.side?.call(item, isSelected) ??
+                (isSelected && selectedBorderColor != null
+                    ? BorderSide(color: selectedBorderColor!, width: 2.0)
+                    : null),
           ),
         ),
       );

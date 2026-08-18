@@ -30,6 +30,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/container_menu.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
@@ -40,6 +41,7 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/t
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
+import 'package:weblibre/presentation/widgets/reorderable_hold_drag.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 
 ContainerColorPalette _palette(
@@ -86,6 +88,44 @@ InlineCountBadge _countBadge(
     backgroundColor: palette.badgeBackgroundColor,
     foregroundColor: palette.badgeForegroundColor,
   );
+}
+
+/// Wraps a container chip in its long-press [ContainerMenu].
+///
+/// [reorderable] must mirror whether the chip sits in a reorderable list: there
+/// the drag recognizer claims the gesture arena, so the menu must detect the
+/// press passively — see [HoldMenuListener].
+class _ContainerChipMenu extends StatelessWidget {
+  final ContainerData? container;
+  final bool reorderable;
+  final Widget child;
+
+  const _ContainerChipMenu({
+    required this.container,
+    required this.reorderable,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isRealContainer = container != null;
+
+    return ContainerMenu(
+      container: container,
+      scopeContainerId: container?.id,
+      enableNewTab: true,
+      enablePin: isRealContainer,
+      enableAssignedSites: isRealContainer,
+      enableEdit: isRealContainer,
+      enableDelete: isRealContainer,
+      builder: (context, controller, _) => HoldMenuListener(
+        controller: controller,
+        claimGesture: !reorderable,
+        borderRadius: BorderRadius.circular(8.0),
+        child: child,
+      ),
+    );
+  }
 }
 
 class _UnassignedContainerChip extends ConsumerWidget {
@@ -259,7 +299,11 @@ class ContainerChips extends HookConsumerWidget {
   final int Function(ContainerDataWithCount?)? containerBadgeCount;
   final void Function(ContainerDataWithCount?)? onSelected;
   final void Function(ContainerDataWithCount)? onDeleted;
-  final void Function(ContainerDataWithCount)? onLongPress;
+
+  /// Long-press a chip to open its [ContainerMenu]. Off by default: pickers and
+  /// filter rows show the same chips but must not offer destructive container
+  /// actions.
+  final bool enableContextMenu;
 
   final ValueListenable<TextEditingValue>? searchTextListenable;
 
@@ -268,7 +312,7 @@ class ContainerChips extends HookConsumerWidget {
     required this.selectedContainer,
     required this.onSelected,
     required this.onDeleted,
-    this.onLongPress,
+    this.enableContextMenu = false,
     this.containerFilter,
     this.containerBadgeCount,
     this.searchTextListenable,
@@ -282,6 +326,27 @@ class ContainerChips extends HookConsumerWidget {
     this.syncedTabCount = 0,
     this.onSyncedChipSelected,
   });
+
+  /// The unassigned pseudo-chip lives in the non-draggable prefix region, so it
+  /// gets the same drop target and context menu as the real chips, but always
+  /// in the arena-claiming variant — there is no reorder drag to defer to.
+  Widget _buildUnassignedChip({required Widget child}) {
+    var wrapped = child;
+
+    if (enableContextMenu) {
+      wrapped = _ContainerChipMenu(
+        container: null,
+        reorderable: false,
+        child: wrapped,
+      );
+    }
+
+    if (enableDragAndDrop) {
+      wrapped = TabDragContainerTarget(container: null, child: wrapped);
+    }
+
+    return wrapped;
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -473,12 +538,26 @@ class ContainerChips extends HookConsumerWidget {
                                 : null,
                           );
                         },
-                        itemWrap: enableDragAndDrop
+                        itemWrap: (enableDragAndDrop || enableContextMenu)
                             ? (child, container) {
-                                return TabDragContainerTarget(
-                                  container: container,
-                                  child: child,
-                                );
+                                var wrapped = child;
+
+                                if (enableContextMenu) {
+                                  wrapped = _ContainerChipMenu(
+                                    container: container,
+                                    reorderable: enableContainerReorder,
+                                    child: wrapped,
+                                  );
+                                }
+
+                                if (enableDragAndDrop) {
+                                  wrapped = TabDragContainerTarget(
+                                    container: container,
+                                    child: wrapped,
+                                  );
+                                }
+
+                                return wrapped;
                               }
                             : null,
                         prefixListItems: [
@@ -489,28 +568,17 @@ class ContainerChips extends HookConsumerWidget {
                               onSelected: onSyncedChipSelected ?? () {},
                             ),
                           if (showUnassignedChip)
-                            enableDragAndDrop
-                                ? TabDragContainerTarget(
-                                    container: null,
-                                    child: _UnassignedContainerChip(
-                                      containerBadgeCount: () =>
-                                          containerBadgeCount?.call(null),
-                                      selected:
-                                          unassignedChipSelected ??
-                                          (selectedContainer == null &&
-                                              !syncedChipSelected),
-                                      onSelected: onSelected,
-                                    ),
-                                  )
-                                : _UnassignedContainerChip(
-                                    containerBadgeCount: () =>
-                                        containerBadgeCount?.call(null),
-                                    selected:
-                                        unassignedChipSelected ??
-                                        (selectedContainer == null &&
-                                            !syncedChipSelected),
-                                    onSelected: onSelected,
-                                  ),
+                            _buildUnassignedChip(
+                              child: _UnassignedContainerChip(
+                                containerBadgeCount: () =>
+                                    containerBadgeCount?.call(null),
+                                selected:
+                                    unassignedChipSelected ??
+                                    (selectedContainer == null &&
+                                        !syncedChipSelected),
+                                onSelected: onSelected,
+                              ),
+                            ),
                           if (showGroupSuggestions)
                             const _ContainerSuggestionsChip(),
                         ],
@@ -518,7 +586,6 @@ class ContainerChips extends HookConsumerWidget {
                         selectedItem: selectedContainer,
                         onSelected: onSelected,
                         onDeleted: onDeleted,
-                        onLongPress: onLongPress,
                         onReorder: enableContainerReorder
                             ? (oldIndex, newIndex) {
                                 unawaited(

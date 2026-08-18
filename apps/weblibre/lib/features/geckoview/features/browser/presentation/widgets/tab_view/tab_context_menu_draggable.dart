@@ -17,8 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:async';
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -73,23 +71,12 @@ class TabContextMenuDraggable extends HookConsumerWidget {
     final isDragMoving = useMemoized(() => ValueNotifier(false));
     final startPosition = useRef(Offset.zero);
     final isDragging = useRef(false);
-    final longPressTimer = useRef<Timer?>(null);
 
     // Clean up ValueNotifier
     useEffect(() => isDragMoving.dispose, [isDragMoving]);
-    useEffect(
-      () =>
-          () => longPressTimer.value?.cancel(),
-      const [],
-    );
 
     if (externalDrag) {
-      return _buildReorderableMode(
-        context,
-        menuController: menuController,
-        startPosition: startPosition,
-        longPressTimer: longPressTimer,
-      );
+      return _buildReorderableMode(menuController: menuController);
     }
 
     return _buildDraggableMode(
@@ -199,42 +186,14 @@ class TabContextMenuDraggable extends HookConsumerWidget {
     );
   }
 
-  /// Reorderable mode: Listener + TabMenu (drag handled externally)
+  /// Reorderable mode: [HoldMenuListener] + TabMenu (drag handled externally)
   ///
-  /// The menu opens after [kItemLongPressDelay]; the same finger movement that
-  /// closes it again is what makes the enclosing [ReorderableHoldDragListener]
-  /// start the reorder drag.
-  Widget _buildReorderableMode(
-    BuildContext context, {
-    required MenuController menuController,
-    required ObjectRef<Offset> startPosition,
-    required ObjectRef<Timer?> longPressTimer,
-  }) {
-    void cancelTimer() {
-      longPressTimer.value?.cancel();
-      longPressTimer.value = null;
-    }
-
-    return Listener(
-      onPointerDown: (event) {
-        startPosition.value = event.position;
-        cancelTimer();
-        longPressTimer.value = Timer(kItemLongPressDelay, () {
-          longPressTimer.value = null;
-          menuController.open();
-        });
-      },
-      onPointerMove: (event) {
-        if ((event.position - startPosition.value).distance > kTouchSlop) {
-          // User started moving - cancel menu timer and close menu if open
-          cancelTimer();
-          if (menuController.isOpen) {
-            menuController.close();
-          }
-        }
-      },
-      onPointerUp: (_) => cancelTimer(),
-      onPointerCancel: (_) => cancelTimer(),
+  /// Detection has to stay passive so the pointer is left to the enclosing
+  /// [ReorderableHoldDragListener]'s recognizer — see [HoldMenuListener].
+  Widget _buildReorderableMode({required MenuController menuController}) {
+    return HoldMenuListener(
+      controller: menuController,
+      claimGesture: false,
       child: _buildTabMenu(
         menuController: menuController,
         builder: (context, controller, _) => child,

@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:fast_equatable/fast_equatable.dart';
@@ -27,7 +26,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
@@ -35,6 +33,7 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_chip.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/container_menu.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
@@ -351,23 +350,32 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
                 itemBuilder: (context, index) {
                   final entry = entries[index];
                   final child = switch (entry) {
-                    _AccordionHeaderEntry() => _AccordionHeaderChip(
-                      entry: entry,
-                      // The narrow rail can't fit the container title; show the
-                      // container icon avatar + count badge only.
-                      showTitle: !isVertical,
-                      onSelected: () => selectContainer(entry.container?.id),
-                      // Long-pressing a real container header opens its settings,
-                      // matching the container chip in the tab view. The
-                      // unassigned pseudo-group has no settings to edit.
-                      onLongPress: switch (entry.container) {
-                        final container? => () async {
-                          await ContainerEditRoute(
-                            containerData: jsonEncode(container.toJson()),
-                          ).push(context);
+                    // Long-pressing a container header opens the same
+                    // [ContainerMenu] as the container chip in the tab view.
+                    // The unassigned pseudo-group gets the reduced variant:
+                    // it has no container row to edit, pin or delete.
+                    _AccordionHeaderEntry() => ContainerMenu(
+                      container: entry.container,
+                      scopeContainerId: entry.container?.id,
+                      enableNewTab: true,
+                      enablePin: entry.container != null,
+                      enableAssignedSites: entry.container != null,
+                      enableEdit: entry.container != null,
+                      enableDelete: entry.container != null,
+                      builder: (context, controller, _) => _AccordionHeaderChip(
+                        entry: entry,
+                        // The narrow rail can't fit the container title;
+                        // show the container icon avatar + count badge only.
+                        showTitle: !isVertical,
+                        onSelected: () => selectContainer(entry.container?.id),
+                        onLongPress: () {
+                          if (controller.isOpen) {
+                            controller.close();
+                          } else {
+                            controller.open();
+                          }
                         },
-                        null => null,
-                      },
+                      ),
                     ),
                     _AccordionTabEntry(:final item) => buildTabChip(item),
                   };
@@ -441,8 +449,7 @@ class _AccordionHeaderChip extends StatelessWidget {
   final _AccordionHeaderEntry entry;
   final VoidCallback onSelected;
 
-  /// Opens the container's settings; null for the unassigned pseudo-group,
-  /// which has no settings to edit.
+  /// Opens the container's context menu.
   final VoidCallback? onLongPress;
 
   /// When false (e.g. the narrow vertical rail) the container title is hidden

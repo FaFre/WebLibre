@@ -27,13 +27,12 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/uuid.dart';
 import 'package:weblibre/features/app_links/presentation/widgets/container_app_link_settings_dialog.dart';
-import 'package:weblibre/features/geckoview/features/history/domain/repositories/container_history.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/controllers/container_topic.dart';
-import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/delete_container_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/discard_changes_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_sites.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/color_picker_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_icon_picker_sheet.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
@@ -42,32 +41,8 @@ import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/proxy_connection_picker_sheet.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 enum _DialogMode { create, edit }
-
-/// Remove any per-container app-link overrides (§ container isolation) stored for
-/// [contextIds] in GeneralSettings. Null ids are ignored; a no-op when none are
-/// present. Keeps overrides from lingering after a container drops isolation or
-/// is deleted.
-Future<void> _removeAppLinkOverrides(
-  WidgetRef ref,
-  Set<String?> contextIds,
-) async {
-  final ids = contextIds.nonNulls.toSet();
-  if (ids.isEmpty) return;
-
-  await ref.read(generalSettingsRepositoryProvider.notifier).updateSettings((
-    current,
-  ) {
-    if (!ids.any(current.appLinkContextOverrides.containsKey)) return current;
-    return current.copyWith.appLinkContextOverrides(
-      {...current.appLinkContextOverrides}
-        ..removeWhere((key, _) => ids.contains(key)),
-    );
-  });
-}
 
 class ContainerEditScreen extends HookConsumerWidget {
   final _DialogMode _mode;
@@ -202,7 +177,7 @@ class ContainerEditScreen extends HookConsumerWidget {
       // toggle: drop it when the container is no longer isolated (or lost its
       // contextId) so it can't linger orphaned in GeneralSettings.
       if (!container.metadata.isolatedAppLinkSettings) {
-        await _removeAppLinkOverrides(ref, {
+        await removeContainerAppLinkOverrides(ref, {
           initialContainer.metadata.contextualIdentity,
           container.metadata.contextualIdentity,
         });
@@ -288,30 +263,14 @@ class ContainerEditScreen extends HookConsumerWidget {
     }
 
     Future<void> deleteContainer() async {
-      final result = await showDeleteContainerDialog(context);
+      final deleted = await confirmAndDeleteContainer(
+        context,
+        ref,
+        initialContainer,
+      );
 
-      if (result != null) {
-        // Delete the container's Places visits BEFORE the container itself so
-        // the relation rows still exist to find them; deleting the container
-        // then dissolves the relations via ON DELETE CASCADE.
-        if (result.wipeHistory) {
-          await ref
-              .read(containerHistoryRepositoryProvider.notifier)
-              .deletePlacesVisitsForContainer(initialContainer.id);
-        }
-
-        await ref
-            .read(containerRepositoryProvider.notifier)
-            .deleteContainer(initialContainer.id);
-
-        // Drop the container's app-link override so it doesn't outlive it.
-        await _removeAppLinkOverrides(ref, {
-          initialContainer.metadata.contextualIdentity,
-        });
-
-        if (context.mounted) {
-          context.pop();
-        }
+      if (deleted && context.mounted) {
+        context.pop();
       }
     }
 

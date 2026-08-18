@@ -126,6 +126,108 @@ class ReorderableHoldDragListener extends HookWidget {
   }
 }
 
+/// The other half of the [ReorderableHoldDragListener] contract: opens
+/// [controller]'s menu once the finger has been held for [kItemLongPressDelay],
+/// and closes it again as soon as the finger moves past [kTouchSlop] — the very
+/// movement that makes the enclosing drag listener pick the item up. So a plain
+/// long press leaves the menu open, and long press + move reorders instead.
+///
+/// [claimGesture] selects how the press is detected, and the choice is not
+/// cosmetic:
+///
+///  * `false` — for items inside a reorderable list. Detection stays passive (a
+///    raw [Listener]) so the pointer is left to
+///    [ReorderableHoldDragListener]'s recognizer, which claims the gesture
+///    arena at the same delay and thereby suppresses the item's own tap.
+///  * `true` — when there is no drag to coordinate with. An [InkWell] long
+///    press claims the arena itself; without it nothing would reject the item's
+///    tap recognizer and a long press would open the menu *and* activate the
+///    item on release.
+class HoldMenuListener extends HookWidget {
+  final MenuController controller;
+
+  /// Whether the long press should claim the gesture arena. See the class
+  /// docs — pass false only when an enclosing drag recognizer does it instead.
+  final bool claimGesture;
+
+  final bool enabled;
+
+  /// Ink splash clipping for the [claimGesture] path.
+  final BorderRadius? borderRadius;
+
+  final Widget child;
+
+  const HoldMenuListener({
+    required this.controller,
+    required this.child,
+    this.claimGesture = true,
+    this.enabled = true,
+    this.borderRadius,
+    super.key,
+  });
+
+  void _toggle() {
+    if (controller.isOpen) {
+      controller.close();
+    } else {
+      controller.open();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final holdTimer = useRef<Timer?>(null);
+    final downPosition = useRef(Offset.zero);
+
+    useEffect(
+      () =>
+          () => holdTimer.value?.cancel(),
+      const [],
+    );
+
+    if (!enabled) {
+      return child;
+    }
+
+    if (claimGesture) {
+      return InkWell(
+        onLongPress: _toggle,
+        borderRadius: borderRadius,
+        child: child,
+      );
+    }
+
+    void cancelHold() {
+      holdTimer.value?.cancel();
+      holdTimer.value = null;
+    }
+
+    return Listener(
+      onPointerDown: (event) {
+        downPosition.value = event.position;
+        cancelHold();
+        holdTimer.value = Timer(kItemLongPressDelay, () {
+          holdTimer.value = null;
+          controller.open();
+        });
+      },
+      onPointerMove: (event) {
+        if ((event.position - downPosition.value).distance > kTouchSlop) {
+          // The finger is on its way into a drag (or a scroll) — hand the
+          // gesture over.
+          cancelHold();
+          if (controller.isOpen) {
+            controller.close();
+          }
+        }
+      },
+      onPointerUp: (_) => cancelHold(),
+      onPointerCancel: (_) => cancelHold(),
+      child: child,
+    );
+  }
+}
+
 class _DelayedDragStartListener extends ReorderableDragStartListener {
   final Duration delay;
 
