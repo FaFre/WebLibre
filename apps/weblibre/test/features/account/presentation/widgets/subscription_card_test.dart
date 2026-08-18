@@ -45,14 +45,14 @@ void main() {
       ),
     );
 
-    expect(repository.refreshCount, 0);
+    expect(repository.refreshCount(), 0);
 
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
     await tester.pump();
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump();
 
-    expect(repository.refreshCount, 1);
+    expect(repository.refreshCount(), 1);
   });
 
   testWidgets(
