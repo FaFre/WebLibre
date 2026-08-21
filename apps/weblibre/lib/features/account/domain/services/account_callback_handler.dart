@@ -18,17 +18,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/account/data/account_handoff_ledger.dart';
 import 'package:weblibre/features/account/domain/repositories/account_auth.dart';
 import 'package:weblibre/features/share_intent/domain/services/sharing_intent.dart';
 
 part 'account_callback_handler.g.dart';
 
-/// Parsed `weblibre://account/callback?code=...` deep link.
+/// Parsed `weblibre://account/callback?code=...&state=...` deep link.
 class AccountCallback {
+  const AccountCallback({required this.handoffCode, this.state});
+
   final String handoffCode;
 
-  const AccountCallback({required this.handoffCode});
+  /// The nonce this app sent with the authentication request, echoed back.
+  ///
+  /// Null for a callback produced by an account web app that predates the
+  /// nonce. Such a callback cannot be authenticated at all — see
+  /// [AccountHandoffLedger] — so it is accepted only under the legacy rule.
+  final String? state;
 }
 
 /// Parses [data] as a WebLibre account callback URI. Returns `null` if it
@@ -45,7 +54,12 @@ AccountCallback? tryParseAccountCallback(String data) {
   }
   final code = uri.queryParameters['code'];
   if (code == null || code.isEmpty) return null;
-  return AccountCallback(handoffCode: code);
+
+  final state = uri.queryParameters['state'];
+  return AccountCallback(
+    handoffCode: code,
+    state: state != null && state.isNotEmpty ? state : null,
+  );
 }
 
 /// Listens for account callback deep links and forwards handoff codes
@@ -56,13 +70,62 @@ AccountCallback? tryParseAccountCallback(String data) {
 @Riverpod(keepAlive: true)
 void accountCallbackHandler(Ref ref) {
   final stream = ref.watch(accountCallbackStreamProvider);
+  final ledger = AccountHandoffLedger(filesystem.startupPaths);
 
-  final subscription = stream.listen((code) async {
+  final subscription = stream.listen((callback) async {
+    if (!await _isOurs(ledger, callback)) return;
+
     logger.i('Received account handoff callback');
     await ref
         .read(accountAuthRepositoryProvider.notifier)
-        .handleHandoffCode(code);
+        .handleHandoffCode(callback.handoffCode);
   });
 
   ref.onDispose(subscription.cancel);
+}
+
+/// Whether [callback] answers an authentication this profile actually started.
+///
+/// The callback carries an opaque code and nothing else that identifies it, so
+/// without the echoed nonce there is no way to tell a real callback from one any
+/// app on the device fired at us. A pending sign-in is not proof of the
+/// callback's authenticity — treating it as proof is how an unsolicited deep link
+/// burns the user's real sign-in and shows them an error for it.
+///
+/// Refusal is silent by design. An unsolicited callback is not the user's doing,
+/// and surfacing an error for it would hand any app on the device a way to
+/// interrupt them.
+Future<bool> _isOurs(
+  AccountHandoffLedger ledger,
+  AccountCallback callback,
+) async {
+  final state = callback.state;
+
+  if (state == null) {
+    // An account web app that predates the nonce. Accepted, because refusing
+    // would break sign-in against a deployed backend that cannot echo one yet —
+    // and logged, because while this branch is reachable the callback is
+    // unauthenticated.
+    logger.w(
+      'Account callback carried no state nonce; accepting it unauthenticated',
+    );
+    return true;
+  }
+
+  // The owning profile is passed *in* rather than checked after the fact. The
+  // record is one-time, so a callback that reaches the wrong profile must not be
+  // able to spend it: consuming first and comparing afterwards left the profile
+  // that actually started the sign-in with nothing to redeem, and no way back.
+  final record = await ledger.consume(
+    state,
+    ownedBy: filesystem.selectedProfile.uuid,
+  );
+  if (record == null) {
+    // Never issued, already used, expired, or another profile's. All of them
+    // mean the same thing here and none may disturb a pending sign-in.
+    logger.w('Ignoring an account callback that answers no sign-in we started');
+    return false;
+  }
+
+  return true;
 }

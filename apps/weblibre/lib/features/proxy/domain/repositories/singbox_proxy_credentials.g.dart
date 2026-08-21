@@ -45,7 +45,7 @@ final class SingboxProxyCredentialsRepositoryProvider
 }
 
 String _$singboxProxyCredentialsRepositoryHash() =>
-    r'b4e11b001ccccfbf26417963adf6cb81e1b1e69f';
+    r'9560f4345d31339c0530afe21e1074036a82cc40';
 
 abstract class _$SingboxProxyCredentialsRepository extends $Notifier<void> {
   void build();

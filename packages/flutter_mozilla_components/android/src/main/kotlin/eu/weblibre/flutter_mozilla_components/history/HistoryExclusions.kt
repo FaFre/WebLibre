@@ -129,10 +129,16 @@ object HistoryExclusions {
         // container was un-excluded.
         provisionalTabIds.removeAll(knownTabIdSet)
 
-        if (context != null) {
+        val tabIdsKey = profileKey(EXCLUDED_TAB_IDS_PREF)
+        val contextIdsKey = profileKey(EXCLUDED_CONTEXT_IDS_PREF)
+
+        // No committed profile means no addressable key. Persisting under the
+        // unscoped name instead would hand this profile's exclusions to whichever
+        // profile starts next, via the legacy fallback in [readExclusions].
+        if (context != null && tabIdsKey != null && contextIdsKey != null) {
             prefs(context).edit {
-                putStringSet(profileKey(context, EXCLUDED_TAB_IDS_PREF), excludedTabIdSet)
-                putStringSet(profileKey(context, EXCLUDED_CONTEXT_IDS_PREF), excludedContextIdSet)
+                putStringSet(tabIdsKey, excludedTabIdSet)
+                putStringSet(contextIdsKey, excludedContextIdSet)
                 // This profile now has its own value, so the pre-scoping one is
                 // obsolete — and it is profile-independent, so leaving it would
                 // let it resurface as *another* profile's fallback below.
@@ -157,8 +163,8 @@ object HistoryExclusions {
      */
     fun loadPersisted(context: Context) {
         val prefs = prefs(context)
-        excludedTabIds = prefs.readExclusions(context, EXCLUDED_TAB_IDS_PREF)
-        excludedContextIds = prefs.readExclusions(context, EXCLUDED_CONTEXT_IDS_PREF)
+        excludedTabIds = prefs.readExclusions(EXCLUDED_TAB_IDS_PREF)
+        excludedContextIds = prefs.readExclusions(EXCLUDED_CONTEXT_IDS_PREF)
         knownTabIds = emptySet()
         provisionalTabIds.clear()
     }
@@ -170,8 +176,10 @@ object HistoryExclusions {
      * ignoring it would mean a cold headless start with no exclusions at all,
      * which leaks rather than merely dropping a visit.
      */
-    private fun SharedPreferences.readExclusions(context: Context, base: String): Set<String> {
-        getStringSet(profileKey(context, base), null)?.let { return it.toSet() }
+    private fun SharedPreferences.readExclusions(base: String): Set<String> {
+        profileKey(base)?.let { key ->
+            getStringSet(key, null)?.let { return it.toSet() }
+        }
         return getStringSet(base, emptySet()).orEmpty().toSet()
     }
 
@@ -186,6 +194,5 @@ object HistoryExclusions {
      * Scope a pref key to the active profile, so a headless start under profile B
      * does not restore profile A's excluded ids.
      */
-    private fun profileKey(context: Context, base: String): String =
-        ProfilePrefs.key(context, base)
+    private fun profileKey(base: String): String? = ProfilePrefs.key(base)
 }

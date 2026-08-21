@@ -63,6 +63,195 @@ final class IntentReceiverProvider
 
 String _$intentReceiverHash() => r'61527e0581f56e82a8eec830ad541c8593502df3';
 
+@ProviderFor(intentBus)
+final intentBusProvider = IntentBusProvider._();
+
+final class IntentBusProvider
+    extends $FunctionalProvider<Raw<IntentBus>, Raw<IntentBus>, Raw<IntentBus>>
+    with $Provider<Raw<IntentBus>> {
+  IntentBusProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'intentBusProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$intentBusHash();
+
+  @$internal
+  @override
+  $ProviderElement<Raw<IntentBus>> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  Raw<IntentBus> create(Ref ref) {
+    return intentBus(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Raw<IntentBus> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Raw<IntentBus>>(value),
+    );
+  }
+}
+
+String _$intentBusHash() => r'e54020cc2c4d5706191b1218e99b2d16a5149aa8';
+
+/// Every intent this app acts on: the live ones, plus the ones that arrived
+/// before it existed.
+///
+/// The plugin sends a live intent straight to Dart over Pigeon, which works only
+/// when something is already listening. During profile selection, maintenance
+/// and restart teardown nothing is, and those launches used to vanish without a
+/// trace. The native broker holds them instead, and they are replayed into this
+/// same stream, so a replayed launch meets exactly the handlers a live one does.
+
+@ProviderFor(allIntents)
+final allIntentsProvider = AllIntentsProvider._();
+
+/// Every intent this app acts on: the live ones, plus the ones that arrived
+/// before it existed.
+///
+/// The plugin sends a live intent straight to Dart over Pigeon, which works only
+/// when something is already listening. During profile selection, maintenance
+/// and restart teardown nothing is, and those launches used to vanish without a
+/// trace. The native broker holds them instead, and they are replayed into this
+/// same stream, so a replayed launch meets exactly the handlers a live one does.
+
+final class AllIntentsProvider
+    extends
+        $FunctionalProvider<
+          Raw<Stream<Intent>>,
+          Raw<Stream<Intent>>,
+          Raw<Stream<Intent>>
+        >
+    with $Provider<Raw<Stream<Intent>>> {
+  /// Every intent this app acts on: the live ones, plus the ones that arrived
+  /// before it existed.
+  ///
+  /// The plugin sends a live intent straight to Dart over Pigeon, which works only
+  /// when something is already listening. During profile selection, maintenance
+  /// and restart teardown nothing is, and those launches used to vanish without a
+  /// trace. The native broker holds them instead, and they are replayed into this
+  /// same stream, so a replayed launch meets exactly the handlers a live one does.
+  AllIntentsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'allIntentsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$allIntentsHash();
+
+  @$internal
+  @override
+  $ProviderElement<Raw<Stream<Intent>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  Raw<Stream<Intent>> create(Ref ref) {
+    return allIntents(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Raw<Stream<Intent>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Raw<Stream<Intent>>>(value),
+    );
+  }
+}
+
+String _$allIntentsHash() => r'd31004c83658da57e8b63ce055126bf7b34192e1';
+
+/// Replays the launches the native broker held, once.
+///
+/// Deliberately not part of [allIntents]. That is a broadcast stream, so an event
+/// added while nothing is subscribed is dropped rather than queued, and the broker
+/// retires an entry as soon as this sink accepts it — draining as a side effect of
+/// building the stream therefore acknowledged launches into a stream whose only
+/// listener was whichever consumer happened to be constructed first, which for a
+/// share or a widget tap was the wrong one.
+///
+/// So the drain is its own step, and the caller runs it only after reading every
+/// consumer of [allIntents]. Those consumers buffer (see [bufferedIntentStream]),
+/// which covers the second half of the problem: the widget that finally acts on a
+/// replayed launch mounts later still.
+
+@ProviderFor(brokeredIntentDelivery)
+final brokeredIntentDeliveryProvider = BrokeredIntentDeliveryProvider._();
+
+/// Replays the launches the native broker held, once.
+///
+/// Deliberately not part of [allIntents]. That is a broadcast stream, so an event
+/// added while nothing is subscribed is dropped rather than queued, and the broker
+/// retires an entry as soon as this sink accepts it — draining as a side effect of
+/// building the stream therefore acknowledged launches into a stream whose only
+/// listener was whichever consumer happened to be constructed first, which for a
+/// share or a widget tap was the wrong one.
+///
+/// So the drain is its own step, and the caller runs it only after reading every
+/// consumer of [allIntents]. Those consumers buffer (see [bufferedIntentStream]),
+/// which covers the second half of the problem: the widget that finally acts on a
+/// replayed launch mounts later still.
+
+final class BrokeredIntentDeliveryProvider
+    extends $FunctionalProvider<AsyncValue<int>, int, FutureOr<int>>
+    with $FutureModifier<int>, $FutureProvider<int> {
+  /// Replays the launches the native broker held, once.
+  ///
+  /// Deliberately not part of [allIntents]. That is a broadcast stream, so an event
+  /// added while nothing is subscribed is dropped rather than queued, and the broker
+  /// retires an entry as soon as this sink accepts it — draining as a side effect of
+  /// building the stream therefore acknowledged launches into a stream whose only
+  /// listener was whichever consumer happened to be constructed first, which for a
+  /// share or a widget tap was the wrong one.
+  ///
+  /// So the drain is its own step, and the caller runs it only after reading every
+  /// consumer of [allIntents]. Those consumers buffer (see [bufferedIntentStream]),
+  /// which covers the second half of the problem: the widget that finally acts on a
+  /// replayed launch mounts later still.
+  BrokeredIntentDeliveryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'brokeredIntentDeliveryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$brokeredIntentDeliveryHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<int> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<int> create(Ref ref) {
+    return brokeredIntentDelivery(ref);
+  }
+}
+
+String _$brokeredIntentDeliveryHash() =>
+    r'4414abdde942e5484fc4154c618e23cdda48e30d';
+
 @ProviderFor(sharingIntentStream)
 final sharingIntentStreamProvider = SharingIntentStreamProvider._();
 
@@ -110,7 +299,7 @@ final class SharingIntentStreamProvider
 }
 
 String _$sharingIntentStreamHash() =>
-    r'62e9e54bfa168e7400c4c496d0aca0972ccdf4c1';
+    r'8d96256473c24d4939e763036b1d7d32018ea953';
 
 /// Stream of account callback handoff codes extracted from deep link intents.
 
@@ -122,11 +311,11 @@ final accountCallbackStreamProvider = AccountCallbackStreamProvider._();
 final class AccountCallbackStreamProvider
     extends
         $FunctionalProvider<
-          Raw<Stream<String>>,
-          Raw<Stream<String>>,
-          Raw<Stream<String>>
+          Raw<Stream<AccountCallback>>,
+          Raw<Stream<AccountCallback>>,
+          Raw<Stream<AccountCallback>>
         >
-    with $Provider<Raw<Stream<String>>> {
+    with $Provider<Raw<Stream<AccountCallback>>> {
   /// Stream of account callback handoff codes extracted from deep link intents.
   AccountCallbackStreamProvider._()
     : super(
@@ -144,23 +333,23 @@ final class AccountCallbackStreamProvider
 
   @$internal
   @override
-  $ProviderElement<Raw<Stream<String>>> $createElement(
+  $ProviderElement<Raw<Stream<AccountCallback>>> $createElement(
     $ProviderPointer pointer,
   ) => $ProviderElement(pointer);
 
   @override
-  Raw<Stream<String>> create(Ref ref) {
+  Raw<Stream<AccountCallback>> create(Ref ref) {
     return accountCallbackStream(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(Raw<Stream<String>> value) {
+  Override overrideWithValue(Raw<Stream<AccountCallback>> value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<Raw<Stream<String>>>(value),
+      providerOverride: $SyncValueProvider<Raw<Stream<AccountCallback>>>(value),
     );
   }
 }
 
 String _$accountCallbackStreamHash() =>
-    r'669354c8000657bcaea046ab6318f89cb10dd7fc';
+    r'f6cf46d135a1fba08ad65f7d18e9ce737094c6e3';

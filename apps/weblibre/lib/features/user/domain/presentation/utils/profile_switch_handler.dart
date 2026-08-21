@@ -65,6 +65,6 @@ Future<void> handleSwitchProfile(
       }
       return;
     }
-    await exitApp(ref.container);
+    await exitApp(ref.container, restart: true);
   }
 }

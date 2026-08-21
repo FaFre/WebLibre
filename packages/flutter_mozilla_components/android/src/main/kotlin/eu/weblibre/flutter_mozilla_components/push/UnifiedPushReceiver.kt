@@ -10,6 +10,9 @@ import android.util.Log
 import eu.weblibre.flutter_mozilla_components.ActiveProfile
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.ProfileContext
+import eu.weblibre.flutter_mozilla_components.startup.ProfileCandidateResolver
+import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
+import eu.weblibre.flutter_mozilla_components.startup.StartupPaths
 import java.security.MessageDigest
 import java.util.UUID
 import java.util.concurrent.Executors
@@ -35,11 +38,36 @@ class UnifiedPushReceiver : MessagingReceiver() {
         synchronized(submissionLock) {
             executor.execute {
                 try {
-                    val profileContext = ActiveProfile.resolveContext(context.applicationContext)
+                    val application = context.applicationContext
+
+                    // Checked before anything commits. A broadcast for a profile
+                    // this process is not going to be is not a reason to bind the
+                    // process at all, and the connector would drop it anyway — its
+                    // token lookup runs against one profile's database.
+                    if (!mayHandle(application, token)) return@execute
+
+                    // May be the first thing running in this process, so it is
+                    // allowed to commit the *candidate* — never a profile of its
+                    // own choosing. A null means the process refuses to bind right
+                    // now (selecting, under maintenance, restarting): we return
+                    // without calling super, so the connector never ACKs and the
+                    // message stays deliverable to whoever owns it.
+                    val profileContext = ActiveProfile.resolveOrCommitContext(application)
                     if (profileContext == null) {
-                        Log.e(TAG, "UnifiedPush broadcast has no active profile")
+                        Log.w(TAG, "UnifiedPush broadcast arrived with no committed profile")
                         return@execute
                     }
+
+                    // Re-checked against what actually got committed, which is not
+                    // necessarily the candidate that was compared above.
+                    val owner = runCatching {
+                        ownershipStore(application).ownerOf(token)
+                    }.getOrNull()
+                    if (owner != null && owner.profileId != profileContext.profileId) {
+                        Log.i(TAG, "Leaving a push for ${owner.profileId} unacknowledged")
+                        return@execute
+                    }
+
                     currentToken.set(token)
                     currentMessageId.set(runCatching { intent.getStringExtra(EXTRA_MESSAGE_ID) }.getOrNull())
                     super.onReceive(profileContext, intent)
@@ -59,6 +87,7 @@ class UnifiedPushReceiver : MessagingReceiver() {
         check(message.decrypted) { "Refusing to ACK an undecrypted push message" }
         val profileContext = context as? ProfileContext
             ?: error("UnifiedPush message did not use a profile context")
+        rememberOwnership(profileContext, instance)
         val id = durableMessageId(instance, checkNotNull(currentToken.get()), currentMessageId.get())
         val stored = PushMessageStore(profileContext).persist(instance, message.content, id)
         // MessagingReceiver sends its connector ACK only after this callback returns.
@@ -71,6 +100,7 @@ class UnifiedPushReceiver : MessagingReceiver() {
     }
 
     override fun onNewEndpoint(context: Context, endpoint: PushEndpoint, instance: String) {
+        rememberOwnership(context, instance)
         val push = GlobalComponents.pushForProfile(context)
         if (push != null) {
             runBlocking { push.onNewEndpoint(instance, endpoint) }
@@ -110,6 +140,11 @@ class UnifiedPushReceiver : MessagingReceiver() {
     }
 
     override fun onUnregistered(context: Context, instance: String) {
+        // The token is dead, so the mapping is too. Keeping it would make the
+        // receiver decline a *future* token that happened to reuse the string.
+        currentToken.get()?.let { token ->
+            runCatching { ownershipStore(context).forget(token) }
+        }
         val push = GlobalComponents.pushForProfile(context)
         if (push != null) {
             runBlocking { push.onUnregistered(instance) }
@@ -118,6 +153,71 @@ class UnifiedPushReceiver : MessagingReceiver() {
             PushProfileState.removeEndpoint(context, instance)
         }
     }
+
+    /**
+     * Whether this process should even try to handle a broadcast for [token].
+     *
+     * Only ever answers "no" from positive knowledge: an unknown token falls
+     * through, because the map is a cache and its absence must cost a wake-up
+     * rather than a message.
+     */
+    private fun mayHandle(application: Context, token: String): Boolean {
+        val owner = runCatching { ownershipStore(application).ownerOf(token) }.getOrNull()
+            ?: return true
+
+        val committed = StartupArbiter.committedProfileId()
+        if (committed != null) {
+            if (owner.profileId == committed) return true
+            Log.i(TAG, "Push for ${owner.profileId} arrived in a process serving $committed")
+            return false
+        }
+
+        // Nothing is committed yet, so compare against the profile this process
+        // *would* bind to. Committing to the candidate just to discover the message
+        // belongs elsewhere would spend the process's one identity on nothing.
+        val candidate = runCatching {
+            ProfileCandidateResolver.resolveOnDisk(StartupPaths(application)).profileId
+        }.getOrNull()
+
+        if (candidate != null && owner.profileId != candidate) {
+            Log.i(TAG, "Push for ${owner.profileId} would have committed $candidate; declining")
+            return false
+        }
+
+        return true
+    }
+
+    /**
+     * Records the token/profile pair after the connector has proved it.
+     *
+     * A callback only fires when the connector found the token in the database of
+     * the profile whose context it was given, so this is the one moment the
+     * mapping is known rather than assumed.
+     */
+    private fun rememberOwnership(context: Context, instance: String) {
+        val profileId = (context as? ProfileContext)?.profileId ?: return
+        val token = currentToken.get() ?: return
+
+        runCatching { ownershipStore(context).record(token, profileId, instance) }
+            .onFailure { Log.w(TAG, "Could not record push ownership", it) }
+    }
+
+    /**
+     * The ownership map, always rooted at the *global* files directory.
+     *
+     * [ProfileContext.getApplicationContext] returns the profile context itself
+     * and its `filesDir` points inside the profile, so handing one to
+     * [StartupPaths] would file the global map under whichever profile happened to
+     * be in hand — where no uncommitted process could ever read it.
+     */
+    private fun ownershipStore(context: Context) = PushOwnershipStore(
+        StartupPaths(
+            when (context) {
+                is ProfileContext -> context.rootApplicationContext
+                else -> context.applicationContext
+            },
+        ),
+    )
 
     private fun FailedReason.toPushError(): PushError = when (this) {
         FailedReason.NETWORK -> PushError.Network("Push service needs network to register")

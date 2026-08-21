@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "taskId": "0199a0b1-0000-7000-8000-000000000003",
+  "kind": "delete",
+  "phase": "completed",
+  "targetProfileId": "0199a0b1-3333-7333-8333-333333333333",
+  "archiveDigest": null,
+  "stagingPath": null,
+  "oldPath": null,
+  "participants": [
+    {"id": "jobs", "version": 1, "state": "finalized", "error": null}
+  ],
+  "updatedAt": "2026-08-18T09:02:00.000Z"
+}

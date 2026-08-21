@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "requestId": "0199a0b2-0000-7000-8000-000000000001",
+  "targetProfileId": "0199a0b1-2222-7222-8222-222222222222",
+  "brokerEntryId": "0199a0b3-0000-7000-8000-00000000000f",
+  "reason": "profileSwitch",
+  "processInstanceId": "0199a0b4-0000-7000-8000-0000000000aa",
+  "state": "pending",
+  "createdAt": "2026-08-18T11:00:00.000Z",
+  "expiresAt": "2026-08-18T11:05:00.000Z",
+  "appliedAt": null
+}

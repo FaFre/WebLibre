@@ -34,7 +34,7 @@ final class AccountAuthRepositoryProvider
 }
 
 String _$accountAuthRepositoryHash() =>
-    r'f02904739df3b31cb3f33dece5e51234beef6edb';
+    r'2db477091817c621408b509d739a88e82f342c0e';
 
 abstract class _$AccountAuthRepository
     extends $AsyncNotifier<AccountAuthState> {

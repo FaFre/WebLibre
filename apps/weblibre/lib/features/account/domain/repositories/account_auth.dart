@@ -22,9 +22,11 @@ import 'dart:async';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase/supabase.dart';
+import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/device_info.dart';
 import 'package:weblibre/features/about/domain/providers.dart';
+import 'package:weblibre/features/account/data/account_handoff_ledger.dart';
 import 'package:weblibre/features/account/data/account_secure_store.dart';
 import 'package:weblibre/features/account/data/models/account_auth_state.dart';
 import 'package:weblibre/features/account/data/models/account_persisted_data.dart';
@@ -229,9 +231,22 @@ class AccountAuthRepository extends _$AccountAuthRepository {
       final data = await _store.read();
       await _store.write(data.copyWith(pendingCodeVerifier: codes.verifier));
 
+      // A nonce the account web app echoes back unchanged. The callback
+      // otherwise carries an opaque code and nothing that identifies it, so
+      // without this there is no way to tell a real callback from one any app on
+      // the device fired at us — and no way, on a cold start, to know which
+      // profile the sign-in belongs to.
+      // Named `handoffState` because `state` is the notifier's own.
+      final handoffState = generateAccountHandoffState();
+      await AccountHandoffLedger(filesystem.startupPaths).record(
+        stateNonce: handoffState,
+        profileId: filesystem.selectedProfile.uuid,
+      );
+
       final queryParams = <String, String>{
         'mode': 'handoff',
         'code_challenge': codes.challenge,
+        'state': handoffState,
       };
 
       final packageInfoData = ref.read(packageInfoProvider).value;

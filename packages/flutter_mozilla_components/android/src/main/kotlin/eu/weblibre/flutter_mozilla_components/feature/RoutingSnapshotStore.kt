@@ -63,7 +63,7 @@ internal object RoutingSnapshotStore {
      * caller that everything it holds for the outgoing profile is now stale.
      */
     fun bind(context: Context): Boolean {
-        val key = ProfilePrefs.key(context, ROUTING_SNAPSHOT_PREF)
+        val key = ProfilePrefs.key(ROUTING_SNAPSHOT_PREF)
         val previous = boundKey
 
         this.context = context

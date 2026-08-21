@@ -13628,11 +13628,15 @@ interface GeckoPushApi {
   fun removeDistributor(callback: (Result<Unit>) -> Unit)
   fun renewRegistration(callback: (Result<Unit>) -> Unit)
   /**
-   * Pauses push transport for the current profile before switching profiles.
-   * Site subscriptions and the chosen distributor are retained for restoration
-   * when this profile becomes active again.
+   * Pauses push transport for this profile ahead of a restart, taking the
+   * profile lock so an in-flight delivery cannot straddle the boundary. Site
+   * subscriptions and the chosen distributor are retained for restoration when
+   * this profile becomes active again.
+   *
+   * Writes no profile state: under the restart protocol the target lives in the
+   * durable restart request and is applied by the next process.
    */
-  fun suspendForProfileSwitch(targetProfileId: String, callback: (Result<Unit>) -> Unit)
+  fun suspendPushForRestart(callback: (Result<Unit>) -> Unit)
   /**
    * Subscriptions Gecko has created, read from the UnifiedPush store. Read-only:
    * there is no app→Gecko channel to revoke a subscription, so removal has to go
@@ -13721,12 +13725,10 @@ interface GeckoPushApi {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoPushApi.suspendForProfileSwitch$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoPushApi.suspendPushForRestart$separatedMessageChannelSuffix", codec)
         if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val targetProfileIdArg = args[0] as String
-            api.suspendForProfileSwitch(targetProfileIdArg) { result: Result<Unit> ->
+          channel.setMessageHandler { _, reply ->
+            api.suspendPushForRestart{ result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(GeckoPigeonUtils.wrapError(error))

@@ -2778,7 +2778,7 @@ class _ProfileCard extends HookConsumerWidget {
               color: theme.colorScheme.onPrimaryContainer,
             ),
           ),
-          title: Text(profile.value?.name ?? 'User'),
+          title: Text(profile.value?.name ?? 'Profile'),
           subtitle: Text(
             'Tap to switch profile',
             style: TextStyle(

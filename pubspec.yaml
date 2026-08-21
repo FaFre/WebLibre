@@ -88,6 +88,17 @@ melos:
     build-go-runtime:
       description: Build combined Android gomobile runtime AAR for proxy plugins
       run: native/go_mobile_runtime/scripts/build-android.sh
+    test-android:
+      description: Run the host-side Kotlin unit tests for the native plugin
+      run: |
+        set -e
+        # No flutter/melos equivalent exists for Android unit tests, so this is
+        # the one sanctioned gradle invocation. It needs a configured Android
+        # project, which `flutter build`/`flutter run` produces — run one first
+        # on a clean checkout.
+        cd apps/weblibre/android
+        ./gradlew :flutter_mozilla_components:testDebugUnitTest
+
     build-browser:
       description: Build stable release APK split per ABI
       run: |

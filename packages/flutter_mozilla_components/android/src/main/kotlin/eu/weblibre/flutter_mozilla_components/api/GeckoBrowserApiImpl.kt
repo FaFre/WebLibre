@@ -43,6 +43,8 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPublicSuffixListApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSitePermissionsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoGestureApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoGestureEvents
+import eu.weblibre.flutter_mozilla_components.PwaConstants
+import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTrackingProtectionApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoLogging
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoMlApi
@@ -81,6 +83,7 @@ import mozilla.components.support.base.log.Log
 import mozilla.components.support.base.log.sink.LogSink
 import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
 import org.mozilla.geckoview.BuildConfig as GeckoViewBuildConfig
+import java.io.File
 import mozilla.appservices.places.BookmarkRoot
 
 class PriorityAwareLogSink(
@@ -238,6 +241,41 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         return false
     }
 
+    /**
+     * Binds this process to the profile Dart activated.
+     *
+     * A mismatch throws instead of rebinding: GeckoView allows one runtime per
+     * process and `GeckoRuntime.shutdown()` does not clear GeckoView's static
+     * runtime, so "just switch" is not a thing this process can do. Failing here
+     * is loud but recoverable; binding Gecko to one profile while Dart writes
+     * another's databases is neither.
+     */
+    /**
+     * Verifies that the profile Dart activated is the one this process committed.
+     *
+     * This is no longer a commit point. Dart calls `GeckoProfileApi.beginStartup`
+     * and commits through the arbiter before it opens a database, so by the time
+     * the engine is built the decision is made and `current_profile` is written.
+     * What remains is the disagreement check: binding Gecko to a folder other
+     * than the committed one would leave Dart state and the engine on different
+     * profiles, and the runtime cannot be re-pointed afterwards.
+     */
+    private fun assertProcessProfile(profileFolder: String) {
+        val profileId = File(profileFolder).name
+            .removePrefix(PwaConstants.PROFILE_DIR_PREFIX)
+            .lowercase()
+
+        val committed = StartupArbiter.committedProfileId()
+            ?: error(
+                "Refusing to start the engine before this process committed a " +
+                    "profile (Dart asked for $profileId)",
+            )
+
+        if (committed != profileId) {
+            error("Dart activated $profileId but this process is committed to $committed")
+        }
+    }
+
     private fun setupGeckoEngine(
         profileFolder: String,
         logLevel: Log.Priority,
@@ -246,6 +284,8 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         fxaServerOverride: String?,
         syncTokenServerOverride: String?,
     ) {
+        assertProcessProfile(profileFolder)
+
         val profileApplicationContext = ProfileContext(_flutterPluginBinding.applicationContext, profileFolder)
 
         val selectionActionEvents =

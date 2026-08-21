@@ -22,10 +22,13 @@ import 'dart:async';
 import 'package:exceptions/exceptions.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/providers/format.dart';
+import 'package:weblibre/core/secure_storage/secure_storage_migration.dart';
 import 'package:weblibre/features/about/domain/providers.dart';
 import 'package:weblibre/features/account/domain/services/account_callback_handler.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 import 'package:weblibre/features/bangs/domain/repositories/sync.dart';
+import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
+import 'package:weblibre/features/user/domain/services/profile_restart_request.dart';
 
 part 'app_initialization.g.dart';
 
@@ -79,8 +82,20 @@ class AppInitializationService extends _$AppInitializationService {
         result.onFailure(errors.add);
       }
 
+      // Claim this profile's pre-qualification secure records before anything
+      // reads them. Must run before the account handler below: that one reads
+      // the account record, and until this has run the legacy unqualified copy
+      // is still the one on disk.
+      await migrateSecureStorageForActiveProfile(
+        ref.read(singboxProxyProfilesRepositoryProvider.notifier),
+      );
+
       // Activate account callback deep link handler
       ref.read(accountCallbackHandlerProvider);
+
+      // Listen for "restart into the shortcut's profile" from the native
+      // mismatch dialog. Only this isolate can shut the profile down cleanly.
+      ref.read(profileRestartRequestHandlerProvider);
 
       return (initialized: true, stage: null, errors: errors);
     });

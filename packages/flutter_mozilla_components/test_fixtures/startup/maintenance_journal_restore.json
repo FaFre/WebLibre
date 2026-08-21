@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "taskId": "0199a0b1-0000-7000-8000-000000000002",
+  "kind": "restore",
+  "phase": "oldMoved",
+  "targetProfileId": "0199a0b1-2222-7222-8222-222222222222",
+  "archiveDigest": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+  "stagingPath": "weblibre_maintenance/restore/0199a0b1-0000-7000-8000-000000000002/staging",
+  "oldPath": "weblibre_maintenance/restore/0199a0b1-0000-7000-8000-000000000002/old",
+  "participants": [
+    {"id": "sharedPreferences", "version": 1, "state": "prepared", "error": null},
+    {"id": "externalTrees", "version": 2, "state": "pending", "error": null}
+  ],
+  "updatedAt": "2026-08-18T10:07:00.000Z"
+}

@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "taskId": "0199a0b1-0000-7000-8000-000000000004",
+  "kind": "teleport",
+  "phase": "beaming",
+  "targetProfileId": "0199a0b1-4444-7444-8444-444444444444",
+  "participants": [],
+  "updatedAt": "2026-08-18T09:03:00.000Z"
+}

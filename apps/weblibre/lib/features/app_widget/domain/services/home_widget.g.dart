@@ -42,8 +42,62 @@ final class WidgetPinnableProvider
 
 String _$widgetPinnableHash() => r'3181e5e3e69e7e796e6429ca7507bbbc239f6c21';
 
+/// Every widget launch, whoever delivered it.
+///
+/// ## Who delivers a widget launch
+///
+/// The `home_widget` plugin reads the launch intent itself, so §7.1's question is
+/// real: broker, plugin, or both with deduplication. The answer here is
+/// **whichever one has it, and never both** — which holds by construction rather
+/// than by filtering:
+///
+/// - **Cold start.** `MainActivity.onCreate` does not queue, so the launch intent
+///   is untouched and `initiallyLaunchedFromHomeWidget()` reads it as always.
+/// - **Warm, profile committed.** The broker declines the intent, `super` runs,
+///   and the plugin's `widgetClicked` fires.
+/// - **Warm, nothing committed** — the picker, maintenance, restart teardown.
+///   The broker takes the intent and `MainActivity` returns without `super`, so
+///   the plugin never sees it and cannot double-deliver. Before this, the plugin
+///   sent it to a Dart side with no listeners and the tap did nothing at all.
+///
+/// The two paths are mutually exclusive on the *same* condition the broker uses
+/// to take an intent, so a deduplication step would have nothing to deduplicate.
+/// The merge below is a union of disjoint sources, not a race.
+///
+/// Subscribed as soon as it is built, and buffered, unlike the plugin's own
+/// streams: a launch the broker replays is delivered once, at startup, while the
+/// widget that reads this only exists once the browser has mounted. See
+/// [bufferedIntentStream].
+
 @ProviderFor(appWidgetLaunchStream)
 final appWidgetLaunchStreamProvider = AppWidgetLaunchStreamProvider._();
+
+/// Every widget launch, whoever delivered it.
+///
+/// ## Who delivers a widget launch
+///
+/// The `home_widget` plugin reads the launch intent itself, so §7.1's question is
+/// real: broker, plugin, or both with deduplication. The answer here is
+/// **whichever one has it, and never both** — which holds by construction rather
+/// than by filtering:
+///
+/// - **Cold start.** `MainActivity.onCreate` does not queue, so the launch intent
+///   is untouched and `initiallyLaunchedFromHomeWidget()` reads it as always.
+/// - **Warm, profile committed.** The broker declines the intent, `super` runs,
+///   and the plugin's `widgetClicked` fires.
+/// - **Warm, nothing committed** — the picker, maintenance, restart teardown.
+///   The broker takes the intent and `MainActivity` returns without `super`, so
+///   the plugin never sees it and cannot double-deliver. Before this, the plugin
+///   sent it to a Dart side with no listeners and the tap did nothing at all.
+///
+/// The two paths are mutually exclusive on the *same* condition the broker uses
+/// to take an intent, so a deduplication step would have nothing to deduplicate.
+/// The merge below is a union of disjoint sources, not a race.
+///
+/// Subscribed as soon as it is built, and buffered, unlike the plugin's own
+/// streams: a launch the broker replays is delivered once, at startup, while the
+/// widget that reads this only exists once the browser has mounted. See
+/// [bufferedIntentStream].
 
 final class AppWidgetLaunchStreamProvider
     extends
@@ -53,13 +107,39 @@ final class AppWidgetLaunchStreamProvider
           Raw<Stream<ReceivedIntentParameter>>
         >
     with $Provider<Raw<Stream<ReceivedIntentParameter>>> {
+  /// Every widget launch, whoever delivered it.
+  ///
+  /// ## Who delivers a widget launch
+  ///
+  /// The `home_widget` plugin reads the launch intent itself, so §7.1's question is
+  /// real: broker, plugin, or both with deduplication. The answer here is
+  /// **whichever one has it, and never both** — which holds by construction rather
+  /// than by filtering:
+  ///
+  /// - **Cold start.** `MainActivity.onCreate` does not queue, so the launch intent
+  ///   is untouched and `initiallyLaunchedFromHomeWidget()` reads it as always.
+  /// - **Warm, profile committed.** The broker declines the intent, `super` runs,
+  ///   and the plugin's `widgetClicked` fires.
+  /// - **Warm, nothing committed** — the picker, maintenance, restart teardown.
+  ///   The broker takes the intent and `MainActivity` returns without `super`, so
+  ///   the plugin never sees it and cannot double-deliver. Before this, the plugin
+  ///   sent it to a Dart side with no listeners and the tap did nothing at all.
+  ///
+  /// The two paths are mutually exclusive on the *same* condition the broker uses
+  /// to take an intent, so a deduplication step would have nothing to deduplicate.
+  /// The merge below is a union of disjoint sources, not a race.
+  ///
+  /// Subscribed as soon as it is built, and buffered, unlike the plugin's own
+  /// streams: a launch the broker replays is delivered once, at startup, while the
+  /// widget that reads this only exists once the browser has mounted. See
+  /// [bufferedIntentStream].
   AppWidgetLaunchStreamProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'appWidgetLaunchStreamProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -89,4 +169,4 @@ final class AppWidgetLaunchStreamProvider
 }
 
 String _$appWidgetLaunchStreamHash() =>
-    r'ed042d1391ae3dbc26f806d6fa2e9a4a2464ae44';
+    r'5515bfa8f97e0238622e94b9f8c565b6b95e4ccd';

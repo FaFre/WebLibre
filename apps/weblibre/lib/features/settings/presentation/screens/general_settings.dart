@@ -17,15 +17,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
     show GeckoBrowserService;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/hooks/keyed_state.dart';
@@ -115,6 +120,25 @@ const List<SettingsSectionDefinition> generalSettingsSections = [
     ],
   ),
   SettingsSectionDefinition(
+    title: 'Profile',
+    keywords: ['user', 'profile'],
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Back up this profile',
+        subtitle: 'Write an encrypted backup file of the profile you are using',
+        keywords: [
+          'backup',
+          'archive',
+          'export',
+          'save',
+          'encrypted',
+          'restore',
+        ],
+        child: _BackupProfileTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
     title: 'Downloads',
     entries: [
       SettingsEntryDefinition(
@@ -126,6 +150,42 @@ const List<SettingsSectionDefinition> generalSettingsSections = [
     ],
   ),
 ];
+
+/// Takes a backup of the *active* profile without switching away from it.
+///
+/// The route it opens is the same one the user list reaches, and nothing about
+/// the operation is special-cased here: the backup is queued and taken by the
+/// next process, with the profile closed. This tile exists only because backing
+/// up the profile you are using is the common case, and getting to it through
+/// Profiles → yourself → Backup is not an obvious path.
+class _BackupProfileTile extends HookConsumerWidget {
+  const _BackupProfileTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profile = ref.watch(selectedProfileProvider);
+
+    return ListTile(
+      enabled: profile.hasValue,
+      leading: const Icon(MdiIcons.safe),
+      title: const Text('Back up this profile'),
+      subtitle: Text(switch (profile) {
+        AsyncData(:final value) =>
+          'Write "${value.name}" to an encrypted backup file',
+        AsyncError() => 'Could not read the active profile',
+        _ => 'Loading…',
+      }),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: profile.hasValue
+          ? () async {
+              await BackupProfileRoute(
+                profile: jsonEncode(profile.requireValue.toJson()),
+              ).push(context);
+            }
+          : null,
+    );
+  }
+}
 
 class GeneralSettingsScreen extends StatelessWidget {
   const GeneralSettingsScreen({super.key});

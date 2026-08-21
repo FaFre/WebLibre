@@ -26,13 +26,16 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:simple_intent_receiver/simple_intent_receiver.dart';
 import 'package:uri_to_file/uri_to_file.dart' as uri_to_file;
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/startup/startup_bootstrap.dart';
 import 'package:weblibre/data/models/received_intent_parameter.dart';
 import 'package:weblibre/features/account/domain/services/account_callback_handler.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/services/intent_gatekeeper.dart';
 import 'package:weblibre/features/share_intent/domain/entities/intent_container_mode.dart';
+import 'package:weblibre/features/share_intent/domain/services/brokered_intents.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/services/profile_restart_request.dart';
 
 part 'sharing_intent.g.dart';
 
@@ -48,6 +51,18 @@ _buildSharingIntentTransformer(
       // Account callback intents are consumed by accountCallbackStreamProvider —
       // suppress them from the regular share/sharing intent pipeline so they
       // don't open a browser tab.
+      return;
+    }
+
+    if (restartProfileIdClaim(intent) != null) {
+      // Same reasoning: profileRestartRequestHandlerProvider consumes these. It
+      // carries no URL, so letting it through here would open a blank tab in the
+      // profile the user is about to leave.
+      //
+      // The *claim* rather than the authorization, deliberately: an unauthorized
+      // request is refused there and must be dropped here too. Suppressing it is
+      // the whole answer — it carries nothing to open — and consuming the
+      // authorization twice would spend it on this branch.
       return;
     }
 
@@ -172,51 +187,136 @@ Raw<IntentReceiver> intentReceiver(Ref ref) {
   return receiver;
 }
 
-/// Runs the receiver event stream through [transformer] and forwards it into a
-/// fresh single-subscription controller wired up to [ref]'s lifecycle.
+/// The one sink every intent reaches Dart through.
 ///
-/// Centralising this in one helper means the two intent-consuming providers
-/// below (sharing intents + account callbacks) agree on the receiver semantics:
-/// `receiver.events` includes the recovered cold-start intent for each
-/// listener, plus all live intents.
-Raw<Stream<T>> _consumeIntents<T>(
-  Ref ref,
-  IntentReceiver receiver,
-  StreamTransformer<Intent, T> transformer,
-) {
-  final controller = StreamController<T>();
+/// Separate from [allIntents] because the two halves have different audiences:
+/// consumers need the stream, and the brokered drain needs the *sink* — at a
+/// moment strictly after those consumers exist, which a provider cannot do for its
+/// own dependents. See [brokeredIntentDelivery].
+class IntentBus {
+  IntentBus() : _controller = StreamController<Intent>.broadcast();
 
-  final sub = receiver.events
-      .transform(transformer)
-      .listen(controller.add, onError: controller.addError);
+  final StreamController<Intent> _controller;
 
-  ref.onDispose(() {
-    unawaited(sub.cancel());
-    unawaited(controller.close());
-  });
+  Stream<Intent> get stream => _controller.stream;
 
-  return controller.stream;
+  void emit(Intent intent) => _controller.add(intent);
+
+  void emitError(Object error, StackTrace stackTrace) =>
+      _controller.addError(error, stackTrace);
+
+  Future<void> close() => _controller.close();
 }
 
 @Riverpod(keepAlive: true)
-Raw<Stream<ReceivedIntentParameter>> sharingIntentStream(Ref ref) {
+Raw<IntentBus> intentBus(Ref ref) {
   final receiver = ref.watch(intentReceiverProvider);
+  final bus = IntentBus();
+
+  final subscription = receiver.events.listen(bus.emit, onError: bus.emitError);
+
+  ref.onDispose(() {
+    unawaited(subscription.cancel());
+    unawaited(bus.close());
+  });
+
+  return bus;
+}
+
+/// Every intent this app acts on: the live ones, plus the ones that arrived
+/// before it existed.
+///
+/// The plugin sends a live intent straight to Dart over Pigeon, which works only
+/// when something is already listening. During profile selection, maintenance
+/// and restart teardown nothing is, and those launches used to vanish without a
+/// trace. The native broker holds them instead, and they are replayed into this
+/// same stream, so a replayed launch meets exactly the handlers a live one does.
+@Riverpod(keepAlive: true)
+Raw<Stream<Intent>> allIntents(Ref ref) => ref.watch(intentBusProvider).stream;
+
+/// Replays the launches the native broker held, once.
+///
+/// Deliberately not part of [allIntents]. That is a broadcast stream, so an event
+/// added while nothing is subscribed is dropped rather than queued, and the broker
+/// retires an entry as soon as this sink accepts it — draining as a side effect of
+/// building the stream therefore acknowledged launches into a stream whose only
+/// listener was whichever consumer happened to be constructed first, which for a
+/// share or a widget tap was the wrong one.
+///
+/// So the drain is its own step, and the caller runs it only after reading every
+/// consumer of [allIntents]. Those consumers buffer (see [bufferedIntentStream]),
+/// which covers the second half of the problem: the widget that finally acts on a
+/// replayed launch mounts later still.
+@Riverpod(keepAlive: true)
+Future<int> brokeredIntentDelivery(Ref ref) {
+  final bus = ref.watch(intentBusProvider);
+
+  return drainBrokeredIntents(
+    engineId: engineInstanceId,
+    deliver: (intent) async => bus.emit(intent),
+  );
+}
+
+/// Subscribes to [source] now, and re-publishes it as a broadcast stream that
+/// holds events while nothing is listening.
+///
+/// Both halves matter for a replayed launch. *Now*, because the broker is drained
+/// once and a lazily-built stream would not be subscribed yet — the event would
+/// reach nobody and be acknowledged anyway. *Held*, because the consumer that acts
+/// on it (a browser widget, a route) mounts later, and a plain broadcast stream
+/// drops whatever arrives before it does. Pausing the upstream subscription rather
+/// than cancelling it is what buffers; the default would tear it down.
+Raw<Stream<T>> bufferedIntentStream<T>(Ref ref, Stream<T> source) {
+  final controller = StreamController<T>();
+
+  final subscription = source.listen(
+    controller.add,
+    onError: controller.addError,
+  );
+
+  ref.onDispose(() {
+    unawaited(subscription.cancel());
+    unawaited(controller.close());
+  });
+
+  return controller.stream.asBroadcastStream(
+    onListen: (upstream) => upstream.resume(),
+    onCancel: (upstream) => upstream.pause(),
+  );
+}
+
+/// Runs the receiver event stream through [transformer] and forwards it into a
+/// buffered broadcast stream wired up to [ref]'s lifecycle.
+///
+/// Centralising this in one helper means the intent-consuming providers below
+/// agree on the source: [allIntents] carries the recovered cold-start intent,
+/// every live intent, and every launch the broker held while the app could not
+/// receive one.
+Raw<Stream<T>> _consumeIntents<T>(
+  Ref ref,
+  Stream<Intent> intents,
+  StreamTransformer<Intent, T> transformer,
+) => bufferedIntentStream(ref, intents.transform(transformer));
+
+@Riverpod(keepAlive: true)
+Raw<Stream<ReceivedIntentParameter>> sharingIntentStream(Ref ref) {
+  final intents = ref.watch(allIntentsProvider);
   final gatekeeper = ref.watch(intentGatekeeperProvider.notifier);
   final settingsRepository = ref.watch(
     generalSettingsRepositoryProvider.notifier,
   );
   return _consumeIntents(
     ref,
-    receiver,
+    intents,
     _buildSharingIntentTransformer(gatekeeper, settingsRepository),
   );
 }
 
 /// Stream of account callback handoff codes extracted from deep link intents.
 @Riverpod(keepAlive: true)
-Raw<Stream<String>> accountCallbackStream(Ref ref) {
-  final receiver = ref.watch(intentReceiverProvider);
-  return _consumeIntents(ref, receiver, _accountCallbackTransformer);
+Raw<Stream<AccountCallback>> accountCallbackStream(Ref ref) {
+  final intents = ref.watch(allIntentsProvider);
+  return _consumeIntents(ref, intents, _accountCallbackTransformer);
 }
 
 /// Transformer that yields handoff codes for matching VIEW intents and
@@ -224,11 +324,13 @@ Raw<Stream<String>> accountCallbackStream(Ref ref) {
 /// branch via [_extractAccountCallback] so the two streams agree on which
 /// intents are "account callbacks".
 final _accountCallbackTransformer =
-    StreamTransformer<Intent, String>.fromHandlers(
+    StreamTransformer<Intent, AccountCallback>.fromHandlers(
       handleData: (intent, sink) {
         final callback = _extractAccountCallback(intent);
         if (callback != null) {
-          sink.add(callback.handoffCode);
+          // The whole callback, not just the code: the echoed nonce is what
+          // decides whether it may be redeemed at all.
+          sink.add(callback);
         }
       },
     );

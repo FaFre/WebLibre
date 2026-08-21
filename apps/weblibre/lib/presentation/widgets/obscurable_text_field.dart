@@ -32,6 +32,13 @@ class ObscurableTextField extends HookWidget {
   final int? revealedMinLines;
   final int? revealedMaxLines;
   final ValueChanged<String>? onChanged;
+  final FocusNode? focusNode;
+  final bool autofocus;
+  final ValueChanged<String>? onSubmitted;
+
+  /// Off by default: everything typed here is a secret, and the IME must not
+  /// learn it.
+  final bool enableIMEPersonalizedLearning;
 
   const ObscurableTextField({
     super.key,
@@ -43,6 +50,10 @@ class ObscurableTextField extends HookWidget {
     this.revealedMinLines,
     this.revealedMaxLines,
     this.onChanged,
+    this.focusNode,
+    this.autofocus = false,
+    this.onSubmitted,
+    this.enableIMEPersonalizedLearning = false,
   });
 
   @override
@@ -61,6 +72,8 @@ class ObscurableTextField extends HookWidget {
 
     return TextField(
       controller: controller,
+      focusNode: focusNode,
+      autofocus: autofocus,
       enabled: enabled,
       obscureText: obscured.value,
       keyboardType: keyboardType,
@@ -69,8 +82,10 @@ class ObscurableTextField extends HookWidget {
       maxLines: obscured.value ? 1 : (revealedMaxLines ?? 1),
       autocorrect: false,
       enableSuggestions: false,
+      enableIMEPersonalizedLearning: enableIMEPersonalizedLearning,
       decoration: decoration.copyWith(suffixIcon: suffix),
       onChanged: onChanged,
+      onSubmitted: onSubmitted,
     );
   }
 }

@@ -143,9 +143,9 @@ object SandboxCaptureFeature : SandboxCaptureApi {
     // JSON mirror file under the active profile dir. Dart writes it on every
     // mutation; Kotlin reads it during pre-Gecko bootstrap.
     private fun sandboxCapturesFile(context: Context): File? {
-        if (ActiveProfile.prefix == null) {
-            ActiveProfile.resolveFromDisk(context)
-        }
+        // Only the committed profile is addressable. Before commitment this returns
+        // null and the bootstrap is a no-op; it is re-driven from the arbiter's
+        // `onCommitted` hook, which is the only point at which the profile is known.
         val prefix = ActiveProfile.prefix ?: return null
         val profileDir = File(
             context.filesDir,

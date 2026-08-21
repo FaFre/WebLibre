@@ -8,9 +8,11 @@ package eu.weblibre.flutter_mozilla_components
 
 import eu.weblibre.flutter_mozilla_components.api.GeckoBrowserApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
+import eu.weblibre.flutter_mozilla_components.api.GeckoProfileApiImpl
 import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureFeature
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoProfileApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPushApi
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -22,7 +24,22 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
   private val browserApi = GeckoBrowserApiImpl()
 
+  /**
+   * Held so the leases this engine took — profile access, and whatever the
+   * arbiter granted it — can be handed back when the engine goes away. See
+   * [GeckoProfileApiImpl.onEngineDetached].
+   */
+  private var profileApi: GeckoProfileApiImpl? = null
+
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+    // Registered first, and unconditionally: this is the arbitration API Dart
+    // `main()` calls before it opens a database, creates a profile, or asks for
+    // anything else. Everything below it is profile-bound and therefore only
+    // legal after a commitment this API hands out.
+    val profileApiImpl = GeckoProfileApiImpl(flutterPluginBinding.applicationContext)
+    profileApi = profileApiImpl
+    GeckoProfileApi.setUp(flutterPluginBinding.binaryMessenger, profileApiImpl)
+
     browserApi.attachBinding(flutterPluginBinding)
     GeckoBrowserApi.setUp(flutterPluginBinding.binaryMessenger, browserApi)
     SandboxCaptureFeature.wireFlutterEvents(flutterPluginBinding.binaryMessenger)
@@ -43,6 +60,14 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
   }
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+    GeckoProfileApi.setUp(binding.binaryMessenger, null)
+    // Before anything else: the profile-access lease and the arbiter's selection
+    // and maintenance leases are all process-global and keyed on the isolate, so
+    // an engine that detaches without handing them back locks every later engine
+    // out until the process dies. MainActivity destroys the cached engine on any
+    // non-finishing destroy, so that is a routine event.
+    profileApi?.onEngineDetached()
+    profileApi = null
     SandboxCaptureFeature.detachFlutterEvents(binding.binaryMessenger)
     GeckoPushApi.setUp(binding.binaryMessenger, null)
     browserApi.disposePushApi()

@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "profilePrompt": "browserOnly",
+  "honorShortcutProfile": false,
+  "pendingTasks": [
+    {
+      "id": "0199a0b1-0000-7000-8000-000000000001",
+      "action": "backup",
+      "profileId": "0199a0b1-1111-7111-8111-111111111111",
+      "profileName": "Default",
+      "state": "queued",
+      "targetTreeUri": "content://com.android.externalstorage.documents/tree/primary%3ABackups",
+      "sourceFileUri": null,
+      "sourceDigest": null,
+      "integrityCheck": true,
+      "adoptArchiveName": false,
+      "createdAt": "2026-08-18T10:00:00.000Z",
+      "startedAt": null,
+      "error": null
+    },
+    {
+      "id": "0199a0b1-0000-7000-8000-000000000002",
+      "action": "restoreOver",
+      "profileId": "0199a0b1-2222-7222-8222-222222222222",
+      "profileName": "Work",
+      "state": "running",
+      "targetTreeUri": null,
+      "sourceFileUri": null,
+      "sourceDigest": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "integrityCheck": true,
+      "adoptArchiveName": true,
+      "createdAt": "2026-08-18T10:05:00.000Z",
+      "startedAt": "2026-08-18T10:06:00.000Z",
+      "error": null
+    },
+    {
+      "id": "0199a0b1-0000-7000-8000-000000000003",
+      "action": "delete",
+      "profileId": "0199a0b1-3333-7333-8333-333333333333",
+      "profileName": "Old",
+      "state": "completed",
+      "integrityCheck": false,
+      "createdAt": "2026-08-18T09:00:00.000Z",
+      "startedAt": "2026-08-18T09:01:00.000Z",
+      "error": null
+    }
+  ]
+}

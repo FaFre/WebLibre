@@ -29,10 +29,15 @@ internal object ProfilePrefs {
             (context as? ProfileContext)?.rootApplicationContext ?: context.applicationContext,
         )
 
-    fun key(context: Context, base: String): String {
-        if (ActiveProfile.prefix == null) {
-            ActiveProfile.resolveFromDisk(context.applicationContext)
-        }
-        return ActiveProfile.prefix?.let { "$base.$it" } ?: base
-    }
+    /**
+     * Scopes [base] to the *committed* profile, or returns `null` when the process
+     * has not committed one yet.
+     *
+     * There is deliberately no unprefixed fallback. Returning [base] when the
+     * profile is unknown wrote one profile's state into a key every other profile
+     * also reads, and re-resolving `current_profile` here could bind a different
+     * profile than the one the process is actually running. A `null` means "not
+     * addressable yet"; callers skip the read or the write.
+     */
+    fun key(base: String): String? = ActiveProfile.prefix?.let { "$base.$it" }
 }

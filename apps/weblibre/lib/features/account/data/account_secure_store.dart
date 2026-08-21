@@ -21,6 +21,9 @@ import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/filesystem.dart';
+import 'package:weblibre/core/secure_storage/profile_secure_store.dart';
+import 'package:weblibre/core/secure_storage/secure_storage_migration.dart';
 import 'package:weblibre/features/account/data/models/account_persisted_data.dart';
 
 part 'account_secure_store.g.dart';
@@ -38,15 +41,20 @@ part 'account_secure_store.g.dart';
 /// deprecated the Jetpack Security library, with automatic migration on
 /// first read.
 class AccountSecureStore {
-  static const _storageKey = 'account_auth_data';
+  /// Scoped to the profile, not the app.
+  ///
+  /// It used to be a single bare `account_auth_data` record, which meant one
+  /// account session — refresh token, e2e sync key and all — was shared by every
+  /// profile on the device: signing in on one signed in on all of them. Secure
+  /// storage has no notion of a profile, so the key is the only thing that can
+  /// carry the boundary.
+  final ProfileSecureStore _store;
 
-  final FlutterSecureStorage _storage;
-
-  AccountSecureStore({FlutterSecureStorage? storage})
-    : _storage = storage ?? const FlutterSecureStorage();
+  AccountSecureStore({required String profileId, FlutterSecureStorage? storage})
+    : _store = ProfileSecureStore(profileId: profileId, storage: storage);
 
   Future<AccountPersistedData> read() async {
-    final json = await _storage.read(key: _storageKey);
+    final json = await _store.read(accountSecureBaseKey);
     if (json == null) return AccountPersistedData();
     return AccountPersistedData.fromJson(
       jsonDecode(json) as Map<String, dynamic>,
@@ -54,13 +62,14 @@ class AccountSecureStore {
   }
 
   Future<void> write(AccountPersistedData data) {
-    return _storage.write(key: _storageKey, value: jsonEncode(data.toJson()));
+    return _store.write(accountSecureBaseKey, jsonEncode(data.toJson()));
   }
 
   Future<void> clear() {
-    return _storage.delete(key: _storageKey);
+    return _store.delete(accountSecureBaseKey);
   }
 }
 
 @Riverpod(keepAlive: true)
-AccountSecureStore accountSecureStore(Ref ref) => AccountSecureStore();
+AccountSecureStore accountSecureStore(Ref ref) =>
+    AccountSecureStore(profileId: filesystem.selectedProfile.uuid);

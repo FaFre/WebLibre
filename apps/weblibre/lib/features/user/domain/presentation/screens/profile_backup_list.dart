@@ -21,16 +21,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:saf_util/saf_util.dart';
+import 'package:weblibre/core/maintenance/backup_archive_name.dart';
 import 'package:weblibre/core/providers/format.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/providers/backup_directory.dart';
 import 'package:weblibre/features/user/domain/services/user_backup.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
-
-final _filenamePattern = RegExp(
-  r'^backup_(?<profile>.+?)_(?<timestamp>\d{4}-\d{2}-\d{2}_\d{6})\.weblibre$',
-);
 
 class ProfileBackupListScreen extends HookConsumerWidget {
   final void Function(BuildContext context, Uri backupFileUri)?
@@ -79,7 +76,7 @@ class ProfileBackupListScreen extends HookConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(MdiIcons.folderCog),
-            tooltip: 'Change backup directory',
+            tooltip: 'Change backup folder',
             onPressed: () => _pickDirectory(ref),
           ),
         ],
@@ -95,18 +92,19 @@ class ProfileBackupListScreen extends HookConsumerWidget {
                       const Icon(MdiIcons.folderOpen, size: 64),
                       const SizedBox(height: 16),
                       const Text(
-                        'Select a directory to store your backups.',
+                        'Choose where to store your backups.',
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'Choose a location outside of the app to keep your backups safe across reinstalls.',
+                        'Pick a location outside the app, so the backups '
+                        'survive uninstalling it.',
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 24),
                       FilledButton.icon(
                         icon: const Icon(MdiIcons.folderPlus),
-                        label: const Text('Select Backup Directory'),
+                        label: const Text('Choose folder'),
                         onPressed: () => _pickDirectory(ref),
                       ),
                     ],
@@ -123,15 +121,11 @@ class ProfileBackupListScreen extends HookConsumerWidget {
                     itemCount: backupList.length,
                     itemBuilder: (context, index) {
                       final file = backupList[index];
-                      final match = _filenamePattern.firstMatch(file.name);
+                      final parsed = BackupArchiveName.tryParse(file.name);
 
-                      if (match != null) {
-                        final profileName = match.group(1)!;
-                        final datePart = match.group(2)!;
-
-                        final dateTime = UserBackupService.dateFormatter.decode(
-                          datePart,
-                        );
+                      if (parsed != null) {
+                        final profileName = parsed.profileName;
+                        final dateTime = parsed.createdAt;
 
                         return ListTile(
                           key: ValueKey(file.uri),
@@ -156,7 +150,7 @@ class ProfileBackupListScreen extends HookConsumerWidget {
                   );
                 },
                 error: (error, stackTrace) => FailureWidget(
-                  title: 'Failed to get backups',
+                  title: 'Could not load backups',
                   exception: error,
                   onRetry: () {
                     ref.invalidate(backupListProvider);

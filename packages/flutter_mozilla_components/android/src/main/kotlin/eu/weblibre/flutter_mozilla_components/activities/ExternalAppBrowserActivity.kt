@@ -110,6 +110,10 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
 
         val components = GlobalComponents.components
         if (components == null) {
+            // Requires a committed profile rather than binding one: this Activity is
+            // launched by IntentReceiverActivity, which has already classified the
+            // launch and bound the right profile. Binding again here could only pick
+            // a different one.
             if (GlobalComponents.ensureExternalComponents(applicationContext)) {
                 showFragment(sessionId)
                 return

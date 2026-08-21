@@ -22,10 +22,7 @@ package eu.weblibre.simple_intent_receiver
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import io.flutter.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -38,15 +35,10 @@ import eu.weblibre.simple_intent_receiver.pigeons.IntentGatekeeperHostApi
 
 class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.NewIntentListener, IntentHost {
   companion object {
-    // Stable names that must match the notification replay path and shared-prefs schema.
-    private const val PREFS_NAME = "weblibre_intent_gatekeeper"
-    private const val KEY_NOTIFICATION_APPROVAL_TOKENS = "notification_approval_tokens"
-    private const val KEY_NOTIFICATION_APPROVAL_PACKAGE_PREFIX = "notification_approval_package_"
-    private const val EXTRA_NOTIFICATION_APPROVAL_TOKEN = "eu.weblibre.gatekeeper.notification_approval_token"
-    private const val EXTRA_ALWAYS_ALLOW_PACKAGE = "eu.weblibre.gatekeeper.always_allow_package"
+    private val EXTRA_NOTIFICATION_APPROVAL_TOKEN =
+      IntentApprovals.EXTRA_NOTIFICATION_APPROVAL_TOKEN
+    private val EXTRA_ALWAYS_ALLOW_PACKAGE = IntentApprovals.EXTRA_ALWAYS_ALLOW_PACKAGE
   }
-
-  private data class NotificationApproval(val alwaysAllowPackage: String?)
 
   private lateinit var context: Context
   private var intentReceiver: IntentReceiver? = null
@@ -175,79 +167,23 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
       intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
     }
 
-    val notificationApproval = consumeNotificationApproval(intent)
+    // Shared with the startup broker, which has to redeem the same token when it
+    // queues a launch the plugin will never see.
+    val notificationApproval = IntentApprovals.consume(context, intent)
     return convertToPigeonIntent(intent, notificationApproval)
   }
 
+  /**
+   * Delegates to [IntentCallerResolver] rather than resolving here, because the
+   * native startup broker has to record the same answer for a launch it replays
+   * later. Two copies of this would agree only until one was edited.
+   */
   private fun resolveCallerPackage(intent: Intent, notificationApproval: NotificationApproval?): String? {
     if (notificationApproval != null) {
       return null
     }
 
-    val raw = resolveRawCallerPackage(intent) ?: return null
-    // Treat system packages (launcher, shell, SystemUI, etc.) as internal — the
-    // gatekeeper shouldn't prompt the user when the OS itself forwards an intent.
-    if (isSystemPackage(raw)) return null
-    return raw
-  }
-
-  private fun resolveRawCallerPackage(intent: Intent): String? {
-    // 1. Try Activity.getReferrer() — handles EXTRA_REFERRER/_NAME and real caller.
-    activity?.referrer?.let { uri ->
-      if (uri.scheme == "android-app") {
-        uri.host?.let { return it }
-      }
-    }
-
-    // 2. Fallback to explicit referrer extras on the intent itself.
-    @Suppress("DEPRECATION")
-    val referrerUri: Uri? = intent.getParcelableExtra(Intent.EXTRA_REFERRER)
-    if (referrerUri?.scheme == "android-app") {
-      referrerUri.host?.let { return it }
-    }
-
-    intent.getStringExtra(Intent.EXTRA_REFERRER_NAME)?.let { name ->
-      Uri.parse(name).takeIf { it.scheme == "android-app" }?.host?.let { return it }
-    }
-
-    // 3. Caller for startActivityForResult flows.
-    return activity?.callingPackage
-  }
-
-  private fun isSystemPackage(packageName: String): Boolean {
-    return try {
-      val pm = context.packageManager
-      val info = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        pm.getApplicationInfo(packageName, PackageManager.ApplicationInfoFlags.of(0))
-      } else {
-        @Suppress("DEPRECATION")
-        pm.getApplicationInfo(packageName, 0)
-      }
-      val systemFlags = ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP
-      (info.flags and systemFlags) != 0
-    } catch (_: PackageManager.NameNotFoundException) {
-      false
-    } catch (_: Exception) {
-      false
-    }
-  }
-
-  private fun consumeNotificationApproval(intent: Intent): NotificationApproval? {
-    val token = intent.getStringExtra(EXTRA_NOTIFICATION_APPROVAL_TOKEN) ?: return null
-    val prefs = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-    val tokens = prefs.getStringSet(KEY_NOTIFICATION_APPROVAL_TOKENS, emptySet())?.toMutableSet()
-      ?: return null
-    if (!tokens.remove(token)) {
-      return null
-    }
-
-    val alwaysAllowPackage = prefs.getString("$KEY_NOTIFICATION_APPROVAL_PACKAGE_PREFIX$token", null)
-    prefs.edit()
-      .putStringSet(KEY_NOTIFICATION_APPROVAL_TOKENS, tokens)
-      .remove("$KEY_NOTIFICATION_APPROVAL_PACKAGE_PREFIX$token")
-      .apply()
-
-    return NotificationApproval(alwaysAllowPackage)
+    return IntentCallerResolver.resolve(context, activity, intent)
   }
 
   private fun convertToPigeonIntent(intent: Intent, notificationApproval: NotificationApproval?): PigeonIntent {

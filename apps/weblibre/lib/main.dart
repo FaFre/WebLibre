@@ -47,9 +47,11 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/app_state.dart';
 import 'package:weblibre/core/providers/defaults.dart';
 import 'package:weblibre/core/providers/router.dart';
+import 'package:weblibre/core/secure_storage/secure_storage_migration.dart';
 import 'package:weblibre/domain/services/app_initialization.dart';
 import 'package:weblibre/domain/services/display_mode.dart';
 import 'package:weblibre/features/account/domain/services/account_callback_handler.dart';
+import 'package:weblibre/features/app_widget/domain/services/home_widget.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/engine_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/proxy_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/services/history_exclusion_replication.dart';
@@ -60,14 +62,18 @@ import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_pruner.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_settings_sync.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_logs.dart';
+import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_autostart.dart';
+import 'package:weblibre/features/share_intent/domain/services/sharing_intent.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/services/profile_restart_request.dart';
 import 'package:weblibre/features/web_feed/presentation/controllers/fetch_articles.dart';
 import 'package:weblibre/features/web_feed/utils/fetch_entrypoint.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
 import 'package:weblibre/presentation/main_app.dart';
+import 'package:weblibre/presentation/startup_phase_host.dart';
 
 ColorScheme _fixSurfaceContainerColors(
   ColorScheme scheme,
@@ -373,8 +379,29 @@ class _MainWidget extends HookConsumerWidget {
       // background; failures are logged and ignored.
       unawaited(ref.read(localIndexPrunerProvider.notifier).prune());
 
+      // Claim this profile's pre-qualification secure records before anything
+      // reads them — the account handler below reads one of them, and until this
+      // has run the legacy unqualified copy is still what is on disk.
+      await migrateSecureStorageForActiveProfile(
+        ref.read(singboxProxyProfilesRepositoryProvider.notifier),
+      );
+
       // Activate account callback deep link handler
       ref.read(accountCallbackHandlerProvider);
+
+      // Listen for "restart into the shortcut's profile" from the native
+      // mismatch dialog. Only this isolate can shut the profile down cleanly.
+      ref.read(profileRestartRequestHandlerProvider);
+
+      // Every consumer of `allIntents` has to exist before the broker is drained.
+      // The stream is a broadcast stream, so a replayed launch added to it with
+      // nothing subscribed is dropped — and then acknowledged, which is exactly
+      // the silent loss the broker exists to prevent. The account-callback and
+      // restart-request consumers are alive from the two reads above; these two
+      // are otherwise built by the browser widget, far too late.
+      ref.read(sharingIntentStreamProvider);
+      ref.read(appWidgetLaunchStreamProvider);
+      await ref.read(brokeredIntentDeliveryProvider.future);
 
       // Bring up the proxy connections flagged for autostart. Their SOCKS
       // endpoints reach Gecko through the routing snapshot mounted above, and
@@ -516,13 +543,7 @@ void main() async {
     return true;
   };
 
-  await filesystem.init();
-
   await RustLib.init();
-
-  if (!kDebugMode) {
-    await BackgroundFetch.registerHeadlessTask(backgroundFetch);
-  }
 
   if (kDebugMode) {
     final serviceProtocolInfo = await Service.getInfo();
@@ -543,7 +564,21 @@ void main() async {
 
   await HomeWidget.setAppGroupId('weblibre');
 
+  // The host is the root, not the app. Nothing below it may exist before the
+  // native arbiter has committed a profile and `filesystem.activate()` has bound
+  // it: a `ProviderScope` opens databases, and the background-fetch headless task
+  // would let a second isolate open the same ones from outside the decision.
   runApp(
-    const ProviderScope(observers: [ErrorObserver()], child: _MainWidget()),
+    StartupPhaseHost(
+      onActivated: () async {
+        if (!kDebugMode) {
+          await BackgroundFetch.registerHeadlessTask(backgroundFetch);
+        }
+      },
+      appBuilder: (context) => const ProviderScope(
+        observers: [ErrorObserver()],
+        child: _MainWidget(),
+      ),
+    ),
   );
 }

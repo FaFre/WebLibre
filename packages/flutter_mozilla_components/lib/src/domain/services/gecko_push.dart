@@ -78,8 +78,9 @@ class GeckoPushService extends GeckoPushEvents {
 
   Future<void> renewRegistration() => _api.renewRegistration();
 
-  Future<void> suspendForProfileSwitch(String targetProfileId) =>
-      _api.suspendForProfileSwitch(targetProfileId);
+  /// Quiesces push before a restart. Writes no profile state — the restart
+  /// request carries the target, and the next process applies it.
+  Future<void> suspendPushForRestart() => _api.suspendPushForRestart();
 
   Future<List<PushSubscription>> getSubscriptions() => _api.getSubscriptions();
 

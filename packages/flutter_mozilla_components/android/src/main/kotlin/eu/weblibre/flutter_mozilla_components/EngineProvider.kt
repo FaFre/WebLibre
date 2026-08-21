@@ -16,6 +16,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMo
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
+import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
 import mozilla.components.browser.engine.gecko.GeckoEngine
 import mozilla.components.browser.engine.gecko.fetch.GeckoViewFetchClient
 import mozilla.components.concept.engine.DefaultSettings
@@ -30,15 +31,66 @@ import org.mozilla.geckoview.ContentBlocking
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoRuntimeSettings
 
+/**
+ * The runtime's lifetime, which is the process's lifetime.
+ *
+ * A nullable runtime cannot express the difference between "not created yet" and
+ * "created and shut down", and those two must not behave alike: GeckoView keeps
+ * its own static reference to the runtime it created, so `shutdown()` does not
+ * return the process to a state where another runtime can be built. Re-creating
+ * after a shutdown fails somewhere deep inside GeckoView instead of here, which
+ * is far harder to attribute.
+ */
+sealed interface GeckoRuntimeState {
+    data object NeverCreated : GeckoRuntimeState
+
+    data class Live(val profileId: String, val runtime: GeckoRuntime) : GeckoRuntimeState
+
+    data class Shutdown(val profileId: String) : GeckoRuntimeState
+}
+
 object EngineProvider {
-    private var runtime: GeckoRuntime? = null
+    private var state: GeckoRuntimeState = GeckoRuntimeState.NeverCreated
+
+    @Synchronized
+    fun runtimeState(): GeckoRuntimeState = state
 
     private val components: Components
         get() = requireNotNull(GlobalComponents.components) { "Components not initialized" }
 
+    /**
+     * The runtime for the committed profile, created on first use.
+     *
+     * Every creation path funnels through here so the identity check cannot be
+     * bypassed: the process profile is decided once by [StartupArbiter], and a
+     * runtime built for any other profile would read a different Gecko data
+     * directory than the rest of the process, permanently.
+     */
     @Synchronized
     fun getOrCreateRuntime(context: Context): GeckoRuntime {
-        if (runtime == null) {
+        val profileId = StartupArbiter.committedProfileId()
+            ?: error("Refusing to create a GeckoRuntime before this process committed a profile")
+
+        when (val current = state) {
+            is GeckoRuntimeState.Live -> {
+                if (current.profileId != profileId) {
+                    error(
+                        "GeckoRuntime is bound to ${current.profileId} but $profileId was " +
+                            "requested; the process profile is immutable",
+                    )
+                }
+                return current.runtime
+            }
+
+            is GeckoRuntimeState.Shutdown -> error(
+                "GeckoRuntime was shut down for ${current.profileId}; this process cannot " +
+                    "create another and must restart",
+            )
+
+            GeckoRuntimeState.NeverCreated -> Unit
+        }
+
+        return run {
             Logger.debug("Creating Runtime")
             val builder = GeckoRuntimeSettings.Builder()
             val contentBlocking = ContentBlocking.Settings.Builder();
@@ -106,10 +158,10 @@ object EngineProvider {
                 }
             }
 
-            runtime = GeckoRuntime.create(context, builder.build())
+            val created = GeckoRuntime.create(context, builder.build())
+            state = GeckoRuntimeState.Live(profileId, created)
+            created
         }
-
-        return runtime!!
     }
 
     fun createEngine(
@@ -152,12 +204,20 @@ object EngineProvider {
         return GeckoViewFetchClient(context, runtime)
     }
 
+    /**
+     * Shuts the runtime down and marks the process terminal for Gecko.
+     *
+     * The state does not go back to [GeckoRuntimeState.NeverCreated]. Recording
+     * which profile it was is what lets a later creation attempt say why it is
+     * refused instead of failing inside GeckoView.
+     */
     @Synchronized
     fun shutdown() {
-        runtime?.let {
+        val current = state
+        if (current is GeckoRuntimeState.Live) {
             Logger.debug("Shutting down GeckoRuntime")
-            it.shutdown()
-            runtime = null
+            current.runtime.shutdown()
+            state = GeckoRuntimeState.Shutdown(current.profileId)
         }
     }
 }

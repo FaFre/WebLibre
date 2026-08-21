@@ -1527,8 +1527,8 @@ packages:
     dependency: transitive
     description:
       path: "packages/secure_archive"
-      ref: "0c515813ac2d29e29ab1c66759a396af825bf8b3"
-      resolved-ref: "0c515813ac2d29e29ab1c66759a396af825bf8b3"
+      ref: "9bec69d2b9957a629f4a7c4d4a732aaa24c3b40b"
+      resolved-ref: "9bec69d2b9957a629f4a7c4d4a732aaa24c3b40b"
       url: "https://github.com/FaFre/secure_archive.git"
     source: git
     version: "1.0.0"

@@ -26,6 +26,7 @@ export 'src/domain/services/gecko_icon.dart';
 export 'src/domain/services/gecko_logging.dart';
 export 'src/domain/services/gecko_ml.dart';
 export 'src/domain/services/gecko_pref.dart';
+export 'src/domain/services/gecko_profile.dart';
 export 'src/domain/services/gecko_push.dart';
 export 'src/domain/services/gecko_readerable.dart';
 export 'src/domain/services/gecko_selection_action.dart';
@@ -158,3 +159,12 @@ export 'src/pigeons/gecko.g.dart'
         WebContentIsolationStrategy,
         WebExtensionActionType,
         WebExtensionData;
+export 'src/pigeons/startup.g.dart'
+    show
+        GeckoProfileApi,
+        ParticipantStep,
+        ProfileStartupDirective,
+        ProfileStartupDirectiveKind,
+        ProfileStartupOwnerType,
+        ProfileStartupPromptMode,
+        StartupIntentRecord;

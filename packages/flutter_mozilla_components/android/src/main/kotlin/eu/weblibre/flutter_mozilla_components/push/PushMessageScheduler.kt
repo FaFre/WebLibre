@@ -12,6 +12,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import eu.weblibre.flutter_mozilla_components.ProfileContext
+import eu.weblibre.flutter_mozilla_components.ProfileWorkTags
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -32,6 +33,10 @@ object PushMessageScheduler {
                     .putString(PushMessageWorker.KEY_MESSAGE_ID, messageId)
                     .build(),
             )
+            // Tagged so a profile delete can find this work. The unique name below
+            // embeds the profile as well, but names cannot be queried by prefix, so
+            // they are no help to anything enumerating a profile's jobs.
+            .addTag(ProfileWorkTags.forRelativePath(context.relativePath))
             .build()
         val operation = WorkManager.getInstance(context)
             .enqueueUniqueWork(workName(context.relativePath, messageId), ExistingWorkPolicy.KEEP, request)

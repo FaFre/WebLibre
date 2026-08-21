@@ -19,18 +19,31 @@
  */
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/filesystem.dart';
+import 'package:weblibre/core/secure_storage/profile_secure_store.dart';
+import 'package:weblibre/core/secure_storage/secure_storage_migration.dart';
 
 part 'singbox_proxy_credentials.g.dart';
 
 @Riverpod(keepAlive: true)
 class SingboxProxyCredentialsRepository
     extends _$SingboxProxyCredentialsRepository {
-  static const _storage = FlutterSecureStorage();
+  /// Scoped to the *user* profile as well as the proxy profile.
+  ///
+  /// `profileId` here is a proxy profile, whose row lives in the user profile's
+  /// own database — so the record has an owner even though the key never said
+  /// so. Naming it makes a deleted user profile's credentials collectable
+  /// instead of orphaned in the app-wide store forever.
+  ProfileSecureStore get _store => ProfileSecureStore(
+    profileId: filesystem.selectedProfile.uuid,
+    storage: const FlutterSecureStorage(),
+  );
 
-  String _secretKey(String profileId) => 'singbox_proxy.secret.$profileId';
+  String _secretKey(String proxyProfileId) =>
+      '$proxySecretKeyPrefix$proxyProfileId';
 
   Future<String?> readSecretJson(String profileId) {
-    return _storage.read(key: _secretKey(profileId));
+    return _store.read(_secretKey(profileId));
   }
 
   Future<void> writeSecretJson(String profileId, String? secretJson) async {
@@ -39,11 +52,11 @@ class SingboxProxyCredentialsRepository
       return;
     }
 
-    await _storage.write(key: _secretKey(profileId), value: secretJson);
+    await _store.write(_secretKey(profileId), secretJson);
   }
 
   Future<void> deleteSecretJson(String profileId) {
-    return _storage.delete(key: _secretKey(profileId));
+    return _store.delete(_secretKey(profileId));
   }
 
   @override

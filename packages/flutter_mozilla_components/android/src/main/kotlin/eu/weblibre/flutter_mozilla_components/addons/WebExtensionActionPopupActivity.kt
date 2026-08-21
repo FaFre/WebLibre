@@ -18,6 +18,7 @@ import mozilla.components.browser.state.action.WebExtensionAction
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.lib.state.ext.consumeFrom
+import mozilla.components.support.base.log.logger.Logger
 
 /**
  * An activity to show the pop up action of a web extension.
@@ -31,6 +32,18 @@ class WebExtensionActionPopupActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Android recreates the top activity after a process death, and the
+        // replacement process has committed nothing. This one cannot bind a
+        // profile to fix that — an extension popup belongs to whichever profile
+        // had the extension loaded, and the recreate intent does not say which —
+        // so it finishes rather than resolving `components` and crashing.
+        if (GlobalComponents.components == null) {
+            Logger.warn("Closing the extension popup: no profile is committed")
+            finish()
+            return
+        }
+
         setContentView(R.layout.activity_add_on_settings)
 
         webExtensionId = requireNotNull(intent.getStringExtra("web_extension_id"))

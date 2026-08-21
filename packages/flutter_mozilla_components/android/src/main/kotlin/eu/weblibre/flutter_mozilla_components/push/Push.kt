@@ -282,49 +282,6 @@ class Push(
     }
 
     /**
-     * Persist the profile switch while holding the profile lock, so an in-flight
-     * delivery worker (which holds the same lock for the duration of a delivery)
-     * cannot straddle the switch and deliver this profile's message after disk
-     * state has moved on. Throws on failure so the caller can abort rather than
-     * proceed with an inconsistent on-disk profile.
-     */
-    suspend fun persistProfileSwitch(targetProfileId: String) {
-        check(!closed.get()) { "Push is closed" }
-        persistProfileSwitch(targetProfileId) { true }
-    }
-
-    /**
-     * Persist the switch if profile and receiver exclusivity can be obtained
-     * within [startTimeoutMillis]. The timeout stops applying once the atomic
-     * file write starts.
-     */
-    suspend fun persistProfileSwitch(
-        targetProfileId: String,
-        startTimeoutMillis: Long,
-    ): Boolean {
-        check(!closed.get()) { "Push is closed" }
-        return runWithStartTimeout(startTimeoutMillis) { tryStart ->
-            persistProfileSwitch(targetProfileId, tryStart)
-        }
-    }
-
-    private suspend fun persistProfileSwitch(
-        targetProfileId: String,
-        tryStart: () -> Boolean,
-    ) {
-        ActiveProfile.withProfileLock {
-            UnifiedPushReceiver.runExclusive {
-                if (tryStart()) {
-                    ActiveProfile.switchTo(
-                        components.profileApplicationContext.rootApplicationContext,
-                        targetProfileId,
-                    )
-                }
-            }
-        }
-    }
-
-    /**
      * Detach the now-inactive profile's push transport. Best-effort: a stale
      * registration is harmless and is cleaned up when that profile next becomes
      * active. Subscriptions and the remembered distributor are preserved.
@@ -341,12 +298,21 @@ class Push(
         }
     }
 
-    /** Persist the switch (mandatory), then best-effort detach the old transport. */
-    suspend fun suspendForProfileSwitch(targetProfileId: String) {
-        persistProfileSwitch(targetProfileId)
+    /**
+     * Quiesce push ahead of a restart. Best-effort by design.
+     *
+     * It writes no profile state. Under the restart protocol the target lives in
+     * the durable restart request and is applied by the *next* process, so this
+     * process must never leave disk saying B while it is still serving A.
+     *
+     * What is still worth doing here is the exclusivity: [detachTransportForSwitch]
+     * takes the profile lock and receiver exclusivity, so an in-flight delivery
+     * cannot straddle the restart boundary.
+     */
+    suspend fun suspendForRestart() {
         runCatching { detachTransportForSwitch() }
             .onFailure { error ->
-                Log.w(TAG, "Failed to detach push transport during profile switch", error)
+                Log.w(TAG, "Failed to detach push transport before restart", error)
             }
     }
 

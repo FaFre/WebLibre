@@ -35,7 +35,14 @@ Future<GoRouter> router(Ref ref) async {
   final onboardingRepository = ref.read(onboardingRepositoryProvider.notifier);
   unawaited(ref.read(profileAuthStateProvider.notifier).bootstrapFromProfile());
 
-  String? initialLocation;
+  /// Where the app belongs once it is unlocked: onboarding when it is owed,
+  /// otherwise the browser.
+  ///
+  /// Resolved once, here, rather than re-derived inside `redirect`: the redirect
+  /// runs on every navigation and cannot await a database read, and the answer
+  /// only changes when onboarding completes — which invalidates this provider and
+  /// rebuilds the whole router.
+  String? onboardingLocation;
 
   final onboardingMandatory = await onboardingRepository.isOutdated();
 
@@ -47,7 +54,7 @@ Future<GoRouter> router(Ref ref) async {
       targetRevision: OnboardingRepository.targetRevision,
     );
 
-    initialLocation = route.location;
+    onboardingLocation = route.location;
   }
 
   final profileAuthRefreshListenable = ref.watch(profileAuthProvider);
@@ -55,7 +62,11 @@ Future<GoRouter> router(Ref ref) async {
   return GoRouter(
     debugLogDiagnostics: true,
     routes: $appRoutes,
-    initialLocation: initialLocation ?? const LockRoute().location,
+    // Always the lock: `bootstrapFromProfile` unlocks immediately for a profile
+    // that has no lock, and the redirect below then forwards to wherever the app
+    // belongs. Starting *at* onboarding instead is what let a locked profile be
+    // walked through onboarding without ever unlocking.
+    initialLocation: const LockRoute().location,
     refreshListenable: profileAuthRefreshListenable,
     redirect: (context, state) {
       final authenticated = ref.read(profileAuthStateProvider);
@@ -63,16 +74,23 @@ Future<GoRouter> router(Ref ref) async {
       final isOnLockRoute = currentTopRouteName == LockRoute.name;
       final isOnOnboarding = currentTopRouteName == OnboardingRoute.name;
 
-      // Don't redirect during onboarding
-      if (isOnOnboarding) return null;
-
+      // The lock comes first, onboarding included. Onboarding used to be exempt,
+      // and it is not a harmless screen to hand out: it writes the profile's
+      // search engine, DNS, toolbar and permission settings, installs add-ons,
+      // and can restore a backup over the profile. It is also owed by *every*
+      // existing profile after a `targetRevision` bump, so the exemption fired on
+      // ordinary updates rather than only on first run.
       if (!authenticated && !isOnLockRoute) {
         return const LockRoute().location;
       }
 
+      // Unlocked, so onboarding is reachable — and is where an unlocked profile
+      // that still owes it belongs.
       if (authenticated && isOnLockRoute) {
-        return const BrowserRoute().location;
+        return onboardingLocation ?? const BrowserRoute().location;
       }
+
+      if (isOnOnboarding) return null;
 
       return null;
     },

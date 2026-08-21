@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "nextSequence": 4,
+  "entries": [
+    {
+      "id": "0199a0b3-0000-7000-8000-000000000002",
+      "sequence": 2,
+      "classification": "regular",
+      "action": "android.intent.action.VIEW",
+      "dataUri": "https://weblibre.eu/",
+      "mimeType": null,
+      "categories": ["android.intent.category.BROWSABLE"],
+      "flags": ["FLAG_ACTIVITY_NEW_TASK"],
+      "extras": {
+        "string": "value",
+        "int": 7,
+        "bool": true,
+        "stringList": ["a", "b"],
+        "nested": {"dropped": true},
+        "mixedList": ["a", 1]
+      },
+      "trustedProfileId": "0199a0b1-9999-7999-8999-999999999999",
+      "callerPackage": "com.example.sender",
+      "payloadDirName": null,
+      "createdAt": "2026-08-18T11:10:00.000Z",
+      "expiresAt": "2026-08-18T11:40:00.000Z",
+      "claim": null,
+      "acknowledged": false
+    },
+    {
+      "id": "0199a0b3-0000-7000-8000-000000000001",
+      "sequence": 1,
+      "classification": "trustedPwa",
+      "action": "eu.weblibre.gecko.PWA_LAUNCH",
+      "dataUri": "https://app.example/start",
+      "mimeType": null,
+      "categories": [],
+      "flags": [],
+      "extras": {},
+      "trustedProfileId": "0199a0b1-2222-7222-8222-222222222222",
+      "callerPackage": null,
+      "payloadDirName": null,
+      "createdAt": "2026-08-18T11:09:00.000Z",
+      "expiresAt": "2026-08-18T11:39:00.000Z",
+      "claim": {
+        "processInstanceId": "0199a0b4-0000-7000-8000-0000000000aa",
+        "engineId": "engine_id",
+        "claimedAt": "2026-08-18T11:09:30.000Z",
+        "expiresAt": "2026-08-18T11:11:30.000Z"
+      },
+      "acknowledged": false
+    },
+    {
+      "id": "0199a0b3-0000-7000-8000-000000000003",
+      "sequence": 3,
+      "classification": "teleport",
+      "action": "android.intent.action.SEND",
+      "dataUri": null,
+      "mimeType": "text/plain",
+      "categories": [],
+      "flags": [],
+      "extras": {},
+      "trustedProfileId": "0199a0b1-3333-7333-8333-333333333333",
+      "payloadDirName": "0199a0b3-0000-7000-8000-000000000003",
+      "createdAt": "2026-08-18T11:11:00.000Z",
+      "expiresAt": "2026-08-18T11:41:00.000Z",
+      "claim": null,
+      "acknowledged": true
+    },
+    {
+      "id": "",
+      "sequence": 9,
+      "classification": "regular",
+      "createdAt": "2026-08-18T11:12:00.000Z",
+      "expiresAt": "2026-08-18T11:42:00.000Z"
+    }
+  ]
+}

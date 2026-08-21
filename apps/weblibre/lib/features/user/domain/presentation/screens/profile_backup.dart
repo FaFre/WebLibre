@@ -17,17 +17,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:fancy_password_field/fancy_password_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:saf_util/saf_util.dart';
+import 'package:weblibre/core/copy/profile_copy.dart';
+import 'package:weblibre/core/maintenance/maintenance_outcome.dart';
+import 'package:weblibre/core/maintenance/saf_archive_target.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/entities/profile.dart';
-import 'package:weblibre/features/user/domain/presentation/dialogs/password_confirmation_dialog.dart';
 import 'package:weblibre/features/user/domain/providers/backup_directory.dart';
 import 'package:weblibre/features/user/domain/services/user_backup.dart';
+import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 class ProfileBackupScreen extends HookConsumerWidget {
@@ -37,14 +39,7 @@ class ProfileBackupScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final formKey = useMemoized(() => GlobalKey<FormState>());
-
-    final passwordTextController = useTextEditingController();
-    final passwordController = useMemoized(() => FancyPasswordController());
-
     final integrityVerification = useState(true);
-    final skipCaches = useState(false);
-    final skipPasswordConfirmation = useState(false);
 
     final backupFuture = useState<Future<bool>?>(null);
     final backupState = useFuture(backupFuture.value);
@@ -57,13 +52,16 @@ class ProfileBackupScreen extends HookConsumerWidget {
       if (backupState.hasError) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!context.mounted) return;
-          showErrorMessage(context, backupState.error!.toString());
+          showErrorMessage(
+            context,
+            describeMaintenanceFailure(backupState.error!),
+          );
         });
       } else if (backupState.hasData && !successHandled.value) {
         successHandled.value = true;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!context.mounted) return;
-          showInfoMessage(context, 'Backup created successfully');
+          showInfoMessage(context, 'Restarting to take the backup');
           ProfileListRoute().go(context);
         });
       }
@@ -79,134 +77,132 @@ class ProfileBackupScreen extends HookConsumerWidget {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-          child: Form(
-            key: formKey,
-            child: ListView(
-              children: [
-                FancyPasswordField(
-                  controller: passwordTextController,
-                  enabled: !disableInteraction,
-                  passwordController: passwordController,
-                  enableSuggestions: false,
-                  autocorrect: false,
-                  enableIMEPersonalizedLearning: false,
-                  keyboardType: TextInputType.visiblePassword,
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                    floatingLabelBehavior: FloatingLabelBehavior.always,
-                  ),
-                  validationRules: {MinCharactersValidationRule(5)},
-                  validator: (value) {
-                    //Make sure since onChange is sometimes unreliable
-                    passwordController.onChange(value ?? '');
-
-                    return passwordController.areAllRulesValidated
-                        ? null
-                        : 'Not Validated';
-                  },
+          child: ListView(
+            children: [
+              const ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.lock_outline),
+                title: Text('You set the password next'),
+                // Asked for after the restart instead of here. A password is
+                // the one thing that must not be written into the durable task
+                // record that survives it.
+                subtitle: Text(
+                  '$restartsThenAsksPassword The profile is closed while the '
+                  'backup is created.',
                 ),
-                const SizedBox(height: 16),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  value: integrityVerification.value,
-                  onChanged: disableInteraction
-                      ? null
-                      : (value) {
-                          integrityVerification.value = value;
-                        },
-                  title: const Text('Verify Backup Integrity'),
-                  subtitle: const Text(
-                    'Automatically check that backups are complete and restorable',
-                  ),
+              ),
+              const SizedBox(height: 16),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                value: integrityVerification.value,
+                onChanged: disableInteraction
+                    ? null
+                    : (value) {
+                        integrityVerification.value = value;
+                      },
+                title: const Text('Verify backup integrity'),
+                subtitle: const Text('Check that the backup can be restored'),
+              ),
+              const ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.info_outline),
+                title: Text('Temporary data is skipped'),
+                // Not a toggle any more: the exclusion list is part of the
+                // backup format, so a restored profile can rely on it.
+                subtitle: Text(
+                  'Cache files and other data WebLibre can rebuild are not '
+                  'saved. $shortcutsNeedPinningAgain',
                 ),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  value: skipCaches.value,
-                  onChanged: disableInteraction
-                      ? null
-                      : (value) {
-                          skipCaches.value = value;
-                        },
-                  title: const Text('Skip Cache Directories'),
-                  subtitle: const Text(
-                    'Leave out temporary browser caches like page, icon, and thumbnail data to keep backups smaller',
-                  ),
+              ),
+              const ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.key_outlined),
+                // Said plainly, because it changes what the file is. It also has
+                // to say *when* they are used: the archive always carries them,
+                // but only replacing a user installs them — restoring into a new
+                // user discards the whole payload on purpose
+                // (`applyCloneParticipantPolicy`), because one login on two
+                // profiles is the isolation failure the profile boundary exists
+                // to prevent. Saying only the first half read as a contradiction
+                // of what the restore screen says.
+                title: Text('WebLibre account data is included'),
+                subtitle: Text(
+                  'The backup file includes this profile’s '
+                  '$profileSecretDataDescription. Replacing a profile restores '
+                  'them; creating a new profile does not. Use a strong password.',
                 ),
-                ExpansionTile(
-                  enabled: !disableInteraction,
-                  childrenPadding: EdgeInsets.zero,
-                  tilePadding: EdgeInsets.zero,
-                  title: const Text('Advanced'),
+              ),
+              const SizedBox(height: 16),
+              if (disableInteraction)
+                const Column(
                   children: [
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      value: skipPasswordConfirmation.value,
-                      onChanged: disableInteraction
-                          ? null
-                          : (value) {
-                              skipPasswordConfirmation.value = value;
-                            },
-                      title: const Text('Skip Password Confirmation Prompt'),
-                    ),
+                    LinearProgressIndicator(),
+                    SizedBox(height: 8),
+                    // Not "Creating Backup": nothing is written here. This
+                    // records the task and closes the app, and the next
+                    // process takes the archive.
+                    Text('Closing WebLibre to take the backup…'),
                   ],
+                )
+              else
+                FilledButton.icon(
+                  icon: const Icon(MdiIcons.safe),
+                  onPressed: () async {
+                    // Re-checked, not just remembered. A grant persists
+                    // across reboots but not across the user revoking it,
+                    // the volume being unmounted, or the folder being
+                    // deleted — and asking again here costs one call, while
+                    // finding out after the restart costs the whole backup.
+                    final remembered = ref.read(backupDirectoryUriProvider);
+                    final usable =
+                        remembered != null &&
+                        await safTargetIsWritable(remembered);
+
+                    if (!usable) {
+                      final dir = await SafUtil().pickDirectory(
+                        writePermission: true,
+                        persistablePermission: true,
+                      );
+                      if (dir == null) return;
+                      ref
+                          .read(backupDirectoryUriProvider.notifier)
+                          .set(Uri.parse(dir.uri));
+                    }
+
+                    // Queues the work and restarts. The archive is written
+                    // by the next process, where nothing has the profile
+                    // open — this one has its databases and engine running,
+                    // so a backup taken here could not be called consistent.
+                    backupFuture.value = _queueAndRestart(
+                      ref,
+                      profile,
+                      integrityCheck: integrityVerification.value,
+                    );
+                  },
+                  label: const Text('Backup'),
                 ),
-                const SizedBox(height: 16),
-                if (disableInteraction)
-                  const Column(
-                    children: [
-                      LinearProgressIndicator(),
-                      Text('Creating Backup'),
-                    ],
-                  )
-                else
-                  FilledButton.icon(
-                    icon: const Icon(MdiIcons.safe),
-                    onPressed: () async {
-                      if (formKey.currentState?.validate() ?? false) {
-                        if (!skipPasswordConfirmation.value) {
-                          final confirmation =
-                              await showPasswordConfirmationDialog(context);
-
-                          if (confirmation != passwordTextController.text) {
-                            if (context.mounted) {
-                              showErrorMessage(
-                                context,
-                                'Passwords do not match',
-                              );
-                            }
-
-                            return;
-                          }
-                        }
-
-                        if (ref.read(backupDirectoryUriProvider) == null) {
-                          final dir = await SafUtil().pickDirectory(
-                            writePermission: true,
-                            persistablePermission: true,
-                          );
-                          if (dir == null) return;
-                          ref
-                              .read(backupDirectoryUriProvider.notifier)
-                              .set(Uri.parse(dir.uri));
-                        }
-
-                        backupFuture.value = ref
-                            .read(userBackupServiceProvider.notifier)
-                            .createUserBackup(
-                              profile,
-                              password: passwordTextController.text,
-                              integrityCheck: integrityVerification.value,
-                              skipCaches: skipCaches.value,
-                            );
-                      }
-                    },
-                    label: const Text('Backup'),
-                  ),
-              ],
-            ),
+            ],
           ),
         ),
       ),
     );
   }
+}
+
+/// Records the backup and restarts so the next process can take it.
+///
+/// Returns true when the restart is armed. It never returns normally after that
+/// in practice — [exitApp] ends the process — but the future still completes on
+/// the paths where arming failed.
+Future<bool> _queueAndRestart(
+  WidgetRef ref,
+  Profile profile, {
+  required bool integrityCheck,
+}) async {
+  await ref
+      .read(userBackupServiceProvider.notifier)
+      .queueBackup(profile, integrityCheck: integrityCheck);
+
+  await exitApp(ref.container, restart: true);
+  return true;
 }

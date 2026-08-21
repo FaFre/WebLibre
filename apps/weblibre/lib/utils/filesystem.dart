@@ -17,10 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid_value.dart';
 import 'package:weblibre/core/logger.dart';
@@ -29,22 +29,8 @@ import 'package:weblibre/domain/entities/profile.dart';
 const profilesDirName = 'weblibre_profiles';
 const profileDirPrefix = 'profile-';
 
-const _startupProfileFileName = 'current_profile';
-const _metadataFile = 'metadata.json';
-
-final profileTransformer =
-    StreamTransformer<FileSystemEntity, Directory>.fromHandlers(
-      handleData: (entity, sink) {
-        if (entity is Directory &&
-            p.basename(entity.path).startsWith(profileDirPrefix)) {
-          sink.add(entity);
-        }
-      },
-    );
-
-Future<List<Directory>> getAvailableProfileDirectories(Directory profilesDir) {
-  return profilesDir.list().transform(profileTransformer).toList();
-}
+const startupProfileFileName = 'current_profile';
+const profileMetadataFileName = 'metadata.json';
 
 Future<void> clearMozillaProfileCache(
   Directory profileDir,
@@ -73,7 +59,7 @@ List<String> getMozillaProfileIds(Directory profileDir) {
 }
 
 Future<UuidValue?> readStartupProfile(Directory dir) async {
-  final file = File(p.join(dir.path, _startupProfileFileName));
+  final file = File(p.join(dir.path, startupProfileFileName));
 
   if (await file.exists()) {
     final contents = await file.readAsString();
@@ -87,45 +73,20 @@ Future<UuidValue?> readStartupProfile(Directory dir) async {
   return null;
 }
 
+/// Writes `current_profile`.
+///
+/// Native owns this file: it is written by the commit that binds a process to a
+/// profile, and a Dart-side write would let a process that never committed
+/// decide what the next one boots. Kept only so tests can stage the file the way
+/// native leaves it.
+@visibleForTesting
 Future<void> writeStartupProfile(
   Directory dir,
   UuidValue profile, {
   bool flush = false,
 }) async {
-  final file = File(p.join(dir.path, _startupProfileFileName));
+  final file = File(p.join(dir.path, startupProfileFileName));
   await file.writeAsString(profile.uuid, flush: flush);
-}
-
-Future<UuidValue?> selectStartupProfile(Directory profilesDir) async {
-  var startupProfile = await readStartupProfile(profilesDir);
-  final availableProfiles = await getAvailableProfileDirectories(profilesDir);
-
-  // Verify the startup profile directory actually exists
-  if (startupProfile != null) {
-    final profileDir = getProfileDir(profilesDir, startupProfile);
-    final exists = availableProfiles.any((dir) => dir.path == profileDir.path);
-    if (!exists) {
-      logger.w('Startup profile directory missing, selecting fallback');
-      startupProfile = null;
-    }
-  }
-
-  if (startupProfile == null) {
-    final sortedDirs = await sortByAccessTime(availableProfiles);
-
-    for (final dir in sortedDirs) {
-      try {
-        startupProfile = extractDirectoryUuid(dir);
-        await writeStartupProfile(profilesDir, startupProfile);
-
-        break;
-      } catch (e, s) {
-        logger.w('Could not parse profile folder', error: e, stackTrace: s);
-      }
-    }
-  }
-
-  return startupProfile;
 }
 
 UuidValue extractDirectoryUuid(Directory dir) => UuidValue.withValidation(
@@ -139,7 +100,7 @@ Directory getProfileDir(Directory profilesDir, UuidValue profileUuid) {
 }
 
 Future<Profile?> readProfileMetadata(Directory profileDir) async {
-  final file = File(p.join(profileDir.path, _metadataFile));
+  final file = File(p.join(profileDir.path, profileMetadataFileName));
   if (!await file.exists()) {
     return null;
   }
@@ -148,9 +109,37 @@ Future<Profile?> readProfileMetadata(Directory profileDir) async {
   return Profile.fromJson(jsonDecode(content) as Map<String, dynamic>);
 }
 
+/// Writes `metadata.json` atomically.
+///
+/// A plain `writeAsString` truncates first, so a crash or power loss during a
+/// rename left a zero-length or half-written file — and profile discovery treats
+/// unreadable metadata as a *damaged* profile and skips it entirely. The
+/// directory and all its data survive, but the profile stops existing as far as
+/// the picker, the candidate resolver and the profile list are concerned, and
+/// startup goes on to create a fresh `Default` alongside it.
+///
+/// Temp-then-rename, matching how every other durable record on this path is
+/// written (see `AtomicJsonFile`). Not reusing that helper only because it is
+/// typed to `Map<String, Object?>` documents under the startup paths, while this
+/// file lives in the profile tree and is the one thing that must be readable
+/// before any of that machinery is reachable.
 Future<void> writeProfileMetadata(Directory profileDir, Profile profile) async {
-  final file = File(p.join(profileDir.path, _metadataFile));
-  await file.writeAsString(jsonEncode(profile.toJson()), flush: true);
+  final file = File(p.join(profileDir.path, profileMetadataFileName));
+  final temp = File('${file.path}.tmp');
+
+  try {
+    await temp.writeAsString(jsonEncode(profile.toJson()), flush: true);
+    await temp.rename(file.path);
+  } catch (_) {
+    if (temp.existsSync()) {
+      try {
+        await temp.delete();
+      } catch (_) {
+        // A stray `.tmp` is inert: discovery matches the exact file name.
+      }
+    }
+    rethrow;
+  }
 }
 
 Future<bool> createNewProfile(Directory profilesDir, Profile profile) async {
@@ -163,23 +152,4 @@ Future<bool> createNewProfile(Directory profilesDir, Profile profile) async {
   await writeProfileMetadata(profileDir, profile);
 
   return true;
-}
-
-Future<List<Directory>> sortByAccessTime(
-  List<Directory> dirs, {
-  bool descending = true,
-}) async {
-  final dirsWithStats = await Future.wait(
-    dirs.map((dir) async {
-      final stat = await dir.stat();
-      return (dir: dir, accessed: stat.accessed);
-    }),
-  );
-
-  dirsWithStats.sort((a, b) {
-    final comparison = a.accessed.compareTo(b.accessed);
-    return descending ? -comparison : comparison;
-  });
-
-  return dirsWithStats.map((record) => record.dir).toList();
 }

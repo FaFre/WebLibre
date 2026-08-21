@@ -39,12 +39,12 @@ import eu.weblibre.flutter_mozilla_components.feature.ContainerProxyFeature
 import eu.weblibre.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
 import eu.weblibre.flutter_mozilla_components.feature.GeckoBookmarksExtensionBridge
 import eu.weblibre.flutter_mozilla_components.push.Push
+import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeoutOrNull
 import mozilla.components.browser.storage.sync.GlobalPlacesDependencyProvider
 import mozilla.components.browser.session.storage.RecoverableBrowserState
 import mozilla.components.browser.state.action.RestoreCompleteAction
@@ -69,8 +69,6 @@ private const val HISTORY_METADATA_MAX_AGE_IN_MS = 14L * 24 * 60 * 60 * 1000 // 
 private const val DEFAULT_QUERY_PARAMETER_STRIPPING_STRIP_LIST =
     "__hsfp __hssc __hstc __s _bhlid _branch_match_id _branch_referrer _gl _hsenc _kx _openstat at_recipient_id at_recipient_list bbeml bsft_clkid bsft_uid dclid et_rid fb_action_ids fb_comment_id fbclid gbraid gclid guce_referrer guce_referrer_sig hsCtaTracking igshid irclickid mc_eid mkt_tok ml_subscriber ml_subscriber_hash msclkid mtm_cid oft_c oft_ck oft_d oft_id oft_ids oft_k oft_lk oft_sk oly_anon_id oly_enc_id pk_cid rb_clickid s_cid sc_customer sc_eh sc_uid sms_click sms_source sms_uph srsltid ss_email_id syclid ttclid twclid unicorn_click_id vero_conv vero_id vgo_ee wbraid wickedid yclid ymclid ysclid"
 private const val UBLOCK_FILTER_LISTS_PREF = "browser.weblibre.uBO.filterLists"
-private const val PROFILE_SWITCH_PERSIST_TIMEOUT_MS = 3000L
-private const val PROFILE_SWITCH_DETACH_TIMEOUT_MS = 2000L
 
 object GlobalComponents {
     private var _components: Components? = null
@@ -92,6 +90,12 @@ object GlobalComponents {
         return current.existingPush?.takeUnless { it.isClosed }
     }
 
+    /**
+     * The committed process context, or `null` while the process is undecided.
+     *
+     * Does not read `current_profile`: once the process has committed, that file is
+     * next-start state and may already name a different profile.
+     */
     fun resolveActiveProfileContext(context: Context): ProfileContext? =
         runCatching { ActiveProfile.resolveContext(context.applicationContext) }.getOrNull()
 
@@ -330,66 +334,41 @@ object GlobalComponents {
     ) {
         Logger.debug("Creating new components")
 
+        // Reject a profile mismatch before anything observable happens — before
+        // history exclusions load, before push state is touched, before a single
+        // previous component is torn down. A mismatch here is not a switch to
+        // perform: the process profile is decided once, and by the time components
+        // are built the runtime is either bound to that profile or about to be.
+        // The only correct response is to refuse and let the caller restart.
+        val requestedProfileId = File(applicationContext.relativePath).name
+            .removePrefix(PwaConstants.PROFILE_DIR_PREFIX)
+            .lowercase()
+        val committedProfileId = StartupArbiter.committedProfileId()
+            ?: error("Refusing to create components before this process committed a profile")
+        if (committedProfileId != requestedProfileId) {
+            error(
+                "Refusing to create components for $requestedProfileId; this process is " +
+                    "committed to $committedProfileId and must restart to change that",
+            )
+        }
+
         val previousComponents = _components
         val previousMode = currentMode
-        val isSameProfile = previousComponents?.profileApplicationContext?.relativePath ==
-            applicationContext.relativePath
-        val previousCustomTabs = if (isSameProfile) {
+
+        // Every setup in a process now targets the same profile, so a rebuild is a
+        // mode change (external -> full) rather than a switch: custom tabs survive
+        // it, and the outgoing push instance belongs to the same profile as the
+        // incoming one.
+        val previousCustomTabs =
             previousComponents?.core?.store?.state?.customTabs.orEmpty()
-        } else {
-            emptyList()
-        }
 
-        if (previousComponents != null && !isSameProfile) {
-            // The outgoing profile's exclusions must not carry over: its tab ids
-            // belong to tabs the incoming profile never sees, so no snapshot of
-            // its own can ever answer for them. Fall back to what the target
-            // profile last persisted until Dart pushes a live snapshot — dropping
-            // a visit is recoverable, leaking one is not. Skipped on the very
-            // first setUp, where Dart has already pushed the real snapshot ahead
-            // of engine init and reloading would throw it away.
-            HistoryExclusions.loadPersisted(applicationContext)
-        }
-
-        previousComponents?.existingPush?.let { previousPush ->
-            if (!isSameProfile) {
-                val targetProfileId = File(applicationContext.relativePath).name
-                    .removePrefix(PwaConstants.PROFILE_DIR_PREFIX)
-                runBlocking {
-                    // Persist the switch while holding the profile lock so an
-                    // in-flight worker or receiver cannot straddle it. Bound only
-                    // the wait for exclusivity; once the atomic write starts it
-                    // must return a definitive result. Failure aborts setup before
-                    // B's components are created.
-                    check(
-                        previousPush.persistProfileSwitch(
-                            targetProfileId,
-                            PROFILE_SWITCH_PERSIST_TIMEOUT_MS,
-                        ),
-                    ) { "Timed out waiting to persist profile switch to $targetProfileId" }
-                    // Detaching the now-inactive profile's transport is best-effort
-                    // cleanup; bound it so a slow distributor cannot stall setup.
-                    runCatching {
-                        withTimeoutOrNull(PROFILE_SWITCH_DETACH_TIMEOUT_MS) {
-                            previousPush.detachTransportForSwitch()
-                        } ?: Logger.warn("Timed out detaching push transport during switch")
-                    }.onFailure {
-                        Logger.warn("Failed to detach push transport during switch", it)
-                    }
-                }
-                // Closing may need the same dispatcher as a timed-out detach.
-                // Mark it closed now, but drain old-profile resources off-main.
-                previousPush.closeDeferred()
-            } else {
-                previousPush.close()
-            }
-        }
+        previousComponents?.existingPush?.close()
 
         // Restore this profile's last routing before the engine — and with it the
-        // proxy extension — exists. Unlike the exclusions above this is loaded on
-        // every setup, not only on a profile change: the extension blocks every
-        // request until it holds a snapshot, and on the headless paths (external
-        // mode, no Flutter engine) Dart is never there to push one. It only ever
+        // proxy extension — exists. This runs on every setup, including a rebuild:
+        // the extension blocks every request until it holds a snapshot, and on the
+        // headless paths (external mode, no Flutter engine) Dart is never there to
+        // push one. It only ever
         // takes effect while nothing has been pushed, so a full start still runs
         // on the live snapshot the moment Dart produces it.
         //
@@ -559,8 +538,16 @@ object GlobalComponents {
             return true
         }
 
-        val profileFolder = resolveExternalProfileFolder(baseContext) ?: return false
-        val profileContext = ProfileContext(baseContext.applicationContext, profileFolder)
+        // Arbitrated, not re-read from disk. This used to parse `current_profile`
+        // itself, which meant a headless start could bind a different profile than
+        // the one the process had already committed to.
+        //
+        // Resolve-only, deliberately: building an engine is not a reason to settle
+        // the profile question. Callers that legitimately may bind the candidate go
+        // through [bindCandidateAndEnsureExternalComponents]; everything else — an
+        // FxA callback, an already-classified custom tab — refuses here rather than
+        // committing a profile nobody chose.
+        val profileContext = ActiveProfile.resolveContext(baseContext) ?: return false
         val messenger = NoopBinaryMessenger()
 
         HistoryExclusions.loadPersisted(baseContext.applicationContext)
@@ -602,21 +589,21 @@ object GlobalComponents {
         return true
     }
 
-    private fun resolveExternalProfileFolder(baseContext: Context): String? {
-        return try {
-            val profileFile = File(baseContext.filesDir, PwaConstants.CURRENT_PROFILE_FILE)
-            if (!profileFile.exists()) return null
-            val profileUuid = profileFile.readText().trim().ifEmpty { return null }
-
-            val relativePath =
-                "${PwaConstants.PROFILES_DIR_NAME}/${PwaConstants.PROFILE_DIR_PREFIX}$profileUuid"
-            val profileDir = File(baseContext.filesDir, relativePath)
-            if (!profileDir.exists()) return null
-
-            relativePath
-        } catch (e: Exception) {
-            Logger.error("Failed to resolve external profile folder", e)
-            null
-        }
+    /**
+     * Commits the startup candidate, then creates the headless component set.
+     *
+     * For entry points that legitimately have no profile of their own to name — a
+     * custom tab, a share-as-custom-tab, a queued push delivery. They may bind the
+     * *candidate*, never a profile of their own choosing, and only while the process
+     * is still unresolved; anything else returns `false` so the caller retries or
+     * fails safely.
+     */
+    fun bindCandidateAndEnsureExternalComponents(
+        baseContext: Context,
+        logLevel: Log.Priority = Log.Priority.WARN,
+    ): Boolean {
+        if (components != null) return true
+        if (ActiveProfile.resolveOrCommitContext(baseContext) == null) return false
+        return ensureExternalComponents(baseContext, logLevel)
     }
 }

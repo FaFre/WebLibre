@@ -29,27 +29,45 @@ Future<bool?> showSwitchProfileDialog(
 }) {
   return showDialog<bool>(
     context: context,
-    builder: (context) => AlertDialog(
-      icon: const Icon(Icons.warning),
-      title: const Text('Switch User'),
-      content: Text(
-        "Switching to User '$profileName' will require a restart of the Browser. Web notifications for the inactive profile will be paused.\n\nPrivate tab data will be cleared on restart.",
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            context.pop(false);
-          },
-          child: const Text('Cancel'),
+    builder: (context) {
+      final theme = Theme.of(context);
+
+      return AlertDialog(
+        icon: const Icon(Icons.swap_horiz),
+        title: Text('Switch to "$profileName"?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('WebLibre closes and reopens as "$profileName".'),
+            const SizedBox(height: 12),
+            // The two consequences worth knowing, as their own lines rather than
+            // one bolded paragraph: emphasising everything emphasises nothing,
+            // and these are consequences to read, not a warning to alarm.
+            Text(
+              '• Private tabs are cleared.\n'
+              '• Web notifications for the profile you leave are paused.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
         ),
-        TextButton(
-          onPressed: () {
-            context.pop(true);
-          },
-          child: const Text('Switch Profile'),
-        ),
-      ],
-    ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              context.pop(false);
+            },
+            child: const Text('Not now'),
+          ),
+          FilledButton(
+            onPressed: () {
+              context.pop(true);
+            },
+            child: const Text('Switch and restart'),
+          ),
+        ],
+      );
+    },
   );
 }

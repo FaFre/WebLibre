@@ -19,10 +19,12 @@
  */
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
 import 'package:weblibre/features/onboarding/domain/entities/onboarding_mode.dart';
@@ -41,7 +43,7 @@ import 'package:weblibre/features/user/domain/presentation/screens/profile_backu
 import 'package:weblibre/features/user/domain/presentation/screens/profile_restore.dart';
 import 'package:weblibre/features/user/domain/repositories/onboarding.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
-import 'package:weblibre/utils/exit_app.dart';
+import 'package:weblibre/utils/ui_helper.dart';
 
 class OnboardingScreen extends HookConsumerWidget {
   final int currentRevision;
@@ -198,50 +200,7 @@ class OnboardingScreen extends HookConsumerWidget {
                     Expanded(
                       child: TextButton.icon(
                         onPressed: eulaAccepted
-                            ? () async {
-                                await Navigator.of(context).push(
-                                  MaterialPageRoute<void>(
-                                    builder: (_) => ProfileBackupListScreen(
-                                      onBackupSelected: (context, uri) {
-                                        unawaited(
-                                          Navigator.of(context).push(
-                                            MaterialPageRoute<void>(
-                                              builder: (_) => ProfileRestoreScreen(
-                                                backupFileUri: uri,
-                                                forcedTarget:
-                                                    RestoreTarget.createNew,
-                                                onRestoreSuccess: (_, profile) async {
-                                                  await ref
-                                                      .read(
-                                                        onboardingRepositoryProvider
-                                                            .notifier,
-                                                      )
-                                                      .pushRevision(
-                                                        targetRevision,
-                                                      );
-                                                  if (profile != null) {
-                                                    await ref
-                                                        .read(
-                                                          profileRepositoryProvider
-                                                              .notifier,
-                                                        )
-                                                        .switchProfile(
-                                                          profile.id,
-                                                        );
-                                                    await exitApp(
-                                                      ref.container,
-                                                    );
-                                                  }
-                                                },
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                );
-                              }
+                            ? () => _restoreIntoThisUser(context, ref)
                             : null,
                         iconAlignment: IconAlignment.end,
                         icon: const Icon(Icons.settings_backup_restore),
@@ -286,4 +245,63 @@ class OnboardingScreen extends HookConsumerWidget {
       ),
     );
   }
+}
+
+/// Restores a backup *into the user this process is already serving*.
+///
+/// It used to restore into a new one. That looked reasonable and was the wrong
+/// shape in three ways at once: the profile the user had just created was left
+/// behind empty and could not be deleted from itself, the lock they had just
+/// configured on it did not travel (a clone is `Profile.create` with no auth
+/// settings), and the onboarding revision was pushed onto the abandoned profile
+/// rather than the one they ended up in.
+///
+/// Replacing instead has none of those problems and needs no new machinery:
+/// `queueRestoreOver` journals the work and restarts into it, and
+/// `bindStagingToTarget` re-addresses the archive onto this profile's id while
+/// keeping its lock. The name is the one thing taken from the archive — at
+/// first run the target is a placeholder (`Default`, or one made a minute ago),
+/// so the backup's own name is the one the user meant.
+///
+/// The onboarding revision is deliberately *not* pushed here. The restored
+/// `user.db` brings its own, and if the restore never runs — a wrong password,
+/// a cancelled task — first run has to still be first run.
+Future<void> _restoreIntoThisUser(BuildContext context, WidgetRef ref) async {
+  final profiles = await ref.read(profileRepositoryProvider.future);
+  final current = profiles.firstWhereOrNull(
+    (profile) => profile.uuidValue == filesystem.selectedProfile,
+  );
+
+  if (!context.mounted) return;
+
+  if (current == null) {
+    // The process is serving a profile the repository cannot see, which means
+    // its metadata is unreadable. Restoring over it would work, but naming the
+    // target is the one thing the confirmation has to be able to do.
+    showErrorMessage(
+      context,
+      'This profile could not be read, so nothing can be restored into it.',
+    );
+    return;
+  }
+
+  await Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => ProfileBackupListScreen(
+        onBackupSelected: (context, uri) {
+          unawaited(
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => ProfileRestoreScreen(
+                  backupFileUri: uri,
+                  forcedOverwriteTarget: current,
+                  adoptArchiveName: true,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    ),
+  );
 }

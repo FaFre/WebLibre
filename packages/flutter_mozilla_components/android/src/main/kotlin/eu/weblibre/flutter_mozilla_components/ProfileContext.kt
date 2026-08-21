@@ -7,6 +7,7 @@ import android.content.SharedPreferences
 import android.content.pm.ApplicationInfo
 import android.os.Build
 import androidx.annotation.RequiresApi
+import eu.weblibre.flutter_mozilla_components.startup.ProfileUuid
 import java.io.File
 
 class ProfileContext(private val base: Context, val relativePath: String) :
@@ -19,6 +20,16 @@ class ProfileContext(private val base: Context, val relativePath: String) :
         File(base.filesDir, relativePath) // /data/user/0/com.app/profiles/default
 
     private val profilePrefix = File(relativePath).name
+
+    /**
+     * The canonical UUID of the profile this context serves, or null if the path
+     * does not name one.
+     *
+     * Callers doing cross-profile work need the id of the profile they are holding
+     * a context for, and deriving it from [relativePath] at each call site is how
+     * two of them end up disagreeing.
+     */
+    val profileId: String? = ProfileUuid.fromDirName(profilePrefix)
 
     private var customFilesDir: File = File(subfolderRoot, "files")
     private var customNoBackupFilesDir: File = File(subfolderRoot, "no_backup")
@@ -47,7 +58,11 @@ class ProfileContext(private val base: Context, val relativePath: String) :
     }
 
     init {
-        ActiveProfile.prefix = profilePrefix
+        // Constructing a profile-scoped context must not change global preference
+        // routing. It used to assign `ActiveProfile.prefix` here, so merely
+        // instantiating this class for *any* profile silently repointed every
+        // profile-sensitive preference file in the process. The committed profile
+        // is now the only thing that decides the prefix.
         customFilesDir.mkdirs()
         customNoBackupFilesDir.mkdirs()
         customObbDir.mkdirs()

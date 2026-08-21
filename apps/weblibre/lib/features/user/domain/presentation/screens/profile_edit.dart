@@ -17,13 +17,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:convert';
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/copy/profile_copy.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/entities/profile.dart';
@@ -34,7 +35,15 @@ import 'package:weblibre/features/user/domain/presentation/utils/profile_switch_
 import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
 import 'package:weblibre/features/user/domain/services/local_authentication.dart';
+import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/form_validators.dart';
+import 'package:weblibre/utils/ui_helper.dart';
+
+/// Scope for the confirmation taken *before* a locked profile exists.
+///
+/// Deliberately not a per-profile key: there is no profile id yet, and the value
+/// only scopes `LocalAuthenticationService`'s result cache.
+const _newProfileAuthKey = 'profile_access::pending';
 
 const _timeoutOptions = <DropdownMenuItem<Duration?>>[
   DropdownMenuItem(value: Duration(minutes: 1), child: Text('1 minute')),
@@ -59,19 +68,44 @@ class ProfileEditScreen extends HookConsumerWidget {
       return;
     }
 
-    // Require biometric confirmation when enabling/changing auth
-    if (profile != null &&
-        (profile!.authSettings.authenticationRequired ||
-            authSettings.authenticationRequired)) {
+    // Require confirmation whenever a lock is involved — including on the
+    // *create* path, which used to skip it because there was no existing profile
+    // to compare against. Skipping it meant a user could switch the lock on with
+    // nothing enrolled on the device: `authenticate` catches `LocalAuthException`
+    // and reports failure, there is no way to clear the lock from outside the
+    // profile, and the result was a user that could never be opened. Proving the
+    // gate works before it is armed is the only thing standing between the toggle
+    // and that.
+    final locking = profile != null
+        ? profile!.authSettings.authenticationRequired ||
+              authSettings.authenticationRequired
+        : authSettings.authenticationRequired;
+
+    if (locking) {
       final authResult = await ref
           .read(localAuthenticationServiceProvider.notifier)
           .authenticate(
-            authKey: profileAccessAuthKey(profile!.id),
-            localizedReason: 'Require authentication for profile',
+            // A profile being created has no id yet, and the key only scopes the
+            // result cache — nothing has been created for it to belong to.
+            authKey: profile != null
+                ? profileAccessAuthKey(profile!.id)
+                : _newProfileAuthKey,
+            localizedReason: profile != null
+                ? 'Require authentication for profile'
+                : 'Confirm you can unlock this profile',
             settings: authSettings,
           );
 
       if (!authResult) {
+        if (context.mounted) {
+          showErrorMessage(
+            context,
+            profile != null
+                ? 'Could not confirm your identity. $nothingChanged'
+                : 'Could not confirm your identity. A locked profile is only '
+                      'created once this device can unlock it.',
+          );
+        }
         return;
       }
     }
@@ -108,8 +142,8 @@ class ProfileEditScreen extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: (profile != null)
-            ? const Text('Edit User')
-            : const Text('Create User'),
+            ? const Text('Edit Profile')
+            : const Text('Create Profile'),
         actions: [
           IconButton(
             onPressed: () async {
@@ -175,10 +209,8 @@ class _AuthSection extends StatelessWidget {
         const SettingSection(name: 'Authentication'),
         SwitchListTile.adaptive(
           value: authSettings.authenticationRequired,
-          title: const Text('Require Authentication'),
-          subtitle: const Text(
-            'Lock this profile when switching away from the app',
-          ),
+          title: const Text('Require authentication'),
+          subtitle: const Text('Ask before this profile can be opened'),
           secondary: const Icon(MdiIcons.fingerprint),
           contentPadding: EdgeInsets.zero,
           onChanged: (value) {
@@ -195,8 +227,8 @@ class _AuthSection extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const ListTile(
-                  title: Text('Auto-lock Behavior'),
-                  subtitle: Text('Choose when to lock the profile'),
+                  title: Text('Auto-lock'),
+                  subtitle: Text('When to lock the profile again'),
                   contentPadding: EdgeInsets.zero,
                   leading: Icon(MdiIcons.lockClock),
                 ),
@@ -213,22 +245,20 @@ class _AuthSection extends StatelessWidget {
                     children: [
                       RadioListTile.adaptive(
                         value: AutoLockMode.background,
-                        title: Text('Lock on Background'),
-                        subtitle: Text(
-                          'Lock immediately when app goes to background',
-                        ),
+                        title: Text('Lock in background'),
+                        subtitle: Text('As soon as WebLibre leaves the screen'),
                       ),
                       RadioListTile.adaptive(
                         value: AutoLockMode.timeout,
-                        title: Text('Lock After Timeout'),
-                        subtitle: Text('Lock after a period of inactivity'),
+                        title: Text('Lock after a timeout'),
+                        subtitle: Text('After a period of inactivity'),
                       ),
                       RadioListTile.adaptive(
                         value: AutoLockMode.startup,
-                        title: Text('Lock on Startup Only'),
+                        title: Text('Lock on startup only'),
                         subtitle: Text(
-                          'Unlock once when the app starts; stay unlocked '
-                          'until the app is fully closed',
+                          'Unlock once at startup, then stay unlocked until '
+                          'WebLibre is fully closed',
                         ),
                       ),
                     ],
@@ -239,7 +269,7 @@ class _AuthSection extends StatelessWidget {
           ),
           if (authSettings.autoLockMode == AutoLockMode.timeout)
             ListTile(
-              title: const Text('Timeout Duration'),
+              title: const Text('Timeout'),
               subtitle: const Text('How long to wait before locking'),
               leading: const Icon(MdiIcons.timerOutline),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -267,10 +297,17 @@ class _ProfileActionsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Backup is offered for every profile, the active one included: it does not
+    // run here at all — it is queued and taken by the next process, with the
+    // profile closed. Switching and deleting are the two that genuinely cannot
+    // act on the profile this process is serving, so they are left out rather
+    // than shown to fail.
+    final isActive = filesystem.selectedProfile == profile.uuidValue;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SettingSection(name: 'Profile Actions'),
+        const SettingSection(name: 'Profile actions'),
         const SizedBox(height: 8),
         SizedBox(
           width: double.infinity,
@@ -284,45 +321,81 @@ class _ProfileActionsSection extends ConsumerWidget {
             },
           ),
         ),
-        const SizedBox(height: 12),
-        if (filesystem.selectedProfile != profile.uuidValue)
+        if (isActive)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Text(
+              'Switching and deleting are unavailable for the profile you '
+              'are using.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          )
+        else ...[
+          const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              label: const Text('Switch to this Profile'),
+              label: const Text('Switch to this profile'),
               icon: const Icon(MdiIcons.accountSwitch),
               onPressed: () async {
                 await handleSwitchProfile(context, ref, profile);
               },
             ),
           ),
-        if (filesystem.selectedProfile != profile.uuidValue)
           const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            style: OutlinedButton.styleFrom(
-              side: BorderSide(color: Theme.of(context).colorScheme.error),
-              foregroundColor: Theme.of(context).colorScheme.error,
-              iconColor: Theme.of(context).colorScheme.error,
-            ),
-            label: const Text('Delete'),
-            icon: const Icon(Icons.delete),
-            onPressed: () async {
-              final result = await showDeleteProfileDialog(context);
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: Theme.of(context).colorScheme.error),
+                foregroundColor: Theme.of(context).colorScheme.error,
+                iconColor: Theme.of(context).colorScheme.error,
+              ),
+              label: const Text('Delete'),
+              icon: const Icon(Icons.delete),
+              onPressed: () async {
+                final result = await showDeleteProfileDialog(
+                  context,
+                  profileName: profile.name,
+                );
 
-              if (result == true) {
-                await ref
-                    .read(profileRepositoryProvider.notifier)
-                    .deleteProfile(profile.uuidValue.uuid);
+                if (result == true) {
+                  // Queues the delete and restarts: a profile's state reaches
+                  // beyond its directory, so removal needs an ownership snapshot
+                  // and a journal, and both need a maintenance lease this process
+                  // cannot hold while it is running the browser.
+                  final bool queued;
+                  try {
+                    queued = await ref
+                        .read(profileRepositoryProvider.notifier)
+                        .deleteProfile(profile.uuidValue.uuid);
+                  } catch (error) {
+                    // Queued and then unqueued: the restart it needs could not be
+                    // scheduled. Caught here because nothing above a button's
+                    // handler would, and an uncaught error means the user taps
+                    // "Delete" on a confirmed dialog and watches nothing happen.
+                    if (context.mounted) {
+                      showErrorMessage(context, 'Could not delete: $error');
+                    }
+                    return;
+                  }
 
-                if (context.mounted) {
-                  context.pop();
+                  if (queued) {
+                    await exitApp(ref.container, restart: true);
+                  } else if (context.mounted) {
+                    // Refused rather than failed — the profile is gone already or
+                    // its metadata is too damaged to discover. Saying so beats a
+                    // screen that just closes after a confirmed delete.
+                    showErrorMessage(context, 'Could not delete this profile');
+                    context.pop();
+                  }
                 }
-              }
-            },
+              },
+            ),
           ),
-        ),
+        ],
       ],
     );
   }

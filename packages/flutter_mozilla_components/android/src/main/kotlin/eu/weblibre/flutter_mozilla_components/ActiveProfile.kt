@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Fabian Freund.
+ * Copyright (c) 2024-2026 Fabian Freund.
  *
  * This file is part of WebLibre
  * (see https://weblibre.eu).
@@ -21,15 +21,32 @@ package eu.weblibre.flutter_mozilla_components
 
 import android.content.Context
 import android.util.AtomicFile
+import eu.weblibre.flutter_mozilla_components.startup.CommittedProfileWriter
+import eu.weblibre.flutter_mozilla_components.startup.ExternalCommitResult
+import eu.weblibre.flutter_mozilla_components.startup.ProfileUuid
+import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
+import eu.weblibre.flutter_mozilla_components.startup.StartupPaths
 import java.io.File
-import java.io.FileNotFoundException
-import java.util.UUID
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
+/**
+ * The process's profile identity.
+ *
+ * All arbitration lives in [StartupArbiter]; this object is the Android-facing
+ * side of it — it owns the `current_profile` write and hands out the one
+ * [ProfileContext] the committed process is allowed to use.
+ *
+ * Two rules are load-bearing:
+ *
+ * - **Committed identity is immutable and is never re-derived from disk.** The old
+ *   implementation reinterpreted `current_profile` on every call, which let a
+ *   worker bind Gecko to profile A while Dart opened profile B's databases.
+ * - **Writing the profile for a *future* process does not rebind this one.**
+ *   `current_profile` is next-start state; the live process keeps serving whatever
+ *   it committed until it dies.
+ */
 object ActiveProfile {
-    @Volatile
-    var prefix: String? = null
 
     /** SharedPreference names used by mozilla-components FxA/sync that need profile isolation */
     val FXA_SHARED_PREFERENCE_NAMES = setOf(
@@ -46,53 +63,142 @@ object ActiveProfile {
     )
 
     /**
-     * Resolve the active profile prefix from disk.
-     * Called in Application.onCreate() to handle cold-start WorkManager scenarios.
+     * SharedPreferences prefix of the committed profile, or `null` before
+     * commitment.
+     *
+     * Read-only on purpose. It used to be a mutable `var` that `ProfileContext.init`
+     * assigned, so merely *constructing* a profile-scoped context silently
+     * repointed every profile-sensitive preference file in the process.
      */
-    fun resolveFromDisk(context: Context): ProfileContext? = resolveContext(context)
+    val prefix: String?
+        get() = StartupArbiter.boundProfileFolder()?.let { File(it).name }
 
-    /** Resolve the active profile without constructing browser components. */
-    @Synchronized
+    /** The committed profile's UUID, or `null` before commitment. */
+    val committedProfileId: String?
+        get() = StartupArbiter.committedProfileId()
+
+    /**
+     * Guards [cachedContext] only.
+     *
+     * Deliberately *not* the object monitor, and deliberately not the same lock as
+     * [writeLock]. [StartupArbiter] calls [persistNextStartProfile] while holding its
+     * own monitor, and [resolveContext] asks the arbiter for the committed folder —
+     * one shared lock here would close that cycle into a deadlock. The arbiter is
+     * always queried before either lock is taken.
+     */
+    private val contextLock = Any()
+
+    /** Guards the `current_profile` write. Nothing under it calls the arbiter. */
+    private val writeLock = Any()
+
+    @Volatile
+    private var cachedContext: ProfileContext? = null
+
+    /**
+     * The one [ProfileContext] this process may use, or `null` while the process is
+     * unresolved, selecting, under maintenance, or restarting.
+     *
+     * A `null` here is never a reason to fall back to an unscoped context. It means
+     * "not yet decided"; the caller must retry or refuse.
+     */
     fun resolveContext(context: Context): ProfileContext? {
-        val profileFile = File(context.filesDir, PwaConstants.CURRENT_PROFILE_FILE)
-        val uuid = try {
-            AtomicFile(profileFile).openRead().bufferedReader().use { it.readText() }.trim()
-        } catch (_: FileNotFoundException) {
-            return null
-        }.ifEmpty { return null }
-        val relativePath = "${PwaConstants.PROFILES_DIR_NAME}/${PwaConstants.PROFILE_DIR_PREFIX}$uuid"
-        if (!File(context.filesDir, relativePath).isDirectory) return null
-        prefix = File(relativePath).name
-        return ProfileContext(context.applicationContext, relativePath)
-    }
+        val relativePath = StartupArbiter.boundProfileFolder() ?: return null
 
-    /** Atomically select the profile used by the next browser process. */
-    @Synchronized
-    fun switchTo(context: Context, profileId: String) {
-        val normalizedId = UUID.fromString(profileId).toString()
-        require(normalizedId == profileId.lowercase()) { "Invalid profile id" }
+        return synchronized(contextLock) {
+            cachedContext?.let { existing ->
+                if (existing.relativePath == relativePath) return@synchronized existing
+                // Cannot happen without a Committed -> Committed transition, which
+                // the arbiter does not have. Fail loudly rather than serve two
+                // profiles from one process.
+                error("Process rebind detected: ${existing.relativePath} -> $relativePath")
+            }
 
-        val relativePath =
-            "${PwaConstants.PROFILES_DIR_NAME}/${PwaConstants.PROFILE_DIR_PREFIX}$normalizedId"
-        require(File(context.filesDir, relativePath).isDirectory) { "Profile does not exist" }
-
-        val profileFile = File(context.filesDir, PwaConstants.CURRENT_PROFILE_FILE)
-        profileFile.parentFile?.mkdirs()
-        val atomicFile = AtomicFile(profileFile)
-        val output = atomicFile.startWrite()
-        try {
-            output.write(normalizedId.toByteArray(Charsets.UTF_8))
-            atomicFile.finishWrite(output)
-        } catch (error: Throwable) {
-            atomicFile.failWrite(output)
-            throw error
+            ProfileContext(context.applicationContext, relativePath).also {
+                cachedContext = it
+            }
         }
-        prefix = File(relativePath).name
     }
 
-    /** Prevent profile switches from crossing active-profile background work. */
+    /**
+     * Resolves the committed context, committing the startup candidate first when
+     * the process is still unresolved.
+     *
+     * This is the entry point for headless components — workers, exported services,
+     * receivers — that may legitimately be the first thing to run in a process.
+     * They may bind the *candidate*, never a profile of their own choosing.
+     *
+     * Returns `null` when the process refuses to bind right now (selection in
+     * progress, maintenance, restarting, or no valid profile). Callers retry or
+     * fail safely; they must not invent a profile.
+     */
+    fun resolveOrCommitContext(context: Context): ProfileContext? {
+        return when (StartupArbiter.tryCommitExternal(requestedProfileId = null, trusted = false)) {
+            is ExternalCommitResult.CommittedRequested,
+            is ExternalCommitResult.AlreadyCommittedSame,
+            is ExternalCommitResult.AlreadyCommittedDifferent,
+            is ExternalCommitResult.AnsweredSelection,
+            -> resolveContext(context)
+
+            ExternalCommitResult.MaintenanceRefused,
+            ExternalCommitResult.SelectionInProgress,
+            ExternalCommitResult.Terminating,
+            ExternalCommitResult.NoValidProfile,
+            -> null
+        }
+    }
+
+    /**
+     * Persists the profile a *future* process should resolve.
+     *
+     * Deliberately does not touch [prefix] or [cachedContext]: this process keeps
+     * serving the profile it committed until it dies. Leaving disk saying B while a
+     * live process still serves A is the intended, temporary state of a switch —
+     * the alternative, rebinding in place, is what corrupts profiles.
+     */
+    fun persistNextStartProfile(context: Context, profileId: String) {
+        val normalizedId = profileId.lowercase()
+        require(ProfileUuid.isCanonical(normalizedId)) { "Invalid profile id" }
+
+        // `filesDir` rather than `applicationContext`: this can be reached from a
+        // context captured in `Application.attachBaseContext`, where the Application
+        // instance itself is not published yet.
+        val paths = StartupPaths(context.filesDir)
+        require(paths.profileDir(normalizedId).isDirectory) { "Profile does not exist" }
+
+        synchronized(writeLock) {
+            val profileFile = paths.currentProfileFile
+            profileFile.parentFile?.mkdirs()
+
+            val atomicFile = AtomicFile(profileFile)
+            val output = atomicFile.startWrite()
+            try {
+                output.write(normalizedId.toByteArray(Charsets.UTF_8))
+                atomicFile.finishWrite(output)
+            } catch (error: Throwable) {
+                atomicFile.failWrite(output)
+                throw error
+            }
+        }
+    }
+
+    /** The [CommittedProfileWriter] the arbiter uses at commit time. */
+    fun committedProfileWriter(context: Context): CommittedProfileWriter =
+        CommittedProfileWriter { profileId -> persistNextStartProfile(context, profileId) }
+
+    /**
+     * Prevents profile switches from crossing active-profile background work.
+     *
+     * Lock order is `startup arbitration -> this lock -> UnifiedPush exclusivity`.
+     * Kotlin's [Mutex] is not reentrant, so nothing under this lock may call back
+     * into a path that takes it again.
+     */
     internal suspend fun <T> withProfileLock(block: suspend () -> T): T =
         profileMutex.withLock { block() }
+
+    /** Test seam. Never call from production code. */
+    internal fun resetForTest() {
+        synchronized(contextLock) { cachedContext = null }
+    }
 
     private val profileMutex = Mutex()
 }

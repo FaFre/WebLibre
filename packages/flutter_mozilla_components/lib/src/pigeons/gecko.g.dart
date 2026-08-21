@@ -13721,17 +13721,21 @@ class GeckoPushApi {
     ;
   }
 
-  /// Pauses push transport for the current profile before switching profiles.
-  /// Site subscriptions and the chosen distributor are retained for restoration
-  /// when this profile becomes active again.
-  Future<void> suspendForProfileSwitch(String targetProfileId) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoPushApi.suspendForProfileSwitch$pigeonVar_messageChannelSuffix';
+  /// Pauses push transport for this profile ahead of a restart, taking the
+  /// profile lock so an in-flight delivery cannot straddle the boundary. Site
+  /// subscriptions and the chosen distributor are retained for restoration when
+  /// this profile becomes active again.
+  ///
+  /// Writes no profile state: under the restart protocol the target lives in the
+  /// durable restart request and is applied by the next process.
+  Future<void> suspendPushForRestart() async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoPushApi.suspendPushForRestart$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[targetProfileId]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(

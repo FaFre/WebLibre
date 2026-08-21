@@ -55,4 +55,4 @@ final class AccountSecureStoreProvider
 }
 
 String _$accountSecureStoreHash() =>
-    r'12a2383a575fb8a07a6fc1e8ac4a477c66db7009';
+    r'86bfa02968fd2f8ed0fabc927e7a23db91400e89';

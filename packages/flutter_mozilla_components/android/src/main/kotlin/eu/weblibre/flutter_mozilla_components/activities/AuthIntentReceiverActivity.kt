@@ -23,6 +23,10 @@ class AuthIntentReceiverActivity : Activity() {
         // app-links authentication carve-out can recognise a sign-in callback for this tab.
         addExternalCallerInformation(sourceIntent)
 
+        // FxA callbacks belong to a profile that is already signed in, so this is
+        // never a place to *choose* one. Without a committed profile — during
+        // selection, maintenance, or a restart — the only safe answer is to refuse
+        // and let the user retry from the browser.
         if (GlobalComponents.components == null && !GlobalComponents.ensureExternalComponents(applicationContext)) {
             finish()
             return

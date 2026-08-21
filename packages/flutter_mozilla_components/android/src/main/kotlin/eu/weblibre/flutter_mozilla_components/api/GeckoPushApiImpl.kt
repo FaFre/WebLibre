@@ -48,9 +48,9 @@ class GeckoPushApiImpl : GeckoPushApi {
         }
     }
 
-    override fun suspendForProfileSwitch(targetProfileId: String, callback: (Result<Unit>) -> Unit) {
+    override fun suspendPushForRestart(callback: (Result<Unit>) -> Unit) {
         respond(callback) {
-            withContext(Dispatchers.IO) { push.suspendForProfileSwitch(targetProfileId) }
+            withContext(Dispatchers.IO) { push.suspendForRestart() }
         }
     }
 

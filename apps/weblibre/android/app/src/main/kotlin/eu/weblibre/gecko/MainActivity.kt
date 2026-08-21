@@ -24,6 +24,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import eu.weblibre.flutter_mozilla_components.HomePressDispatcher
+import eu.weblibre.flutter_mozilla_components.startup.LaunchTrust
+import eu.weblibre.flutter_mozilla_components.startup.StartupIntentBroker
+import eu.weblibre.flutter_mozilla_components.startup.StartupPaths
+import eu.weblibre.simple_intent_receiver.IntentApprovals
+import eu.weblibre.simple_intent_receiver.IntentCallerResolver
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
@@ -66,9 +71,90 @@ class MainActivity : FlutterFragmentActivity() {
             return
         }
 
+        // Before Flutter sees it. An intent that arrives while the picker is up,
+        // while maintenance owns the process, or while a restart is tearing it
+        // down reaches a Dart side with no listeners — the plugin sends it over
+        // Pigeon and the message goes nowhere. The broker takes those and hands
+        // them over once the app exists.
+        //
+        // Deliberately returning without `super`: once the broker owns delivery,
+        // letting the plugin send it as well is how a silent drop becomes a
+        // duplicate open.
+        //
+        // Guarded on `shouldTake()` rather than letting `takeIfUndeliverable`
+        // decide, because everything below it has to happen *only* on the queueing
+        // path: it redeems a one-shot token, which the plugin must still find on
+        // the ordinary path a moment later.
+        if (StartupIntentBroker.shouldTake() && queueLaunch(intent)) {
+            Log.d(TAG, "Queued ${intent.action} until a profile is committed")
+            checkAndExitPiP()
+            return
+        }
+
         super.onNewIntent(intent)
 
         checkAndExitPiP()
+    }
+
+    /**
+     * Hands [intent] to the broker with everything the plugin would have resolved.
+     *
+     * Both halves have to be settled here, because a queued launch never reaches
+     * the plugin and nothing downstream can work them out afterwards:
+     *
+     * - **Who sent it.** `getReferrer()` answers about the activity running when it
+     *   is asked, so a queued launch that did not write down its caller comes back
+     *   looking internal — and internal is precisely what the gatekeeper never
+     *   prompts about.
+     * - **Whether the user already approved it.** A "Allow once" relaunch carries a
+     *   one-shot token that makes the caller count as internal. Left unredeemed,
+     *   the replay arrives naming the sending package, meets that package's block
+     *   policy, and is dropped — the one launch the user explicitly allowed.
+     *
+     * The token is redeemed before the queue write and put back if the broker
+     * declines after all, so it is never spent on a launch nobody delivers.
+     *
+     * - **What kind of launch it is.** A queued entry's classification is the only
+     *   channel by which a replayed launch can still name a profile: the Dart side
+     *   is forbidden from deriving one from raw intent extras, precisely because
+     *   `pwa_profile_uuid` is an extra any app on the device can forge. Queued with
+     *   the default `UNKNOWN`, a pinned PWA that reached us during the picker or
+     *   maintenance came back indistinguishable from an anonymous deep link, and
+     *   nothing downstream could tell it had ever been trusted. [LaunchTrust] is
+     *   the same validation `IntentReceiverActivity` runs, so a forged extra gets
+     *   no more here than it does there.
+     */
+    private fun queueLaunch(intent: Intent): Boolean {
+        val approval = IntentApprovals.consume(applicationContext, intent)
+
+        // A copy: the original still goes to `super` when this declines, and it
+        // has to reach the plugin with its extras untouched.
+        val queueable = IntentApprovals.applyTo(Intent(intent), approval)
+
+        // Classified from the intent as it will be queued, so the approval the
+        // user just granted is part of what is being described.
+        val descriptor = LaunchTrust.classify(applicationContext, queueable)
+
+        val queued = StartupIntentBroker.takeIfUndeliverable(
+            context = applicationContext,
+            paths = StartupPaths(applicationContext),
+            intent = queueable,
+            classification = descriptor.classification,
+            trustedProfileId = descriptor.trustedProfileId,
+            callerPackage = {
+                if (approval != null) {
+                    null
+                } else {
+                    IntentCallerResolver.resolve(applicationContext, this, intent)
+                }
+            },
+        )
+
+        if (!queued) {
+            approval?.let { IntentApprovals.restore(applicationContext, it) }
+        }
+
+        return queued
     }
 
     /**

@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "profilePrompt": "browserAndExternal",
+  "honorShortcutProfile": "yes",
+  "unknownFutureKey": {"nested": true},
+  "pendingTasks": [
+    {
+      "id": "0199a0b1-0000-7000-8000-00000000000a",
+      "action": "backup",
+      "profileId": "0199a0b1-1111-7111-8111-111111111111",
+      "profileName": "Default",
+      "state": "queued",
+      "createdAt": "2026-08-18T10:00:00.000Z"
+    },
+    {
+      "id": "0199a0b1-0000-7000-8000-00000000000b",
+      "action": "teleport",
+      "profileId": "0199a0b1-1111-7111-8111-111111111111",
+      "profileName": "Default",
+      "state": "queued",
+      "createdAt": "2026-08-18T10:01:00.000Z"
+    },
+    {
+      "id": "0199a0b1-0000-7000-8000-00000000000c",
+      "action": "backup",
+      "profileId": "0199a0b1-1111-7111-8111-111111111111",
+      "profileName": "Default",
+      "state": "levitating",
+      "createdAt": "2026-08-18T10:02:00.000Z"
+    },
+    {
+      "action": "backup",
+      "profileId": "0199a0b1-1111-7111-8111-111111111111",
+      "state": "queued",
+      "createdAt": "2026-08-18T10:03:00.000Z"
+    },
+    {
+      "id": "0199a0b1-0000-7000-8000-00000000000d",
+      "action": "backup",
+      "profileName": "No profile",
+      "state": "queued",
+      "createdAt": "2026-08-18T10:04:00.000Z"
+    },
+    {
+      "id": "0199a0b1-0000-7000-8000-00000000000a",
+      "action": "delete",
+      "profileId": "0199a0b1-9999-7999-8999-999999999999",
+      "profileName": "Duplicate id",
+      "state": "queued",
+      "createdAt": "2026-08-18T10:05:00.000Z"
+    },
+    "not an object",
+    17
+  ]
+}

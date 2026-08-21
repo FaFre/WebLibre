@@ -3626,11 +3626,15 @@ abstract class GeckoPushApi {
   @async
   void renewRegistration();
 
-  /// Pauses push transport for the current profile before switching profiles.
-  /// Site subscriptions and the chosen distributor are retained for restoration
-  /// when this profile becomes active again.
+  /// Pauses push transport for this profile ahead of a restart, taking the
+  /// profile lock so an in-flight delivery cannot straddle the boundary. Site
+  /// subscriptions and the chosen distributor are retained for restoration when
+  /// this profile becomes active again.
+  ///
+  /// Writes no profile state: under the restart protocol the target lives in the
+  /// durable restart request and is applied by the next process.
   @async
-  void suspendForProfileSwitch(String targetProfileId);
+  void suspendPushForRestart();
 
   /// Subscriptions Gecko has created, read from the UnifiedPush store. Read-only:
   /// there is no app→Gecko channel to revoke a subscription, so removal has to go

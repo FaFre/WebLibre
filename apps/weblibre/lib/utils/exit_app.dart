@@ -29,8 +29,13 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 
-Future<void> exitApp(ProviderContainer container) async {
-  logger.i('Preparing exit');
+/// Tears down the app and ends the process.
+///
+/// With [restart] the process is ended natively instead of by `exit(0)`, so the
+/// armed relaunch runs: the trampoline has to be started from a process that is
+/// still alive, and `exit(0)` from Dart skips that.
+Future<void> exitApp(ProviderContainer container, {bool restart = false}) async {
+  logger.i(restart ? 'Preparing restart' : 'Preparing exit');
 
   // 1. Close private tabs (clears browsing data for private contexts).
   //    Isolated tabs are persistent and should survive app exit.
@@ -117,11 +122,35 @@ Future<void> exitApp(ProviderContainer container) async {
   container.dispose();
   logger.i('Provider container disposed');
 
-  // 6. Signal the system to finish the activity and give fire-and-forget
-  //    async onDispose callbacks time to settle.
-  await SystemNavigator.pop();
+  // 6. Give fire-and-forget async onDispose callbacks time to settle.
+  //
+  //    Finishing the Activity is skipped when restarting. There is nothing to
+  //    return to — the process is about to die and the trampoline is already
+  //    waiting for it — and popping first leaves a detached engine in the cache
+  //    that the relaunch would attach to if the exit below ever failed to run.
+  if (!restart) {
+    await SystemNavigator.pop();
+  }
   await Future.delayed(const Duration(seconds: 1));
 
   logger.i('Bye !!1');
+
+  if (restart) {
+    // Best effort, and deliberately not allowed to throw past this point. The
+    // channel runs through an engine this teardown has been dismantling, so it
+    // can fail — and an exception here used to skip `exit(0)` entirely, leaving a
+    // live process for the trampoline to relaunch into once it gave up waiting.
+    // Exiting is what actually matters; the native call only saves a moment.
+    try {
+      await GeckoProfileService().completeProfileRestart();
+    } catch (error, stackTrace) {
+      logger.w(
+        'Native restart exit was unreachable; exiting from Dart',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
   exit(0);
 }

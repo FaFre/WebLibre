@@ -24,6 +24,9 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/core/startup/models/startup_config.dart';
+import 'package:weblibre/core/startup/startup_settings.dart';
+import 'package:weblibre/features/user/domain/presentation/utils/profile_labels.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
@@ -36,7 +39,7 @@ class ProfileListScreen extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Users'),
+        title: const Text('Profiles'),
         actions: [
           IconButton(
             onPressed: () async {
@@ -49,30 +52,45 @@ class ProfileListScreen extends HookConsumerWidget {
       body: SafeArea(
         child: usersAsync.when(
           skipLoadingOnReload: true,
-          data: (profiles) => ListView.builder(
-            itemCount: profiles.length,
-            itemBuilder: (context, index) {
-              final profile = profiles[index];
-              final isSelected =
-                  filesystem.selectedProfile == profile.uuidValue;
+          data: (profiles) {
+            // Two users with one name are two identical rows, and the row you
+            // tap is the one whose Delete you reach.
+            final labels = profileLabels(profiles);
 
-              return ListTile(
-                enabled: !isSelected,
-                leading: const Icon(Icons.person),
-                title: Text(profile.name),
-                subtitle: isSelected ? const Text('Active') : null,
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () async {
-                  await EditProfileRoute(
-                    profile: jsonEncode(profile.toJson()),
-                  ).push(context);
-                },
-              );
-            },
-          ),
+            return ListView.builder(
+              // One extra row for the startup prompt switch, kept in the same
+              // scrollable so a long profile list does not push it out of reach.
+              itemCount: profiles.length + 1,
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return const _StartupPromptTile();
+                }
+
+                final profile = profiles[index - 1];
+                final isSelected =
+                    filesystem.selectedProfile == profile.uuidValue;
+
+                // The active profile is tappable like any other: its edit screen
+                // is the only way to reach backup, rename and auth settings, and
+                // all three work on the profile this process is serving. Only
+                // switching and deleting do not, and the edit screen hides those.
+                return ListTile(
+                  leading: const Icon(Icons.person),
+                  title: Text(labelOfProfile(profile, labels)),
+                  subtitle: isSelected ? const Text('Active') : null,
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () async {
+                    await EditProfileRoute(
+                      profile: jsonEncode(profile.toJson()),
+                    ).push(context);
+                  },
+                );
+              },
+            );
+          },
           error: (error, stackTrace) => Center(
             child: FailureWidget(
-              title: 'Failed to load Profiles',
+              title: 'Could not load profiles',
               exception: error,
             ),
           ),
@@ -85,6 +103,41 @@ class ProfileListScreen extends HookConsumerWidget {
         },
         child: const Icon(Icons.person_add),
       ),
+    );
+  }
+}
+
+/// Switches the global startup profile prompt.
+///
+/// It lives here rather than in settings because settings are per profile, and
+/// this decides which profile starts — a per-profile switch could be on in one
+/// and off in another with no way to say which wins.
+///
+/// Turning it on changes nothing until a second profile exists: with one profile
+/// there is nothing to choose between, so startup does not stop to ask.
+class _StartupPromptTile extends HookConsumerWidget {
+  const _StartupPromptTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final setting = ref.watch(profilePromptSettingProvider);
+
+    return SwitchListTile(
+      secondary: const Icon(MdiIcons.accountQuestion),
+      title: const Text('Ask which profile to open'),
+      subtitle: const Text('At startup, when more than one profile exists'),
+      value: setting.value == ProfilePromptMode.browserOnly,
+      onChanged: setting.isLoading
+          ? null
+          : (enabled) async {
+              await ref
+                  .read(profilePromptSettingProvider.notifier)
+                  .setMode(
+                    enabled
+                        ? ProfilePromptMode.browserOnly
+                        : ProfilePromptMode.off,
+                  );
+            },
     );
   }
 }

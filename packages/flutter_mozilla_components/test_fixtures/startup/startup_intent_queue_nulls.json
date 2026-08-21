@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "nextSequence": 2,
+  "entries": [
+    {
+      "id": "0199a0b3-0000-7000-8000-0000000000f1",
+      "sequence": 1,
+      "classification": null,
+      "action": null,
+      "dataUri": null,
+      "mimeType": null,
+      "categories": null,
+      "flags": null,
+      "extras": null,
+      "trustedProfileId": null,
+      "callerPackage": null,
+      "payloadDirName": null,
+      "createdAt": "2026-08-18T11:10:00.000Z",
+      "expiresAt": "2026-08-18T11:40:00.000Z",
+      "claim": null,
+      "acknowledged": null
+    }
+  ]
+}

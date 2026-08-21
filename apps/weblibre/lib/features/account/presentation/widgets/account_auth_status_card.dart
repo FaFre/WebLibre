@@ -19,6 +19,8 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/features/account/data/account_adoption.dart';
+import 'package:weblibre/features/account/data/account_adoption_provider.dart';
 import 'package:weblibre/features/account/data/models/account_auth_state.dart';
 import 'package:weblibre/features/account/domain/repositories/account_auth.dart';
 
@@ -33,13 +35,141 @@ class AccountAuthStatusCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return switch (authState.status) {
-      AccountAuthStatus.signedOut => const _SignedOutTile(),
+      AccountAuthStatus.signedOut => const _SignedOutSection(),
       AccountAuthStatus.signingIn => const _SigningInTile(),
       AccountAuthStatus.signedIn => _SignedInTile(authState: authState),
       AccountAuthStatus.error => _ErrorTile(authState: authState),
     };
   }
 }
+
+/// Signed out — but possibly only because the upgrade could not tell which
+/// profile the existing session belonged to.
+///
+/// Qualifying secure-storage keys by profile fixed a real isolation defect (one
+/// session was shared by every profile), and the cost was that the pre-existing
+/// record has no owner. Nothing on the device records which profile it was for.
+/// Rather than guess, or discard it and call that a migration, the session is
+/// offered back here by name — the user is the only party who knows.
+class _SignedOutSection extends ConsumerWidget {
+  const _SignedOutSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unclaimed = ref.watch(unclaimedAccountRecordProvider).value;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (unclaimed != null) _AdoptAccountTile(record: unclaimed),
+        const _SignedOutTile(),
+      ],
+    );
+  }
+}
+
+class _AdoptAccountTile extends ConsumerWidget {
+  const _AdoptAccountTile({required this.record});
+
+  final UnclaimedAccountRecord record;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+
+    return Card(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      color: theme.colorScheme.secondaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.person_search_outlined,
+                  color: theme.colorScheme.onSecondaryContainer,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Keep your sign-in on this profile?',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.onSecondaryContainer,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'WebLibre found a sign-in for ${record.label} from before '
+              'profiles kept separate accounts. It cannot tell which profile '
+              'it belonged to, and will not guess.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSecondaryContainer,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () async {
+                    final confirmed = await _confirmDiscard(context, record);
+                    if (confirmed != true) return;
+                    await ref
+                        .read(accountAdoptionProvider.notifier)
+                        .discard(record);
+                  },
+                  child: const Text('Not mine'),
+                ),
+                const SizedBox(width: 8),
+                FilledButton(
+                  onPressed: () async {
+                    await ref
+                        .read(accountAdoptionProvider.notifier)
+                        .adopt(record);
+                  },
+                  child: const Text('Use it here'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Confirmed, because it is the only irreversible half of the choice.
+///
+/// "Use it here" can be undone by signing out; discarding destroys the only copy
+/// of a session that may belong to another profile the user has not opened yet.
+Future<bool?> _confirmDiscard(
+  BuildContext context,
+  UnclaimedAccountRecord record,
+) => showDialog<bool>(
+  context: context,
+  builder: (context) => AlertDialog(
+    title: const Text('Forget this sign-in?'),
+    content: Text(
+      'The saved session for ${record.label} is deleted from this device. If '
+      'it belonged to another profile, you have to sign in again there.',
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.pop(context, false),
+        child: const Text('Cancel'),
+      ),
+      TextButton(
+        onPressed: () => Navigator.pop(context, true),
+        child: const Text('Forget it'),
+      ),
+    ],
+  ),
+);
 
 class _SignedOutTile extends ConsumerWidget {
   const _SignedOutTile();

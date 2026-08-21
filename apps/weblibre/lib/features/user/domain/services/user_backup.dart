@@ -19,7 +19,7 @@
  */
 import 'dart:io';
 
-import 'package:convert/convert.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -27,99 +27,25 @@ import 'package:saf_stream/saf_stream.dart';
 import 'package:saf_util/saf_util.dart';
 import 'package:saf_util/saf_util_platform_interface.dart';
 import 'package:secure_archive/secure_archive.dart';
+import 'package:weblibre/core/copy/profile_copy.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/maintenance/clone_participant_policy.dart';
+import 'package:weblibre/core/maintenance/saf_archive_target.dart';
+import 'package:weblibre/core/startup/models/startup_config.dart';
+import 'package:weblibre/core/startup/startup_config_store.dart';
+import 'package:weblibre/core/uuid.dart';
 import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/features/user/domain/providers/backup_directory.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
+import 'package:weblibre/utils/filesystem.dart' as fs;
 
 part 'user_backup.g.dart';
 
 @Riverpod(keepAlive: true)
 class UserBackupService extends _$UserBackupService {
-  static final dateFormatter = FixedDateTimeFormatter('YYYY-MM-DD_hhmmss');
-  static const _excludedBackupRelativePaths = {'cache'};
-
   static final _safUtil = SafUtil();
   static final _safStream = SafStream();
-
-  bool _isExcludedBackupPath(String relativePath) {
-    final normalizedPath = p.normalize(relativePath);
-
-    for (final excludedPath in _excludedBackupRelativePaths) {
-      if (normalizedPath == excludedPath ||
-          p.isWithin(excludedPath, normalizedPath)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  Future<void> _copyCuratedBackupSource(
-    Directory rootDirectory,
-    Directory sourceDirectory,
-    Directory targetDirectory,
-  ) async {
-    await targetDirectory.create(recursive: true);
-
-    await for (final entity in sourceDirectory.list(followLinks: false)) {
-      final relativePath = p.relative(entity.path, from: rootDirectory.path);
-
-      if (_isExcludedBackupPath(relativePath)) {
-        continue;
-      }
-
-      final targetPath = p.join(targetDirectory.path, p.basename(entity.path));
-
-      if (entity is Directory) {
-        await _copyCuratedBackupSource(
-          rootDirectory,
-          entity,
-          Directory(targetPath),
-        );
-      } else if (entity is File) {
-        await entity.copy(targetPath);
-      } else if (entity is Link) {
-        await Link(targetPath).create(await entity.target());
-      }
-    }
-  }
-
-  Future<Directory> _prepareBackupSourceDirectory(
-    Directory sourceDirectory, {
-    required bool skipCaches,
-  }) async {
-    if (!skipCaches) {
-      return sourceDirectory;
-    }
-
-    final tempDirectory = await getTemporaryDirectory();
-    final curatedDirectory = Directory(
-      p.join(
-        tempDirectory.path,
-        'backup_source_${DateTime.now().microsecondsSinceEpoch}',
-      ),
-    );
-
-    try {
-      await _copyCuratedBackupSource(
-        sourceDirectory,
-        sourceDirectory,
-        curatedDirectory,
-      );
-      return curatedDirectory;
-    } catch (_) {
-      try {
-        if (await curatedDirectory.exists()) {
-          await curatedDirectory.delete(recursive: true);
-        }
-      } catch (_) {
-        // Ignore cleanup errors for partially copied backup sources.
-      }
-      rethrow;
-    }
-  }
 
   Uri _requireBackupDirectoryUri() {
     final uri = ref.read(backupDirectoryUriProvider);
@@ -136,70 +62,46 @@ class UserBackupService extends _$UserBackupService {
         .toList();
   }
 
-  Future<bool> createUserBackup(
+  /// Queues a backup of [profile] and arms the restart that will run it.
+  ///
+  /// The backup itself deliberately does not happen here. A consistent archive
+  /// needs the profile to have no writers, and this process is the writer — it
+  /// has the databases open and the engine running. So the task is recorded
+  /// durably, the process restarts, and the next one runs it under a maintenance
+  /// lease before it opens anything.
+  ///
+  /// The SAF target travels in the task record because it normally lives in
+  /// profile settings, which the maintenance process cannot read. The password
+  /// deliberately does not: it is asked for again on the maintenance screen.
+  Future<MaintenanceTask> queueBackup(
     Profile profile, {
-    required String password,
     required bool integrityCheck,
-    required bool skipCaches,
   }) async {
     final dirUri = _requireBackupDirectoryUri();
-    final timestamp = dateFormatter.encode(DateTime.now());
-    final fileName = 'backup_${profile.name}_$timestamp.weblibre';
-    final sourceDirectory = filesystem.getProfileDir(profile.uuidValue);
 
-    final tempDir = await getTemporaryDirectory();
-    final tempFile = File(p.join(tempDir.path, fileName));
-    Directory? curatedSourceDirectory;
+    final task = MaintenanceTask.create(
+      id: uuid.v4(),
+      action: MaintenanceAction.backup,
+      profileId: profile.uuidValue.uuid,
+      profileName: profile.name,
+      createdAt: DateTime.now().toUtc(),
+      targetTreeUri: dirUri.toString(),
+      integrityCheck: integrityCheck,
+    );
 
-    try {
-      curatedSourceDirectory = await _prepareBackupSourceDirectory(
-        sourceDirectory,
-        skipCaches: skipCaches,
-      );
+    await StartupConfigStore(filesystem.startupPaths).enqueueTask(task);
 
-      final backup = SecureArchivePack(
-        outputFile: tempFile,
-        sourceDirectory: curatedSourceDirectory,
-        argon2Params: Argon2Params.memoryConstrained(),
-      );
-
-      await backup.pack(password, integrityCheck: integrityCheck);
-
-      await _safStream.pasteLocalFile(
-        tempFile.path,
-        dirUri.toString(),
-        fileName,
-        'application/octet-stream',
-      );
-
-      return true;
-    } finally {
-      try {
-        if (await tempFile.exists()) {
-          await tempFile.delete();
-        }
-      } catch (e, s) {
-        logger.w(
-          'Failed to cleanup temporary backup file: ${tempFile.path}',
-          error: e,
-          stackTrace: s,
-        );
-      }
-      if (curatedSourceDirectory != null &&
-          curatedSourceDirectory.path != sourceDirectory.path) {
-        try {
-          if (await curatedSourceDirectory.exists()) {
-            await curatedSourceDirectory.delete(recursive: true);
-          }
-        } catch (e, s) {
-          logger.w(
-            'Failed to cleanup curated backup directory: ${curatedSourceDirectory.path}',
-            error: e,
-            stackTrace: s,
-          );
-        }
-      }
+    final armed = await GeckoProfileService().armProfileRestart(
+      reason: 'maintenanceBackup',
+    );
+    if (!armed) {
+      // Leaving the task queued would reserve maintenance on the next start with
+      // nothing having asked for it.
+      await StartupConfigStore(filesystem.startupPaths).removeTask(task.id);
+      throw Exception(restartCouldNotBeScheduled);
     }
+
+    return task;
   }
 
   Future<Profile> restoreAndCreateNew(
@@ -215,37 +117,56 @@ class UserBackupService extends _$UserBackupService {
     );
 
     try {
-      await _safStream.copyToLocalFile(backupFileUri.toString(), tempFile.path);
+      final newProfile = await withArchiveFromSaf(
+        sourceUri: backupFileUri,
+        local: tempFile,
+        safStream: _safStream,
+        use: (archive) async {
+          // The extractor refuses a target directory that already exists, so a
+          // previous attempt that died before its cleanup would otherwise make
+          // every later restore fail. Nothing of value can be in here: it is a
+          // scratch path that only ever holds a half-unpacked archive.
+          if (await outputDirectory.exists()) {
+            await outputDirectory.delete(recursive: true);
+          }
 
-      final backup = SecureArchiveUnpack(
-        inputFile: tempFile,
-        outputDirectory: outputDirectory,
-        argon2Params: Argon2Params.memoryConstrained(),
+          await SecureArchiveUnpack(
+            inputFile: archive,
+            outputDirectory: outputDirectory,
+            argon2Params: Argon2Params.memoryConstrained(),
+          ).unpack(password);
+
+          final newProfile = Profile.create(name: profileName);
+          final newPath = filesystem.getProfileDir(newProfile.uuidValue);
+
+          // Before the tree becomes a profile. The archive carries a
+          // `weblibre_participants/` payload describing the profile it was taken
+          // *from* — including its account session and proxy credentials as
+          // plain JSON — and a clone is a different profile that must not
+          // inherit it. See [applyCloneParticipantPolicy] for what a future
+          // build could keep.
+          await applyCloneParticipantPolicy(outputDirectory);
+
+          // Addressed to its new id *before* the rename, never after. The
+          // archive's own `metadata.json` names the profile it was taken from,
+          // so a tree that reaches `profile-<newId>` still carrying it is in the
+          // one state discovery refuses to list or repair —
+          // `metadataUuidMismatch` — and a process killed between the two steps
+          // left that permanently: a full profile directory, intact on disk and
+          // invisible to the picker, the candidate resolver and the profile
+          // list. Writing first makes the rename the single commit point, so an
+          // interruption leaves a scratch directory instead.
+          await fs.writeProfileMetadata(outputDirectory, newProfile);
+
+          await outputDirectory.rename(newPath.path);
+          await filesystem.healProfile(newPath);
+          return newProfile;
+        },
       );
-      final newProfile = await backup.unpack(password).then((_) async {
-        final newProfile = Profile.create(name: profileName);
-        final newPath = filesystem.getProfileDir(newProfile.uuidValue);
-
-        await outputDirectory.rename(newPath.path);
-        await filesystem.updateProfileMetadata(newProfile);
-        await filesystem.healProfile(newPath);
-        return newProfile;
-      });
 
       ref.invalidate(profileRepositoryProvider);
       return newProfile;
     } finally {
-      try {
-        if (await tempFile.exists()) {
-          await tempFile.delete();
-        }
-      } catch (e, s) {
-        logger.w(
-          'Failed to cleanup temporary restore file: ${tempFile.path}',
-          error: e,
-          stackTrace: s,
-        );
-      }
       try {
         if (await outputDirectory.exists()) {
           await outputDirectory.delete(recursive: true);
@@ -260,83 +181,44 @@ class UserBackupService extends _$UserBackupService {
     }
   }
 
-  Future<bool> restoreAndCreateOrOverride(
-    Uri backupFileUri, {
-    required String password,
-    required FutureOr<bool?> Function() confirmOverrideCallback,
+  /// Queues a journaled restore over [profile] and arms the restart that runs it.
+  ///
+  /// The archive is not opened here and the password is not asked for here. Both
+  /// happen in the maintenance process, which is the only one entitled to replace
+  /// a profile's contents — and, because it has never opened the profile, the only
+  /// one that can do it to the *currently active* profile at all. The old inline
+  /// path could not: it deleted the target directory and renamed staging into
+  /// place, so a crash between those two steps destroyed the profile with no
+  /// record that anything had been in flight.
+  /// [adoptArchiveName] renames the target to whatever the archive calls itself.
+  /// Only the first-run restore sets it: elsewhere the user picked an existing
+  /// user to overwrite and did not ask to rename it.
+  Future<MaintenanceTask> queueRestoreOver(
+    Profile profile, {
+    required Uri sourceFileUri,
+    bool adoptArchiveName = false,
   }) async {
-    final tempDir = await getTemporaryDirectory();
-    final tempFile = File(p.join(tempDir.path, 'restore_temp.weblibre'));
-
-    final outputDirectory = Directory(
-      p.join(filesystem.profilesDir.path, 'restore_temp'),
+    final task = MaintenanceTask.create(
+      id: uuid.v4(),
+      action: MaintenanceAction.restoreOver,
+      profileId: profile.uuidValue.uuid,
+      profileName: profile.name,
+      createdAt: DateTime.now().toUtc(),
+      sourceFileUri: sourceFileUri.toString(),
+      adoptArchiveName: adoptArchiveName,
     );
 
-    try {
-      await _safStream.copyToLocalFile(backupFileUri.toString(), tempFile.path);
+    final store = StartupConfigStore(filesystem.startupPaths);
+    await store.enqueueTask(task);
 
-      final backup = SecureArchiveUnpack(
-        inputFile: tempFile,
-        outputDirectory: outputDirectory,
-        argon2Params: Argon2Params.memoryConstrained(),
-      );
-      await backup.unpack(password).then((_) async {
-        final existingProfile = await filesystem.readProfileMetadata(
-          outputDirectory,
-        );
-        if (existingProfile == null) {
-          throw Exception('Backup does not contain valid profile metadata');
-        }
-
-        if (existingProfile.uuidValue == filesystem.selectedProfile) {
-          throw Exception(
-            'Unable to override active User, please switch to another User and try again',
-          );
-        }
-
-        final profileDir = filesystem.getProfileDir(existingProfile.uuidValue);
-
-        if (await profileDir.exists()) {
-          final result = await confirmOverrideCallback();
-
-          if (result == true) {
-            await profileDir.delete(recursive: true);
-            await outputDirectory.rename(profileDir.path);
-            await filesystem.healProfile(profileDir);
-          }
-        } else {
-          // Profile doesn't exist yet, just move the restored data into place
-          await outputDirectory.rename(profileDir.path);
-          await filesystem.healProfile(profileDir);
-        }
-      });
-
-      ref.invalidate(profileRepositoryProvider);
-      return true;
-    } finally {
-      try {
-        if (await tempFile.exists()) {
-          await tempFile.delete();
-        }
-      } catch (e, s) {
-        logger.w(
-          'Failed to cleanup temporary restore file: ${tempFile.path}',
-          error: e,
-          stackTrace: s,
-        );
-      }
-      try {
-        if (await outputDirectory.exists()) {
-          await outputDirectory.delete(recursive: true);
-        }
-      } catch (e, s) {
-        logger.w(
-          'Failed to cleanup temporary backup directory: ${outputDirectory.path}',
-          error: e,
-          stackTrace: s,
-        );
-      }
+    if (!await GeckoProfileService().armProfileRestart(
+      reason: 'maintenanceRestore',
+    )) {
+      await store.removeTask(task.id);
+      throw Exception(restartCouldNotBeScheduled);
     }
+
+    return task;
   }
 
   Future<int> migrateOldBackups(Uri newDirUri) async {
