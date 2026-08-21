@@ -46,12 +46,27 @@ class SyncSettingsScreen extends HookConsumerWidget {
 
     final generalSettings = ref.watch(generalSettingsWithDefaultsProvider);
 
-    final syncStarted = ref.watch(
-      syncEventProvider.select(
-        (value) => value.isLoading || value.value?.$1 == SyncEvent.started,
-      ),
+    final lastSyncEvent = ref.watch(
+      syncEventProvider.select((value) => value.value?.$1),
     );
-    final isSyncing = syncStarted || syncInfo?.syncing == true;
+
+    // `account.syncing` is the primary signal: it rides the auth-state stream, which
+    // is a BehaviorSubject, so it is replayed to whoever subscribes late and carries
+    // the value the native sync callback actually knew.
+    //
+    // The start/complete events cannot play that role — they are PublishSubjects, so
+    // anything emitted before the repository subscribes is gone, which is why
+    // `started` must never latch the spinner on by itself. A *finished* event is
+    // only used in the other direction, as a release: having observed a sync end is
+    // proof we are idle even if the flag has gone stale.
+    //
+    // Deliberately not keyed off `AsyncValue.isLoading` any more: that is true while
+    // the provider recomputes after *any* repository change, which made an unrelated
+    // refresh look like a sync in progress.
+    final isSyncing = switch (lastSyncEvent) {
+      SyncEvent.completed || SyncEvent.error => false,
+      _ => syncInfo?.syncing == true,
+    };
 
     final syncText = useMemoized(() {
       if (isSyncing) {
@@ -70,6 +85,14 @@ class SyncSettingsScreen extends HookConsumerWidget {
 
       return 'Last synced: $formattedDate';
     }, [syncInfo, isSyncing]);
+
+    // `authenticated` is the only trustworthy signal for "is there an account".
+    // The email comes from the FxA profile, which is absent whenever the profile
+    // fetch has not succeeded — keying the card off it rendered a perfectly
+    // signed-in account as "Not signed in". `needsReauth` still means an account
+    // exists, just an expired one.
+    final hasAccount =
+        syncInfo?.authenticated == true || syncInfo?.needsReauth == true;
 
     final disableAnimations = MediaQuery.disableAnimationsOf(context);
 
@@ -102,12 +125,16 @@ class SyncSettingsScreen extends HookConsumerWidget {
               children: [
                 ListTile(
                   leading: const Icon(Icons.account_circle_outlined),
-                  title: Text(syncInfo?.email ?? 'Not signed in'),
+                  title: Text(
+                    syncInfo?.email ??
+                        (hasAccount ? 'Signed in' : 'Not signed in'),
+                  ),
                   subtitle: Text(
                     syncInfo?.needsReauth == true
                         ? 'Authentication expired. Sign in again to continue syncing.'
                         : syncInfo?.authenticated == true
-                        ? (syncInfo?.displayName ?? 'Signed in')
+                        ? (syncInfo?.displayName ??
+                              'Syncing tabs, bookmarks, and history')
                         : 'Sign in to synchronize tabs, bookmarks, and history',
                   ),
                   trailing: syncInfo?.authenticated == true

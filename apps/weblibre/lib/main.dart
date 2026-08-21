@@ -65,6 +65,7 @@ import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_logs.d
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_autostart.dart';
 import 'package:weblibre/features/share_intent/domain/services/sharing_intent.dart';
+import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/services/profile_restart_request.dart';
@@ -306,6 +307,17 @@ class _MainWidget extends HookConsumerWidget {
       // installed the shorter the window in which protected containers cannot
       // load — and it is a barrier, never a leak, if it is late.
       ref.read(proxySettingsReplicationProvider);
+
+      // Same reason, for sync: registering the GeckoSyncStateEvents handler is what
+      // makes the account state pushed during `accountManager.start()` reachable.
+      // That push is the only thing that corrects the sync UI when the first read
+      // of the account happens before the manager has finished restoring it, and it
+      // used to be registered lazily — the first time a widget watched
+      // syncRepositoryProvider — by which point the event was long gone and a
+      // signed-in profile kept rendering as signed out until the next real auth
+      // change. The repository picks the state up from the BehaviorSubject whenever
+      // it does build.
+      ref.read(geckoSyncStateServiceProvider);
 
       try {
         await GeckoBrowserService().initialize(

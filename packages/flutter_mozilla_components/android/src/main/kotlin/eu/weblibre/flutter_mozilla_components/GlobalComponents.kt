@@ -399,9 +399,10 @@ object GlobalComponents {
         currentMode = mode
 
         previousComponents?.let {
-            runCatching {
-                it.backgroundServices.accountManager.close()
-            }
+            // Not `accountManager.close()`: that reaches through a lazy and would
+            // build a whole account manager just to close it when the outgoing
+            // components never used one. `close()` also flushes the account state.
+            runCatching { it.backgroundServices.close() }
         }
 
         stopPrivateTabsNotificationFeature()

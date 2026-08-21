@@ -212,8 +212,27 @@ class SyncRepository extends _$SyncRepository {
   Future<void> _refreshDeviceName() async {
     await _awaitInitialized();
 
-    final deviceName = await _service.getDeviceName();
-    _update((s) => s.copyWith(deviceName: deviceName));
+    try {
+      final deviceName = await _service.getDeviceName();
+      _update((s) => s.copyWith(deviceName: deviceName));
+    } on Exception catch (e) {
+      // Deliberately not surfaced as a sync error: the name is a label, and the
+      // repository keeps whatever it already had rather than blanking it.
+      logger.w('Failed to refresh sync device name', error: e);
+    }
+  }
+
+  /// Refreshes the device list, then the device name, in that order.
+  ///
+  /// Never concurrently. `getDevices` forces a network refresh of the
+  /// constellation, while `getDeviceName` deliberately reads whatever is already
+  /// in memory — so run together, the name read wins the race and writes back the
+  /// name from *before* the refresh. That is why a rename only appeared after a
+  /// restart: a cold start has no in-memory constellation, so the name read is
+  /// forced to fetch and gets the current one.
+  Future<void> _refreshDevicesThenName() async {
+    await _refreshDevices();
+    await _refreshDeviceName();
   }
 
   Future<SyncAccountInfo> refresh() async {
@@ -234,8 +253,28 @@ class SyncRepository extends _$SyncRepository {
   }
 
   Future<void> syncNow() async {
-    await _service.syncNow();
-    await Future.wait([_refreshAccount(), _refreshTabs(), _refreshDevices()]);
+    // `syncNow` reports failure now that it waits for the account manager instead
+    // of quietly no-opping against an unstarted one, and every caller is a plain
+    // onTap. Record it the way a failed sync is recorded rather than letting it
+    // escape into an unhandled async error.
+    try {
+      await _service.syncNow();
+    } on Exception catch (e) {
+      logger.e('Failed to start synchronization', error: e);
+      _update(
+        (s) => s.copyWith(
+          lastSyncEvent: SyncEvent.error,
+          lastSyncError: e.toString(),
+        ),
+      );
+      return;
+    }
+
+    await Future.wait([
+      _refreshAccount(),
+      _refreshTabs(),
+      _refreshDevicesThenName(),
+    ]);
   }
 
   Future<void> setEngineEnabled(SyncEngineValue engine, bool enabled) async {
@@ -253,13 +292,15 @@ class SyncRepository extends _$SyncRepository {
   }
 
   Future<bool> setDeviceName(String newName) async {
-    final result = await _service.setDeviceName(newName);
-
-    if (result) {
-      await Future.wait([_refreshDevices(), _refreshDeviceName()]);
+    try {
+      return await _service.setDeviceName(newName);
+    } finally {
+      // Refreshed whatever the call reported. A rename can reach the server and
+      // still come back as a failure — mozilla-components returns
+      // `rename && refreshDevices()`, so a failed refresh hides a successful
+      // rename — and in that case the local view is exactly what needs updating.
+      await _refreshDevicesThenName();
     }
-
-    return result;
   }
 
   Future<void> refreshDevices() async {
@@ -325,7 +366,21 @@ class SyncRepository extends _$SyncRepository {
         (s) =>
             s.copyWith(lastSyncEvent: SyncEvent.completed, lastSyncError: null),
       );
-      unawaited(Future.wait([_refreshTabs(), _refreshDevices()]));
+      // The device name goes along with the devices: a rename performed on another
+      // client only reaches us through a refresh, and refreshing the list while
+      // leaving the name behind is how it ended up stuck at its first value.
+      //
+      // The account is re-read too, for `lastSyncedAt`. The worker writes that
+      // timestamp just before it reports success, so it is only ever current
+      // *after* a completion — polling it here is what keeps "Last synced" from
+      // showing the previous run's time.
+      unawaited(
+        Future.wait([
+          _refreshAccount(),
+          _refreshTabs(),
+          _refreshDevicesThenName(),
+        ]),
+      );
     });
 
     _syncErrorSub = syncStateService.syncErrorEvents.listen((error) {
@@ -360,8 +415,7 @@ class SyncRepository extends _$SyncRepository {
           Future.wait([
             _refreshAccount(),
             _refreshTabs(),
-            _refreshDevices(),
-            _refreshDeviceName(),
+            _refreshDevicesThenName(),
           ]),
         );
       }

@@ -26,6 +26,7 @@ import eu.weblibre.flutter_mozilla_components.startup.ExternalCommitResult
 import eu.weblibre.flutter_mozilla_components.startup.ProfileUuid
 import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
 import eu.weblibre.flutter_mozilla_components.startup.StartupPaths
+import eu.weblibre.flutter_mozilla_components.sync.SyncStateCache
 import java.io.File
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -60,6 +61,7 @@ object ActiveProfile {
         "FxaDeviceSettingsCache",       // Cached device settings (ID, name, type)
         "syncEngines",                  // Per-engine enabled/disabled state
         "syncPrefs",                    // Last-synced timestamp + persisted sync state
+        SyncStateCache.STORAGE_NAME,    // Last-known account profile + device constellation
     )
 
     /**

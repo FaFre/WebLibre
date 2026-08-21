@@ -36,7 +36,7 @@ part 'preference_settings.g.dart';
 
 const _preferenceMigrationVersionKey = 'preferenceMigrationVersion';
 const _preferenceMigrationPartitionKey = 'preferenceMigration';
-const _preferenceMigrationSchemaVersion = 1;
+const _preferenceMigrationSchemaVersion = 2;
 const _mainProcessDisableJitPref =
     'javascript.options.main_process_disable_jit';
 
@@ -49,8 +49,30 @@ class StartupPreferenceEnforcementService
     schemaVersion: _preferenceMigrationSchemaVersion,
     steps: {
       0: () => _prefManager.resetPrefs([_mainProcessDisableJitPref]),
+      1: _removeFxaProfileDomainFromLocalDnsBlocks,
     },
   );
+
+  Future<void> _removeFxaProfileDomainFromLocalDnsBlocks() async {
+    const dnsLocalDomainsPref = 'network.dns.localDomains';
+    const fxaProfileDomain = 'profile.accounts.firefox.com';
+
+    final pref = (await _prefManager.getPrefs([
+      dnsLocalDomainsPref,
+    ]))[dnsLocalDomainsPref];
+    final value = pref?.userValue;
+
+    if (value is! String || !value.contains(fxaProfileDomain)) {
+      return;
+    }
+
+    final updatedValue = value
+        .split(',')
+        .where((domain) => domain != fxaProfileDomain)
+        .join(',');
+
+    await _prefManager.applyPrefs({dnsLocalDomainsPref: updatedValue});
+  }
 
   Future<int> _readPreferenceMigrationVersion() async {
     final db = ref.read(userDatabaseProvider);

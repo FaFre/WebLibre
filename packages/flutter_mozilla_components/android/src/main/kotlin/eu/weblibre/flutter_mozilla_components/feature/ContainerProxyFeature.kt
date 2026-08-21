@@ -13,6 +13,7 @@ import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.pigeons.ContainerSiteAssignment
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import java.util.concurrent.atomic.AtomicLong
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -22,6 +23,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import mozilla.components.concept.engine.webextension.MessageHandler
 import mozilla.components.concept.engine.webextension.Port
 import mozilla.components.concept.engine.webextension.WebExtensionRuntime
@@ -68,6 +70,30 @@ object ContainerProxyFeature {
      * session while the extension is in fact configured.
      */
     private val connectionEpoch = AtomicLong(0)
+
+    /**
+     * Completes once the extension has confirmed applying *a* routing snapshot.
+     *
+     * Not the same question as [acknowledgedSnapshotGeneration], which asks whether
+     * the *current* routing is installed. This asks only whether the extension has
+     * stopped blocking: until its store holds a snapshot it answers every request
+     * with the emergency break, and a seeded or superseded snapshot ends that just
+     * as well as the current one.
+     *
+     * Process-global and never reset, because the thing it guards against is a
+     * cold-start window, and the extension re-seeds itself on reconnect.
+     */
+    private val routingInstalled = CompletableDeferred<Unit>()
+
+    /**
+     * Waits for the extension to hold routing, returning false if it never does.
+     *
+     * For callers whose request cannot simply fail and be retried — the FxA state
+     * machine disconnects the account outright when its startup call fails, so
+     * letting it run into the emergency break costs the user their sign-in.
+     */
+    suspend fun awaitRoutingInstalled(timeoutMillis: Long): Boolean =
+        withTimeoutOrNull(timeoutMillis) { routingInstalled.await() } != null
 
     /** A request waiting for a reply, tagged with the connection that carries it. */
     private class PendingRequest(
@@ -379,6 +405,14 @@ object ContainerProxyFeature {
      * must not take it again.
      */
     private fun onSnapshotAcknowledgedLocked(generation: Long, epoch: Long) {
+        if (epoch == connectionEpoch.get()) {
+            // Deliberately before the checks below. They decide whether this is the
+            // routing we asked for; this only records that the extension now holds
+            // routing at all, which a superseded or seeded snapshot establishes just
+            // as well — and which is all [awaitRoutingInstalled] promises.
+            routingInstalled.complete(Unit)
+        }
+
         if (generation != lastSnapshotGeneration) {
             // A reply for a snapshot that has since been superseded. Treating it
             // as current would report routing as installed that is not.

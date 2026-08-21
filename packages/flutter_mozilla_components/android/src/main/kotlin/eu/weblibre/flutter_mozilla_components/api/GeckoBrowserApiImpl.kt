@@ -599,8 +599,11 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
                 // Stop the FxA web channel feature
                 runCatching { components.services.fxaWebChannelFeature.stop() }
 
-                // Close the account manager
-                runCatching { components.backgroundServices.accountManager.close() }
+                // Closes the account manager *and* forces its state to disk. The
+                // quit path ends in `exit(0)`, which skips the flush the framework
+                // would otherwise do — and an account state left in memory reads back
+                // as signed out.
+                runCatching { components.backgroundServices.close() }
             }
         } catch (e: Exception) {
             logger.error("$TAG: Error during component shutdown", e)
