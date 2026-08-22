@@ -29,6 +29,7 @@ import eu.weblibre.flutter_mozilla_components.databinding.FragmentBrowserBinding
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
 import eu.weblibre.flutter_mozilla_components.ext.toPigeonDownloadState
+import eu.weblibre.flutter_mozilla_components.feature.AppLifecycleFeature
 import eu.weblibre.flutter_mozilla_components.feature.BrowserHandlingScrollFeature
 import eu.weblibre.flutter_mozilla_components.feature.GestureAwareSwipeRefreshFeature
 import eu.weblibre.flutter_mozilla_components.feature.KeyboardVisibilityFeature
@@ -689,6 +690,9 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         fragmentEngineView?.let {
             components.activeEngineView = it
         }
+        // Whichever fragment resumed last is the one in front, so it owns the
+        // session the process should keep prioritised when it goes to background.
+        AppLifecycleFeature.setVisibleSession(this, sessionId)
         keyboardVisibilityFeature?.checkKeyboardState()
     }
 
@@ -716,6 +720,8 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
         // Holds the Activity, so it must not outlive the view it was created with.
         pictureInPictureFeature = null
+
+        AppLifecycleFeature.clearVisibleSession(this)
 
         GlobalComponents.onPullToRefreshEnabledChanged = null
         GlobalComponents.onScreenshotProtectionEnabledChanged = null

@@ -35,6 +35,7 @@ import eu.weblibre.flutter_mozilla_components.services.PrivateTabsNotificationSe
 import eu.weblibre.flutter_mozilla_components.addons.AddonPrefs
 import eu.weblibre.flutter_mozilla_components.api.GeckoViewportApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
+import eu.weblibre.flutter_mozilla_components.feature.AppLifecycleFeature
 import eu.weblibre.flutter_mozilla_components.feature.ContainerProxyFeature
 import eu.weblibre.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
 import eu.weblibre.flutter_mozilla_components.feature.GeckoBookmarksExtensionBridge
@@ -406,6 +407,10 @@ object GlobalComponents {
         }
 
         stopPrivateTabsNotificationFeature()
+
+        // Process-scoped and idempotent: it resolves the current components on
+        // every callback, so a rebuild must not re-register it.
+        AppLifecycleFeature.install()
 
         //newComponents.crashReporter.install(applicationContext)
 

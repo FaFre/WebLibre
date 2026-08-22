@@ -27,6 +27,7 @@ import eu.weblibre.flutter_mozilla_components.R
 import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
 import eu.weblibre.flutter_mozilla_components.applinks.PendingAppLinkStores
 import eu.weblibre.flutter_mozilla_components.middleware.AppLinkNavigationMiddleware
+import eu.weblibre.flutter_mozilla_components.middleware.CrashRecoveryMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.FlutterEventMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataService
@@ -249,6 +250,9 @@ class Core(
                 // history delegate for a tab-scoped one before that session is
                 // linked and starts loading.
                 HistoryDelegateBindingMiddleware(historyStorageDelegate),
+                // Android Components deliberately parks a crashed tab until the
+                // app asks for it back; nothing else here ever would.
+                CrashRecoveryMiddleware(),
                 FlutterEventMiddleware(flutterEvents),
                 DownloadMiddleware(
                     applicationContext = context,
