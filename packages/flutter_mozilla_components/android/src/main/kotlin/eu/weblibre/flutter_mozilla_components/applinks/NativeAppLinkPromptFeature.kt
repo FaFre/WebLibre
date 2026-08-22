@@ -12,6 +12,7 @@ import android.os.Looper
 import androidx.appcompat.app.AlertDialog
 import eu.weblibre.flutter_mozilla_components.R
 import eu.weblibre.flutter_mozilla_components.pigeons.AppLinkPromptOwner
+import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.support.base.feature.LifecycleAwareFeature
 import java.util.concurrent.ConcurrentHashMap
@@ -52,6 +53,7 @@ class NativeAppLinkPromptFeature(
     private val context: Context,
     private val tabId: String,
     private val store: PendingAppLinkStore,
+    private val browserStore: BrowserStore,
     private val launcher: AppLinkLauncher,
     private val sessionUseCases: SessionUseCases,
 ) : LifecycleAwareFeature {
@@ -67,9 +69,8 @@ class NativeAppLinkPromptFeature(
      */
     private val expiryTick = Runnable {
         dismissStaleDialog()
-        // The store sweeps on a strict `>`, so a tick can land a millisecond before the request is
-        // actually droppable and dismiss nothing. Re-arm in that case rather than leave the dialog
-        // with no deadline at all; [MIN_EXPIRY_TICK_MS] keeps that from spinning.
+        // A tick can land a millisecond early and dismiss nothing. Re-arm in that case rather than
+        // leave the dialog with no deadline at all; [MIN_EXPIRY_TICK_MS] keeps that from spinning.
         shownRequest?.let(::scheduleExpiryTick)
         // A dialog retired by its own deadline still has to make way for whatever else pends.
         showNext()
@@ -131,6 +132,11 @@ class NativeAppLinkPromptFeature(
     }
 
     private fun showNext() {
+        // Every path into this surface funnels through here — start, the availability event, the
+        // expiry tick and each resolution — so it is where lapsed debts get settled. Ahead of the
+        // early return: a request can lapse while another dialog is still up.
+        releaseExpiredHeldNavigations()
+
         if (dialog != null) return
 
         val request = store.getPending(AppLinkPromptOwner.NATIVE_EXTERNAL)
@@ -175,11 +181,16 @@ class NativeAppLinkPromptFeature(
         // null expectedPackage, so this stays null and the chooser still opens.
         val result = launcher.launch(consumed.url, mode, expectedPackage = consumed.expectedPackage)
         if (result != AppLinkLaunchResult.LAUNCHED) {
-            consumed.fallbackUrl?.let { fallback ->
+            val fallback = consumed.fallbackUrl
+            if (fallback != null) {
                 // Guard the fallback load against immediately bouncing back out to an
                 // app (§2.7): a validated fallback can itself resolve externally.
                 store.recordFallbackReentry(fallback)
                 sessionUseCases.loadUrl(url = fallback, sessionId = consumed.tabId)
+            } else {
+                // Under `blockWhilePrompting` this tab is showing nothing at all, so "the app
+                // wouldn't open" must not also mean "and the page never arrives".
+                releaseHeldNavigation(store, browserStore, sessionUseCases, consumed, reason = "launch_failed")
             }
         }
         afterResolve()
@@ -188,6 +199,9 @@ class NativeAppLinkPromptFeature(
     private fun resolveCancel(request: PendingAppLinkRequest) {
         val consumed = store.consume(request.requestId) ?: return afterResolve()
         store.recordSuppression(consumed.tabId, consumed.targetFingerprint)
+        // Under `blockWhilePrompting` this Custom Tab is sitting on nothing; declining is the user
+        // asking for the page here rather than in the app.
+        releaseHeldNavigation(store, browserStore, sessionUseCases, consumed, reason = "cancel")
         afterResolve()
     }
 
@@ -196,6 +210,17 @@ class NativeAppLinkPromptFeature(
         dialog = null
         shownRequest = null
         showNext()
+    }
+
+    /**
+     * Settle whatever lapsed while this surface was busy. The expiry tick and every resolution pass
+     * through here, so a prompt the user simply ignored still ends with its page on screen instead of
+     * a navigation that silently died.
+     */
+    private fun releaseExpiredHeldNavigations() {
+        store.drainExpiredHeldNavigations().forEach { expired ->
+            releaseHeldNavigation(store, browserStore, sessionUseCases, expired, reason = "expired")
+        }
     }
 
     private companion object {

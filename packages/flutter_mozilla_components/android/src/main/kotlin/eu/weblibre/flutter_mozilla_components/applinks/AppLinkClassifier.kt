@@ -59,6 +59,18 @@ data class AppLinkPolicy(
     val protectedTargetPatterns: List<ProtectedTargetPattern>,
     val authExceptionsEnabled: Boolean,
     /**
+     * When true, an engine-supported (http(s)) navigation that raises a prompt is **denied** while
+     * the prompt is up, instead of being allowed to load behind it (§2.2). Declining then re-issues
+     * the load; see [WebLibreAppLinksInterceptor] and `AppLinkNavigationRelease`.
+     *
+     * Opt-in, and the seed default is deliberately `false`: this flag decides whether a navigation
+     * is *stalled*, and the surface that would un-stall it (a prompt UI) is not guaranteed to exist
+     * before the first replicated snapshot arrives — a cold Custom Tab under `EXTERNAL` would dead-end.
+     * Not blocking is the fail-safe direction here, unlike [globalMode], where `ASK` is safe because
+     * it refuses to *launch*.
+     */
+    val blockWhilePrompting: Boolean = false,
+    /**
      * Per-container overrides keyed by contextId; only isolated containers appear. A navigation whose
      * source contextId is a key uses the entry's mode + rules instead of the global ones (replace).
      */
@@ -74,6 +86,7 @@ data class AppLinkPolicy(
             strictContextIds = emptySet(),
             protectedTargetPatterns = emptyList(),
             authExceptionsEnabled = true,
+            blockWhilePrompting = false,
             contextOverrides = emptyMap(),
         )
     }

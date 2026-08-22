@@ -33,6 +33,25 @@ void main() {
       expect(settings.appLinkMarketplaceFallback, isFalse);
     });
 
+    test('blocking while prompting defaults to off', () {
+      // The non-blocking banner is the shipped behaviour; holding a navigation is
+      // opt-in because a stalled load is a worse failure than an early request.
+      expect(
+        GeneralSettings.withDefaults().appLinkBlockWhilePrompting,
+        isFalse,
+      );
+    });
+
+    test('blocking while prompting survives a round-trip', () {
+      final settings = GeneralSettings.withDefaults(
+        appLinkBlockWhilePrompting: true,
+      );
+      expect(
+        GeneralSettings.fromJson(settings.toJson()).appLinkBlockWhilePrompting,
+        isTrue,
+      );
+    });
+
     test('the three fields survive a toJson -> fromJson round-trip', () {
       final rule = PersistedAppLinkRule(
         decision: AppLinkRuleDecision.alwaysOpen,

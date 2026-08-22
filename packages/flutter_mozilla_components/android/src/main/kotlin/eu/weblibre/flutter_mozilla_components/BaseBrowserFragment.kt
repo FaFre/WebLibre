@@ -375,6 +375,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                         store = PendingAppLinkStores.forProfile(
                             components.profileApplicationContext.relativePath,
                         ),
+                        browserStore = components.core.store,
                         launcher = AppLinkRuntime.get(profileContext).launcher,
                         sessionUseCases = components.useCases.sessionUseCases,
                     ),

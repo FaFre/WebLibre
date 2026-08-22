@@ -283,6 +283,15 @@ class GeneralSettings with FastEquatable {
   /// obey [appLinksMode].
   final bool appLinkAuthExceptionsEnabled;
 
+  /// Whether an http(s) app-link prompt holds its navigation instead of letting
+  /// the page load behind the banner (§2.2). Defaults to false, which keeps the
+  /// non-blocking behaviour: the page loads while the banner is up, so the site
+  /// sees one request even when the user picks the app. With this on, the tab
+  /// stays on its previous page until the prompt is answered, and declining
+  /// loads the page then. Only meaningful under [AppLinksMode.ask]; prompts for
+  /// unsupported schemes always hold their navigation regardless.
+  final bool appLinkBlockWhilePrompting;
+
   /// Whether the local search index (`history` table populated via tab→
   /// history triggers) is active. When false, the SQL trigger guard returns
   /// without writing; existing rows stay until the user clears them.
@@ -394,6 +403,7 @@ class GeneralSettings with FastEquatable {
     required this.appLinkContextOverrides,
     required this.appLinkMarketplaceFallback,
     required this.appLinkAuthExceptionsEnabled,
+    required this.appLinkBlockWhilePrompting,
     required this.enableLocalSearchIndex,
     required this.indexPrivateTabs,
     required this.acceptSuggestionOnSubmit,
@@ -475,6 +485,7 @@ class GeneralSettings with FastEquatable {
     Map<String, ContextAppLinkPolicy>? appLinkContextOverrides,
     bool? appLinkMarketplaceFallback,
     bool? appLinkAuthExceptionsEnabled,
+    bool? appLinkBlockWhilePrompting,
     bool? enableLocalSearchIndex,
     bool? indexPrivateTabs,
     bool? acceptSuggestionOnSubmit,
@@ -571,6 +582,7 @@ class GeneralSettings with FastEquatable {
        appLinkContextOverrides = appLinkContextOverrides ?? const {},
        appLinkMarketplaceFallback = appLinkMarketplaceFallback ?? false,
        appLinkAuthExceptionsEnabled = appLinkAuthExceptionsEnabled ?? true,
+       appLinkBlockWhilePrompting = appLinkBlockWhilePrompting ?? false,
        enableLocalSearchIndex = enableLocalSearchIndex ?? true,
        indexPrivateTabs = indexPrivateTabs ?? false,
        acceptSuggestionOnSubmit = acceptSuggestionOnSubmit ?? true,
@@ -750,6 +762,7 @@ class GeneralSettings with FastEquatable {
     appLinkContextOverrides,
     appLinkMarketplaceFallback,
     appLinkAuthExceptionsEnabled,
+    appLinkBlockWhilePrompting,
     enableLocalSearchIndex,
     indexPrivateTabs,
     acceptSuggestionOnSubmit,

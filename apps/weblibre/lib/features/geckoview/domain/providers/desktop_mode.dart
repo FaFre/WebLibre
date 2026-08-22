@@ -65,7 +65,17 @@ class DesktopMode extends _$DesktopMode {
     // to the browser-wide default. Watching only the host keeps in-page
     // navigations (path/query changes) from clobbering a manual override.
     ref.listen(tabStateProvider(tabId), (previous, next) {
-      if (previous?.url.host != next?.url.host) {
+      // Only a real host is a page whose rule can be applied. A navigation can
+      // pass through a hostless URL on its way — `about:blank` shows up as a
+      // transient location change when the engine switches content process —
+      // and reacting to it applies the *next* page's rule while the current one
+      // is still committed. `requestDesktopSite` reloads unconditionally
+      // (`toggleDesktopMode(enable, reload = true)`), so that reload lands on
+      // the old entry and cancels the navigation in flight, snapping the tab
+      // back to the page it was leaving.
+      final nextHost = next?.url.host;
+      if (nextHost == null || nextHost.isEmpty) return;
+      if (previous?.url.host != nextHost) {
         state = _resolveForHost(next?.url);
       }
     });

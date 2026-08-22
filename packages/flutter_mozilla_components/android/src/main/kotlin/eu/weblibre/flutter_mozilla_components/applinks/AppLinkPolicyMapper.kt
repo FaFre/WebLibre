@@ -29,6 +29,7 @@ fun AppLinkPolicySnapshot.toAppLinkPolicy(): AppLinkPolicy {
             )
         },
         authExceptionsEnabled = authExceptionsEnabled,
+        blockWhilePrompting = blockWhilePrompting,
         contextOverrides = contextOverrides.mapValues { (_, override) ->
             ContextAppLinkPolicy(
                 globalMode = override.mode.toAppLinkMode(),

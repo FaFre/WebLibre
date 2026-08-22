@@ -3081,6 +3081,11 @@ class AppLinkPolicySnapshot {
   /// return to their app even when the general app-link mode is `never`.
   final bool authExceptionsEnabled;
 
+  /// Hold an engine-supported (http(s)) navigation while its prompt is up
+  /// instead of letting the page load behind the banner (§2.2). Declining
+  /// re-issues the load. Opt-in; native seeds it `false`.
+  final bool blockWhilePrompting;
+
   /// Regular / no-contextId tabs are proxied via the `general` scope.
   final bool protectGeneralContext;
 
@@ -3102,6 +3107,7 @@ class AppLinkPolicySnapshot {
     required this.rules,
     required this.marketplaceFallbackEnabled,
     required this.authExceptionsEnabled,
+    required this.blockWhilePrompting,
     required this.protectGeneralContext,
     required this.protectedContextIds,
     required this.strictContextIds,

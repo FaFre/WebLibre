@@ -55,6 +55,49 @@ class WebLibreAppLinksInterceptor(
         isSubframeRequest: Boolean,
     ): RequestInterceptor.InterceptionResponse? {
         val components = GlobalComponents.components ?: return null
+        val response = decide(
+            components, engineSession, uri, lastUri,
+            hasUserGesture, isRedirect, isDirectNavigation, isSubframeRequest,
+        )
+
+        // Advance the tab's navigation generation only for a navigation that is actually going to
+        // happen. An *attempt* is not a move: a load we deny leaves the tab exactly where it was, and
+        // counting it would make a pending hold answer for a navigation that never occurred — the
+        // release would then be refused and the user's "stay in the browser" would silently do
+        // nothing. `Deny` therefore never bumps, which is also what makes the hold this very call may
+        // have just created self-consistent: it denies, so the generation it stamped is still current.
+        //
+        // `null` (the engine proceeds) and `Url` (we hand over a fallback to load) both move the tab,
+        // and both must invalidate any older hold. Subframes are excluded throughout: an iframe
+        // loading does not mean the tab left the page.
+        val tabId = components.core.store.state.findTabOrCustomTab(engineSession)?.id
+        val outcome = when (response) {
+            null -> "proceed"
+            is RequestInterceptor.InterceptionResponse.Deny -> "deny"
+            is RequestInterceptor.InterceptionResponse.Url -> "fallback"
+            else -> response::class.java.simpleName
+        }
+        logger.info(
+            "onLoadRequest tab=$tabId subframe=$isSubframeRequest gesture=$hasUserGesture " +
+                "redirect=$isRedirect direct=$isDirectNavigation uri=$uri last=$lastUri -> $outcome",
+        )
+        if (!isSubframeRequest && response !is RequestInterceptor.InterceptionResponse.Deny) {
+            tabId?.let { pendingStoreFor(components).beginNavigation(it, reason = "intercept:$outcome") }
+        }
+        return response
+    }
+
+    @Suppress("LongParameterList")
+    private fun decide(
+        components: Components,
+        engineSession: EngineSession,
+        uri: String,
+        lastUri: String?,
+        hasUserGesture: Boolean,
+        isRedirect: Boolean,
+        isDirectNavigation: Boolean,
+        isSubframeRequest: Boolean,
+    ): RequestInterceptor.InterceptionResponse? {
 
         val uriScheme = runCatching { uri.toUri().scheme }.getOrNull()
         val engineSupportsScheme = AppLinkSchemes.isEngineSupported(uriScheme)
@@ -66,6 +109,12 @@ class WebLibreAppLinksInterceptor(
         // eligibility rules rather than only skipping the launch below.
         val authExceptionsAllowed = policy.authExceptionsEnabled && isPossibleAuthentication(session)
         val isSameDomainNavigation = isSameDomain(lastUri, uri)
+
+        // The generation a hold raised here answers for. Read, not advanced: the bump belongs to
+        // [onLoadRequest], after the outcome is known, so that only navigations which actually
+        // proceed count. A hold denies this load, so it keeps this value and stays releasable.
+        val currentGeneration = session?.id
+            ?.let { pendingStoreFor(components).currentNavGeneration(it) } ?: 0L
 
         // Step 2 — navigation eligibility. Any hit lets the engine proceed normally.
         if (!isEligible(
@@ -175,7 +224,14 @@ class WebLibreAppLinksInterceptor(
                 "protected=${input.isProtected} private=${input.isPrivate} wallet=${input.isWallet} " +
                 "suppressed=${input.suppressionHit} rule=${input.matchingRule?.decision} -> $decision",
         )
-        return execute(decision, components, pendingStore, session, uri, lastUri, input, hasUserGesture)
+        return execute(
+            decision, components, pendingStore, session, uri, lastUri, input, hasUserGesture,
+            navGeneration = currentGeneration,
+            // A subframe navigation may be prompted, but it may never be *held*: the release path
+            // loads into the tab, and replaying an iframe's target as a top-level load would replace
+            // the whole page the user was reading. Let those load in their frame as before.
+            blockWhilePrompting = policy.blockWhilePrompting && !isSubframeRequest,
+        )
     }
 
     private fun execute(
@@ -187,6 +243,8 @@ class WebLibreAppLinksInterceptor(
         lastUri: String?,
         input: ClassifierInput,
         hasUserGesture: Boolean,
+        navGeneration: Long,
+        blockWhilePrompting: Boolean,
     ): RequestInterceptor.InterceptionResponse? {
         val resolved = input.resolved
         return when (decision) {
@@ -214,6 +272,7 @@ class WebLibreAppLinksInterceptor(
                         execute(
                             AppLinkClassifier.classify(withoutRule),
                             components, pendingStore, session, uri, lastUri, withoutRule, hasUserGesture,
+                            navGeneration, blockWhilePrompting,
                         )
                     }
 
@@ -232,12 +291,24 @@ class WebLibreAppLinksInterceptor(
                 // A missing session cannot host a prompt; the classifier never reaches Prompt in that
                 // case, so `session` is non-null here.
                 val tab = session ?: return safeNonLaunchResponse(pendingStore, null, resolved)
-                createPrompt(pendingStore, tab, uri, lastUri, input, decision, hasUserGesture)
-                if (decision.kind == AppLinkPromptKind.BANNER) {
+                // A banner-class prompt is engine-supported, so the page *can* load behind it. Whether
+                // it does is the user's choice: by default it loads (the site sees one request even if
+                // the app is chosen), and under `blockWhilePrompting` the navigation is held until the
+                // prompt is answered. Holding it makes this the only branch that owes the tab a load
+                // later, which is what `heldNavigation` records — see [releaseHeldNavigation].
+                val holdNavigation = decision.kind == AppLinkPromptKind.BANNER && blockWhilePrompting
+                createPrompt(
+                    pendingStore, tab, uri, lastUri, input, decision, hasUserGesture,
+                    heldNavigation = holdNavigation,
+                    navGeneration = navGeneration,
+                )
+                if (decision.kind == AppLinkPromptKind.BANNER && !holdNavigation) {
                     // Engine-supported: allow the page to load while the non-modal banner is up.
                     null
                 } else {
                     // Unsupported scheme (or marketplace): the navigation is stalled, no page to show.
+                    // Under `blockWhilePrompting` a banner stalls its navigation the same way, and the
+                    // page arrives only if the user declines (or the request lapses).
                     RequestInterceptor.InterceptionResponse.Deny
                 }
             }
@@ -252,6 +323,8 @@ class WebLibreAppLinksInterceptor(
         input: ClassifierInput,
         decision: AppLinkDecision.Prompt,
         hasUserGesture: Boolean,
+        heldNavigation: Boolean,
+        navGeneration: Long,
     ) {
         val resolved = input.resolved
         val owner = if (tab is CustomTabSessionState) {
@@ -289,13 +362,21 @@ class WebLibreAppLinksInterceptor(
                 appName = resolved.appName,
                 packageName = resolved.packageName,
                 scopeKey = resolved.scopeKey,
+                heldNavigation = heldNavigation,
+                // Where the tab is left standing while the prompt is up. Read from the store rather
+                // than `lastUri`, which is the previous load *request* and need not be what actually
+                // committed. Empty for a tab opened for this very link, which is exactly right: it
+                // stays empty until something loads, so the release still recognises it.
+                heldAnchorUrl = if (heldNavigation) tab.content.url else null,
+                navGeneration = navGeneration,
                 isUserGesture = hasUserGesture,
             ),
         )
 
         logger.info(
             "createPrompt owner=$owner tab=${tab.id} class=$urlClass id=${created.requestId} " +
-                "canRemember=${decision.canRemember} url=$uri",
+                "canRemember=${decision.canRemember} held=$heldNavigation " +
+                "gen=$navGeneration anchor=${tab.content.url} url=$uri",
         )
 
         when (owner) {

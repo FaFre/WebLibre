@@ -175,6 +175,8 @@ abstract class _$GeneralSettingsCWProxy {
     bool appLinkAuthExceptionsEnabled,
   );
 
+  GeneralSettings appLinkBlockWhilePrompting(bool appLinkBlockWhilePrompting);
+
   GeneralSettings enableLocalSearchIndex(bool enableLocalSearchIndex);
 
   GeneralSettings indexPrivateTabs(bool indexPrivateTabs);
@@ -271,6 +273,7 @@ abstract class _$GeneralSettingsCWProxy {
     Map<String, ContextAppLinkPolicy> appLinkContextOverrides,
     bool appLinkMarketplaceFallback,
     bool appLinkAuthExceptionsEnabled,
+    bool appLinkBlockWhilePrompting,
     bool enableLocalSearchIndex,
     bool indexPrivateTabs,
     bool acceptSuggestionOnSubmit,
@@ -598,6 +601,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   ) => call(appLinkAuthExceptionsEnabled: appLinkAuthExceptionsEnabled);
 
   @override
+  GeneralSettings appLinkBlockWhilePrompting(bool appLinkBlockWhilePrompting) =>
+      call(appLinkBlockWhilePrompting: appLinkBlockWhilePrompting);
+
+  @override
   GeneralSettings enableLocalSearchIndex(bool enableLocalSearchIndex) =>
       call(enableLocalSearchIndex: enableLocalSearchIndex);
 
@@ -711,6 +718,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? appLinkContextOverrides = const $CopyWithPlaceholder(),
     Object? appLinkMarketplaceFallback = const $CopyWithPlaceholder(),
     Object? appLinkAuthExceptionsEnabled = const $CopyWithPlaceholder(),
+    Object? appLinkBlockWhilePrompting = const $CopyWithPlaceholder(),
     Object? enableLocalSearchIndex = const $CopyWithPlaceholder(),
     Object? indexPrivateTabs = const $CopyWithPlaceholder(),
     Object? acceptSuggestionOnSubmit = const $CopyWithPlaceholder(),
@@ -1132,6 +1140,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.appLinkAuthExceptionsEnabled
           // ignore: cast_nullable_to_non_nullable
           : appLinkAuthExceptionsEnabled as bool,
+      appLinkBlockWhilePrompting:
+          appLinkBlockWhilePrompting == const $CopyWithPlaceholder() ||
+              appLinkBlockWhilePrompting == null
+          ? _value.appLinkBlockWhilePrompting
+          // ignore: cast_nullable_to_non_nullable
+          : appLinkBlockWhilePrompting as bool,
       enableLocalSearchIndex:
           enableLocalSearchIndex == const $CopyWithPlaceholder() ||
               enableLocalSearchIndex == null
@@ -1336,6 +1350,7 @@ GeneralSettings _$GeneralSettingsFromJson(
   ),
   appLinkMarketplaceFallback: json['appLinkMarketplaceFallback'] as bool?,
   appLinkAuthExceptionsEnabled: json['appLinkAuthExceptionsEnabled'] as bool?,
+  appLinkBlockWhilePrompting: json['appLinkBlockWhilePrompting'] as bool?,
   enableLocalSearchIndex: json['enableLocalSearchIndex'] as bool?,
   indexPrivateTabs: json['indexPrivateTabs'] as bool?,
   acceptSuggestionOnSubmit: json['acceptSuggestionOnSubmit'] as bool?,
@@ -1441,6 +1456,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   ),
   'appLinkMarketplaceFallback': instance.appLinkMarketplaceFallback,
   'appLinkAuthExceptionsEnabled': instance.appLinkAuthExceptionsEnabled,
+  'appLinkBlockWhilePrompting': instance.appLinkBlockWhilePrompting,
   'enableLocalSearchIndex': instance.enableLocalSearchIndex,
   'indexPrivateTabs': instance.indexPrivateTabs,
   'acceptSuggestionOnSubmit': instance.acceptSuggestionOnSubmit,

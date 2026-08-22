@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/app_links/domain/services/app_links_coordinator.dart';
 import 'package:weblibre/features/app_links/presentation/widgets/app_link_prompt_dialog.dart';
 
@@ -41,6 +42,11 @@ class AppLinkOpenBanner extends HookConsumerWidget {
     final theme = Theme.of(context);
 
     Future<void> resolve(AppLinkDecision decision) async {
+      logger.i(
+        'app-link banner tap request=${request.requestId} decision=$decision '
+        'remember=${remember.value} canRemember=${request.canRemember} '
+        'target=${target.url}',
+      );
       if (remember.value && request.canRemember) {
         final rule = decision == AppLinkDecision.open
             ? alwaysOpenRuleFor(target)

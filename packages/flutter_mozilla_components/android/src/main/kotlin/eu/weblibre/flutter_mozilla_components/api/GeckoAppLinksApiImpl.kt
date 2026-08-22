@@ -16,6 +16,7 @@ import eu.weblibre.flutter_mozilla_components.applinks.AppLinkRuntime
 import eu.weblibre.flutter_mozilla_components.applinks.PendingAppLinkRequest
 import eu.weblibre.flutter_mozilla_components.applinks.PendingAppLinkStore
 import eu.weblibre.flutter_mozilla_components.applinks.PendingAppLinkStores
+import eu.weblibre.flutter_mozilla_components.applinks.releaseHeldNavigation
 import eu.weblibre.flutter_mozilla_components.applinks.toAppLinkPolicy
 import eu.weblibre.flutter_mozilla_components.pigeons.AppLinkDecision
 import eu.weblibre.flutter_mozilla_components.pigeons.AppLinkPolicySnapshot
@@ -29,7 +30,10 @@ import mozilla.components.support.base.log.logger.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import androidx.annotation.MainThread
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.Locale
 
 /**
  * WebLibre-owned implementation of [GeckoAppLinksApi] backed by [ExternalAppResolver] and
@@ -136,11 +140,35 @@ class GeckoAppLinksApiImpl(
                 val list = components
                     ?.let {
                         val store = pendingStoreFor(it)
-                        store.getPending(owner).map { request ->
+                        val pending = store.getPending(owner).map { request ->
                             request.toPigeon(store.expiresInMs(request))
                         }
+                        pending
                     }
                     ?: emptyList()
+
+                // The surface re-queries on the soonest deadline in order to retire lapsed prompts,
+                // which makes this the natural place to settle what those prompts were holding: a
+                // banner the user simply ignored must still end with the page on screen, not with a
+                // navigation that silently died. Released on the main thread for the same reason as
+                // the resolution path.
+                components?.let {
+                    val store = pendingStoreFor(it)
+                    val expired = store.drainExpiredHeldNavigations()
+                    if (expired.isNotEmpty()) {
+                        withContext(Dispatchers.Main) {
+                            expired.forEach { request ->
+                                releaseHeldNavigation(
+                                    store,
+                                    it.core.store,
+                                    it.useCases.sessionUseCases,
+                                    request,
+                                    reason = "expired",
+                                )
+                            }
+                        }
+                    }
+                }
                 callback(Result.success(list))
             } catch (e: Exception) {
                 callback(Result.success(emptyList()))
@@ -178,13 +206,30 @@ class GeckoAppLinksApiImpl(
                     )
                 }
 
-                val result = when (decision) {
-                    AppLinkDecision.OPEN -> handleOpen(components, request)
-                    AppLinkDecision.CANCEL, AppLinkDecision.DISMISS -> {
-                        store.recordSuppression(request.tabId, request.targetFingerprint)
-                        AppLinkResolutionResult(false, false, null)
+                // This scope is `Dispatchers.Default`, and everything below reaches the engine:
+                // launching, loading a fallback, and claiming a held navigation. Navigation itself
+                // runs on the UI thread, so claiming from here would race it — and would hand the
+                // engine session a load from the wrong thread besides.
+                val result = withContext(Dispatchers.Main) {
+                    when (decision) {
+                        AppLinkDecision.OPEN -> handleOpen(components, request)
+                        AppLinkDecision.CANCEL, AppLinkDecision.DISMISS -> {
+                            store.recordSuppression(request.tabId, request.targetFingerprint)
+                            // Under `blockWhilePrompting` the page never loaded; declining is the
+                            // user asking for it in the browser, so it is owed to them now. A no-op
+                            // on the non-blocking path, where the page is already on screen.
+                            releaseHeldNavigation(
+                                store,
+                                components.core.store,
+                                components.useCases.sessionUseCases,
+                                request,
+                                reason = decision.name.lowercase(Locale.ROOT),
+                            )
+                            AppLinkResolutionResult(false, false, null)
+                        }
                     }
                 }
+                logger.info("resolvePendingAppLink id=$requestId -> $result")
                 callback(Result.success(result))
             } catch (e: Exception) {
                 callback(Result.success(AppLinkResolutionResult(false, false, "launch_failed")))
@@ -192,6 +237,7 @@ class GeckoAppLinksApiImpl(
         }
     }
 
+    @MainThread
     private fun handleOpen(
         components: Components,
         request: PendingAppLinkRequest,
@@ -226,6 +272,15 @@ class GeckoAppLinksApiImpl(
             )
             return AppLinkResolutionResult(false, true, "launch_failed")
         }
+        // No fallback to fall back to. Under `blockWhilePrompting` the tab is showing nothing at
+        // all, so "the app wouldn't open" must not also mean "and the page never arrives".
+        releaseHeldNavigation(
+            pendingStoreFor(components),
+            components.core.store,
+            components.useCases.sessionUseCases,
+            request,
+            reason = "launch_failed",
+        )
         return AppLinkResolutionResult(false, false, "launch_failed")
     }
 

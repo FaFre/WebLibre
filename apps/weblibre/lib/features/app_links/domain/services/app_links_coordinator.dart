@@ -116,7 +116,7 @@ class AppLinksCoordinator extends _$AppLinksCoordinator {
           ),
       ];
     } catch (error, stackTrace) {
-      logger.w(
+      logger.i(
         'Failed to query pending app-link prompts',
         error: error,
         stackTrace: stackTrace,
@@ -129,7 +129,12 @@ class AppLinksCoordinator extends _$AppLinksCoordinator {
     int requestId,
     AppLinkDecision decision,
   ) async {
+    logger.i('app-link resolve request=$requestId decision=$decision');
     final result = await _service.resolvePendingAppLink(requestId, decision);
+    logger.i(
+      'app-link resolve request=$requestId -> launched=${result.launched} '
+      'loadedFallback=${result.loadedFallback} failure=${result.failureReason}',
+    );
     await refresh();
     return result;
   }
@@ -150,6 +155,10 @@ class AppLinksCoordinator extends _$AppLinksCoordinator {
     PersistedAppLinkRule rule, {
     String? contextId,
   }) async {
+    logger.i(
+      'app-link resolveWithRule request=$requestId decision=$decision '
+      'rule=${rule.decision} scope=${rule.scope} contextId=$contextId',
+    );
     final overrideKey = await _overrideKeyForContext(contextId);
 
     await ref.read(generalSettingsRepositoryProvider.notifier).updateSettings((

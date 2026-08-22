@@ -981,6 +981,11 @@ class _AppLinksModeSection extends HookConsumerWidget {
         (s) => s.appLinkAuthExceptionsEnabled,
       ),
     );
+    final blockWhilePrompting = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.appLinkBlockWhilePrompting,
+      ),
+    );
     final rules = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.appLinkRules),
     );
@@ -1031,6 +1036,30 @@ class _AppLinksModeSection extends HookConsumerWidget {
                 ),
               ],
             ),
+          ),
+          SwitchListTile.adaptive(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Wait for your answer'),
+            subtitle: const Text(
+              'Hold the page while asking, instead of loading it in the '
+              'background. The site is not contacted unless you stay in the '
+              'browser',
+            ),
+            value: blockWhilePrompting,
+            // Deliberately never disabled on the global mode. Prompts are not the
+            // global mode's alone to grant: a protected container, a private tab
+            // and a wallet scheme all prompt regardless of it, and a container
+            // with isolated app-link settings can sit on `ask` while the global
+            // mode is `never`. Greying this out under those modes would leave
+            // blocking switched on with no way to switch it off.
+            onChanged: (value) async {
+              await ref
+                  .read(saveGeneralSettingsControllerProvider.notifier)
+                  .save(
+                    (current) =>
+                        current.copyWith.appLinkBlockWhilePrompting(value),
+                  );
+            },
           ),
           SwitchListTile.adaptive(
             contentPadding: EdgeInsets.zero,

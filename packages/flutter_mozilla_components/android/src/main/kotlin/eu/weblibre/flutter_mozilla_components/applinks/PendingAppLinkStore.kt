@@ -49,6 +49,36 @@ data class PendingAppLinkRequest(
     val appName: String?,
     val packageName: String?,
     val scopeKey: String,
+    /**
+     * The interceptor denied an engine-supported load to raise this prompt (policy
+     * `blockWhilePrompting`), so the tab is sitting on its previous page and [url] is owed to it if
+     * the user declines or the request lapses. False for a prompt raised over a page that was
+     * allowed to load, and for an unsupported scheme (there is nothing loadable to owe).
+     */
+    val heldNavigation: Boolean,
+    /**
+     * The URL the tab was committed to when [heldNavigation] was taken — the page the user is left
+     * looking at while the prompt is up, and the proof that releasing is still safe.
+     *
+     * Checked again at release time rather than invalidated on navigation. Store actions cannot
+     * express "the user has moved on": a direct load runs the interceptor *inside*
+     * `engineSession.loadUrl()` (GeckoView short-circuits the delegate for direct navigation), so
+     * the `LoadUrlAction` that follows would clear a hold created a moment earlier; and in-page
+     * links, Back/Forward and reload dispatch no load action at all. Comparing where the tab
+     * actually is closes both ends, and needs no ordering guarantee.
+     */
+    val heldAnchorUrl: String?,
+    /**
+     * The tab's navigation generation when the hold was taken (see
+     * [PendingAppLinkStore.beginNavigation]). Releasing is only safe while the tab is still on that
+     * navigation.
+     *
+     * This is what the committed-URL anchor cannot express. The anchor only changes when a load
+     * *commits*, so a navigation the user has already started — but which has not painted yet —
+     * leaves it matching, and the release lands on top of an in-flight page. The generation moves at
+     * `onLoadRequest`, the moment a navigation is attempted.
+     */
+    val navGeneration: Long,
     val createdAt: Long,
 ) {
     fun toPigeon(expiresInMs: Long): AppLinkPromptRequest = AppLinkPromptRequest(
@@ -97,6 +127,12 @@ data class NewAppLinkRequest(
     val appName: String?,
     val packageName: String?,
     val scopeKey: String,
+    /** See [PendingAppLinkRequest.heldNavigation]. */
+    val heldNavigation: Boolean = false,
+    /** See [PendingAppLinkRequest.heldAnchorUrl]. */
+    val heldAnchorUrl: String? = null,
+    /** See [PendingAppLinkRequest.navGeneration]. */
+    val navGeneration: Long = 0L,
     /** A user-gesture attempt is never deduped into an older request (§2.6). */
     val isUserGesture: Boolean = false,
 )
@@ -167,6 +203,16 @@ class PendingAppLinkStore(
     private val fallbackIssued = HashMap<String, Long>()
     private val fallbackBudget = HashMap<String, FallbackBudget>()
 
+    /**
+     * Requests that lapsed while still holding a navigation, waiting to be released by whichever
+     * surface next touches the store. Expiry is lazy and the store owns no use cases, so it cannot
+     * issue the load itself — it only records the debt.
+     */
+    private val expiredHeld = mutableListOf<PendingAppLinkRequest>()
+
+    /** Per-tab navigation counter; see [beginNavigation]. */
+    private val navGeneration = HashMap<String, Long>()
+
     private fun suppressionKey(tabId: String, fingerprint: String) = "$tabId\u0000$fingerprint"
 
     // Same tab-scoped composite shape as [suppressionKey]; a sessionless navigation keys under the
@@ -202,9 +248,28 @@ class PendingAppLinkStore(
                         candidate.targetFingerprint == input.targetFingerprint &&
                         candidate.owner == input.owner &&
                         candidate.urlClass == input.urlClass &&
+                        // Collapsing across a change of held state would hand back a request whose
+                        // obligation disagrees with the answer the interceptor is about to give:
+                        // a denied load left un-owed (never released), or an allowed one carrying a
+                        // debt that would later overwrite the page it just let through. The anchor
+                        // has to agree too — the same target reattempted from a different page
+                        // would otherwise inherit the first page's anchor, and the release check
+                        // would then refuse a decline that deserves its load.
+                        candidate.heldNavigation == input.heldNavigation &&
+                        candidate.heldAnchorUrl == input.heldAnchorUrl &&
                         clock.elapsedRealtime() <= candidate.createdAt + dedupeWindowMs
                 }
-                if (existing != null) return existing
+                if (existing != null) {
+                    // Same offer, but this is a *later* navigation attempt: the interceptor has just
+                    // denied another load and bumped the generation. Handing the request back with
+                    // its original stamp would leave the newest hold answering for a navigation that
+                    // no longer exists, and [claimRelease] would strand it. Re-stamp instead of
+                    // splitting the request, so the surface keeps showing one unchanged prompt.
+                    if (existing.navGeneration == input.navGeneration) return existing
+                    val restamped = existing.copy(navGeneration = input.navGeneration)
+                    requests[existing.requestId] = restamped
+                    return restamped
+                }
             }
 
             val request = PendingAppLinkRequest(
@@ -228,6 +293,9 @@ class PendingAppLinkStore(
                 appName = input.appName,
                 packageName = input.packageName,
                 scopeKey = input.scopeKey,
+                heldNavigation = input.heldNavigation,
+                heldAnchorUrl = input.heldAnchorUrl,
+                navGeneration = input.navGeneration,
                 createdAt = clock.elapsedRealtime(),
             )
             // At most one live banner per tab: the surface renders one anyway, and a second
@@ -237,6 +305,13 @@ class PendingAppLinkStore(
                     it.tabId == request.tabId && it.urlClass == AppLinkUrlClass.BANNER
                 }
             }
+            // Banner replacement above only reaches *live* requests, but the sweep at the top of
+            // this method may just have queued an older held request for release. Releasing it then
+            // would load a page the user has already moved past, over whatever this newer request
+            // concerns. Unconditional on the new request's own held state: a replacement raised
+            // after blocking was switched off, or an unheld subframe banner, supersedes the older
+            // offer just as surely as a held one does.
+            expiredHeld.removeAll { it.tabId == request.tabId }
             requests[request.requestId] = request
             return request
         }
@@ -249,6 +324,118 @@ class PendingAppLinkStore(
      */
     fun expiresInMs(request: PendingAppLinkRequest): Long =
         (expiryFor(request) - (clock.elapsedRealtime() - request.createdAt)).coerceAtLeast(0L)
+
+    /**
+     * Record that a tab is going somewhere, and return the tab's new generation.
+     *
+     * Counts navigations that will actually *proceed*, not attempts. A denied load leaves the tab
+     * where it was, so counting it would make a pending hold answer for a navigation that never
+     * happened and [claimRelease] would refuse a release that was perfectly safe — the user's "stay
+     * in the browser" silently doing nothing. The interceptor therefore bumps only once it knows the
+     * outcome, and never for `Deny`; that is also what keeps a hold self-consistent, since raising
+     * one denies the load and so leaves the generation it stamped current.
+     *
+     * Driven from the interceptor rather than from a store action wherever it can be, and that
+     * placement is the point. GeckoView short-circuits the navigation delegate for direct loads, so
+     * `onLoadRequest` runs inline inside `engineSession.loadUrl()` — *before* `SessionUseCases`
+     * dispatches anything. A counter driven purely by those actions would always land one step after
+     * the hold it was meant to protect and cancel it immediately.
+     *
+     * [AppLinkNavigationMiddleware] covers the engine-delegated navigations that never reach the
+     * interceptor (history, reload, `loadData`, desktop-mode toggle), gated on the tab really having
+     * somewhere to go for the same reason. Navigations that reach neither (a PWA/TWA scoped load, a
+     * sandbox capture, `weblibre://`, FxA) do not bump at all; the committed-URL anchor stays the
+     * backstop for those, which is why [claimRelease] checks both.
+     */
+    fun beginNavigation(tabId: String, reason: String = "?"): Long {
+        synchronized(lock) {
+            val next = (navGeneration[tabId] ?: 0L) + 1L
+            navGeneration[tabId] = next
+            val heldHere = requests.values.count { it.tabId == tabId && it.heldNavigation }
+            logger.info(
+                "nav bump tab=$tabId gen=${next - 1} -> $next reason=$reason " +
+                    "(invalidates $heldHere live hold(s))",
+            )
+            return next
+        }
+    }
+
+    /** Current generation, for a caller that needs to compare without advancing it. */
+    fun currentNavGeneration(tabId: String): Long = synchronized(lock) { navGeneration[tabId] ?: 0L }
+
+    /**
+     * Decide, atomically, whether [request]'s held navigation may still be loaded.
+     *
+     * Consume and drain both detach a request *before* the load happens, which leaves a window the
+     * store can no longer police from the outside: a newer prompt raised in that window cannot
+     * cancel debt that is no longer in the map, and it leaves the tab on the same page, so the URL
+     * anchor still agrees. Deciding here, under the lock, against state the store still owns, closes
+     * both — this is the last word on whether the load may happen.
+     *
+     * @param currentUrl the tab's committed URL, read by the caller from the browser store.
+     */
+    fun claimRelease(request: PendingAppLinkRequest, currentUrl: String): Boolean {
+        synchronized(lock) {
+            sweepExpiredLocked()
+            val liveGeneration = navGeneration[request.tabId] ?: 0L
+            val newerHold = requests.values
+                .firstOrNull { it.tabId == request.tabId && it.heldNavigation }
+            if (!request.heldNavigation) return false
+            // The tab has moved on since the hold was taken.
+            if (liveGeneration != request.navGeneration) {
+                logger.info(
+                    "claimRelease id=${request.requestId} REFUSED: generation moved " +
+                        "(${request.navGeneration} -> $liveGeneration)",
+                )
+                return false
+            }
+            // A newer hold is what this tab is waiting on now; the older debt is superseded even
+            // though it was detached before this one existed.
+            //
+            // Deliberately narrower than the discard in [createRequest], which drops *queued* debt
+            // for any newer request at all. The two are not the same debt. Queued debt belongs to a
+            // prompt the user ignored, so a newer offer may quietly retire it. Debt in a caller's
+            // hand belongs to a prompt the user just answered with "stay in the browser", and the
+            // page they asked for is owed to them whatever else has since appeared over it — an
+            // unheld banner (a subframe offer, or one raised after blocking was switched off) leaves
+            // the tab exactly where the hold left it, so there is nothing to overwrite and cancelling
+            // here would strand the answer instead.
+            if (newerHold != null) {
+                logger.info(
+                    "claimRelease id=${request.requestId} REFUSED: newer hold ${newerHold.requestId}",
+                )
+                return false
+            }
+            // Backstop for navigations that never bumped the generation.
+            if (!isSameDocumentTarget(currentUrl, request.heldAnchorUrl)) {
+                logger.info(
+                    "claimRelease id=${request.requestId} REFUSED: anchor mismatch " +
+                        "(anchor=${request.heldAnchorUrl} now=$currentUrl)",
+                )
+                return false
+            }
+            logger.info("claimRelease id=${request.requestId} GRANTED -> will load ${request.url}")
+            return true
+        }
+    }
+
+    /**
+     * Take the requests that lapsed while holding a navigation, so the caller can re-issue their
+     * loads. Draining is destructive: each lapsed request is handed out exactly once.
+     *
+     * Sweeping is lazy, so this only sees what the store's own timers/queries have reached — which
+     * is enough, because both surfaces already re-query on the soonest deadline in order to retire
+     * the prompt on time.
+     */
+    fun drainExpiredHeldNavigations(): List<PendingAppLinkRequest> {
+        synchronized(lock) {
+            sweepExpiredLocked()
+            if (expiredHeld.isEmpty()) return emptyList()
+            val drained = expiredHeld.toList()
+            expiredHeld.clear()
+            return drained
+        }
+    }
 
     /** Non-consuming query of live requests for [owner]. */
     fun getPending(owner: AppLinkPromptOwner): List<PendingAppLinkRequest> {
@@ -289,6 +476,9 @@ class PendingAppLinkStore(
                 .filter { it.tabId == tabId }
                 .mapTo(mutableSetOf()) { it.owner }
             requests.values.removeAll { it.tabId == tabId }
+            // The tab is gone; nothing is owed a load any more.
+            expiredHeld.removeAll { it.tabId == tabId }
+            navGeneration.remove(tabId)
             suppression.keys.removeAll { it.startsWith("$tabId\u0000") }
             fallbackIssued.keys.removeAll { it.startsWith(fallbackIssueKey(tabId, "")) }
             fallbackBudget.remove(tabId)
@@ -310,6 +500,40 @@ class PendingAppLinkStore(
             sweepExpiredLocked()
             val expiresAt = suppression[suppressionKey(tabId, fingerprint)] ?: return false
             return clock.elapsedRealtime() <= expiresAt
+        }
+    }
+
+    /**
+     * Drop every request whose tab is gone, for the bulk close/restore actions that name no tab
+     * (close-all, close-all-private, close-all-custom-tabs). Reconciling against the surviving tabs
+     * avoids mirroring each reducer's notion of what it removed.
+     *
+     * @return the tabs that lost a request, mapped to the owners that were showing one.
+     */
+    fun retainTabs(liveTabIds: Set<String>): Map<String, Set<AppLinkPromptOwner>> {
+        synchronized(lock) {
+            val affected = requests.values
+                .filterNot { it.tabId in liveTabIds }
+                .groupBy({ it.tabId }, { it.owner })
+                .mapValues { (_, owners) -> owners.toSet() }
+            requests.values.removeAll { it.tabId !in liveTabIds }
+            // A closed tab is owed nothing; releasing into it would resurrect it.
+            expiredHeld.removeAll { it.tabId !in liveTabIds }
+            // Same cleanup a single-tab close does. "Close all" then "undo" restores the very same
+            // tab ids, so anything keyed on them outlives the tabs and lands on their replacements:
+            // a stale suppression silently swallows the next prompt, a stale fallback claim refuses
+            // the next fallback.
+            // The empty tab id is the sessionless-navigation bucket, not a closed tab; it belongs
+            // to no tab and must survive.
+            val dead = { key: String ->
+                val tabId = key.substringBefore('\u0000')
+                tabId.isNotEmpty() && tabId !in liveTabIds
+            }
+            suppression.keys.removeAll(dead)
+            fallbackIssued.keys.removeAll(dead)
+            fallbackBudget.keys.removeAll { it.isNotEmpty() && it !in liveTabIds }
+            navGeneration.keys.removeAll { it !in liveTabIds }
+            return affected
         }
     }
 
@@ -398,7 +622,17 @@ class PendingAppLinkStore(
 
     private fun sweepExpiredLocked() {
         val now = clock.elapsedRealtime()
-        requests.values.removeAll { now > it.createdAt + expiryFor(it) }
+        requests.values.removeAll { request ->
+            // `>=`, not `>`: at the exact deadline [expiresInMs] already reports zero, and a surface
+            // that is told "no time left" drops the prompt and arms no further refresh. Handing back
+            // a request nobody will ask about again would leave its held navigation pending until
+            // some unrelated event happened along.
+            val expired = now >= request.createdAt + expiryFor(request)
+            // A lapsed request that stalled a navigation leaves the tab with nothing to show; record
+            // the debt before dropping it so the next surface to touch the store can load the page.
+            if (expired && request.heldNavigation) expiredHeld.add(request)
+            expired
+        }
         suppression.values.removeAll { now > it }
         fallbackReentry.values.removeAll { now > it }
         fallbackIssued.values.removeAll { now > it }

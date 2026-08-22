@@ -111,6 +111,7 @@ AppLinkPolicySnapshot? appLinkPolicySnapshot(Ref ref) {
     },
     marketplaceFallbackEnabled: settings.appLinkMarketplaceFallback,
     authExceptionsEnabled: settings.appLinkAuthExceptionsEnabled,
+    blockWhilePrompting: settings.appLinkBlockWhilePrompting,
     protectGeneralContext: protection.protectGeneralContext,
     protectedContextIds: protection.protectedContextIds.toList(),
     strictContextIds: protection.strictContextIds.toList(),

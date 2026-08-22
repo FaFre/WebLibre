@@ -26,6 +26,8 @@ class PendingAppLinkStoreTest {
         owner: AppLinkPromptOwner = AppLinkPromptOwner.FLUTTER_BROWSER,
         urlClass: AppLinkUrlClass = AppLinkUrlClass.MODAL,
         url: String = "zoommtg://join",
+        engineSupportsScheme: Boolean = false,
+        heldNavigation: Boolean = false,
         isUserGesture: Boolean = false,
     ) = NewAppLinkRequest(
         owner = owner,
@@ -41,13 +43,23 @@ class PendingAppLinkStoreTest {
         url = url,
         expectedPackage = null,
         fallbackUrl = null,
-        engineSupportsScheme = false,
+        engineSupportsScheme = engineSupportsScheme,
         isMarketplace = false,
         targetFingerprint = fingerprint,
         appName = "App",
         packageName = "com.app",
         scopeKey = "pkg:com.app",
+        heldNavigation = heldNavigation,
         isUserGesture = isUserGesture,
+    )
+
+    private fun heldBanner(tabId: String = "tab1", fingerprint: String = "fp1") = newRequest(
+        tabId = tabId,
+        fingerprint = fingerprint,
+        urlClass = AppLinkUrlClass.BANNER,
+        url = "https://example.com/watch",
+        engineSupportsScheme = true,
+        heldNavigation = true,
     )
 
     @Test
@@ -328,5 +340,404 @@ class PendingAppLinkStoreTest {
         val store = PendingAppLinkStore(clock, fallbackIssueMs = 10_000L)
         assertTrue(store.claimFallbackIssue(null, "https://maps.example/place"))
         assertFalse(store.claimFallbackIssue(null, "https://maps.example/place"))
+    }
+
+    // ---- Held navigations (blockWhilePrompting) ----
+
+    @Test
+    fun lapsedHeldBannerIsDrainedExactlyOnce() {
+        val clock = FakeClock()
+        val store = PendingAppLinkStore(clock)
+        val request = store.createRequest(heldBanner())
+
+        assertTrue(store.drainExpiredHeldNavigations().isEmpty())
+
+        clock.now += PendingAppLinkStore.BANNER_EXPIRY_MS + 1
+        val drained = store.drainExpiredHeldNavigations()
+        assertEquals(listOf(request.requestId), drained.map { it.requestId })
+        // Draining is the debt being settled: a second surface must not load the page again.
+        assertTrue(store.drainExpiredHeldNavigations().isEmpty())
+    }
+
+    @Test
+    fun lapsedNonHeldBannerOwesNothing() {
+        val clock = FakeClock()
+        val store = PendingAppLinkStore(clock)
+        store.createRequest(
+            newRequest(urlClass = AppLinkUrlClass.BANNER, engineSupportsScheme = true),
+        )
+
+        clock.now += PendingAppLinkStore.BANNER_EXPIRY_MS + 1
+        // The page loaded behind this banner already; nothing to release.
+        assertTrue(store.drainExpiredHeldNavigations().isEmpty())
+    }
+
+    @Test
+    fun resolvedHeldBannerIsNotDrained() {
+        val clock = FakeClock()
+        val store = PendingAppLinkStore(clock)
+        val request = store.createRequest(heldBanner())
+
+        // The caller consumed it, so the caller already released it.
+        assertNotNull(store.consume(request.requestId))
+        clock.now += PendingAppLinkStore.BANNER_EXPIRY_MS + 1
+        assertTrue(store.drainExpiredHeldNavigations().isEmpty())
+    }
+
+    @Test
+    fun heldBannerOfAClosedTabOwesNothing() {
+        val clock = FakeClock()
+        val store = PendingAppLinkStore(clock)
+        store.createRequest(heldBanner())
+
+        clock.now += PendingAppLinkStore.BANNER_EXPIRY_MS + 1
+        // Sweep the debt into the queue, then close the tab it belonged to.
+        store.getPending(AppLinkPromptOwner.FLUTTER_BROWSER)
+        store.invalidateTab("tab1")
+
+        // Loading into a dead tab would recreate it; the navigation dies with the tab.
+        assertTrue(store.drainExpiredHeldNavigations().isEmpty())
+    }
+
+    @Test
+    fun heldBannerSupersededByANewerOneOwesNothing() {
+        val clock = FakeClock()
+        val store = PendingAppLinkStore(clock)
+        store.createRequest(heldBanner(fingerprint = "first"))
+        // A second app-link target in the same tab replaces the offer (one banner per tab). The
+        // first navigation is superseded by the second, not owed.
+        store.createRequest(heldBanner(fingerprint = "second"))
+
+        clock.now += PendingAppLinkStore.BANNER_EXPIRY_MS + 1
+        assertEquals(1, store.drainExpiredHeldNavigations().size)
+    }
+
+    @Test
+    fun aNewerBannerDiscardsTheLapsedOnesDebt() {
+        val clock = FakeClock()
+        val store = PendingAppLinkStore(clock)
+        store.createRequest(heldBanner(fingerprint = "old"))
+
+        // The old banner lapses, then a second app-link target arrives in the same tab. The sweep
+        // inside createRequest queues the old debt; the new hold has to discard it, or the next
+        // query loads the stale page over the navigation the new prompt is holding.
+        clock.now += PendingAppLinkStore.BANNER_EXPIRY_MS + 1
+        store.createRequest(heldBanner(fingerprint = "new"))
+
+        assertTrue(store.drainExpiredHeldNavigations().isEmpty())
+    }
+
+    @Test
+    fun anUnheldReplacementAlsoDiscardsTheLapsedOnesDebt() {
+        val clock = FakeClock()
+        val store = PendingAppLinkStore(clock)
+        store.createRequest(heldBanner(fingerprint = "old"))
+
+        // The replacement holds nothing — blocking was switched off, or it is a subframe banner.
+        // The older debt is superseded all the same; releasing it would load over the page this
+        // banner is sitting on.
+        clock.now += PendingAppLinkStore.BANNER_EXPIRY_MS + 1
+        store.createRequest(
+            newRequest(
+                fingerprint = "new",
+                urlClass = AppLinkUrlClass.BANNER,
+                engineSupportsScheme = true,
+            ),
+        )
+
+        assertTrue(store.drainExpiredHeldNavigations().isEmpty())
+    }
+
+    @Test
+    fun dedupeDoesNotCollapseAcrossAChangeOfHeldState() {
+        val store = PendingAppLinkStore(FakeClock())
+        val held = store.createRequest(heldBanner())
+        // Same tab, same target, inside the dedupe window, but blocking flipped in between. Handing
+        // back the held request would leave this denied load owing nothing to anyone.
+        val unheld = store.createRequest(
+            newRequest(
+                urlClass = AppLinkUrlClass.BANNER,
+                url = "https://example.com/watch",
+                engineSupportsScheme = true,
+            ),
+        )
+
+        assertNotEquals(held.requestId, unheld.requestId)
+        assertFalse(unheld.heldNavigation)
+    }
+
+    @Test
+    fun dedupeStillCollapsesMatchingHeldAttempts() {
+        val store = PendingAppLinkStore(FakeClock())
+        val first = store.createRequest(heldBanner())
+        val second = store.createRequest(heldBanner())
+
+        assertEquals(first.requestId, second.requestId)
+    }
+
+    @Test
+    fun theAnchorIsCarriedOntoTheRequest() {
+        val store = PendingAppLinkStore(FakeClock())
+        val request = store.createRequest(
+            heldBanner().copy(heldAnchorUrl = "https://news.example/article"),
+        )
+
+        assertEquals("https://news.example/article", request.heldAnchorUrl)
+    }
+
+    @Test
+    fun bulkRemovalClearsTheClosedTabsSuppressionAndFallbackClaims() {
+        val store = PendingAppLinkStore(FakeClock())
+        store.recordSuppression("gone", "fp")
+        store.recordSuppression("kept", "fp")
+        assertTrue(store.claimFallbackIssue("gone", "https://fallback.example/page"))
+
+        store.retainTabs(setOf("kept"))
+
+        // "Close all" then "undo" restores the same ids; stale state would land on the new tabs.
+        assertFalse(store.isSuppressed("gone", "fp"))
+        assertTrue(store.isSuppressed("kept", "fp"))
+        assertTrue(store.claimFallbackIssue("gone", "https://fallback.example/page"))
+    }
+
+    @Test
+    fun retainTabsDropsLiveRequestsOfClosedTabs() {
+        val store = PendingAppLinkStore(FakeClock())
+        store.createRequest(heldBanner(tabId = "gone"))
+        val kept = store.createRequest(heldBanner(tabId = "kept"))
+
+        val affected = store.retainTabs(setOf("kept"))
+
+        // The caller re-queries the surfaces that were showing something for a now-dead tab.
+        assertEquals(setOf("gone"), affected.keys)
+        assertEquals(
+            listOf(kept.requestId),
+            store.getPending(AppLinkPromptOwner.FLUTTER_BROWSER).map { it.requestId },
+        )
+    }
+
+    @Test
+    fun retainTabsDropsQueuedDebtOfClosedTabs() {
+        val clock = FakeClock()
+        val store = PendingAppLinkStore(clock)
+        store.createRequest(heldBanner(tabId = "gone"))
+        val kept = store.createRequest(heldBanner(tabId = "kept"))
+
+        // Both lapse first, so the debts are already queued and no live request names either tab.
+        clock.now += PendingAppLinkStore.BANNER_EXPIRY_MS + 1
+        store.getPending(AppLinkPromptOwner.FLUTTER_BROWSER)
+
+        store.retainTabs(setOf("kept"))
+
+        // Only the surviving tab is still owed anything; loading into a closed tab would revive it.
+        assertEquals(
+            listOf(kept.requestId),
+            store.drainExpiredHeldNavigations().map { it.requestId },
+        )
+    }
+
+    @Test
+    fun retainTabsKeepsEverythingWhenNothingClosed() {
+        val store = PendingAppLinkStore(FakeClock())
+        val request = store.createRequest(heldBanner())
+
+        assertTrue(store.retainTabs(setOf("tab1")).isEmpty())
+        assertEquals(
+            listOf(request.requestId),
+            store.getPending(AppLinkPromptOwner.FLUTTER_BROWSER).map { it.requestId },
+        )
+    }
+
+    // ---- Navigation generation + release claim ----
+
+    private fun heldAt(
+        store: PendingAppLinkStore,
+        tabId: String = "tab1",
+        fingerprint: String = "fp1",
+        anchor: String = "https://source.example/page",
+    ): PendingAppLinkRequest {
+        // Exactly the interceptor's order: a hold reads the tab's current generation and denies the
+        // load, so nothing bumps — the navigation it interrupted never happened.
+        val generation = store.currentNavGeneration(tabId)
+        return store.createRequest(
+            heldBanner(tabId = tabId, fingerprint = fingerprint)
+                .copy(heldAnchorUrl = anchor, navGeneration = generation),
+        )
+    }
+
+    @Test
+    fun aHoldIsNotCancelledByTheNavigationThatRaisedIt() {
+        // The regression that killed the previous design: a direct load runs the interceptor inline,
+        // so anything bumping the generation *after* the hold would strand every omnibar app link.
+        val store = PendingAppLinkStore(FakeClock())
+        val request = heldAt(store)
+
+        assertNotNull(store.consume(request.requestId))
+        assertTrue(store.claimRelease(request, "https://source.example/page"))
+    }
+
+    @Test
+    fun aLaterNavigationRevokesTheClaim() {
+        val store = PendingAppLinkStore(FakeClock())
+        val request = heldAt(store)
+        assertNotNull(store.consume(request.requestId))
+
+        // The user went somewhere else. The load has started but nothing has committed yet, so the
+        // committed URL still matches the anchor — only the generation knows.
+        store.beginNavigation("tab1")
+
+        assertFalse(store.claimRelease(request, "https://source.example/page"))
+    }
+
+    @Test
+    fun aNewerHoldRevokesDetachedDebt() {
+        val store = PendingAppLinkStore(FakeClock())
+        val request = heldAt(store)
+        assertNotNull(store.consume(request.requestId))
+
+        // Defence in depth for a hold raised without bumping the generation: once detached, nothing
+        // outside the store could cancel this debt, and both holds leave the tab on the same page.
+        store.createRequest(
+            heldBanner(fingerprint = "newer").copy(
+                heldAnchorUrl = "https://source.example/page",
+                navGeneration = request.navGeneration,
+            ),
+        )
+
+        assertFalse(store.claimRelease(request, "https://source.example/page"))
+    }
+
+    @Test
+    fun aCommittedUrlChangeStillRevokesWithoutAGenerationBump() {
+        // Backstop for navigations that never reach the interceptor tail (PWA/TWA, sandbox capture,
+        // weblibre://, FxA): they bump nothing, so only the anchor can catch them.
+        val store = PendingAppLinkStore(FakeClock())
+        val request = heldAt(store)
+        assertNotNull(store.consume(request.requestId))
+
+        assertFalse(store.claimRelease(request, "https://elsewhere.example/"))
+    }
+
+    @Test
+    fun anUnheldRequestIsNeverReleased() {
+        val store = PendingAppLinkStore(FakeClock())
+        val request = store.createRequest(
+            newRequest(urlClass = AppLinkUrlClass.BANNER, engineSupportsScheme = true),
+        )
+
+        assertFalse(store.claimRelease(request, "https://source.example/page"))
+    }
+
+    @Test
+    fun generationsAreTrackedPerTab() {
+        val store = PendingAppLinkStore(FakeClock())
+        val first = heldAt(store, tabId = "tab1")
+        assertNotNull(store.consume(first.requestId))
+
+        // A different tab navigating must not revoke this tab's debt.
+        store.beginNavigation("tab2")
+
+        assertTrue(store.claimRelease(first, "https://source.example/page"))
+    }
+
+    @Test
+    fun aSubframeLoadDoesNotAdvanceTheGeneration() {
+        val store = PendingAppLinkStore(FakeClock())
+        store.beginNavigation("tab1")
+        val observed = store.currentNavGeneration("tab1")
+
+        // What the interceptor reads for a subframe request: an iframe loading does not mean the tab
+        // left the page, so a pending hold survives it.
+        assertEquals(observed, store.currentNavGeneration("tab1"))
+    }
+
+    @Test
+    fun closingATabForgetsItsGeneration() {
+        val store = PendingAppLinkStore(FakeClock())
+        store.beginNavigation("tab1")
+        store.beginNavigation("tab1")
+        store.invalidateTab("tab1")
+
+        // A recycled id must not inherit a stale count.
+        assertEquals(0L, store.currentNavGeneration("tab1"))
+    }
+
+    @Test
+    fun dedupeRestampsTheHoldWithTheNewerNavigation() {
+        val store = PendingAppLinkStore(FakeClock())
+        val first = heldAt(store)
+
+        // The same target denied again from the same page: one offer, but a second navigation. The
+        // request must answer for the newer one or the release check strands it.
+        val generation = store.beginNavigation("tab1")
+        val second = store.createRequest(
+            heldBanner().copy(
+                heldAnchorUrl = "https://source.example/page",
+                navGeneration = generation,
+            ),
+        )
+
+        assertEquals(first.requestId, second.requestId)
+        assertEquals(generation, second.navGeneration)
+
+        assertNotNull(store.consume(second.requestId))
+        assertTrue(store.claimRelease(second, "https://source.example/page"))
+    }
+
+    @Test
+    fun dedupeAtTheSameGenerationChangesNothing() {
+        val store = PendingAppLinkStore(FakeClock())
+        val first = heldAt(store)
+        val second = store.createRequest(
+            heldBanner().copy(
+                heldAnchorUrl = "https://source.example/page",
+                navGeneration = first.navGeneration,
+            ),
+        )
+
+        assertEquals(first.requestId, second.requestId)
+        assertEquals(first.navGeneration, second.navGeneration)
+    }
+
+    @Test
+    fun anUnheldNewerRequestDoesNotCancelAnAnsweredDecline() {
+        val store = PendingAppLinkStore(FakeClock())
+        val request = heldAt(store)
+        assertNotNull(store.consume(request.requestId))
+
+        // A subframe offer, or one raised after blocking was switched off. It leaves the tab exactly
+        // where the hold left it, so the page the user just asked for is still owed to them.
+        store.createRequest(
+            newRequest(
+                fingerprint = "subframe",
+                urlClass = AppLinkUrlClass.BANNER,
+                engineSupportsScheme = true,
+            ),
+        )
+
+        assertTrue(store.claimRelease(request, "https://source.example/page"))
+    }
+
+    @Test
+    fun aDeniedNavigationLeavesAHoldReleasable() {
+        val store = PendingAppLinkStore(FakeClock())
+        val request = heldAt(store)
+        assertNotNull(store.consume(request.requestId))
+
+        // Another app link denied on the same tab: the page did not move, so nothing bumped and the
+        // answer the user already gave is still owed to them. Counting attempts instead of moves is
+        // what made "stay in browser" do nothing.
+        assertTrue(store.claimRelease(request, "https://source.example/page"))
+    }
+
+    @Test
+    fun aProceedingNavigationStillInvalidatesAHold() {
+        val store = PendingAppLinkStore(FakeClock())
+        val request = heldAt(store)
+        assertNotNull(store.consume(request.requestId))
+
+        store.beginNavigation("tab1")
+
+        assertFalse(store.claimRelease(request, "https://source.example/page"))
     }
 }
