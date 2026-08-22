@@ -1005,12 +1005,6 @@ enum AppLinksMode {
   never,
 }
 
-enum WebContentIsolationStrategy {
-  isolateNothing,
-  isolateEverything,
-  isolateHighValue,
-}
-
 /// Cookie blocking policy for Custom tracking protection mode.
 /// Note: These only apply when blockCookies is true.
 enum CustomCookiePolicy {
@@ -1083,7 +1077,6 @@ class GeckoEngineSettings {
   final CookieBannerHandlingMode? cookieBannerHandlingModePrivateBrowsing;
   final bool? cookieBannerHandlingGlobalRules;
   final bool? cookieBannerHandlingGlobalRulesSubFrames;
-  final WebContentIsolationStrategy? webContentIsolationStrategy;
   final String? userAgent;
   final ContentBlocking? contentBlocking;
   final bool? enterpriseRootsEnabled;
@@ -1168,7 +1161,6 @@ class GeckoEngineSettings {
     this.cookieBannerHandlingModePrivateBrowsing,
     this.cookieBannerHandlingGlobalRules,
     this.cookieBannerHandlingGlobalRulesSubFrames,
-    this.webContentIsolationStrategy,
     this.userAgent,
     this.contentBlocking,
     this.enterpriseRootsEnabled,

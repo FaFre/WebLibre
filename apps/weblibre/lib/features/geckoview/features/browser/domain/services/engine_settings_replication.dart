@@ -298,12 +298,6 @@ class EngineSettingsReplicationService
                 settings.cookieBannerHandlingGlobalRulesSubFrames,
               );
             }
-            if (previous.value?.webContentIsolationStrategy !=
-                settings.webContentIsolationStrategy) {
-              await _service.webContentIsolationStrategy(
-                settings.webContentIsolationStrategy,
-              );
-            }
             if (previous.value?.contentBlocking != settings.contentBlocking) {
               await _service.contentBlocking(settings.contentBlocking);
             }

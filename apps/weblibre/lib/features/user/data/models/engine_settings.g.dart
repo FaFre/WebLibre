@@ -96,10 +96,6 @@ abstract class _$EngineSettingsCWProxy {
     bool? cookieBannerHandlingGlobalRulesSubFrames,
   );
 
-  EngineSettings webContentIsolationStrategy(
-    WebContentIsolationStrategy? webContentIsolationStrategy,
-  );
-
   EngineSettings userAgent(String? userAgent);
 
   EngineSettings enterpriseRootsEnabled(bool? enterpriseRootsEnabled);
@@ -221,7 +217,6 @@ abstract class _$EngineSettingsCWProxy {
     CookieBannerHandlingMode? cookieBannerHandlingModePrivateBrowsing,
     bool? cookieBannerHandlingGlobalRules,
     bool? cookieBannerHandlingGlobalRulesSubFrames,
-    WebContentIsolationStrategy? webContentIsolationStrategy,
     String? userAgent,
     bool? enterpriseRootsEnabled,
     QueryParameterStripping queryParameterStripping,
@@ -324,11 +319,6 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     cookieBannerHandlingGlobalRulesSubFrames:
         cookieBannerHandlingGlobalRulesSubFrames,
   );
-
-  @override
-  EngineSettings webContentIsolationStrategy(
-    WebContentIsolationStrategy? webContentIsolationStrategy,
-  ) => call(webContentIsolationStrategy: webContentIsolationStrategy);
 
   @override
   EngineSettings userAgent(String? userAgent) => call(userAgent: userAgent);
@@ -539,7 +529,6 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? cookieBannerHandlingGlobalRules = const $CopyWithPlaceholder(),
     Object? cookieBannerHandlingGlobalRulesSubFrames =
         const $CopyWithPlaceholder(),
-    Object? webContentIsolationStrategy = const $CopyWithPlaceholder(),
     Object? userAgent = const $CopyWithPlaceholder(),
     Object? enterpriseRootsEnabled = const $CopyWithPlaceholder(),
     Object? queryParameterStripping = const $CopyWithPlaceholder(),
@@ -632,11 +621,6 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.cookieBannerHandlingGlobalRulesSubFrames
           // ignore: cast_nullable_to_non_nullable
           : cookieBannerHandlingGlobalRulesSubFrames as bool?,
-      webContentIsolationStrategy:
-          webContentIsolationStrategy == const $CopyWithPlaceholder()
-          ? _value.webContentIsolationStrategy
-          // ignore: cast_nullable_to_non_nullable
-          : webContentIsolationStrategy as WebContentIsolationStrategy?,
       userAgent: userAgent == const $CopyWithPlaceholder()
           ? _value.userAgent
           // ignore: cast_nullable_to_non_nullable
@@ -904,10 +888,6 @@ EngineSettings _$EngineSettingsFromJson(
       json['cookieBannerHandlingGlobalRules'] as bool?,
   cookieBannerHandlingGlobalRulesSubFrames:
       json['cookieBannerHandlingGlobalRulesSubFrames'] as bool?,
-  webContentIsolationStrategy: $enumDecodeNullable(
-    _$WebContentIsolationStrategyEnumMap,
-    json['webContentIsolationStrategy'],
-  ),
   queryParameterStripping: $enumDecodeNullable(
     _$QueryParameterStrippingEnumMap,
     json['queryParameterStripping'],
@@ -1011,9 +991,6 @@ Map<String, dynamic> _$EngineSettingsToJson(
   'cookieBannerHandlingGlobalRules': instance.cookieBannerHandlingGlobalRules,
   'cookieBannerHandlingGlobalRulesSubFrames':
       instance.cookieBannerHandlingGlobalRulesSubFrames,
-  'webContentIsolationStrategy':
-      _$WebContentIsolationStrategyEnumMap[instance
-          .webContentIsolationStrategy]!,
   'enterpriseRootsEnabled': instance.enterpriseRootsEnabled,
   'locales': instance.locales,
   'useContentBlockingDatabase': instance.useContentBlockingDatabase,
@@ -1088,12 +1065,6 @@ const _$CookieBannerHandlingModeEnumMap = {
   CookieBannerHandlingMode.disabled: 'disabled',
   CookieBannerHandlingMode.rejectAll: 'rejectAll',
   CookieBannerHandlingMode.rejectOrAcceptAll: 'rejectOrAcceptAll',
-};
-
-const _$WebContentIsolationStrategyEnumMap = {
-  WebContentIsolationStrategy.isolateNothing: 'isolateNothing',
-  WebContentIsolationStrategy.isolateEverything: 'isolateEverything',
-  WebContentIsolationStrategy.isolateHighValue: 'isolateHighValue',
 };
 
 const _$QueryParameterStrippingEnumMap = {

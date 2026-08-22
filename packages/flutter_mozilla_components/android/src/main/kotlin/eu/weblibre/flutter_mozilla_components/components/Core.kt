@@ -53,7 +53,6 @@ import mozilla.components.concept.engine.DefaultSettings
 import mozilla.components.concept.engine.Engine
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.EngineSession.TrackingProtectionPolicy
-import mozilla.components.concept.engine.fission.WebContentIsolationStrategy
 import mozilla.components.concept.fetch.Client
 import mozilla.components.feature.addons.AddonManager
 import mozilla.components.feature.addons.amo.AMOAddonsProvider
@@ -142,7 +141,6 @@ class Core(
             cookieBannerHandlingModePrivateBrowsing = EngineSession.CookieBannerHandlingMode.REJECT_ALL,
             cookieBannerHandlingGlobalRules = true,
             cookieBannerHandlingGlobalRulesSubFrames = true,
-            webContentIsolationStrategy = WebContentIsolationStrategy.ISOLATE_HIGH_VALUE,
             downloadDelegate = EngineDownloadDelegate(
                 context = context,
                 downloadLocation = {

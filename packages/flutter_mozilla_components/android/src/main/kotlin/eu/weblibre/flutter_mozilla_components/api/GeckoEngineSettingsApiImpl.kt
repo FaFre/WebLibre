@@ -21,7 +21,6 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.HttpsOnlyMode
 import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
 import eu.weblibre.flutter_mozilla_components.pigeons.TrackingScope
-import eu.weblibre.flutter_mozilla_components.pigeons.WebContentIsolationStrategy
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.action.DefaultDesktopModeAction
 import mozilla.components.concept.engine.Engine
@@ -234,13 +233,6 @@ class GeckoEngineSettingsApiImpl(
         if(settings.cookieBannerHandlingGlobalRulesSubFrames != null) {
             components.core.engineSettings.cookieBannerHandlingGlobalRulesSubFrames = settings.cookieBannerHandlingGlobalRulesSubFrames;
         }
-        if(settings.webContentIsolationStrategy != null) {
-            components.core.engineSettings.webContentIsolationStrategy = when(settings.webContentIsolationStrategy) {
-                WebContentIsolationStrategy.ISOLATE_NOTHING -> mozilla.components.concept.engine.fission.WebContentIsolationStrategy.ISOLATE_NOTHING
-                WebContentIsolationStrategy.ISOLATE_EVERYTHING -> mozilla.components.concept.engine.fission.WebContentIsolationStrategy.ISOLATE_EVERYTHING
-                WebContentIsolationStrategy.ISOLATE_HIGH_VALUE -> mozilla.components.concept.engine.fission.WebContentIsolationStrategy.ISOLATE_HIGH_VALUE
-            }
-        }
         if(settings.userAgent != null) {
             components.core.engineSettings.userAgentString = settings.userAgent;
         }
@@ -364,9 +356,6 @@ class GeckoEngineSettingsApiImpl(
         }
         if(settings.cookieBannerHandlingGlobalRulesSubFrames != null) {
             components.core.engine.settings.cookieBannerHandlingGlobalRulesSubFrames = components.core.engineSettings.cookieBannerHandlingGlobalRulesSubFrames
-        }
-        if(settings.webContentIsolationStrategy != null) {
-            components.core.engine.settings.webContentIsolationStrategy = components.core.engineSettings.webContentIsolationStrategy
         }
         if(settings.userAgent != null) {
             components.core.engine.settings.userAgentString = components.core.engineSettings.userAgentString

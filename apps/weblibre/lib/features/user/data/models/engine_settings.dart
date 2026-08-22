@@ -128,9 +128,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
   bool get cookieBannerHandlingGlobalRulesSubFrames =>
       super.cookieBannerHandlingGlobalRulesSubFrames!;
   @override
-  WebContentIsolationStrategy get webContentIsolationStrategy =>
-      super.webContentIsolationStrategy!;
-  @override
   bool get enterpriseRootsEnabled => super.enterpriseRootsEnabled!;
 
   @override
@@ -246,7 +243,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required super.cookieBannerHandlingModePrivateBrowsing,
     required super.cookieBannerHandlingGlobalRules,
     required super.cookieBannerHandlingGlobalRulesSubFrames,
-    required super.webContentIsolationStrategy,
     required super.userAgent,
     required super.enterpriseRootsEnabled,
     required this.queryParameterStripping,
@@ -304,7 +300,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     CookieBannerHandlingMode? cookieBannerHandlingModePrivateBrowsing,
     bool? cookieBannerHandlingGlobalRules,
     bool? cookieBannerHandlingGlobalRulesSubFrames,
-    WebContentIsolationStrategy? webContentIsolationStrategy,
     QueryParameterStripping? queryParameterStripping,
     BounceTrackingProtectionMode? bounceTrackingProtectionMode,
     super.userAgent,
@@ -384,9 +379,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
              cookieBannerHandlingGlobalRules ?? true,
          cookieBannerHandlingGlobalRulesSubFrames:
              cookieBannerHandlingGlobalRulesSubFrames ?? true,
-         webContentIsolationStrategy:
-             webContentIsolationStrategy ??
-             WebContentIsolationStrategy.isolateHighValue,
          enterpriseRootsEnabled: enterpriseRootsEnabled ?? false,
          fingerprintingProtectionOverrides:
              fingerprintingProtectionOverrides ??
@@ -464,7 +456,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     cookieBannerHandlingModePrivateBrowsing,
     cookieBannerHandlingGlobalRules,
     cookieBannerHandlingGlobalRulesSubFrames,
-    webContentIsolationStrategy,
     userAgent,
     enterpriseRootsEnabled,
     queryParameterStripping,

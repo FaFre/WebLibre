@@ -80,8 +80,6 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
             DriftSqlType.bool,
             db.typeMapping,
           ),
-      'webContentIsolationStrategy': settings['webContentIsolationStrategy']
-          ?.readAs(DriftSqlType.string, db.typeMapping),
       'userAgent': settings['userAgent']?.readAs(
         DriftSqlType.string,
         db.typeMapping,

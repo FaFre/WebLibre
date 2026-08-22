@@ -1234,15 +1234,35 @@
                 "browser.privatebrowsing.forceMediaMemoryCache": {
                     "value": true,
                     "title": "Keep media cache in memory for Private Browsing"
+                }
+            }
+        },
+        "Process Isolation": {
+            "description": "Control how strictly sites are separated into their own processes",
+            "preferences": {
+                "fission.webContentIsolationStrategy": {
+                    "value": 1,
+                    "title": "Isolate every site in its own process",
+                    "description": "Gives each site-origin a dedicated content process instead of only isolating sites Gecko considers high value"
                 },
-                "media.memory_cache_max_size": {
-                    "value": 65536,
-                    "title": "Increase the in-memory media cache size"
+                "dom.ipc.processCount.webIsolated": {
+                    "value": 4,
+                    "title": "Allow more isolated content processes per origin",
+                    "description": "Improves site isolation at the cost of higher memory usage"
                 },
-                "browser.sessionstore.privacy_level": {
-                    "value": 2,
-                    "title": "Disable storing extra session data",
-                    "description": "Extra session data such as form content, cookies and POST data"
+                "javascript.options.spectre.disable_for_isolated_content": {
+                    "value": false,
+                    "title": "Keep Spectre mitigations enabled for isolated content",
+                    "description": "Site isolation is not a complete substitute for the JIT Spectre mitigations. Might impact performance negatively"
+                },
+                "dom.ipc.processPrelaunch.enabled": {
+                    "value": false,
+                    "title": "Don't pre-allocate content processes",
+                    "description": "Pre-allocated processes can keep stale settings alive after a change and cost memory while idle"
+                },
+                "dom.ipc.processPrelaunch.fission.number": {
+                    "value": 0,
+                    "title": "Don't pre-allocate isolated content processes"
                 }
             }
         },

@@ -123,12 +123,6 @@ class GeckoEngineSettingsService {
     );
   }
 
-  Future<void> webContentIsolationStrategy(WebContentIsolationStrategy state) {
-    return _api.updateRuntimeSettings(
-      GeckoEngineSettings(webContentIsolationStrategy: state),
-    );
-  }
-
   Future<void> contentBlocking(ContentBlocking state) {
     return _api.updateRuntimeSettings(
       GeckoEngineSettings(contentBlocking: state),

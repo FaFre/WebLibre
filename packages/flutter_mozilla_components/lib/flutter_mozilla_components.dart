@@ -156,7 +156,6 @@ export 'src/pigeons/gecko.g.dart'
         VideoHitResult,
         VisitInfo,
         VisitType,
-        WebContentIsolationStrategy,
         WebExtensionActionType,
         WebExtensionData;
 export 'src/pigeons/startup.g.dart'

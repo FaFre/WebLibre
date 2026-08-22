@@ -36,9 +36,24 @@ part 'preference_settings.g.dart';
 
 const _preferenceMigrationVersionKey = 'preferenceMigrationVersion';
 const _preferenceMigrationPartitionKey = 'preferenceMigration';
-const _preferenceMigrationSchemaVersion = 2;
+const _preferenceMigrationSchemaVersion = 3;
 const _mainProcessDisableJitPref =
     'javascript.options.main_process_disable_jit';
+
+/// Preferences we used to ship and have since dropped from `settings.json`.
+///
+/// Applying a preference writes it to the user branch, so removing the entry
+/// only stops new profiles from getting it — every profile that already
+/// applied it keeps the value forever. Resetting hands them back to Gecko's
+/// default branch.
+const _retiredPrefs = [
+  // Was raised to 65536 KiB (8x Gecko's default), which buffers any media
+  // resource under 64 MiB entirely in content-process memory.
+  'media.memory_cache_max_size',
+  // Only read by desktop Firefox's SessionStore, which GeckoView does not
+  // ship, so it never did anything here.
+  'browser.sessionstore.privacy_level',
+];
 
 @Riverpod(keepAlive: true)
 class StartupPreferenceEnforcementService
@@ -50,6 +65,7 @@ class StartupPreferenceEnforcementService
     steps: {
       0: () => _prefManager.resetPrefs([_mainProcessDisableJitPref]),
       1: _removeFxaProfileDomainFromLocalDnsBlocks,
+      2: () => _prefManager.resetPrefs(_retiredPrefs),
     },
   );
 
