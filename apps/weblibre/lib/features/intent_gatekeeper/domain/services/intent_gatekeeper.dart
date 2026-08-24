@@ -102,6 +102,8 @@ class IntentGatekeeper extends _$IntentGatekeeper {
     return completer.future;
   }
 
+  bool isPending(int id) => _pending.containsKey(id);
+
   Future<void> resolve({
     required int id,
     required IntentSourcePolicy decision,

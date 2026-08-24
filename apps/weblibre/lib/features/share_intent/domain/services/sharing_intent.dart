@@ -197,10 +197,32 @@ class IntentBus {
   IntentBus() : _controller = StreamController<Intent>.broadcast();
 
   final StreamController<Intent> _controller;
+  final List<Intent> _startupQueue = [];
+  bool _deliveryStarted = false;
 
   Stream<Intent> get stream => _controller.stream;
 
-  void emit(Intent intent) => _controller.add(intent);
+  void emit(Intent intent) {
+    if (_deliveryStarted) {
+      _controller.add(intent);
+    } else {
+      _startupQueue.add(intent);
+    }
+  }
+
+  /// Releases intents received while startup consumers were being installed.
+  ///
+  /// This is deliberately one-way rather than replaying the last event: a
+  /// provider rebuilt later must not reopen an old external link.
+  void startDelivery() {
+    if (_deliveryStarted) return;
+
+    _deliveryStarted = true;
+    for (final intent in _startupQueue) {
+      _controller.add(intent);
+    }
+    _startupQueue.clear();
+  }
 
   void emitError(Object error, StackTrace stackTrace) =>
       _controller.addError(error, stackTrace);
@@ -236,20 +258,19 @@ Raw<Stream<Intent>> allIntents(Ref ref) => ref.watch(intentBusProvider).stream;
 
 /// Replays the launches the native broker held, once.
 ///
-/// Deliberately not part of [allIntents]. That is a broadcast stream, so an event
-/// added while nothing is subscribed is dropped rather than queued, and the broker
-/// retires an entry as soon as this sink accepts it — draining as a side effect of
-/// building the stream therefore acknowledged launches into a stream whose only
-/// listener was whichever consumer happened to be constructed first, which for a
-/// share or a widget tap was the wrong one.
+/// Deliberately not part of [allIntents]. The bus holds native cold-start events
+/// until this provider starts delivery, then the broker retires entries as soon as
+/// this sink accepts them. Draining as a side effect of building the stream would
+/// therefore acknowledge launches before all semantic consumers existed.
 ///
-/// So the drain is its own step, and the caller runs it only after reading every
-/// consumer of [allIntents]. Those consumers buffer (see [bufferedIntentStream]),
-/// which covers the second half of the problem: the widget that finally acts on a
-/// replayed launch mounts later still.
+/// So delivery and the drain are one explicit step, and the caller runs it only
+/// after reading every consumer of [allIntents]. Those consumers buffer (see
+/// [bufferedIntentStream]), which covers the second half of the problem: the
+/// widget that finally acts on a replayed launch mounts later still.
 @Riverpod(keepAlive: true)
 Future<int> brokeredIntentDelivery(Ref ref) {
   final bus = ref.watch(intentBusProvider);
+  bus.startDelivery();
 
   return drainBrokeredIntents(
     engineId: engineInstanceId,

@@ -423,6 +423,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
     });
 
     ref.listenManual<AsyncValue<PendingIntentDecision>>(
+      fireImmediately: true,
       intentGatekeeperProvider,
       (previous, next) async {
         final request = next.value;
@@ -431,6 +432,10 @@ class _BrowserViewState extends ConsumerState<BrowserView>
         }
 
         final gatekeeper = ref.read(intentGatekeeperProvider.notifier);
+        if (!gatekeeper.isPending(request.id)) {
+          return;
+        }
+
         if (!context.mounted) {
           await gatekeeper.resolve(
             id: request.id,

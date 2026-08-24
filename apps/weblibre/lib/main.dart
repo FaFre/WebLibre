@@ -405,10 +405,8 @@ class _MainWidget extends HookConsumerWidget {
       // mismatch dialog. Only this isolate can shut the profile down cleanly.
       ref.read(profileRestartRequestHandlerProvider);
 
-      // Every consumer of `allIntents` has to exist before the broker is drained.
-      // The stream is a broadcast stream, so a replayed launch added to it with
-      // nothing subscribed is dropped — and then acknowledged, which is exactly
-      // the silent loss the broker exists to prevent. The account-callback and
+      // Every consumer of `allIntents` has to exist before the intent bus starts
+      // delivery and the broker is drained. The account-callback and
       // restart-request consumers are alive from the two reads above; these two
       // are otherwise built by the browser widget, far too late.
       ref.read(sharingIntentStreamProvider);
