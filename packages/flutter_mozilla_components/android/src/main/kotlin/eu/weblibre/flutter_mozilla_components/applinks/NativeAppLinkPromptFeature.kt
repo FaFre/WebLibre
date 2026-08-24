@@ -132,11 +132,6 @@ class NativeAppLinkPromptFeature(
     }
 
     private fun showNext() {
-        // Every path into this surface funnels through here — start, the availability event, the
-        // expiry tick and each resolution — so it is where lapsed debts get settled. Ahead of the
-        // early return: a request can lapse while another dialog is still up.
-        releaseExpiredHeldNavigations()
-
         if (dialog != null) return
 
         val request = store.getPending(AppLinkPromptOwner.NATIVE_EXTERNAL)
@@ -158,7 +153,7 @@ class NativeAppLinkPromptFeature(
             }
             .setOnCancelListener {
                 // Back / touch-outside is an explicit passive dismissal (§2.6).
-                resolveCancel(request)
+                resolveDismiss(request)
             }
             .setOnDismissListener { dialog = null }
             .show()
@@ -205,22 +200,18 @@ class NativeAppLinkPromptFeature(
         afterResolve()
     }
 
+    private fun resolveDismiss(request: PendingAppLinkRequest) {
+        // Passive dismissal is not "stay in browser": retire the prompt without loading the held
+        // URL or suppressing a future prompt for the same target.
+        store.consume(request.requestId)
+        afterResolve()
+    }
+
     private fun afterResolve() {
         mainHandler.removeCallbacks(expiryTick)
         dialog = null
         shownRequest = null
         showNext()
-    }
-
-    /**
-     * Settle whatever lapsed while this surface was busy. The expiry tick and every resolution pass
-     * through here, so a prompt the user simply ignored still ends with its page on screen instead of
-     * a navigation that silently died.
-     */
-    private fun releaseExpiredHeldNavigations() {
-        store.drainExpiredHeldNavigations().forEach { expired ->
-            releaseHeldNavigation(store, browserStore, sessionUseCases, expired, reason = "expired")
-        }
     }
 
     private companion object {

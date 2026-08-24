@@ -345,107 +345,17 @@ class PendingAppLinkStoreTest {
     // ---- Held navigations (blockWhilePrompting) ----
 
     @Test
-    fun lapsedHeldBannerIsDrainedExactlyOnce() {
+    fun lapsedHeldBannerExpiresWithoutBeingResolved() {
         val clock = FakeClock()
         val store = PendingAppLinkStore(clock)
         val request = store.createRequest(heldBanner())
 
-        assertTrue(store.drainExpiredHeldNavigations().isEmpty())
-
         clock.now += PendingAppLinkStore.BANNER_EXPIRY_MS + 1
-        val drained = store.drainExpiredHeldNavigations()
-        assertEquals(listOf(request.requestId), drained.map { it.requestId })
-        // Draining is the debt being settled: a second surface must not load the page again.
-        assertTrue(store.drainExpiredHeldNavigations().isEmpty())
-    }
-
-    @Test
-    fun lapsedNonHeldBannerOwesNothing() {
-        val clock = FakeClock()
-        val store = PendingAppLinkStore(clock)
-        store.createRequest(
-            newRequest(urlClass = AppLinkUrlClass.BANNER, engineSupportsScheme = true),
-        )
-
-        clock.now += PendingAppLinkStore.BANNER_EXPIRY_MS + 1
-        // The page loaded behind this banner already; nothing to release.
-        assertTrue(store.drainExpiredHeldNavigations().isEmpty())
-    }
-
-    @Test
-    fun resolvedHeldBannerIsNotDrained() {
-        val clock = FakeClock()
-        val store = PendingAppLinkStore(clock)
-        val request = store.createRequest(heldBanner())
-
-        // The caller consumed it, so the caller already released it.
-        assertNotNull(store.consume(request.requestId))
-        clock.now += PendingAppLinkStore.BANNER_EXPIRY_MS + 1
-        assertTrue(store.drainExpiredHeldNavigations().isEmpty())
-    }
-
-    @Test
-    fun heldBannerOfAClosedTabOwesNothing() {
-        val clock = FakeClock()
-        val store = PendingAppLinkStore(clock)
-        store.createRequest(heldBanner())
-
-        clock.now += PendingAppLinkStore.BANNER_EXPIRY_MS + 1
-        // Sweep the debt into the queue, then close the tab it belonged to.
-        store.getPending(AppLinkPromptOwner.FLUTTER_BROWSER)
-        store.invalidateTab("tab1")
-
-        // Loading into a dead tab would recreate it; the navigation dies with the tab.
-        assertTrue(store.drainExpiredHeldNavigations().isEmpty())
-    }
-
-    @Test
-    fun heldBannerSupersededByANewerOneOwesNothing() {
-        val clock = FakeClock()
-        val store = PendingAppLinkStore(clock)
-        store.createRequest(heldBanner(fingerprint = "first"))
-        // A second app-link target in the same tab replaces the offer (one banner per tab). The
-        // first navigation is superseded by the second, not owed.
-        store.createRequest(heldBanner(fingerprint = "second"))
-
-        clock.now += PendingAppLinkStore.BANNER_EXPIRY_MS + 1
-        assertEquals(1, store.drainExpiredHeldNavigations().size)
-    }
-
-    @Test
-    fun aNewerBannerDiscardsTheLapsedOnesDebt() {
-        val clock = FakeClock()
-        val store = PendingAppLinkStore(clock)
-        store.createRequest(heldBanner(fingerprint = "old"))
-
-        // The old banner lapses, then a second app-link target arrives in the same tab. The sweep
-        // inside createRequest queues the old debt; the new hold has to discard it, or the next
-        // query loads the stale page over the navigation the new prompt is holding.
-        clock.now += PendingAppLinkStore.BANNER_EXPIRY_MS + 1
-        store.createRequest(heldBanner(fingerprint = "new"))
-
-        assertTrue(store.drainExpiredHeldNavigations().isEmpty())
-    }
-
-    @Test
-    fun anUnheldReplacementAlsoDiscardsTheLapsedOnesDebt() {
-        val clock = FakeClock()
-        val store = PendingAppLinkStore(clock)
-        store.createRequest(heldBanner(fingerprint = "old"))
-
-        // The replacement holds nothing — blocking was switched off, or it is a subframe banner.
-        // The older debt is superseded all the same; releasing it would load over the page this
-        // banner is sitting on.
-        clock.now += PendingAppLinkStore.BANNER_EXPIRY_MS + 1
-        store.createRequest(
-            newRequest(
-                fingerprint = "new",
-                urlClass = AppLinkUrlClass.BANNER,
-                engineSupportsScheme = true,
-            ),
-        )
-
-        assertTrue(store.drainExpiredHeldNavigations().isEmpty())
+        // Timeout is passive: the request disappears without becoming a resolution that could
+        // suppress future prompts or release the held URL.
+        assertNull(store.consume(request.requestId))
+        assertTrue(store.getPending(AppLinkPromptOwner.FLUTTER_BROWSER).isEmpty())
+        assertFalse(store.isSuppressed(request.tabId, request.targetFingerprint))
     }
 
     @Test
@@ -513,26 +423,6 @@ class PendingAppLinkStoreTest {
         assertEquals(
             listOf(kept.requestId),
             store.getPending(AppLinkPromptOwner.FLUTTER_BROWSER).map { it.requestId },
-        )
-    }
-
-    @Test
-    fun retainTabsDropsQueuedDebtOfClosedTabs() {
-        val clock = FakeClock()
-        val store = PendingAppLinkStore(clock)
-        store.createRequest(heldBanner(tabId = "gone"))
-        val kept = store.createRequest(heldBanner(tabId = "kept"))
-
-        // Both lapse first, so the debts are already queued and no live request names either tab.
-        clock.now += PendingAppLinkStore.BANNER_EXPIRY_MS + 1
-        store.getPending(AppLinkPromptOwner.FLUTTER_BROWSER)
-
-        store.retainTabs(setOf("kept"))
-
-        // Only the surviving tab is still owed anything; loading into a closed tab would revive it.
-        assertEquals(
-            listOf(kept.requestId),
-            store.drainExpiredHeldNavigations().map { it.requestId },
         )
     }
 

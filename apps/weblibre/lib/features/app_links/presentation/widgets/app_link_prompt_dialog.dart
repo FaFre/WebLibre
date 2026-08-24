@@ -45,6 +45,15 @@ PersistedAppLinkRule neverOpenRuleFor(AppLinkTarget target) {
   );
 }
 
+PersistedAppLinkRule? rememberedRuleFor(
+  AppLinkDecision decision,
+  AppLinkTarget target,
+) => switch (decision) {
+  AppLinkDecision.open => alwaysOpenRuleFor(target),
+  AppLinkDecision.cancel => neverOpenRuleFor(target),
+  AppLinkDecision.dismiss => null,
+};
+
 /// Modal prompt for an unsupported-scheme app link (§2.2). The navigation is
 /// genuinely stalled and there is no page to show behind it.
 class AppLinkPromptDialog extends HookConsumerWidget {
@@ -67,9 +76,7 @@ class AppLinkPromptDialog extends HookConsumerWidget {
       resolving.value = true;
       final navigator = Navigator.of(context);
       if (remember.value && request.canRemember) {
-        final rule = decision == AppLinkDecision.open
-            ? alwaysOpenRuleFor(target)
-            : neverOpenRuleFor(target);
+        final rule = rememberedRuleFor(decision, target);
         if (rule != null) {
           await coordinator.resolveWithRule(
             request.requestId,

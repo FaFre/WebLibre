@@ -33,7 +33,6 @@ import kotlinx.coroutines.SupervisorJob
 import androidx.annotation.MainThread
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Locale
 
 /**
  * WebLibre-owned implementation of [GeckoAppLinksApi] backed by [ExternalAppResolver] and
@@ -147,28 +146,6 @@ class GeckoAppLinksApiImpl(
                     }
                     ?: emptyList()
 
-                // The surface re-queries on the soonest deadline in order to retire lapsed prompts,
-                // which makes this the natural place to settle what those prompts were holding: a
-                // banner the user simply ignored must still end with the page on screen, not with a
-                // navigation that silently died. Released on the main thread for the same reason as
-                // the resolution path.
-                components?.let {
-                    val store = pendingStoreFor(it)
-                    val expired = store.drainExpiredHeldNavigations()
-                    if (expired.isNotEmpty()) {
-                        withContext(Dispatchers.Main) {
-                            expired.forEach { request ->
-                                releaseHeldNavigation(
-                                    store,
-                                    it.core.store,
-                                    it.useCases.sessionUseCases,
-                                    request,
-                                    reason = "expired",
-                                )
-                            }
-                        }
-                    }
-                }
                 callback(Result.success(list))
             } catch (e: Exception) {
                 callback(Result.success(emptyList()))
@@ -213,7 +190,7 @@ class GeckoAppLinksApiImpl(
                 val result = withContext(Dispatchers.Main) {
                     when (decision) {
                         AppLinkDecision.OPEN -> handleOpen(components, request)
-                        AppLinkDecision.CANCEL, AppLinkDecision.DISMISS -> {
+                        AppLinkDecision.CANCEL -> {
                             store.recordSuppression(request.tabId, request.targetFingerprint)
                             // Under `blockWhilePrompting` the page never loaded; declining is the
                             // user asking for it in the browser, so it is owed to them now. A no-op
@@ -223,10 +200,14 @@ class GeckoAppLinksApiImpl(
                                 components.core.store,
                                 components.useCases.sessionUseCases,
                                 request,
-                                reason = decision.name.lowercase(Locale.ROOT),
+                                reason = "cancel",
                             )
                             AppLinkResolutionResult(false, false, null)
                         }
+                        // Closing the prompt is not a choice between the app and browser. Consume
+                        // the request, but otherwise leave both the current page and future prompts
+                        // untouched.
+                        AppLinkDecision.DISMISS -> AppLinkResolutionResult(false, false, null)
                     }
                 }
                 logger.info("resolvePendingAppLink id=$requestId -> $result")

@@ -308,7 +308,7 @@ class WebLibreAppLinksInterceptor(
                 } else {
                     // Unsupported scheme (or marketplace): the navigation is stalled, no page to show.
                     // Under `blockWhilePrompting` a banner stalls its navigation the same way, and the
-                    // page arrives only if the user declines (or the request lapses).
+                    // page arrives only if the user explicitly chooses to stay in the browser.
                     RequestInterceptor.InterceptionResponse.Deny
                 }
             }

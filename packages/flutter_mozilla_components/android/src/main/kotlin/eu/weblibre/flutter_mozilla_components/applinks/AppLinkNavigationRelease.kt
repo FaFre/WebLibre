@@ -42,9 +42,9 @@ internal val RELEASE_LOAD_FLAGS: EngineSession.LoadUrlFlags = EngineSession.Load
  *
  * Under `blockWhilePrompting` the interceptor answers a prompted engine-supported navigation with
  * `Deny`, so the tab stays on its previous page (or stays blank, for a link that opened a new tab)
- * while the prompt is up. Every way out of that prompt other than "open the app" therefore owes the
- * tab that page: declining, dismissing, lapsing, and a launch that failed with no fallback all route
- * here.
+ * while the prompt is up. An explicit "stay in browser" choice owes the tab that page, as does a
+ * launch that failed with no fallback. Passive dismissal and expiry deliberately do nothing and do
+ * not route here.
  *
  * A no-op when the request was not holding a navigation — the non-blocking path, where the page is
  * already on screen; every unsupported-scheme prompt, where there was never a loadable page; and

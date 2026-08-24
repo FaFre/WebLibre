@@ -52,8 +52,9 @@ data class PendingAppLinkRequest(
     /**
      * The interceptor denied an engine-supported load to raise this prompt (policy
      * `blockWhilePrompting`), so the tab is sitting on its previous page and [url] is owed to it if
-     * the user declines or the request lapses. False for a prompt raised over a page that was
-     * allowed to load, and for an unsupported scheme (there is nothing loadable to owe).
+     * the user explicitly declines opening the app. False for a prompt raised over a page that was
+     * allowed to load, and for an unsupported scheme (there is nothing loadable to owe). Passive
+     * dismissal and expiry intentionally leave the tab unchanged.
      */
     val heldNavigation: Boolean,
     /**
@@ -203,13 +204,6 @@ class PendingAppLinkStore(
     private val fallbackIssued = HashMap<String, Long>()
     private val fallbackBudget = HashMap<String, FallbackBudget>()
 
-    /**
-     * Requests that lapsed while still holding a navigation, waiting to be released by whichever
-     * surface next touches the store. Expiry is lazy and the store owns no use cases, so it cannot
-     * issue the load itself — it only records the debt.
-     */
-    private val expiredHeld = mutableListOf<PendingAppLinkRequest>()
-
     /** Per-tab navigation counter; see [beginNavigation]. */
     private val navGeneration = HashMap<String, Long>()
 
@@ -305,13 +299,6 @@ class PendingAppLinkStore(
                     it.tabId == request.tabId && it.urlClass == AppLinkUrlClass.BANNER
                 }
             }
-            // Banner replacement above only reaches *live* requests, but the sweep at the top of
-            // this method may just have queued an older held request for release. Releasing it then
-            // would load a page the user has already moved past, over whatever this newer request
-            // concerns. Unconditional on the new request's own held state: a replacement raised
-            // after blocking was switched off, or an unheld subframe banner, supersedes the older
-            // offer just as surely as a held one does.
-            expiredHeld.removeAll { it.tabId == request.tabId }
             requests[request.requestId] = request
             return request
         }
@@ -366,7 +353,7 @@ class PendingAppLinkStore(
     /**
      * Decide, atomically, whether [request]'s held navigation may still be loaded.
      *
-     * Consume and drain both detach a request *before* the load happens, which leaves a window the
+     * Consuming detaches a request *before* the load happens, which leaves a window the
      * store can no longer police from the outside: a newer prompt raised in that window cannot
      * cancel debt that is no longer in the map, and it leaves the tab on the same page, so the URL
      * anchor still agrees. Deciding here, under the lock, against state the store still owns, closes
@@ -419,24 +406,6 @@ class PendingAppLinkStore(
         }
     }
 
-    /**
-     * Take the requests that lapsed while holding a navigation, so the caller can re-issue their
-     * loads. Draining is destructive: each lapsed request is handed out exactly once.
-     *
-     * Sweeping is lazy, so this only sees what the store's own timers/queries have reached — which
-     * is enough, because both surfaces already re-query on the soonest deadline in order to retire
-     * the prompt on time.
-     */
-    fun drainExpiredHeldNavigations(): List<PendingAppLinkRequest> {
-        synchronized(lock) {
-            sweepExpiredLocked()
-            if (expiredHeld.isEmpty()) return emptyList()
-            val drained = expiredHeld.toList()
-            expiredHeld.clear()
-            return drained
-        }
-    }
-
     /** Non-consuming query of live requests for [owner]. */
     fun getPending(owner: AppLinkPromptOwner): List<PendingAppLinkRequest> {
         synchronized(lock) {
@@ -476,8 +445,6 @@ class PendingAppLinkStore(
                 .filter { it.tabId == tabId }
                 .mapTo(mutableSetOf()) { it.owner }
             requests.values.removeAll { it.tabId == tabId }
-            // The tab is gone; nothing is owed a load any more.
-            expiredHeld.removeAll { it.tabId == tabId }
             navGeneration.remove(tabId)
             suppression.keys.removeAll { it.startsWith("$tabId\u0000") }
             fallbackIssued.keys.removeAll { it.startsWith(fallbackIssueKey(tabId, "")) }
@@ -517,8 +484,6 @@ class PendingAppLinkStore(
                 .groupBy({ it.tabId }, { it.owner })
                 .mapValues { (_, owners) -> owners.toSet() }
             requests.values.removeAll { it.tabId !in liveTabIds }
-            // A closed tab is owed nothing; releasing into it would resurrect it.
-            expiredHeld.removeAll { it.tabId !in liveTabIds }
             // Same cleanup a single-tab close does. "Close all" then "undo" restores the very same
             // tab ids, so anything keyed on them outlives the tabs and lands on their replacements:
             // a stale suppression silently swallows the next prompt, a stale fallback claim refuses
@@ -624,14 +589,8 @@ class PendingAppLinkStore(
         val now = clock.elapsedRealtime()
         requests.values.removeAll { request ->
             // `>=`, not `>`: at the exact deadline [expiresInMs] already reports zero, and a surface
-            // that is told "no time left" drops the prompt and arms no further refresh. Handing back
-            // a request nobody will ask about again would leave its held navigation pending until
-            // some unrelated event happened along.
-            val expired = now >= request.createdAt + expiryFor(request)
-            // A lapsed request that stalled a navigation leaves the tab with nothing to show; record
-            // the debt before dropping it so the next surface to touch the store can load the page.
-            if (expired && request.heldNavigation) expiredHeld.add(request)
-            expired
+            // that is told "no time left" drops the prompt and arms no further refresh.
+            now >= request.createdAt + expiryFor(request)
         }
         suppression.values.removeAll { now > it }
         fallbackReentry.values.removeAll { now > it }

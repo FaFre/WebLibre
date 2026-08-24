@@ -93,4 +93,21 @@ void main() {
       expect(rule.isValid, isTrue);
     });
   });
+
+  group('rememberedRuleFor', () {
+    test('maps explicit choices to persistent rules', () {
+      expect(
+        rememberedRuleFor(AppLinkDecision.open, _target())?.decision,
+        AppLinkRuleDecision.alwaysOpen,
+      );
+      expect(
+        rememberedRuleFor(AppLinkDecision.cancel, _target())?.decision,
+        AppLinkRuleDecision.neverOpen,
+      );
+    });
+
+    test('does not persist passive dismissal', () {
+      expect(rememberedRuleFor(AppLinkDecision.dismiss, _target()), isNull);
+    });
+  });
 }

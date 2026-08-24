@@ -48,9 +48,7 @@ class AppLinkOpenBanner extends HookConsumerWidget {
         'target=${target.url}',
       );
       if (remember.value && request.canRemember) {
-        final rule = decision == AppLinkDecision.open
-            ? alwaysOpenRuleFor(target)
-            : neverOpenRuleFor(target);
+        final rule = rememberedRuleFor(decision, target);
         if (rule != null) {
           await coordinator.resolveWithRule(
             request.requestId,
