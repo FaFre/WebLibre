@@ -135,18 +135,35 @@ class _AnimatedToolbar extends HookWidget {
 /// Manages scroll-based auto-hide logic and returns the toolbar widget.
 /// Whether the main toolbar row should be dropped for the browser home surface.
 ///
-/// Held back when there is no contextual toolbar: the tab count and the
-/// navigation menu relocate there when it exists, and the main row is their only
-/// other home — dropping it without one would leave no way to reach the menu.
+/// Never dropped under [HomeSearchBarPlacement.tabBar]: there the row's own
+/// (empty) address field *is* the home surface's search entry, and the pill is
+/// the thing that stands down instead. The two are mutually exclusive by
+/// construction rather than by two independent settings, because the home
+/// surface has no other way into search — a state where both are off is not
+/// one the user should be able to reach.
+///
+/// Under [HomeSearchBarPlacement.top] the row is still held back when there is
+/// no contextual toolbar: the tab count and the navigation menu relocate there
+/// when it exists, and the main row is their only other home — dropping it
+/// without one would leave no way to reach the menu. That leaves the row's
+/// address field showing beside the pill, which is redundant but harmless;
+/// blanking only the title would strand the pinned add-ons at the right of an
+/// empty strip and still reserve [kToolbarHeight].
 ///
 /// A function rather than an inline condition because it is evaluated in two
 /// places — where the bar is built and where its height is measured for the
 /// browser viewport inset. If those two disagree the browser is inset for a row
-/// that is not drawn.
+/// that is not drawn. For the same reason the placement is passed in already
+/// resolved: [BrowserTabBar.getToolbarHeight] runs from the wrappers'
+/// constructors, outside the widget tree, where no provider can be read.
 bool _suppressMainToolbarForHome({
   required bool showBrowserHome,
   required bool showContextualToolbar,
-}) => showBrowserHome && showContextualToolbar;
+  required HomeSearchBarPlacement placement,
+}) =>
+    showBrowserHome &&
+    showContextualToolbar &&
+    placement != HomeSearchBarPlacement.tabBar;
 
 /// Animation is handled by the parent _AnimatedToolbar wrapper.
 class _TabBar extends HookConsumerWidget {
@@ -246,6 +263,11 @@ class _TabBar extends HookConsumerWidget {
     final suppressMainToolbar = _suppressMainToolbarForHome(
       showBrowserHome: ref.watch(shouldShowBrowserHomeProvider),
       showContextualToolbar: showContextualToolbar,
+      placement: ref.watch(
+        generalSettingsWithDefaultsProvider.select(
+          (settings) => settings.effectiveHomeSearchBarPlacement(),
+        ),
+      ),
     );
 
     // Return the toolbar widget - parent handles animation.
@@ -1220,6 +1242,11 @@ class BrowserScreen extends HookConsumerWidget {
     final suppressMainToolbarForHome = _suppressMainToolbarForHome(
       showBrowserHome: ref.watch(shouldShowBrowserHomeProvider),
       showContextualToolbar: showContextualToolbar,
+      placement: ref.watch(
+        generalSettingsWithDefaultsProvider.select(
+          (settings) => settings.effectiveHomeSearchBarPlacement(),
+        ),
+      ),
     );
 
     // Calculate bottom toolbar size for FAB and sheet positioning

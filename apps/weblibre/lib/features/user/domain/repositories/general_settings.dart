@@ -123,6 +123,7 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'homeTarget': DriftSqlType.string,
   'homeTargetUrl': DriftSqlType.string,
   'homeTargetOnLastTabClosed': DriftSqlType.bool,
+  'homeSearchBarPlacement': DriftSqlType.string,
   'globalDesktopMode': DriftSqlType.bool,
   'unmountGeckoViewOffRoute': DriftSqlType.bool,
 };

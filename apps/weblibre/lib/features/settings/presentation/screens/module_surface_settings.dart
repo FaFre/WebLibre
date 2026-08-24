@@ -21,7 +21,10 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_module_order.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
+import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 /// Reorders and toggles the sections of one [ModuleSurface].
 ///
@@ -74,6 +77,13 @@ class ModuleSurfaceSettingsScreen extends HookConsumerWidget {
             ),
           ),
         ),
+        // Fixed, above the draggable list: the search bar is chrome, not a
+        // section — it is pinned, it cannot be reordered against the sections
+        // below it, and it can never be switched off, only moved. It sits here
+        // anyway because this screen is where users come looking after
+        // discovering the home page is configurable.
+        if (surface == ModuleSurface.home)
+          const SliverToBoxAdapter(child: _HomeSearchBarRow()),
         SliverReorderableList(
           itemCount: entries.length,
           onReorderItem: notifier.reorder,
@@ -113,6 +123,51 @@ class ModuleSurfaceSettingsScreen extends HookConsumerWidget {
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 24)),
       ],
+    );
+  }
+}
+
+/// Where the home surface's search entry sits, as a one-tap menu.
+///
+/// Shows the resolved placement rather than the stored one, so "Follow the tab
+/// bar" reads as the position it actually produces.
+class _HomeSearchBarRow extends ConsumerWidget {
+  const _HomeSearchBarRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final stored = settings.homeSearchBarPlacement;
+    final resolved = settings.effectiveHomeSearchBarPlacement();
+
+    return MenuAnchor(
+      menuChildren: [
+        for (final placement in HomeSearchBarPlacement.values)
+          MenuItemButton(
+            leadingIcon: Icon(
+              placement == stored
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_unchecked,
+            ),
+            onPressed: () async {
+              await ref
+                  .read(saveGeneralSettingsControllerProvider.notifier)
+                  .save((s) => s.copyWith.homeSearchBarPlacement(placement));
+            },
+            child: Text(placement.label),
+          ),
+      ],
+      builder: (context, controller, child) => ListTile(
+        leading: const Icon(Icons.search),
+        title: const Text('Search bar'),
+        subtitle: Text(
+          stored == HomeSearchBarPlacement.auto
+              ? '${stored.label} — currently ${resolved.label.toLowerCase()}'
+              : stored.label,
+        ),
+        trailing: const Icon(Icons.arrow_drop_down),
+        onTap: () => controller.isOpen ? controller.close() : controller.open(),
+      ),
     );
   }
 }

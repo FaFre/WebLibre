@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -34,9 +36,13 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/provid
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
+import 'package:weblibre/presentation/widgets/qr_scanner_button.dart';
+import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 
 class CompactAppBarTitle extends ConsumerWidget {
@@ -63,11 +69,15 @@ class CompactAppBarTitle extends ConsumerWidget {
 
     if (tabState == null) {
       return _EmptyAppBarAddressField(
-        onTap: () async {
-          await SearchRoute(
-            tabType: selectedTabType ?? settings.effectiveDefaultCreateTabType,
-          ).push(context);
-        },
+        tabType: selectedTabType ?? settings.effectiveDefaultCreateTabType,
+        // The tools turn this field from "no page loaded" into the home
+        // surface's search entry, which is only what it is when the pill has
+        // stood down for it. Everywhere else the row has a page's worth of
+        // buttons beside it and no width to spare.
+        showSearchTools:
+            ref.watch(shouldShowBrowserHomeProvider) &&
+            settings.effectiveHomeSearchBarPlacement() ==
+                HomeSearchBarPlacement.tabBar,
       );
     }
 
@@ -276,11 +286,15 @@ class AppBarTitle extends ConsumerWidget {
 
     if (tabState == null) {
       return _EmptyAppBarAddressField(
-        onTap: () async {
-          await SearchRoute(
-            tabType: selectedTabType ?? settings.effectiveDefaultCreateTabType,
-          ).push(context);
-        },
+        tabType: selectedTabType ?? settings.effectiveDefaultCreateTabType,
+        // The tools turn this field from "no page loaded" into the home
+        // surface's search entry, which is only what it is when the pill has
+        // stood down for it. Everywhere else the row has a page's worth of
+        // buttons beside it and no width to spare.
+        showSearchTools:
+            ref.watch(shouldShowBrowserHomeProvider) &&
+            settings.effectiveHomeSearchBarPlacement() ==
+                HomeSearchBarPlacement.tabBar,
       );
     }
 
@@ -796,36 +810,133 @@ class _SecurityStatusIcon extends StatelessWidget {
   }
 }
 
+/// The address field with no tab behind it.
+///
+/// With [showSearchTools] it is the home surface's search entry under
+/// [HomeSearchBarPlacement.tabBar], and grows the same leading icon and
+/// QR/voice buttons [HomeSearchPill] carries — the row is otherwise empty here
+/// (no favicon, no site settings, no page actions), so there is room for them
+/// exactly where there would not be beside a loaded page.
+///
+/// Like the pill, the tools cannot type into anything: there is no live field
+/// in the toolbar. They hand their result to the search screen as its initial
+/// text, and neither auto-submits — speech recognition misfires, and a scanned
+/// code is untrusted input that should not navigate on its own.
 class _EmptyAppBarAddressField extends StatelessWidget {
-  const _EmptyAppBarAddressField({required this.onTap});
+  const _EmptyAppBarAddressField({
+    required this.tabType,
+    this.showSearchTools = false,
+  });
 
-  final VoidCallback onTap;
+  final TabType tabType;
+  final bool showSearchTools;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    void openSearch([String? initialText]) {
+      unawaited(
+        SearchRoute(
+          tabType: tabType,
+          // The route encodes this into a path segment, so an empty string
+          // would leave a trailing slash that no longer matches the pattern.
+          searchText: (initialText == null || initialText.isEmpty)
+              ? SearchRoute.emptySearchText
+              : initialText,
+        ).push(context),
+      );
+    }
+
+    final label = Text(
+      'Search or enter URL',
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: theme.textTheme.bodyMedium?.copyWith(
+        color: theme.colorScheme.onSurface,
+      ),
+    );
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            'Search or enter URL',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(24),
         ),
+        clipBehavior: Clip.antiAlias,
+        child: showSearchTools
+            ? Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      onTap: openSearch,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.search,
+                              size: 18,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(child: label),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  // The bar row is [kToolbarHeight] tall and this field only
+                  // part of it, so the buttons have to give up their default
+                  // 48px tap target or they force the pill taller than the row.
+                  IconButtonTheme(
+                    data: IconButtonThemeData(
+                      style: IconButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size.square(32),
+                        iconSize: 18,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        foregroundColor: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        QrScannerButton(
+                          onScanResult: (scanResult) {
+                            final code = scanResult?.code;
+                            if (code == null || !context.mounted) return;
+
+                            openSearch(code);
+                          },
+                        ),
+                        const SizedBox(width: 4),
+                        SpeechToTextButton(
+                          onTextReceived: (text) {
+                            if (!context.mounted) return;
+
+                            openSearch(text);
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                    ),
+                  ),
+                ],
+              )
+            : GestureDetector(
+                onTap: openSearch,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 12,
+                  ),
+                  alignment: Alignment.center,
+                  child: label,
+                ),
+              ),
       ),
     );
   }

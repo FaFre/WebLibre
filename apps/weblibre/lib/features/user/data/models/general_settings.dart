@@ -128,6 +128,32 @@ enum TabBarPosition {
 
 enum TabBarLayout { withTitle, compact }
 
+/// Where the browser home surface offers its entry into search.
+///
+/// The home surface has no address field of its own, so exactly one of these
+/// two has to be present: the pinned pill at the top of the home content, or
+/// the tab bar's own (empty) address field — the behaviour that predates the
+/// home surface. [auto] picks whichever sits on the same edge the user already
+/// chose for the tab bar, so a bottom tab bar keeps the search entry within
+/// thumb reach instead of moving it to the top of the screen.
+enum HomeSearchBarPlacement {
+  auto,
+  top,
+  tabBar;
+
+  String get label => switch (this) {
+    auto => 'Follow the tab bar',
+    top => 'Top of the home page',
+    tabBar => 'In the tab bar',
+  };
+
+  String get description => switch (this) {
+    auto => 'Whichever edge the tab bar is on',
+    top => 'A pinned search bar above the home sections',
+    tabBar => "The tab bar's address field, with QR and voice search",
+  };
+}
+
 enum DeleteBrowsingDataType {
   tabs('Open tabs'),
   history('Browsing history'),
@@ -181,6 +207,10 @@ class GeneralSettings with FastEquatable {
   /// Also apply [homeTarget] when the last tab in the current container is
   /// closed, instead of falling through to a tab from somewhere else.
   final bool homeTargetOnLastTabClosed;
+
+  /// Where the home surface's search entry is rendered. See
+  /// [HomeSearchBarPlacement] and [effectiveHomeSearchBarPlacement].
+  final HomeSearchBarPlacement homeSearchBarPlacement;
   @JsonKey(name: 'defaultCreateTabType')
   final TabType storedDefaultCreateTabType;
   final TabDirection tabListDirection;
@@ -352,6 +382,7 @@ class GeneralSettings with FastEquatable {
     required this.homeTarget,
     required this.homeTargetUrl,
     required this.homeTargetOnLastTabClosed,
+    required this.homeSearchBarPlacement,
     required this.storedDefaultCreateTabType,
     required this.tabListDirection,
     required this.tabBarDirection,
@@ -434,6 +465,7 @@ class GeneralSettings with FastEquatable {
     HomeTarget? homeTarget,
     this.homeTargetUrl,
     bool? homeTargetOnLastTabClosed,
+    HomeSearchBarPlacement? homeSearchBarPlacement,
     TabType? storedDefaultCreateTabType,
     TabDirection? tabListDirection,
     TabDirection? tabBarDirection,
@@ -514,6 +546,10 @@ class GeneralSettings with FastEquatable {
        // setting existed. Anything else would change startup for every user.
        homeTarget = homeTarget ?? HomeTarget.home,
        homeTargetOnLastTabClosed = homeTargetOnLastTabClosed ?? false,
+       // Deliberately not a fixed edge: the placement that matches the user's
+       // tab bar position is the one they can reach.
+       homeSearchBarPlacement =
+           homeSearchBarPlacement ?? HomeSearchBarPlacement.auto,
        storedDefaultCreateTabType =
            storedDefaultCreateTabType ?? TabType.regular,
        tabListDirection = tabListDirection ?? TabDirection.newestFirst,
@@ -667,6 +703,23 @@ class GeneralSettings with FastEquatable {
   bool get effectiveSequentialTabNavigationCrossContainers =>
       sequentialTabNavigationCrossContainers || !showContainerUi;
 
+  /// [homeSearchBarPlacement] with [HomeSearchBarPlacement.auto] resolved
+  /// against the tab bar's position, so callers never have to. Never returns
+  /// [HomeSearchBarPlacement.auto].
+  ///
+  /// Only a bottom tab bar resolves to [HomeSearchBarPlacement.tabBar]: a top
+  /// bar puts its address field next to the pill's own position anyway, and on
+  /// the vertical side rail the address field is rotated 90 degrees, which is
+  /// a poor search entry to hand someone as their only one.
+  HomeSearchBarPlacement effectiveHomeSearchBarPlacement() =>
+      switch (homeSearchBarPlacement) {
+        HomeSearchBarPlacement.auto =>
+          tabBarPosition == TabBarPosition.bottom
+              ? HomeSearchBarPlacement.tabBar
+              : HomeSearchBarPlacement.top,
+        final placement => placement,
+      };
+
   /// Container-dependent stacking modes degrade to a single recently-used
   /// row when the container UI is disabled. Two-level stacking additionally
   /// degrades to accordion (the default mode, which has a vertical form) on the
@@ -711,6 +764,7 @@ class GeneralSettings with FastEquatable {
     homeTarget,
     homeTargetUrl,
     homeTargetOnLastTabClosed,
+    homeSearchBarPlacement,
     storedDefaultCreateTabType,
     tabListDirection,
     tabBarDirection,

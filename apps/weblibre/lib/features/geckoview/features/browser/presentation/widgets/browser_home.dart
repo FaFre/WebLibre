@@ -37,6 +37,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/container_
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
 
@@ -147,11 +148,12 @@ class BrowserHome extends ConsumerWidget {
               slivers: [
                 const SliverToBoxAdapter(child: SizedBox(height: 20)),
                 const SliverToBoxAdapter(child: _HomeHeader()),
-                // Pinned, because the browser toolbar's address field is
-                // suppressed while home is showing: this is the only way into
-                // search, so it has to survive scrolling. Pinning it above the
-                // section headers also gives them something to slide under.
-                const SliverPinnedHeader(child: HomeSearchPill()),
+                // Pinned, because under [HomeSearchBarPlacement.top] the
+                // browser toolbar's address field is suppressed while home is
+                // showing: this is then the only way into search, so it has to
+                // survive scrolling. Pinning it above the section headers also
+                // gives them something to slide under.
+                const _HomeSearchPillSliver(),
                 const SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16),
@@ -169,6 +171,32 @@ class BrowserHome extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+/// The pinned search pill, present only when the search entry is placed here
+/// rather than in the tab bar.
+///
+/// Its own widget so the placement watch does not rebuild [BrowserHome] — and
+/// so the sliver disappears entirely rather than collapsing to a zero-height
+/// pinned header, which would still hold a scroll offset the section headers
+/// slide under.
+class _HomeSearchPillSliver extends ConsumerWidget {
+  const _HomeSearchPillSliver();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final placement = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.effectiveHomeSearchBarPlacement(),
+      ),
+    );
+
+    if (placement == HomeSearchBarPlacement.tabBar) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+
+    return const SliverPinnedHeader(child: HomeSearchPill());
   }
 }
 

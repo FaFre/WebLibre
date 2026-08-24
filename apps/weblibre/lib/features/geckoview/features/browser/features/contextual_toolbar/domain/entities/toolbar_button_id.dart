@@ -36,6 +36,8 @@ enum ToolbarButtonId {
   findInPage,
   closeTab,
   inputUrl,
+  qrScan,
+  voiceSearch,
   duplicateTab,
   increaseFont,
   decreaseFont,

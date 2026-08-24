@@ -179,51 +179,45 @@ String _$allIntentsHash() => r'd31004c83658da57e8b63ce055126bf7b34192e1';
 
 /// Replays the launches the native broker held, once.
 ///
-/// Deliberately not part of [allIntents]. That is a broadcast stream, so an event
-/// added while nothing is subscribed is dropped rather than queued, and the broker
-/// retires an entry as soon as this sink accepts it — draining as a side effect of
-/// building the stream therefore acknowledged launches into a stream whose only
-/// listener was whichever consumer happened to be constructed first, which for a
-/// share or a widget tap was the wrong one.
+/// Deliberately not part of [allIntents]. The bus holds native cold-start events
+/// until this provider starts delivery, then the broker retires entries as soon as
+/// this sink accepts them. Draining as a side effect of building the stream would
+/// therefore acknowledge launches before all semantic consumers existed.
 ///
-/// So the drain is its own step, and the caller runs it only after reading every
-/// consumer of [allIntents]. Those consumers buffer (see [bufferedIntentStream]),
-/// which covers the second half of the problem: the widget that finally acts on a
-/// replayed launch mounts later still.
+/// So delivery and the drain are one explicit step, and the caller runs it only
+/// after reading every consumer of [allIntents]. Those consumers buffer (see
+/// [bufferedIntentStream]), which covers the second half of the problem: the
+/// widget that finally acts on a replayed launch mounts later still.
 
 @ProviderFor(brokeredIntentDelivery)
 final brokeredIntentDeliveryProvider = BrokeredIntentDeliveryProvider._();
 
 /// Replays the launches the native broker held, once.
 ///
-/// Deliberately not part of [allIntents]. That is a broadcast stream, so an event
-/// added while nothing is subscribed is dropped rather than queued, and the broker
-/// retires an entry as soon as this sink accepts it — draining as a side effect of
-/// building the stream therefore acknowledged launches into a stream whose only
-/// listener was whichever consumer happened to be constructed first, which for a
-/// share or a widget tap was the wrong one.
+/// Deliberately not part of [allIntents]. The bus holds native cold-start events
+/// until this provider starts delivery, then the broker retires entries as soon as
+/// this sink accepts them. Draining as a side effect of building the stream would
+/// therefore acknowledge launches before all semantic consumers existed.
 ///
-/// So the drain is its own step, and the caller runs it only after reading every
-/// consumer of [allIntents]. Those consumers buffer (see [bufferedIntentStream]),
-/// which covers the second half of the problem: the widget that finally acts on a
-/// replayed launch mounts later still.
+/// So delivery and the drain are one explicit step, and the caller runs it only
+/// after reading every consumer of [allIntents]. Those consumers buffer (see
+/// [bufferedIntentStream]), which covers the second half of the problem: the
+/// widget that finally acts on a replayed launch mounts later still.
 
 final class BrokeredIntentDeliveryProvider
     extends $FunctionalProvider<AsyncValue<int>, int, FutureOr<int>>
     with $FutureModifier<int>, $FutureProvider<int> {
   /// Replays the launches the native broker held, once.
   ///
-  /// Deliberately not part of [allIntents]. That is a broadcast stream, so an event
-  /// added while nothing is subscribed is dropped rather than queued, and the broker
-  /// retires an entry as soon as this sink accepts it — draining as a side effect of
-  /// building the stream therefore acknowledged launches into a stream whose only
-  /// listener was whichever consumer happened to be constructed first, which for a
-  /// share or a widget tap was the wrong one.
+  /// Deliberately not part of [allIntents]. The bus holds native cold-start events
+  /// until this provider starts delivery, then the broker retires entries as soon as
+  /// this sink accepts them. Draining as a side effect of building the stream would
+  /// therefore acknowledge launches before all semantic consumers existed.
   ///
-  /// So the drain is its own step, and the caller runs it only after reading every
-  /// consumer of [allIntents]. Those consumers buffer (see [bufferedIntentStream]),
-  /// which covers the second half of the problem: the widget that finally acts on a
-  /// replayed launch mounts later still.
+  /// So delivery and the drain are one explicit step, and the caller runs it only
+  /// after reading every consumer of [allIntents]. Those consumers buffer (see
+  /// [bufferedIntentStream]), which covers the second half of the problem: the
+  /// widget that finally acts on a replayed launch mounts later still.
   BrokeredIntentDeliveryProvider._()
     : super(
         from: null,
@@ -250,7 +244,7 @@ final class BrokeredIntentDeliveryProvider
 }
 
 String _$brokeredIntentDeliveryHash() =>
-    r'4414abdde942e5484fc4154c618e23cdda48e30d';
+    r'2e0693e495cae3dc67bc66fc9e7741e593f76300';
 
 @ProviderFor(sharingIntentStream)
 final sharingIntentStreamProvider = SharingIntentStreamProvider._();

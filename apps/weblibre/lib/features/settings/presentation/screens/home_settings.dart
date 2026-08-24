@@ -55,6 +55,22 @@ const List<SettingsSectionDefinition> homeSettingsSections = [
     keywords: ['home', 'new tab', 'sections', 'modules', 'layout'],
     entries: [
       SettingsEntryDefinition(
+        title: 'Search bar position',
+        subtitle: 'Where the home page offers its search field',
+        keywords: [
+          'search',
+          'bar',
+          'position',
+          'address',
+          'url',
+          'top',
+          'bottom',
+          'tab bar',
+          'home',
+        ],
+        child: _HomeSearchBarPlacementTile(),
+      ),
+      SettingsEntryDefinition(
         title: 'Customize home sections',
         subtitle: 'Choose and order what the home page shows',
         keywords: [
@@ -199,6 +215,47 @@ class _HomeTargetOnLastTabClosedTile extends ConsumerWidget {
             .read(saveGeneralSettingsControllerProvider.notifier)
             .save((s) => s.copyWith.homeTargetOnLastTabClosed(value));
       },
+    );
+  }
+}
+
+/// Where the home surface's search entry sits.
+///
+/// A placement, not a visibility toggle: the home surface has no address field
+/// of its own, so one of the two positions always holds it. There is no "off".
+class _HomeSearchBarPlacementTile extends ConsumerWidget {
+  const _HomeSearchBarPlacementTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final resolved = settings.effectiveHomeSearchBarPlacement();
+
+    return RadioGroup<HomeSearchBarPlacement>(
+      groupValue: settings.homeSearchBarPlacement,
+      onChanged: (value) async {
+        if (value == null) return;
+
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save((s) => s.copyWith.homeSearchBarPlacement(value));
+      },
+      child: Column(
+        children: [
+          for (final placement in HomeSearchBarPlacement.values)
+            RadioListTile<HomeSearchBarPlacement>(
+              value: placement,
+              title: Text(placement.label),
+              // Auto says what it currently resolves to; the fixed choices
+              // already describe themselves.
+              subtitle: Text(
+                placement == HomeSearchBarPlacement.auto
+                    ? 'Currently: ${resolved.label.toLowerCase()}'
+                    : placement.description,
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

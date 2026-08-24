@@ -124,6 +124,21 @@ const inputUrlToolbarButtonSpec = ToolbarButtonSpec(
   defaultVisible: false,
 );
 
+/// Scan a QR code and hand the result to the search screen. Off by default:
+/// the home surface's search entry carries its own copy, and this is for
+/// people who want it while a page is open too.
+const qrScanToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.qrScan,
+  defaultVisible: false,
+);
+
+/// Dictate a query and hand the result to the search screen. Off by default,
+/// for the same reason as [qrScanToolbarButtonSpec].
+const voiceSearchToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.voiceSearch,
+  defaultVisible: false,
+);
+
 const duplicateTabToolbarButtonSpec = ToolbarButtonSpec(
   id: ToolbarButtonId.duplicateTab,
   defaultVisible: false,
@@ -203,6 +218,8 @@ const toolbarButtonSpecs = [
   findInPageToolbarButtonSpec,
   closeTabToolbarButtonSpec,
   inputUrlToolbarButtonSpec,
+  qrScanToolbarButtonSpec,
+  voiceSearchToolbarButtonSpec,
   duplicateTabToolbarButtonSpec,
   increaseFontToolbarButtonSpec,
   decreaseFontToolbarButtonSpec,

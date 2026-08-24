@@ -49,6 +49,10 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings homeTargetOnLastTabClosed(bool homeTargetOnLastTabClosed);
 
+  GeneralSettings homeSearchBarPlacement(
+    HomeSearchBarPlacement homeSearchBarPlacement,
+  );
+
   GeneralSettings storedDefaultCreateTabType(
     TabType storedDefaultCreateTabType,
   );
@@ -222,6 +226,7 @@ abstract class _$GeneralSettingsCWProxy {
     HomeTarget homeTarget,
     String? homeTargetUrl,
     bool homeTargetOnLastTabClosed,
+    HomeSearchBarPlacement homeSearchBarPlacement,
     TabType storedDefaultCreateTabType,
     TabDirection tabListDirection,
     TabDirection tabBarDirection,
@@ -369,6 +374,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings homeTargetOnLastTabClosed(bool homeTargetOnLastTabClosed) =>
       call(homeTargetOnLastTabClosed: homeTargetOnLastTabClosed);
+
+  @override
+  GeneralSettings homeSearchBarPlacement(
+    HomeSearchBarPlacement homeSearchBarPlacement,
+  ) => call(homeSearchBarPlacement: homeSearchBarPlacement);
 
   @override
   GeneralSettings storedDefaultCreateTabType(
@@ -664,6 +674,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? homeTarget = const $CopyWithPlaceholder(),
     Object? homeTargetUrl = const $CopyWithPlaceholder(),
     Object? homeTargetOnLastTabClosed = const $CopyWithPlaceholder(),
+    Object? homeSearchBarPlacement = const $CopyWithPlaceholder(),
     Object? storedDefaultCreateTabType = const $CopyWithPlaceholder(),
     Object? tabListDirection = const $CopyWithPlaceholder(),
     Object? tabBarDirection = const $CopyWithPlaceholder(),
@@ -835,6 +846,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.homeTargetOnLastTabClosed
           // ignore: cast_nullable_to_non_nullable
           : homeTargetOnLastTabClosed as bool,
+      homeSearchBarPlacement:
+          homeSearchBarPlacement == const $CopyWithPlaceholder() ||
+              homeSearchBarPlacement == null
+          ? _value.homeSearchBarPlacement
+          // ignore: cast_nullable_to_non_nullable
+          : homeSearchBarPlacement as HomeSearchBarPlacement,
       storedDefaultCreateTabType:
           storedDefaultCreateTabType == const $CopyWithPlaceholder() ||
               storedDefaultCreateTabType == null
@@ -1239,6 +1256,10 @@ GeneralSettings _$GeneralSettingsFromJson(
   homeTarget: $enumDecodeNullable(_$HomeTargetEnumMap, json['homeTarget']),
   homeTargetUrl: json['homeTargetUrl'] as String?,
   homeTargetOnLastTabClosed: json['homeTargetOnLastTabClosed'] as bool?,
+  homeSearchBarPlacement: $enumDecodeNullable(
+    _$HomeSearchBarPlacementEnumMap,
+    json['homeSearchBarPlacement'],
+  ),
   storedDefaultCreateTabType: $enumDecodeNullable(
     _$TabTypeEnumMap,
     json['defaultCreateTabType'],
@@ -1392,6 +1413,8 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'homeTarget': _$HomeTargetEnumMap[instance.homeTarget]!,
   'homeTargetUrl': instance.homeTargetUrl,
   'homeTargetOnLastTabClosed': instance.homeTargetOnLastTabClosed,
+  'homeSearchBarPlacement':
+      _$HomeSearchBarPlacementEnumMap[instance.homeSearchBarPlacement]!,
   'defaultCreateTabType':
       _$TabTypeEnumMap[instance.storedDefaultCreateTabType]!,
   'tabListDirection': _$TabDirectionEnumMap[instance.tabListDirection]!,
@@ -1501,6 +1524,12 @@ const _$HomeTargetEnumMap = {
   HomeTarget.home: 'home',
   HomeTarget.resumeLastTab: 'resumeLastTab',
   HomeTarget.customUrl: 'customUrl',
+};
+
+const _$HomeSearchBarPlacementEnumMap = {
+  HomeSearchBarPlacement.auto: 'auto',
+  HomeSearchBarPlacement.top: 'top',
+  HomeSearchBarPlacement.tabBar: 'tabBar',
 };
 
 const _$TabTypeEnumMap = {

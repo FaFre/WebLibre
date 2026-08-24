@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -60,6 +62,8 @@ import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
+import 'package:weblibre/presentation/widgets/qr_scanner_button.dart';
+import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/move_to_background.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -99,6 +103,31 @@ bool _isReloadButtonVisible(WidgetRef ref, ToolbarConfigLocation location) {
         (config) =>
             config.buttonId == ToolbarButtonId.reload.name && config.isVisible,
       );
+}
+
+/// Opens the search screen with [text] already in the field.
+///
+/// Targets the selected tab when there is one, so submitting navigates the
+/// page the user is looking at rather than opening a second tab beside it —
+/// the same thing typing in the address bar does. With no tab selected there
+/// is nothing to navigate, so it falls back to the configured new-tab type.
+Future<void> _pushSearchWithText(
+  ContextualToolbarScope scope,
+  BuildContext context,
+  WidgetRef ref,
+  String text,
+) {
+  final tabState = scope.tabState;
+
+  return SearchRoute(
+    tabId: tabState?.id,
+    searchText: text.isEmpty ? SearchRoute.emptySearchText : text,
+    tabType:
+        tabState?.tabMode.toTabType() ??
+        ref
+            .read(generalSettingsWithDefaultsProvider)
+            .effectiveDefaultCreateTabType,
+  ).push(context);
 }
 
 final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
@@ -385,6 +414,42 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
               },
         icon: const Icon(Icons.edit),
       );
+    },
+  ),
+  ToolbarButtonDefinition(
+    spec: qrScanToolbarButtonSpec,
+    label: 'Scan QR Code',
+    icon: MdiIcons.barcodeScan,
+    builder: (scope, context, ref) {
+      return scope.isPreview
+          ? IconButton(onPressed: () {}, icon: const Icon(MdiIcons.barcodeScan))
+          : QrScannerButton(
+              onScanResult: (scanResult) {
+                final code = scanResult?.code;
+                if (code == null || !context.mounted) return;
+
+                // Never navigates on its own: a scanned code is untrusted
+                // input, so it lands in the search field for the user to
+                // confirm — the same contract the home search entry keeps.
+                unawaited(_pushSearchWithText(scope, context, ref, code));
+              },
+            );
+    },
+  ),
+  ToolbarButtonDefinition(
+    spec: voiceSearchToolbarButtonSpec,
+    label: 'Voice Search',
+    icon: Icons.mic,
+    builder: (scope, context, ref) {
+      return scope.isPreview
+          ? IconButton(onPressed: () {}, icon: const Icon(Icons.mic))
+          : SpeechToTextButton(
+              onTextReceived: (text) {
+                if (!context.mounted) return;
+
+                unawaited(_pushSearchWithText(scope, context, ref, text));
+              },
+            );
     },
   ),
   ToolbarButtonDefinition(
