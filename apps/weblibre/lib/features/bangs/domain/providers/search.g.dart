@@ -102,7 +102,7 @@ final class BangSearchProvider
   BangSearch create() => BangSearch();
 }
 
-String _$bangSearchHash() => r'a541da1cfd8155abf03bbe19ab7c7200febd821c';
+String _$bangSearchHash() => r'666cb6aa392fcca8b371cf5688fe1d20bf8fa8d0';
 
 abstract class _$BangSearch extends $StreamNotifier<List<BangData>> {
   Stream<List<BangData>> build();
@@ -154,7 +154,7 @@ final class SeamlessBangProvider
   }
 }
 
-String _$seamlessBangHash() => r'8bd7a2cbe4c302ae08f85167290666a7437f8b9b';
+String _$seamlessBangHash() => r'1a3e12a782c7117ab5e508cfb0a59346a67e6b78';
 
 abstract class _$SeamlessBang extends $Notifier<AsyncValue<List<BangData>>> {
   AsyncValue<List<BangData>> build();
