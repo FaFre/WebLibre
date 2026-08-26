@@ -19,11 +19,10 @@ import mozilla.components.concept.sync.ConstellationState
 import mozilla.components.concept.sync.DeviceCapability
 import mozilla.components.concept.sync.DeviceCommandOutgoing
 import mozilla.components.concept.sync.TabData
+import mozilla.components.concept.sync.SyncEngine
 import mozilla.components.concept.sync.TabPrivacy
-import mozilla.components.service.fxa.SyncEngine
 import mozilla.components.service.fxa.manager.SCOPE_PROFILE
 import mozilla.components.service.fxa.manager.SCOPE_SYNC
-import mozilla.components.service.fxa.manager.SyncEnginesStorage
 import mozilla.components.service.fxa.sync.SyncReason
 
 class GeckoSyncApiImpl : GeckoSyncApi {
@@ -140,20 +139,15 @@ class GeckoSyncApiImpl : GeckoSyncApi {
     ) {
         coroutineScope.launch {
             runCatching {
-                val storage = SyncEnginesStorage(components.profileApplicationContext)
                 val mapped = when (engine) {
                     SyncEngineValue.HISTORY -> SyncEngine.History
                     SyncEngineValue.BOOKMARKS -> SyncEngine.Bookmarks
                     SyncEngineValue.TABS -> SyncEngine.Tabs
                 }
 
-                // Persist the choice first and unconditionally. It is the user's
-                // setting and does not need the account manager; only the sync that
-                // propagates it does.
-                storage.setStatus(mapped, enabled)
-
-                runCatching { components.backgroundServices.awaitStarted() }
-                components.backgroundServices.accountManager.syncNow(SyncReason.EngineChange)
+                // setEngineEnabled persists the choice and triggers the propagating
+                // sync itself; it does not require the account manager to be started.
+                components.backgroundServices.accountManager.setEngineEnabled(mapped, enabled)
             }.fold(
                 onSuccess = { callback(Result.success(Unit)) },
                 onFailure = { callback(Result.failure(it)) },

@@ -126,7 +126,6 @@ enum IconType {
   openGraph,
   twitter,
   microsoftTile,
-  tippyTop,
   manifestIcon,
 }
 

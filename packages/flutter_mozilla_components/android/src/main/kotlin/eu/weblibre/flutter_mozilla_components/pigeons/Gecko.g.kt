@@ -220,8 +220,7 @@ enum class IconType(val raw: Int) {
   OPEN_GRAPH(4),
   TWITTER(5),
   MICROSOFT_TILE(6),
-  TIPPY_TOP(7),
-  MANIFEST_ICON(8);
+  MANIFEST_ICON(7);
 
   companion object {
     fun ofRaw(raw: Int): IconType? {

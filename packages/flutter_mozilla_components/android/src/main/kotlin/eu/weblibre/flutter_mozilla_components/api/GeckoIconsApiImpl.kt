@@ -142,7 +142,6 @@ class GeckoIconsApiImpl : GeckoIconsApi {
         IconType.OPEN_GRAPH -> MozillaIconResourceType.OPENGRAPH
         IconType.TWITTER -> MozillaIconResourceType.TWITTER
         IconType.MICROSOFT_TILE -> MozillaIconResourceType.MICROSOFT_TILE
-        IconType.TIPPY_TOP -> MozillaIconResourceType.TIPPY_TOP
         IconType.MANIFEST_ICON -> MozillaIconResourceType.MANIFEST_ICON
     }
 

@@ -2,14 +2,14 @@ group = "eu.weblibre.flutter_mozilla_components"
 version = "1.0-SNAPSHOT"
 
 buildscript {
-    ext.mozillaComponentsVersion = '152.0.4'
+    ext.mozillaComponentsVersion = '154.0'
 
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:9.2.1")
+        classpath("com.android.tools.build:gradle:9.3.2")
     }
 }
 
@@ -157,5 +157,5 @@ dependencies {
     testImplementation("org.mockito:mockito-core:5.23.0")
     // android.jar's org.json is a stub that throws; unit tests that exercise
     // JSON-shaped APIs need the real implementation on the test classpath.
-    testImplementation("org.json:json:20250107")
+    testImplementation("org.json:json:20260814")
 }

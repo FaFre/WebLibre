@@ -475,10 +475,10 @@ object GlobalComponents {
                 WebExtensionSupport.initialize(
                     newComponents.core.engine,
                     newComponents.core.store,
-                    onNewTabOverride = { _, engineSession, url ->
+                    onNewTabOverride = { _, engineSession, url, active ->
                         newComponents.useCases.tabsUseCases.addTab(
                             url,
-                            selectTab = true,
+                            selectTab = active,
                             engineSession = engineSession
                         )
                     },
