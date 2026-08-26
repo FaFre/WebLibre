@@ -43,41 +43,39 @@ android {
         targetSdk = 37
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
-        // Whether the Flutter engine renders via Impeller or the legacy Skia
-        // backend. Read by io.flutter.embedding.android.EnableImpeller in
-        // AndroidManifest.xml. Overridden per-flavor below.
-        manifestPlaceholders = [enableImpeller: "true"]
+        // Whether the Flutter engine renders via Impeller or Skia. Read by
+        // io.flutter.embedding.android.EnableImpeller in AndroidManifest.xml.
+        // Skia is the default; comparison flavors override this below.
+        manifestPlaceholders = [enableImpeller: "false"]
     }
 
     flavorDimensions "track"
     productFlavors {
         stable {
             dimension "track"
-            manifestPlaceholders = [appName: "WebLibre"]
+            manifestPlaceholders = [appName: "WebLibre", enableImpeller: "false"]
         }
-        // "alpha" stays the default alpha build (Impeller, as before this split) so
-        // existing tooling/filters keyed on the "alpha" name keep working.
-        // alphaLegacy is an additional variant using the legacy Skia renderer, for
-        // side-by-side comparison. The renderer is chosen at Flutter engine
-        // startup via a manifest meta-data flag and cannot be switched at
-        // runtime, hence a separate build rather than a single toggle.
+        stableImpeller {
+            dimension "track"
+            manifestPlaceholders = [appName: "WebLibre (Impeller)", enableImpeller: "true"]
+        }
         alpha {
             dimension "track"
             applicationIdSuffix ".alpha"
             versionNameSuffix "-alpha"
-            manifestPlaceholders = [appName: "WebLibre Alpha", enableImpeller: "true"]
+            manifestPlaceholders = [appName: "WebLibre Alpha", enableImpeller: "false"]
         }
-        alphaLegacy {
+        alphaImpeller {
             dimension "track"
             applicationIdSuffix ".alpha"
             versionNameSuffix "-alpha"
-            manifestPlaceholders = [appName: "WebLibre Alpha (Legacy)", enableImpeller: "false"]
+            manifestPlaceholders = [appName: "WebLibre Alpha (Impeller)", enableImpeller: "true"]
         }
     }
 
     sourceSets {
-        // alphaLegacy shares the existing alpha launcher icon/branding.
-        alphaLegacy {
+        // The Impeller comparison build shares the alpha launcher branding.
+        alphaImpeller {
             res.srcDirs += 'src/alpha/res'
         }
     }

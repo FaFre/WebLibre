@@ -151,13 +151,17 @@ jobs:
         if: steps.build-type.outputs.is_prerelease == 'true'
         run: melos run build-browser-alpha --no-select
 
-      - name: Build APK (Alpha, Legacy renderer)
+      - name: Build APK (Alpha, Impeller)
         if: steps.build-type.outputs.is_prerelease == 'true'
-        run: melos run build-browser-alpha-legacy --no-select
+        run: melos run build-browser-alpha-impeller --no-select
 
       - name: Build APK (Stable)
         if: steps.build-type.outputs.is_prerelease == 'false'
         run: melos run build-browser --no-select
+
+      - name: Build APK (Stable, Impeller)
+        if: steps.build-type.outputs.is_prerelease == 'false'
+        run: melos run build-browser-impeller --no-select
 
       - name: Build App Bundle
         if: steps.build-type.outputs.is_prerelease == 'false'
@@ -168,14 +172,14 @@ jobs:
         if: steps.build-type.outputs.is_prerelease == 'true'
         uses: ncipollo/release-action@v1.17.0
         with:
-          artifacts: "apps/weblibre/build/app/outputs/apk/alpha/release/*.apk,apps/weblibre/build/app/outputs/apk/alphaLegacy/release/*.apk"
+          artifacts: "apps/weblibre/build/app/outputs/apk/alpha/release/*.apk,apps/weblibre/build/app/outputs/apk/alphaImpeller/release/*.apk"
           prerelease: true
 
       - name: Create github artifact release (Full)
         if: steps.build-type.outputs.is_prerelease == 'false'
         uses: ncipollo/release-action@v1.17.0
         with:
-          artifacts: "apps/weblibre/build/app/outputs/apk/stable/release/*.apk,apps/weblibre/build/app/outputs/bundle/stableRelease/app-stable-release.aab"
+          artifacts: "apps/weblibre/build/app/outputs/apk/stable/release/*.apk,apps/weblibre/build/app/outputs/apk/stableImpeller/release/*.apk,apps/weblibre/build/app/outputs/bundle/stableRelease/app-stable-release.aab"
 
       - name: Upload app bundle artifact
         if: steps.build-type.outputs.is_prerelease == 'false'
