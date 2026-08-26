@@ -18,53 +18,65 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
+import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/presentation/widgets/bang_label.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/bang_chip_menu.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
-// These helpers are conceptually `BangChipStrip`-private — they capture
-// the chip's own selection / delete-affordance rules and are not part of
-// the public bang API. The `@visibleForTesting` annotation keeps them
-// reachable from `frequent_bangs_section_test.dart` (which asserts the
-// rules directly) without inviting unrelated call sites.
+// Conceptually `BangChipStrip`-private — this captures the chip's own
+// selection rule and is not part of the public bang API. The
+// `@visibleForTesting` annotation keeps it reachable from
+// `frequent_bangs_section_test.dart` (which asserts the rule directly)
+// without inviting unrelated call sites.
 @visibleForTesting
 bool isSelectedBangChip(BangData bang, BangData? selectedBang) =>
     selectedBang != null && bang.toKey() == selectedBang.toKey();
 
-@visibleForTesting
-bool canDeleteBangChip(
-  BangData bang, {
-  BangData? selectedBang,
-  required bool allowFrequencyResetAction,
-}) => isSelectedBangChip(bang, selectedBang) || allowFrequencyResetAction;
-
-@visibleForTesting
-IconData? bangChipDeleteIcon(
-  BangData bang, {
-  BangData? selectedBang,
-  required bool allowFrequencyResetAction,
+/// Pinned bangs first, then whatever of [rest] they do not already cover.
+///
+/// Dedup is by full [BangKey]: the same trigger in two groups is two different
+/// bangs and both may legitimately appear.
+List<BangData> mergePinnedBangs({
+  required List<BangData> pinned,
+  required List<BangData> rest,
 }) {
-  if (isSelectedBangChip(bang, selectedBang)) {
-    return Icons.clear;
+  if (pinned.isEmpty) {
+    return rest;
   }
 
-  return allowFrequencyResetAction ? MdiIcons.restore : null;
+  final pinnedKeys = pinned.map((bang) => bang.toKey()).toSet();
+
+  return [
+    ...pinned,
+    ...rest.where((bang) => !pinnedKeys.contains(bang.toKey())),
+  ];
 }
 
 class BangChipStrip extends StatelessWidget {
   final List<BangData> bangs;
+
+  /// The chip drawn as the active one. Not necessarily a selection: a strip
+  /// may render the standing default provider as active.
   final BangData? selectedBang;
-  final BangData? deletableSelectedBang;
-  final bool Function(BangData bang)? canDeleteBang;
+
+  /// The chip that actually holds the selection, and therefore the only one
+  /// whose trailing `x` appears. Null means nothing is selected — no chip
+  /// offers to clear, not even the one [selectedBang] draws as active. Passed
+  /// separately rather than derived so a default-as-active chip can't end up
+  /// with an `x` that deselects nothing.
+  final BangData? clearableBang;
+
   final int? maxCount;
   final List<Widget> prefixItems;
   final bool showTrailingMenu;
   final bool sortSelectedFirst;
-  final bool allowFrequencyResetAction;
   final VoidCallback? onMenuPressed;
   final void Function(BangData bang) onSelected;
+
+  /// Invoked by the trailing `x`, which only ever means "clear the selection".
+  /// Everything else a chip can do lives in its long-press [BangChipMenu].
   final void Function(BangData bang) onDeleted;
 
   const BangChipStrip({
@@ -72,13 +84,11 @@ class BangChipStrip extends StatelessWidget {
     required this.selectedBang,
     required this.onSelected,
     required this.onDeleted,
-    this.deletableSelectedBang,
-    this.canDeleteBang,
+    required this.clearableBang,
     this.maxCount,
     this.prefixItems = const [],
     this.showTrailingMenu = false,
     this.sortSelectedFirst = true,
-    this.allowFrequencyResetAction = false,
     this.onMenuPressed,
     super.key,
   });
@@ -86,7 +96,6 @@ class BangChipStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasContent = selectedBang != null || bangs.isNotEmpty;
-    final resolvedDeletableSelectedBang = deletableSelectedBang ?? selectedBang;
 
     return SizedBox(
       height: 48,
@@ -94,8 +103,11 @@ class BangChipStrip extends StatelessWidget {
         children: [
           if (hasContent)
             Expanded(
-              child: SelectableChips<BangData, BangData, String>(
-                itemId: (bang) => bang.trigger,
+              child: SelectableChips<BangData, BangData, BangKey>(
+                // Keyed by the full key, not the trigger: a user bang
+                // overriding a synced one shares its trigger, and two chips
+                // sharing an id collapse into one.
+                itemId: (bang) => bang.toKey(),
                 itemAvatar: (bang) =>
                     UrlIcon([bang.getDefaultUrl()], iconSize: 20),
                 itemLabel: (bang) => BangLabel(bang),
@@ -105,22 +117,13 @@ class BangChipStrip extends StatelessWidget {
                 maxCount: maxCount,
                 sortSelectedFirst: sortSelectedFirst,
                 decoration: SelectableChipDecoration(
-                  canDelete: (bang) =>
-                      canDeleteBangChip(
-                        bang,
-                        selectedBang: resolvedDeletableSelectedBang,
-                        allowFrequencyResetAction: allowFrequencyResetAction,
-                      ) &&
-                      (canDeleteBang?.call(bang) ?? true),
-                  deleteIcon: (bang) {
-                    final icon = bangChipDeleteIcon(
-                      bang,
-                      selectedBang: resolvedDeletableSelectedBang,
-                      allowFrequencyResetAction: allowFrequencyResetAction,
-                    );
-                    return icon == null ? null : Icon(icon);
-                  },
+                  // The trailing button means one thing only: drop the
+                  // selection. So only the selected chip carries one.
+                  canDelete: (bang) => isSelectedBangChip(bang, clearableBang),
+                  deleteIcon: (_) => const Icon(Icons.clear),
                 ),
+                itemWrap: (child, bang) =>
+                    BangChipMenu(bang: bang, child: child),
                 onSelected: onSelected,
                 onDeleted: onDeleted,
               ),

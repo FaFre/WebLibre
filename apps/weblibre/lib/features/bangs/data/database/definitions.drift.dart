@@ -3300,10 +3300,20 @@ class DefinitionsDrift extends i7.ModularAccessor {
     );
   }
 
-  i0.Selectable<i6.BangData> queryBangs({required String query}) {
+  i0.Selectable<i6.BangData> queryBangs({
+    required String triggerCandidate,
+    required String query,
+    required i2.BangGroup preferredGroup,
+    required int limit,
+  }) {
     return customSelect(
-      'WITH weights AS (SELECT 10.0 AS "trigger", 8.0 AS additional_trigger, 5.0 AS website_name), bang_results AS (SELECT b.*, bf.frequency, bf.last_used, bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank FROM bang_fts(?1)AS fts INNER JOIN bang AS b ON b."rowid" = fts."rowid" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" AND b."group" = bf."group" CROSS JOIN weights), trigger_results AS (SELECT b.*, bf.frequency, bf.last_used, bm25(bang_triggers_fts, weights.additional_trigger) AS weighted_rank FROM bang_triggers_fts(?1)AS tfts INNER JOIN bang_triggers AS bt ON bt."rowid" = tfts."rowid" INNER JOIN bang AS b ON b."trigger" = bt."trigger" AND b."group" = bt."group" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" AND b."group" = bf."group" CROSS JOIN weights), combined_results AS (SELECT * FROM bang_results UNION ALL SELECT * FROM trigger_results) SELECT *, MIN(weighted_rank) AS weighted_rank FROM combined_results GROUP BY "trigger", "group" ORDER BY weighted_rank ASC, frequency NULLS LAST',
-      variables: [i0.Variable<String>(query)],
+      'WITH weights AS (SELECT 10.0 AS "trigger", 8.0 AS additional_trigger, 5.0 AS website_name), bang_results AS (SELECT b.*, bf.frequency, bf.last_used, bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank, CASE WHEN ?1 = \'\' THEN 2 WHEN b."trigger" LIKE ?1 || \'%\' THEN 0 ELSE 2 END AS primary_match_rank, CASE WHEN ?1 = \'\' THEN 2 WHEN b."trigger" = ?1 COLLATE NOCASE THEN 0 WHEN b."trigger" LIKE ?1 || \'%\' THEN 1 ELSE 2 END AS match_rank FROM bang_fts(?2)AS fts INNER JOIN bang AS b ON b."rowid" = fts."rowid" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" AND b."group" = bf."group" CROSS JOIN weights), trigger_results AS (SELECT b.*, bf.frequency, bf.last_used, bm25(bang_triggers_fts, weights.additional_trigger) AS weighted_rank, CASE WHEN ?1 = \'\' THEN 2 WHEN bt.additional_trigger LIKE ?1 || \'%\' THEN 1 ELSE 2 END AS primary_match_rank, CASE WHEN ?1 = \'\' THEN 2 WHEN bt.additional_trigger = ?1 COLLATE NOCASE THEN 0 WHEN bt.additional_trigger LIKE ?1 || \'%\' THEN 1 ELSE 2 END AS match_rank FROM bang_triggers_fts(?2)AS tfts INNER JOIN bang_triggers AS bt ON bt."rowid" = tfts."rowid" INNER JOIN bang AS b ON b."trigger" = bt."trigger" AND b."group" = bt."group" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" AND b."group" = bf."group" CROSS JOIN weights), combined_results AS (SELECT * FROM bang_results UNION ALL SELECT * FROM trigger_results) SELECT *, MIN(weighted_rank) AS best_rank, MIN(primary_match_rank) AS best_primary_match_rank, MIN(match_rank) AS best_match_rank FROM combined_results GROUP BY "trigger", "group" ORDER BY best_match_rank ASC, best_primary_match_rank ASC,("group" = ?3)DESC, best_rank ASC, frequency DESC NULLS LAST, website_name ASC LIMIT ?4',
+      variables: [
+        i0.Variable<String>(triggerCandidate),
+        i0.Variable<String>(query),
+        i0.Variable<int>(i3.BangTable.$convertergroup.toSql(preferredGroup)),
+        i0.Variable<int>(limit),
+      ],
       readsFrom: {bangFrequency, bangFts, bang, bangTriggersFts, bangTriggers},
     ).map(
       (i0.QueryRow row) => i6.BangData(
@@ -3328,10 +3338,20 @@ class DefinitionsDrift extends i7.ModularAccessor {
     );
   }
 
-  i0.Selectable<i6.BangData> queryBangsBasic({required String query}) {
+  i0.Selectable<i6.BangData> queryBangsBasic({
+    required String triggerCandidate,
+    required String query,
+    required i2.BangGroup preferredGroup,
+    required int limit,
+  }) {
     return customSelect(
-      'WITH weights AS (SELECT 10.0 AS "trigger", 8.0 AS additional_trigger, 5.0 AS website_name), bang_results AS (SELECT b.*, bf.frequency, bf.last_used, bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank FROM bang_fts AS fts INNER JOIN bang AS b ON b."rowid" = fts."rowid" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" AND b."group" = bf."group" CROSS JOIN weights WHERE fts."trigger" LIKE ?1 OR fts.website_name LIKE ?1), trigger_results AS (SELECT b.*, bf.frequency, bf.last_used, bm25(bang_triggers_fts, weights.additional_trigger) AS weighted_rank FROM bang_triggers_fts AS tfts INNER JOIN bang_triggers AS bt ON bt."rowid" = tfts."rowid" INNER JOIN bang AS b ON b."trigger" = bt."trigger" AND b."group" = bt."group" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" AND b."group" = bf."group" CROSS JOIN weights WHERE tfts.additional_trigger LIKE ?1), combined_results AS (SELECT * FROM bang_results UNION ALL SELECT * FROM trigger_results) SELECT *, MIN(weighted_rank) AS weighted_rank FROM combined_results GROUP BY "trigger", "group" ORDER BY weighted_rank ASC, frequency NULLS LAST',
-      variables: [i0.Variable<String>(query)],
+      'WITH weights AS (SELECT 10.0 AS "trigger", 8.0 AS additional_trigger, 5.0 AS website_name), bang_results AS (SELECT b.*, bf.frequency, bf.last_used, bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank, CASE WHEN ?1 = \'\' THEN 2 WHEN b."trigger" LIKE ?1 || \'%\' THEN 0 ELSE 2 END AS primary_match_rank, CASE WHEN ?1 = \'\' THEN 2 WHEN b."trigger" = ?1 COLLATE NOCASE THEN 0 WHEN b."trigger" LIKE ?1 || \'%\' THEN 1 ELSE 2 END AS match_rank FROM bang_fts AS fts INNER JOIN bang AS b ON b."rowid" = fts."rowid" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" AND b."group" = bf."group" CROSS JOIN weights WHERE fts."trigger" LIKE ?2 OR fts.website_name LIKE ?2), trigger_results AS (SELECT b.*, bf.frequency, bf.last_used, bm25(bang_triggers_fts, weights.additional_trigger) AS weighted_rank, CASE WHEN ?1 = \'\' THEN 2 WHEN bt.additional_trigger LIKE ?1 || \'%\' THEN 1 ELSE 2 END AS primary_match_rank, CASE WHEN ?1 = \'\' THEN 2 WHEN bt.additional_trigger = ?1 COLLATE NOCASE THEN 0 WHEN bt.additional_trigger LIKE ?1 || \'%\' THEN 1 ELSE 2 END AS match_rank FROM bang_triggers_fts AS tfts INNER JOIN bang_triggers AS bt ON bt."rowid" = tfts."rowid" INNER JOIN bang AS b ON b."trigger" = bt."trigger" AND b."group" = bt."group" LEFT JOIN bang_frequency AS bf ON b."trigger" = bf."trigger" AND b."group" = bf."group" CROSS JOIN weights WHERE tfts.additional_trigger LIKE ?2), combined_results AS (SELECT * FROM bang_results UNION ALL SELECT * FROM trigger_results) SELECT *, MIN(weighted_rank) AS best_rank, MIN(primary_match_rank) AS best_primary_match_rank, MIN(match_rank) AS best_match_rank FROM combined_results GROUP BY "trigger", "group" ORDER BY best_match_rank ASC, best_primary_match_rank ASC,("group" = ?3)DESC, best_rank ASC, frequency DESC NULLS LAST, website_name ASC LIMIT ?4',
+      variables: [
+        i0.Variable<String>(triggerCandidate),
+        i0.Variable<String>(query),
+        i0.Variable<int>(i3.BangTable.$convertergroup.toSql(preferredGroup)),
+        i0.Variable<int>(limit),
+      ],
       readsFrom: {bangFrequency, bangFts, bang, bangTriggersFts, bangTriggers},
     ).map(
       (i0.QueryRow row) => i6.BangData(
@@ -3354,6 +3374,14 @@ class DefinitionsDrift extends i7.ModularAccessor {
         lastUsed: row.readNullable<DateTime>('last_used'),
       ),
     );
+  }
+
+  i0.Selectable<i6.BangData> bangsByTrigger({required String trigger}) {
+    return customSelect(
+      'SELECT v.* FROM bang_data_view AS v WHERE v."trigger" = ?1 COLLATE NOCASE OR EXISTS (SELECT 1 AS _c0 FROM bang_triggers AS bt WHERE bt."trigger" = v."trigger" AND bt."group" = v."group" AND bt.additional_trigger = ?1 COLLATE NOCASE)',
+      variables: [i0.Variable<String>(trigger)],
+      readsFrom: {bangTriggers, bang, bangFrequency},
+    ).asyncMap(bangDataView.mapFromRow);
   }
 
   i0.Selectable<String> categoriesJson() {
@@ -3405,6 +3433,9 @@ class DefinitionsDrift extends i7.ModularAccessor {
   i3.BangTriggers get bangTriggers => i7.ReadDatabaseContainer(
     attachedDatabase,
   ).resultSet<i3.BangTriggers>('bang_triggers');
+  i3.BangDataView get bangDataView => i7.ReadDatabaseContainer(
+    attachedDatabase,
+  ).resultSet<i3.BangDataView>('bang_data_view');
   i3.BangHistory get bangHistory => i7.ReadDatabaseContainer(
     attachedDatabase,
   ).resultSet<i3.BangHistory>('bang_history');

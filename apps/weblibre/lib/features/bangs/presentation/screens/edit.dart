@@ -27,6 +27,7 @@ import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
+import 'package:weblibre/features/bangs/domain/services/bang_query.dart';
 import 'package:weblibre/features/bangs/presentation/dialogs/delete_bang_dialog.dart';
 import 'package:weblibre/utils/form_validators.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -34,11 +35,24 @@ import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 class EditBangScreen extends HookConsumerWidget {
   final Bang? initialBang;
 
-  const EditBangScreen({super.key, required this.initialBang});
+  /// The form is seeded from a bang the user does not own, and saving creates
+  /// their own copy instead of writing back to the source. See
+  /// [EditUserBangRoute.fork].
+  final bool fork;
+
+  const EditBangScreen({
+    super.key,
+    required this.initialBang,
+    this.fork = false,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final formKey = useMemoized(() => GlobalKey<FormState>());
+
+    // A fork looks like an edit but behaves like a new bang: there is no
+    // existing user bang behind it to rename, overwrite or delete.
+    final editsExistingUserBang = initialBang != null && !fork;
     final categories = ref.watch(
       bangCategoriesProvider.select((value) => value.value),
     );
@@ -51,6 +65,9 @@ class EditBangScreen extends HookConsumerWidget {
     );
     final urlTextController = useTextEditingController(
       text: initialBang?.urlTemplate,
+    );
+    final aliasTextController = useTextEditingController(
+      text: formatBangAliases(initialBang?.additionalTriggers),
     );
 
     final category = useState(initialBang?.category);
@@ -74,7 +91,13 @@ class EditBangScreen extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(initialBang == null ? 'New Bang' : 'Edit Bang'),
+        title: Text(
+          fork
+              ? 'Customize Bang'
+              : initialBang == null
+              ? 'New Bang'
+              : 'Edit Bang',
+        ),
         actions: [
           IconButton(
             onPressed: () async {
@@ -87,8 +110,8 @@ class EditBangScreen extends HookConsumerWidget {
                     .read(bangDataRepositoryProvider.notifier)
                     .getBang(BangKey(group: BangGroup.user, trigger: trigger));
 
-                if ((initialBang == null && existingBang != null) ||
-                    (initialBang != null &&
+                if ((!editsExistingUserBang && existingBang != null) ||
+                    (editsExistingUserBang &&
                         existingBang != null &&
                         existingBang.trigger != initialBang!.trigger)) {
                   if (context.mounted) {
@@ -119,12 +142,15 @@ class EditBangScreen extends HookConsumerWidget {
                   searxngApi: false,
                   category: category.value,
                   subCategory: subCategory.value,
-                  additionalTriggers: initialBang?.additionalTriggers,
+                  additionalTriggers: parseBangAliases(
+                    aliasTextController.text,
+                    trigger: trigger,
+                  ),
                   snapDomain: initialBang?.snapDomain,
                   format: formatFlags.value,
                 );
 
-                if (initialBang != null &&
+                if (editsExistingUserBang &&
                     initialBang!.trigger != bang.trigger) {
                   await ref
                       .read(bangDataRepositoryProvider.notifier)
@@ -179,6 +205,18 @@ class EditBangScreen extends HookConsumerWidget {
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
                   validator: (value) => validateRequired(value?.trim()),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: aliasTextController,
+                  autocorrect: false,
+                  decoration: const InputDecoration(
+                    label: Text('Additional triggers'),
+                    helper: Text(
+                      'Other words that invoke this bang, separated by commas or spaces. A leading ! is optional.',
+                    ),
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -292,7 +330,7 @@ class EditBangScreen extends HookConsumerWidget {
                     }
                   },
                 ),
-                if (initialBang != null)
+                if (editsExistingUserBang)
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(

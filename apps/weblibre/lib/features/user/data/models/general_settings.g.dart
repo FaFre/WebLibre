@@ -29,6 +29,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings defaultSearchProvider(BangKey? defaultSearchProvider);
 
+  GeneralSettings pinnedBangs(List<BangKey> pinnedBangs);
+
   GeneralSettings defaultSearchSuggestionsProvider(
     SearchSuggestionProviders defaultSearchSuggestionsProvider,
   );
@@ -217,6 +219,7 @@ abstract class _$GeneralSettingsCWProxy {
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
     bool screenshotProtectionEnabled,
     BangKey? defaultSearchProvider,
+    List<BangKey> pinnedBangs,
     SearchSuggestionProviders defaultSearchSuggestionsProvider,
     bool createChildTabsOption,
     bool enableLocalAiFeatures,
@@ -337,6 +340,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings defaultSearchProvider(BangKey? defaultSearchProvider) =>
       call(defaultSearchProvider: defaultSearchProvider);
+
+  @override
+  GeneralSettings pinnedBangs(List<BangKey> pinnedBangs) =>
+      call(pinnedBangs: pinnedBangs);
 
   @override
   GeneralSettings defaultSearchSuggestionsProvider(
@@ -665,6 +672,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? deleteBrowsingDataOnQuit = const $CopyWithPlaceholder(),
     Object? screenshotProtectionEnabled = const $CopyWithPlaceholder(),
     Object? defaultSearchProvider = const $CopyWithPlaceholder(),
+    Object? pinnedBangs = const $CopyWithPlaceholder(),
     Object? defaultSearchSuggestionsProvider = const $CopyWithPlaceholder(),
     Object? createChildTabsOption = const $CopyWithPlaceholder(),
     Object? enableLocalAiFeatures = const $CopyWithPlaceholder(),
@@ -795,6 +803,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.defaultSearchProvider
           // ignore: cast_nullable_to_non_nullable
           : defaultSearchProvider as BangKey?,
+      pinnedBangs:
+          pinnedBangs == const $CopyWithPlaceholder() || pinnedBangs == null
+          ? _value.pinnedBangs
+          // ignore: cast_nullable_to_non_nullable
+          : pinnedBangs as List<BangKey>,
       defaultSearchSuggestionsProvider:
           defaultSearchSuggestionsProvider == const $CopyWithPlaceholder() ||
               defaultSearchSuggestionsProvider == null
@@ -1244,6 +1257,9 @@ GeneralSettings _$GeneralSettingsFromJson(
   defaultSearchProvider: const BangKeyConverter().fromJson(
     json['defaultSearchProvider'] as String?,
   ),
+  pinnedBangs: const BangKeyListConverter().fromJson(
+    json['pinnedBangs'] as List?,
+  ),
   defaultSearchSuggestionsProvider: $enumDecodeNullable(
     _$SearchSuggestionProvidersEnumMap,
     json['defaultSearchSuggestionsProvider'],
@@ -1402,6 +1418,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'defaultSearchProvider': const BangKeyConverter().toJson(
     instance.defaultSearchProvider,
   ),
+  'pinnedBangs': const BangKeyListConverter().toJson(instance.pinnedBangs),
   'defaultSearchSuggestionsProvider':
       _$SearchSuggestionProvidersEnumMap[instance
           .defaultSearchSuggestionsProvider]!,

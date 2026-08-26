@@ -139,7 +139,12 @@ class NewUserBangRoute extends GoRouteData with $NewUserBangRoute {
 class EditUserBangRoute extends GoRouteData with $EditUserBangRoute {
   final String initialBang;
 
-  const EditUserBangRoute({required this.initialBang});
+  /// Seeds the form from a bang the user does not own — a synced repository
+  /// entry they want their own version of. The result is saved as a *new* user
+  /// bang, so the source is left untouched and the screen offers no Delete.
+  final bool fork;
+
+  const EditUserBangRoute({required this.initialBang, this.fork = false});
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -147,6 +152,7 @@ class EditUserBangRoute extends GoRouteData with $EditUserBangRoute {
       initialBang: Bang.fromJson(
         jsonDecode(initialBang) as Map<String, dynamic>,
       ),
+      fork: fork,
     );
   }
 }

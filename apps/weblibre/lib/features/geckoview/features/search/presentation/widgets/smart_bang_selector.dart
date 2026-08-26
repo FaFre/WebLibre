@@ -27,10 +27,8 @@ import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/providers/search.dart';
-import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/bangs/presentation/widgets/bang_label.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/search/presentation/dialogs/reset_bang_dialog.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/bang_chip_strip.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/widgets/sliding_pill_toggle.dart';
@@ -93,9 +91,21 @@ class SmartBangSelector extends HookConsumerWidget {
       frequentBangListProvider.select((v) => v.value ?? const []),
     );
 
-    final globalBangs = searchBangs.isNotEmpty ? searchBangs : frequentBangs;
+    final pinnedBangs = ref.watch(
+      pinnedBangListProvider.select((v) => v.value ?? const []),
+    );
 
-    // Trigger search when text changes
+    // Search results stand on their own — they are already ranked, and pushing
+    // pins in front of an explicit query would bury what was asked for. With
+    // no query the pins lead, then whatever frequency turned up that they do
+    // not already cover.
+    final globalBangs = searchBangs.isNotEmpty
+        ? searchBangs
+        : mergePinnedBangs(pinned: pinnedBangs, rest: frequentBangs);
+
+    // Trigger search when text changes, and once for the text that is already
+    // there: this selector only mounts once the field is non-empty, so the
+    // keystroke that brought it on screen never arrives as a change event.
     useOnListenableChangeSelector(
       searchTextController,
       () => searchTextController.text,
@@ -104,6 +114,7 @@ class SmartBangSelector extends HookConsumerWidget {
             .read(seamlessBangProvider.notifier)
             .search(searchTextController.text);
       },
+      fireImmediately: true,
     );
 
     // Determine if we should show tabs
@@ -130,10 +141,16 @@ class SmartBangSelector extends HookConsumerWidget {
       );
     }
 
-    // No tabs - show global bangs directly
+    // No tabs — these are global bangs, so they select into the global scope
+    // even in edit mode. Scoping them to the domain instead put the selection
+    // somewhere nothing else reads: the reverse URL match and the new-tab
+    // strip both write the global one, and the chip's `x` then found no
+    // selection to clear.
     return _BangChipsList(
-      domain: domain,
-      siteDomain: null, // No mutual exclusion needed without tabs
+      domain: null,
+      // Still worth clearing a leftover site selection, which would otherwise
+      // outrank the global one this list writes.
+      siteDomain: domain,
       bangs: globalBangs,
       selectedBang: activeBang,
       searchTextController: searchTextController,
@@ -279,13 +296,16 @@ class _BangChipsList extends HookConsumerWidget {
     return BangChipStrip(
       bangs: bangs,
       selectedBang: selectedBang,
+      // Here the active chip is always a real selection — the default provider
+      // has its own prefix chip rather than a place in this list.
+      clearableBang: selectedBang,
       prefixItems: displayMenu
           ? const [_DefaultSearchProviderChip()]
           : const [],
       showTrailingMenu: displayMenu,
       onMenuPressed: displayMenu ? () => _openBangSearch(context, ref) : null,
       onSelected: (bang) => _handleSelection(context, ref, bang),
-      onDeleted: (bang) => _handleDeletion(context, ref, bang),
+      onDeleted: (_) => _handleDeletion(ref),
     );
   }
 
@@ -333,32 +353,22 @@ class _BangChipsList extends HookConsumerWidget {
     }
   }
 
-  Future<void> _handleDeletion(
-    BuildContext context,
-    WidgetRef ref,
-    BangData bang,
-  ) async {
-    final currentSelection = ref.read(
-      selectedBangTriggerProvider(domain: domain),
-    );
+  /// Clears the selection — the only thing the trailing `x` does. Frequency
+  /// reset lives in the chip's long-press menu.
+  ///
+  /// Both scopes are cleared rather than the one this list writes to: a bang
+  /// auto-selected from a reverse URL match lands in the global scope while a
+  /// site-scoped list may be the one on screen, and mutual exclusion means at
+  /// most one of them holds anything anyway.
+  void _handleDeletion(WidgetRef ref) {
+    ref
+        .read(selectedBangTriggerProvider(domain: domain).notifier)
+        .clearTrigger();
 
-    if (currentSelection == bang.toKey()) {
-      // Clear selection if the deleted bang is currently selected
+    if (siteDomain != null && siteDomain != domain) {
       ref
-          .read(selectedBangTriggerProvider(domain: domain).notifier)
+          .read(selectedBangTriggerProvider(domain: siteDomain).notifier)
           .clearTrigger();
-    } else {
-      // Show reset frequency dialog for non-selected bangs
-      final dialogResult = await showResetBangDialog(
-        context,
-        triggerName: bang.trigger,
-      );
-
-      if (dialogResult == true) {
-        await ref
-            .read(bangDataRepositoryProvider.notifier)
-            .resetFrequency(bang.trigger);
-      }
     }
   }
 

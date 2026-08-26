@@ -46,6 +46,8 @@ class SearchTermSuggestionsSection extends HookConsumerWidget {
       searchSuggestionsProvider().select((value) => value.value ?? const []),
     );
 
+    // Seeded on mount too — this section appears with the first keystroke
+    // already in the field, which therefore never arrives as a change event.
     useOnListenableChangeSelector(
       searchTextController,
       () => searchTextController.text,
@@ -54,6 +56,7 @@ class SearchTermSuggestionsSection extends HookConsumerWidget {
             .read(searchSuggestionsProvider().notifier)
             .addQuery(searchTextController.text);
       },
+      fireImmediately: true,
     );
 
     final queries = [

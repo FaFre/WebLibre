@@ -35,8 +35,15 @@ class BangDatabase extends $BangDatabase with PrefixQueryBuilderMixin {
 
   @override
   final int ftsTokenLimit = 6;
+
+  /// Unlike prose corpora, bang triggers are routinely one character (`g`,
+  /// `w`, `a`). Dropping those tokens pushed every single-letter query onto
+  /// the `LIKE '%g%'` fallback, which matches substrings anywhere and ranks by
+  /// a constant bm25. One-character prefixes are not covered by the
+  /// `prefix='2 3'` index so FTS5 scans the term b-tree for them, which is
+  /// cheap enough at this table's size.
   @override
-  final int ftsMinTokenLength = 2;
+  final int ftsMinTokenLength = 1;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(

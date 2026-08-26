@@ -138,6 +138,7 @@ const generalSettingJsonKeys = <String>{
   'appLinkRules',
   'appLinkContextOverrides',
   'desktopModeSites',
+  'pinnedBangs',
 };
 
 @Riverpod(keepAlive: true)

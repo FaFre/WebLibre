@@ -26,6 +26,7 @@ import 'package:weblibre/features/bangs/data/models/bang.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
+import 'package:weblibre/features/bangs/domain/services/bang_query.dart';
 import 'package:weblibre/utils/uri_parser.dart';
 
 @DriftAccessor()
@@ -145,14 +146,37 @@ class BangDao extends DatabaseAccessor<BangDatabase> with $BangDaoMixin {
       ..where((_) => clauses.reduce((a, b) => a | b));
   }
 
+  /// Caps how many bangs a single query hands back. The bundled DuckDuckGo set
+  /// is ~13k entries, so a broad prefix ("a") matches thousands of them — none
+  /// of which a user scrolls to. Ranking decides what survives the cap.
+  static const searchResultLimit = 100;
+
+  /// Every bang that answers to [trigger], by its own trigger or an alias.
+  /// Use [pickBangByPrecedence] to choose between them.
+  Selectable<BangData> getBangDataByTrigger(String trigger) {
+    return db.definitionsDrift.bangsByTrigger(trigger: trigger);
+  }
+
   Selectable<BangData> queryBangs(String searchString) {
-    final ftsQuery = db.buildFtsQuery(searchString);
+    // `!g` and `g` mean the same thing to the index; the trigger candidate is
+    // what floats the bang the user is actually typing to the top.
+    final normalized = normalizeBangSearchInput(searchString);
+    final triggerCandidate = bangTriggerCandidate(searchString);
+    final ftsQuery = db.buildFtsQuery(normalized);
 
     if (ftsQuery.isNotEmpty) {
-      return db.definitionsDrift.queryBangs(query: ftsQuery);
+      return db.definitionsDrift.queryBangs(
+        query: ftsQuery,
+        triggerCandidate: triggerCandidate,
+        preferredGroup: BangGroup.user,
+        limit: searchResultLimit,
+      );
     } else {
       return db.definitionsDrift.queryBangsBasic(
-        query: db.buildLikeQuery(searchString),
+        query: db.buildLikeQuery(normalized),
+        triggerCandidate: triggerCandidate,
+        preferredGroup: BangGroup.user,
+        limit: searchResultLimit,
       );
     }
   }

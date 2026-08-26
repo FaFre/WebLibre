@@ -353,6 +353,120 @@ final class FrequentBangListProvider
 
 String _$frequentBangListHash() => r'2c1ecb7e9416772fc1c32d01d767e1eb4f865975';
 
+/// The bangs the user pinned, in the order they pinned them.
+///
+/// Pins that no longer resolve to a bang are skipped rather than rendered as
+/// gaps — a repository resync or a deleted user bang can strand a key.
+
+@ProviderFor(pinnedBangList)
+final pinnedBangListProvider = PinnedBangListProvider._();
+
+/// The bangs the user pinned, in the order they pinned them.
+///
+/// Pins that no longer resolve to a bang are skipped rather than rendered as
+/// gaps — a repository resync or a deleted user bang can strand a key.
+
+final class PinnedBangListProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<BangData>>,
+          List<BangData>,
+          Stream<List<BangData>>
+        >
+    with $FutureModifier<List<BangData>>, $StreamProvider<List<BangData>> {
+  /// The bangs the user pinned, in the order they pinned them.
+  ///
+  /// Pins that no longer resolve to a bang are skipped rather than rendered as
+  /// gaps — a repository resync or a deleted user bang can strand a key.
+  PinnedBangListProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'pinnedBangListProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$pinnedBangListHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<List<BangData>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<BangData>> create(Ref ref) {
+    return pinnedBangList(ref);
+  }
+}
+
+String _$pinnedBangListHash() => r'75cc4728c27948884372d7ef299db1a216740279';
+
+/// Adds and removes pins. Pinning is idempotent, so a chip and a details screen
+/// can both drive it without having to agree on the current state first.
+
+@ProviderFor(PinnedBangs)
+final pinnedBangsProvider = PinnedBangsProvider._();
+
+/// Adds and removes pins. Pinning is idempotent, so a chip and a details screen
+/// can both drive it without having to agree on the current state first.
+final class PinnedBangsProvider extends $NotifierProvider<PinnedBangs, void> {
+  /// Adds and removes pins. Pinning is idempotent, so a chip and a details screen
+  /// can both drive it without having to agree on the current state first.
+  PinnedBangsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'pinnedBangsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$pinnedBangsHash();
+
+  @$internal
+  @override
+  PinnedBangs create() => PinnedBangs();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(void value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<void>(value),
+    );
+  }
+}
+
+String _$pinnedBangsHash() => r'18e48df24ef08277eae1636d950f43cbb02e65c3';
+
+/// Adds and removes pins. Pinning is idempotent, so a chip and a details screen
+/// can both drive it without having to agree on the current state first.
+
+abstract class _$PinnedBangs extends $Notifier<void> {
+  void build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<void, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<void, void>,
+              void,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(searchHistory)
 final searchHistoryProvider = SearchHistoryProvider._();
 

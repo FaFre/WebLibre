@@ -17,21 +17,26 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:flutter/material.dart';
-import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/bang_chip_menu.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/bang_chip_strip.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/frequent_bangs_section.dart';
 
-BangData _bang(String trigger, String name) => BangData(
+BangData _bang(
+  String trigger,
+  String name, {
+  BangGroup group = BangGroup.general,
+  int frequency = 0,
+}) => BangData(
   websiteName: name,
   domain: '$trigger.example',
   trigger: trigger,
   urlTemplate: 'https://$trigger.example/?q={{{s}}}',
-  group: BangGroup.general,
+  group: group,
   searxngApi: false,
+  frequency: frequency,
 );
 
 void main() {
@@ -64,109 +69,93 @@ void main() {
     });
   });
 
-  group('canDeleteFrequentBang', () {
-    test('implicit default bang is not deletable', () {
-      final defaultBang = _bang('wl', 'WebLibre Search');
-
-      expect(
-        canDeleteFrequentBang(bang: defaultBang, defaultBang: defaultBang),
-        isFalse,
+  group('pinned bangs', () {
+    test('leads the frequency-ranked chips', () {
+      final result = buildFrequentBangDisplayList(
+        frequentBangs: [_bang('g', 'Google'), _bang('w', 'Wikipedia')],
+        pinnedBangs: [_bang('sp', 'StartPage')],
       );
+
+      expect(result.map((bang) => bang.trigger), ['sp', 'g', 'w']);
     });
 
-    test('explicitly selected default bang remains clearable', () {
+    test('a pinned bang that is also frequent appears once, pinned', () {
+      final google = _bang('g', 'Google');
+
+      final result = buildFrequentBangDisplayList(
+        frequentBangs: [_bang('w', 'Wikipedia'), google],
+        pinnedBangs: [google],
+      );
+
+      expect(result.map((bang) => bang.trigger), ['g', 'w']);
+    });
+
+    test('keeps the selection and default anchors intact', () {
+      final selectedBang = _bang('ddg', 'DuckDuckGo');
       final defaultBang = _bang('wl', 'WebLibre Search');
 
+      final result = buildFrequentBangDisplayList(
+        frequentBangs: [_bang('g', 'Google')],
+        pinnedBangs: [_bang('sp', 'StartPage')],
+        selectedBang: selectedBang,
+        defaultBang: defaultBang,
+      );
+
+      expect(result.map((bang) => bang.trigger), ['ddg', 'sp', 'g', 'wl']);
+    });
+
+    test('an empty pin list changes nothing', () {
+      final frequentBangs = [_bang('g', 'Google')];
+
       expect(
-        canDeleteFrequentBang(
-          bang: defaultBang,
-          selectedBang: defaultBang,
-          defaultBang: defaultBang,
-        ),
-        isTrue,
+        buildFrequentBangDisplayList(frequentBangs: frequentBangs),
+        frequentBangs,
       );
     });
   });
 
-  group('BangChipStrip delete affordances', () {
-    test('only selected bang keeps clear when frequency reset is disabled', () {
+  group('BangChipStrip delete affordance', () {
+    test('belongs to the selected bang alone', () {
       final selectedBang = _bang('ddg', 'DuckDuckGo');
       final otherBang = _bang('wl', 'WebLibre Search');
 
+      expect(isSelectedBangChip(selectedBang, selectedBang), isTrue);
+      expect(isSelectedBangChip(otherBang, selectedBang), isFalse);
+      expect(isSelectedBangChip(otherBang, null), isFalse);
+    });
+
+    test('a bang selected in another group is a different chip', () {
+      final syncedBang = _bang('ddg', 'DuckDuckGo');
+      final userBang = _bang('ddg', 'DuckDuckGo', group: BangGroup.user);
+
+      expect(isSelectedBangChip(userBang, syncedBang), isFalse);
+    });
+  });
+
+  group('canResetBangFrequency', () {
+    test('an unused bang has nothing to reset', () {
       expect(
-        canDeleteBangChip(
-          selectedBang,
-          selectedBang: selectedBang,
-          allowFrequencyResetAction: false,
-        ),
-        isTrue,
-      );
-      expect(
-        canDeleteBangChip(
-          otherBang,
-          selectedBang: selectedBang,
-          allowFrequencyResetAction: false,
-        ),
+        canResetBangFrequency(bang: _bang('g', 'Google'), defaultBang: null),
         isFalse,
       );
+    });
+
+    test('the default search bang stays anchored in quick select', () {
+      final defaultBang = _bang('wl', 'WebLibre Search', frequency: 7);
+
       expect(
-        bangChipDeleteIcon(
-          selectedBang,
-          selectedBang: selectedBang,
-          allowFrequencyResetAction: false,
-        ),
-        Icons.clear,
-      );
-      expect(
-        bangChipDeleteIcon(
-          otherBang,
-          selectedBang: selectedBang,
-          allowFrequencyResetAction: false,
-        ),
-        isNull,
+        canResetBangFrequency(bang: defaultBang, defaultBang: defaultBang),
+        isFalse,
       );
     });
 
-    test('non-selected bangs use restore when frequency reset is enabled', () {
-      final selectedBang = _bang('ddg', 'DuckDuckGo');
-      final otherBang = _bang('wl', 'WebLibre Search');
-
+    test('any other used bang can be reset', () {
       expect(
-        canDeleteBangChip(
-          otherBang,
-          selectedBang: selectedBang,
-          allowFrequencyResetAction: true,
+        canResetBangFrequency(
+          bang: _bang('g', 'Google', frequency: 3),
+          defaultBang: _bang('wl', 'WebLibre Search', frequency: 7),
         ),
         isTrue,
-      );
-      expect(
-        bangChipDeleteIcon(
-          selectedBang,
-          selectedBang: selectedBang,
-          allowFrequencyResetAction: true,
-        ),
-        Icons.clear,
-      );
-      expect(
-        bangChipDeleteIcon(
-          otherBang,
-          selectedBang: selectedBang,
-          allowFrequencyResetAction: true,
-        ),
-        MdiIcons.restore,
-      );
-    });
-
-    test('selected bangs always use clear even when restore is enabled', () {
-      final selectedBang = _bang('wl', 'WebLibre Search');
-
-      expect(
-        bangChipDeleteIcon(
-          selectedBang,
-          selectedBang: selectedBang,
-          allowFrequencyResetAction: true,
-        ),
-        Icons.clear,
       );
     });
   });

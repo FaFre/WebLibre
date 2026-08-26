@@ -35,4 +35,17 @@ enum BangGroup {
   final String? remote;
 
   const BangGroup({required this.bundled, required this.remote});
+
+  /// Which group wins when several claim the same trigger. Lower wins.
+  ///
+  /// The user's own bangs come first — that is what makes a user bang an
+  /// *override* of a synced one rather than a duplicate of it. Declared apart
+  /// from the enum's own order, which is a stored value the database migrations
+  /// depend on and must not be reshuffled.
+  int get precedence => switch (this) {
+    BangGroup.user => 0,
+    BangGroup.weblibre => 1,
+    BangGroup.kagi => 2,
+    BangGroup.general => 3,
+  };
 }

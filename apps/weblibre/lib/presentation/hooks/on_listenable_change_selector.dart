@@ -27,6 +27,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 /// build when the listener is called. Use this for side effects that do not
 /// require a rebuild.
 ///
+/// Pass [fireImmediately] when the listener also has to account for the value
+/// the [listenable] already carries at mount. A widget that appears only once
+/// its input is non-empty — a search module that mounts on the first keystroke
+/// — would otherwise never see that first value: the hook registers after it
+/// was written, and the next change event reports the second one.
+///
 /// See also:
 ///  * [Listenable]
 ///  * [ValueListenable]
@@ -34,9 +40,17 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 void useOnListenableChangeSelector<R>(
   Listenable? listenable,
   R Function() selector,
-  VoidCallback listener,
-) {
-  return use(_OnListenableChangeSelectorHook(listenable, selector, listener));
+  VoidCallback listener, {
+  bool fireImmediately = false,
+}) {
+  return use(
+    _OnListenableChangeSelectorHook(
+      listenable,
+      selector,
+      listener,
+      fireImmediately,
+    ),
+  );
 }
 
 class _OnListenableChangeSelectorHook<R> extends Hook<void> {
@@ -44,11 +58,13 @@ class _OnListenableChangeSelectorHook<R> extends Hook<void> {
     this.listenable,
     this.selector,
     this.listener,
+    this.fireImmediately,
   );
 
   final Listenable? listenable;
   final R Function() selector;
   final VoidCallback listener;
+  final bool fireImmediately;
 
   @override
   _OnListenableChangeSelectorHookState<R> createState() =>
@@ -57,12 +73,26 @@ class _OnListenableChangeSelectorHook<R> extends Hook<void> {
 
 class _OnListenableChangeSelectorHookState<R>
     extends HookState<void, _OnListenableChangeSelectorHook<R>> {
-  late R _selectorResult = hook.selector();
+  late R _selectorResult;
 
   @override
   void initHook() {
     super.initHook();
+    // Seeded here rather than lazily on first read: the first read happens
+    // inside `_listener`, which would initialise the baseline to the value
+    // that just changed and so swallow that very change.
+    _selectorResult = hook.selector();
     hook.listenable?.addListener(_listener);
+
+    if (hook.fireImmediately) {
+      // Deferred to the end of the frame: listeners here run side effects, and
+      // the common one — writing to a provider — is illegal during build.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          hook.listener();
+        }
+      });
+    }
   }
 
   @override

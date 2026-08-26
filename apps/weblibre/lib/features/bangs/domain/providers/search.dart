@@ -24,13 +24,67 @@ import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/data/providers.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
+import 'package:weblibre/features/bangs/domain/services/bang_query.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'search.g.dart';
 
+/// A bang the user wrote inline (`!g cats`) together with the query left after
+/// the bang token was lifted out.
+class InlineBangMatch {
+  final BangData bang;
+  final String query;
+
+  const InlineBangMatch({required this.bang, required this.query});
+}
+
+/// Tracks the bang written into the address bar as the user types.
+///
+/// Kept as a notifier rather than a `.family` on the text so that a keystroke
+/// updates one provider instead of creating and disposing one per input value.
+@Riverpod()
+class InlineBang extends _$InlineBang {
+  /// Guards against a slow lookup for stale text overwriting a newer one.
+  String? _pendingInput;
+
+  @override
+  InlineBangMatch? build() => null;
+
+  /// Resolves the bang in [input], publishes it as this provider's state and
+  /// returns it. Submit paths use the return value directly so they never race
+  /// the state write.
+  Future<InlineBangMatch?> resolve(String input) async {
+    final parsed = parseBangInput(input);
+    _pendingInput = input;
+
+    if (!parsed.hasBang) {
+      state = null;
+      return null;
+    }
+
+    // Read the repository before the await: an autoDispose notifier that is
+    // disposed mid-flight loses its ref.
+    final repository = ref.read(bangDataRepositoryProvider.notifier);
+    final bang = await repository.resolveTrigger(parsed.trigger!);
+
+    final match = bang == null
+        ? null
+        : InlineBangMatch(bang: bang, query: parsed.query);
+
+    // A newer keystroke has already been handled, or the provider is gone.
+    if (_pendingInput != input || !ref.mounted) {
+      return match;
+    }
+
+    state = match;
+    return match;
+  }
+}
+
 @Riverpod()
 class BangSearch extends _$BangSearch {
   late StreamController<List<BangData>> _streamController;
+  String _pendingInput = '';
 
   Future<Uri> triggerBangSearch(BangData bang, String searchQuery) async {
     final bangDataNotifier = ref.read(bangDataRepositoryProvider.notifier);
@@ -54,14 +108,24 @@ class BangSearch extends _$BangSearch {
   }
 
   Future<void> search(String input) async {
-    if (input.isNotEmpty) {
-      await ref.read(bangDatabaseProvider).bangDao.queryBangs(input).get().then(
-        (value) {
-          if (!_streamController.isClosed) {
-            _streamController.add(value);
-          }
-        },
-      );
+    _pendingInput = input;
+
+    if (!_streamController.isClosed) {
+      _streamController.add([]);
+    }
+
+    if (input.isEmpty) {
+      return;
+    }
+
+    final results = await ref
+        .read(bangDatabaseProvider)
+        .bangDao
+        .queryBangs(input)
+        .get();
+
+    if (ref.mounted && _pendingInput == input && !_streamController.isClosed) {
+      _streamController.add(results);
     }
   }
 
@@ -101,8 +165,14 @@ class SeamlessBang extends _$SeamlessBang {
 
   @override
   AsyncValue<List<BangData>> build() {
-    return _hasSearch
-        ? ref.watch(bangSearchProvider)
-        : ref.watch(frequentBangListProvider);
+    // Both are watched unconditionally, and only the presentation switches.
+    // `search()` pushes into `bangSearchProvider` before the rebuild that
+    // starts watching it lands; watching it only once `_hasSearch` flipped
+    // left that provider without a listener in between, so autoDispose tore it
+    // down — closing the stream controller and dropping the first query.
+    final searchResults = ref.watch(bangSearchProvider);
+    final frequentBangs = ref.watch(frequentBangListProvider);
+
+    return _hasSearch ? searchResults : frequentBangs;
   }
 }

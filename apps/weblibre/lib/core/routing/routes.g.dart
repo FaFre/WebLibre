@@ -231,6 +231,9 @@ mixin $NewUserBangRoute on GoRouteData {
 mixin $EditUserBangRoute on GoRouteData {
   static EditUserBangRoute _fromState(GoRouterState state) => EditUserBangRoute(
     initialBang: state.uri.queryParameters['initial-bang']!,
+    fork:
+        _$convertMapValue('fork', state.uri.queryParameters, _$boolConverter) ??
+        false,
   );
 
   EditUserBangRoute get _self => this as EditUserBangRoute;
@@ -238,7 +241,10 @@ mixin $EditUserBangRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
     '/bangs/user/edit',
-    queryParams: {'initial-bang': _self.initialBang},
+    queryParams: {
+      'initial-bang': _self.initialBang,
+      if (_self.fork != false) 'fork': _self.fork.toString(),
+    },
   );
 
   @override
@@ -354,6 +360,26 @@ mixin $BangSubCategoryRoute on GoRouteData {
 
   @override
   void replace(BuildContext context) => context.replace(location);
+}
+
+T? _$convertMapValue<T>(
+  String key,
+  Map<String, String> map,
+  T? Function(String) converter,
+) {
+  final value = map[key];
+  return value == null ? null : converter(value);
+}
+
+bool _$boolConverter(String value) {
+  switch (value) {
+    case 'true':
+      return true;
+    case 'false':
+      return false;
+    default:
+      throw UnsupportedError('Cannot convert "$value" into a bool.');
+  }
 }
 
 RouteBase get $bookmarksRoute => GoRouteData.$route(
@@ -947,26 +973,6 @@ mixin $SelectProfileRoute on GoRouteData {
 
   @override
   void replace(BuildContext context) => context.replace(location);
-}
-
-T? _$convertMapValue<T>(
-  String key,
-  Map<String, String> map,
-  T? Function(String) converter,
-) {
-  final value = map[key];
-  return value == null ? null : converter(value);
-}
-
-bool _$boolConverter(String value) {
-  switch (value) {
-    case 'true':
-      return true;
-    case 'false':
-      return false;
-    default:
-      throw UnsupportedError('Cannot convert "$value" into a bool.');
-  }
 }
 
 extension<T extends Enum> on Map<T, String> {

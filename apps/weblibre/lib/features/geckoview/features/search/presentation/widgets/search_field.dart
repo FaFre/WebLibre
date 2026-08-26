@@ -49,6 +49,15 @@ class SearchField extends HookConsumerWidget {
   final BangData? activeBang;
   final bool showBangIcon;
 
+  /// Whether [activeBang] was explicitly chosen for this search — a provider
+  /// chip or an inline `!bang` — rather than being the standing default.
+  ///
+  /// Picking a provider states the intent to *search*, so the inline URL
+  /// completion is no longer what submitting should mean. The suggestion stays
+  /// on screen and can still be taken by tapping it; it just no longer wins by
+  /// default when the user hits enter.
+  final bool explicitBangSelected;
+
   /// Overrides the clear (`x`) button behaviour. When null, the button just
   /// clears the text. When provided, the callback decides what to do (e.g.
   /// restore a previous value first, then clear on the next press).
@@ -66,6 +75,7 @@ class SearchField extends HookConsumerWidget {
     this.minLines = 1,
     this.unfocusOnTapOutside = true,
     this.showBangIcon = true,
+    this.explicitBangSelected = false,
     this.autofocus = false,
     this.textFieldKey,
     this.hint,
@@ -132,7 +142,8 @@ class SearchField extends HookConsumerWidget {
       child: AutoSuggestTextField(
         controller: textEditingController,
         suggestion: suggestion.value,
-        acceptSuggestionOnSubmit: acceptSuggestionOnSubmit,
+        acceptSuggestionOnSubmit:
+            acceptSuggestionOnSubmit && !explicitBangSelected,
         enableSuggestions: true,
         autocorrect: false,
         enableIMEPersonalizedLearning: !privateMode,

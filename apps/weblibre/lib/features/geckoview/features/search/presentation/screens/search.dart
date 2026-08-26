@@ -30,6 +30,7 @@ import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/data/models/web_search_bang.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/providers/search.dart';
+import 'package:weblibre/features/bangs/domain/services/bang_query.dart';
 import 'package:weblibre/features/bangs/domain/services/reverse_match.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
@@ -197,6 +198,11 @@ class SearchScreen extends HookConsumerWidget {
       () {
         final text = searchTextController.text;
         hasUserProvidedInput.value = text.isNotEmpty;
+
+        // Keeps the address bar's provider icon in step with a bang the user
+        // is typing. Submitting resolves again from the submitted text, so a
+        // lookup still in flight here can never decide where a search goes.
+        unawaited(ref.read(inlineBangProvider.notifier).resolve(text));
 
         final metaState = ref.read(metaSearchControllerProvider);
 
@@ -401,8 +407,37 @@ class SearchScreen extends HookConsumerWidget {
 
     // The active selection is whichever one is set (site takes priority if both somehow set)
     final selectedBang = siteSelectedBang ?? globalSelectedBang;
-    final activeBang = selectedBang ?? defaultSearchBang;
-    final showBangIcon = selectedBang != null;
+
+    // A bang written into the field beats a chip: it is the more explicit and
+    // more recent statement of where this one search should go.
+    final inlineBang = ref.watch(inlineBangProvider);
+
+    final activeBang = inlineBang?.bang ?? selectedBang ?? defaultSearchBang;
+
+    // The user named a provider for this search instead of falling back to the
+    // default. That drives the field's provider icon, and it also settles what
+    // enter means: search with that provider, not open the completed URL.
+    final showBangIcon = inlineBang != null || selectedBang != null;
+
+    // What the rest of the modules should search for. A resolved bang is an
+    // instruction, not a search term, so it is lifted out before bookmarks,
+    // history and the rest see the text. An unresolved `!foo` stays put — it
+    // is just a word the user typed.
+    final sampledQueryText = useValueNotifier(sampledSearchText.value);
+    useEffect(() {
+      void sync() {
+        final value = sampledSearchText.value;
+        // Only the text matters downstream; selection and composing belong to
+        // the field the user is actually editing.
+        sampledQueryText.value = inlineBang == null
+            ? value
+            : TextEditingValue(text: parseBangInput(value.text).query);
+      }
+
+      sync();
+      sampledSearchText.addListener(sync);
+      return () => sampledSearchText.removeListener(sync);
+    }, [sampledSearchText, sampledQueryText, inlineBang]);
 
     useEffect(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -476,11 +511,21 @@ class SearchScreen extends HookConsumerWidget {
     }
 
     Future<void> submitSearch(String query) async {
-      if (activeBang != null && (formKey.currentState?.validate() == true)) {
-        final uri = await resolveSearchUri(activeBang, query);
-        if (uri != null) {
-          await openUriInTab(uri);
-        }
+      if (formKey.currentState?.validate() != true) {
+        return;
+      }
+
+      // Suggestion rows carry the typed text forward verbatim, bang and all.
+      final inline = await ref.read(inlineBangProvider.notifier).resolve(query);
+      final bang = inline?.bang ?? activeBang;
+
+      if (bang == null) {
+        return;
+      }
+
+      final uri = await resolveSearchUri(bang, inline?.query ?? query);
+      if (uri != null) {
+        await openUriInTab(uri);
       }
     }
 
@@ -497,7 +542,7 @@ class SearchScreen extends HookConsumerWidget {
 
       autoSubmittedInitialSearch.value = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        unawaited(resolveSearchUri(activeBang, initialSearchText!));
+        unawaited(submitSearch(initialSearchText!));
       });
 
       return null;
@@ -565,6 +610,8 @@ class SearchScreen extends HookConsumerWidget {
     );
 
     final searchWidgets = <SearchModuleType, Widget>{
+      // The bang picker is the one module that wants the raw text: `!g` is
+      // what it filters on.
       SearchModuleType.searchProviders: SearchProvidersSection(
         searchTextController: searchTextController,
         domain: isEditMode ? existingTabState.url.host : null,
@@ -573,28 +620,28 @@ class SearchScreen extends HookConsumerWidget {
         searchTextController: searchTextController,
         submitSearch: submitSearch,
       ),
-      SearchModuleType.tabs: TabSearch(searchTextListenable: sampledSearchText),
+      SearchModuleType.tabs: TabSearch(searchTextListenable: sampledQueryText),
       SearchModuleType.bookmarks: BookmarkSearch(
-        searchTextListenable: sampledSearchText,
+        searchTextListenable: sampledQueryText,
         onUriSelected: openUriInTab,
       ),
       SearchModuleType.articles: FeedSearch(
-        searchTextNotifier: sampledSearchText,
+        searchTextNotifier: sampledQueryText,
       ),
       SearchModuleType.history: HistorySuggestions(
-        searchTextListenable: sampledSearchText,
+        searchTextListenable: sampledQueryText,
         onUriSelected: openUriInTab,
       ),
       SearchModuleType.localHistory: LocalHistorySuggestions(
-        searchTextListenable: sampledSearchText,
+        searchTextListenable: sampledQueryText,
         onUriSelected: openUriInTab,
       ),
       SearchModuleType.combinedHistory: CombinedHistorySuggestions(
-        searchTextListenable: sampledSearchText,
+        searchTextListenable: sampledQueryText,
         onUriSelected: openUriInTab,
       ),
       SearchModuleType.popularSites: PopularSitesSuggestions(
-        searchTextListenable: sampledSearchText,
+        searchTextListenable: sampledQueryText,
         onUriSelected: openUriInTab,
       ),
     };
@@ -732,6 +779,7 @@ class SearchScreen extends HookConsumerWidget {
                     child: SearchField(
                       textFieldKey: textFieldKey,
                       showBangIcon: showBangIcon,
+                      explicitBangSelected: showBangIcon,
                       textEditingController: searchTextController,
                       focusNode: searchFocusNode,
                       maxLines: isEditMode ? 3 : 1,
@@ -771,6 +819,13 @@ class SearchScreen extends HookConsumerWidget {
                           case NavigateInputClassification(:final uri):
                             await openUriInTab(uri);
                           case SearchInputClassification(:final query):
+                            // Resolved from the submitted text rather than the
+                            // provider's state so a lookup still in flight for
+                            // the last keystroke cannot misroute the search.
+                            final inline = await ref
+                                .read(inlineBangProvider.notifier)
+                                .resolve(query);
+
                             // Read from both providers - use site if set, otherwise global
                             final siteBang = isEditMode
                                 ? ref.read(
@@ -783,6 +838,7 @@ class SearchScreen extends HookConsumerWidget {
                               selectedBangDataProvider(),
                             );
                             final bang =
+                                inline?.bang ??
                                 siteBang ??
                                 globalBang ??
                                 await ref.read(
@@ -791,7 +847,12 @@ class SearchScreen extends HookConsumerWidget {
 
                             if (bang == null) return;
 
-                            final uri = await resolveSearchUri(bang, query);
+                            // `!g` on its own carries no query, which every
+                            // bang already reads as "open the site itself".
+                            final uri = await resolveSearchUri(
+                              bang,
+                              inline?.query ?? query,
+                            );
                             if (uri == null) {
                               // Web search dispatched in-app; reset edit state.
                               isEditingAfterSearch.value = false;

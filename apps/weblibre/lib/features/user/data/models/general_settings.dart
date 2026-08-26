@@ -185,6 +185,13 @@ class GeneralSettings with FastEquatable {
   final bool screenshotProtectionEnabled;
   @BangKeyConverter()
   final BangKey? defaultSearchProvider;
+
+  /// Bangs the user keeps in the search-provider strip regardless of how often
+  /// they are used. Frequency-ranked chips churn as habits change; a pin does
+  /// not. Ordered, because the order is the user's own.
+  @BangKeyListConverter()
+  final List<BangKey> pinnedBangs;
+
   final SearchSuggestionProviders defaultSearchSuggestionsProvider;
   final bool createChildTabsOption;
   final bool enableLocalAiFeatures;
@@ -373,6 +380,7 @@ class GeneralSettings with FastEquatable {
     required this.deleteBrowsingDataOnQuit,
     required this.screenshotProtectionEnabled,
     required this.defaultSearchProvider,
+    required this.pinnedBangs,
     required this.defaultSearchSuggestionsProvider,
     required this.createChildTabsOption,
     required this.enableLocalAiFeatures,
@@ -456,6 +464,7 @@ class GeneralSettings with FastEquatable {
     this.deleteBrowsingDataOnQuit,
     bool? screenshotProtectionEnabled,
     BangKey? defaultSearchProvider,
+    List<BangKey>? pinnedBangs,
     SearchSuggestionProviders? defaultSearchSuggestionsProvider,
     bool? createChildTabsOption,
     bool? enableLocalAiFeatures,
@@ -535,6 +544,7 @@ class GeneralSettings with FastEquatable {
        enforceReadability = enforceReadability ?? false,
        screenshotProtectionEnabled = screenshotProtectionEnabled ?? false,
        defaultSearchProvider = defaultSearchProvider ?? _fallbackSearchProvider,
+       pinnedBangs = pinnedBangs ?? const [],
        defaultSearchSuggestionsProvider =
            defaultSearchSuggestionsProvider ?? _fallbackAutocompleteProvider,
        createChildTabsOption = createChildTabsOption ?? false,
@@ -755,6 +765,7 @@ class GeneralSettings with FastEquatable {
     deleteBrowsingDataOnQuit,
     screenshotProtectionEnabled,
     defaultSearchProvider,
+    pinnedBangs,
     defaultSearchSuggestionsProvider,
     createChildTabsOption,
     enableLocalAiFeatures,

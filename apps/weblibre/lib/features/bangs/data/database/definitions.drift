@@ -161,8 +161,19 @@ queryBangs WITH BangData:
       b.*,
       bf.frequency,
       bf.last_used,
-      bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank
-    FROM 
+      bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank,
+      CASE
+        WHEN :triggerCandidate = '' THEN 2
+        WHEN b."trigger" LIKE :triggerCandidate || '%' THEN 0
+        ELSE 2
+      END AS primary_match_rank,
+      CASE
+        WHEN :triggerCandidate = '' THEN 2
+        WHEN b."trigger" = :triggerCandidate COLLATE NOCASE THEN 0
+        WHEN b."trigger" LIKE :triggerCandidate || '%' THEN 1
+        ELSE 2
+      END AS match_rank
+    FROM
       bang_fts(:query) fts
     INNER JOIN
       bang b ON b.rowid = fts.rowid
@@ -171,12 +182,23 @@ queryBangs WITH BangData:
     CROSS JOIN weights
   ),
   trigger_results AS (
-    SELECT 
+    SELECT
       b.*,
       bf.frequency,
       bf.last_used,
-      bm25(bang_triggers_fts, weights.additional_trigger) AS weighted_rank
-    FROM 
+      bm25(bang_triggers_fts, weights.additional_trigger) AS weighted_rank,
+      CASE
+        WHEN :triggerCandidate = '' THEN 2
+        WHEN bt.additional_trigger LIKE :triggerCandidate || '%' THEN 1
+        ELSE 2
+      END AS primary_match_rank,
+      CASE
+        WHEN :triggerCandidate = '' THEN 2
+        WHEN bt.additional_trigger = :triggerCandidate COLLATE NOCASE THEN 0
+        WHEN bt.additional_trigger LIKE :triggerCandidate || '%' THEN 1
+        ELSE 2
+      END AS match_rank
+    FROM
       bang_triggers_fts(:query) tfts
     INNER JOIN
       bang_triggers bt ON bt.rowid = tfts.rowid
@@ -191,14 +213,26 @@ queryBangs WITH BangData:
     UNION ALL
     SELECT * FROM trigger_results
   )
-  SELECT 
+  -- Both aggregates are needed, which forfeits SQLite's bare-column rule.
+  -- That is harmless here: every row grouped under one ("trigger", "group")
+  -- carries the same bang and frequency, only the two ranks differ.
+  SELECT
     *,
-    MIN(weighted_rank) AS weighted_rank
+    MIN(weighted_rank) AS best_rank,
+    MIN(primary_match_rank) AS best_primary_match_rank,
+    MIN(match_rank) AS best_match_rank
   FROM combined_results
   GROUP BY "trigger", "group"
-  ORDER BY 
-    weighted_rank ASC,
-    frequency NULLS LAST;
+  ORDER BY
+    best_match_rank ASC,
+    best_primary_match_rank ASC,
+    -- A user bang overriding a synced one has to be the visible winner, not
+    -- just the one an inline `!trigger` happens to pick.
+    ("group" = :preferredGroup) DESC,
+    best_rank ASC,
+    frequency DESC NULLS LAST,
+    website_name ASC
+  LIMIT :limit;
 
 queryBangsBasic WITH BangData:
   WITH weights AS (
@@ -212,25 +246,47 @@ queryBangsBasic WITH BangData:
       b.*,
       bf.frequency,
       bf.last_used,
-      bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank
-    FROM 
+      bm25(bang_fts, weights."trigger", weights.website_name) AS weighted_rank,
+      CASE
+        WHEN :triggerCandidate = '' THEN 2
+        WHEN b."trigger" LIKE :triggerCandidate || '%' THEN 0
+        ELSE 2
+      END AS primary_match_rank,
+      CASE
+        WHEN :triggerCandidate = '' THEN 2
+        WHEN b."trigger" = :triggerCandidate COLLATE NOCASE THEN 0
+        WHEN b."trigger" LIKE :triggerCandidate || '%' THEN 1
+        ELSE 2
+      END AS match_rank
+    FROM
       bang_fts fts
     INNER JOIN
       bang b ON b.rowid = fts.rowid
     LEFT JOIN
       bang_frequency bf ON b."trigger" = bf."trigger" AND b."group" = bf."group"
     CROSS JOIN weights
-    WHERE 
+    WHERE
       fts."trigger" LIKE :query OR
       fts.website_name LIKE :query
   ),
   trigger_results AS (
-    SELECT 
+    SELECT
       b.*,
       bf.frequency,
       bf.last_used,
-      bm25(bang_triggers_fts, weights.additional_trigger) AS weighted_rank
-    FROM 
+      bm25(bang_triggers_fts, weights.additional_trigger) AS weighted_rank,
+      CASE
+        WHEN :triggerCandidate = '' THEN 2
+        WHEN bt.additional_trigger LIKE :triggerCandidate || '%' THEN 1
+        ELSE 2
+      END AS primary_match_rank,
+      CASE
+        WHEN :triggerCandidate = '' THEN 2
+        WHEN bt.additional_trigger = :triggerCandidate COLLATE NOCASE THEN 0
+        WHEN bt.additional_trigger LIKE :triggerCandidate || '%' THEN 1
+        ELSE 2
+      END AS match_rank
+    FROM
       bang_triggers_fts tfts
     INNER JOIN
       bang_triggers bt ON bt.rowid = tfts.rowid
@@ -239,7 +295,7 @@ queryBangsBasic WITH BangData:
     LEFT JOIN
       bang_frequency bf ON b."trigger" = bf."trigger" AND b."group" = bf."group"
     CROSS JOIN weights
-    WHERE 
+    WHERE
       tfts.additional_trigger LIKE :query
   ),
   combined_results AS (
@@ -247,14 +303,41 @@ queryBangsBasic WITH BangData:
     UNION ALL
     SELECT * FROM trigger_results
   )
-  SELECT 
+  -- bm25() over a non-MATCH query is a constant 0.0, so this path leans
+  -- entirely on the trigger match rank and the frequency tiebreak.
+  SELECT
     *,
-    MIN(weighted_rank) AS weighted_rank
+    MIN(weighted_rank) AS best_rank,
+    MIN(primary_match_rank) AS best_primary_match_rank,
+    MIN(match_rank) AS best_match_rank
   FROM combined_results
   GROUP BY "trigger", "group"
-  ORDER BY 
-    weighted_rank ASC,
-    frequency NULLS LAST;
+  ORDER BY
+    best_match_rank ASC,
+    best_primary_match_rank ASC,
+    -- A user bang overriding a synced one has to be the visible winner, not
+    -- just the one an inline `!trigger` happens to pick.
+    ("group" = :preferredGroup) DESC,
+    best_rank ASC,
+    frequency DESC NULLS LAST,
+    website_name ASC
+  LIMIT :limit;
+
+-- Every bang that answers to what the user typed after `!`, by its own trigger
+-- or by an alias. Which one actually wins is decided in Dart, where
+-- `BangGroup.precedence` lives; the candidate set is tiny.
+bangsByTrigger WITH BangData:
+  SELECT v.*
+  FROM bang_data_view v
+  WHERE
+    v."trigger" = :trigger COLLATE NOCASE OR
+    EXISTS (
+      SELECT 1 FROM bang_triggers bt
+      WHERE
+        bt."trigger" = v."trigger" AND
+        bt."group" = v."group" AND
+        bt.additional_trigger = :trigger COLLATE NOCASE
+    );
 
 categoriesJson:
   WITH categories AS (

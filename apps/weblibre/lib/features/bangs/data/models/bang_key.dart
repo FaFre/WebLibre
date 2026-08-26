@@ -81,3 +81,27 @@ class BangKeyConverter implements JsonConverter<BangKey?, String?> {
     return object?.toString();
   }
 }
+
+/// Stores an ordered list of keys as their string form. Entries that no longer
+/// parse are dropped rather than failing the whole list — a key can outlive the
+/// bang it points at (a repository resync, a deleted user bang), and one stale
+/// pin must not cost the user the rest of them.
+class BangKeyListConverter
+    implements JsonConverter<List<BangKey>, List<dynamic>?> {
+  const BangKeyListConverter();
+
+  @override
+  List<BangKey> fromJson(List<dynamic>? json) {
+    return json
+            ?.whereType<String>()
+            .map(BangKey.tryFromString)
+            .nonNulls
+            .toList() ??
+        const [];
+  }
+
+  @override
+  List<dynamic> toJson(List<BangKey> object) {
+    return object.map((key) => key.toString()).toList();
+  }
+}

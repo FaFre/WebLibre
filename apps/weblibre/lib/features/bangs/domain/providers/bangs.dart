@@ -25,6 +25,7 @@ import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/data/models/search_history_entry.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/bangs/domain/repositories/sync.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'bangs.g.dart';
@@ -91,6 +92,42 @@ Stream<List<BangData>> bangList(
 Stream<List<BangData>> frequentBangList(Ref ref) {
   final repository = ref.watch(bangDataRepositoryProvider.notifier);
   return repository.watchFrequentBangs();
+}
+
+/// The bangs the user pinned, in the order they pinned them.
+///
+/// Pins that no longer resolve to a bang are skipped rather than rendered as
+/// gaps — a repository resync or a deleted user bang can strand a key.
+@Riverpod()
+Stream<List<BangData>> pinnedBangList(Ref ref) {
+  final keys = ref.watch(
+    generalSettingsWithDefaultsProvider.select((value) => value.pinnedBangs),
+  );
+
+  final repository = ref.watch(bangDataRepositoryProvider.notifier);
+  return repository.watchPinnedBangs(keys);
+}
+
+/// Adds and removes pins. Pinning is idempotent, so a chip and a details screen
+/// can both drive it without having to agree on the current state first.
+@Riverpod(keepAlive: true)
+class PinnedBangs extends _$PinnedBangs {
+  @override
+  void build() {}
+
+  Future<void> toggle(BangKey key) {
+    return ref.read(generalSettingsRepositoryProvider.notifier).updateSettings((
+      settings,
+    ) {
+      final pinned = List.of(settings.pinnedBangs);
+
+      if (!pinned.remove(key)) {
+        pinned.add(key);
+      }
+
+      return settings.copyWith.pinnedBangs(pinned);
+    });
+  }
 }
 
 @Riverpod()

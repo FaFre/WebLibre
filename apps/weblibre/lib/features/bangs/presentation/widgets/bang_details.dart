@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -24,6 +26,7 @@ import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
+import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -48,6 +51,12 @@ class BangDetails extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+
+    final isPinned = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.pinnedBangs.contains(bangData.toKey()),
+      ),
+    );
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -88,6 +97,34 @@ class BangDetails extends HookConsumerWidget {
                         size: 20.0,
                       ),
                     ),
+                  if (bangData.group != BangGroup.user)
+                    IconButton(
+                      tooltip: 'Customize as your own bang',
+                      icon: const Icon(MdiIcons.pencilBoxOutline),
+                      onPressed: () async {
+                        // Seeds a user bang from this one. With user bangs
+                        // taking precedence, keeping the same trigger is how
+                        // a synced bang gets overridden.
+                        await EditUserBangRoute(
+                          initialBang: jsonEncode(bangData.toJson()),
+                          fork: true,
+                        ).push(context);
+                      },
+                    ),
+                  IconButton(
+                    tooltip: isPinned
+                        ? 'Unpin from search providers'
+                        : 'Pin to search providers',
+                    icon: Icon(
+                      isPinned ? MdiIcons.pin : MdiIcons.pinOutline,
+                      color: isPinned ? theme.colorScheme.primary : null,
+                    ),
+                    onPressed: () async {
+                      await ref
+                          .read(pinnedBangsProvider.notifier)
+                          .toggle(bangData.toKey());
+                    },
+                  ),
                 ],
               ),
               const SizedBox(height: 8.0),

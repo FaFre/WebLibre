@@ -27,6 +27,7 @@ import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/data/models/search_history_entry.dart';
 import 'package:weblibre/features/bangs/data/providers.dart';
+import 'package:weblibre/features/bangs/domain/services/bang_resolution.dart';
 
 part 'data.g.dart';
 
@@ -90,6 +91,26 @@ class BangDataRepository extends _$BangDataRepository {
         .watch();
   }
 
+  /// Resolves [keys] to bangs, preserving the caller's order and silently
+  /// dropping keys nothing answers to.
+  Stream<List<BangData>> watchPinnedBangs(List<BangKey> keys) {
+    if (keys.isEmpty) {
+      return Stream.value(const []);
+    }
+
+    // One query over the triggers, then paired back up by full key — the
+    // trigger alone is not unique across groups.
+    return ref
+        .read(bangDatabaseProvider)
+        .bangDao
+        .getBangDataList(triggers: keys.map((key) => key.trigger).toSet())
+        .watch()
+        .map((bangs) {
+          final byKey = {for (final bang in bangs) bang.toKey(): bang};
+          return keys.map((key) => byKey[key]).nonNulls.toList();
+        });
+  }
+
   Stream<List<BangData>> watchFrequentBangs({Iterable<BangGroup>? groups}) {
     return ref
         .read(bangDatabaseProvider)
@@ -150,11 +171,28 @@ class BangDataRepository extends _$BangDataRepository {
     return ref.read(bangDatabaseProvider).bangFrequency.deleteAll();
   }
 
-  Future<int> resetFrequency(String trigger) {
+  /// Keyed by the full [BangKey], not by trigger alone: a user bang and the
+  /// synced one it overrides share a trigger, and resetting one must not wipe
+  /// the other's usage history.
+  Future<int> resetFrequency(BangKey key) {
     return ref
         .read(bangDatabaseProvider)
         .bangFrequency
-        .deleteWhere((t) => t.trigger.equals(trigger));
+        .deleteWhere(
+          (t) => t.trigger.equals(key.trigger) & t.group.equalsValue(key.group),
+        );
+  }
+
+  /// Resolves a trigger the user wrote inline (`!g`) to a bang, across every
+  /// group and including aliases.
+  Future<BangData?> resolveTrigger(String trigger) async {
+    final candidates = await ref
+        .read(bangDatabaseProvider)
+        .bangDao
+        .getBangDataByTrigger(trigger)
+        .get();
+
+    return pickBangByPrecedence(candidates, trigger);
   }
 
   Future<BangData?> getBang(BangKey key) {
