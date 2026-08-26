@@ -66,6 +66,18 @@ class AccountAuthRepository extends _$AccountAuthRepository {
   Timer? _signingInTimeout;
   Timer? _restoreRetryTimer;
 
+  /// The live client, tracked here as well as on the state.
+  ///
+  /// Not a duplicate for convenience: `onDispose` has to close it, and reading
+  /// `state` inside a life-cycle throws `UnmountedRefException` — the ref is
+  /// already down by the time the callback runs. So the old
+  /// `state.value?.client` threw on *every* disposal and rebuild of this
+  /// provider, before it ever reached `dispose()`. Nothing surfaced it, because
+  /// Riverpod reports a failing dispose callback to the zone rather than to the
+  /// caller: the visible symptom was a leaked HTTP client and a still-running
+  /// token-refresh timer per rebuild.
+  SupabaseClient? _client;
+
   /// Handoff code currently being redeemed, or `null` when idle. The OS can
   /// deliver the `weblibre://account/callback` deep link more than once in
   /// quick succession (observed ~12ms apart on some devices, see issue #460).
@@ -89,7 +101,8 @@ class AccountAuthRepository extends _$AccountAuthRepository {
       _signingInTimeout?.cancel();
       _restoreRetryTimer?.cancel();
       await _authSubscription?.cancel();
-      final client = state.value?.client;
+      final client = _client;
+      _client = null;
       await client?.dispose();
     });
 
@@ -99,46 +112,101 @@ class AccountAuthRepository extends _$AccountAuthRepository {
     final data = await _store.read();
 
     if (data.session == null) {
-      return AccountAuthState();
+      // Signed out, but not necessarily blank. A record can hold the identity
+      // and the sync key with no session — that is exactly what the revoked-token
+      // branch below leaves behind, and what an older backup restores. Dropping
+      // the identity here would throw away the one thing that tells the user
+      // *which* account to sign back into to finish the restore.
+      return AccountAuthState(
+        email: data.email,
+        displayName: data.displayName ?? data.email,
+        userId: data.userId,
+        syncKey: data.syncKey,
+      );
     }
 
+    // Created outside the try so every failure path can close it. It owns a
+    // token-refresh timer of its own, and `_scheduleRestoreRetry` re-runs this
+    // build every 30 seconds while the network is down — so a client abandoned
+    // on the error path is not one leak but one per retry, each still waking up
+    // to talk to the account backend.
+    final client = _createClient();
+
     try {
-      final client = _createClient();
       final response = await client.auth.setSession(data.session!.refreshToken);
 
-      if (response.session != null) {
-        _listenToAuthState(client);
-        final user = response.session!.user;
-
-        await _persistSession(response.session!, data);
-
-        return AccountAuthState(
-          status: AccountAuthStatus.signedIn,
-          email: user.email,
-          displayName:
-              user.userMetadata?['display_name'] as String? ??
-              user.userMetadata?['full_name'] as String? ??
-              user.email,
-          userId: user.id,
-          syncKey: data.syncKey,
-          client: client,
-        );
-      } else {
+      if (response.session == null) {
         await client.dispose();
         return AccountAuthState();
       }
+
+      final user = response.session!.user;
+      await _persistSession(response.session!);
+
+      // Committed only once nothing further can throw: past this point the
+      // client belongs to the notifier, and the catch handlers below must not
+      // close it out from under `_client`.
+      _client = client;
+      _listenToAuthState(client);
+
+      return AccountAuthState(
+        status: AccountAuthStatus.signedIn,
+        email: user.email,
+        displayName:
+            user.userMetadata?['display_name'] as String? ??
+            user.userMetadata?['full_name'] as String? ??
+            user.email,
+        userId: user.id,
+        // The same rule `_persistSession` just applied to the stored record,
+        // so the state cannot claim a key the store no longer holds.
+        syncKey: _syncKeyForUser(data, user.id),
+        client: client,
+      );
     } on AuthRetryableFetchException catch (e) {
       // Transient network error — preserve session and retry shortly.
+      await client.dispose();
       return _transientRestoreFailure(data, e);
     } on AuthException {
-      // Definitive auth failure (expired/revoked token) — clear credentials.
-      await _store.clear();
-      return AccountAuthState();
+      // Definitive auth failure (expired/revoked token). Only the *session* goes:
+      // a refresh token the server no longer honours says nothing about the
+      // end-to-end sync key, which is not a session artefact but the thing that
+      // decrypts the user's snapshots. Clearing both — as this used to — turned
+      // an expired login into the destruction of the key, and restoring an older
+      // backup is precisely the case that arrives with a stale token.
+      //
+      // The identity is kept beside it, so a later sign-in can prove the key
+      // still belongs to the same account before reusing it.
+      await client.dispose();
+      await _store.clearSession();
+      return _sessionExpiredState(data);
     } catch (e) {
       // Non-auth error (e.g. SocketException) — also transient, preserve.
+      await client.dispose();
       return _transientRestoreFailure(data, e);
     }
   }
+
+  /// What the user sees when a stored session is definitively no longer valid.
+  ///
+  /// The message is written here rather than passed as a fallback to
+  /// [_sanitizeAuthError], which was unreachable: that helper returns
+  /// `AuthException.message` for every `AuthException`, so the branch always
+  /// rendered the server's own wording — "Invalid Refresh Token: Refresh Token
+  /// Not Found" — which tells the user nothing about what happened or what to
+  /// do, and least of all that their sync key survived.
+  AccountAuthState _sessionExpiredState(AccountPersistedData data) =>
+      AccountAuthState(
+        status: AccountAuthStatus.error,
+        email: data.email,
+        displayName: data.displayName ?? data.email,
+        userId: data.userId,
+        syncKey: data.syncKey,
+        lastError: data.syncKey != null
+            ? 'Your saved sign-in is no longer valid. Sign in again to finish '
+                  'restoring this account — your sync key is kept.'
+            : 'Your saved sign-in is no longer valid. Sign in again to '
+                  'continue.',
+      );
 
   AccountAuthState _transientRestoreFailure(
     AccountPersistedData data,
@@ -193,27 +261,84 @@ class AccountAuthRepository extends _$AccountAuthRepository {
   void _listenToAuthState(SupabaseClient client) {
     unawaited(_authSubscription?.cancel());
     _authSubscription = client.auth.onAuthStateChange.listen((data) {
-      if (data.event == AuthChangeEvent.signedOut ||
-          // ignore: deprecated_member_use
-          data.event == AuthChangeEvent.userDeleted) {
-        unawaited(_handleSignedOut());
+      // ignore: deprecated_member_use
+      if (data.event == AuthChangeEvent.userDeleted) {
+        // The account itself is gone, so there is nothing for the sync key to
+        // belong to and no sign-in that could ever recover it.
+        unawaited(_reportingFailure('forgetting the account', _forgetAccount));
+      } else if (data.event == AuthChangeEvent.signedOut) {
+        // *Not* the user's doing. This is what the client emits when a refresh
+        // is definitively rejected mid-session — a revoked token, a password
+        // changed on another device. Treating it as a deliberate sign-out is
+        // how the startup path used to destroy the sync key, and doing it here
+        // instead would have left exactly the same hole open at runtime.
+        unawaited(
+          _reportingFailure('ending a revoked session', _sessionRevoked),
+        );
       } else if (data.event == AuthChangeEvent.tokenRefreshed &&
           data.session != null) {
-        unawaited(_persistSessionRefresh(data.session!));
+        unawaited(
+          _reportingFailure(
+            'persisting a refreshed session',
+            () => _persistSession(data.session!),
+          ),
+        );
       }
     });
   }
 
-  Future<void> _handleSignedOut() async {
+  /// Runs work started by the auth stream, which has no caller to throw at.
+  ///
+  /// Every branch of the listener touches secure storage, and a platform failure
+  /// there would otherwise leave the zone's error handler as the only thing that
+  /// ever heard about it.
+  Future<void> _reportingFailure(
+    String what,
+    Future<void> Function() work,
+  ) async {
+    try {
+      await work();
+    } catch (error, stackTrace) {
+      logger.e(
+        'Account auth: $what failed',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  /// A session ended without the user asking for it.
+  ///
+  /// Same rule as the startup branch: the session goes, the identity and the
+  /// end-to-end sync key stay, and the user is told to sign in again rather than
+  /// simply finding themselves signed out with their snapshots undecryptable.
+  Future<void> _sessionRevoked() async {
+    final data = await _store.read();
+    await _store.clearSession();
+    await _closeClient();
+    if (!ref.mounted) return;
+    state = AsyncData(_sessionExpiredState(data));
+  }
+
+  /// Everything goes: the user asked to sign out, or the account no longer
+  /// exists.
+  Future<void> _forgetAccount() async {
     await _store.clear();
     // Stashed Privacy Pass tokens survive sign-out: they are anonymous
     // blobs already redeemed against the user's credit balance, and the
     // backend cannot link them back to the issuing account. Clearing them
     // here would destroy prepaid value with no refund path.
-    await _authSubscription?.cancel();
-    final client = state.value?.client;
-    await client?.dispose();
+    await _closeClient();
+    if (!ref.mounted) return;
     state = AsyncData(AccountAuthState());
+  }
+
+  Future<void> _closeClient() async {
+    await _authSubscription?.cancel();
+    _authSubscription = null;
+    final client = _client;
+    _client = null;
+    await client?.dispose();
   }
 
   // -- Sign-in flow ----------------------------------------------------------
@@ -228,8 +353,9 @@ class AccountAuthRepository extends _$AccountAuthRepository {
     try {
       final codes = PkceCodes.generate();
 
-      final data = await _store.read();
-      await _store.write(data.copyWith(pendingCodeVerifier: codes.verifier));
+      await _store.update(
+        (data) => data.copyWith(pendingCodeVerifier: codes.verifier),
+      );
 
       // A nonce the account web app echoes back unchanged. The callback
       // otherwise carries an opaque code and nothing that identifies it, so
@@ -302,8 +428,7 @@ class AccountAuthRepository extends _$AccountAuthRepository {
     _signingInTimeout = null;
 
     // Clear the pending code verifier so a late browser callback is rejected.
-    final data = await _store.read();
-    await _store.write(data.copyWith(pendingCodeVerifier: null));
+    await _store.update((data) => data.copyWith(pendingCodeVerifier: null));
 
     state = AsyncData(AccountAuthState());
   }
@@ -338,43 +463,100 @@ class AccountAuthRepository extends _$AccountAuthRepository {
 
       final refreshToken = result.session['refresh_token'] as String;
 
-      final previousClient = _currentOrEmpty.client;
+      // The redeem response describes the same sign-in twice: once as a Supabase
+      // session and once as an account record. Checked against each other before
+      // anything is created or written, because the two used to be consumed
+      // independently — the session's id decided what was persisted and which
+      // sync key survived, while the account's id decided what the screen said
+      // the user was signed in as. A response where they disagree would have
+      // stored one identity and displayed another, with the key bound to
+      // whichever the storage path happened to pick.
+      final sessionUserId =
+          (result.session['user'] as Map<String, dynamic>?)?['id'] as String?;
+      final accountUserId = result.account['user_id'] as String?;
+      if (sessionUserId != null &&
+          accountUserId != null &&
+          sessionUserId != accountUserId) {
+        logger.e(
+          'Handoff redeem returned a session and an account for different '
+          'users; refusing the sign-in',
+        );
+        throw AccountAuthFlowException(
+          'Sign-in could not be verified. Please try again.',
+        );
+      }
+
+      final previousClient = _client;
       final newClient = _createClient();
 
+      final AuthResponse authResponse;
       try {
-        await newClient.auth.setSession(refreshToken);
+        // `setSession` with no access token is a refresh call: it spends
+        // [refreshToken] against `/token?grant_type=refresh_token` and comes back
+        // with whatever the server issued in its place. With rotation on — the
+        // Supabase default, and this client knows it, it has a branch for
+        // `refresh_token_already_used` — the handoff token in `result.session`
+        // is dead from this moment.
+        authResponse = await newClient.auth.setSession(refreshToken);
       } catch (e) {
         await newClient.dispose();
         rethrow;
       }
 
+      // So the response is the only source for what to persist. Storing
+      // `result.session` instead wrote the token that had just been spent: the
+      // session worked for the rest of the run, because the live client holds
+      // the real one, and then the next cold start restored with a revoked token
+      // and signed the user out of an account they had signed into minutes
+      // earlier. It self-healed only if the client's own refresh timer happened
+      // to fire first and overwrite the record.
+      //
+      // Not fixable by subscribing before the call instead: the `tokenRefreshed`
+      // event `setSession` emits would then race this write rather than replace
+      // it. `build()` has always taken the response here; this path was the one
+      // that did not.
+      final session = authResponse.session;
+      if (session == null) {
+        await newClient.dispose();
+        throw AccountAuthFlowException(
+          'Sign-in could not be completed. Please try again.',
+        );
+      }
+
+      final newUserId = sessionUserId ?? accountUserId;
+      if (newUserId != null && session.user.id != newUserId) {
+        // The identity checked above was a claim in the redeem response; this is
+        // the one the auth server just authenticated, and it is what gets stored
+        // and what the sync key is bound to.
+        logger.e(
+          'The refreshed session names a different user than the redeem '
+          'response; refusing the sign-in',
+        );
+        await newClient.dispose();
+        throw AccountAuthFlowException(
+          'Sign-in could not be verified. Please try again.',
+        );
+      }
+
+      _client = newClient;
       await previousClient?.dispose();
       _listenToAuthState(newClient);
 
-      // Persist session and clear the verifier in one write. Reuse the
-      // existing persisted record via copyWith so any unrelated fields
-      // (notably syncKey) survive a re-sign-in without being clobbered.
-      final persistedSession = PersistedSession.fromJson(result.session);
-      final user = result.session['user'] as Map<String, dynamic>?;
-      await _store.write(
-        data.copyWith(
-          session: persistedSession,
-          userId: user?['id'] as String?,
-          email: user?['email'] as String?,
-          displayName:
-              (user?['user_metadata'] as Map<String, dynamic>?)?['display_name']
-                  as String?,
-          pendingCodeVerifier: null,
-        ),
-      );
+      // One write, through the same helper the restore and token-refresh paths
+      // use — this path used to map the session fields itself, which is exactly
+      // how it came to drift from them.
+      final stored = await _persistSession(session, clearPendingSignIn: true);
 
       state = AsyncData(
         AccountAuthState(
           status: AccountAuthStatus.signedIn,
-          email: result.account['email'] as String?,
-          displayName: result.account['display_name'] as String?,
-          userId: result.account['user_id'] as String?,
-          syncKey: _currentOrEmpty.syncKey,
+          // Read back from what was stored, falling back to the account half, so
+          // the screen and the record can never name different users.
+          email: stored.email ?? result.account['email'] as String?,
+          displayName:
+              stored.displayName ?? result.account['display_name'] as String?,
+          userId: stored.userId,
+          syncKey: stored.syncKey,
           client: newClient,
         ),
       );
@@ -396,36 +578,84 @@ class AccountAuthRepository extends _$AccountAuthRepository {
   }
 
   Future<void> signOut() async {
+    // Unsubscribed *before* asking the server, because our own sign-out comes
+    // back through `onAuthStateChange` as a `signedOut` event — and that handler
+    // now deliberately keeps the identity and sync key. Left listening, it would
+    // race the clear below and put back exactly what a deliberate sign-out is
+    // supposed to remove.
+    await _authSubscription?.cancel();
+    _authSubscription = null;
+
     try {
-      await state.value?.client?.auth.signOut();
+      await _client?.auth.signOut();
     } catch (_) {
       // Sign out may fail if the session is already invalid
     }
-    await _handleSignedOut();
+    await _forgetAccount();
   }
 
   // -- Sync key management ---------------------------------------------------
 
+  /// The sync key [current] may keep now that [newUserId] has signed in.
+  ///
+  /// The key survives a re-authentication on purpose: it is derived from the
+  /// account password, and making the user re-enter it after every expired token
+  /// would be noise. What it must not survive is a change of *account*. Keeping
+  /// it across identities would attach one account's encryption key to another
+  /// — snapshots written under the new account would be encrypted with a key the
+  /// old one also holds, and a restore of the old account's data would appear to
+  /// decrypt.
+  ///
+  /// Ownership has to be *proved*, not merely left uncontradicted. A record
+  /// carrying a sync key but no [AccountPersistedData.userId] is not a record
+  /// whose owner is "whoever asks": no path in this app writes a key without
+  /// also writing the id it was derived under, so a key with no owner is a
+  /// record that was hand-made, damaged, or restored from somewhere else —
+  /// exactly the inputs that must not be trusted. The cost of being wrong the
+  /// safe way is one password prompt, because the key is derived from the
+  /// account password and can be re-entered; the cost of being wrong the other
+  /// way is one account's encryption key silently attached to another's data.
+  static String? _syncKeyForUser(AccountPersistedData current, String? userId) {
+    if (current.syncKey == null) return null;
+    if (current.userId != null && userId != null && userId == current.userId) {
+      return current.syncKey;
+    }
+
+    logger.i(
+      'Dropping the stored sync key: it is not proven to belong to the account '
+      'that just signed in',
+    );
+    return null;
+  }
+
   Future<void> setSyncKey(String key) async {
-    final data = await _store.read();
-    await _store.write(data.copyWith(syncKey: key));
+    await _store.update((data) => data.copyWith(syncKey: key));
+    if (!ref.mounted) return;
     state = AsyncData(_currentOrEmpty.copyWith(syncKey: key));
   }
 
   Future<void> clearSyncKey() async {
-    final data = await _store.read();
-    await _store.write(data.copyWith(syncKey: null));
+    await _store.update((data) => data.copyWith(syncKey: null));
+    if (!ref.mounted) return;
     state = AsyncData(_currentOrEmpty.copyWith(syncKey: null));
   }
 
   // -- Session persistence helpers ------------------------------------------
 
-  Future<void> _persistSession(
-    Session session,
-    AccountPersistedData current,
-  ) async {
-    await _store.write(
-      current.copyWith(
+  /// Writes [session] onto whatever the record holds *now*.
+  ///
+  /// Through `update` rather than a read-then-write, because the caller is often
+  /// the Supabase client's own refresh timer: it fires whenever it likes, and a
+  /// blind write of a record read moments earlier is how a sync key set in
+  /// between gets reverted.
+  /// [clearPendingSignIn] retires the PKCE verifier in the same write, for the
+  /// one caller that has just finished the exchange it belonged to.
+  Future<AccountPersistedData> _persistSession(
+    Session session, {
+    bool clearPendingSignIn = false,
+  }) {
+    return _store.update(
+      (current) => current.copyWith(
         session: PersistedSession(
           accessToken: session.accessToken,
           refreshToken: session.refreshToken!,
@@ -437,12 +667,11 @@ class AccountAuthRepository extends _$AccountAuthRepository {
         displayName:
             session.user.userMetadata?['display_name'] as String? ??
             session.user.userMetadata?['full_name'] as String?,
+        syncKey: _syncKeyForUser(current, session.user.id),
+        pendingCodeVerifier: clearPendingSignIn
+            ? null
+            : current.pendingCodeVerifier,
       ),
     );
-  }
-
-  Future<void> _persistSessionRefresh(Session session) async {
-    final data = await _store.read();
-    await _persistSession(session, data);
   }
 }

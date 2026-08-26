@@ -79,6 +79,30 @@ void main() {
     expect(File(p.join(clone.path, 'metadata.json')).existsSync(), isTrue);
   });
 
+  test('staged credentials that cannot be removed abort the clone', () async {
+    // The failure this used to log and walk past. The staged payload is the
+    // source profile's refresh token, sync key and proxy credentials in plain
+    // JSON; carrying on would leave them unencrypted inside a brand-new profile
+    // the user is told was created successfully. The caller unpacks into a
+    // scratch directory and renames it into place afterwards, so throwing here
+    // creates nothing at all.
+    final staged = Directory(p.join(clone.path, participantStagingDirName));
+    participantDir('secureStorage');
+    File(
+      p.join(staged.path, 'secureStorage', 'secure_storage.json'),
+    ).writeAsStringSync('{"account_auth_data@p:abc":"refresh-token"}');
+
+    // Read+execute only: the entries stay listable, and deleting them fails.
+    final chmod = await Process.run('chmod', ['a-w', staged.path]);
+    expect(chmod.exitCode, 0, reason: 'test needs a POSIX chmod');
+    addTearDown(() => Process.run('chmod', ['u+w', staged.path]));
+
+    await expectLater(
+      applyCloneParticipantPolicy(clone),
+      throwsA(isA<CloneParticipantPolicyFailure>()),
+    );
+  }, skip: Platform.isWindows ? 'needs POSIX permissions' : null);
+
   test('an archive with no participant payload is a no-op', () async {
     // Predates participants entirely.
     File(p.join(clone.path, 'metadata.json')).writeAsStringSync('{}');

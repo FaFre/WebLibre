@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -111,7 +112,61 @@ class SecureStorageParticipant implements MaintenanceParticipant {
     await target.parent.create(recursive: true);
     // Atomic like every other durable record on this path — and this is the one
     // whose payload is credentials, so a torn write is the worst case here.
-    await AtomicJsonFile(target).write(entries);
+    //
+    // Only the archive copy is sanitised. Rollback data is what the live store
+    // looked like a moment ago and has to go back byte for byte; "improving" it
+    // would mean an undo that restores something other than what was undone.
+    await AtomicJsonFile(target).write(
+      context.kind == MaintenanceOperationKind.backup
+          ? _archivable(entries)
+          : entries,
+    );
+  }
+
+  /// [entries] with the account record made fit to travel.
+  ///
+  /// Two things happen to it, and only to it:
+  ///
+  /// - **An in-flight sign-in is dropped.** The PKCE verifier is one half of an
+  ///   exchange whose other half — the one-time handoff code and the state nonce
+  ///   that authenticates the callback — is not in the archive and never will
+  ///   be. Restoring it re-arms a sign-in that can no longer be completed, on a
+  ///   device and in a process that never started it, and the callback path
+  ///   still accepts a nonce-less callback for backwards compatibility. It is
+  ///   the one field here with a lifetime measured in minutes.
+  /// - **A record that is not JSON is left out.** Values are opaque strings to
+  ///   this participant, so `"account_auth_data": "not json"` used to install and
+  ///   verify perfectly while the account layer quietly read it as "never signed
+  ///   in" — a restore reporting success over a credential nothing can use.
+  ///   Dropping it reaches the same signed-out end state without also planting
+  ///   the corrupt blob, and, unlike failing, does not cost the user the tabs and
+  ///   history the archive is mostly made of.
+  ///
+  /// The shallow JSON check is deliberate: `core` cannot import the account
+  /// model, and the deep one already exists where it belongs, in
+  /// `AccountSecureStore.read`.
+  Map<String, String> _archivable(Map<String, String> entries) {
+    final account = entries[accountSecureBaseKey];
+    if (account == null) return entries;
+
+    Map<String, dynamic> decoded;
+    try {
+      decoded = jsonDecode(account) as Map<String, dynamic>;
+    } catch (error) {
+      logger.w(
+        'Leaving an account record that is not readable JSON out of the '
+        'secure-storage snapshot: $error',
+      );
+      return {
+        for (final entry in entries.entries)
+          if (entry.key != accountSecureBaseKey) entry.key: entry.value,
+      };
+    }
+
+    if (!decoded.containsKey(accountPendingCodeVerifierField)) return entries;
+
+    decoded.remove(accountPendingCodeVerifierField);
+    return {...entries, accountSecureBaseKey: jsonEncode(decoded)};
   }
 
   @override
@@ -122,15 +177,31 @@ class SecureStorageParticipant implements MaintenanceParticipant {
 
       case MaintenanceOperationKind.restore:
         final staged = await _read(_file(context.stagedDir, _snapshotFile));
-        if (staged == null) {
-          // An archive from before this participant. Leaving the live records
-          // alone beats deleting an account the archive never carried.
-          logger.i(
-            'Archive carries no secure records; leaving them as they are',
-          );
-          return;
+        switch (staged) {
+          case _SnapshotAbsent():
+            // An archive from before this participant. Leaving the live records
+            // alone beats deleting an account the archive never carried.
+            logger.i(
+              'Archive carries no secure records; leaving them as they are',
+            );
+            return;
+          case _SnapshotUnreadable(:final reason):
+            // Not the same as absent, and the difference decides whether the
+            // user keeps an account. An archive that *does* carry credentials
+            // but whose snapshot will not parse must not be silently downgraded
+            // to "carried none": that would report a successful restore over a
+            // profile whose live credentials are still the pre-restore ones, or
+            // — for a restore that also replaced the databases — an account
+            // paired with somebody else's browsing data.
+            throw StateError(
+              'Secure records in the archive are unusable: $reason',
+            );
+          case _SnapshotPresent(:final entries):
+            // Sanitised again on the way in, not only on the way out: archives
+            // written before this participant learned to strip an in-flight
+            // sign-in — or damaged since — are exactly the ones being restored.
+            await _store(context).replaceAllOwned(_archivable(entries));
         }
-        await _store(context).replaceAllOwned(staged);
 
       case MaintenanceOperationKind.delete:
         await _store(context).deleteAllOwned();
@@ -197,13 +268,36 @@ class SecureStorageParticipant implements MaintenanceParticipant {
 
       case MaintenanceOperationKind.restore:
         final staged = await _read(_file(context.stagedDir, _snapshotFile));
-        if (staged == null) return;
+        // Unreadable already threw in `apply`; reaching here with one would mean
+        // the file rotted between the two calls, and that is still not a restore
+        // anybody should be told succeeded.
+        if (staged is _SnapshotAbsent) return;
+        if (staged is! _SnapshotPresent) {
+          throw StateError('Secure records in the archive became unreadable');
+        }
+        final expected = _archivable(staged.entries);
 
         final live = await _store(context).readAllOwned();
-        final missing = staged.keys.where((key) => !live.containsKey(key));
-        if (missing.isNotEmpty) {
+
+        // Values, not just keys. `replaceAllOwned` deletes what it does not
+        // write, so the live set should equal the staged set exactly — and a key
+        // that exists holding the *previous* profile's refresh token is the one
+        // outcome a presence check calls a success.
+        final wrong = [
+          for (final entry in expected.entries)
+            if (live[entry.key] != entry.value) entry.key,
+        ];
+        if (wrong.isNotEmpty) {
           throw StateError(
-            'Secure records did not restore: ${missing.join(', ')}',
+            'Secure records did not restore: ${wrong.join(', ')}',
+          );
+        }
+
+        final extra = live.keys.where((key) => !expected.containsKey(key));
+        if (extra.isNotEmpty) {
+          throw StateError(
+            'Secure records the archive never carried survived the restore: '
+            '${extra.join(', ')}',
           );
         }
 
@@ -212,6 +306,20 @@ class SecureStorageParticipant implements MaintenanceParticipant {
         if (live.isNotEmpty) {
           throw StateError(
             'Secure records survived the delete: ${live.keys.join(', ')}',
+          );
+        }
+
+        // The unqualified records this profile owns are deleted by `apply` too,
+        // and they are invisible to the suffix enumeration above — so without
+        // this a delete could leave a proxy credential behind and still report
+        // that it had removed everything.
+        final all = await _storage.readAll();
+        final legacy = (await _legacyKeysOwnedBy(
+          context,
+        )).where(all.containsKey);
+        if (legacy.isNotEmpty) {
+          throw StateError(
+            'Legacy secure records survived the delete: ${legacy.join(', ')}',
           );
         }
     }
@@ -229,36 +337,84 @@ class SecureStorageParticipant implements MaintenanceParticipant {
   @override
   Future<void> rollback(MaintenanceParticipantContext context) async {
     final snapshot = await _read(_file(context.rollbackDir, _rollbackFile));
-    if (snapshot == null) {
-      // Not a failure, per the coordinator's rollback contract: recovery cannot
-      // know which participants ran, and no undo data means this one either never
-      // applied or already finalized. Failing here would turn an ordinary
-      // reconciliation into an unrecoverable one.
-      logger.i('No secure-storage rollback data; nothing to put back');
-      return;
-    }
 
-    await _store(context).replaceAllOwned(snapshot);
+    switch (snapshot) {
+      case _SnapshotAbsent():
+        // Not a failure, per the coordinator's rollback contract: recovery cannot
+        // know which participants ran, and no undo data means this one either never
+        // applied or already finalized. Failing here would turn an ordinary
+        // reconciliation into an unrecoverable one.
+        logger.i('No secure-storage rollback data; nothing to put back');
+      case _SnapshotUnreadable(:final reason):
+        // A file that exists and will not parse is the opposite case: the undo
+        // data was written, so this participant did apply, and there is no
+        // second copy of what the live credentials used to be. Reporting a
+        // successful rollback here would tell recovery the profile is back when
+        // its account is gone.
+        throw StateError('Secure-storage rollback data is unusable: $reason');
+      case _SnapshotPresent(:final entries):
+        await _store(context).replaceAllOwned(entries);
+    }
   }
 
-  Future<Map<String, String>?> _read(File file) async {
+  Future<_SnapshotRead> _read(File file) async {
     // `quarantineCorrupt: false` deliberately: for a rollback file this is the
     // only copy of what the live state used to be, so it is never moved aside.
     final result = await AtomicJsonFile(file).read(quarantineCorrupt: false);
 
-    if (result is! AtomicJsonPresent) {
-      if (result is AtomicJsonCorrupt) {
+    switch (result) {
+      case AtomicJsonAbsent():
+        return const _SnapshotAbsent();
+      case AtomicJsonCorrupt(:final reason):
         logger.w(
           'Could not read secure-storage participant data ${file.path}: '
-          '${result.reason}',
+          '$reason',
         );
-      }
-      return null;
-    }
+        return _SnapshotUnreadable(reason);
+      case AtomicJsonPresent(:final json):
+        // A non-string value is not a record this participant ever wrote.
+        // Dropping it quietly, as this used to, turns a mangled snapshot into a
+        // smaller valid-looking one — which restores as "the archive did not
+        // carry that credential" and deletes it from the live store.
+        final bad = json.entries.where((entry) => entry.value is! String);
+        if (bad.isNotEmpty) {
+          final reason =
+              'non-string values for ${bad.map((entry) => entry.key).join(', ')}';
+          logger.w(
+            'Malformed secure-storage participant data ${file.path}: $reason',
+          );
+          return _SnapshotUnreadable(reason);
+        }
 
-    return {
-      for (final entry in result.json.entries)
-        if (entry.value is String) entry.key: entry.value! as String,
-    };
+        return _SnapshotPresent({
+          for (final entry in json.entries) entry.key: entry.value! as String,
+        });
+    }
   }
+}
+
+/// What a staged or rollback snapshot file turned out to be.
+///
+/// Three answers, not two: "there was none" and "there was one and it is
+/// damaged" lead to opposite decisions everywhere this is used, and collapsing
+/// them into a nullable map is what let a damaged snapshot pass for an archive
+/// that simply predated this participant.
+sealed class _SnapshotRead {
+  const _SnapshotRead();
+}
+
+class _SnapshotAbsent extends _SnapshotRead {
+  const _SnapshotAbsent();
+}
+
+class _SnapshotUnreadable extends _SnapshotRead {
+  const _SnapshotUnreadable(this.reason);
+
+  final String reason;
+}
+
+class _SnapshotPresent extends _SnapshotRead {
+  const _SnapshotPresent(this.entries);
+
+  final Map<String, String> entries;
 }

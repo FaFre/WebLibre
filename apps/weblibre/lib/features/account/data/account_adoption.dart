@@ -43,6 +43,7 @@ class UnclaimedAccountRecord {
   const UnclaimedAccountRecord({
     required this.storageKey,
     required this.rawValue,
+    required this.isUsable,
     this.email,
     this.displayName,
   });
@@ -57,6 +58,17 @@ class UnclaimedAccountRecord {
 
   final String? email;
   final String? displayName;
+
+  /// Whether the record can still be turned back into an account.
+  ///
+  /// False when the stored JSON does not decode into [AccountPersistedData] —
+  /// and that is not a cosmetic detail, because `AccountSecureStore.read` parses
+  /// it with the same call. Adopting an unreadable record would file a blob no
+  /// part of the app can use under this profile's key, where the auth repository
+  /// then trips over it on every build. So it is still *shown* — silently
+  /// dropping a credential is what this whole flow refuses to do — but only
+  /// discarding it is offered.
+  final bool isUsable;
 
   /// What to call the account on screen. Never a bare "an account": a choice
   /// about a credential the user cannot identify is not a choice.
@@ -107,6 +119,7 @@ Future<UnclaimedAccountRecord?> findUnclaimedAccountRecord({
 
   String? email;
   String? displayName;
+  var usable = true;
   try {
     final data = AccountPersistedData.fromJson(
       jsonDecode(raw) as Map<String, dynamic>,
@@ -114,15 +127,17 @@ Future<UnclaimedAccountRecord?> findUnclaimedAccountRecord({
     email = data.email;
     displayName = data.displayName;
   } catch (error) {
-    // Still offered, just unnamed. A record we cannot parse may well still be a
-    // valid session to the server, and refusing to mention it would silently
-    // sign the user out for a reason they can never discover.
+    // Still offered, just unnamed and not adoptable. Refusing to mention it
+    // would sign the user out for a reason they can never discover; offering to
+    // adopt it would move a blob the app cannot read into this profile's key.
+    usable = false;
     logger.w('Unclaimed account record could not be described: $error');
   }
 
   return UnclaimedAccountRecord(
     storageKey: key,
     rawValue: raw,
+    isUsable: usable,
     email: email,
     displayName: displayName,
   );
@@ -139,12 +154,29 @@ Future<void> adoptAccountRecord(
   required String profileId,
   FlutterSecureStorage? storage,
 }) async {
-  final store = storage ?? const FlutterSecureStorage();
+  if (!record.isUsable) {
+    // Belt and braces: the tile does not offer adoption for one of these, and a
+    // caller that got here anyway is about to install a record that
+    // `AccountSecureStore.read` will throw on for the life of the profile.
+    throw StateError('Refusing to adopt an unreadable account record');
+  }
 
-  await ProfileSecureStore(
-    profileId: profileId,
-    storage: store,
-  ).write(accountSecureBaseKey, record.rawValue);
+  final store = storage ?? const FlutterSecureStorage();
+  final destination = ProfileSecureStore(profileId: profileId, storage: store);
+
+  // Re-checked here and not only in `findUnclaimedAccountRecord`, because the
+  // card can sit on screen indefinitely: the user reads it, thinks about it, and
+  // may sign in normally — or have a `weblibre://account/callback` arrive — in
+  // between. The record they are answering about is old; the profile's own
+  // sign-in would not be, and this write would replace it.
+  if (await destination.read(accountSecureBaseKey) != null) {
+    throw StateError(
+      'Refusing to adopt over an account this profile signed in to since the '
+      'record was offered',
+    );
+  }
+
+  await destination.write(accountSecureBaseKey, record.rawValue);
   // The raw store, deliberately: [record.storageKey] is the *unscoped* key the
   // record is being adopted away from.
   await store.delete(key: record.storageKey);

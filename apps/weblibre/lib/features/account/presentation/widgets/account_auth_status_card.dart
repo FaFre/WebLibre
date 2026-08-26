@@ -35,7 +35,7 @@ class AccountAuthStatusCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return switch (authState.status) {
-      AccountAuthStatus.signedOut => const _SignedOutSection(),
+      AccountAuthStatus.signedOut => _SignedOutSection(authState: authState),
       AccountAuthStatus.signingIn => const _SigningInTile(),
       AccountAuthStatus.signedIn => _SignedInTile(authState: authState),
       AccountAuthStatus.error => _ErrorTile(authState: authState),
@@ -52,7 +52,9 @@ class AccountAuthStatusCard extends ConsumerWidget {
 /// Rather than guess, or discard it and call that a migration, the session is
 /// offered back here by name — the user is the only party who knows.
 class _SignedOutSection extends ConsumerWidget {
-  const _SignedOutSection();
+  const _SignedOutSection({required this.authState});
+
+  final AccountAuthState authState;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -62,7 +64,7 @@ class _SignedOutSection extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (unclaimed != null) _AdoptAccountTile(record: unclaimed),
-        const _SignedOutTile(),
+        _SignedOutTile(knownAccount: authState.email ?? authState.displayName),
       ],
     );
   }
@@ -76,6 +78,10 @@ class _AdoptAccountTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    // Watched, not read: the controller is what says whether the answer is
+    // still being carried out, and both buttons stay inert-looking without it.
+    final adoption = ref.watch(accountAdoptionProvider);
+    final busy = adoption.isLoading;
 
     return Card(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -94,7 +100,9 @@ class _AdoptAccountTile extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Keep your sign-in on this profile?',
+                    record.isUsable
+                        ? 'An older sign-in is still on this device'
+                        : 'An older sign-in cannot be read',
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: theme.colorScheme.onSecondaryContainer,
                     ),
@@ -104,36 +112,77 @@ class _AdoptAccountTile extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'WebLibre found a sign-in for ${record.label} from before '
-              'profiles kept separate accounts. It cannot tell which profile '
-              'it belonged to, and will not guess.',
+              record.isUsable
+                  // Says where it came from, because the moment this card is
+                  // most likely to be seen is straight after a restore — and it
+                  // has nothing to do with the archive. A restore into a new
+                  // profile deliberately leaves the archive's account behind, so
+                  // reading this as "your backed-up account" would be exactly
+                  // wrong.
+                  ? 'WebLibre kept a sign-in for ${record.label} from before '
+                        'profiles had separate accounts. It is not from a '
+                        'backup, and nothing on this device records which '
+                        'profile it belonged to — so it will not be guessed at.'
+                  : 'WebLibre kept a sign-in from before profiles had separate '
+                        'accounts, but the saved data is damaged and cannot be '
+                        'used to sign in. Signing in again is the only way '
+                        'back; removing it clears this message.',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSecondaryContainer,
               ),
             ),
+            if (adoption.hasError) ...[
+              const SizedBox(height: 12),
+              Text(
+                'That did not work. Check your connection and try again.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.error,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: () async {
-                    final confirmed = await _confirmDiscard(context, record);
-                    if (confirmed != true) return;
-                    await ref
-                        .read(accountAdoptionProvider.notifier)
-                        .discard(record);
-                  },
-                  child: const Text('Not mine'),
+                  onPressed: busy
+                      ? null
+                      : () async {
+                          final confirmed = await _confirmDiscard(
+                            context,
+                            record,
+                          );
+                          if (confirmed != true) return;
+                          // The dialog is an async gap, and this `ref` belongs
+                          // to the widget: using it after the settings screen
+                          // has gone throws. The controller itself is keepAlive,
+                          // so a discard already under way is unaffected.
+                          if (!context.mounted) return;
+                          await ref
+                              .read(accountAdoptionProvider.notifier)
+                              .discard(record);
+                        },
+                  child: Text(record.isUsable ? 'Not mine' : 'Remove it'),
                 ),
-                const SizedBox(width: 8),
-                FilledButton(
-                  onPressed: () async {
-                    await ref
-                        .read(accountAdoptionProvider.notifier)
-                        .adopt(record);
-                  },
-                  child: const Text('Use it here'),
-                ),
+                if (record.isUsable) ...[
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: busy
+                        ? null
+                        : () async {
+                            await ref
+                                .read(accountAdoptionProvider.notifier)
+                                .adopt(record);
+                          },
+                    child: busy
+                        ? const SizedBox.square(
+                            dimension: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Use it here'),
+                  ),
+                ],
               ],
             ),
           ],
@@ -172,14 +221,29 @@ Future<bool?> _confirmDiscard(
 );
 
 class _SignedOutTile extends ConsumerWidget {
-  const _SignedOutTile();
+  const _SignedOutTile({this.knownAccount});
+
+  /// The account this profile was last signed in as, when the stored record
+  /// still says. Present after a session expired or was revoked — including the
+  /// common case of restoring a backup old enough that its refresh token no
+  /// longer works — where "Sign in" alone leaves the user guessing which account
+  /// the restore was supposed to bring back.
+  final String? knownAccount;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ListTile(
       leading: const Icon(Icons.login),
-      title: const Text('Sign in to WebLibre Account'),
-      subtitle: const Text('Sync your settings across devices'),
+      title: Text(
+        knownAccount == null
+            ? 'Sign in to WebLibre Account'
+            : 'Sign in again as $knownAccount',
+      ),
+      subtitle: Text(
+        knownAccount == null
+            ? 'Sync your settings across devices'
+            : "This profile's saved sign-in expired. Your sync key is kept.",
+      ),
       contentPadding: const EdgeInsets.symmetric(
         vertical: 8.0,
         horizontal: 16.0,
@@ -312,7 +376,13 @@ class _ErrorTile extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Sign-in failed',
+                // A session that expired under a known account is a different
+                // situation from a sign-in that failed, and saying "Sign-in
+                // failed" over a restored profile reads as though the restore
+                // itself went wrong.
+                authState.email == null
+                    ? 'Sign-in failed'
+                    : 'Sign in again as ${authState.email}',
                 style: TextStyle(
                   color: colorScheme.onErrorContainer,
                   fontWeight: FontWeight.bold,

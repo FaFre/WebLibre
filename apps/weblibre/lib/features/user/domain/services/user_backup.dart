@@ -31,6 +31,7 @@ import 'package:weblibre/core/copy/profile_copy.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/maintenance/clone_participant_policy.dart';
+import 'package:weblibre/core/maintenance/plaintext_cleanup.dart';
 import 'package:weblibre/core/maintenance/saf_archive_target.dart';
 import 'package:weblibre/core/startup/models/startup_config.dart';
 import 'package:weblibre/core/startup/startup_config_store.dart';
@@ -167,17 +168,11 @@ class UserBackupService extends _$UserBackupService {
       ref.invalidate(profileRepositoryProvider);
       return newProfile;
     } finally {
-      try {
-        if (await outputDirectory.exists()) {
-          await outputDirectory.delete(recursive: true);
-        }
-      } catch (e, s) {
-        logger.w(
-          'Failed to cleanup temporary backup directory: ${outputDirectory.path}',
-          error: e,
-          stackTrace: s,
-        );
-      }
+      // Shredded rather than deleted, and it matters most on the path that
+      // brought us here by throwing: `applyCloneParticipantPolicy` refuses when
+      // it cannot remove the archive's credential payload, and this scratch tree
+      // is then the thing still holding it.
+      await shredDirectory(outputDirectory, 'the unpacked archive');
     }
   }
 

@@ -17,11 +17,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/filesystem.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/secure_storage/profile_secure_store.dart';
 import 'package:weblibre/core/secure_storage/secure_storage_migration.dart';
 import 'package:weblibre/features/account/data/models/account_persisted_data.dart';
@@ -53,20 +55,95 @@ class AccountSecureStore {
   AccountSecureStore({required String profileId, FlutterSecureStorage? storage})
     : _store = ProfileSecureStore(profileId: profileId, storage: storage);
 
+  /// Serialises [update] so two read-modify-writes cannot interleave.
+  ///
+  /// The record is one JSON blob holding independent things — the session, the
+  /// sync key, the in-flight PKCE verifier — and every writer had to read the
+  /// whole blob, change its own field and write the whole blob back. Those
+  /// writers are not all user-driven: the Supabase client's own refresh timer
+  /// fires `_persistSessionRefresh` whenever it likes, so a token refresh landing
+  /// between another writer's read and write silently reverted that writer's
+  /// field, or was itself reverted — a refreshed token thrown away, which is a
+  /// sign-out the next time the app starts.
+  Future<void> _writeQueue = Future<void>.value();
+
   Future<AccountPersistedData> read() async {
+    // Deliberately *not* guarded: a platform failure (a Keystore that is
+    // temporarily unavailable, a channel error) is not an empty account, and
+    // treating it as one would let the very next write replace a live session
+    // with a blank record. It propagates, and the caller retries.
     final json = await _store.read(accountSecureBaseKey);
     if (json == null) return AccountPersistedData();
-    return AccountPersistedData.fromJson(
-      jsonDecode(json) as Map<String, dynamic>,
-    );
+
+    try {
+      return AccountPersistedData.fromJson(
+        jsonDecode(json) as Map<String, dynamic>,
+      );
+    } catch (error, stackTrace) {
+      // Content that does not decode, on the other hand, is unusable by
+      // definition — nothing in the app can turn it back into a session. Letting
+      // it throw took the whole account screen with it ("Failed to load
+      // account"), from which there is no way back to a sign-in button. An empty
+      // record leaves the user somewhere they can act.
+      logger.w(
+        'Stored account record could not be decoded; treating it as empty',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return AccountPersistedData();
+    }
   }
 
   Future<void> write(AccountPersistedData data) {
     return _store.write(accountSecureBaseKey, jsonEncode(data.toJson()));
   }
 
+  /// Read, transform, write — with no other writer able to slip in between.
+  ///
+  /// Every partial mutation of the record should go through this rather than
+  /// through [read] followed by [write].
+  Future<AccountPersistedData> update(
+    AccountPersistedData Function(AccountPersistedData current) transform,
+  ) {
+    return _enqueue(() async {
+      final next = transform(await read());
+      await write(next);
+      return next;
+    });
+  }
+
   Future<void> clear() {
-    return _store.delete(accountSecureBaseKey);
+    return _enqueue(() => _store.delete(accountSecureBaseKey));
+  }
+
+  /// Drops the session and any in-flight sign-in, keeping who the account is and
+  /// the end-to-end sync key.
+  ///
+  /// The distinction the old blanket [clear] did not make. A refresh token that
+  /// the server no longer honours says nothing about the sync key, which is not
+  /// a session artefact but the thing that decrypts the user's snapshots — and
+  /// it is the identity, kept here alongside it, that later lets a re-sign-in
+  /// prove the key still belongs to the same account.
+  Future<void> clearSession() {
+    return _enqueue(() async {
+      final data = await read();
+      await write(
+        AccountPersistedData(
+          userId: data.userId,
+          email: data.email,
+          displayName: data.displayName,
+          syncKey: data.syncKey,
+        ),
+      );
+    });
+  }
+
+  Future<T> _enqueue<T>(Future<T> Function() action) {
+    final result = _writeQueue.then((_) => action());
+    // The queue must not inherit the failure, or one failed write would poison
+    // every later one.
+    _writeQueue = result.then((_) {}, onError: (_) {});
+    return result;
   }
 }
 

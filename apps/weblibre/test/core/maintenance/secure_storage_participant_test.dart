@@ -85,7 +85,8 @@ void main() {
     FlutterSecureStoragePlatform.instance = platform;
     storage = const FlutterSecureStorage();
     root = Directory.systemTemp.createTempSync('weblibre_secure_participant');
-    staged = Directory(p.join(root.path, 'staged'))..createSync(recursive: true);
+    staged = Directory(p.join(root.path, 'staged'))
+      ..createSync(recursive: true);
     rollback = Directory(p.join(root.path, 'rollback'))
       ..createSync(recursive: true);
     participant = SecureStorageParticipant(storage: storage);
@@ -128,9 +129,16 @@ void main() {
   ProfileSecureStore storeFor(String profileId) =>
       ProfileSecureStore(profileId: profileId, storage: storage);
 
+  /// The account record is the one value this participant looks inside — it has
+  /// to be a JSON object, or the snapshot leaves it out — so the fixtures use a
+  /// real record rather than an opaque marker.
+  String accountRecord(String label) => jsonEncode({'email': label});
+
   group('secure storage participant', () {
     test('a backup snapshot restores the profile it came from', () async {
-      await storeFor(_a).write(accountSecureBaseKey, 'a-session');
+      await storeFor(
+        _a,
+      ).write(accountSecureBaseKey, accountRecord('a-session'));
 
       await participant.prepare(contextFor(MaintenanceOperationKind.backup));
 
@@ -143,36 +151,247 @@ void main() {
       await participant.apply(restore);
       await participant.verify(restore);
 
-      expect(await storeFor(_a).read(accountSecureBaseKey), 'a-session');
+      expect(
+        await storeFor(_a).read(accountSecureBaseKey),
+        accountRecord('a-session'),
+      );
     });
 
     test('a restore leaves other profiles alone', () async {
-      await storeFor(_a).write(accountSecureBaseKey, 'a-session');
-      await storeFor(_b).write(accountSecureBaseKey, 'b-session');
+      await storeFor(
+        _a,
+      ).write(accountSecureBaseKey, accountRecord('a-session'));
+      await storeFor(
+        _b,
+      ).write(accountSecureBaseKey, accountRecord('b-session'));
 
       await participant.prepare(contextFor(MaintenanceOperationKind.backup));
       final restore = contextFor(MaintenanceOperationKind.restore);
       await participant.prepare(restore);
       await participant.apply(restore);
 
-      expect(await storeFor(_b).read(accountSecureBaseKey), 'b-session');
+      expect(
+        await storeFor(_b).read(accountSecureBaseKey),
+        accountRecord('b-session'),
+      );
     });
 
     test('an archive with no snapshot leaves credentials alone', () async {
       // Such an archive predates this participant. Wiping would sign the profile
       // out of an account the archive never described.
-      await storeFor(_a).write(accountSecureBaseKey, 'a-session');
+      await storeFor(
+        _a,
+      ).write(accountSecureBaseKey, accountRecord('a-session'));
 
       final restore = contextFor(MaintenanceOperationKind.restore);
       await participant.prepare(restore);
       await participant.apply(restore);
       await participant.verify(restore);
 
-      expect(await storeFor(_a).read(accountSecureBaseKey), 'a-session');
+      expect(
+        await storeFor(_a).read(accountSecureBaseKey),
+        accountRecord('a-session'),
+      );
+    });
+
+    test('an in-flight sign-in does not travel in the archive', () async {
+      // The PKCE verifier is one half of an exchange whose other half — the
+      // one-time handoff code and the state nonce that authenticates the
+      // callback — is not in the archive and never will be. Restoring it
+      // re-arms a sign-in that cannot be completed, in a process that never
+      // started it.
+      await storeFor(_a).write(
+        accountSecureBaseKey,
+        jsonEncode({
+          'email': 'me@example.com',
+          'syncKey': 'k',
+          'pendingCodeVerifier': 'in-flight',
+        }),
+      );
+
+      await participant.prepare(contextFor(MaintenanceOperationKind.backup));
+
+      final archived =
+          jsonDecode(
+                File(
+                  p.join(staged.path, participant.id, 'secure_storage.json'),
+                ).readAsStringSync(),
+              )
+              as Map<String, dynamic>;
+      final record =
+          jsonDecode(archived[accountSecureBaseKey] as String)
+              as Map<String, dynamic>;
+
+      expect(record.containsKey('pendingCodeVerifier'), isFalse);
+      // Everything that is not a few-minute artefact still travels.
+      expect(record['syncKey'], 'k');
+      expect(record['email'], 'me@example.com');
+    });
+
+    test('a restored in-flight sign-in is dropped on the way in', () async {
+      // Archives written before the strip existed are exactly the ones being
+      // restored.
+      File(p.join(staged.path, participant.id, 'secure_storage.json'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+          jsonEncode({
+            accountSecureBaseKey: jsonEncode({
+              'email': 'me@example.com',
+              'pendingCodeVerifier': 'stale',
+            }),
+          }),
+        );
+
+      final restore = contextFor(MaintenanceOperationKind.restore);
+      await participant.prepare(restore);
+      await participant.apply(restore);
+      await participant.verify(restore);
+
+      final installed =
+          jsonDecode((await storeFor(_a).read(accountSecureBaseKey))!)
+              as Map<String, dynamic>;
+      expect(installed.containsKey('pendingCodeVerifier'), isFalse);
+      expect(installed['email'], 'me@example.com');
+    });
+
+    test('an account record that is not JSON is left out entirely', () async {
+      // Values are opaque strings to this participant, so this used to install
+      // and verify perfectly while the account layer read it as "never signed
+      // in" — a restore reporting success over a credential nothing can use.
+      // Dropping it reaches the same signed-out end state without planting the
+      // corrupt blob, and does not cost the user the tabs and history the
+      // archive is mostly made of.
+      File(p.join(staged.path, participant.id, 'secure_storage.json'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+          jsonEncode({
+            accountSecureBaseKey: 'not json',
+            '${proxySecretKeyPrefix}p1': 'a-proxy-secret',
+          }),
+        );
+
+      final restore = contextFor(MaintenanceOperationKind.restore);
+      await participant.prepare(restore);
+      await participant.apply(restore);
+      // Verification agrees with what apply installs, rather than demanding a
+      // key apply deliberately refused.
+      await participant.verify(restore);
+
+      expect(await storeFor(_a).read(accountSecureBaseKey), isNull);
+      expect(
+        await storeFor(_a).read('${proxySecretKeyPrefix}p1'),
+        'a-proxy-secret',
+      );
+    });
+
+    test('rollback data is never sanitised', () async {
+      // It is what the live store looked like a moment ago and has to go back
+      // byte for byte; "improving" it would mean an undo that restores something
+      // other than what was undone.
+      const live = '{"email":"me@example.com","pendingCodeVerifier":"live"}';
+      await storeFor(_a).write(accountSecureBaseKey, live);
+
+      final restore = contextFor(MaintenanceOperationKind.restore);
+      await participant.prepare(restore);
+      await storeFor(_a).deleteAllOwned();
+      await participant.rollback(restore);
+
+      expect(await storeFor(_a).read(accountSecureBaseKey), live);
+    });
+
+    test('a damaged snapshot fails the restore instead of emptying it', () async {
+      // The dangerous near-miss: a snapshot that will not parse used to be
+      // indistinguishable from an archive that carried none, so the restore
+      // reported success while the profile kept its *pre-restore* credentials —
+      // an account paired with somebody else's restored browsing data.
+      await storeFor(
+        _a,
+      ).write(accountSecureBaseKey, accountRecord('a-session'));
+      File(p.join(staged.path, 'secureStorage', 'secure_storage.json'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{ not json');
+
+      final restore = contextFor(MaintenanceOperationKind.restore);
+      await participant.prepare(restore);
+
+      await expectLater(participant.apply(restore), throwsStateError);
+      // Refused before touching anything, so the rollback the coordinator runs
+      // has something to put back.
+      expect(
+        await storeFor(_a).read(accountSecureBaseKey),
+        accountRecord('a-session'),
+      );
+    });
+
+    test('a snapshot with a non-string value is damaged, not smaller', () async {
+      // Quietly dropping the entry turned a mangled snapshot into a valid-looking
+      // shorter one, which restores as "the archive did not carry that
+      // credential" — and `replaceAllOwned` then deletes it from the live store.
+      File(p.join(staged.path, 'secureStorage', 'secure_storage.json'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"$accountSecureBaseKey": {"nested": true}}');
+
+      final restore = contextFor(MaintenanceOperationKind.restore);
+      await participant.prepare(restore);
+
+      await expectLater(participant.apply(restore), throwsStateError);
+    });
+
+    test('a restore that installed the wrong value fails verification', () async {
+      // Presence is not restoration. A key that exists holding the *previous*
+      // profile's refresh token is the one outcome a key-only check calls a
+      // success.
+      await storeFor(
+        _a,
+      ).write(accountSecureBaseKey, accountRecord('from-the-archive'));
+      await participant.prepare(contextFor(MaintenanceOperationKind.backup));
+
+      await storeFor(
+        _a,
+      ).write(accountSecureBaseKey, accountRecord('the-old-one'));
+
+      final restore = contextFor(MaintenanceOperationKind.restore);
+      await participant.prepare(restore);
+      // `apply` deliberately skipped: this is what a half-done apply looks like.
+      await expectLater(participant.verify(restore), throwsStateError);
+    });
+
+    test('a credential the archive never carried fails verification', () async {
+      await storeFor(
+        _a,
+      ).write(accountSecureBaseKey, accountRecord('a-session'));
+      await participant.prepare(contextFor(MaintenanceOperationKind.backup));
+
+      final restore = contextFor(MaintenanceOperationKind.restore);
+      await participant.prepare(restore);
+      await participant.apply(restore);
+      await storeFor(_a).write('$proxySecretKeyPrefix-leftover', 'stale');
+
+      await expectLater(participant.verify(restore), throwsStateError);
+    });
+
+    test('damaged rollback data is not a successful rollback', () async {
+      // Absent undo data means this participant never applied, or already
+      // finalized — both fine. Undo data that exists and will not parse means it
+      // *did* apply and the only record of the previous credentials is gone.
+      File(
+          p.join(
+            rollback.path,
+            'secureStorage',
+            'secure_storage.rollback.json',
+          ),
+        )
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{ not json');
+
+      await expectLater(
+        participant.rollback(contextFor(MaintenanceOperationKind.restore)),
+        throwsStateError,
+      );
     });
 
     test('rollback puts the live credentials back', () async {
-      await storeFor(_a).write(accountSecureBaseKey, 'live');
+      await storeFor(_a).write(accountSecureBaseKey, accountRecord('live'));
 
       final restore = contextFor(MaintenanceOperationKind.restore);
       await participant.prepare(restore);
@@ -182,37 +401,56 @@ void main() {
         p.join(staged.path, participant.id, 'secure_storage.json'),
       );
       await archived.parent.create(recursive: true);
-      await archived.writeAsString('{"$accountSecureBaseKey":"from-archive"}');
+      await archived.writeAsString(
+        jsonEncode({accountSecureBaseKey: accountRecord('from-archive')}),
+      );
       await participant.apply(restore);
-      expect(await storeFor(_a).read(accountSecureBaseKey), 'from-archive');
+      expect(
+        await storeFor(_a).read(accountSecureBaseKey),
+        accountRecord('from-archive'),
+      );
 
       await participant.rollback(restore);
 
-      expect(await storeFor(_a).read(accountSecureBaseKey), 'live');
-    });
-
-    test('rollback data does not live in the tree a restore replaces', () async {
-      // The undo file must survive the staged tree being renamed over the
-      // profile, so it belongs in the rollback workspace.
-      await storeFor(_a).write(accountSecureBaseKey, 'live');
-
-      await participant.prepare(contextFor(MaintenanceOperationKind.restore));
-
       expect(
-        File(
-          p.join(rollback.path, participant.id, 'secure_storage.rollback.json'),
-        ).existsSync(),
-        isTrue,
-      );
-      expect(
-        Directory(p.join(staged.path, participant.id)).existsSync(),
-        isFalse,
+        await storeFor(_a).read(accountSecureBaseKey),
+        accountRecord('live'),
       );
     });
+
+    test(
+      'rollback data does not live in the tree a restore replaces',
+      () async {
+        // The undo file must survive the staged tree being renamed over the
+        // profile, so it belongs in the rollback workspace.
+        await storeFor(_a).write(accountSecureBaseKey, accountRecord('live'));
+
+        await participant.prepare(contextFor(MaintenanceOperationKind.restore));
+
+        expect(
+          File(
+            p.join(
+              rollback.path,
+              participant.id,
+              'secure_storage.rollback.json',
+            ),
+          ).existsSync(),
+          isTrue,
+        );
+        expect(
+          Directory(p.join(staged.path, participant.id)).existsSync(),
+          isFalse,
+        );
+      },
+    );
 
     test("delete removes only the target profile's credentials", () async {
-      await storeFor(_a).write(accountSecureBaseKey, 'a-session');
-      await storeFor(_b).write(accountSecureBaseKey, 'b-session');
+      await storeFor(
+        _a,
+      ).write(accountSecureBaseKey, accountRecord('a-session'));
+      await storeFor(
+        _b,
+      ).write(accountSecureBaseKey, accountRecord('b-session'));
 
       final delete = contextFor(MaintenanceOperationKind.delete);
       await participant.prepare(delete);
@@ -220,11 +458,16 @@ void main() {
       await participant.verify(delete);
 
       expect(await storeFor(_a).readAllOwned(), isEmpty);
-      expect(await storeFor(_b).read(accountSecureBaseKey), 'b-session');
+      expect(
+        await storeFor(_b).read(accountSecureBaseKey),
+        accountRecord('b-session'),
+      );
     });
 
     test('a delete that left something behind fails verification', () async {
-      await storeFor(_a).write(accountSecureBaseKey, 'a-session');
+      await storeFor(
+        _a,
+      ).write(accountSecureBaseKey, accountRecord('a-session'));
 
       final delete = contextFor(MaintenanceOperationKind.delete);
       await participant.prepare(delete);
@@ -235,7 +478,9 @@ void main() {
 
     test('finalize drops the undo data', () async {
       final delete = contextFor(MaintenanceOperationKind.delete);
-      await storeFor(_a).write(accountSecureBaseKey, 'a-session');
+      await storeFor(
+        _a,
+      ).write(accountSecureBaseKey, accountRecord('a-session'));
       await participant.prepare(delete);
 
       await participant.finalizeWork(delete);
@@ -254,8 +499,9 @@ void main() {
       await participant.prepare(backup);
 
       expect(
-        File(p.join(staged.path, participant.id, 'secure_storage.json'))
-            .readAsStringSync(),
+        File(
+          p.join(staged.path, participant.id, 'secure_storage.json'),
+        ).readAsStringSync(),
         '{}',
       );
     });
@@ -324,8 +570,9 @@ void main() {
       final tree = Directory(p.join(root.path, 'broken'))
         ..createSync(recursive: true);
       Directory(p.join(tree.path, 'databases')).createSync();
-      File(p.join(tree.path, 'databases', 'user.db'))
-          .writeAsStringSync('not a database');
+      File(
+        p.join(tree.path, 'databases', 'user.db'),
+      ).writeAsStringSync('not a database');
 
       final context = contextFor(
         MaintenanceOperationKind.delete,
@@ -346,46 +593,56 @@ void main() {
 
       expect(platform.values['${proxySecretKeyPrefix}proxy-1'], 'secret-1');
     });
-  
-    test('a live scoped record is never overwritten by a stale legacy one', () async {
-      // Both can exist: the migration writes the scoped key and *then* deletes
-      // the legacy one, so a process that died between those steps leaves both
-      // behind. A secret changed since then is current under the scoped key and
-      // stale under the legacy one.
-      platform.values['${proxySecretKeyPrefix}proxy-1'] = 'stale';
-      await storeFor(_a).write('${proxySecretKeyPrefix}proxy-1', 'current');
-      final tree = profileTreeWith(['proxy-1']);
 
-      await participant.prepare(
-        contextFor(MaintenanceOperationKind.backup, profileDir: tree),
-      );
+    test(
+      'a live scoped record is never overwritten by a stale legacy one',
+      () async {
+        // Both can exist: the migration writes the scoped key and *then* deletes
+        // the legacy one, so a process that died between those steps leaves both
+        // behind. A secret changed since then is current under the scoped key and
+        // stale under the legacy one.
+        platform.values['${proxySecretKeyPrefix}proxy-1'] = 'stale';
+        await storeFor(_a).write('${proxySecretKeyPrefix}proxy-1', 'current');
+        final tree = profileTreeWith(['proxy-1']);
 
-      final snapshot = jsonDecode(
-        File(
-          p.join(staged.path, 'secureStorage', 'secure_storage.json'),
-        ).readAsStringSync(),
-      ) as Map<String, dynamic>;
+        await participant.prepare(
+          contextFor(MaintenanceOperationKind.backup, profileDir: tree),
+        );
 
-      // The scoped record is what ProfileSecureStore reads, so it is the live
-      // value by definition.
-      expect(snapshot['${proxySecretKeyPrefix}proxy-1'], 'current');
-    });
+        final snapshot =
+            jsonDecode(
+                  File(
+                    p.join(staged.path, 'secureStorage', 'secure_storage.json'),
+                  ).readAsStringSync(),
+                )
+                as Map<String, dynamic>;
 
-    test('a legacy record still fills a gap the scoped keys do not cover', () async {
-      platform.values['${proxySecretKeyPrefix}proxy-1'] = 'only-copy';
-      final tree = profileTreeWith(['proxy-1']);
+        // The scoped record is what ProfileSecureStore reads, so it is the live
+        // value by definition.
+        expect(snapshot['${proxySecretKeyPrefix}proxy-1'], 'current');
+      },
+    );
 
-      await participant.prepare(
-        contextFor(MaintenanceOperationKind.backup, profileDir: tree),
-      );
+    test(
+      'a legacy record still fills a gap the scoped keys do not cover',
+      () async {
+        platform.values['${proxySecretKeyPrefix}proxy-1'] = 'only-copy';
+        final tree = profileTreeWith(['proxy-1']);
 
-      final snapshot = jsonDecode(
-        File(
-          p.join(staged.path, 'secureStorage', 'secure_storage.json'),
-        ).readAsStringSync(),
-      ) as Map<String, dynamic>;
+        await participant.prepare(
+          contextFor(MaintenanceOperationKind.backup, profileDir: tree),
+        );
 
-      expect(snapshot['${proxySecretKeyPrefix}proxy-1'], 'only-copy');
-    });
+        final snapshot =
+            jsonDecode(
+                  File(
+                    p.join(staged.path, 'secureStorage', 'secure_storage.json'),
+                  ).readAsStringSync(),
+                )
+                as Map<String, dynamic>;
+
+        expect(snapshot['${proxySecretKeyPrefix}proxy-1'], 'only-copy');
+      },
+    );
   });
 }

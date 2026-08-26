@@ -25,6 +25,7 @@ import 'package:weblibre/core/maintenance/maintenance_journal_store.dart';
 import 'package:weblibre/core/maintenance/maintenance_lease.dart';
 import 'package:weblibre/core/maintenance/maintenance_outcome.dart';
 import 'package:weblibre/core/maintenance/maintenance_participant.dart';
+import 'package:weblibre/core/maintenance/plaintext_cleanup.dart';
 import 'package:weblibre/core/startup/models/maintenance_journal.dart';
 import 'package:weblibre/core/startup/startup_paths.dart';
 import 'package:weblibre/domain/entities/profile.dart';
@@ -761,19 +762,8 @@ class RestoreOperation {
   /// Only ever after the operation has reached a terminal state: it is the sole
   /// record of what the live state looked like before the restore, so clearing it
   /// early would turn a recoverable failure into an unrecoverable one.
-  Future<void> _discardParticipantWork(Directory rollbackDir) async {
-    try {
-      if (rollbackDir.existsSync()) {
-        await rollbackDir.delete(recursive: true);
-      }
-    } catch (error, stackTrace) {
-      logger.w(
-        'Could not clear participant rollback data ${rollbackDir.path}',
-        error: error,
-        stackTrace: stackTrace,
-      );
-    }
-  }
+  Future<void> _discardParticipantWork(Directory rollbackDir) =>
+      shredDirectory(rollbackDir, 'participant rollback data');
 
   /// Removes the archive's participant payload from the installed profile.
   ///
@@ -787,35 +777,14 @@ class RestoreOperation {
   ///
   /// Only ever called from a terminal step: until the operation is finished,
   /// recovery may still need to replay `applyAll` out of it.
-  Future<void> _discardStagedParticipantWork(Directory tree) async {
-    final staged = _stagedDirIn(tree);
-
-    try {
-      if (staged.existsSync()) {
-        await staged.delete(recursive: true);
-      }
-    } catch (error, stackTrace) {
-      logger.w(
-        'Could not clear staged participant data ${staged.path}',
-        error: error,
-        stackTrace: stackTrace,
-      );
-    }
-  }
+  Future<void> _discardStagedParticipantWork(Directory tree) =>
+      shredDirectory(_stagedDirIn(tree), 'staged participant data');
 
   Future<void> _discardWorkspace(Directory staging, Directory old) async {
     for (final directory in [staging, old]) {
-      try {
-        if (directory.existsSync()) {
-          await directory.delete(recursive: true);
-        }
-      } catch (error, stackTrace) {
-        logger.w(
-          'Could not clear the restore workspace ${directory.path}',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      }
+      // Shredded rather than merely deleted: `staging` is the unpacked archive,
+      // participant payload and all.
+      await shredDirectory(directory, 'the restore workspace');
     }
   }
 }

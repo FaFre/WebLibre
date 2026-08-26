@@ -72,6 +72,7 @@ void main() {
     // identify is not a choice.
     expect(found?.label, 'me@example.com');
     expect(found?.storageKey, accountSecureBaseKey);
+    expect(found?.isUsable, isTrue);
   });
 
   test('a record parked by an earlier build is offered too', () async {
@@ -86,8 +87,8 @@ void main() {
   });
 
   test('an unparseable record is still offered, just unnamed', () async {
-    // It may well still be a valid session to the server. Staying quiet about it
-    // would sign the user out for a reason they could never discover.
+    // Staying quiet about it would sign the user out for a reason they could
+    // never discover.
     platform.values[accountSecureBaseKey] = 'not json';
 
     final found = await findUnclaimedAccountRecord(
@@ -97,6 +98,32 @@ void main() {
 
     expect(found, isNotNull);
     expect(found!.label, isNotEmpty);
+  });
+
+  test('an unparseable record is offered but not as adoptable', () async {
+    // `AccountSecureStore.read` parses it with the same call, so filing it under
+    // this profile would install a blob the app throws on for the life of the
+    // profile. Shown, so the user can clear it; never adopted.
+    platform.values[accountSecureBaseKey] = 'not json';
+
+    final found = (await findUnclaimedAccountRecord(
+      profileId: _a,
+      storage: storage,
+    ))!;
+
+    expect(found.isUsable, isFalse);
+    await expectLater(
+      adoptAccountRecord(found, profileId: _a, storage: storage),
+      throwsStateError,
+    );
+    // And nothing moved: the record is still exactly where it was.
+    expect(platform.values[accountSecureBaseKey], 'not json');
+    expect(
+      platform.values.containsKey(
+        profileScopedSecureKey(accountSecureBaseKey, _a),
+      ),
+      isFalse,
+    );
   });
 
   test('a profile that is already signed in is offered nothing', () async {
@@ -140,7 +167,9 @@ void main() {
   test('adoption preserves the record byte for byte', () async {
     // Re-filed verbatim rather than round-tripped through a model that may not
     // know every field the session carries.
-    const exotic = '{"session":{"refreshToken":"r"},"unknownFutureField":1}';
+    const exotic =
+        '{"session":{"access_token":"a","refresh_token":"r",'
+        '"token_type":"bearer","expires_in":3600},"unknownFutureField":1}';
     platform.values[accountSecureBaseKey] = exotic;
 
     final found = (await findUnclaimedAccountRecord(
@@ -154,6 +183,35 @@ void main() {
       exotic,
     );
   });
+
+  test(
+    'adoption refuses to overwrite a sign-in that arrived meanwhile',
+    () async {
+      // The card can sit on screen indefinitely while the user thinks about it,
+      // and a normal sign-in — or a `weblibre://account/callback` — can land in
+      // between. The record being answered about is old; the profile's own
+      // sign-in would not be.
+      platform.values[accountSecureBaseKey] = session;
+      final found = (await findUnclaimedAccountRecord(
+        profileId: _a,
+        storage: storage,
+      ))!;
+
+      platform.values[profileScopedSecureKey(accountSecureBaseKey, _a)] =
+          'signed-in-since';
+
+      await expectLater(
+        adoptAccountRecord(found, profileId: _a, storage: storage),
+        throwsStateError,
+      );
+      expect(
+        platform.values[profileScopedSecureKey(accountSecureBaseKey, _a)],
+        'signed-in-since',
+      );
+      // And the offered record is left where it was, not half-moved.
+      expect(platform.values[accountSecureBaseKey], session);
+    },
+  );
 
   test('discarding removes it', () async {
     platform.values[accountSecureBaseKey] = session;

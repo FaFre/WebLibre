@@ -26,6 +26,16 @@ import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profil
 /// Base key of the account session, sync key and in-flight PKCE verifier.
 const accountSecureBaseKey = 'account_auth_data';
 
+/// Field of the account record holding the PKCE verifier of a sign-in that is
+/// still in progress.
+///
+/// Named here rather than in the account feature because the maintenance
+/// participant has to strip it on the way into an archive, and `core` may not
+/// reach into a feature to ask. It must stay equal to
+/// `AccountPersistedData.pendingCodeVerifier`'s JSON key; there is a test that
+/// says so.
+const accountPendingCodeVerifierField = 'pendingCodeVerifier';
+
 /// Prefix of the per-proxy-profile sing-box credential records.
 const proxySecretKeyPrefix = 'singbox_proxy.secret.';
 
