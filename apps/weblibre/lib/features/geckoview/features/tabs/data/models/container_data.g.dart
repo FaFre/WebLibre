@@ -29,6 +29,8 @@ abstract class _$ContainerMetadataCWProxy {
 
   ContainerMetadata isolatedAppLinkSettings(bool isolatedAppLinkSettings);
 
+  ContainerMetadata wallpaper(WallpaperOverride? wallpaper);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContainerMetadata(...).copyWith.fieldName(value)`.
   ///
@@ -48,6 +50,7 @@ abstract class _$ContainerMetadataCWProxy {
     List<Uri>? assignedSites,
     bool strictMode,
     bool isolatedAppLinkSettings,
+    WallpaperOverride? wallpaper,
   });
 }
 
@@ -100,6 +103,10 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
   ContainerMetadata isolatedAppLinkSettings(bool isolatedAppLinkSettings) =>
       call(isolatedAppLinkSettings: isolatedAppLinkSettings);
 
+  @override
+  ContainerMetadata wallpaper(WallpaperOverride? wallpaper) =>
+      call(wallpaper: wallpaper);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContainerMetadata(...).copyWith.fieldName(value)`.
   ///
@@ -120,6 +127,7 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
     Object? assignedSites = const $CopyWithPlaceholder(),
     Object? strictMode = const $CopyWithPlaceholder(),
     Object? isolatedAppLinkSettings = const $CopyWithPlaceholder(),
+    Object? wallpaper = const $CopyWithPlaceholder(),
   }) {
     return ContainerMetadata(
       iconData: iconData == const $CopyWithPlaceholder()
@@ -179,6 +187,10 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
           ? _value.isolatedAppLinkSettings
           // ignore: cast_nullable_to_non_nullable
           : isolatedAppLinkSettings as bool,
+      wallpaper: wallpaper == const $CopyWithPlaceholder()
+          ? _value.wallpaper
+          // ignore: cast_nullable_to_non_nullable
+          : wallpaper as WallpaperOverride?,
     );
   }
 }
@@ -303,28 +315,31 @@ extension $ContainerDataCopyWith on ContainerData {
 // JsonSerializableGenerator
 // **************************************************************************
 
-ContainerMetadata _$ContainerMetadataFromJson(Map<String, dynamic> json) =>
-    ContainerMetadata.withDefaults(
-      iconData: _$JsonConverterFromJson<Map<String, dynamic>, IconData>(
-        json['iconData'],
-        const IconDataJsonConverter().fromJson,
-      ),
-      contextualIdentity: json['contextualIdentity'] as String?,
-      proxyConnectionId: _proxyConnectionIdFromJson(
-        json['proxyConnectionId'] as String?,
-      ),
-      clearDataOnExit: json['clearDataOnExit'] as bool? ?? false,
-      excludeFromIndex: json['excludeFromIndex'] as bool? ?? false,
-      excludeFromHistory: json['excludeFromHistory'] as bool? ?? false,
-      bypassGlobalProxy: json['bypassGlobalProxy'] as bool? ?? false,
-      useCustomColor: json['useCustomColor'] as bool? ?? false,
-      assignedSites: (json['assignedSites'] as List<dynamic>?)
-          ?.map((e) => Uri.parse(e as String))
-          .toList(),
-      strictMode: json['strictMode'] as bool? ?? false,
-      isolatedAppLinkSettings:
-          json['isolatedAppLinkSettings'] as bool? ?? false,
-    );
+ContainerMetadata _$ContainerMetadataFromJson(
+  Map<String, dynamic> json,
+) => ContainerMetadata.withDefaults(
+  iconData: _$JsonConverterFromJson<Map<String, dynamic>, IconData>(
+    json['iconData'],
+    const IconDataJsonConverter().fromJson,
+  ),
+  contextualIdentity: json['contextualIdentity'] as String?,
+  proxyConnectionId: _proxyConnectionIdFromJson(
+    json['proxyConnectionId'] as String?,
+  ),
+  clearDataOnExit: json['clearDataOnExit'] as bool? ?? false,
+  excludeFromIndex: json['excludeFromIndex'] as bool? ?? false,
+  excludeFromHistory: json['excludeFromHistory'] as bool? ?? false,
+  bypassGlobalProxy: json['bypassGlobalProxy'] as bool? ?? false,
+  useCustomColor: json['useCustomColor'] as bool? ?? false,
+  assignedSites: (json['assignedSites'] as List<dynamic>?)
+      ?.map((e) => Uri.parse(e as String))
+      .toList(),
+  strictMode: json['strictMode'] as bool? ?? false,
+  isolatedAppLinkSettings: json['isolatedAppLinkSettings'] as bool? ?? false,
+  wallpaper: json['wallpaper'] == null
+      ? null
+      : WallpaperOverride.fromJson(json['wallpaper'] as Map<String, dynamic>),
+);
 
 Map<String, dynamic> _$ContainerMetadataToJson(
   ContainerMetadata instance,
@@ -343,6 +358,7 @@ Map<String, dynamic> _$ContainerMetadataToJson(
   'assignedSites': instance.assignedSites?.map((e) => e.toString()).toList(),
   'strictMode': instance.strictMode,
   'isolatedAppLinkSettings': instance.isolatedAppLinkSettings,
+  'wallpaper': instance.wallpaper?.toJson(),
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(

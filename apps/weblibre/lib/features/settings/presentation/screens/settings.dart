@@ -126,6 +126,8 @@ _CategoryGroups _buildCategories() {
         'shortcuts',
         'top sites',
         'quote',
+        'wallpaper',
+        'background',
       ],
       sections: homeSettingsSections,
       onTap: (context) => const HomeSettingsRoute().push(context),

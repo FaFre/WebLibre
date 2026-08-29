@@ -24,6 +24,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:weblibre/data/database/converters/color.dart';
 import 'package:weblibre/data/database/converters/icon_data.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
+import 'package:weblibre/features/wallpaper/domain/entities/wallpaper_override.dart';
 
 part 'container_data.g.dart';
 
@@ -93,6 +94,15 @@ class ContainerMetadata with FastEquatable {
   @JsonKey(defaultValue: false)
   final bool isolatedAppLinkSettings;
 
+  // This container's own home wallpaper, shown instead of the profile-wide one
+  // while the container is selected. Null follows the profile. See
+  // [WallpaperOverride] and [GeneralSettings.homeWallpaperFile].
+  //
+  // Unlike strictMode / isolatedAppLinkSettings this needs no contextId: it is
+  // pure presentation, resolved in Dart from the selected container, and means
+  // the same thing with cookie isolation off.
+  final WallpaperOverride? wallpaper;
+
   ContainerMetadata({
     required this.iconData,
     required this.contextualIdentity,
@@ -105,6 +115,7 @@ class ContainerMetadata with FastEquatable {
     required this.assignedSites,
     required this.strictMode,
     required this.isolatedAppLinkSettings,
+    required this.wallpaper,
   });
 
   ContainerMetadata.withDefaults({
@@ -119,6 +130,7 @@ class ContainerMetadata with FastEquatable {
     List<Uri>? assignedSites,
     bool? strictMode,
     bool? isolatedAppLinkSettings,
+    WallpaperOverride? wallpaper,
   }) : this(
          iconData: iconData,
          contextualIdentity: contextualIdentity,
@@ -138,6 +150,7 @@ class ContainerMetadata with FastEquatable {
          // combination on read; writers re-apply it via [sanitized].
          isolatedAppLinkSettings:
              (isolatedAppLinkSettings ?? false) && contextualIdentity != null,
+         wallpaper: wallpaper,
        );
 
   /// Enforce the settings that only mean something for a cookie-isolated
@@ -193,6 +206,7 @@ class ContainerMetadata with FastEquatable {
     assignedSites,
     strictMode,
     isolatedAppLinkSettings,
+    wallpaper,
   ];
 }
 

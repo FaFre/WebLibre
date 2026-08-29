@@ -108,6 +108,7 @@ import 'package:weblibre/features/user/domain/presentation/screens/profile_list.
 import 'package:weblibre/features/user/domain/presentation/screens/profile_restore.dart';
 import 'package:weblibre/features/user/domain/presentation/widgets/auth_gate.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/wallpaper/presentation/screens/wallpaper_settings.dart';
 import 'package:weblibre/features/web_feed/presentation/add_feed_dialog.dart';
 import 'package:weblibre/features/web_feed/presentation/screens/feed_article.dart';
 import 'package:weblibre/features/web_feed/presentation/screens/feed_article_list.dart';

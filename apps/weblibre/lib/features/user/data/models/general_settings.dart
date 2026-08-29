@@ -31,6 +31,7 @@ import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/home_target.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
+import 'package:weblibre/features/wallpaper/domain/entities/home_wallpaper.dart';
 
 part 'general_settings.g.dart';
 
@@ -218,6 +219,28 @@ class GeneralSettings with FastEquatable {
   /// Where the home surface's search entry is rendered. See
   /// [HomeSearchBarPlacement] and [effectiveHomeSearchBarPlacement].
   final HomeSearchBarPlacement homeSearchBarPlacement;
+
+  /// The wallpaper shown behind the home surface, as a file name within the
+  /// profile's wallpaper directory — never a path. Null means no wallpaper, and
+  /// the home surface keeps its aura backdrop.
+  ///
+  /// A name rather than a path because profile directories move between
+  /// installs and restores, and a fresh name per import is also what evicts the
+  /// previous image from Flutter's image cache when a wallpaper is replaced.
+  /// See `WallpaperStore`.
+  final String? homeWallpaperFile;
+
+  /// Gaussian sigma, in logical pixels, applied to [homeWallpaperFile].
+  final double homeWallpaperBlur;
+
+  /// How far [homeWallpaperFile] is pulled toward the theme's surface colour,
+  /// 0 (untouched) to [maxHomeWallpaperDim].
+  ///
+  /// The scrim follows the theme rather than always darkening: the home
+  /// surface draws its header, container name and section headers in theme
+  /// colours directly on top of the image, so in a light theme the image has to
+  /// be washed *lighter* for those to stay readable.
+  final double homeWallpaperDim;
   @JsonKey(name: 'defaultCreateTabType')
   final TabType storedDefaultCreateTabType;
   final TabDirection tabListDirection;
@@ -391,6 +414,9 @@ class GeneralSettings with FastEquatable {
     required this.homeTargetUrl,
     required this.homeTargetOnLastTabClosed,
     required this.homeSearchBarPlacement,
+    required this.homeWallpaperFile,
+    required this.homeWallpaperBlur,
+    required this.homeWallpaperDim,
     required this.storedDefaultCreateTabType,
     required this.tabListDirection,
     required this.tabBarDirection,
@@ -475,6 +501,9 @@ class GeneralSettings with FastEquatable {
     this.homeTargetUrl,
     bool? homeTargetOnLastTabClosed,
     HomeSearchBarPlacement? homeSearchBarPlacement,
+    this.homeWallpaperFile,
+    double? homeWallpaperBlur,
+    double? homeWallpaperDim,
     TabType? storedDefaultCreateTabType,
     TabDirection? tabListDirection,
     TabDirection? tabBarDirection,
@@ -560,6 +589,17 @@ class GeneralSettings with FastEquatable {
        // tab bar position is the one they can reach.
        homeSearchBarPlacement =
            homeSearchBarPlacement ?? HomeSearchBarPlacement.auto,
+       // Clamped on the way in: these reach the widget tree as an ImageFilter
+       // sigma and a colour alpha, and a value read back from a hand-edited
+       // database must not be able to hand either one something invalid.
+       homeWallpaperBlur = (homeWallpaperBlur ?? 0).clamp(
+         0,
+         maxHomeWallpaperBlur,
+       ),
+       homeWallpaperDim = (homeWallpaperDim ?? defaultHomeWallpaperDim).clamp(
+         0,
+         maxHomeWallpaperDim,
+       ),
        storedDefaultCreateTabType =
            storedDefaultCreateTabType ?? TabType.regular,
        tabListDirection = tabListDirection ?? TabDirection.newestFirst,
@@ -776,6 +816,9 @@ class GeneralSettings with FastEquatable {
     homeTargetUrl,
     homeTargetOnLastTabClosed,
     homeSearchBarPlacement,
+    homeWallpaperFile,
+    homeWallpaperBlur,
+    homeWallpaperDim,
     storedDefaultCreateTabType,
     tabListDirection,
     tabBarDirection,

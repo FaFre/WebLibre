@@ -73,6 +73,7 @@ import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/services/local_authentication.dart';
+import 'package:weblibre/features/wallpaper/domain/providers.dart';
 import 'package:weblibre/features/web_feed/domain/providers/add_dialog_blocking.dart';
 import 'package:weblibre/features/web_feed/domain/services/article_content_processor.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
@@ -174,6 +175,16 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                   );
             }
           });
+
+      // Wallpapers nothing points at any more: replaced images, a container
+      // edit that imported one and was then cancelled, containers since
+      // deleted. Startup is the one moment when no picker can be holding a
+      // staged import, and nothing waits on the result.
+      unawaited(
+        ref.read(wallpaperSweeperProvider.notifier).sweep().onError((e, s) {
+          logger.w('Wallpaper sweep failed', error: e, stackTrace: s);
+        }),
+      );
 
       // Clear data for containers with clearDataOnExit enabled
       final containersToClear = await ref

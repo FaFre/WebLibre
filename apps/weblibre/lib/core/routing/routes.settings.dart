@@ -126,6 +126,10 @@ part of 'routes.dart';
       name: 'NewTabModulesSettingsRoute',
       path: 'new_tab_modules',
     ),
+    TypedGoRoute<WallpaperSettingsRoute>(
+      name: 'WallpaperSettingsRoute',
+      path: 'wallpaper',
+    ),
     TypedGoRoute<ContextualToolbarSettingsRoute>(
       name: 'ContextualToolbarSettingsRoute',
       path: 'contextual_toolbar',
@@ -384,6 +388,15 @@ class HomeModulesSettingsRoute extends GoRouteData
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const ModuleSurfaceSettingsScreen();
+  }
+}
+
+class WallpaperSettingsRoute extends GoRouteData with $WallpaperSettingsRoute {
+  const WallpaperSettingsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const WallpaperSettingsScreen();
   }
 }
 

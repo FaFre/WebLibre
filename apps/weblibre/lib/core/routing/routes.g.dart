@@ -1775,6 +1775,12 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       factory: $NewTabModulesSettingsRoute._fromState,
     ),
     GoRouteData.$route(
+      path: 'wallpaper',
+      name: 'WallpaperSettingsRoute',
+      hasOverriddenOnExit: false,
+      factory: $WallpaperSettingsRoute._fromState,
+    ),
+    GoRouteData.$route(
       path: 'contextual_toolbar',
       name: 'ContextualToolbarSettingsRoute',
       hasOverriddenOnExit: false,
@@ -2452,6 +2458,27 @@ mixin $NewTabModulesSettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/new_tab_modules');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $WallpaperSettingsRoute on GoRouteData {
+  static WallpaperSettingsRoute _fromState(GoRouterState state) =>
+      const WallpaperSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/wallpaper');
 
   @override
   void go(BuildContext context) => context.go(location);

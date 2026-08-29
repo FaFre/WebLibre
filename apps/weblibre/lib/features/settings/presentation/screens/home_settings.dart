@@ -51,6 +51,27 @@ const List<SettingsSectionDefinition> homeSettingsSections = [
     ],
   ),
   SettingsSectionDefinition(
+    title: 'Appearance',
+    keywords: ['home', 'wallpaper', 'background', 'image', 'blur', 'dim'],
+    entries: [
+      SettingsEntryDefinition(
+        title: 'Wallpaper',
+        subtitle: 'A background image for the home page',
+        keywords: [
+          'wallpaper',
+          'background',
+          'image',
+          'photo',
+          'picture',
+          'blur',
+          'dim',
+          'home',
+        ],
+        child: _WallpaperTile(),
+      ),
+    ],
+  ),
+  SettingsSectionDefinition(
     title: 'Layout',
     keywords: ['home', 'new tab', 'sections', 'modules', 'layout'],
     entries: [
@@ -256,6 +277,34 @@ class _HomeSearchBarPlacementTile extends ConsumerWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+/// Entry point for the profile-wide home wallpaper. A container can override it
+/// from the container editor, which is where that setting belongs — it is one
+/// container's property, not a global one.
+class _WallpaperTile extends ConsumerWidget {
+  const _WallpaperTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final hasWallpaper = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.homeWallpaperFile != null,
+      ),
+    );
+
+    return ListTile(
+      leading: const Icon(MdiIcons.imageOutline),
+      title: const Text('Wallpaper'),
+      subtitle: Text(
+        hasWallpaper
+            ? 'A background image is set for the home page'
+            : 'Set a background image for the home page',
+      ),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () => const WallpaperSettingsRoute().push(context),
     );
   }
 }

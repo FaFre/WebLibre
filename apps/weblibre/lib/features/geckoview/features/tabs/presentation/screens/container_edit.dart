@@ -41,6 +41,9 @@ import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/proxy_connection_picker_sheet.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/wallpaper/domain/entities/wallpaper_override.dart';
+import 'package:weblibre/features/wallpaper/presentation/widgets/wallpaper_editor.dart';
 
 enum _DialogMode { create, edit }
 
@@ -114,6 +117,7 @@ class ContainerEditScreen extends HookConsumerWidget {
       initialContainer.metadata.isolatedAppLinkSettings,
     );
     final isPinned = useState(initialContainer.isPinned);
+    final wallpaper = useState(initialContainer.metadata.wallpaper);
 
     final textController = useTextEditingController(
       text: initialContainer.name,
@@ -153,6 +157,7 @@ class ContainerEditScreen extends HookConsumerWidget {
               isolatedAppLinkSettings:
                   isolatedAppLinkSettings.value &&
                   contextualIdentity.value != null,
+              wallpaper: wallpaper.value,
             )
             .sanitized(),
       );
@@ -408,16 +413,88 @@ class ContainerEditScreen extends HookConsumerWidget {
                     margin: EdgeInsets.zero,
                     color: colorScheme.surfaceContainer,
                     clipBehavior: Clip.antiAlias,
-                    child: SwitchListTile.adaptive(
-                      value: isPinned.value,
-                      title: const Text('Pin Container'),
-                      subtitle: const Text(
-                        'Keep this container at the top of the list',
-                      ),
-                      secondary: const Icon(MdiIcons.pin),
-                      onChanged: (value) {
-                        isPinned.value = value;
-                      },
+                    child: Column(
+                      children: [
+                        SwitchListTile.adaptive(
+                          value: isPinned.value,
+                          title: const Text('Pin Container'),
+                          subtitle: const Text(
+                            'Keep this container at the top of the list',
+                          ),
+                          secondary: const Icon(MdiIcons.pin),
+                          onChanged: (value) {
+                            isPinned.value = value;
+                          },
+                        ),
+                        const Divider(height: 1, indent: 56),
+                        // Collapsed by default: most containers use the
+                        // profile's wallpaper, and an always-open picker with a
+                        // preview would push the rest of this form off screen.
+                        ExpansionTile(
+                          shape: const Border(),
+                          collapsedShape: const Border(),
+                          leading: const Icon(MdiIcons.imageOutline),
+                          title: const Text('Wallpaper'),
+                          subtitle: Text(
+                            wallpaper.value != null
+                                ? 'Shown on home while this container is '
+                                      'selected'
+                                : 'Uses the wallpaper from settings',
+                          ),
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                              // The inherited treatment is read here rather
+                              // than in the screen's build: a collapsed
+                              // ExpansionTile never builds its body, so a form
+                              // whose wallpaper section is untouched does not
+                              // open the settings database at all.
+                              child: Consumer(
+                                builder: (context, ref, child) {
+                                  final settings = ref.watch(
+                                    generalSettingsWithDefaultsProvider,
+                                  );
+
+                                  final override = wallpaper.value;
+
+                                  return WallpaperEditor(
+                                    fileName: override?.file,
+                                    blur:
+                                        override?.blur ??
+                                        settings.homeWallpaperBlur,
+                                    dim:
+                                        override?.dim ??
+                                        settings.homeWallpaperDim,
+                                    emptyDescription:
+                                        'This container falls back to the '
+                                        'wallpaper set in settings.',
+                                    // Replacing the picture keeps the
+                                    // treatment; removing it drops the whole
+                                    // override, so a later pick starts from
+                                    // whatever the profile does now rather
+                                    // than from a setting made months ago.
+                                    onFileChanged: (fileName) =>
+                                        wallpaper.value = fileName == null
+                                        ? null
+                                        : WallpaperOverride(
+                                            file: fileName,
+                                            blur: override?.blur,
+                                            dim: override?.dim,
+                                          ),
+                                    // The sliders are disabled without a
+                                    // wallpaper, so there is always an
+                                    // override to amend here.
+                                    onBlurChanged: (value) => wallpaper.value =
+                                        override?.copyWith(blur: value),
+                                    onDimChanged: (value) => wallpaper.value =
+                                        override?.copyWith(dim: value),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 24),

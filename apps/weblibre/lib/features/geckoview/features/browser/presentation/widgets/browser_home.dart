@@ -39,6 +39,7 @@ import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors
 import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/wallpaper/presentation/widgets/wallpaper_backdrop.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
 
 /// The home surface creates tabs of the user's configured default type; the
@@ -129,43 +130,51 @@ class BrowserHome extends ConsumerWidget {
     );
 
     return BrowserPage(
-      // The viewport, not just its first sliver, has to clear the status bar:
-      // BrowserSystemBars fills that inset with an opaque strip painted over
-      // this surface, and the pinned pill below would scroll underneath it and
-      // disappear. Bottom stays excluded — [_HomeBottomInsetSpacer] owns it,
-      // because that inset animates with the toolbar.
-      child: SafeArea(
-        bottom: false,
-        child: RepaintBoundary(
-          child: ModuleSurfaceScope(
-            surface: ModuleSurface.home,
-            // Unpinned: the sections here are short, and the pinned search pill
-            // above already holds the top of the viewport. Backing each header
-            // so it could pin would lay opaque bands across the aura gradient.
-            pinnedHeaderBackgroundColor: null,
-            child: CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                const SliverToBoxAdapter(child: SizedBox(height: 20)),
-                const SliverToBoxAdapter(child: _HomeHeader()),
-                // Pinned, because under [HomeSearchBarPlacement.top] the
-                // browser toolbar's address field is suppressed while home is
-                // showing: this is then the only way into search, so it has to
-                // survive scrolling. Pinning it above the section headers also
-                // gives them something to slide under.
-                const _HomeSearchPillSliver(),
-                const SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: SupporterHomeBanner(),
+      // The wallpaper sits over the aura backdrop and under everything else.
+      // The aura keeps painting beneath it rather than being switched off:
+      // an image that has gone missing (a profile restored from an older
+      // archive, storage cleared underneath us) then degrades to the plain
+      // home surface instead of a blank one, and the aura is a raster-cached
+      // static picture, so the cost of it being covered is a single fill.
+      child: HomeWallpaperBackdrop(
+        // The viewport, not just its first sliver, has to clear the status bar:
+        // BrowserSystemBars fills that inset with an opaque strip painted over
+        // this surface, and the pinned pill below would scroll underneath it
+        // and disappear. Bottom stays excluded — [_HomeBottomInsetSpacer] owns
+        // it, because that inset animates with the toolbar.
+        child: SafeArea(
+          bottom: false,
+          child: RepaintBoundary(
+            child: ModuleSurfaceScope(
+              surface: ModuleSurface.home,
+              // Unpinned: the sections here are short, and the pinned search pill
+              // above already holds the top of the viewport. Backing each header
+              // so it could pin would lay opaque bands across the aura gradient.
+              pinnedHeaderBackgroundColor: null,
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  const SliverToBoxAdapter(child: SizedBox(height: 20)),
+                  const SliverToBoxAdapter(child: _HomeHeader()),
+                  // Pinned, because under [HomeSearchBarPlacement.top] the
+                  // browser toolbar's address field is suppressed while home is
+                  // showing: this is then the only way into search, so it has to
+                  // survive scrolling. Pinning it above the section headers also
+                  // gives them something to slide under.
+                  const _HomeSearchPillSliver(),
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: SupporterHomeBanner(),
+                    ),
                   ),
-                ),
-                ModuleSurfaceSliverList(
-                  surface: ModuleSurface.home,
-                  callbacks: callbacks,
-                ),
-                const _HomeBottomInsetSpacer(),
-              ],
+                  ModuleSurfaceSliverList(
+                    surface: ModuleSurface.home,
+                    callbacks: callbacks,
+                  ),
+                  const _HomeBottomInsetSpacer(),
+                ],
+              ),
             ),
           ),
         ),
