@@ -90,7 +90,8 @@ interface WildcardAssignment {
  *
  * A snapshot is therefore the only way the store becomes usable: it replaces
  * every field at once and stamps a generation, and until one arrives the store
- * reports itself unready so requests fail closed instead of leaking.
+ * reports itself unready so requests wait — and, if none ever comes, fail
+ * closed instead of leaking.
  */
 export interface RoutingSnapshot {
   generation: number
@@ -99,6 +100,32 @@ export interface RoutingSnapshot {
   directScopes: { [key: string]: string }
   siteAssignments: { [key: string]: string }
   strictContexts: { [key: string]: string[] }
+
+  /**
+   * Whether a further snapshot is expected to replace this one.
+   *
+   * Set by the native side when it seeds the store from the routing this
+   * profile had last time it ran, in a process that also runs the app half and
+   * will therefore push the live routing shortly. The seed is deliberately
+   * stripped of proxy endpoints (an address is only valid while its backend
+   * runs), so every context it routes through a proxy resolves to "no endpoint"
+   * until that push lands — which is a startup window, not a decision.
+   *
+   * Absent on an app push (the routing *is* the decision) and on a seed
+   * installed in a process with no app half, where nothing will ever follow it.
+   */
+  provisional?: boolean
+
+  /**
+   * Proxy ids named by [relations], missing from [proxies], and still being
+   * brought up by the app.
+   *
+   * The narrow form of [provisional]: it does not say the snapshot is about to
+   * be replaced, only that these particular relations are blocked by a backend
+   * that has not finished starting. Everything else in the snapshot is a
+   * decision, including relations naming a proxy that is *not* in this list.
+   */
+  awaitingProxies?: string[]
 }
 
 export class Store {
@@ -113,16 +140,98 @@ export class Store {
    */
   private generation: number | null = null
 
+  /** See [RoutingSnapshot.provisional]. */
+  private provisional: boolean = false
+
+  /** See [RoutingSnapshot.awaitingProxies]. */
+  private awaitingProxies: Set<string> = new Set<string>()
+
+  /**
+   * Resolvers waiting for the next snapshot, see [awaitSnapshot].
+   *
+   * Held rather than polled so a request blocked on routing resumes in the same
+   * turn the snapshot is applied.
+   */
+  private snapshotWaiters: Array<() => void> = []
+
   /**
    * Whether an authoritative snapshot has been applied. Callers must treat a
-   * false answer as "block", never as "direct".
+   * false answer as "wait, then block", never as "direct" — see
+   * [awaitSnapshot].
    */
   isReady(): boolean {
     return this.generation !== null
   }
 
+  /**
+   * Whether the applied snapshot announces a successor, i.e. whether routing
+   * this store currently resolves to "blocked" may still resolve to a live
+   * proxy without anything else changing.
+   */
+  isProvisional(): boolean {
+    return this.provisional
+  }
+
+  /**
+   * Whether [contextId]'s route is blocked by a backend that is still starting,
+   * rather than by one that is not running.
+   *
+   * Asked of the context rather than of a proxy id, so the caller does not have
+   * to reimplement how a context resolves to a relation — the inheritance rules
+   * are the store's, and answering the wrong context is how a wait ends up on
+   * a request that should have failed at once.
+   */
+  isContextAwaitingProxy(contextId: string): boolean {
+    if (this.awaitingProxies.size === 0) return false
+
+    const relation = this.getEffectiveRelation(contextId)
+    if (relation === undefined) return false
+
+    return relation.some(proxyId => this.awaitingProxies.has(proxyId))
+  }
+
   getGeneration(): number | null {
     return this.generation
+  }
+
+  /**
+   * Resolves true when a snapshot is applied, false when [timeoutMs] passes
+   * first.
+   *
+   * This is what lets the request path treat "routing is not known yet" as a
+   * wait rather than a failure: on a cold start the store is empty for as long
+   * as it takes the seed or the app's first push to arrive, and everything that
+   * loads inside that window would otherwise be answered with the emergency
+   * break — an error page on a page the user just opened, with nothing left to
+   * retry it in a process that has no app half.
+   *
+   * A non-positive timeout resolves false without waiting, so a caller working
+   * to a deadline never has to special-case having reached it.
+   */
+  async awaitSnapshot(timeoutMs: number): Promise<boolean> {
+    if (timeoutMs <= 0) return false
+
+    return await new Promise<boolean>(resolve => {
+      const waiter = (): void => {
+        clearTimeout(timer)
+        resolve(true)
+      }
+
+      const timer = setTimeout(() => {
+        this.snapshotWaiters = this.snapshotWaiters.filter(w => w !== waiter)
+        resolve(false)
+      }, timeoutMs)
+
+      this.snapshotWaiters.push(waiter)
+    })
+  }
+
+  private wakeSnapshotWaiters(): void {
+    const waiters = this.snapshotWaiters
+    this.snapshotWaiters = []
+    for (const waiter of waiters) {
+      waiter()
+    }
   }
 
   /**
@@ -144,6 +253,11 @@ export class Store {
     this.setStrictContexts(new Map(Object.entries(snapshot.strictContexts)))
 
     this.generation = snapshot.generation
+    this.provisional = snapshot.provisional === true
+    this.awaitingProxies = new Set(snapshot.awaitingProxies ?? [])
+
+    // Last, so a waiter that resumes here reads the whole new state.
+    this.wakeSnapshotWaiters()
   }
 
   private siteAssignments: Map<string, string> = new Map<string, string>()

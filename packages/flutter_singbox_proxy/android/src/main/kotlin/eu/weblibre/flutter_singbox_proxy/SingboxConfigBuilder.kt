@@ -3,6 +3,7 @@ package eu.weblibre.flutter_singbox_proxy
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyConfigResult
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyDnsConfig
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyDnsServerConfig
+import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyLogLevel
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyProfile
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyProfileType
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyRuntimeEndpoint
@@ -122,15 +123,23 @@ class SingboxConfigBuilder(
             })
         }
 
-        val dnsBlock = options.dnsConfig?.let(::buildDnsBlock)
-        if (dnsBlock != null && options.bootstrapDohUrl.isNullOrBlank()) {
+        val configuredDnsBlock = options.dnsConfig?.let(::buildDnsBlock)
+        if (configuredDnsBlock != null && options.bootstrapDohUrl.isNullOrBlank()) {
             throw IllegalArgumentException(
                 "bootstrapDohUrl is required when dnsConfig is provided."
             )
         }
+        // A caller with a bootstrap URL but no servers still gets the platform
+        // `local` transport and `default_domain_resolver` below. Without a
+        // `dns` block sing-box resolves through /etc/resolv.conf, which does
+        // not exist on Android — every hostname, the WireGuard peer included,
+        // then fails to resolve.
+        val dnsBlock = configuredDnsBlock ?: bootstrapOnlyDnsBlock(options.bootstrapDohUrl)
 
         val config = JSONObject().apply {
-            put("log", JSONObject().apply { put("level", "info") })
+            put("log", JSONObject().apply {
+                put("level", singboxLogLevel(options.logLevel))
+            })
             put("inbounds", inbounds)
             if (endpointsJson.length() > 0) {
                 put("endpoints", endpointsJson)
@@ -154,6 +163,22 @@ class SingboxConfigBuilder(
             configJson = config.toString(2),
             endpoints = endpoints
         )
+    }
+
+    /**
+     * sing-box `log.level` for [level].
+     *
+     * `info` and above cost roughly one line per connection each from the SOCKS
+     * inbound, the DNS router (on cache hits too) and the outbound, and every
+     * line is forwarded to Dart over the platform channel on the main thread.
+     * That is a diagnostic mode, which is why `warn` is the default and the
+     * verbose levels are reachable only through a setting.
+     */
+    private fun singboxLogLevel(level: SingboxProxyLogLevel): String = when (level) {
+        SingboxProxyLogLevel.WARN -> "warn"
+        SingboxProxyLogLevel.INFO -> "info"
+        SingboxProxyLogLevel.DEBUG -> "debug"
+        SingboxProxyLogLevel.TRACE -> "trace"
     }
 
     private fun inboundPorts(
@@ -202,6 +227,19 @@ class SingboxConfigBuilder(
         throw IOException("Could not allocate a free local SOCKS port")
     }
 
+    /** DNS block holding nothing but the platform bootstrap transport. */
+    private fun bootstrapOnlyDnsBlock(bootstrapDohUrl: String?): JSONObject? {
+        if (bootstrapDohUrl.isNullOrBlank()) return null
+
+        return JSONObject().apply {
+            put("servers", JSONArray().put(JSONObject().apply {
+                put("type", "local")
+                put("tag", DNS_BOOTSTRAP_TAG)
+            }))
+            put("final", DNS_BOOTSTRAP_TAG)
+        }
+    }
+
     private fun buildDnsBlock(dns: SingboxProxyDnsConfig): JSONObject? {
         if (dns.servers.isEmpty()) return null
 
@@ -216,6 +254,23 @@ class SingboxConfigBuilder(
             put("type", "local")
             put("tag", DNS_BOOTSTRAP_TAG)
         })
+
+        // A DNS server's own hostname resolves through `local`, always and
+        // before anything else can claim it. Without this a lookup for a DoH
+        // endpoint can take the rules path and land on a DoH server — possibly
+        // the one being dialled, possibly one behind a tunnel that is still
+        // waiting on this very lookup.
+        val bootstrapDomains = dns.servers
+            .mapNotNull { server -> parseDnsAddress(server.address).server }
+            .filterNot { host -> isIpLiteral(host) }
+            .distinct()
+        if (bootstrapDomains.isNotEmpty()) {
+            rulesJson.put(JSONObject().apply {
+                put("domain", JSONArray(bootstrapDomains))
+                put("action", "route")
+                put("server", DNS_BOOTSTRAP_TAG)
+            })
+        }
 
         for (server in dns.servers) {
             serversJson.put(buildDnsServer(server))
@@ -372,12 +427,65 @@ class SingboxConfigBuilder(
             endpoint.put("peers", JSONArray().put(peer))
         }
 
-        endpoint.remove("local_address")?.let { endpoint.put("address", it) }
+        endpoint.remove("local_address")?.let { endpoint.put("address", withCidrPrefixes(it)) }
         endpoint.remove("system_interface")?.let { endpoint.put("system", it) }
         endpoint.remove("interface_name")?.let { endpoint.put("name", it) }
         endpoint.remove("gso")
 
         return endpoint
+    }
+
+    /**
+     * The tunnel's own addresses, every one of them carrying a prefix length.
+     *
+     * sing-box reads `address` as a list of prefixes and refuses to parse a bare
+     * one, which is a start-up failure naming a field the user never typed. The
+     * importer and the profile form both fill the prefix in now, so this only
+     * catches profiles saved before they did — but those are exactly the ones
+     * that fail, and nothing else here can repair them.
+     *
+     * Anything that is not an address is passed through untouched: sing-box's
+     * own error names the value, and a guess made here would only replace it
+     * with a worse one.
+     */
+    private fun withCidrPrefixes(addresses: Any): Any {
+        if (addresses !is JSONArray) return withCidrPrefix(addresses)
+
+        return JSONArray().apply {
+            for (index in 0 until addresses.length()) {
+                put(withCidrPrefix(addresses.get(index)))
+            }
+        }
+    }
+
+    private fun withCidrPrefix(address: Any): Any {
+        if (address !is String) return address
+
+        val value = address.trim()
+        if (value.isEmpty()) return address
+
+        val separatorIndex = value.lastIndexOf('/')
+        val addressPart = if (separatorIndex < 0) value else value.substring(0, separatorIndex)
+        // Kept with its slash so it can be re-attached verbatim; whether the
+        // prefix is in range is sing-box's to say, not ours to guess at.
+        val prefixPart = if (separatorIndex < 0) null else value.substring(separatorIndex)
+
+        // Brackets are endpoint syntax (`[fd00::1]:443`), and an address list
+        // never needs them — sing-box refuses one that carries them. A profile
+        // written by hand from an endpoint is exactly where they turn up, and
+        // that is the population this whole function exists for. Stripped
+        // before the prefix question, because a bracketed address that already
+        // has one is just as unparseable as one that has not.
+        val bare = addressPart.removeSurrounding("[", "]")
+        if (bare.isEmpty()) return address
+
+        if (prefixPart != null) return bare + prefixPart
+
+        return when {
+            bare.contains(':') -> "$bare/128"
+            bare.count { it == '.' } == 3 -> "$bare/32"
+            else -> address
+        }
     }
 
     private fun deepMerge(target: JSONObject, source: JSONObject) {

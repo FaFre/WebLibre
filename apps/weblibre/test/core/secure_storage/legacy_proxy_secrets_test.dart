@@ -53,14 +53,17 @@ void main() {
     expect(ownership.proxyProfileIds, {'proxy-1', 'proxy-2'});
   });
 
-  test('a profile with no proxies reads as an empty, complete answer', () async {
-    writeProxyRows([]);
+  test(
+    'a profile with no proxies reads as an empty, complete answer',
+    () async {
+      writeProxyRows([]);
 
-    final ownership = await readProxyProfileIds(profileDir);
+      final ownership = await readProxyProfileIds(profileDir);
 
-    expect(ownership.readable, isTrue);
-    expect(ownership.proxyProfileIds, isEmpty);
-  });
+      expect(ownership.readable, isTrue);
+      expect(ownership.proxyProfileIds, isEmpty);
+    },
+  );
 
   test('no database at all is empty, not unreadable', () async {
     // There can be no proxy rows if the profile never opened its database.
@@ -98,10 +101,9 @@ void main() {
     writeProxyRows(['proxy-1']);
     await readProxyProfileIds(profileDir);
 
-    final names = Directory(p.join(profileDir.path, 'databases'))
-        .listSync()
-        .map((entity) => p.basename(entity.path))
-        .toList();
+    final names = Directory(
+      p.join(profileDir.path, 'databases'),
+    ).listSync().map((entity) => p.basename(entity.path)).toList();
     expect(names, ['user.db']);
   });
 }

@@ -39,42 +39,41 @@ const int _ringBufferCapacity = 2000;
 /// actually sees.
 const _publishInterval = Duration(milliseconds: 100);
 
-/// Snapshot of buffered log entries. Most-recent-last (chronological).
+/// Ring buffer of proxy/Tor log lines.
 ///
 /// This notifier is `keepAlive` and subscribed from app start (see
 /// `main.dart`) so startup messages are retained even before any UI mounts.
-/// Appending and *publishing* are therefore deliberately decoupled: lines
-/// always land in [_buffer], but a new immutable snapshot is only produced
-/// while the log screen is on screen ([setLivePublishing]) and at most once
-/// per [_publishInterval].
+/// It holds no provider state of its own: appending to a buffer thousands of
+/// times a minute must not notify anybody, and materializing a snapshot is
+/// [ProxyLogFeed]'s job, which only exists while something displays the logs.
 @Riverpod(keepAlive: true)
 class SingboxProxyLogs extends _$SingboxProxyLogs {
   final _buffer = Queue<ProxyLogMessage>();
 
+  /// Ticks [changes]. Created with the notifier and never closed, deliberately.
+  ///
+  /// Riverpod reuses one notifier instance across rebuilds and runs the
+  /// previous build's `onDispose` callbacks when it re-runs [build], so closing
+  /// this in there closes it for the life of the process: the first rebuild — a
+  /// new [singboxProxyClientProvider], or `torLogStream` rebuilding the Tor
+  /// service — would leave [_notify] short-circuiting on `isClosed` and
+  /// [ProxyLogFeed] listening to a stream that is already done, freezing the
+  /// log screen on its seed snapshot with nothing logged anywhere.
+  ///
+  /// There is nothing to release either way: this provider is `keepAlive` and
+  /// subscribed for the whole process, and a broadcast controller whose
+  /// listeners have all cancelled holds nothing on.
+  final _changes = StreamController<void>.broadcast();
+
   StreamSubscription<SingboxProxyLogMessage>? _singboxSubscription;
   StreamSubscription<TorLogMessage>? _torSubscription;
 
-  Timer? _publishTimer;
-  bool _livePublishing = false;
-
-  /// Buffer contents materialized on demand, regardless of publication state.
-  /// Lets a freshly mounted screen paint the backlog without waiting for the
-  /// first throttled snapshot.
+  /// Buffer contents materialized on demand. Lets a freshly mounted screen
+  /// paint the backlog in its first frame.
   List<ProxyLogMessage> get snapshot => List.unmodifiable(_buffer);
 
-  /// Enables/disables snapshot publication. Called by the log screen as it
-  /// mounts and unmounts; flushes on both edges so the state left behind is
-  /// always complete.
-  void setLivePublishing(bool enabled) {
-    if (_livePublishing == enabled) {
-      return;
-    }
-
-    _livePublishing = enabled;
-    _publishTimer?.cancel();
-    _publishTimer = null;
-    _publish();
-  }
+  /// Ticks whenever [snapshot] would return something new.
+  Stream<void> get changes => _changes.stream;
 
   void _append(ProxyLogMessage message) {
     _buffer.add(message);
@@ -83,32 +82,28 @@ class SingboxProxyLogs extends _$SingboxProxyLogs {
       _buffer.removeFirst();
     }
 
-    if (!_livePublishing || (_publishTimer?.isActive ?? false)) {
-      return;
-    }
-
-    _publishTimer = Timer(_publishInterval, _publish);
-  }
-
-  void _publish() {
-    _publishTimer = null;
-
-    if (!ref.mounted) {
-      return;
-    }
-
-    state = snapshot;
+    _notify();
   }
 
   void clear() {
     _buffer.clear();
-    _publishTimer?.cancel();
-    _publishTimer = null;
-    state = const [];
+    _notify();
+  }
+
+  void _notify() {
+    // Nothing is watching for most of the process's life — the buffer exists so
+    // that a screen opened *later* has a backlog, and it fills at trace level
+    // thousands of times a minute. A stream event per append when nobody is
+    // there to receive it is a microtask per append for no one.
+    if (_changes.isClosed || !_changes.hasListener) {
+      return;
+    }
+
+    _changes.add(null);
   }
 
   @override
-  List<ProxyLogMessage> build() {
+  void build() {
     final client = ref.watch(singboxProxyClientProvider);
     final torLogs = torLogStream(ref);
 
@@ -120,11 +115,48 @@ class SingboxProxyLogs extends _$SingboxProxyLogs {
     );
 
     ref.onDispose(() {
-      _publishTimer?.cancel();
       unawaited(_singboxSubscription?.cancel());
       unawaited(_torSubscription?.cancel());
     });
+  }
+}
 
-    return snapshot;
+/// Throttled snapshots of [SingboxProxyLogs]' ring buffer, most-recent-last.
+///
+/// Auto-disposed, and that is the whole point: copying up to
+/// [_ringBufferCapacity] entries is only worth doing while something is
+/// actually showing them, and tying that to the provider's own lifetime keeps
+/// it out of a widget life-cycle. Publishing from `useEffect` — whose body runs
+/// during build — wrote provider state mid-frame, which Riverpod refuses.
+@riverpod
+class ProxyLogFeed extends _$ProxyLogFeed {
+  Timer? _publishTimer;
+
+  @override
+  List<ProxyLogMessage> build() {
+    final logs = ref.watch(singboxProxyLogsProvider.notifier);
+
+    final subscription = logs.changes.listen((_) {
+      if (_publishTimer?.isActive ?? false) {
+        return;
+      }
+
+      _publishTimer = Timer(_publishInterval, () {
+        if (!ref.mounted) {
+          return;
+        }
+
+        state = logs.snapshot;
+      });
+    });
+
+    ref.onDispose(() {
+      _publishTimer?.cancel();
+      unawaited(subscription.cancel());
+    });
+
+    // Seeded from the live buffer so the backlog paints in the first frame
+    // instead of after the first throttled publication.
+    return logs.snapshot;
   }
 }

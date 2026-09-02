@@ -5,7 +5,6 @@ package eu.weblibre.flutter_mozilla_components.middleware
 
 import android.graphics.Bitmap
 import android.util.Log
-import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.ext.resize
 import eu.weblibre.flutter_mozilla_components.ext.toWebPBytes
@@ -22,7 +21,6 @@ import eu.weblibre.flutter_mozilla_components.pigeons.VideoHitResult
 import mozilla.components.browser.state.action.BrowserAction
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.action.LastAccessAction
-import mozilla.components.browser.state.action.ReaderAction
 import mozilla.components.browser.state.action.TabListAction
 import mozilla.components.browser.state.action.WebExtensionAction
 import mozilla.components.browser.state.selector.findCustomTab
@@ -41,10 +39,6 @@ import kotlin.reflect.typeOf
  * the thumbnail to the disk cache.
  */
 class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Middleware<BrowserState, BrowserAction> {
-    private val components by lazy {
-        requireNotNull(GlobalComponents.components) { "Components not initialized" }
-    }
-    
     @Suppress("ComplexMethod")
     override fun invoke(
         store: Store<BrowserState, BrowserAction>,
@@ -58,20 +52,6 @@ class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Midd
 
                 runOnUiThread {
                     flutterEvents.onThumbnailChange(EventSequence.next(), action.sessionId, bytes) { _ -> }
-                }
-            }
-            //UpdateReaderConnectRequiredAction seems to be the only event that is called predictable
-            //after a hot reload
-            is ReaderAction.UpdateReaderConnectRequiredAction -> {
-                if(!components.engineReportedInitialized) {
-                    runOnUiThread {
-                        flutterEvents.onEngineReadyStateChange(
-                            EventSequence.next(),
-                            true
-                        ) { _ -> }
-                    }
-
-                    components.engineReportedInitialized = true
                 }
             }
             is TabListAction.AddTabAction -> {

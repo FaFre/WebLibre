@@ -17,17 +17,35 @@ import okhttp3.RequestBody.Companion.toRequestBody
  * straight to a configured DoH endpoint so no query ever hits Android's
  * system resolver.
  *
- * The DoH endpoint's own hostname is resolved exactly once by the JVM HTTP
- * stack. Configure the URL with an IP literal (e.g. `https://1.1.1.1/dns-query`)
- * if even that one lookup must not leak.
+ * Every lookup the runtime makes — the WireGuard peer address included — goes
+ * through here, and sing-box gives each DNS exchange a fixed budget
+ * (`C.DNSTimeout`, 10s). An exchange that outlives that budget is reported as
+ * `context deadline exceeded` on sing-box's side while this call is still
+ * running, which reads as "DNS is broken" with nothing logged here to say why.
+ * The call timeout below is therefore a hard bound well inside that budget: a
+ * DoH endpoint we cannot reach must fail *and be logged* rather than hang. It
+ * is the only bound that has to be tight — the per-attempt timeouts are left
+ * generous on purpose, because a cold cellular link routinely takes several
+ * seconds to complete a first connection, and cutting an attempt short there
+ * turns "DNS was slow" into a SERVFAIL that surfaces as "the tunnel won't come
+ * up" (every lookup, the WireGuard peer hostname included, comes through here).
+ *
+ * The DoH endpoint's own hostname is resolved once by the platform resolver.
+ * Configure the URL with an IP literal (e.g. `https://9.9.9.9/dns-query`) if
+ * even that one lookup must not leak.
  */
 class PlatformDohResolver(
-    private val connectTimeoutMillis: Int = 5_000,
-    private val readTimeoutMillis: Int = 5_000,
+    connectTimeoutMillis: Long = 5_000,
+    readTimeoutMillis: Long = 5_000,
+    callTimeoutMillis: Long = 6_000,
 ) {
     private val client: OkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(connectTimeoutMillis.toLong(), TimeUnit.MILLISECONDS)
-        .readTimeout(readTimeoutMillis.toLong(), TimeUnit.MILLISECONDS)
+        // Bounds the whole exchange: connect/read timeouts are per attempt and
+        // OkHttp walks every address the endpoint resolves to, so a host with
+        // one dead address family can otherwise outlast sing-box's deadline.
+        .callTimeout(callTimeoutMillis, TimeUnit.MILLISECONDS)
+        .connectTimeout(connectTimeoutMillis, TimeUnit.MILLISECONDS)
+        .readTimeout(readTimeoutMillis, TimeUnit.MILLISECONDS)
         .build()
 
     /** Send [request] as a DoH POST and return the raw DNS wire-format reply. */

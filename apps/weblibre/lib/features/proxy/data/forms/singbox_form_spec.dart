@@ -21,6 +21,7 @@ import 'dart:convert';
 
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:weblibre/features/proxy/data/forms/singbox_form_field.dart';
+import 'package:weblibre/features/proxy/data/parsers/cidr.dart';
 
 class SingboxProxyFormSpec {
   final SingboxProxyProfileType type;
@@ -66,6 +67,14 @@ class SingboxProxyFormSpec {
           final maxValue = field.maxValue;
           if (maxValue != null && parsed > maxValue) {
             return '${field.label} must contain numbers less than or equal to $maxValue.';
+          }
+        }
+      }
+      if (field.isCidrList && value.isNotEmpty) {
+        for (final item in splitFormStringList(value)) {
+          if (tryParseCidr(item) == null) {
+            return '${field.label} must contain IP addresses, '
+                'optionally with a /prefix — "$item" is not one.';
           }
         }
       }
@@ -143,6 +152,14 @@ Object _fieldJsonValue(SingboxProxyFormField field, String value) {
     return splitFormStringList(value).map(int.parse).toList();
   }
   if (field.isBoolean) return parseFormBool(value)!;
+  // Before [isStringList], which a CIDR list also answers to: the entries are
+  // written out as prefixes even when the user typed a bare address, because
+  // that is the only shape sing-box accepts.
+  if (field.isCidrList) {
+    return splitFormStringList(
+      value,
+    ).map((item) => tryNormalizeCidr(item) ?? item).toList();
+  }
   if (field.isStringList) return splitFormStringList(value);
   return value;
 }

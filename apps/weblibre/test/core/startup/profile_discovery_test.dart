@@ -58,7 +58,10 @@ void main() {
     });
 
     test('rejects spellings that are not exactly canonical', () {
-      expect(parseCanonicalProfileDirName('profile-${_oldest.toUpperCase()}'), isNull);
+      expect(
+        parseCanonicalProfileDirName('profile-${_oldest.toUpperCase()}'),
+        isNull,
+      );
       expect(
         parseCanonicalProfileDirName('profile-${_oldest.replaceAll('-', '')}'),
         isNull,
@@ -75,20 +78,23 @@ void main() {
       expect((await discoverProfiles(missing)).profiles, isEmpty);
     });
 
-    test('sorts valid profiles by canonical uuid, i.e. creation order', () async {
-      await writeProfile(_newest, name: 'Newest');
-      await writeProfile(_oldest, name: 'Oldest');
-      await writeProfile(_middle, name: 'Middle');
+    test(
+      'sorts valid profiles by canonical uuid, i.e. creation order',
+      () async {
+        await writeProfile(_newest, name: 'Newest');
+        await writeProfile(_oldest, name: 'Oldest');
+        await writeProfile(_middle, name: 'Middle');
 
-      final discovery = await discoverProfiles(profilesDir);
+        final discovery = await discoverProfiles(profilesDir);
 
-      expect(discovery.profiles.map((profile) => profile.name), [
-        'Oldest',
-        'Middle',
-        'Newest',
-      ]);
-      expect(discovery.damaged, isEmpty);
-    });
+        expect(discovery.profiles.map((profile) => profile.name), [
+          'Oldest',
+          'Middle',
+          'Newest',
+        ]);
+        expect(discovery.damaged, isEmpty);
+      },
+    );
 
     test('one damaged profile does not hide the others', () async {
       await writeProfile(_oldest, name: 'Good');
@@ -107,26 +113,32 @@ void main() {
       );
     });
 
-    test('metadata must have the exact shape Profile.fromJson requires', () async {
-      // Mirrored by `ProfileCandidateResolverTest.metadataMustHaveTheExactShape…`.
-      // Kotlin has to reject exactly what this rejects: a headless start that
-      // committed a profile Flutter then refuses would surface as an
-      // unrecoverable process-profile mismatch, not as a skipped profile.
-      await writeProfile(_oldest, rawMetadata: '{"id":"$_oldest"}');
-      await writeProfile(_middle, rawMetadata: '{"id":"$_middle","name":null}');
-      await writeProfile(_newest, rawMetadata: '{"id":"$_newest","name":7}');
+    test(
+      'metadata must have the exact shape Profile.fromJson requires',
+      () async {
+        // Mirrored by `ProfileCandidateResolverTest.metadataMustHaveTheExactShape…`.
+        // Kotlin has to reject exactly what this rejects: a headless start that
+        // committed a profile Flutter then refuses would surface as an
+        // unrecoverable process-profile mismatch, not as a skipped profile.
+        await writeProfile(_oldest, rawMetadata: '{"id":"$_oldest"}');
+        await writeProfile(
+          _middle,
+          rawMetadata: '{"id":"$_middle","name":null}',
+        );
+        await writeProfile(_newest, rawMetadata: '{"id":"$_newest","name":7}');
 
-      final discovery = await discoverProfiles(profilesDir);
+        final discovery = await discoverProfiles(profilesDir);
 
-      expect(discovery.profiles, isEmpty);
-      expect(discovery.damaged, hasLength(3));
-      expect(
-        discovery.damaged.every(
-          (entry) => entry.defect == ProfileDefect.unreadableMetadata,
-        ),
-        isTrue,
-      );
-    });
+        expect(discovery.profiles, isEmpty);
+        expect(discovery.damaged, hasLength(3));
+        expect(
+          discovery.damaged.every(
+            (entry) => entry.defect == ProfileDefect.unreadableMetadata,
+          ),
+          isTrue,
+        );
+      },
+    );
 
     test('a non-object authSettings is refused', () async {
       await writeProfile(
@@ -140,16 +152,19 @@ void main() {
       expect(discovery.damaged.single.defect, ProfileDefect.unreadableMetadata);
     });
 
-    test('an absent authSettings is fine because the model defaults it', () async {
-      await writeProfile(
-        _oldest,
-        rawMetadata: '{"id":"$_oldest","name":"Default"}',
-      );
+    test(
+      'an absent authSettings is fine because the model defaults it',
+      () async {
+        await writeProfile(
+          _oldest,
+          rawMetadata: '{"id":"$_oldest","name":"Default"}',
+        );
 
-      final discovery = await discoverProfiles(profilesDir);
+        final discovery = await discoverProfiles(profilesDir);
 
-      expect(discovery.profiles.map((profile) => profile.name), ['Default']);
-    });
+        expect(discovery.profiles.map((profile) => profile.name), ['Default']);
+      },
+    );
 
     test('a non-string id is refused', () async {
       await writeProfile(_oldest, rawMetadata: '{"id":7,"name":"Default"}');
@@ -172,18 +187,28 @@ void main() {
       );
     });
 
-    test('a non-canonical directory name is damaged, not silently ignored', () async {
-      await writeProfile(_oldest, dirName: 'profile-${_oldest.toUpperCase()}');
+    test(
+      'a non-canonical directory name is damaged, not silently ignored',
+      () async {
+        await writeProfile(
+          _oldest,
+          dirName: 'profile-${_oldest.toUpperCase()}',
+        );
 
-      final discovery = await discoverProfiles(profilesDir);
+        final discovery = await discoverProfiles(profilesDir);
 
-      expect(discovery.profiles, isEmpty);
-      expect(discovery.damaged.single.defect, ProfileDefect.nonCanonicalName);
-    });
+        expect(discovery.profiles, isEmpty);
+        expect(discovery.damaged.single.defect, ProfileDefect.nonCanonicalName);
+      },
+    );
 
     test('unrelated directories are neither profiles nor damage', () async {
-      await Directory(p.join(profilesDir.path, 'weblibre_maintenance')).create();
-      await File(p.join(profilesDir.path, 'current_profile')).writeAsString(_oldest);
+      await Directory(
+        p.join(profilesDir.path, 'weblibre_maintenance'),
+      ).create();
+      await File(
+        p.join(profilesDir.path, 'current_profile'),
+      ).writeAsString(_oldest);
       await writeProfile(_oldest);
 
       final discovery = await discoverProfiles(profilesDir);

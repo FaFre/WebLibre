@@ -43,7 +43,10 @@ void main() {
         profileScopedSecureKey('k', _a.toUpperCase()),
         profileScopedSecureKey('k', _a),
       );
-      expect(secureKeyBelongsTo(profileScopedSecureKey('k', _a), _a.toUpperCase()), isTrue);
+      expect(
+        secureKeyBelongsTo(profileScopedSecureKey('k', _a), _a.toUpperCase()),
+        isTrue,
+      );
     });
 
     test('an unqualified key has no owner', () {
@@ -64,7 +67,10 @@ void main() {
     test('a separator that is not followed by a UUID is not ownership', () {
       // Otherwise any base key containing the separator would be mistaken for a
       // qualified one and mis-attributed.
-      expect(profileOfSecureKey('weird${secureKeyProfileSeparator}notauuid'), isNull);
+      expect(
+        profileOfSecureKey('weird${secureKeyProfileSeparator}notauuid'),
+        isNull,
+      );
       expect(
         baseOfSecureKey('weird${secureKeyProfileSeparator}notauuid'),
         'weird${secureKeyProfileSeparator}notauuid',

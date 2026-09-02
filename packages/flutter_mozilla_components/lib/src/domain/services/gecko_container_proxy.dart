@@ -41,6 +41,33 @@ class GeckoContainerProxyService {
     }
   }
 
+  /// The launch waiting for a proxy to be started, if one is, consuming it.
+  ///
+  /// Answers immediately — including with null — so a startup that has to know
+  /// whether anything is waiting can find out without holding anything open.
+  Future<GeckoRoutingDemand?> takeRoutingDemand() async {
+    try {
+      return await _apiInstance.takeRoutingDemand();
+    } catch (e, s) {
+      developer.log(
+        'Reading the pending routing demand failed',
+        error: e,
+        stackTrace: s,
+        name: 'GeckoContainerProxyService',
+      );
+      return null;
+    }
+  }
+
+  /// Completes when a launch registers a demand, consuming it.
+  ///
+  /// Deliberately without a timeout: the answer is a user tapping a shortcut,
+  /// which happens whenever it happens. Errors are surfaced rather than
+  /// swallowed — a caller looping on this would otherwise spin.
+  Future<GeckoRoutingDemand> nextRoutingDemand() {
+    return _apiInstance.nextRoutingDemand();
+  }
+
   /// Whether the extension currently holds an acknowledged routing snapshot.
   ///
   /// Answered from native's own record of the last acknowledgement, so it does

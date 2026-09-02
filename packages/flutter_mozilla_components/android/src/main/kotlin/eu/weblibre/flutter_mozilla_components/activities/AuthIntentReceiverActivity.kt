@@ -48,7 +48,11 @@ class AuthIntentReceiverActivity : Activity() {
             val sessionId = sourceIntent.getSessionId() ?: components.core.store.state.customTabs.lastOrNull()?.id
             if (sessionId != null) {
                 val authIntent = ExternalAppBrowserActivity
-                    .createIntent(this, sessionId)
+                    .createIntent(
+                        context = this,
+                        customTabSessionId = sessionId,
+                        isPrivate = sourceIntent.getBooleanExtra(PRIVATE_BROWSING_MODE, false),
+                    )
                     .setClassName(this, AuthCustomTabActivity::class.java.name)
                 startActivity(authIntent)
             } else {

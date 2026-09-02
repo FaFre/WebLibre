@@ -19,8 +19,11 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/features/user/data/models/proxy_diagnostics_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/proxy_diagnostics_settings.dart';
 
 const List<SettingsSectionDefinition> proxySettingsSections = [
   SettingsSectionDefinition(
@@ -47,6 +50,22 @@ const List<SettingsSectionDefinition> proxySettingsSections = [
         subtitle: 'Choose which proxy carries regular and private tabs',
         keywords: ['routing', 'container'],
         child: _ProxyRoutingTile(),
+      ),
+      SettingsEntryDefinition(
+        title: 'Proxy Logs',
+        subtitle: 'Read the proxy log and set how much it records',
+        keywords: [
+          'log',
+          'logging',
+          'logs',
+          'diagnostics',
+          'debug',
+          'trace',
+          'verbose',
+          'troubleshoot',
+          'level',
+        ],
+        child: _ProxyLogsTile(),
       ),
     ],
   ),
@@ -105,6 +124,47 @@ class _ProxyRoutingTile extends StatelessWidget {
       ),
       onTap: () async {
         await const ProxyRoutingSettingsRoute().push(context);
+      },
+    );
+  }
+}
+
+/// Links to the log rather than reproducing its settings here.
+///
+/// The verbosity control belongs with the log it fills — it is only ever
+/// changed because of what the log does or does not show, and a level raised
+/// for one diagnosis has to be put back afterwards from the same place. What
+/// this entry owes the user is the current level, so a verbose one left on is
+/// visible from the settings list without opening anything.
+class _ProxyLogsTile extends ConsumerWidget {
+  const _ProxyLogsTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final logLevel = ref
+        .watch(proxyDiagnosticsSettingsWithDefaultsProvider)
+        .logLevel;
+
+    return ListTile(
+      leading: Icon(
+        logLevel.isVerbose
+            ? MdiIcons.textBoxSearchOutline
+            : MdiIcons.textBoxOutline,
+        color: logLevel.isVerbose ? Theme.of(context).colorScheme.error : null,
+      ),
+      title: const Text('Proxy Logs'),
+      subtitle: Text(
+        logLevel.isVerbose
+            ? 'Recording ${logLevel.label.toLowerCase()} — this slows browsing'
+            : 'Recording ${logLevel.label.toLowerCase()}',
+      ),
+      trailing: const Icon(Icons.chevron_right),
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 8.0,
+        horizontal: 16.0,
+      ),
+      onTap: () async {
+        await const SingboxProxyLogsRoute().push(context);
       },
     );
   }

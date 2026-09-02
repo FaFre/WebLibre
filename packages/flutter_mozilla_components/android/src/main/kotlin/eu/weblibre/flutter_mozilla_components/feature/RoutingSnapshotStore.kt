@@ -72,6 +72,30 @@ internal object RoutingSnapshotStore {
         return previous != null && previous != key
     }
 
+    /**
+     * Reads the committed profile's snapshot without binding the store to it.
+     *
+     * For callers that need to know what this profile routed through *before*
+     * components exist — the launch path decides whether a Custom Tab or PWA can
+     * be served headlessly at all. Binding here would consume the
+     * profile-changed signal that [bind] hands to [ContainerProxyFeature], and
+     * with it the drop of the outgoing profile's cached routing.
+     *
+     * Null when no profile is committed yet, which callers must read as "not
+     * known", never as "no routing".
+     */
+    fun peek(context: Context): JSONObject? {
+        val key = ProfilePrefs.key(ROUTING_SNAPSHOT_PREF) ?: return null
+        val raw = ProfilePrefs.of(context).getString(key, null) ?: return null
+
+        return try {
+            JSONObject(raw)
+        } catch (e: JSONException) {
+            logger.error("Failed to parse persisted routing snapshot", e)
+            null
+        }
+    }
+
     fun read(): JSONObject? {
         val context = this.context ?: return null
         val key = boundKey ?: return null

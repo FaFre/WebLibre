@@ -7,6 +7,7 @@ export 'src/singbox_proxy_api.g.dart'
         SingboxProxyConfigResult,
         SingboxProxyDnsConfig,
         SingboxProxyDnsServerConfig,
+        SingboxProxyLogLevel,
         SingboxProxyLogMessage,
         SingboxProxyProfile,
         SingboxProxyProfileType,

@@ -4,6 +4,8 @@ gradle-wrapper.jar
 /gradlew
 /gradlew.bat
 /local.properties
+# Machine-local JDK pin written by Android Studio.
+/gradle/config.properties
 GeneratedPluginRegistrant.java
 .cxx
 

@@ -23,7 +23,9 @@ Directory startupFixturesDir() {
 
     final parent = dir.parent;
     if (parent.path == dir.path) {
-      throw StateError('Could not locate shared startup fixtures from ${Directory.current.path}');
+      throw StateError(
+        'Could not locate shared startup fixtures from ${Directory.current.path}',
+      );
     }
     dir = parent;
   }

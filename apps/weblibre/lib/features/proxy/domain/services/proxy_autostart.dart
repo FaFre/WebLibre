@@ -36,6 +36,21 @@ part 'proxy_autostart.g.dart';
 /// While a start is in flight [pendingStartFor] hands the caller the running
 /// future instead of a "not running" snapshot — the connection is on its way
 /// up, so prompting the user for it would be wrong.
+///
+/// The provider's own state answers the same question for everything that
+/// cannot hold a future: the encoded ids startup is still going to bring up,
+/// or null while the configuration that decides them has not been read yet.
+/// [ProxyStartExpectation] reads it to tell a relation whose backend is still
+/// coming up from one whose backend is simply not running, and startup
+/// publishes routing long before [run] is even called — so "nothing is known
+/// yet" has to be the initial answer, not "nothing is pending".
+///
+/// Deliberately a set rather than a "startup has finished" flag. The flag made
+/// every connection look pending until the slowest start settled, so a
+/// container routed through a sing-box profile nobody was starting sat out the
+/// extension's whole budget behind an unrelated Tor bootstrap. What ends the
+/// unknown state is the *lookups* landing; from then on the answer is per
+/// connection.
 @Riverpod(keepAlive: true)
 class ProxyAutostartService extends _$ProxyAutostartService {
   /// Completes when the autostart profile set is known. Published before the
@@ -52,11 +67,38 @@ class ProxyAutostartService extends _$ProxyAutostartService {
   bool? _torAutostart;
   Future<void>? _torStart;
 
+  /// Each backend's contribution to [state], null until its lookup lands.
+  ///
+  /// Kept apart so the two can resolve independently, and republished as a
+  /// whole: a set assembled from one landed lookup and one outstanding one
+  /// would present a connection nothing has decided about yet as one nothing
+  /// is starting, which is the answer that fails a request rather than holding
+  /// it.
+  Set<String>? _singboxPending;
+  Set<String>? _torPending;
+
+  void _publishPending() {
+    final singbox = _singboxPending;
+    final tor = _torPending;
+    if (singbox == null || tor == null) return;
+
+    state = {...singbox, ...tor};
+  }
+
   /// Kicks off every configured autostart connection and completes once they
   /// have all settled. Failures are logged, never thrown: a proxy that cannot
   /// come up must not take app startup down with it.
   Future<void> run() async {
-    await (_startSingboxProfiles(), _startTor()).wait;
+    try {
+      await (_startSingboxProfiles(), _startTor()).wait;
+    } finally {
+      // In a `finally` because what this publishes is "startup is no longer
+      // going to bring anything up", which is just as true of a sequence that
+      // failed. Leaving anything pending would hold requests for connections
+      // nothing is starting any more, for as long as the extension's budget
+      // allows.
+      state = const {};
+    }
   }
 
   /// The in-flight autostart for [connectionId], or null when it is not part
@@ -124,6 +166,11 @@ class ProxyAutostartService extends _$ProxyAutostartService {
     // whether their connection is part of this startup. No await may separate
     // the completion from the _singboxStart assignment below.
     _singboxProfileIds = profileIds.toSet();
+    _singboxPending = {
+      for (final profileId in profileIds)
+        SingboxProxyConnectionId(profileId).encode(),
+    };
+    _publishPending();
     lookup.complete();
 
     if (profileIds.isEmpty) return;
@@ -150,6 +197,10 @@ class ProxyAutostartService extends _$ProxyAutostartService {
       );
     } finally {
       _singboxStart = null;
+      // Settled, whichever way it went. A start that threw is not one anything
+      // is still waiting for.
+      _singboxPending = const {};
+      _publishPending();
     }
   }
 
@@ -173,6 +224,10 @@ class ProxyAutostartService extends _$ProxyAutostartService {
     }
 
     _torAutostart = autostart;
+    _torPending = autostart
+        ? {const TorProxyConnectionId().encode()}
+        : const {};
+    _publishPending();
     lookup.complete();
 
     if (!autostart) return;
@@ -200,9 +255,14 @@ class ProxyAutostartService extends _$ProxyAutostartService {
       );
     } finally {
       _torStart = null;
+      _torPending = const {};
+      _publishPending();
     }
   }
 
+  /// What startup is still going to bring up, or null while it does not know.
+  /// See the class doc: the initial `null` is load-bearing, because routing is
+  /// published before startup runs autostart.
   @override
-  void build() {}
+  Set<String>? build() => null;
 }

@@ -1,0 +1,202 @@
+{
+  "cases": [
+    {
+      "name": "a context with no relation anywhere is direct",
+      "contextId": "work",
+      "expected": "DIRECT",
+      "snapshot": {
+        "generation": 1,
+        "proxies": [],
+        "relations": {},
+        "directScopes": {},
+        "siteAssignments": {},
+        "strictContexts": {}
+      }
+    },
+    {
+      "name": "an empty relation is an explicit direct connection",
+      "contextId": "work",
+      "expected": "DIRECT",
+      "snapshot": {
+        "generation": 1,
+        "proxies": [],
+        "relations": { "work": [] },
+        "directScopes": { "work": "work" },
+        "siteAssignments": {},
+        "strictContexts": {}
+      }
+    },
+    {
+      "name": "an explicit direct relation beats a routed general one",
+      "contextId": "work",
+      "expected": "DIRECT",
+      "snapshot": {
+        "generation": 1,
+        "proxies": [
+          { "id": "tor", "type": "socks", "host": "127.0.0.1", "port": 9050, "doNotProxyLocal": true }
+        ],
+        "relations": { "general": ["tor"], "work": [] },
+        "directScopes": { "work": "work" },
+        "siteAssignments": {},
+        "strictContexts": {}
+      }
+    },
+    {
+      "name": "a context without a relation inherits the general one",
+      "contextId": "work",
+      "expected": "BLOCKED",
+      "snapshot": {
+        "generation": 1,
+        "proxies": [],
+        "relations": { "general": ["tor"] },
+        "directScopes": {},
+        "siteAssignments": {},
+        "strictContexts": {}
+      }
+    },
+    {
+      "name": "a context inheriting a live general relation is live",
+      "contextId": "work",
+      "expected": "LIVE",
+      "snapshot": {
+        "generation": 1,
+        "proxies": [
+          { "id": "tor", "type": "socks", "host": "127.0.0.1", "port": 9050, "doNotProxyLocal": true }
+        ],
+        "relations": { "general": ["tor"] },
+        "directScopes": {},
+        "siteAssignments": {},
+        "strictContexts": {}
+      }
+    },
+    {
+      "name": "private never inherits the general relation",
+      "contextId": "private",
+      "expected": "DIRECT",
+      "snapshot": {
+        "generation": 1,
+        "proxies": [
+          { "id": "tor", "type": "socks", "host": "127.0.0.1", "port": 9050, "doNotProxyLocal": true }
+        ],
+        "relations": { "general": ["tor"] },
+        "directScopes": {},
+        "siteAssignments": {},
+        "strictContexts": {}
+      }
+    },
+    {
+      "name": "private with its own routed relation is routed",
+      "contextId": "private",
+      "expected": "LIVE",
+      "snapshot": {
+        "generation": 1,
+        "proxies": [
+          { "id": "tor", "type": "socks", "host": "127.0.0.1", "port": 9050, "doNotProxyLocal": true }
+        ],
+        "relations": { "private": ["tor"] },
+        "directScopes": {},
+        "siteAssignments": {},
+        "strictContexts": {}
+      }
+    },
+    {
+      "name": "a relation with a live endpoint is live",
+      "contextId": "work",
+      "expected": "LIVE",
+      "snapshot": {
+        "generation": 1,
+        "proxies": [
+          { "id": "tor", "type": "socks", "host": "127.0.0.1", "port": 9050, "doNotProxyLocal": true }
+        ],
+        "relations": { "work": ["tor"] },
+        "directScopes": {},
+        "siteAssignments": {},
+        "strictContexts": {}
+      }
+    },
+    {
+      "name": "one live endpoint among several makes the relation live",
+      "contextId": "work",
+      "expected": "LIVE",
+      "snapshot": {
+        "generation": 1,
+        "proxies": [
+          { "id": "tor", "type": "socks", "host": "127.0.0.1", "port": 9050, "doNotProxyLocal": true }
+        ],
+        "relations": { "work": ["singbox:profile-1", "tor"] },
+        "directScopes": {},
+        "siteAssignments": {},
+        "strictContexts": {},
+        "awaitingProxies": ["singbox:profile-1"]
+      }
+    },
+    {
+      "name": "a relation whose backend is starting is not yet blocked",
+      "contextId": "work",
+      "expected": "STARTING",
+      "snapshot": {
+        "generation": 1,
+        "proxies": [],
+        "relations": { "work": ["tor"] },
+        "directScopes": {},
+        "siteAssignments": {},
+        "strictContexts": {},
+        "awaitingProxies": ["tor"]
+      }
+    },
+    {
+      "name": "a relation with no endpoint and nothing starting is blocked",
+      "contextId": "work",
+      "expected": "BLOCKED",
+      "snapshot": {
+        "generation": 1,
+        "proxies": [],
+        "relations": { "work": ["tor"] },
+        "directScopes": {},
+        "siteAssignments": {},
+        "strictContexts": {}
+      }
+    },
+    {
+      "name": "a start for someone else's backend does not unblock this one",
+      "contextId": "work",
+      "expected": "BLOCKED",
+      "snapshot": {
+        "generation": 1,
+        "proxies": [],
+        "relations": { "work": ["singbox:profile-1"], "leisure": ["tor"] },
+        "directScopes": {},
+        "siteAssignments": {},
+        "strictContexts": {},
+        "awaitingProxies": ["tor"]
+      }
+    },
+    {
+      "name": "a context inheriting a starting general relation is starting",
+      "contextId": "work",
+      "expected": "STARTING",
+      "snapshot": {
+        "generation": 1,
+        "proxies": [],
+        "relations": { "general": ["tor"] },
+        "directScopes": {},
+        "siteAssignments": {},
+        "strictContexts": {},
+        "awaitingProxies": ["tor"]
+      }
+    },
+    {
+      "name": "the seed's shape: relations restored, endpoints deliberately dropped",
+      "contextId": "work",
+      "expected": "BLOCKED",
+      "snapshot": {
+        "generation": 0,
+        "proxies": [],
+        "relations": { "work": ["singbox:profile-1"] },
+        "directScopes": {},
+        "siteAssignments": { "https://example.com": "work" },
+        "strictContexts": {}
+      }
+    }
+  ]
+}

@@ -38,4 +38,34 @@
     <string name="weblibre_app_link_prompt_open">Open</string>
     <string name="weblibre_app_link_prompt_cancel">Cancel</string>
 
+    <!-- Shown in a Custom Tab / PWA window while the part of WebLibre that runs
+       - the proxy is still starting, and instead of it when that fails. -->
+    <string name="weblibre_launch_waiting_title">Connecting privately</string>
+    <!-- %1$s is the site or app being opened, already quoted. -->
+    <string name="weblibre_launch_waiting_message">%1$s goes through a proxy that only WebLibre can start.</string>
+    <string name="weblibre_launch_waiting_message_generic">This goes through a proxy that only WebLibre can start.</string>
+    <string name="weblibre_launch_progress_description">Starting WebLibre</string>
+
+    <!-- Live status while waiting, one per step the start-up has reached. -->
+    <string name="weblibre_launch_step_starting">Starting WebLibre…</string>
+    <string name="weblibre_launch_step_preparing">Preparing your profile…</string>
+    <string name="weblibre_launch_step_browser">Starting the browser engine…</string>
+    <string name="weblibre_launch_step_routing">Connecting to the proxy…</string>
+
+    <!-- Titles for the three ways a launch can fail to be served. -->
+    <string name="weblibre_launch_blocked_title">Proxy is not running</string>
+    <string name="weblibre_launch_slow_title">Taking longer than expected</string>
+    <string name="weblibre_launch_failed_title">WebLibre could not start</string>
+
+    <!-- %1$s is the site or app being opened, already quoted. -->
+    <string name="weblibre_launch_blocked_message">%1$s goes through a proxy, and that proxy is not running. Nothing here can start it.\n\nOpen it in the browser to get the prompt to start that proxy.</string>
+    <string name="weblibre_launch_slow_message">%1$s goes through a proxy, and WebLibre was still starting when this stopped waiting.\n\nTrying again usually works — the first launch after an update is slow. The browser is the other way in, and shows what is happening.</string>
+    <string name="weblibre_launch_failed_message">%1$s goes through a proxy, and WebLibre could not start the part of itself that runs it.\n\nOpen it in the browser to see what went wrong.</string>
+
+    <!-- Buttons on the waiting and failure screens. -->
+    <string name="weblibre_launch_action_try_again">Try again</string>
+    <string name="weblibre_launch_action_open_in_browser">Open in browser</string>
+    <string name="weblibre_launch_action_cancel">Cancel</string>
+    <string name="weblibre_launch_action_close">Close</string>
+
 </resources>

@@ -27,6 +27,12 @@ enum SingboxFieldKind {
   boolean,
   stringList,
 
+  /// A list of IP prefixes, one per line. Serialized like
+  /// [SingboxFieldKind.stringList], except that every entry is normalized to
+  /// `address/prefix` first — see `tryNormalizeCidr` for why a bare address
+  /// cannot simply be passed through.
+  cidrList,
+
   /// A value constrained to [SingboxProxyFormField.allowedValues] and always
   /// serialized as a JSON string. Use for sing-box string enums such as the
   /// SOCKS `version` field, whose accepted values ("4", "4a", "5") are
@@ -68,7 +74,9 @@ class SingboxProxyFormField {
   bool get isIntegerList => kind == SingboxFieldKind.integerList;
   bool get isPort => kind == SingboxFieldKind.port;
   bool get isBoolean => kind == SingboxFieldKind.boolean;
-  bool get isStringList => kind == SingboxFieldKind.stringList;
+  bool get isStringList =>
+      kind == SingboxFieldKind.stringList || kind == SingboxFieldKind.cidrList;
+  bool get isCidrList => kind == SingboxFieldKind.cidrList;
   bool get isChoice => kind == SingboxFieldKind.choice;
 }
 

@@ -150,20 +150,23 @@ void main() {
     expect(records.first.version, 3);
   });
 
-  test('a failed prepare needs no rollback because nothing went live', () async {
-    await expectLater(
-      coordinatorFor([
-        _FakeParticipant('shortcuts', recorder),
-        _FailingPrepare('prefs', recorder),
-      ]).prepareAll(context),
-      throwsA(isA<MaintenanceParticipantFailure>()),
-    );
+  test(
+    'a failed prepare needs no rollback because nothing went live',
+    () async {
+      await expectLater(
+        coordinatorFor([
+          _FakeParticipant('shortcuts', recorder),
+          _FailingPrepare('prefs', recorder),
+        ]).prepareAll(context),
+        throwsA(isA<MaintenanceParticipantFailure>()),
+      );
 
-    // `prepare` stages without changing live ownership, so the earlier
-    // participant has nothing to undo.
-    expect(recorder.calls, isNot(contains('rollback:shortcuts')));
-    expect(recorder.calls, contains('prepare:prefs'));
-  });
+      // `prepare` stages without changing live ownership, so the earlier
+      // participant has nothing to undo.
+      expect(recorder.calls, isNot(contains('rollback:shortcuts')));
+      expect(recorder.calls, contains('prepare:prefs'));
+    },
+  );
 
   test('apply verifies each participant as it goes', () async {
     final records = await coordinatorFor([
@@ -198,10 +201,11 @@ void main() {
     // the new ones — so a half-applied participant has undo data of its own, and
     // leaving it out is how live state stays behind after everything else is
     // back.
-    expect(
-      recorder.calls.where((call) => call.startsWith('rollback')),
-      ['rollback:jobs', 'rollback:push', 'rollback:prefs'],
-    );
+    expect(recorder.calls.where((call) => call.startsWith('rollback')), [
+      'rollback:jobs',
+      'rollback:push',
+      'rollback:prefs',
+    ]);
   });
 
   test('a failed verify still rolls that participant back', () async {
@@ -214,10 +218,10 @@ void main() {
     );
 
     // push applied successfully before verify failed, so it is undone too.
-    expect(
-      recorder.calls.where((call) => call.startsWith('rollback')),
-      ['rollback:push', 'rollback:prefs'],
-    );
+    expect(recorder.calls.where((call) => call.startsWith('rollback')), [
+      'rollback:push',
+      'rollback:prefs',
+    ]);
   });
 
   test('delete never rolls back, because it cannot', () async {
@@ -245,7 +249,8 @@ void main() {
     expect(
       last.any(
         (record) =>
-            record.id == 'prefs' && (record.error?.startsWith('rollback') ?? false),
+            record.id == 'prefs' &&
+            (record.error?.startsWith('rollback') ?? false),
       ),
       isTrue,
     );
@@ -262,16 +267,19 @@ void main() {
     expect(records.last.state, ParticipantState.finalized);
   });
 
-  test('records are published as the run progresses, not only at the end', () async {
-    await coordinatorFor([
-      _FakeParticipant('prefs', recorder),
-      _FakeParticipant('push', recorder),
-    ]).applyAll(context, rollbackOnFailure: true);
+  test(
+    'records are published as the run progresses, not only at the end',
+    () async {
+      await coordinatorFor([
+        _FakeParticipant('prefs', recorder),
+        _FakeParticipant('push', recorder),
+      ]).applyAll(context, rollbackOnFailure: true);
 
-    // A record that only reaches disk at the end would tell recovery nothing
-    // about a run that died in the middle.
-    expect(published.length, greaterThan(2));
-  });
+      // A record that only reaches disk at the end would tell recovery nothing
+      // about a run that died in the middle.
+      expect(published.length, greaterThan(2));
+    },
+  );
 }
 
 /// Fails during `prepare`, before anything is live.

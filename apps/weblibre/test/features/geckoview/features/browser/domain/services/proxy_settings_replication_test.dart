@@ -23,6 +23,8 @@ import 'package:weblibre/features/proxy/domain/repositories/container_proxy.dart
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
 import 'package:weblibre/features/proxy/domain/services/container_routing_snapshot.dart';
+import 'package:weblibre/features/proxy/domain/services/proxy_autostart.dart';
+import 'package:weblibre/features/proxy/domain/services/proxy_demand.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_pref_baseline.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
@@ -127,6 +129,248 @@ void main() {
     // letting it fall through to a direct connection.
     expect(snapshot.relations['context-a'], [profileId.encode()]);
     expect(snapshot.proxies, isEmpty);
+  });
+
+  test(
+    'an endpoint the startup sequence may still bring up is announced',
+    () async {
+      const profileId = SingboxProxyConnectionId('profile-1');
+      final harness = await _harness(
+        containers: [
+          _container(
+            id: 'container-1',
+            contextId: 'context-a',
+            proxyConnectionId: profileId,
+          ),
+        ],
+      );
+
+      final snapshot = await harness.awaitSnapshot();
+
+      // Routing is published before autostart has even been asked what it will
+      // start, so this relation is "blocked, but possibly only for a moment" —
+      // and the extension is told which proxy that applies to.
+      expect(snapshot.awaitingProxyIds, [profileId.encode()]);
+    },
+  );
+
+  test(
+    'an endpoint-less relation is a settled block once startup has run',
+    () async {
+      const profileId = SingboxProxyConnectionId('profile-1');
+      final harness = await _harness(
+        autostartSettled: true,
+        containers: [
+          _container(
+            id: 'container-1',
+            contextId: 'context-a',
+            proxyConnectionId: profileId,
+          ),
+        ],
+      );
+
+      final snapshot = await harness.awaitSnapshot();
+
+      // Nothing is bringing this backend up any more, so the extension must stop
+      // holding requests for it and let the error page and its "start this
+      // proxy?" prompt through.
+      expect(snapshot.relations['context-a'], [profileId.encode()]);
+      expect(snapshot.awaitingProxyIds, isEmpty);
+    },
+  );
+
+  test('a sing-box profile nobody is starting is a settled block', () async {
+    const starting = SingboxProxyConnectionId('profile-1');
+    const idle = SingboxProxyConnectionId('profile-2');
+    final harness = await _harness(
+      autostartSettled: true,
+      // One profile is coming up; the other is stopped and nothing is bringing
+      // it up. Reading "sing-box is starting" as one flag for the runtime held
+      // the second one behind the first for the extension's whole budget.
+      startingSingboxIds: {starting.encode()},
+      containers: [
+        _container(
+          id: 'container-1',
+          contextId: 'context-a',
+          proxyConnectionId: starting,
+        ),
+        _container(
+          id: 'container-2',
+          contextId: 'context-b',
+          proxyConnectionId: idle,
+        ),
+      ],
+    );
+
+    final snapshot = await harness.awaitSnapshot();
+
+    expect(snapshot.awaitingProxyIds, [starting.encode()]);
+  });
+
+  test(
+    'a start autostart has decided on but not yet called is announced',
+    () async {
+      const profileId = SingboxProxyConnectionId('profile-1');
+      final harness = await _harness(
+        // The lookups have landed, so the startup as a whole is no longer
+        // unknown — but the start itself has not reached the runtime yet, and a
+        // gap there would classify this relation as a settled block.
+        autostartSettled: true,
+        autostartPending: {profileId.encode()},
+        containers: [
+          _container(
+            id: 'container-1',
+            contextId: 'context-a',
+            proxyConnectionId: profileId,
+          ),
+        ],
+      );
+
+      final snapshot = await harness.awaitSnapshot();
+
+      expect(snapshot.awaitingProxyIds, [profileId.encode()]);
+    },
+  );
+
+  test(
+    'a proxy a waiting launch asked for is announced as still starting',
+    () async {
+      const profileId = SingboxProxyConnectionId('profile-1');
+      final harness = await _harness(
+        autostartSettled: true,
+        // A Custom Tab or PWA is waiting for this backend right now. Startup is
+        // over, so nothing else vouches for it — and calling it a settled block
+        // releases the very requests that launch is waiting on into an error
+        // page, seconds before its endpoint appears.
+        demandPending: {profileId.encode()},
+        containers: [
+          _container(
+            id: 'container-1',
+            contextId: 'context-a',
+            proxyConnectionId: profileId,
+          ),
+        ],
+      );
+
+      final snapshot = await harness.awaitSnapshot();
+
+      expect(snapshot.awaitingProxyIds, [profileId.encode()]);
+    },
+  );
+
+  test('nothing is a settled block until the demand read has landed', () async {
+    const profileId = SingboxProxyConnectionId('profile-1');
+    final harness = await _harness(
+      autostartSettled: true,
+      // The isolate has not yet asked native whether a launch is waiting. Until
+      // it has, "nothing is being started" is a guess, not an answer.
+      demandSettled: false,
+      containers: [
+        _container(
+          id: 'container-1',
+          contextId: 'context-a',
+          proxyConnectionId: profileId,
+        ),
+      ],
+    );
+
+    final snapshot = await harness.awaitSnapshot();
+
+    expect(snapshot.awaitingProxyIds, [profileId.encode()]);
+  });
+
+  test('a live endpoint is never announced as still starting', () async {
+    const profileId = SingboxProxyConnectionId('profile-1');
+    final runtime = _FakeSingboxRuntimeRepository(
+      SingboxProxyRuntimeState(
+        status: SingboxProxyRuntimeStatus.running,
+        endpoints: [
+          SingboxProxyRuntimeEndpoint(
+            profileId: profileId.encode(),
+            host: '127.0.0.1',
+            port: 12080,
+            username: 'user',
+            password: 'pass',
+          ),
+        ],
+      ),
+    );
+    final harness = await _harness(
+      runtimeRepository: runtime,
+      containers: [
+        _container(
+          id: 'container-1',
+          contextId: 'context-a',
+          proxyConnectionId: profileId,
+        ),
+      ],
+    );
+
+    final snapshot = await harness.awaitSnapshot();
+
+    expect(snapshot.proxies.single.id, profileId.encode());
+    expect(snapshot.awaitingProxyIds, isEmpty);
+  });
+
+  test('a bootstrapping Tor publishes no endpoint but is announced', () async {
+    final harness = await _harness(
+      containers: const [],
+      autostartSettled: true,
+      // Tor opens its SOCKS port long before the bootstrap that makes it
+      // usable; publishing it here would tell the extension to route traffic
+      // into a port that cannot carry it yet.
+      torStatus: TorStatus(
+        isRunning: true,
+        bootstrapProgress: 40,
+        socksPort: 9050,
+      ),
+      routingSettings: ProxyRoutingSettings.withDefaults(
+        regularTabsMode: ProxyRegularTabRoutingMode.all,
+        regularTabsProxyConnectionId: const TorProxyConnectionId(),
+      ),
+    );
+
+    final snapshot = await harness.awaitSnapshot();
+
+    expect(snapshot.proxies, isEmpty);
+    expect(snapshot.awaitingProxyIds, [const TorProxyConnectionId().encode()]);
+  });
+
+  test('endpoints from a runtime that is not running are dropped', () async {
+    const profileId = SingboxProxyConnectionId('profile-1');
+    final runtime = _FakeSingboxRuntimeRepository(
+      // The addresses of the last run, still attached to a runtime that has
+      // fallen over. Nothing owns those loopback ports any more.
+      SingboxProxyRuntimeState(
+        status: SingboxProxyRuntimeStatus.error,
+        endpoints: [
+          SingboxProxyRuntimeEndpoint(
+            profileId: profileId.encode(),
+            host: '127.0.0.1',
+            port: 12080,
+            username: 'user',
+            password: 'pass',
+          ),
+        ],
+      ),
+    );
+    final harness = await _harness(
+      autostartSettled: true,
+      runtimeRepository: runtime,
+      containers: [
+        _container(
+          id: 'container-1',
+          contextId: 'context-a',
+          proxyConnectionId: profileId,
+        ),
+      ],
+    );
+
+    final snapshot = await harness.awaitSnapshot();
+
+    expect(snapshot.proxies, isEmpty);
+    expect(snapshot.relations['context-a'], [profileId.encode()]);
+    expect(snapshot.awaitingProxyIds, isEmpty);
   });
 
   test('a stopped sing-box endpoint drops out of the snapshot', () async {
@@ -314,6 +558,50 @@ void main() {
       expect(harness.container.read(containerRoutingSnapshotProvider), isNull);
     },
   );
+
+  /// The defect behind the cold-start PWA/Custom Tab hang.
+  ///
+  /// `main.dart` used to start this service with `ref.read(...)`, which builds
+  /// the notifier and then leaves it with zero listeners. Riverpod only
+  /// recomputes *active* elements — `ProviderScheduler._performRefresh` calls
+  /// `flush()` only `if (element.isActive)` — and inactivity propagates
+  /// upstream through the subscriptions the inactive element itself made. So
+  /// the gate never recomputed when its inputs resolved: the snapshot stayed
+  /// null, the extension kept failing closed, and nothing was logged because
+  /// nothing had failed.
+  ///
+  /// Every other test here activates the service correctly, which is precisely
+  /// why they all passed while a headless launch blocked forever. This one
+  /// pins the activation itself.
+  test(
+    'a service started with `read` alone never opens the gate',
+    () async {
+      final harness = await _harness(
+        containers: [
+          _container(
+            id: 'container-1',
+            contextId: 'context-a',
+            proxyConnectionId: const SingboxProxyConnectionId('profile-1'),
+          ),
+        ],
+        activateWithReadOnly: true,
+      );
+
+      await pumpEventQueue();
+
+      // Not an aspiration — the observed behaviour, pinned. Every input above
+      // is an already-resolved `Stream.value`, so there is nothing left to wait
+      // for, and the gate still reports all five unresolved forever. That is
+      // the whole defect, reproduced without a device.
+      expect(
+        harness.container.read(containerRoutingSnapshotProvider),
+        isNull,
+        reason:
+            'read-only activation leaves the chain inactive; main.dart must '
+            'activate services with listenManual instead',
+      );
+    },
+  );
 }
 
 class _Harness {
@@ -341,7 +629,24 @@ Future<_Harness> _harness({
   Map<String, Set<String>> isolationContexts = const {},
   bool seedIsolatedTabs = false,
   bool withholdSiteAssignments = false,
+  bool autostartSettled = false,
+  Set<String> autostartPending = const {},
+
+  /// Whether the launch-demand read has landed. Defaults to "it has", so every
+  /// test that is about autostart's window keeps describing only that window.
+  bool demandSettled = true,
+  Set<String> demandPending = const {},
+  Set<String> startingSingboxIds = const {},
+  TorStatus? torStatus,
   _FakeSingboxRuntimeRepository? runtimeRepository,
+
+  /// How `main.dart` starts the service.
+  ///
+  /// A bare `read` creates the notifier and gives it no listener, which in
+  /// Riverpod 3 leaves it — and transitively everything it watches —
+  /// permanently inactive and never flushed. Defaults to the correct
+  /// `listen`; the regression test below is the one case that uses `read`.
+  bool activateWithReadOnly = false,
 }) async {
   final db = TabDatabase(
     NativeDatabase.memory(
@@ -376,7 +681,24 @@ Future<_Harness> _harness({
       containerRepositoryProvider.overrideWith(
         () => _FakeContainerRepository(containers),
       ),
-      torProxyServiceProvider.overrideWith(_FakeTorProxyService.new),
+      torProxyServiceProvider.overrideWith(
+        () => _FakeTorProxyService(torStatus),
+      ),
+      proxyAutostartServiceProvider.overrideWith(
+        () => _FakeProxyAutostartService(
+          settled: autostartSettled,
+          pending: autostartPending,
+        ),
+      ),
+      proxyDemandServiceProvider.overrideWith(
+        () => _FakeProxyDemandService(
+          settled: demandSettled,
+          pending: demandPending,
+        ),
+      ),
+      singboxProxyStartingConnectionsProvider.overrideWith(
+        () => _FakeSingboxStartingConnections(startingSingboxIds),
+      ),
       proxyPrefBaselineProvider.overrideWith(() => baseline),
       singboxProxyProfilesRepositoryProvider.overrideWith(
         _FakeProfilesRepository.new,
@@ -411,12 +733,16 @@ Future<_Harness> _harness({
     await db.close();
   });
 
-  final subscription = providerContainer.listen<void>(
-    proxySettingsReplicationProvider,
-    (previous, next) {},
-    fireImmediately: true,
-  );
-  addTearDown(subscription.close);
+  if (activateWithReadOnly) {
+    providerContainer.read(proxySettingsReplicationProvider);
+  } else {
+    final subscription = providerContainer.listen<void>(
+      proxySettingsReplicationProvider,
+      (previous, next) {},
+      fireImmediately: true,
+    );
+    addTearDown(subscription.close);
+  }
 
   return _Harness(providerContainer, baseline, containerProxy);
 }
@@ -472,14 +798,54 @@ class _FakeContainerRepository extends ContainerRepository {
   void build() {}
 }
 
+/// Stands in for the startup autostart sequence, which in production decides
+/// whether an endpoint-less relation is still waiting for its backend.
+class _FakeProxyAutostartService extends ProxyAutostartService {
+  _FakeProxyAutostartService({required this.settled, this.pending = const {}});
+
+  final bool settled;
+
+  /// What autostart still intends to bring up once [settled] says its lookups
+  /// have landed.
+  final Set<String> pending;
+
+  @override
+  Set<String>? build() => settled ? pending : null;
+}
+
+class _FakeProxyDemandService extends ProxyDemandService {
+  _FakeProxyDemandService({required this.settled, this.pending = const {}});
+
+  final bool settled;
+
+  /// Connections a waiting Custom Tab or PWA launch has asked to be started.
+  final Set<String> pending;
+
+  @override
+  Set<String>? build() => settled ? pending : null;
+}
+
 class _FakeTorProxyService extends TorProxyService {
+  _FakeTorProxyService([this._status]);
+
+  final TorStatus? _status;
+
   @override
   Stream<TorStatus> build() async* {
     // Mirror production: the real TorProxyService seeds the provider with the
     // current status so downstream `selectAsync` paths don't stay in
-    // AsyncLoading forever. Tor is stopped in these tests.
-    yield TorStatus(isRunning: false, bootstrapProgress: 0);
+    // AsyncLoading forever. Tor is stopped unless a test says otherwise.
+    yield _status ?? TorStatus(isRunning: false, bootstrapProgress: 0);
   }
+}
+
+class _FakeSingboxStartingConnections extends SingboxProxyStartingConnections {
+  _FakeSingboxStartingConnections(this._starting);
+
+  final Set<String> _starting;
+
+  @override
+  Set<String> build() => _starting;
 }
 
 class _FakeSingboxRuntimeRepository extends SingboxProxyRuntimeRepository {

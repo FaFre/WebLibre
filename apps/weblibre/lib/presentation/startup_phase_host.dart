@@ -59,11 +59,43 @@ class StartupPhaseHost extends HookWidget {
 
   Future<StartupPhase> _settle(StartupPhase phase) async {
     if (phase is StartupActivated) {
+      // The one success this class reports. Without it an activated profile is
+      // indistinguishable in the logs from arbitration that never answered —
+      // which is exactly the pair a stalled headless bootstrap sits between.
+      logger.i('Startup activated profile ${phase.profileId}');
       await onActivated?.call();
     } else if (phase is StartupHalted) {
       logger.w('Startup halted: $phase');
     }
+
+    _pumpFrame();
     return phase;
+  }
+
+  /// Forces the rebuild this phase change asks for, instead of waiting for the
+  /// engine to schedule one.
+  ///
+  /// Every phase after the first arrives on a future, and a future's `setState`
+  /// only marks the tree dirty — the build itself happens in the next frame. A
+  /// Flutter engine with no view attached is not reliably given one: `runApp`
+  /// gets its first build from a warm-up frame, which is driven by a timer and
+  /// needs no vsync, and after that the framework asks the platform for frames.
+  /// That makes the activation hand-off — the step where this host stops
+  /// rendering a spinner and builds the app — the first thing in the whole boot
+  /// that depends on the engine having a window, in a process that deliberately
+  /// has none: a headless launch bootstrap. Everything the app does from there
+  /// is asynchronous and needs no further frames, so one warm-up frame here is
+  /// the whole difference between a boot that finishes and one that stops after
+  /// arbitration with nothing in the log.
+  ///
+  /// Harmless where frames do arrive: the build happens a few milliseconds
+  /// earlier than it would have, which is what warm-up frames are for, and
+  /// `scheduleWarmUpFrame` re-schedules any frame it displaced.
+  void _pumpFrame() {
+    // A timer rather than a microtask, so the `setState` that consumed this
+    // phase — a `then` on the same future — has already run and there is
+    // something dirty to build.
+    Timer.run(() => WidgetsBinding.instance.scheduleWarmUpFrame());
   }
 
   @override
@@ -193,6 +225,8 @@ class StartupPhaseHost extends HookWidget {
     // bootstrap nor the halt log applies yet.
     if (phase is StartupSelectionRequired ||
         phase is StartupMaintenanceRequired) {
+      // Not settled, but still a phase change that has to reach the screen.
+      _pumpFrame();
       return phase;
     }
     return _settle(phase);

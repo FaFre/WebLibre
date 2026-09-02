@@ -34,7 +34,10 @@ import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 /// With [restart] the process is ended natively instead of by `exit(0)`, so the
 /// armed relaunch runs: the trampoline has to be started from a process that is
 /// still alive, and `exit(0)` from Dart skips that.
-Future<void> exitApp(ProviderContainer container, {bool restart = false}) async {
+Future<void> exitApp(
+  ProviderContainer container, {
+  bool restart = false,
+}) async {
   logger.i(restart ? 'Preparing restart' : 'Preparing exit');
 
   // 1. Close private tabs (clears browsing data for private contexts).

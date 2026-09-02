@@ -21,7 +21,11 @@ part of 'proxy_settings_replication.dart';
 /// Proxy *endpoints* are deliberately not waited on. A relation whose backend
 /// is not running yet stays in the snapshot with no matching endpoint, which
 /// the extension blocks — so a slow Tor bootstrap costs the containers that use
-/// Tor their connectivity, not the whole browser its routing.
+/// Tor their connectivity, not the whole browser its routing. What the snapshot
+/// does carry is whether such an endpoint is still *coming*
+/// ([ProxyStartExpectation]), which is the difference between blocking a
+/// container and holding its requests for the second it takes its backend to
+/// finish starting.
 ///
 /// Waiting forever is a different matter: see [containerRoutingInputProviders].
 
@@ -41,7 +45,11 @@ final containerRoutingSnapshotProvider = ContainerRoutingSnapshotProvider._();
 /// Proxy *endpoints* are deliberately not waited on. A relation whose backend
 /// is not running yet stays in the snapshot with no matching endpoint, which
 /// the extension blocks — so a slow Tor bootstrap costs the containers that use
-/// Tor their connectivity, not the whole browser its routing.
+/// Tor their connectivity, not the whole browser its routing. What the snapshot
+/// does carry is whether such an endpoint is still *coming*
+/// ([ProxyStartExpectation]), which is the difference between blocking a
+/// container and holding its requests for the second it takes its backend to
+/// finish starting.
 ///
 /// Waiting forever is a different matter: see [containerRoutingInputProviders].
 
@@ -66,7 +74,11 @@ final class ContainerRoutingSnapshotProvider
   /// Proxy *endpoints* are deliberately not waited on. A relation whose backend
   /// is not running yet stays in the snapshot with no matching endpoint, which
   /// the extension blocks — so a slow Tor bootstrap costs the containers that use
-  /// Tor their connectivity, not the whole browser its routing.
+  /// Tor their connectivity, not the whole browser its routing. What the snapshot
+  /// does carry is whether such an endpoint is still *coming*
+  /// ([ProxyStartExpectation]), which is the difference between blocking a
+  /// container and holding its requests for the second it takes its backend to
+  /// finish starting.
   ///
   /// Waiting forever is a different matter: see [containerRoutingInputProviders].
   ContainerRoutingSnapshotProvider._()
@@ -104,7 +116,7 @@ final class ContainerRoutingSnapshotProvider
 }
 
 String _$containerRoutingSnapshotHash() =>
-    r'a34cbb70d60b48c2076512b78e54bbbad3e1ce93';
+    r'5da0001a5637069a8e693ccd58ee74131745bd51';
 
 /// Single serialised writer that installs [containerRoutingSnapshotProvider]
 /// into Gecko's proxy extension.

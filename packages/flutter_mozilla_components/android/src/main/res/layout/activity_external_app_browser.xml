@@ -3,8 +3,22 @@
    - License, v. 2.0. If a copy of the MPL was not distributed with this
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 
+<!-- The status view is a sibling of the browser container, not a child of it:
+   - the fragment transaction replaces everything in @id/container, and a launch
+   - that is still waiting for its routing has to survive until there is a
+   - session to replace it with. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true" />
+    android:fitsSystemWindows="true">
+
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <include
+        android:id="@+id/launch_status"
+        layout="@layout/view_external_launch_status" />
+
+</FrameLayout>

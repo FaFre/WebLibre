@@ -46,7 +46,9 @@ class BrowserFragment() : BaseBrowserFragment(), UserInteractionHandler {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        components.mainBrowserEngineView = null
+        // Same reason as the base cleanup: this can run before components
+        // ever existed.
+        GlobalComponents.components?.mainBrowserEngineView = null
     }
 
     companion object {

@@ -235,11 +235,23 @@ GeckoGestureService gestureService(Ref ref) {
   return service;
 }
 
+/// Whether native has reported that the engine and its components are up.
+///
+/// Native reports this once `GeckoBrowserApi.initialize` has built the
+/// components, and again whenever a Flutter view attaches (a restarted Dart
+/// half has lost the first report). It says nothing about tabs: the pull-based
+/// `syncEvents` catch-ups that gate on it need the engine, not a session.
+///
+/// It used to be inferred from a reader-view action, which AC only dispatches
+/// once a tab is selected — so a start that landed on the home surface never
+/// reported ready and every catch-up sat out the timeout below instead.
 @Riverpod(keepAlive: true)
 class EngineReadyState extends _$EngineReadyState {
-  Future<bool> waitUntilReady({
-    Duration timeout = const Duration(seconds: 3),
-  }) async {
+  /// Long enough that it only ever expires when the native report is genuinely
+  /// missing, rather than merely late.
+  static const _readySignalTimeout = Duration(seconds: 10);
+
+  Future<bool> waitUntilReady({Duration timeout = _readySignalTimeout}) async {
     final eventService = ref.read(eventServiceProvider);
     final currentState =
         eventService.engineReadyStateEvents.valueOrNull ?? false;
@@ -259,7 +271,14 @@ class EngineReadyState extends _$EngineReadyState {
 
       return ready;
     } on TimeoutException {
-      logger.w('Waiting for engine ready state timed out');
+      // Proceeding anyway is the safety valve, not the design: every caller
+      // here only wants to ask native for state it may have missed, and never
+      // asking is worse than asking too early. If this fires, the native report
+      // is missing — see [EngineReadyState].
+      logger.w(
+        'Engine never reported ready; proceeding after '
+        '${timeout.inSeconds}s without the native signal',
+      );
 
       if (ref.mounted) {
         state = true;

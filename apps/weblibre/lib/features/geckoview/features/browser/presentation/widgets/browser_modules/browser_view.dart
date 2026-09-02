@@ -33,7 +33,6 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/app_links/domain/services/app_link_policy_replication.dart';
 import 'package:weblibre/features/bangs/data/models/web_search_bang.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
-import 'package:weblibre/features/bangs/domain/services/search_history_cleanup.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
@@ -41,17 +40,14 @@ import 'package:weblibre/features/geckoview/domain/providers/browser_extension.d
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/controllers/home_target_controller.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers/intent.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers/lifecycle.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/services/engine_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_home.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
-import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
@@ -63,14 +59,12 @@ import 'package:weblibre/features/gestures/presentation/widgets/gesture_feedback
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/pending_intent_decision.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/services/intent_gatekeeper.dart';
-import 'package:weblibre/features/intent_gatekeeper/domain/services/native_gatekeeper_replicator.dart';
 import 'package:weblibre/features/intent_gatekeeper/presentation/widgets/intent_gatekeeper_dialog.dart';
 import 'package:weblibre/features/share_intent/domain/entities/intent_container_mode.dart';
 import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
-import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/services/local_authentication.dart';
 import 'package:weblibre/features/wallpaper/domain/providers.dart';
@@ -586,102 +580,11 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
     ref.listenManual(
       fireImmediately: true,
-      nativeIntentGatekeeperReplicatorProvider,
-      (previous, next) {},
-      onError: (error, stackTrace) {
-        logger.e(
-          'Error listening to nativeIntentGatekeeperReplicatorProvider',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      },
-    );
-
-    ref.listenManual(
-      fireImmediately: true,
       selectionActionServiceProvider,
       (previous, next) {},
       onError: (error, stackTrace) {
         logger.e(
           'Error listening to selectionActionServiceProvider',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      },
-    );
-
-    ref.listenManual(
-      fireImmediately: true,
-      webExtensionsStateProvider(WebExtensionActionType.browser),
-      (previous, next) {},
-      onError: (error, stackTrace) {
-        logger.e(
-          'Error listening to webExtensionsStateProvider',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      },
-    );
-
-    ref.listenManual(
-      fireImmediately: true,
-      webExtensionsStateProvider(WebExtensionActionType.page),
-      (previous, next) {},
-      onError: (error, stackTrace) {
-        logger.e(
-          'Error listening to webExtensionsStateProvider',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      },
-    );
-
-    ref.listenManual(
-      fireImmediately: true,
-      cacheRepositoryProvider,
-      (previous, next) {},
-      onError: (error, stackTrace) {
-        logger.e(
-          'Error listening to cacheRepositoryProvider',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      },
-    );
-
-    ref.listenManual(
-      fireImmediately: true,
-      preferenceFixatorProvider,
-      (previous, next) {},
-      onError: (error, stackTrace) {
-        logger.e(
-          'Error listening to preferenceFixatorProvider',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      },
-    );
-
-    ref.listenManual(
-      fireImmediately: true,
-      searchHistoryCleanupServiceProvider,
-      (previous, next) {},
-      onError: (error, stackTrace) {
-        logger.e(
-          'Error listening to searchHistoryCleanupServiceProvider',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      },
-    );
-
-    ref.listenManual(
-      fireImmediately: true,
-      engineSettingsReplicationServiceProvider,
-      (previous, next) {},
-      onError: (error, stackTrace) {
-        logger.e(
-          'Error listening to engineSettingsReplicationServiceProvider',
           error: error,
           stackTrace: stackTrace,
         );
@@ -730,6 +633,15 @@ class _BrowserViewState extends ConsumerState<BrowserView>
     // historyExclusionReplication is deliberately NOT activated here: it must
     // keep pushing while this view is gone (the container editor is where the
     // setting is changed). main.dart owns it.
+    //
+    // For the same reason main.dart now owns everything that talks to the
+    // engine or to native: preferenceFixator, engineSettingsReplication (and
+    // with it the settings.json baseline), both webExtensionsState families,
+    // nativeIntentGatekeeperReplicator, cacheRepository and
+    // searchHistoryCleanup. This view is only mounted on the browser route, and
+    // a start that lands on the home surface with no tab never mounts it — so
+    // anything activated from here did not run at all until the user opened a
+    // tab.
 
     ref.listenManual(
       fireImmediately: true,

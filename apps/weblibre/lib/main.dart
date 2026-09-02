@@ -33,9 +33,13 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
         GeckoBrowserService,
         GeckoEngineSettingsService,
         GeckoLoggingService,
-        LogLevel;
+        LogLevel,
+        WebExtensionActionType;
 import 'package:home_widget/home_widget.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+// `ProviderListenable` — the type `listenManual` accepts — lives here rather
+// than in the main barrel; see [_activateService].
+import 'package:hooks_riverpod/misc.dart' show ProviderListenable;
 import 'package:logger/logger.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
 import 'package:nullability/nullability.dart';
@@ -52,6 +56,8 @@ import 'package:weblibre/domain/services/app_initialization.dart';
 import 'package:weblibre/domain/services/display_mode.dart';
 import 'package:weblibre/features/account/domain/services/account_callback_handler.dart';
 import 'package:weblibre/features/app_widget/domain/services/home_widget.dart';
+import 'package:weblibre/features/bangs/domain/services/search_history_cleanup.dart';
+import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/engine_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/proxy_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/services/history_exclusion_replication.dart';
@@ -61,11 +67,15 @@ import 'package:weblibre/features/geckoview/features/preferences/data/repositori
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_pruner.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_settings_sync.dart';
+import 'package:weblibre/features/intent_gatekeeper/domain/services/native_gatekeeper_replicator.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_logs.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_autostart.dart';
+import 'package:weblibre/features/proxy/domain/services/proxy_demand.dart';
+import 'package:weblibre/features/proxy/domain/services/proxy_log_level_applier.dart';
 import 'package:weblibre/features/share_intent/domain/services/sharing_intent.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
+import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/services/profile_restart_request.dart';
@@ -155,6 +165,30 @@ const _noAnimationPageTransitionsTheme = PageTransitionsTheme(
   },
 );
 
+/// Starts a long-lived service provider **and keeps it reacting**.
+///
+/// [WidgetRef.read] is not enough, and the difference is invisible until it
+/// isn't. Riverpod only recomputes elements that are *active*
+/// (`ProviderScheduler._performRefresh` calls `flush()` only
+/// `if (element.isActive)`, and `isActive` counts non-paused listeners), and a
+/// `read` adds no listener at all. Worse, the inactivity is transitive: an
+/// inactive service's own `watch`/`listen` subscriptions are deactivated in
+/// turn, so everything upstream of it stops being flushed as well. Such a
+/// service builds once and then silently stops seeing changes — no error, no
+/// log, a stream that emits into nothing.
+///
+/// In the full browser that hides, because widgets watch the same upstream
+/// providers and reactivate the chain. On the headless Custom Tab / PWA launch
+/// path nothing does, which is how a cold start could sit forever with the
+/// container routing gate reporting all five inputs unresolved while the
+/// identical queries answered in single-digit milliseconds.
+///
+/// The listener is deliberately empty: the subscription exists to keep the
+/// chain active, not to observe it.
+void _activateService(WidgetRef ref, ProviderListenable<Object?> provider) {
+  ref.listenManual(provider, (previous, next) {});
+}
+
 class _MainWidget extends HookConsumerWidget {
   const _MainWidget();
 
@@ -166,10 +200,13 @@ class _MainWidget extends HookConsumerWidget {
     // Keep proxy/Tor log subscriptions active from app start so startup
     // messages reach the ring buffer before the browser view (or logs
     // screen) mounts and would otherwise drop them.
-    ref.watch(singboxProxyLogsProvider.select((_) => null));
+    ref.watch(singboxProxyLogsProvider);
     // Apply the configured display refresh rate from app start and keep it in
     // sync with the setting (Flutter defaults to 60Hz otherwise).
     ref.watch(displayModeApplierProvider);
+    // Watch the proxy log level so changing it restarts a running runtime;
+    // sing-box only reads `log.level` from the config it is started with.
+    ref.watch(proxyLogLevelApplierProvider);
 
     final rootKey = ref.watch(appStateKeyProvider);
 
@@ -299,14 +336,14 @@ class _MainWidget extends HookConsumerWidget {
       // initialize — Pigeon FlutterApi messages aren't buffered, so a recorder
       // registered afterwards would silently drop those early visits' container
       // relations.
-      ref.read(visitContainerRecorderProvider);
+      _activateService(ref, visitContainerRecorderProvider);
 
       // Start assembling the container routing snapshot BEFORE the engine, so
       // the push is already queued when the proxy extension comes up. The
       // extension blocks every request until it has one, so the sooner this is
       // installed the shorter the window in which protected containers cannot
       // load — and it is a barrier, never a leak, if it is late.
-      ref.read(proxySettingsReplicationProvider);
+      _activateService(ref, proxySettingsReplicationProvider);
 
       // Same reason, for sync: registering the GeckoSyncStateEvents handler is what
       // makes the account state pushed during `accountManager.start()` reachable.
@@ -317,7 +354,13 @@ class _MainWidget extends HookConsumerWidget {
       // signed-in profile kept rendering as signed out until the next real auth
       // change. The repository picks the state up from the BehaviorSubject whenever
       // it does build.
-      ref.read(geckoSyncStateServiceProvider);
+      _activateService(ref, geckoSyncStateServiceProvider);
+
+      // Logged because it is the last long step of a cold start, and the one a
+      // headless bootstrap waits on: a launch that never reaches full components
+      // needs this line to say whether the app half got here and stalled, or
+      // never got here at all.
+      logger.i('Initializing the Gecko browser service');
 
       try {
         await GeckoBrowserService().initialize(
@@ -362,63 +405,114 @@ class _MainWidget extends HookConsumerWidget {
         );
       }
 
-      await ref.read(appInitializationServiceProvider.notifier).initialize();
-
-      Future<void> preloadUrlCleanerCatalog() async {
-        if (!generalSettings.urlCleanerEnabled) {
-          return;
-        }
-
-        try {
-          await ref.read(urlCleanerCatalogServiceProvider.future);
-        } catch (e, s) {
-          logger.w(
-            'Failed preloading URL cleaner catalog',
-            error: e,
-            stackTrace: s,
-          );
-        }
-      }
-
-      unawaited(preloadUrlCleanerCatalog());
-
-      // Wire settings → local_index_setting (tab.db) so the trigger gate
-      // is in sync from the moment tabs start writing.
-      ref.read(localIndexSettingsSyncProvider);
-
-      // Cold-start prune of the local search index — drops rows the engine
-      // has forgotten (Places retention, user-initiated clears). Cheap and
-      // background; failures are logged and ignored.
-      unawaited(ref.read(localIndexPrunerProvider.notifier).prune());
-
-      // Claim this profile's pre-qualification secure records before anything
-      // reads them — the account handler below reads one of them, and until this
-      // has run the legacy unqualified copy is still what is on disk.
-      await migrateSecureStorageForActiveProfile(
-        ref.read(singboxProxyProfilesRepositoryProvider.notifier),
+      // Everything that talks to the engine or to native belongs here, not to
+      // the browser view. That widget is only mounted on the browser route, and
+      // the default start lands on the home surface with no tab — so services
+      // activated from there did not run at all until the user opened a tab.
+      // Prefs stayed unenforced, the settings.json baseline unapplied, and the
+      // extension action state unread.
+      //
+      // Order matters: the fixator has to exist before engine settings
+      // replication registers pref overrides with it, and the uBO sync above
+      // has to keep running first for the same reason.
+      _activateService(ref, preferenceFixatorProvider);
+      _activateService(ref, engineSettingsReplicationServiceProvider);
+      _activateService(
+        ref,
+        webExtensionsStateProvider(WebExtensionActionType.browser),
+      );
+      _activateService(
+        ref,
+        webExtensionsStateProvider(WebExtensionActionType.page),
       );
 
-      // Activate account callback deep link handler
-      ref.read(accountCallbackHandlerProvider);
+      // Replicates the intent policy the native `IntentReceiverActivity` reads
+      // to reject intents without launching Flutter. Left to the browser view
+      // it stayed stale for any run that never showed it.
+      _activateService(ref, nativeIntentGatekeeperReplicatorProvider);
 
-      // Listen for "restart into the shortcut's profile" from the native
-      // mismatch dialog. Only this isolate can shut the profile down cleanly.
-      ref.read(profileRestartRequestHandlerProvider);
+      _activateService(ref, cacheRepositoryProvider);
+      // Arms the "search history limit was reduced" listener; a reduction made
+      // while the browser view was gone used to be missed entirely.
+      _activateService(ref, searchHistoryCleanupServiceProvider);
 
-      // Every consumer of `allIntents` has to exist before the intent bus starts
-      // delivery and the broker is drained. The account-callback and
-      // restart-request consumers are alive from the two reads above; these two
-      // are otherwise built by the browser widget, far too late.
-      ref.read(sharingIntentStreamProvider);
-      ref.read(appWidgetLaunchStreamProvider);
-      await ref.read(brokeredIntentDeliveryProvider.future);
+      try {
+        await ref.read(appInitializationServiceProvider.notifier).initialize();
 
-      // Bring up the proxy connections flagged for autostart. Their SOCKS
-      // endpoints reach Gecko through the routing snapshot mounted above, and
-      // this is left unawaited so a slow Tor bootstrap can't stall startup —
-      // tabs that need one of these connections wait on the pending start
-      // instead of prompting, and stay blocked until it resolves.
-      unawaited(ref.read(proxyAutostartServiceProvider.notifier).run());
+        Future<void> preloadUrlCleanerCatalog() async {
+          if (!generalSettings.urlCleanerEnabled) {
+            return;
+          }
+
+          try {
+            await ref.read(urlCleanerCatalogServiceProvider.future);
+          } catch (e, s) {
+            logger.w(
+              'Failed preloading URL cleaner catalog',
+              error: e,
+              stackTrace: s,
+            );
+          }
+        }
+
+        unawaited(preloadUrlCleanerCatalog());
+
+        // Wire settings → local_index_setting (tab.db) so the trigger gate
+        // is in sync from the moment tabs start writing.
+        _activateService(ref, localIndexSettingsSyncProvider);
+
+        // Cold-start prune of the local search index — drops rows the engine
+        // has forgotten (Places retention, user-initiated clears). Cheap and
+        // background; failures are logged and ignored.
+        unawaited(ref.read(localIndexPrunerProvider.notifier).prune());
+
+        // Claim this profile's pre-qualification secure records before anything
+        // reads them — the account handler below reads one of them, and until this
+        // has run the legacy unqualified copy is still what is on disk.
+        await migrateSecureStorageForActiveProfile(
+          ref.read(singboxProxyProfilesRepositoryProvider.notifier),
+        );
+
+        // Activate account callback deep link handler
+        _activateService(ref, accountCallbackHandlerProvider);
+
+        // Listen for "restart into the shortcut's profile" from the native
+        // mismatch dialog. Only this isolate can shut the profile down cleanly.
+        _activateService(ref, profileRestartRequestHandlerProvider);
+
+        // Every consumer of `allIntents` has to exist before the intent bus starts
+        // delivery and the broker is drained. The account-callback and
+        // restart-request consumers are alive from the two reads above; these two
+        // are otherwise built by the browser widget, far too late.
+        _activateService(ref, sharingIntentStreamProvider);
+        _activateService(ref, appWidgetLaunchStreamProvider);
+        await ref.read(brokeredIntentDeliveryProvider.future);
+      } finally {
+        // In a `finally`, and reached whatever happened above: what this
+        // resolves is not just "start the autostart connections" but "startup
+        // has decided which connections it starts by itself", and until that
+        // lands every relation without a live endpoint is published as still
+        // coming up. An exception on the way here would leave that answer in
+        // force for the life of the process — every request for such a relation
+        // held for the extension's full budget before failing, and every
+        // headless launch told its route is starting when nothing is starting
+        // it. The failure still propagates; it just no longer takes this with
+        // it.
+        //
+        // The connections it brings up reach Gecko through the routing
+        // snapshot mounted above, and the run is left unawaited so a slow Tor
+        // bootstrap can't stall startup — tabs that need one of them wait on
+        // the pending start instead of prompting, and stay blocked until it
+        // resolves.
+        unawaited(ref.read(proxyAutostartServiceProvider.notifier).run());
+
+        // The other half of the same answer, and in the same `finally` for the
+        // same reason: a Custom Tab or PWA can be waiting right now for a proxy
+        // only this isolate can start, and until this has asked, every relation
+        // without a live endpoint is published as still coming up. It does not
+        // terminate — it keeps answering launches for the life of the isolate.
+        unawaited(ref.read(proxyDemandServiceProvider.notifier).run());
+      }
 
       if (!kDebugMode) {
         await BackgroundFetch.configure(

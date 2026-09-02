@@ -71,6 +71,7 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     SandboxCaptureFeature.detachFlutterEvents(binding.binaryMessenger)
     GeckoPushApi.setUp(binding.binaryMessenger, null)
     browserApi.disposePushApi()
+    browserApi.disposeContainerProxyApi()
     GlobalComponents.historyEvents = null
     // The availability event is optimisation-only; once Flutter detaches, the surface
     // re-queries pending prompts on its next attach/resume, so dropping the sink is safe.

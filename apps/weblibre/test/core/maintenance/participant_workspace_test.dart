@@ -136,10 +136,7 @@ void main() {
     test('each participant gets its own directory', () async {
       final api = await runEveryStep(MaintenanceOperationKind.restore);
 
-      expect(
-        p.basename(api.steps[ParticipantStep.apply]!),
-        'prefs',
-      );
+      expect(p.basename(api.steps[ParticipantStep.apply]!), 'prefs');
     });
   });
 }

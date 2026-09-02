@@ -32,6 +32,17 @@ enum SingboxProxyProfileType {
 
 enum SingboxProxyRuntimeStatus { stopped, starting, running, stopping, error }
 
+/// sing-box `log.level` for the generated runtime config.
+///
+/// Only the levels worth offering: everything below [warn] hides errors the
+/// user needs, and everything above [trace] does not exist. [warn] is the
+/// operating default — sing-box logs one or two lines per *connection* at
+/// [info] and above (`protocol/socks/inbound.go`, `dns/client_log.go`,
+/// `protocol/wireguard/endpoint.go`), and every one of those crosses to Dart
+/// over the platform channel on the main thread, so the verbose levels are for
+/// a diagnostic session and not for normal browsing.
+enum SingboxProxyLogLevel { warn, info, debug, trace }
+
 class SingboxProxyProfile {
   SingboxProxyProfile({
     required this.id,
@@ -60,6 +71,7 @@ class SingboxProxyRuntimeOptions {
     this.blockUnmatchedTraffic = true,
     this.dnsConfig,
     this.bootstrapDohUrl,
+    this.logLevel = SingboxProxyLogLevel.warn,
   });
 
   /// Optional preferred start port for generated local SOCKS inbounds.
@@ -80,6 +92,10 @@ class SingboxProxyRuntimeOptions {
   /// sing-box's stock `/etc/resolv.conf`/127.0.0.1:53 path runs — which is
   /// broken on Android. Callers should always pass the browser DoH URL.
   final String? bootstrapDohUrl;
+
+  /// Verbosity of the generated config's `log` block. Defaults to
+  /// [SingboxProxyLogLevel.warn]; raise it only for a diagnostic session.
+  final SingboxProxyLogLevel logLevel;
 }
 
 class SingboxProxyDnsServerConfig {

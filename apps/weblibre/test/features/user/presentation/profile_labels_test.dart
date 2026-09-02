@@ -54,11 +54,7 @@ void main() {
   });
 
   test('three of a kind are all disambiguated', () {
-    final profiles = [
-      named(_a, 'Work'),
-      named(_b, 'Work'),
-      named(_c, 'Work'),
-    ];
+    final profiles = [named(_a, 'Work'), named(_b, 'Work'), named(_c, 'Work')];
     final labels = profileLabels(profiles);
 
     expect(

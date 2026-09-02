@@ -352,9 +352,12 @@ const singboxProxyFormSpecs = <SingboxProxyProfileType, SingboxProxyFormSpec>{
       SingboxProxyFormField(
         key: 'local_address',
         label: 'Local Address',
-        helperText: 'One CIDR per line, for example 10.0.0.2/32.',
+        helperText:
+            'The address this device has inside the tunnel, one per line — for '
+            'example 10.0.0.2/32. A bare address is read as a single one (/32, '
+            'or /128 for IPv6).',
         required: true,
-        kind: SingboxFieldKind.stringList,
+        kind: SingboxFieldKind.cidrList,
       ),
       SingboxProxyFormField(
         key: 'peer_public_key',
@@ -377,9 +380,24 @@ const singboxProxyFormSpecs = <SingboxProxyProfileType, SingboxProxyFormSpec>{
       SingboxProxyFormField(
         key: 'mtu',
         label: 'MTU',
-        helperText: 'Optional. sing-box uses 1408 by default.',
-        defaultValue: '1408',
+        helperText:
+            'Lower this if the tunnel connects but pages never load: packets '
+            'larger than the path allows are dropped outright. 1280 is safe '
+            'almost everywhere, around 1200 when already on another VPN.',
+        defaultValue: '1280',
         kind: SingboxFieldKind.integer,
+      ),
+      SingboxProxyFormField(
+        key: 'persistent_keepalive_interval',
+        label: 'Persistent Keepalive',
+        helperText:
+            'Seconds between keepalive packets. A phone sits behind NAT, and '
+            'without these the mapping expires while idle: the peer can no '
+            'longer reach us, so connections stall until the next handshake. '
+            '0 disables.',
+        defaultValue: '25',
+        kind: SingboxFieldKind.integer,
+        minValue: 0,
       ),
       SingboxProxyFormField(
         key: 'reserved',

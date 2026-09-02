@@ -26,6 +26,7 @@ import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
+import eu.weblibre.flutter_mozilla_components.activities.ExternalAppBrowserActivity
 import eu.weblibre.flutter_mozilla_components.feature.PwaWindowFeature
 import eu.weblibre.flutter_mozilla_components.widget.CustomTabToolbar
 import eu.weblibre.flutter_mozilla_components.widget.CustomTabToolbarFeature
@@ -80,13 +81,26 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
     @Suppress("LongMethod")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+    }
 
+    /**
+     * Installs the custom-tab features once components exist.
+     *
+     * This used to be its own `view.post` that returned silently when
+     * components were not up yet, so a window shown during a cold headless
+     * launch got none of them. The base class owns the wait now.
+     */
+    override fun onComponentsAvailable(view: View) {
         val sessionId = customTabSessionId ?: return
+        initializeCustomTabFeatures(view, sessionId)
+    }
 
-        view.post {
-            if (GlobalComponents.components == null) return@post
-            initializeCustomTabFeatures(view, sessionId)
-        }
+    /**
+     * Nothing can be shown in this window, so send the launch to the browser
+     * rather than leaving a blank custom tab.
+     */
+    override fun onComponentsUnavailable() {
+        (activity as? ExternalAppBrowserActivity)?.fallbackToMainActivityFromWindow()
     }
 
     private fun createContextMenuCandidates(view: View): List<ContextMenuCandidate> {
@@ -452,7 +466,9 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
         activePopup?.dismiss()
         activePopup = null
         customTabToolbar = null
-        components.externalAppEngineView = null
+        // Same reason as the base cleanup: this can run before components
+        // ever existed.
+        GlobalComponents.components?.externalAppEngineView = null
     }
 
     companion object {

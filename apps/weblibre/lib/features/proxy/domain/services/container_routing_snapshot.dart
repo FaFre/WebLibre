@@ -25,6 +25,7 @@ import 'package:weblibre/features/app_links/domain/services/effective_routing.da
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
+import 'package:weblibre/features/proxy/domain/services/proxy_start_expectation.dart';
 import 'package:weblibre/features/user/data/models/proxy_routing_settings.dart';
 
 /// Gecko's cookie-store context for regular, non-container tabs. Also the
@@ -65,12 +66,30 @@ class ContainerRoutingSnapshot with FastEquatable {
   /// site assignments it honours.
   final Map<String, List<String>> strictContexts;
 
+  /// Proxy ids a relation names, that have no endpoint here *yet*, and that the
+  /// app is in the middle of bringing up. Sorted.
+  ///
+  /// Endpoints are deliberately not waited on before publishing routing, so
+  /// every startup begins with relations whose backends are still coming up.
+  /// The extension blocks a relation with no endpoint, which is right when the
+  /// backend is simply not running and wrong while it is still starting: the
+  /// first case is an error page the user can act on, the second is a page that
+  /// would have loaded a second later. This is the difference, and it is the
+  /// app's to declare — the extension cannot see a proxy that has not published
+  /// an endpoint yet.
+  ///
+  /// Named ids rather than one flag for the whole snapshot: a container routed
+  /// through a sing-box profile nobody is starting has to fail at once, even
+  /// while Tor is bootstrapping for a different container.
+  final List<String> awaitingProxyIds;
+
   ContainerRoutingSnapshot({
     required this.proxies,
     required this.relations,
     required this.directScopes,
     required this.siteAssignments,
     required this.strictContexts,
+    this.awaitingProxyIds = const [],
   });
 
   @override
@@ -80,6 +99,10 @@ class ContainerRoutingSnapshot with FastEquatable {
     directScopes,
     siteAssignments,
     strictContexts,
+    // Part of the identity, so the push that clears it actually happens: it is
+    // what releases requests the extension is holding for a start that has
+    // since settled.
+    awaitingProxyIds,
   ];
 
   GeckoProxyRoutingSnapshot toPigeon(int generation) {
@@ -90,6 +113,7 @@ class ContainerRoutingSnapshot with FastEquatable {
       directScopes: directScopes,
       siteAssignments: siteAssignments,
       strictContexts: strictContexts,
+      awaitingProxyIds: awaitingProxyIds,
     );
   }
 }
@@ -129,6 +153,7 @@ ContainerRoutingSnapshot computeContainerRoutingSnapshot({
   required List<SiteAssignment> siteAssignments,
   required Map<String, List<String>> strictContexts,
   Map<String, ProxyConnectionId?> isolationContextRoutes = const {},
+  ProxyStartExpectation? startExpectation,
   void Function(String message)? onConflict,
 }) {
   final proxies = <GeckoProxySettings>[
@@ -243,6 +268,9 @@ ContainerRoutingSnapshot computeContainerRoutingSnapshot({
     });
   }
 
+  final liveProxyIds = {for (final proxy in proxies) proxy.id};
+  final expectation = startExpectation ?? ProxyStartExpectation.none;
+
   return ContainerRoutingSnapshot(
     proxies: proxies,
     relations: relations,
@@ -253,5 +281,14 @@ ContainerRoutingSnapshot computeContainerRoutingSnapshot({
             assignment.contextualIdentity ?? generalContextId,
     },
     strictContexts: strictContexts,
+    // Only relations that are *routed but not yet live*. A proxy that is
+    // starting while nothing routes through it changes nothing, and one that is
+    // already live is not waiting for anything.
+    awaitingProxyIds: {
+      for (final proxyIds in relations.values)
+        for (final proxyId in proxyIds)
+          if (!liveProxyIds.contains(proxyId) && expectation.covers(proxyId))
+            proxyId,
+    }.toList()..sort(),
   );
 }

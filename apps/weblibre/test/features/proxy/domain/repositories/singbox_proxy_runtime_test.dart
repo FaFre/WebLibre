@@ -13,8 +13,10 @@ import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtim
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ProxyProfile;
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
+import 'package:weblibre/features/user/data/models/proxy_diagnostics_settings.dart';
 import 'package:weblibre/features/user/data/models/proxy_routing_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/proxy_diagnostics_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/proxy_routing_settings.dart';
 
 void main() {
@@ -42,6 +44,54 @@ void main() {
       client.startCalls.single.map((profile) => profile.id),
       unorderedEquals([profile1.proxyConnectionId, profile2.proxyConnectionId]),
     );
+  });
+
+  test('ensureProfilesStarted preserves already-running profiles', () async {
+    final profile1 = _profile(id: 'profile-1', name: 'First');
+    final profile2 = _profile(id: 'profile-2', name: 'Second');
+    final client = _FakeSingboxProxyClient(
+      _state([_endpoint(profile1.proxyConnectionId, port: 12080)]),
+    );
+    final container = _container(
+      client: client,
+      profilesRepository: _FakeProfilesRepository([profile1, profile2]),
+    );
+    addTearDown(container.dispose);
+
+    await container.read(singboxProxyRuntimeRepositoryProvider.future);
+    await container
+        .read(singboxProxyRuntimeRepositoryProvider.notifier)
+        .ensureProfilesStarted([profile2.id]);
+
+    // The authoritative `startProfiles` would have stopped the first profile —
+    // and with it every container routing through it — to serve a launch that
+    // asked only about the second.
+    expect(client.startCalls, hasLength(1));
+    expect(
+      client.startCalls.single.map((profile) => profile.id),
+      unorderedEquals([profile1.proxyConnectionId, profile2.proxyConnectionId]),
+    );
+  });
+
+  test('ensureProfilesStarted does not restart what already runs', () async {
+    final profile1 = _profile(id: 'profile-1', name: 'First');
+    final client = _FakeSingboxProxyClient(
+      _state([_endpoint(profile1.proxyConnectionId, port: 12080)]),
+    );
+    final container = _container(
+      client: client,
+      profilesRepository: _FakeProfilesRepository([profile1]),
+    );
+    addTearDown(container.dispose);
+
+    await container.read(singboxProxyRuntimeRepositoryProvider.future);
+    await container
+        .read(singboxProxyRuntimeRepositoryProvider.notifier)
+        .ensureProfilesStarted([profile1.id]);
+
+    // A second launch into the same container arrives while the first one's
+    // start is done; restarting would drop the SOCKS port its tabs are using.
+    expect(client.startCalls, isEmpty);
   });
 
   test(
@@ -173,6 +223,113 @@ void main() {
       expect(profilesRepository.deletedProfileIds, [profile.id]);
     },
   );
+
+  test('a blank DoH setting still starts with DNS configured', () async {
+    final profile = _profile(id: 'profile-1', name: 'WireGuard');
+    final client = _FakeSingboxProxyClient(_state(const []));
+    final container = _container(
+      client: client,
+      profilesRepository: _FakeProfilesRepository([profile]),
+      engineSettings: EngineSettings.withDefaults(
+        dohProviderUrl: '',
+        dohDefaultProviderUrl: '',
+      ),
+    );
+    addTearDown(container.dispose);
+
+    await container.read(singboxProxyRuntimeRepositoryProvider.future);
+    await container
+        .read(singboxProxyRuntimeRepositoryProvider.notifier)
+        .startProfile(profile.id);
+
+    final options = client.startOptions.single;
+
+    // An unset resolver must not translate into "no DNS": the bootstrap URL
+    // backs the platform transport that answers every lookup, and a blank one
+    // leaves it returning SERVFAIL to everything.
+    expect(options, isNotNull);
+    expect(options!.bootstrapDohUrl, BuiltInDohProviders.quad9.url);
+  });
+
+  test(
+    'starts at the quiet log level unless the setting says otherwise',
+    () async {
+      final profile = _profile(id: 'profile-1', name: 'WireGuard');
+      final client = _FakeSingboxProxyClient(_state(const []));
+      final container = _container(
+        client: client,
+        profilesRepository: _FakeProfilesRepository([profile]),
+      );
+      addTearDown(container.dispose);
+
+      await container.read(singboxProxyRuntimeRepositoryProvider.future);
+      await container
+          .read(singboxProxyRuntimeRepositoryProvider.notifier)
+          .startProfile(profile.id);
+
+      // The default is load-bearing: from `info` upwards sing-box writes a line
+      // per connection, and each one crosses to Dart on the main thread.
+      expect(client.startOptions.single?.logLevel, SingboxProxyLogLevel.warn);
+    },
+  );
+
+  test('carries the configured log level into the runtime options', () async {
+    final profile = _profile(id: 'profile-1', name: 'WireGuard');
+    final client = _FakeSingboxProxyClient(_state(const []));
+    final container = _container(
+      client: client,
+      profilesRepository: _FakeProfilesRepository([profile]),
+      logLevel: ProxyLogLevel.debug,
+    );
+    addTearDown(container.dispose);
+
+    await container.read(singboxProxyRuntimeRepositoryProvider.future);
+    await container
+        .read(singboxProxyRuntimeRepositoryProvider.notifier)
+        .startProfile(profile.id);
+
+    expect(client.startOptions.single?.logLevel, SingboxProxyLogLevel.debug);
+  });
+
+  test('reloadActiveProfiles restarts exactly what is running', () async {
+    final profile1 = _profile(id: 'profile-1', name: 'First');
+    final profile2 = _profile(id: 'profile-2', name: 'Second');
+    final client = _FakeSingboxProxyClient(
+      _state([_endpoint(profile1.proxyConnectionId, port: 12080)]),
+    );
+    final container = _container(
+      client: client,
+      profilesRepository: _FakeProfilesRepository([profile1, profile2]),
+    );
+    addTearDown(container.dispose);
+
+    await container.read(singboxProxyRuntimeRepositoryProvider.future);
+    await container
+        .read(singboxProxyRuntimeRepositoryProvider.notifier)
+        .reloadActiveProfiles();
+
+    expect(client.startCalls, hasLength(1));
+    expect(client.startCalls.single.map((profile) => profile.id), [
+      profile1.proxyConnectionId,
+    ]);
+  });
+
+  test('reloadActiveProfiles does nothing while nothing runs', () async {
+    final profile = _profile(id: 'profile-1', name: 'WireGuard');
+    final client = _FakeSingboxProxyClient(_state(const []));
+    final container = _container(
+      client: client,
+      profilesRepository: _FakeProfilesRepository([profile]),
+    );
+    addTearDown(container.dispose);
+
+    await container.read(singboxProxyRuntimeRepositoryProvider.future);
+    await container
+        .read(singboxProxyRuntimeRepositoryProvider.notifier)
+        .reloadActiveProfiles();
+
+    expect(client.startCalls, isEmpty);
+  });
 }
 
 ProviderContainer _container({
@@ -181,6 +338,8 @@ ProviderContainer _container({
   _FakeContainerProxyRepository? containerProxyRepository,
   _FakeContainerRepository? containerRepository,
   _FakeProxyRoutingSettingsRepository? routingSettingsRepository,
+  EngineSettings? engineSettings,
+  ProxyLogLevel? logLevel,
 }) {
   final container = ProviderContainer(
     overrides: [
@@ -192,7 +351,7 @@ ProviderContainer _container({
         _FakeCredentialsRepository.new,
       ),
       engineSettingsRepositoryProvider.overrideWith(
-        _FakeEngineSettingsRepository.new,
+        () => _FakeEngineSettingsRepository(engineSettings),
       ),
       containerProxyRepositoryProvider.overrideWith(
         () => containerProxyRepository ?? _FakeContainerProxyRepository(),
@@ -203,6 +362,9 @@ ProviderContainer _container({
       proxyRoutingSettingsRepositoryProvider.overrideWith(
         () =>
             routingSettingsRepository ?? _FakeProxyRoutingSettingsRepository(),
+      ),
+      proxyDiagnosticsSettingsRepositoryProvider.overrideWith(
+        () => _FakeProxyDiagnosticsSettingsRepository(logLevel),
       ),
     ],
   );
@@ -251,6 +413,7 @@ class _FakeSingboxProxyClient implements SingboxProxyClient {
   final _stateController =
       StreamController<SingboxProxyRuntimeState>.broadcast();
   final startCalls = <List<SingboxProxyProfile>>[];
+  final startOptions = <SingboxProxyRuntimeOptions?>[];
   final stopCalls = <String>[];
   SingboxProxyRuntimeState _currentState;
   SingboxProxyRuntimeState? stateAfterStop;
@@ -277,6 +440,7 @@ class _FakeSingboxProxyClient implements SingboxProxyClient {
     SingboxProxyRuntimeOptions? options,
   }) async {
     startCalls.add(profiles);
+    startOptions.add(options);
     return _currentState = _state(
       profiles.indexed
           .map((item) => _endpoint(item.$2.id, port: 12080 + item.$1))
@@ -337,13 +501,30 @@ class _FakeCredentialsRepository extends SingboxProxyCredentialsRepository {
 }
 
 class _FakeEngineSettingsRepository extends EngineSettingsRepository {
-  final settings = EngineSettings.withDefaults();
+  final EngineSettings settings;
+
+  _FakeEngineSettingsRepository([EngineSettings? settings])
+    : settings = settings ?? EngineSettings.withDefaults();
 
   @override
   Future<EngineSettings> fetchSettings() async => settings;
 
   @override
   Stream<EngineSettings> build() => Stream.value(settings);
+}
+
+class _FakeProxyDiagnosticsSettingsRepository
+    extends ProxyDiagnosticsSettingsRepository {
+  final ProxyDiagnosticsSettings settings;
+
+  _FakeProxyDiagnosticsSettingsRepository([ProxyLogLevel? logLevel])
+    : settings = ProxyDiagnosticsSettings.withDefaults(logLevel: logLevel);
+
+  @override
+  Future<ProxyDiagnosticsSettings> fetchSettings() async => settings;
+
+  @override
+  Stream<ProxyDiagnosticsSettings> build() => Stream.value(settings);
 }
 
 class _FakeContainerProxyRepository extends ContainerProxyRepository {

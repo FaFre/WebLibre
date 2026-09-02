@@ -25,6 +25,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:weblibre/features/proxy/data/models/singbox_proxy_profile.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
+import 'package:weblibre/features/proxy/domain/extensions/proxy_log_level_x.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_credentials.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/domain/services/dns_config_resolver.dart';
@@ -32,6 +33,7 @@ import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ProxyProfile;
 import 'package:weblibre/features/user/data/models/proxy_dns_override.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/proxy_diagnostics_settings.dart';
 
 part 'singbox_proxy_runtime.g.dart';
 
@@ -109,6 +111,35 @@ SingboxProxyClient singboxProxyClient(Ref ref) {
   return FlutterSingboxProxyClient();
 }
 
+/// The proxy connections a sing-box start is in flight for, encoded.
+///
+/// The runtime's own status is one flag for the whole runtime — it does not
+/// report which profiles a start covers until they are running — so reading it
+/// as "sing-box is starting" holds every endpoint-less sing-box relation behind
+/// whichever profile happens to be coming up. The ids are known at exactly one
+/// place, the start call, so that is where they are recorded.
+///
+/// Published separately from [SingboxProxyRuntimeRepository]'s own state
+/// because it answers a different question — "is something bringing this
+/// connection up?" rather than "what is running?" — and because the routing
+/// snapshot has to recompute when it changes.
+@Riverpod(keepAlive: true)
+class SingboxProxyStartingConnections
+    extends _$SingboxProxyStartingConnections {
+  @override
+  Set<String> build() => const {};
+
+  void _begin(Set<String> encodedIds) {
+    if (encodedIds.isEmpty) return;
+    state = {...state, ...encodedIds};
+  }
+
+  void _end(Set<String> encodedIds) {
+    if (encodedIds.isEmpty) return;
+    state = state.difference(encodedIds);
+  }
+}
+
 @Riverpod(keepAlive: true)
 class SingboxProxyRuntimeRepository extends _$SingboxProxyRuntimeRepository {
   final _lock = Lock();
@@ -139,12 +170,57 @@ class SingboxProxyRuntimeRepository extends _$SingboxProxyRuntimeRepository {
     });
   }
 
+  /// Brings [profileIds] up alongside whatever already runs.
+  ///
+  /// [startProfile] for a set, and deliberately not [startProfiles]: that one
+  /// is authoritative — it starts exactly the list it is given and stops
+  /// everything else — which is what startup wants and the opposite of what a
+  /// caller adding one connection wants. One union under one lock, so a set is
+  /// not N restarts of everything already running.
+  Future<SingboxProxyRuntimeState> ensureProfilesStarted(
+    List<String> profileIds, {
+    SingboxProxyRuntimeOptions? options,
+  }) {
+    return _lock.synchronized(() async {
+      final currentState = await _stateSnapshotUnlocked();
+      final activeProfileIds = _activeProfileIds(currentState);
+
+      if (profileIds.every(activeProfileIds.contains)) return currentState;
+
+      return _startProfilesUnlocked(
+        {...activeProfileIds, ...profileIds}.toList(),
+        options: options,
+      );
+    });
+  }
+
   Set<String> _activeProfileIds(SingboxProxyRuntimeState runtimeState) {
     return runtimeState.endpoints
         .map((endpoint) => ProxyConnectionId.decode(endpoint.profileId))
         .whereType<SingboxProxyConnectionId>()
         .map((connectionId) => connectionId.profileId)
         .toSet();
+  }
+
+  /// Restart whatever is currently running, so options resolved at start time
+  /// are rebuilt from current settings.
+  ///
+  /// Needed because a few of those options are not reconfigurable in place:
+  /// sing-box reads `log.level` out of the config document it is handed, so a
+  /// changed level reaches a running runtime only by handing it a new one.
+  /// Reuses the running endpoints' ports, so tabs keep the SOCKS address they
+  /// were already given.
+  ///
+  /// A no-op when nothing runs — there is no config to replace, and the next
+  /// start will pick the new options up on its own.
+  Future<void> reloadActiveProfiles() {
+    return _lock.synchronized(() async {
+      final currentState = await _stateSnapshotUnlocked();
+      final activeProfileIds = _activeProfileIds(currentState);
+      if (activeProfileIds.isEmpty) return;
+
+      await _startProfilesUnlocked(activeProfileIds.toList());
+    });
   }
 
   Future<SingboxProxyRuntimeState> startProfiles(
@@ -162,6 +238,17 @@ class SingboxProxyRuntimeRepository extends _$SingboxProxyRuntimeRepository {
   }) async {
     state = const AsyncLoading<SingboxProxyRuntimeState>();
 
+    final startingIds = {
+      for (final profileId in profileIds)
+        SingboxProxyConnectionId(profileId).encode(),
+    };
+    // Announced before the first suspension, so routing recomputed anywhere in
+    // this start's window sees it. Cleared in the `finally` whichever way the
+    // start goes: one that threw is not one anything should still be held for.
+    ref
+        .read(singboxProxyStartingConnectionsProvider.notifier)
+        ._begin(startingIds);
+
     try {
       final profiles = await _runtimeProfiles(profileIds);
       final resolvedOptions = await _buildRuntimeOptions(
@@ -176,6 +263,10 @@ class SingboxProxyRuntimeRepository extends _$SingboxProxyRuntimeRepository {
     } catch (error, stackTrace) {
       state = AsyncError(error, stackTrace);
       rethrow;
+    } finally {
+      ref
+          .read(singboxProxyStartingConnectionsProvider.notifier)
+          ._end(startingIds);
     }
   }
 
@@ -188,14 +279,36 @@ class SingboxProxyRuntimeRepository extends _$SingboxProxyRuntimeRepository {
     final engineSettings = await ref
         .read(engineSettingsRepositoryProvider.notifier)
         .fetchSettings();
-    final dohUrl = engineSettings.dohProviderUrl;
+    // Resolved rather than read straight off the settings: a blank resolver
+    // URL would leave the runtime with no `dns` block and a bootstrap bridge
+    // that SERVFAILs every lookup — see [resolveBrowserDohUrl].
+    final dohUrl = resolveBrowserDohUrl(
+      selectedUrl: engineSettings.dohProviderUrl,
+      defaultUrl: engineSettings.dohDefaultProviderUrl,
+    );
+
+    // Read here rather than watched: `log.level` is fixed at the moment
+    // sing-box is handed a config, so the only value that matters is the one
+    // in force at the start. A change to it restarts the runtime
+    // ([ProxyLogLevelApplier]), which comes back through this same path.
+    final logLevel =
+        (await ref
+                .read(proxyDiagnosticsSettingsRepositoryProvider.notifier)
+                .fetchSettings())
+            .logLevel
+            .singboxLevel;
 
     if (base.dnsConfig != null) {
+      final baseBootstrap = base.bootstrapDohUrl?.trim();
+
       return SingboxProxyRuntimeOptions(
         preferredBasePort: base.preferredBasePort,
         blockUnmatchedTraffic: base.blockUnmatchedTraffic,
         dnsConfig: base.dnsConfig,
-        bootstrapDohUrl: base.bootstrapDohUrl ?? dohUrl,
+        bootstrapDohUrl: (baseBootstrap == null || baseBootstrap.isEmpty)
+            ? dohUrl
+            : baseBootstrap,
+        logLevel: logLevel,
       );
     }
 
@@ -220,6 +333,7 @@ class SingboxProxyRuntimeRepository extends _$SingboxProxyRuntimeRepository {
       blockUnmatchedTraffic: base.blockUnmatchedTraffic,
       dnsConfig: dnsConfig,
       bootstrapDohUrl: dohUrl,
+      logLevel: logLevel,
     );
   }
 

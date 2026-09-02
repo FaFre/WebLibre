@@ -40,6 +40,7 @@ import eu.weblibre.flutter_mozilla_components.feature.ContainerProxyFeature
 import eu.weblibre.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
 import eu.weblibre.flutter_mozilla_components.feature.GeckoBookmarksExtensionBridge
 import eu.weblibre.flutter_mozilla_components.push.Push
+import eu.weblibre.flutter_mozilla_components.startup.EngineWarmupSession
 import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -105,6 +106,10 @@ object GlobalComponents {
     }
 
     fun tearDown() {
+        // Normally already closed by the shutdown path, which has to do it
+        // before the runtime goes away rather than after. Here for the case
+        // where it is not.
+        EngineWarmupSession.stop()
         _components?.existingPush?.close()
         _components = null
         currentMode = null
@@ -379,6 +384,12 @@ object GlobalComponents {
         ContainerProxyFeature.loadPersisted(
             applicationContext,
             canReopenAssignedSites = mode == ComponentsMode.FULL,
+            // Only a full setup has the Dart half that pushes live routing over
+            // the seed. Where it does, the extension holds requests the
+            // endpoint-less seed would block for that push rather than turning
+            // a startup window into an error page; where it does not, the seed
+            // is final and blocking is immediate.
+            expectsAppPush = mode == ComponentsMode.FULL,
         )
 
         val newComponents = Components(
@@ -411,6 +422,23 @@ object GlobalComponents {
         // Process-scoped and idempotent: it resolves the current components on
         // every callback, so a rebuild must not re-register it.
         AppLifecycleFeature.install()
+
+        // Hold a window open across startup. Gecko gates its delayed startup —
+        // and with it every already-installed extension's background script —
+        // on a chrome window existing, which nothing creates until a session is
+        // opened. See [EngineWarmupSession].
+        //
+        // Dispatched, and deliberately not with `Main.immediate`. Opening a
+        // session asserts the UI thread, and this runs off it on the external
+        // path — `CustomTabsService` calls in on a binder thread — so it has to
+        // be a dispatch either way. `immediate` would then run inline for
+        // everyone already on the main thread, i.e. in the middle of this
+        // function, and forcing the engine there would put the built-in
+        // extensions in front of the uBO managed pref that is written for them
+        // below. Posting keeps every ordering in this function as it was.
+        GlobalScope.launch(Dispatchers.Main) {
+            EngineWarmupSession.start(newComponents)
+        }
 
         //newComponents.crashReporter.install(applicationContext)
 

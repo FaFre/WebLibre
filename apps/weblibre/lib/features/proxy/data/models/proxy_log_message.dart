@@ -23,12 +23,69 @@ import 'package:flutter_tor/flutter_tor.dart';
 
 enum ProxyLogSource { singBox, tor }
 
+extension ProxyLogSourceX on ProxyLogSource {
+  String get label => switch (this) {
+    ProxyLogSource.singBox => 'sing-box',
+    ProxyLogSource.tor => 'tor',
+  };
+}
+
+/// How serious one log line is, in the one vocabulary the log viewer speaks.
+///
+/// The two runtimes do not agree on a spelling — sing-box writes `warn` and
+/// `fatal`, Tor writes `WARN`, `ERR` and `NOTICE` — and neither is a closed set
+/// this build controls. So the raw string stays on [ProxyLogMessage] as the
+/// thing to *show*, and this is what the viewer filters and colours by.
+///
+/// Ordered least to most serious, which is what makes "at least this level" a
+/// comparison rather than a table.
+enum ProxyLogSeverity {
+  trace,
+  debug,
+  info,
+  warn,
+  error;
+
+  /// The severity [raw] names.
+  ///
+  /// A level this build has never heard of is read as [info] rather than
+  /// dropped: it came from a runtime that thought it worth writing, and a
+  /// viewer that silently hides lines is worse than one that ranks a rare one
+  /// slightly wrong.
+  static ProxyLogSeverity parse(String raw) =>
+      switch (raw.trim().toLowerCase()) {
+        'trace' => trace,
+        'debug' => debug,
+        'info' || 'notice' => info,
+        'warn' || 'warning' => warn,
+        'error' || 'err' || 'fatal' || 'panic' => error,
+        _ => info,
+      };
+
+  /// Label for the viewer's filter. Plural because it selects a range: picking
+  /// [warn] shows warnings *and* everything worse.
+  String get filterLabel => switch (this) {
+    ProxyLogSeverity.trace => 'Trace',
+    ProxyLogSeverity.debug => 'Debug',
+    ProxyLogSeverity.info => 'Info',
+    ProxyLogSeverity.warn => 'Warnings',
+    ProxyLogSeverity.error => 'Errors',
+  };
+
+  bool get isAtLeastWarn => index >= ProxyLogSeverity.warn.index;
+
+  bool isAtLeast(ProxyLogSeverity minimum) => index >= minimum.index;
+}
+
 class ProxyLogMessage with FastEquatable {
   final ProxyLogSource source;
   final String level;
   final String message;
   final int timestamp;
   final String? profileId;
+
+  /// [level] ranked, computed once per line rather than on every filter pass.
+  late final ProxyLogSeverity severity = ProxyLogSeverity.parse(level);
 
   ProxyLogMessage({
     required this.source,

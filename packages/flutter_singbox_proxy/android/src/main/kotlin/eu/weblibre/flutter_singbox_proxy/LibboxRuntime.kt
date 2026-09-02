@@ -4,6 +4,8 @@ import android.content.Context
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 
 open class LibboxRuntime(
     private val context: Context,
@@ -22,6 +24,29 @@ open class LibboxRuntime(
     @Volatile
     private var bootstrapDohUrl: String? = null
 
+    private val bootstrapAnnounced = AtomicBoolean(false)
+
+    /**
+     * Highest libbox log level worth synthesizing *our own* entries for. Lower
+     * numbers are more severe (0 panic … 6 trace).
+     *
+     * Scoped to [forwardConnectionEvents], which invents info-level lines out
+     * of the connection stream — there is no point walking that list when
+     * nothing downstream would keep the result. sing-box's own entries are
+     * forwarded unfiltered; [SingboxRuntimeManager] is the single gate for
+     * those, because it inspects lines it does not forward.
+     *
+     * Written from the platform thread on start, read on libbox worker
+     * threads.
+     */
+    @Volatile
+    private var maxLogLevel: Int = LOG_LEVEL_WARN
+
+    /** See [maxLogLevel]. */
+    open fun setMaxLogLevel(level: Int) {
+        maxLogLevel = level
+    }
+
     /**
      * Set the DoH endpoint the platform LocalDNSTransport will use for
      * bootstrap lookups. Pass null to disable the bridge (sing-box's broken
@@ -30,6 +55,7 @@ open class LibboxRuntime(
      */
     open fun setBootstrapDohUrl(url: String?) {
         bootstrapDohUrl = url?.takeIf { it.isNotBlank() }
+        bootstrapAnnounced.set(false)
     }
 
     open fun isAvailable(): Boolean = runCatching {
@@ -104,11 +130,11 @@ open class LibboxRuntime(
         invokeIfAvailable(options, "setCrashReportSource", "flutter_singbox_proxy")
         // sing-box renamed the OOM killer toggle between releases; only one of
         // these exists on the linked libbox AAR, so call whichever responds.
-        invokeFirstAvailable(
-            options,
-            methodNames = listOf("setOomKillerDisabled", "setOomKillerEnabled"),
-            args = arrayOf(true),
-        )
+        // The two names say opposite things, so they take opposite arguments —
+        // one `true` for both would ask for the killer on half the time.
+        if (!invokeIfAvailable(options, "setOomKillerDisabled", true)) {
+            invokeIfAvailable(options, "setOomKillerEnabled", false)
+        }
         invokeIfAvailable(options, "setOomMemoryLimit", 0L)
 
         val libbox = Class.forName(LIBBOX_CLASS)
@@ -267,7 +293,12 @@ open class LibboxRuntime(
         }
     }
 
-    private fun forwardLogIterator(iterator: Any) {
+    /**
+     * Visible for tests: the reflective reads below are duck-typed by method
+     * name, so a plain object exposing `hasNext`/`next`/`getLevel`/`getMessage`
+     * stands in for a libbox `LogIterator`.
+     */
+    internal fun forwardLogIterator(iterator: Any) {
         val sink = logSink ?: return
         runCatching {
             while (invoke(iterator, "hasNext") as? Boolean == true) {
@@ -276,6 +307,13 @@ open class LibboxRuntime(
                     ?.toInt() ?: 0
                 val message = runCatching { invoke(entry, "getMessage") }
                     .getOrNull() as? String ?: continue
+                // Deliberately unfiltered: every entry is offered to the sink
+                // whatever its level, because the sink reads the text of lines
+                // it will not forward (the oversized-packet hint keys off a
+                // wire error that carries no guaranteed level). The level gate
+                // lives downstream in SingboxRuntimeManager, ahead of the
+                // main-thread hop that is the part actually worth avoiding.
+                // Reflection here is cached, so a dropped line stays cheap.
                 sink(level, message)
             }
         }
@@ -283,6 +321,9 @@ open class LibboxRuntime(
 
     private fun forwardConnectionEvents(events: Any) {
         val sink = logSink ?: return
+        // Synthesized as info lines below, so they answer to the same
+        // threshold — and skipping early avoids walking the whole event list.
+        if (LOG_LEVEL_INFO > maxLogLevel) return
         runCatching {
             val iterator = invokeFirstAvailableResult(events, listOf("iterator", "Iterator")) ?: return
             while (invoke(iterator, "hasNext") as? Boolean == true) {
@@ -359,18 +400,43 @@ open class LibboxRuntime(
         if (url == null) {
             // No bootstrap URL configured — return SERVFAIL so sing-box gets a
             // clean failure instead of hanging on a half-initialized bridge.
+            logSink?.invoke(3, "DoH bootstrap skipped: no resolver URL configured")
             invokeIfAvailable(ctx, "errorCode", DNS_RCODE_SERVFAIL)
             return
         }
 
+        // One line, once per runtime: it is the only way to tell a bootstrap
+        // that is failing from one that sing-box never asked. Without it, both
+        // look identical from the log — `context deadline exceeded` and
+        // silence on this side.
+        if (bootstrapAnnounced.compareAndSet(false, true)) {
+            logSink?.invoke(4, "DoH bootstrap resolver active: $url")
+        }
+
+        val startedAt = System.nanoTime()
         try {
             val response = dohResolver.exchange(url, request)
             invokeIfAvailable(ctx, "rawSuccess", response)
+            val elapsed = elapsedMillis(startedAt)
+            // Every lookup the runtime makes waits on this call, and sing-box
+            // gives each exchange 10s before reporting `context deadline
+            // exceeded` with nothing on our side to explain it. Say so while
+            // there is still something to say.
+            if (elapsed >= SLOW_EXCHANGE_MILLIS) {
+                logSink?.invoke(3, "DoH bootstrap exchange to $url took ${elapsed}ms")
+            }
         } catch (error: Throwable) {
-            logSink?.invoke(3, "DoH bootstrap exchange failed: ${error.message}")
+            logSink?.invoke(
+                3,
+                "DoH bootstrap exchange to $url failed after ${elapsedMillis(startedAt)}ms: " +
+                    "${error.javaClass.simpleName}: ${error.message ?: "no message"}",
+            )
             invokeIfAvailable(ctx, "errorCode", DNS_RCODE_SERVFAIL)
         }
     }
+
+    private fun elapsedMillis(startedAt: Long): Long =
+        (System.nanoTime() - startedAt) / 1_000_000
 
     private fun emptyStringIterator(): Any = emptyIterator(STRING_ITERATOR_CLASS)
 
@@ -398,11 +464,18 @@ open class LibboxRuntime(
         return method.invoke(target, *args)
     }
 
-    private fun invokeIfAvailable(target: Any, methodName: String, vararg args: Any?) {
+    /** Returns whether [methodName] existed and was called. */
+    private fun invokeIfAvailable(
+        target: Any,
+        methodName: String,
+        vararg args: Any?,
+    ): Boolean {
         val method = target.javaClass.methods.firstOrNull { candidate ->
             candidate.name == methodName && candidate.parameterTypes.size == args.size
-        }
-        method?.invoke(target, *args)
+        } ?: return false
+
+        method.invoke(target, *args)
+        return true
     }
 
     private fun invokeFirstAvailable(
@@ -437,10 +510,29 @@ open class LibboxRuntime(
         return null
     }
 
+    /**
+     * Resolved [findMethod] lookups.
+     *
+     * `Class.getMethods()` allocates a fresh array on every call, and the log
+     * path makes several lookups per entry on a stream that can run to
+     * thousands of lines a minute. The classes involved (gomobile bindings and
+     * JDK proxies) are stable for the process, so the result caches cleanly.
+     */
+    private val methodCache = ConcurrentHashMap<Triple<Class<*>, String, Int>, Method>()
+
     private fun findMethod(clazz: Class<*>, methodName: String, argCount: Int): Method {
-        return clazz.methods.firstOrNull { method ->
+        val key = Triple(clazz, methodName, argCount)
+        methodCache[key]?.let { return it }
+
+        val resolved = clazz.methods.firstOrNull { method ->
             method.name == methodName && method.parameterTypes.size == argCount
-        } ?: throw NoSuchMethodError(
+        }
+        if (resolved != null) {
+            methodCache[key] = resolved
+            return resolved
+        }
+
+        throw NoSuchMethodError(
             "${clazz.name}.$methodName($argCount args) is missing — linked libbox AAR " +
                 "may be incompatible. Available '${methodName}' overloads: " +
                 clazz.methods
@@ -470,6 +562,12 @@ open class LibboxRuntime(
         const val PLATFORM_INTERFACE_CLASS = "io.nekohasekai.libbox.PlatformInterface"
         const val LOCAL_DNS_TRANSPORT_CLASS = "io.nekohasekai.libbox.LocalDNSTransport"
         const val DNS_RCODE_SERVFAIL = 2
+
+        /**
+         * Worth reporting even on success: sing-box abandons a DNS exchange
+         * after 10s, so anything near that is about to start failing.
+         */
+        const val SLOW_EXCHANGE_MILLIS = 1_500L
         const val OVERRIDE_OPTIONS_CLASS = "io.nekohasekai.libbox.OverrideOptions"
         const val STRING_ITERATOR_CLASS = "io.nekohasekai.libbox.StringIterator"
         const val NETWORK_INTERFACE_ITERATOR_CLASS = "io.nekohasekai.libbox.NetworkInterfaceIterator"
@@ -479,6 +577,9 @@ open class LibboxRuntime(
         const val COMMAND_CLIENT_CLASS = "io.nekohasekai.libbox.CommandClient"
         const val COMMAND_CLIENT_HANDLER_CLASS = "io.nekohasekai.libbox.CommandClientHandler"
         const val COMMAND_CLIENT_OPTIONS_CLASS = "io.nekohasekai.libbox.CommandClientOptions"
+        // libbox log levels, from sing/common/logger: lower is more severe.
+        const val LOG_LEVEL_WARN = 3
+        const val LOG_LEVEL_INFO = 4
         const val CONNECTION_EVENT_NEW = 0
         const val CONNECTION_EVENT_CLOSED = 2
     }

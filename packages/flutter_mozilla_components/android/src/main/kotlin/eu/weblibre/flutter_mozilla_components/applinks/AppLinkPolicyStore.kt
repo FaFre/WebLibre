@@ -8,6 +8,7 @@ package eu.weblibre.flutter_mozilla_components.applinks
 
 import android.content.Context
 import eu.weblibre.flutter_mozilla_components.ProfileContext
+import eu.weblibre.flutter_mozilla_components.ext.toStringSet
 import mozilla.components.support.base.log.logger.Logger
 import org.json.JSONArray
 import org.json.JSONObject
@@ -207,15 +208,6 @@ class AppLinkPolicyStore internal constructor(
 
     private fun JSONObject.optStringOrNull(key: String): String? =
         if (has(key) && !isNull(key)) getString(key) else null
-
-    private fun JSONArray?.toStringSet(): Set<String> {
-        if (this == null) return emptySet()
-        val out = LinkedHashSet<String>(length())
-        for (i in 0 until length()) {
-            out.add(getString(i))
-        }
-        return out
-    }
 
     companion object {
         const val PREFS_NAME = "weblibre_app_link_policy"

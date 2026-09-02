@@ -40,6 +40,18 @@ function parseSnapshot(args: any): RoutingSnapshot | undefined {
         directScopes: args.directScopes ?? {},
         siteAssignments: args.siteAssignments ?? {},
         strictContexts,
+        // Only ever true when the sender says so, so a snapshot that predates
+        // the flag — or one from an app push, which is never provisional — is
+        // treated as the final word on routing.
+        provisional: args.provisional === true,
+        // Anything that is not a list of ids is no list of ids: an unparseable
+        // value must leave every relation deciding for itself, not hold
+        // requests for backends nobody named.
+        awaitingProxies: Array.isArray(args.awaitingProxies)
+            ? (args.awaitingProxies as unknown[]).filter(
+                (id): id is string => typeof id === 'string'
+            )
+            : [],
     }
 }
 

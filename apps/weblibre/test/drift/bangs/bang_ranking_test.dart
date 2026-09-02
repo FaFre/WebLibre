@@ -252,22 +252,25 @@ void main() {
       expect(results.first.group, BangGroup.user);
     });
 
-    test('surfaces a primary trigger above a higher-precedence alias', () async {
-      await db.bangDao.upsertBang(_bang('yt', 'YouTube'));
-      await db.bangDao.upsertBang(
-        _bang(
-          'mine',
-          'Mine',
-          group: BangGroup.user,
-          additionalTriggers: {'yt'},
-        ),
-      );
+    test(
+      'surfaces a primary trigger above a higher-precedence alias',
+      () async {
+        await db.bangDao.upsertBang(_bang('yt', 'YouTube'));
+        await db.bangDao.upsertBang(
+          _bang(
+            'mine',
+            'Mine',
+            group: BangGroup.user,
+            additionalTriggers: {'yt'},
+          ),
+        );
 
-      final results = await db.bangDao.queryBangs('yt').get();
+        final results = await db.bangDao.queryBangs('yt').get();
 
-      expect(results.first.trigger, 'yt');
-      expect(results.first.group, BangGroup.general);
-    });
+        expect(results.first.trigger, 'yt');
+        expect(results.first.group, BangGroup.general);
+      },
+    );
   });
 
   group('editing aliases', () {

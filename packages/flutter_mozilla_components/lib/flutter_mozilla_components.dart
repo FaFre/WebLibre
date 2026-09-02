@@ -91,6 +91,7 @@ export 'src/pigeons/gecko.g.dart'
         GeckoProxySettings,
         GeckoPublicSuffixListApi,
         GeckoPwaApi,
+        GeckoRoutingDemand,
         GeckoSitePermissionsApi,
         GeckoSuggestion,
         GeckoSuggestionType,

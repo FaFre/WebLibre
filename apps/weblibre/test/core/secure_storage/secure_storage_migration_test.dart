@@ -121,16 +121,19 @@ void main() {
       );
     });
 
-    test('the unclaimed account record is not readable by any profile', () async {
-      platform.values[accountSecureBaseKey] = 'session';
-      await migrate();
+    test(
+      'the unclaimed account record is not readable by any profile',
+      () async {
+        platform.values[accountSecureBaseKey] = 'session';
+        await migrate();
 
-      final storeA = ProfileSecureStore(profileId: _a, storage: storage);
-      final storeB = ProfileSecureStore(profileId: _b, storage: storage);
+        final storeA = ProfileSecureStore(profileId: _a, storage: storage);
+        final storeB = ProfileSecureStore(profileId: _b, storage: storage);
 
-      expect(await storeA.read(accountSecureBaseKey), isNull);
-      expect(await storeB.read(accountSecureBaseKey), isNull);
-    });
+        expect(await storeA.read(accountSecureBaseKey), isNull);
+        expect(await storeB.read(accountSecureBaseKey), isNull);
+      },
+    );
 
     test('nothing is destroyed', () async {
       platform.values[accountSecureBaseKey] = 'session';
@@ -161,10 +164,7 @@ void main() {
 
       expect(result.claimedProxySecrets, 1);
       final store = ProfileSecureStore(profileId: _a, storage: storage);
-      expect(
-        await store.read('$proxySecretKeyPrefix$_proxyOfA'),
-        'secret-a',
-      );
+      expect(await store.read('$proxySecretKeyPrefix$_proxyOfA'), 'secret-a');
       expect(
         platform.values.containsKey('$proxySecretKeyPrefix$_proxyOfA'),
         isFalse,
@@ -254,14 +254,17 @@ void main() {
       await store.write(accountSecureBaseKey, 'stale');
       await store.write('$proxySecretKeyPrefix$_proxyOfA', 'secret');
 
-      await store.replaceAllOwned({'$proxySecretKeyPrefix$_proxyOfA': 'secret'});
+      await store.replaceAllOwned({
+        '$proxySecretKeyPrefix$_proxyOfA': 'secret',
+      });
 
       expect(await store.read(accountSecureBaseKey), isNull);
       expect(await store.read('$proxySecretKeyPrefix$_proxyOfA'), 'secret');
     });
 
     test('a parked record is not owned by anyone', () async {
-      platform.values['$accountSecureBaseKey$secureKeyUnattributedSuffix'] = 'x';
+      platform.values['$accountSecureBaseKey$secureKeyUnattributedSuffix'] =
+          'x';
 
       final store = ProfileSecureStore(profileId: _a, storage: storage);
 

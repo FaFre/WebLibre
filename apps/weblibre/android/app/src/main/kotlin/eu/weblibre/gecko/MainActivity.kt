@@ -23,6 +23,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import eu.weblibre.flutter_mozilla_components.FlutterEngineCoordinator
 import eu.weblibre.flutter_mozilla_components.HomePressDispatcher
 import eu.weblibre.flutter_mozilla_components.startup.LaunchTrust
 import eu.weblibre.flutter_mozilla_components.startup.StartupIntentBroker
@@ -32,8 +33,6 @@ import eu.weblibre.simple_intent_receiver.IntentCallerResolver
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
-import io.flutter.embedding.engine.FlutterJNI
-import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterFragmentActivity() {
@@ -46,7 +45,7 @@ class MainActivity : FlutterFragmentActivity() {
 
     private val TRIM_MEMORY_CHANNEL = "eu.weblibre.flutter_mozilla_components/trim_memory"
     private val ACTIVITY_CHANNEL = "eu.weblibre.gecko/activity"
-    private val ENGINE_ID = "engine_id"
+    private val ENGINE_ID = FlutterEngineCoordinator.ENGINE_ID
     private var trimMemoryChannel: MethodChannel? = null
 
     private fun engineTag(engine: FlutterEngine?): String {
@@ -180,23 +179,6 @@ class MainActivity : FlutterFragmentActivity() {
         super.onUserLeaveHint()
     }
 
-    /**
-     * Check whether the FlutterEngine's native JNI layer is still attached.
-     * Note: binaryMessenger.send() does NOT throw when JNI is detached — it just
-     * logs a warning. We must use reflection to access FlutterJNI.isAttachedToJni().
-     */
-    private fun isEngineNativeAlive(engine: FlutterEngine): Boolean {
-        return try {
-            val field = FlutterEngine::class.java.getDeclaredField("flutterJNI")
-            field.isAccessible = true
-            val jni = field.get(engine) as FlutterJNI
-            jni.isAttached
-        } catch (e: Exception) {
-            Log.w(TAG, "Could not check JNI attachment state: ${e.message}")
-            false
-        }
-    }
-
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
@@ -224,17 +206,8 @@ class MainActivity : FlutterFragmentActivity() {
         super.onDestroy()
 
         if (!isFinishing) {
-            val cache = FlutterEngineCache.getInstance()
-            val engine = cache.get(ENGINE_ID)
-            if (engine != null) {
-                Log.d(TAG, "onDestroy: system-initiated destroy, clearing stale engine")
-                cache.remove(ENGINE_ID)
-                try {
-                    engine.destroy()
-                } catch (e: Exception) {
-                    Log.w(TAG, "Error destroying engine in onDestroy", e)
-                }
-            }
+            Log.d(TAG, "onDestroy: system-initiated destroy, clearing stale engine")
+            FlutterEngineCoordinator.discard()
         }
     }
 
@@ -243,41 +216,14 @@ class MainActivity : FlutterFragmentActivity() {
         trimMemoryChannel?.invokeMethod("onTrimMemory", level)
     }
 
-    override fun provideFlutterEngine(context: Context): FlutterEngine {
-        val cache = FlutterEngineCache.getInstance()
-        val cachedEngine = cache.get(ENGINE_ID)
-        if (cachedEngine != null) {
-            val isHealthy = try {
-                cachedEngine.dartExecutor.isExecutingDart && isEngineNativeAlive(cachedEngine)
-            } catch (e: Exception) {
-                Log.w(TAG, "Cached engine health check failed", e)
-                false
-            }
-
-            if (isHealthy) {
-                Log.d(TAG, "provideFlutterEngine: reusing cached engine ${engineTag(cachedEngine)}")
-                return cachedEngine
-            }
-
-            Log.w(TAG, "provideFlutterEngine: cached engine ${engineTag(cachedEngine)} is stale, creating fresh")
-            cache.remove(ENGINE_ID)
-            try {
-                cachedEngine.destroy()
-            } catch (e: Exception) {
-                Log.w(TAG, "Error destroying stale engine", e)
-            }
-        }
-
-        val flutterEngine = FlutterEngine(context.applicationContext)
-        flutterEngine.navigationChannel.setInitialRoute("/")
-        flutterEngine.dartExecutor.executeDartEntrypoint(
-            DartExecutor.DartEntrypoint.createDefault()
-        )
-        cache.put(ENGINE_ID, flutterEngine)
-
-        Log.d(TAG, "provideFlutterEngine: created new engine ${engineTag(flutterEngine)}")
-        return flutterEngine
-    }
+    /**
+     * The engine is owned by [FlutterEngineCoordinator], not by this activity: a
+     * headless launch (a Custom Tab or PWA into a proxied container) can have
+     * started the app half before any activity existed, and this attaches to
+     * that same engine rather than standing up a second one.
+     */
+    override fun provideFlutterEngine(context: Context): FlutterEngine =
+        FlutterEngineCoordinator.obtain(context)
 
     override fun shouldDestroyEngineWithHost(): Boolean {
         return false // Keep engine alive when activity is destroyed

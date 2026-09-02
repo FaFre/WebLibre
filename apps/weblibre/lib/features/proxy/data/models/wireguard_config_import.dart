@@ -21,6 +21,7 @@ import 'dart:convert';
 
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:weblibre/core/branding/proxy_brands.dart';
+import 'package:weblibre/features/proxy/data/parsers/cidr.dart';
 import 'package:weblibre/features/proxy/data/parsers/host_port.dart';
 
 class WireguardConfigImport with FastEquatable {
@@ -55,16 +56,33 @@ class WireguardConfigImport with FastEquatable {
             invalidMessage: '$wireGuardBrand endpoint must be host:port.',
           );
     final mtu = interface['mtu']?.trim();
+    // A phone is always behind NAT. Without keepalives the mapping for the
+    // tunnel's UDP flow expires while idle, the peer's packets stop arriving,
+    // and everything stalls until WireGuard notices ("stopped hearing back
+    // after 15 seconds") and re-handshakes — over and over. Configs written
+    // for a server routinely leave this out, so absent means 25s, not off.
+    final keepalive = peer['persistentkeepalive']?.trim();
 
     return WireguardConfigImport(
       values: {
         'server': endpoint.host,
         'server_port': endpoint.port,
-        'local_address': _wireguardListValue(interface['address']),
+        // Normalized here rather than only on the way to sing-box, so the
+        // form the user is about to look at shows the prefix that will
+        // actually be used instead of silently disagreeing with it.
+        'local_address': _wireguardAddressValue(interface['address']),
         'private_key': interface['privatekey']?.trim() ?? '',
         'peer_public_key': peer['publickey']?.trim() ?? '',
         'pre_shared_key': peer['presharedkey']?.trim() ?? '',
-        'mtu': mtu == null || mtu.isEmpty ? '1408' : mtu,
+        // sing-box's own default is 1408, which assumes a 1500-byte path.
+        // A phone rarely has one: mobile carriers, PPPoE and any tunnel this
+        // device is already inside give less, and then every full-size packet
+        // fails to send at all ("sendmsg: message too long") while handshakes
+        // and DNS still fit. 1280 is the IPv6 minimum every path must carry.
+        'mtu': mtu == null || mtu.isEmpty ? '1280' : mtu,
+        'persistent_keepalive_interval': keepalive == null || keepalive.isEmpty
+            ? '25'
+            : keepalive,
       },
       dns: _wireguardListValue(interface['dns']),
     );
@@ -74,11 +92,17 @@ class WireguardConfigImport with FastEquatable {
   /// the imported config had no `DNS = …` line. Bare IPs become `udp://<ip>`
   /// (sing-box's plain-UDP scheme); anything already containing `://` is kept
   /// verbatim so users can paste `https://…/dns-query` etc.
+  ///
+  /// An IPv6 literal is bracketed on the way in. A `DNS =` line carries it
+  /// bare, but the result is parsed as a URI, and `udp://fd00::1` has no
+  /// readable host — the runtime would refuse to start on an address the user
+  /// never typed.
   String? get primaryDnsAddress {
     final entries = _splitList(dns);
     if (entries.isEmpty) return null;
     final first = entries.first;
     if (first.contains('://')) return first;
+    if (first.contains(':')) return 'udp://[$first]';
     return 'udp://$first';
   }
 }
@@ -144,6 +168,19 @@ String _stripWireguardComment(String line) {
   if (indexes.isEmpty) return line;
   indexes.sort();
   return line.substring(0, indexes.first);
+}
+
+/// The `[Interface] Address` list, every entry carrying a prefix length.
+///
+/// `wg-quick` accepts `Address = 10.0.0.2`; sing-box's `local_address` is a
+/// list of prefixes and refuses to parse a bare one, so a config that imported
+/// cleanly would fail at start-up instead — see [tryNormalizeCidr]. Entries
+/// that are not addresses at all are kept verbatim: the form validates them and
+/// says so, which is more use than dropping them here without a word.
+String _wireguardAddressValue(String? value) {
+  return _splitList(
+    _wireguardListValue(value),
+  ).map((entry) => tryNormalizeCidr(entry) ?? entry).join('\n');
 }
 
 String _wireguardListValue(String? value) {

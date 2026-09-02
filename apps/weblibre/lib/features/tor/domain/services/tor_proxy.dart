@@ -47,105 +47,126 @@ class TorProxyService extends _$TorProxyService {
     if (!currentStatus.isReady || reconfigureIfRunning) {
       state = const AsyncLoading();
 
-      final torSettings = await ref
-          .read(torSettingsRepositoryProvider.notifier)
-          .fetchSettings();
-
-      Setting? setting;
-      if (torSettings.config == TorConnectionConfig.auto) {
-        List<Setting>? config;
-
-        final moat = MoatService();
-        try {
-          await moat.initialize();
-          config = await moat.autoConf(
-            cannotConnectWithoutPt: torSettings.requireBridge,
-          );
-
-          if (config == null && torSettings.requireBridge) {
-            config = MoatService.convertBuiltinToSettings(
-              await ref
-                  .read(builtinBridgesRepositoryProvider(moat).notifier)
-                  .getBridges(),
-            );
-          }
-        } catch (e, s) {
-          logger.e('Failed auto configure bridges', error: e, stackTrace: s);
-        } finally {
-          await moat.dispose();
-        }
-
-        setting = config.mapNotNull(
-          (config) =>
-              config.firstWhereOrNull(
-                (setting) => setting.bridge.type == MoatTransportType.obfs4,
-              ) ??
-              config.firstWhereOrNull(
-                (setting) => setting.bridge.type == MoatTransportType.snowflake,
-              ),
-        );
-      } else if (torSettings.config != TorConnectionConfig.direct) {
-        List<Setting>? config;
-
-        final moat = MoatService();
-        try {
-          await moat.initialize();
-          if (torSettings.fetchRemoteBridges) {
-            config = await moat.getDefaultBridges();
-          }
-
-          if (config == null &&
-              (torSettings.requireBridge || !torSettings.fetchRemoteBridges)) {
-            config = MoatService.convertBuiltinToSettings(
-              await ref
-                  .read(builtinBridgesRepositoryProvider(moat).notifier)
-                  .getBridges(tryUpdate: torSettings.fetchRemoteBridges),
-            );
-          }
-
-          setting = config.mapNotNull(
-            (config) => config.firstWhereOrNull(
-              (setting) =>
-                  setting.bridge.type ==
-                  switch (torSettings.config) {
-                    TorConnectionConfig.auto => throw UnimplementedError(
-                      'TorConnectionConfig.auto bridge type not supported',
-                    ),
-                    TorConnectionConfig.direct => throw UnimplementedError(
-                      'TorConnectionConfig.direct does not use bridges',
-                    ),
-                    TorConnectionConfig.obfs4 => MoatTransportType.obfs4,
-                    TorConnectionConfig.snowflake =>
-                      MoatTransportType.snowflake,
-                  },
-            ),
-          );
-        } catch (e, s) {
-          logger.e('Failed auto configure bridges', error: e, stackTrace: s);
-        } finally {
-          await moat.dispose();
-        }
+      try {
+        return await _configureAndStart();
+      } catch (error, stackTrace) {
+        // The loading state above is not just a spinner: routing reads it as
+        // "an endpoint for Tor is still on its way", and holds every Tor-routed
+        // request for the extension's whole budget while it stands. A start
+        // that threw is one that is not coming, so the provider goes back to
+        // reporting whatever the runtime actually is — bootstrapping if the
+        // failure was a reconfigure over a running Tor, stopped if it never got
+        // up.
+        state = await AsyncValue.guard(_tor.getStatus);
+        Error.throwWithStackTrace(error, stackTrace);
       }
-
-      final config = TorConfiguration(
-        transport: switch (setting?.bridge.type) {
-          MoatTransportType.obfs4 => TransportType.obfs4,
-          MoatTransportType.snowflake => TransportType.snowflake,
-          MoatTransportType.meek => TransportType.meek,
-          MoatTransportType.meekAzure => TransportType.meekAzure,
-          MoatTransportType.webtunnel => TransportType.webtunnel,
-          null => TransportType.none,
-        },
-        bridgeLines: setting?.bridge.bridges ?? [],
-        entryNodeCountries: torSettings.entryNodeCountry?.toLowerCase(),
-        exitNodeCountries: torSettings.exitNodeCountry?.toLowerCase(),
-      );
-
-      await _tor.start(config);
-      return _tor.getStatus();
     }
 
     return currentStatus;
+  }
+
+  /// Resolves the bridge configuration for the current settings and brings Tor
+  /// up on it.
+  ///
+  /// Split out only so [startOrReconfigure] can wrap the whole of it in one
+  /// failure path — every step here can throw, and the provider must not be
+  /// left reporting a start in flight when one does.
+  Future<TorStatus> _configureAndStart() async {
+    final torSettings = await ref
+        .read(torSettingsRepositoryProvider.notifier)
+        .fetchSettings();
+
+    Setting? setting;
+    if (torSettings.config == TorConnectionConfig.auto) {
+      List<Setting>? config;
+
+      final moat = MoatService();
+      try {
+        await moat.initialize();
+        config = await moat.autoConf(
+          cannotConnectWithoutPt: torSettings.requireBridge,
+        );
+
+        if (config == null && torSettings.requireBridge) {
+          config = MoatService.convertBuiltinToSettings(
+            await ref
+                .read(builtinBridgesRepositoryProvider(moat).notifier)
+                .getBridges(),
+          );
+        }
+      } catch (e, s) {
+        logger.e('Failed auto configure bridges', error: e, stackTrace: s);
+      } finally {
+        await moat.dispose();
+      }
+
+      setting = config.mapNotNull(
+        (config) =>
+            config.firstWhereOrNull(
+              (setting) => setting.bridge.type == MoatTransportType.obfs4,
+            ) ??
+            config.firstWhereOrNull(
+              (setting) => setting.bridge.type == MoatTransportType.snowflake,
+            ),
+      );
+    } else if (torSettings.config != TorConnectionConfig.direct) {
+      List<Setting>? config;
+
+      final moat = MoatService();
+      try {
+        await moat.initialize();
+        if (torSettings.fetchRemoteBridges) {
+          config = await moat.getDefaultBridges();
+        }
+
+        if (config == null &&
+            (torSettings.requireBridge || !torSettings.fetchRemoteBridges)) {
+          config = MoatService.convertBuiltinToSettings(
+            await ref
+                .read(builtinBridgesRepositoryProvider(moat).notifier)
+                .getBridges(tryUpdate: torSettings.fetchRemoteBridges),
+          );
+        }
+
+        setting = config.mapNotNull(
+          (config) => config.firstWhereOrNull(
+            (setting) =>
+                setting.bridge.type ==
+                switch (torSettings.config) {
+                  TorConnectionConfig.auto => throw UnimplementedError(
+                    'TorConnectionConfig.auto bridge type not supported',
+                  ),
+                  TorConnectionConfig.direct => throw UnimplementedError(
+                    'TorConnectionConfig.direct does not use bridges',
+                  ),
+                  TorConnectionConfig.obfs4 => MoatTransportType.obfs4,
+                  TorConnectionConfig.snowflake => MoatTransportType.snowflake,
+                },
+          ),
+        );
+      } catch (e, s) {
+        logger.e('Failed auto configure bridges', error: e, stackTrace: s);
+      } finally {
+        await moat.dispose();
+      }
+    }
+
+    final config = TorConfiguration(
+      transport: switch (setting?.bridge.type) {
+        MoatTransportType.obfs4 => TransportType.obfs4,
+        MoatTransportType.snowflake => TransportType.snowflake,
+        MoatTransportType.meek => TransportType.meek,
+        MoatTransportType.meekAzure => TransportType.meekAzure,
+        MoatTransportType.webtunnel => TransportType.webtunnel,
+        null => TransportType.none,
+      },
+      bridgeLines: setting?.bridge.bridges ?? [],
+      entryNodeCountries: torSettings.entryNodeCountry?.toLowerCase(),
+      exitNodeCountries: torSettings.exitNodeCountry?.toLowerCase(),
+    );
+
+    await _tor.start(config);
+    return _tor.getStatus();
   }
 
   Future<TorStatus> requestSync() async {

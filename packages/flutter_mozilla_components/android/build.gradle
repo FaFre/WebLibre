@@ -50,6 +50,10 @@ android {
     sourceSets {
         main.java.srcDirs += "src/main/kotlin"
         test.java.srcDirs += "src/test/kotlin"
+        // Fixtures the proxy extension's own test suite reads too, so a routing
+        // rule that changes on one side fails on the other. See
+        // ../shared/routing/README.md.
+        test.resources.srcDirs += "../shared/routing"
     }
 
     defaultConfig {

@@ -13,6 +13,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -140,6 +141,9 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         get() = arguments?.getString(SESSION_ID_KEY)
 
     private var _binding: FragmentBrowserBinding? = null
+
+    /** Pending tick of the components wait, so [onDestroyView] can cancel it. */
+    private var componentsWait: Runnable? = null
     val binding get() = _binding!!
 
     protected val components by lazy {
@@ -220,15 +224,89 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     @CallSuper
     @Suppress("LongMethod")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        view.post {
-            if (GlobalComponents.components != null) {
-                createAndSetupEngine(view)
-            } else {
-                // Retry or handle error
-                view.postDelayed({ createAndSetupEngine(view) }, 100)
-            }
-        }
+        scheduleComponentsWait(view, SystemClock.elapsedRealtime(), delayMs = 0)
     }
+
+    /**
+     * Queues the next tick of the components wait, keeping it cancellable.
+     *
+     * The handle matters: `postDelayed` outlives detachment — a pending
+     * runnable is held in the view's action queue and replayed on the next
+     * attach — so an uncancelled tick can run after `onDestroyView` has torn
+     * the binding down, against a view that is no longer the fragment's.
+     */
+    private fun scheduleComponentsWait(view: View, startedAt: Long, delayMs: Long) {
+        val tick = Runnable { awaitComponentsThenSetupEngine(view, startedAt) }
+        componentsWait = tick
+        view.postDelayed(tick, delayMs)
+    }
+
+    /**
+     * Polls for [GlobalComponents] and builds the engine as soon as they exist.
+     *
+     * A single short retry is not enough on the headless launch path: a Custom
+     * Tab or PWA started into a fresh process shows this fragment while the app
+     * half is still booting Flutter, and `GlobalComponents.setUp` runs a couple
+     * of seconds later — longer under the jank of a cold start. Building the
+     * engine before that throws, and the failure used to restart the whole app
+     * into the main browser, which is a far worse outcome than waiting.
+     *
+     * The deadline bounds the wait so a genuinely absent set-up still resolves
+     * rather than leaving a blank window forever.
+     */
+    private fun awaitComponentsThenSetupEngine(view: View, startedAt: Long) {
+        componentsWait = null
+
+        // The window can be gone by the time a queued tick runs, and every step
+        // below needs a live view: `binding` throws once `onDestroyView` has
+        // nulled it.
+        if (_binding == null) return
+
+        if (GlobalComponents.components != null) {
+            // Only signal availability when the engine was actually built.
+            // `createAndSetupEngine` races components a second time and calls
+            // `onComponentsUnavailable` when it loses, and firing both hooks
+            // would have a subclass tearing this window down and installing
+            // features into it at once.
+            if (createAndSetupEngine(view)) {
+                onComponentsAvailable(view)
+            }
+            return
+        }
+
+        val waited = SystemClock.elapsedRealtime() - startedAt
+        if (waited >= COMPONENTS_WAIT_TIMEOUT_MS) {
+            Log.w(
+                "EngineCreation",
+                "Components still not initialized after ${waited}ms; giving up on this window",
+            )
+            // Deliberately not a restart: the process is healthy, this window
+            // just has nothing to render into. Leave it to the activity, which
+            // knows whether it can fall back to the browser.
+            onComponentsUnavailable()
+            return
+        }
+
+        scheduleComponentsWait(view, startedAt, COMPONENTS_WAIT_INTERVAL_MS)
+    }
+
+    /**
+     * Called once [GlobalComponents] exist and the engine has been built.
+     *
+     * Subclasses install their own component-dependent features here rather
+     * than posting a second, shorter wait of their own — which would give up
+     * silently on exactly the cold start this wait exists for.
+     */
+    protected open fun onComponentsAvailable(view: View) = Unit
+
+    /**
+     * Called when [GlobalComponents] never arrived within the deadline.
+     *
+     * Subclasses that can do something better than an empty window — an
+     * external-app window can hand the launch to the main browser — override
+     * this.
+     */
+    protected open fun onComponentsUnavailable() = Unit
 
     private fun restartApp(context: Context) {
         val packageManager = context.packageManager
@@ -244,7 +322,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         Runtime.getRuntime().exit(0)
     }
 
-    private fun createAndSetupEngine(view: View) {
+    private fun createAndSetupEngine(view: View): Boolean {
         try {
             // Set layout parameters
             val layoutParams = FrameLayout.LayoutParams(
@@ -589,9 +667,22 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
             onEngineSetupComplete()
 
+            return true
         } catch (e: Exception) {
             Log.e("EngineCreation", "Failed to create engine: ${e.message}", e)
+
+            // Components disappearing between the check above and here is a
+            // race, not a broken install, and it is not worth killing the
+            // process over — that lands the user in the main browser with no
+            // explanation, which is exactly what an unserved PWA launch used to
+            // do. Anything else really is unrecoverable for this window.
+            if (GlobalComponents.components == null) {
+                onComponentsUnavailable()
+                return false
+            }
+
             context?.let { restartApp(it) }
+            return false
         }
     }
 
@@ -674,6 +765,19 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     companion object {
         private const val SESSION_ID_KEY = "session_id"
 
+        /** How often to re-check for [GlobalComponents] while waiting. */
+        private const val COMPONENTS_WAIT_INTERVAL_MS = 100L
+
+        /**
+         * How long a window waits for components before giving up.
+         *
+         * Sized for the headless launch path: the app half has to start the
+         * Flutter engine, open four databases and run `GeckoBrowserService
+         * .initialize` before `GlobalComponents.setUp` returns, which is
+         * seconds on a cold start.
+         */
+        private const val COMPONENTS_WAIT_TIMEOUT_MS = 20_000L
+
         private const val REQUEST_CODE_DOWNLOAD_PERMISSIONS = 1
         private const val REQUEST_CODE_PROMPT_PERMISSIONS = 2
         private const val REQUEST_CODE_APP_PERMISSIONS = 3
@@ -700,15 +804,27 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     override fun onStop() {
         super.onStop()
 
-        components.core.store.state.findTabOrCustomTabOrSelectedTab(sessionId)?.let { session ->
-            if (!session.content.pictureInPictureEnabled && fullScreenFeature.onBackPressed()) {
-                fullScreenChanged(false)
+        // Through `GlobalComponents`, not the `components` lazy: a window shown
+        // during a cold headless launch can be stopped while it is still
+        // waiting for set-up, and the lazy throws "Components not initialized"
+        // there. No components means no session to leave fullscreen anyway.
+        GlobalComponents.components
+            ?.core
+            ?.store
+            ?.state
+            ?.findTabOrCustomTabOrSelectedTab(sessionId)
+            ?.let { session ->
+                if (!session.content.pictureInPictureEnabled && fullScreenFeature.onBackPressed()) {
+                    fullScreenChanged(false)
+                }
             }
-        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+
+        componentsWait?.let { view?.removeCallbacks(it) }
+        componentsWait = null
 
         // Stop keyboard visibility detection
         keyboardVisibilityFeature?.stop()
@@ -727,8 +843,13 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         GlobalComponents.onScreenshotProtectionEnabledChanged = null
         val engineView = fragmentEngineView
         engineView?.setActivityContext(null)
-        if (components.activeEngineView == engineView) {
-            components.activeEngineView = null
+        // Read through `GlobalComponents` rather than the `components` lazy:
+        // a window that gave up waiting is destroyed without components ever
+        // existing, and the lazy throws "Components not initialized" there.
+        GlobalComponents.components?.let { components ->
+            if (components.activeEngineView == engineView) {
+                components.activeEngineView = null
+            }
         }
         _binding = null
         fragmentEngineView = null

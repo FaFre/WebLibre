@@ -1964,6 +1964,23 @@ class GeckoProxyRoutingSnapshot {
   /// back with `strict = true`.
   final Map<String, List<String>> strictContexts;
 
+  /// Ids named by [relations] but absent from [proxies] whose endpoint is still
+  /// expected to appear — proxy backends the app is bringing up right now
+  /// (autostart, or a start the user just asked for).
+  ///
+  /// Routing is published before its endpoints on purpose, so a slow Tor
+  /// bootstrap costs the containers that use Tor their connectivity rather than
+  /// costing the whole browser its routing. The extension blocks a relation
+  /// with no live endpoint; this tells it the difference between "blocked
+  /// because the backend is not running" and "blocked because it has not
+  /// finished starting", so the second one can be waited out instead of turned
+  /// into an error page.
+  ///
+  /// Per id, not per snapshot: a container routed through a sing-box profile
+  /// nobody is starting must fail immediately even while Tor happens to be
+  /// bootstrapping for some other container.
+  final List<String> awaitingProxyIds;
+
   const GeckoProxyRoutingSnapshot({
     required this.generation,
     required this.proxies,
@@ -1971,7 +1988,27 @@ class GeckoProxyRoutingSnapshot {
     required this.directScopes,
     required this.siteAssignments,
     required this.strictContexts,
+    required this.awaitingProxyIds,
   });
+}
+
+/// A launch that cannot be served until a proxy it needs is running.
+///
+/// Custom Tab and PWA launches are decided natively, before — and often
+/// without — the app half existing. When the container a launch belongs to
+/// routes through a proxy that is not running, the launch is blocked and
+/// nothing in the launch path can change that: sing-box and Tor both live in
+/// the Flutter isolate. So the need is recorded natively and handed to the app
+/// half, which is the half that can act on it.
+class GeckoRoutingDemand {
+  /// The cookie-store context the waiting launch's traffic is keyed on.
+  final String contextId;
+
+  /// Encoded proxy connection ids that context routes through and that have no
+  /// live endpoint — everything that has to come up for the launch to load.
+  final List<String> proxyIds;
+
+  const GeckoRoutingDemand({required this.contextId, required this.proxyIds});
 }
 
 /// What the extension is currently known to have installed.
@@ -2009,6 +2046,26 @@ abstract class GeckoContainerProxyApi {
   /// Locally cached view of what the extension acknowledged. Does not talk to
   /// the extension, so it is safe to call on a hot path.
   GeckoProxyRoutingStatus routingStatus();
+
+  /// The oldest launch waiting for a proxy to be started, or null when none is.
+  /// Consumes it: a demand is answered by starting what it names.
+  ///
+  /// Answers immediately, including when there is nothing to answer with. That
+  /// is what lets startup resolve "no launch is waiting" without holding every
+  /// endpoint-less route open while it finds out.
+  GeckoRoutingDemand? takeRoutingDemand();
+
+  /// Completes when a launch registers a demand, consuming it as
+  /// [takeRoutingDemand] does. Never completes on its own.
+  ///
+  /// A launch into a proxied container can arrive at any point in the life of
+  /// the process, long after startup has settled what it brings up, and the
+  /// window in which it can be served is the few seconds it spends waiting. A
+  /// push would be lost whenever it arrived before the app half was listening —
+  /// which is every cold start, the case this exists for — so the app half asks
+  /// and native answers when there is something to say.
+  @async
+  GeckoRoutingDemand nextRoutingDemand();
 }
 
 @HostApi()

@@ -60,11 +60,7 @@ class _FakeSafUtil implements SafUtil {
   }
 
   @override
-  Future<SafDocumentFile> rename(
-    String uri,
-    bool isDir,
-    String newName,
-  ) async {
+  Future<SafDocumentFile> rename(String uri, bool isDir, String newName) async {
     if (renameThrows) throw const FileSystemException('rename refused');
 
     final entry = tree.documents.remove(uri)!;

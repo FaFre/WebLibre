@@ -44,6 +44,8 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSitePermissionsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoGestureApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoGestureEvents
 import eu.weblibre.flutter_mozilla_components.PwaConstants
+import eu.weblibre.flutter_mozilla_components.ext.EventSequence
+import eu.weblibre.flutter_mozilla_components.startup.EngineWarmupSession
 import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTrackingProtectionApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoLogging
@@ -140,6 +142,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
     private var activity: Activity? = null
     private var isPlatformViewRegistered = false
     private var pushApi: GeckoPushApiImpl? = null
+    private var containerProxyApi: GeckoContainerProxyApiImpl? = null
 
     private lateinit var _flutterPluginBinding: FlutterPlugin.FlutterPluginBinding
     private lateinit var _flutterEvents: GeckoStateEvents
@@ -178,6 +181,15 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
     fun disposePushApi() {
         pushApi?.dispose()
         pushApi = null
+    }
+
+    fun disposeContainerProxyApi() {
+        val api = containerProxyApi
+        containerProxyApi = null
+        api?.dispose()
+        if (::_flutterPluginBinding.isInitialized) {
+            GeckoContainerProxyApi.setUp(_flutterPluginBinding.binaryMessenger, null)
+        }
     }
 
     fun detachActivity() {
@@ -374,10 +386,13 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         GeckoCookieApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoCookieApiImpl())
         GeckoMlApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoMlApiImpl(_flutterPluginBinding.binaryMessenger, _flutterEvents))
         GeckoPrefApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoPrefApiImpl())
+        disposeContainerProxyApi()
+        val containerProxyApiImpl = GeckoContainerProxyApiImpl()
         GeckoContainerProxyApi.setUp(
             _flutterPluginBinding.binaryMessenger,
-            GeckoContainerProxyApiImpl()
+            containerProxyApiImpl
         )
+        containerProxyApi = containerProxyApiImpl
         GeckoFindApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoFindApiImpl())
         GeckoSelectionActionController.setUp(
             _flutterPluginBinding.binaryMessenger, GeckoSelectionActionControllerImpl(
@@ -442,6 +457,30 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
             Intent(profileApplicationContext, NotificationActivity::class.java)
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         profileApplicationContext.startActivity(intent)
+
+        reportEngineReady()
+    }
+
+    /**
+     * Tells Dart the engine is usable.
+     *
+     * This is the moment components exist and every API above is registered —
+     * it has nothing to do with tabs. It used to be inferred from a reader-view
+     * action, which only ever fires once a tab is selected, so a start that
+     * landed on the home surface never reported ready at all and every
+     * `syncEvents` catch-up waited out a timeout instead.
+     *
+     * Reported once per [setupGeckoEngine]. `GeckoPlatformView` reports it
+     * again on every Flutter view attach, over that view's own event sink,
+     * because a Dart half that restarted has lost the one it was told here.
+     */
+    private fun reportEngineReady() {
+        if (!::_flutterEvents.isInitialized) return
+
+        GlobalComponents.components?.engineReportedInitialized = true
+        runOnUiThread {
+            _flutterEvents.onEngineReadyStateChange(EventSequence.next(), true) { _ -> }
+        }
     }
 
     private fun showFragmentCallback(): Boolean {
@@ -533,6 +572,13 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         val intent = ExternalAppBrowserActivity.createIntent(
             context = currentActivity,
             customTabSessionId = tab.id,
+            // The window decides what routing this launch needs from the intent,
+            // not from the session (`LaunchRouting.contextIdFor`), and the
+            // fallback to the ordinary browser reopens the URL from it as well.
+            // Left off, a tab created for a container is served — and recovered —
+            // as if it belonged to no container at all.
+            pwaContextId = contextId,
+            isPrivate = `private`,
         )
         currentActivity.startActivity(intent)
 
@@ -592,6 +638,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         // 2. Stop component-level services
         try {
             GlobalComponents.stopPrivateTabsNotificationFeature()
+            disposeContainerProxyApi()
             disposePushApi()
             GlobalComponents.closePush()
 
@@ -609,7 +656,13 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
             logger.error("$TAG: Error during component shutdown", e)
         }
 
-        // 3. Shutdown GeckoRuntime (safe now that no views reference it)
+        // 3. Give back the warm-up window, if this process is still holding
+        //    one. Has to happen before the runtime goes, not with the rest of
+        //    the components in tearDown() below.
+        runCatching { EngineWarmupSession.stop() }
+            .onFailure { logger.error("$TAG: Error closing the engine warm-up session", it) }
+
+        // 4. Shutdown GeckoRuntime (safe now that no views reference it)
         try {
             EngineProvider.shutdown()
         } catch (e: Exception) {

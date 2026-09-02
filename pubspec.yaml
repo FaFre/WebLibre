@@ -97,7 +97,12 @@ melos:
         # project, which `flutter build`/`flutter run` produces — run one first
         # on a clean checkout.
         cd apps/weblibre/android
-        ./gradlew :flutter_mozilla_components:testDebugUnitTest
+        # --continue: one applinks test fails permanently (see CLAUDE.md), and
+        # without it that failure would stop the second module from running at
+        # all. Read the XML reports, not the exit status.
+        ./gradlew --continue \
+          :flutter_mozilla_components:testDebugUnitTest \
+          :flutter_singbox_proxy:testDebugUnitTest
 
     build-browser:
       description: Build stable release APKs split per ABI with the Skia renderer

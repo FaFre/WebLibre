@@ -36,10 +36,6 @@ private class NativeFragmentView(
     containerId: Int,
     private val flutterEvents: GeckoStateEvents
 ) : PlatformView {
-    private val components by lazy {
-        requireNotNull(GlobalComponents.components) { "Components not initialized" }
-    }
-
     private val container: View
 
     /**
@@ -88,7 +84,18 @@ private class NativeFragmentView(
     override fun onFlutterViewAttached(flutterView: View) {
         super.onFlutterViewAttached(flutterView)
 
-        components.engineReportedInitialized = false
+        // A Dart half that restarted has lost the ready state it was told when
+        // components came up, and nothing else would tell it again: the engine
+        // is initialized once per process, not once per Flutter view. Re-assert
+        // it rather than clearing the latch and waiting for something to
+        // rediscover it.
+        //
+        // Only when there is something to assert it about: with no components
+        // the engine is not up, and saying otherwise would send Dart off to
+        // call APIs that do not exist yet.
+        val components = GlobalComponents.components ?: return
+        components.engineReportedInitialized = true
+        flutterEvents.onEngineReadyStateChange(EventSequence.next(), true) { _ -> }
     }
 
     override fun getView(): View {

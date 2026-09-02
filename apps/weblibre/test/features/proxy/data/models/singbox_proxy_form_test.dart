@@ -155,6 +155,40 @@ void main() {
       });
     });
 
+    test('a WireGuard address without a prefix is written out as one', () {
+      final spec = singboxProxyFormSpecs[SingboxProxyProfileType.wireguard]!;
+      final values = {
+        'server': 'wg.example.com',
+        'server_port': '51820',
+        'local_address': '10.0.0.2\nfd00::2',
+        'private_key': 'private-key',
+        'peer_public_key': 'peer-public-key',
+      };
+
+      expect(spec.validate(values), isNull);
+
+      final config =
+          jsonDecode(spec.toConfigJson(values)) as Map<String, Object?>;
+      expect(
+        config['local_address'],
+        ['10.0.0.2/32', 'fd00::2/128'],
+        reason: 'sing-box only accepts prefixes, and refuses to start without',
+      );
+    });
+
+    test('a WireGuard address that is not an address is refused', () {
+      final spec = singboxProxyFormSpecs[SingboxProxyProfileType.wireguard]!;
+      final values = {
+        'server': 'wg.example.com',
+        'server_port': '51820',
+        'local_address': '10.0.0.2\nnot-an-address',
+        'private_key': 'private-key',
+        'peer_public_key': 'peer-public-key',
+      };
+
+      expect(spec.validate(values), contains('not-an-address'));
+    });
+
     test('hydrates WireGuard values from public and secret JSON', () {
       final spec = singboxProxyFormSpecs[SingboxProxyProfileType.wireguard]!;
 

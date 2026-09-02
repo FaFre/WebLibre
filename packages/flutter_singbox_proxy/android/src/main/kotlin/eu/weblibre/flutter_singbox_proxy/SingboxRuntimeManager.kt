@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyApi
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyConfigResult
+import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyLogLevel
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyLogMessage
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyProfile
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyRuntimeOptions
@@ -43,10 +44,23 @@ class SingboxRuntimeManager(
         message = null
     )
     private var activeProfiles = emptyList<SingboxProxyProfile>()
-    private var activeOptions = SingboxProxyRuntimeOptions(
-        preferredBasePort = null,
-        blockUnmatchedTraffic = true
-    )
+    private val oversizedPacketsExplained = java.util.concurrent.atomic.AtomicBoolean(false)
+
+    /**
+     * Highest libbox level forwarded to Dart (lower is more severe).
+     *
+     * The config's `log.level` does not do this job. sing-box applies it to its
+     * own writer only — `log/observable.go` guards the early return with
+     * `l.platformWriter == nil` and then writes to the platform writer
+     * unconditionally — so under libbox every line reaches us regardless. This
+     * is the gate that keeps a quiet setting quiet.
+     *
+     * Written on the runtime executor under [stateLock], read on libbox
+     * callback threads.
+     */
+    @Volatile
+    private var maxLogLevel: Int = LIBBOX_LEVEL_WARN
+    private var activeOptions = defaultRuntimeOptions()
 
     init {
         // Forward every sing-box log entry to Dart. libbox levels follow
@@ -69,10 +83,55 @@ class SingboxRuntimeManager(
     }
 
     private fun emitLogMessage(level: Int, message: String) {
+        // Ahead of the gate: the wire error this looks for can arrive at any
+        // level, and the explanation it emits is a warning either way.
+        maybeExplainOversizedPackets(message)
+
+        if (level > maxLogLevel) return
+
         emitLogMessage(
             SingboxProxyLogMessage(
                 level = libboxLogLevelName(level),
                 message = message,
+                timestamp = System.currentTimeMillis(),
+                profileId = null
+            )
+        )
+    }
+
+    /** libbox threshold for [level]. See [maxLogLevel]. */
+    private fun libboxLevelThreshold(level: SingboxProxyLogLevel): Int = when (level) {
+        SingboxProxyLogLevel.WARN -> LIBBOX_LEVEL_WARN
+        SingboxProxyLogLevel.INFO -> LIBBOX_LEVEL_INFO
+        SingboxProxyLogLevel.DEBUG -> LIBBOX_LEVEL_DEBUG
+        SingboxProxyLogLevel.TRACE -> LIBBOX_LEVEL_TRACE
+    }
+
+    private fun applyLogLevel(level: SingboxProxyLogLevel) {
+        val threshold = libboxLevelThreshold(level)
+        maxLogLevel = threshold
+        libboxRuntime.setMaxLogLevel(threshold)
+    }
+
+    /**
+     * `sendmsg: message too long` means the encapsulated packet is bigger than
+     * the path to the peer accepts, so every full-size packet is dropped at the
+     * socket while small ones (a DNS query, a handshake) still go through. That
+     * reads as "the tunnel connects but nothing loads", and the wire error says
+     * nothing about the setting that fixes it. Said once per run, next to the
+     * error it explains.
+     */
+    private fun maybeExplainOversizedPackets(message: String) {
+        if (!message.contains(EMSGSIZE_MARKER, ignoreCase = true)) return
+        if (!oversizedPacketsExplained.compareAndSet(false, true)) return
+
+        emitLogMessage(
+            SingboxProxyLogMessage(
+                level = "warn",
+                message = "Packets are too large for this network. Lower the " +
+                    "profile's MTU (1280 is safe almost everywhere; go lower, " +
+                    "around 1200, when this device is already on another VPN) " +
+                    "and restart the profile.",
                 timestamp = System.currentTimeMillis(),
                 profileId = null
             )
@@ -145,8 +204,17 @@ class SingboxRuntimeManager(
                         throw IllegalStateException(message)
                     }
 
+                    // Once per run, and this is where a run begins: the same
+                    // profile started again on a network that still cannot
+                    // carry its packets deserves the hint again.
+                    oversizedPacketsExplained.set(false)
+
                     val previousBootstrapDohUrl = activeOptions.bootstrapDohUrl
+                    val previousLogLevel = activeOptions.logLevel
                     libboxRuntime.setBootstrapDohUrl(options.bootstrapDohUrl)
+                    // Applied before the start so the new level also covers the
+                    // startup lines this very start produces.
+                    applyLogLevel(options.logLevel)
                     val config: SingboxProxyConfigResult
                     try {
                         config = startWithConfigRetries(
@@ -156,6 +224,7 @@ class SingboxRuntimeManager(
                         )
                     } catch (error: Throwable) {
                         libboxRuntime.setBootstrapDohUrl(previousBootstrapDohUrl)
+                        applyLogLevel(previousLogLevel)
                         throw error
                     }
                     // Only commit profiles/options after start() returns without
@@ -357,6 +426,16 @@ class SingboxRuntimeManager(
         preferredBasePort = null,
         blockUnmatchedTraffic = true,
         dnsConfig = null,
-        bootstrapDohUrl = null
+        bootstrapDohUrl = null,
+        logLevel = SingboxProxyLogLevel.WARN
     )
+
+    private companion object {
+        // libbox log levels, from sing/common/logger: lower is more severe.
+        const val LIBBOX_LEVEL_WARN = 3
+        const val LIBBOX_LEVEL_INFO = 4
+        const val LIBBOX_LEVEL_DEBUG = 5
+        const val LIBBOX_LEVEL_TRACE = 6
+        const val EMSGSIZE_MARKER = "message too long"
+    }
 }

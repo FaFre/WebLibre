@@ -10,9 +10,9 @@ import 'package:flutter/services.dart';
 import 'package:meta/meta.dart' show immutable, protected, visibleForTesting;
 
 Object? _extractReplyValueOrThrow(
-    List<Object?>? replyList,
-    String channelName, {
-    required bool isNullValid,
+  List<Object?>? replyList,
+  String channelName, {
+  required bool isNullValid,
 }) {
   if (replyList == null) {
     throw PlatformException(
@@ -34,8 +34,11 @@ Object? _extractReplyValueOrThrow(
   return replyList.firstOrNull;
 }
 
-
-List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty = false}) {
+List<Object?> wrapResponse({
+  Object? result,
+  PlatformException? error,
+  bool empty = false,
+}) {
   if (empty) {
     return <Object?>[];
   }
@@ -44,6 +47,7 @@ List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty
   }
   return <Object?>[error.code, error.message, error.details];
 }
+
 bool _deepEquals(Object? a, Object? b) {
   if (identical(a, b)) {
     return true;
@@ -56,8 +60,9 @@ bool _deepEquals(Object? a, Object? b) {
   }
   if (a is List && b is List) {
     return a.length == b.length &&
-        a.indexed
-            .every(((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]));
+        a.indexed.every(
+          ((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]),
+        );
   }
   if (a is Map && b is Map) {
     if (a.length != b.length) {
@@ -106,7 +111,6 @@ int _deepHash(Object? value) {
   return value.hashCode;
 }
 
-
 enum SingboxProxyProfileType {
   socks,
   http,
@@ -125,13 +129,18 @@ enum SingboxProxyProfileType {
   customOutbound,
 }
 
-enum SingboxProxyRuntimeStatus {
-  stopped,
-  starting,
-  running,
-  stopping,
-  error,
-}
+enum SingboxProxyRuntimeStatus { stopped, starting, running, stopping, error }
+
+/// sing-box `log.level` for the generated runtime config.
+///
+/// Only the levels worth offering: everything below [warn] hides errors the
+/// user needs, and everything above [trace] does not exist. [warn] is the
+/// operating default — sing-box logs one or two lines per *connection* at
+/// [info] and above (`protocol/socks/inbound.go`, `dns/client_log.go`,
+/// `protocol/wireguard/endpoint.go`), and every one of those crosses to Dart
+/// over the platform channel on the main thread, so the verbose levels are for
+/// a diagnostic session and not for normal browsing.
+enum SingboxProxyLogLevel { warn, info, debug, trace }
 
 class SingboxProxyProfile {
   SingboxProxyProfile({
@@ -157,17 +166,12 @@ class SingboxProxyProfile {
   String? secretJson;
 
   List<Object?> _toList() {
-    return <Object?>[
-      id,
-      name,
-      type,
-      configJson,
-      secretJson,
-    ];
+    return <Object?>[id, name, type, configJson, secretJson];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static SingboxProxyProfile decode(Object result) {
     result as List<Object?>;
@@ -189,7 +193,11 @@ class SingboxProxyProfile {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(id, other.id) && _deepEquals(name, other.name) && _deepEquals(type, other.type) && _deepEquals(configJson, other.configJson) && _deepEquals(secretJson, other.secretJson);
+    return _deepEquals(id, other.id) &&
+        _deepEquals(name, other.name) &&
+        _deepEquals(type, other.type) &&
+        _deepEquals(configJson, other.configJson) &&
+        _deepEquals(secretJson, other.secretJson);
   }
 
   @override
@@ -208,6 +216,7 @@ class SingboxProxyRuntimeOptions {
     this.blockUnmatchedTraffic = true,
     this.dnsConfig,
     this.bootstrapDohUrl,
+    this.logLevel = SingboxProxyLogLevel.warn,
   });
 
   /// Optional preferred start port for generated local SOCKS inbounds.
@@ -229,17 +238,23 @@ class SingboxProxyRuntimeOptions {
   /// broken on Android. Callers should always pass the browser DoH URL.
   String? bootstrapDohUrl;
 
+  /// Verbosity of the generated config's `log` block. Defaults to
+  /// [SingboxProxyLogLevel.warn]; raise it only for a diagnostic session.
+  SingboxProxyLogLevel logLevel;
+
   List<Object?> _toList() {
     return <Object?>[
       preferredBasePort,
       blockUnmatchedTraffic,
       dnsConfig,
       bootstrapDohUrl,
+      logLevel,
     ];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static SingboxProxyRuntimeOptions decode(Object result) {
     result as List<Object?>;
@@ -248,19 +263,25 @@ class SingboxProxyRuntimeOptions {
       blockUnmatchedTraffic: result[1]! as bool,
       dnsConfig: result[2] as SingboxProxyDnsConfig?,
       bootstrapDohUrl: result[3] as String?,
+      logLevel: result[4]! as SingboxProxyLogLevel,
     );
   }
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! SingboxProxyRuntimeOptions || other.runtimeType != runtimeType) {
+    if (other is! SingboxProxyRuntimeOptions ||
+        other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(preferredBasePort, other.preferredBasePort) && _deepEquals(blockUnmatchedTraffic, other.blockUnmatchedTraffic) && _deepEquals(dnsConfig, other.dnsConfig) && _deepEquals(bootstrapDohUrl, other.bootstrapDohUrl);
+    return _deepEquals(preferredBasePort, other.preferredBasePort) &&
+        _deepEquals(blockUnmatchedTraffic, other.blockUnmatchedTraffic) &&
+        _deepEquals(dnsConfig, other.dnsConfig) &&
+        _deepEquals(bootstrapDohUrl, other.bootstrapDohUrl) &&
+        _deepEquals(logLevel, other.logLevel);
   }
 
   @override
@@ -269,7 +290,7 @@ class SingboxProxyRuntimeOptions {
 
   @override
   String toString() {
-    return 'SingboxProxyRuntimeOptions(preferredBasePort: $preferredBasePort, blockUnmatchedTraffic: $blockUnmatchedTraffic, dnsConfig: $dnsConfig, bootstrapDohUrl: $bootstrapDohUrl)';
+    return 'SingboxProxyRuntimeOptions(preferredBasePort: $preferredBasePort, blockUnmatchedTraffic: $blockUnmatchedTraffic, dnsConfig: $dnsConfig, bootstrapDohUrl: $bootstrapDohUrl, logLevel: $logLevel)';
   }
 }
 
@@ -331,7 +352,8 @@ class SingboxProxyDnsServerConfig {
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static SingboxProxyDnsServerConfig decode(Object result) {
     result as List<Object?>;
@@ -349,13 +371,20 @@ class SingboxProxyDnsServerConfig {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! SingboxProxyDnsServerConfig || other.runtimeType != runtimeType) {
+    if (other is! SingboxProxyDnsServerConfig ||
+        other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(tag, other.tag) && _deepEquals(address, other.address) && _deepEquals(detourTag, other.detourTag) && _deepEquals(matchDomainSuffixes, other.matchDomainSuffixes) && _deepEquals(matchGeosites, other.matchGeosites) && _deepEquals(matchOutbounds, other.matchOutbounds) && _deepEquals(matchInbounds, other.matchInbounds);
+    return _deepEquals(tag, other.tag) &&
+        _deepEquals(address, other.address) &&
+        _deepEquals(detourTag, other.detourTag) &&
+        _deepEquals(matchDomainSuffixes, other.matchDomainSuffixes) &&
+        _deepEquals(matchGeosites, other.matchGeosites) &&
+        _deepEquals(matchOutbounds, other.matchOutbounds) &&
+        _deepEquals(matchInbounds, other.matchInbounds);
   }
 
   @override
@@ -385,20 +414,18 @@ class SingboxProxyDnsConfig {
   String domainStrategy;
 
   List<Object?> _toList() {
-    return <Object?>[
-      servers,
-      finalServerTag,
-      domainStrategy,
-    ];
+    return <Object?>[servers, finalServerTag, domainStrategy];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static SingboxProxyDnsConfig decode(Object result) {
     result as List<Object?>;
     return SingboxProxyDnsConfig(
-      servers: (result[0]! as List<Object?>).cast<SingboxProxyDnsServerConfig>(),
+      servers: (result[0]! as List<Object?>)
+          .cast<SingboxProxyDnsServerConfig>(),
       finalServerTag: result[1] as String?,
       domainStrategy: result[2]! as String,
     );
@@ -413,7 +440,9 @@ class SingboxProxyDnsConfig {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(servers, other.servers) && _deepEquals(finalServerTag, other.finalServerTag) && _deepEquals(domainStrategy, other.domainStrategy);
+    return _deepEquals(servers, other.servers) &&
+        _deepEquals(finalServerTag, other.finalServerTag) &&
+        _deepEquals(domainStrategy, other.domainStrategy);
   }
 
   @override
@@ -446,17 +475,12 @@ class SingboxProxyRuntimeEndpoint {
   String password;
 
   List<Object?> _toList() {
-    return <Object?>[
-      profileId,
-      host,
-      port,
-      username,
-      password,
-    ];
+    return <Object?>[profileId, host, port, username, password];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static SingboxProxyRuntimeEndpoint decode(Object result) {
     result as List<Object?>;
@@ -472,13 +496,18 @@ class SingboxProxyRuntimeEndpoint {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! SingboxProxyRuntimeEndpoint || other.runtimeType != runtimeType) {
+    if (other is! SingboxProxyRuntimeEndpoint ||
+        other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(profileId, other.profileId) && _deepEquals(host, other.host) && _deepEquals(port, other.port) && _deepEquals(username, other.username) && _deepEquals(password, other.password);
+    return _deepEquals(profileId, other.profileId) &&
+        _deepEquals(host, other.host) &&
+        _deepEquals(port, other.port) &&
+        _deepEquals(username, other.username) &&
+        _deepEquals(password, other.password);
   }
 
   @override
@@ -505,21 +534,19 @@ class SingboxProxyRuntimeState {
   String? message;
 
   List<Object?> _toList() {
-    return <Object?>[
-      status,
-      endpoints,
-      message,
-    ];
+    return <Object?>[status, endpoints, message];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static SingboxProxyRuntimeState decode(Object result) {
     result as List<Object?>;
     return SingboxProxyRuntimeState(
       status: result[0]! as SingboxProxyRuntimeStatus,
-      endpoints: (result[1]! as List<Object?>).cast<SingboxProxyRuntimeEndpoint>(),
+      endpoints: (result[1]! as List<Object?>)
+          .cast<SingboxProxyRuntimeEndpoint>(),
       message: result[2] as String?,
     );
   }
@@ -527,13 +554,16 @@ class SingboxProxyRuntimeState {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! SingboxProxyRuntimeState || other.runtimeType != runtimeType) {
+    if (other is! SingboxProxyRuntimeState ||
+        other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(status, other.status) && _deepEquals(endpoints, other.endpoints) && _deepEquals(message, other.message);
+    return _deepEquals(status, other.status) &&
+        _deepEquals(endpoints, other.endpoints) &&
+        _deepEquals(message, other.message);
   }
 
   @override
@@ -547,43 +577,41 @@ class SingboxProxyRuntimeState {
 }
 
 class SingboxProxyConfigResult {
-  SingboxProxyConfigResult({
-    required this.configJson,
-    required this.endpoints,
-  });
+  SingboxProxyConfigResult({required this.configJson, required this.endpoints});
 
   String configJson;
 
   List<SingboxProxyRuntimeEndpoint> endpoints;
 
   List<Object?> _toList() {
-    return <Object?>[
-      configJson,
-      endpoints,
-    ];
+    return <Object?>[configJson, endpoints];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static SingboxProxyConfigResult decode(Object result) {
     result as List<Object?>;
     return SingboxProxyConfigResult(
       configJson: result[0]! as String,
-      endpoints: (result[1]! as List<Object?>).cast<SingboxProxyRuntimeEndpoint>(),
+      endpoints: (result[1]! as List<Object?>)
+          .cast<SingboxProxyRuntimeEndpoint>(),
     );
   }
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! SingboxProxyConfigResult || other.runtimeType != runtimeType) {
+    if (other is! SingboxProxyConfigResult ||
+        other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(configJson, other.configJson) && _deepEquals(endpoints, other.endpoints);
+    return _deepEquals(configJson, other.configJson) &&
+        _deepEquals(endpoints, other.endpoints);
   }
 
   @override
@@ -613,16 +641,12 @@ class SingboxProxyLogMessage {
   String? profileId;
 
   List<Object?> _toList() {
-    return <Object?>[
-      level,
-      message,
-      timestamp,
-      profileId,
-    ];
+    return <Object?>[level, message, timestamp, profileId];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static SingboxProxyLogMessage decode(Object result) {
     result as List<Object?>;
@@ -643,7 +667,10 @@ class SingboxProxyLogMessage {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(level, other.level) && _deepEquals(message, other.message) && _deepEquals(timestamp, other.timestamp) && _deepEquals(profileId, other.profileId);
+    return _deepEquals(level, other.level) &&
+        _deepEquals(message, other.message) &&
+        _deepEquals(timestamp, other.timestamp) &&
+        _deepEquals(profileId, other.profileId);
   }
 
   @override
@@ -656,7 +683,6 @@ class SingboxProxyLogMessage {
   }
 }
 
-
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
   @override
@@ -664,35 +690,38 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    }    else if (value is SingboxProxyProfileType) {
+    } else if (value is SingboxProxyProfileType) {
       buffer.putUint8(129);
       writeValue(buffer, value.index);
-    }    else if (value is SingboxProxyRuntimeStatus) {
+    } else if (value is SingboxProxyRuntimeStatus) {
       buffer.putUint8(130);
       writeValue(buffer, value.index);
-    }    else if (value is SingboxProxyProfile) {
+    } else if (value is SingboxProxyLogLevel) {
       buffer.putUint8(131);
-      writeValue(buffer, value.encode());
-    }    else if (value is SingboxProxyRuntimeOptions) {
+      writeValue(buffer, value.index);
+    } else if (value is SingboxProxyProfile) {
       buffer.putUint8(132);
       writeValue(buffer, value.encode());
-    }    else if (value is SingboxProxyDnsServerConfig) {
+    } else if (value is SingboxProxyRuntimeOptions) {
       buffer.putUint8(133);
       writeValue(buffer, value.encode());
-    }    else if (value is SingboxProxyDnsConfig) {
+    } else if (value is SingboxProxyDnsServerConfig) {
       buffer.putUint8(134);
       writeValue(buffer, value.encode());
-    }    else if (value is SingboxProxyRuntimeEndpoint) {
+    } else if (value is SingboxProxyDnsConfig) {
       buffer.putUint8(135);
       writeValue(buffer, value.encode());
-    }    else if (value is SingboxProxyRuntimeState) {
+    } else if (value is SingboxProxyRuntimeEndpoint) {
       buffer.putUint8(136);
       writeValue(buffer, value.encode());
-    }    else if (value is SingboxProxyConfigResult) {
+    } else if (value is SingboxProxyRuntimeState) {
       buffer.putUint8(137);
       writeValue(buffer, value.encode());
-    }    else if (value is SingboxProxyLogMessage) {
+    } else if (value is SingboxProxyConfigResult) {
       buffer.putUint8(138);
+      writeValue(buffer, value.encode());
+    } else if (value is SingboxProxyLogMessage) {
+      buffer.putUint8(139);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -709,20 +738,23 @@ class _PigeonCodec extends StandardMessageCodec {
         final value = readValue(buffer) as int?;
         return value == null ? null : SingboxProxyRuntimeStatus.values[value];
       case 131:
-        return SingboxProxyProfile.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : SingboxProxyLogLevel.values[value];
       case 132:
-        return SingboxProxyRuntimeOptions.decode(readValue(buffer)!);
+        return SingboxProxyProfile.decode(readValue(buffer)!);
       case 133:
-        return SingboxProxyDnsServerConfig.decode(readValue(buffer)!);
+        return SingboxProxyRuntimeOptions.decode(readValue(buffer)!);
       case 134:
-        return SingboxProxyDnsConfig.decode(readValue(buffer)!);
+        return SingboxProxyDnsServerConfig.decode(readValue(buffer)!);
       case 135:
-        return SingboxProxyRuntimeEndpoint.decode(readValue(buffer)!);
+        return SingboxProxyDnsConfig.decode(readValue(buffer)!);
       case 136:
-        return SingboxProxyRuntimeState.decode(readValue(buffer)!);
+        return SingboxProxyRuntimeEndpoint.decode(readValue(buffer)!);
       case 137:
-        return SingboxProxyConfigResult.decode(readValue(buffer)!);
+        return SingboxProxyRuntimeState.decode(readValue(buffer)!);
       case 138:
+        return SingboxProxyConfigResult.decode(readValue(buffer)!);
+      case 139:
         return SingboxProxyLogMessage.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -734,9 +766,13 @@ class SingboxProxyApi {
   /// Constructor for [SingboxProxyApi]. The [binaryMessenger] named argument is
   /// available for dependency injection. If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  SingboxProxyApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  SingboxProxyApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
   final BinaryMessenger? pigeonVar_binaryMessenger;
 
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
@@ -744,82 +780,97 @@ class SingboxProxyApi {
   final String pigeonVar_messageChannelSuffix;
 
   Future<String?> validateProfile(SingboxProxyProfile profile) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyApi.validateProfile$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyApi.validateProfile$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[profile]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[profile],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: true,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
     return pigeonVar_replyValue as String?;
   }
 
-  Future<SingboxProxyConfigResult> buildConfig(List<SingboxProxyProfile> profiles, SingboxProxyRuntimeOptions options) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyApi.buildConfig$pigeonVar_messageChannelSuffix';
+  Future<SingboxProxyConfigResult> buildConfig(
+    List<SingboxProxyProfile> profiles,
+    SingboxProxyRuntimeOptions options,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyApi.buildConfig$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[profiles, options]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[profiles, options],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as SingboxProxyConfigResult;
   }
 
-  Future<SingboxProxyRuntimeState> start(List<SingboxProxyProfile> profiles, SingboxProxyRuntimeOptions options) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyApi.start$pigeonVar_messageChannelSuffix';
+  Future<SingboxProxyRuntimeState> start(
+    List<SingboxProxyProfile> profiles,
+    SingboxProxyRuntimeOptions options,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyApi.start$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[profiles, options]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[profiles, options],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as SingboxProxyRuntimeState;
   }
 
   Future<void> stop(List<String> profileIds) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyApi.stop$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyApi.stop$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[profileIds]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[profileIds],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: true,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
   }
 
   Future<void> stopAll() async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyApi.stopAll$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyApi.stopAll$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -829,15 +880,15 @@ class SingboxProxyApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: true,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
   }
 
   Future<SingboxProxyRuntimeState> getState() async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyApi.getState$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyApi.getState$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -847,11 +898,10 @@ class SingboxProxyApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as SingboxProxyRuntimeState;
   }
 }
@@ -863,46 +913,62 @@ abstract class SingboxProxyEventsApi {
 
   void onLogMessage(SingboxProxyLogMessage message);
 
-  static void setUp(SingboxProxyEventsApi? api, {BinaryMessenger? binaryMessenger, String messageChannelSuffix = '',}) {
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  static void setUp(
+    SingboxProxyEventsApi? api, {
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty
+        ? '.$messageChannelSuffix'
+        : '';
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyEventsApi.onStateChanged$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+        'dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyEventsApi.onStateChanged$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
           final List<Object?> args = message! as List<Object?>;
-          final SingboxProxyRuntimeState arg_state = args[0]! as SingboxProxyRuntimeState;
+          final SingboxProxyRuntimeState arg_state =
+              args[0]! as SingboxProxyRuntimeState;
           try {
             api.onStateChanged(arg_state);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }
     }
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyEventsApi.onLogMessage$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+        'dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyEventsApi.onLogMessage$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
         pigeonVar_channel.setMessageHandler((Object? message) async {
           final List<Object?> args = message! as List<Object?>;
-          final SingboxProxyLogMessage arg_message = args[0]! as SingboxProxyLogMessage;
+          final SingboxProxyLogMessage arg_message =
+              args[0]! as SingboxProxyLogMessage;
           try {
             api.onLogMessage(arg_message);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }

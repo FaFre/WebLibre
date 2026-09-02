@@ -19,9 +19,11 @@
  */
 import 'dart:async';
 
+import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/proxy/data/models/singbox_proxy_profile.dart';
 import 'package:weblibre/features/proxy/domain/repositories/container_proxy.dart';
@@ -29,6 +31,8 @@ import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profil
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
 import 'package:weblibre/features/proxy/domain/services/container_routing_snapshot.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_pref_baseline.dart';
+import 'package:weblibre/features/proxy/domain/services/proxy_start_expectation.dart';
+import 'package:weblibre/features/tor/domain/extensions/tor_status_x.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/domain/repositories/proxy_routing_settings.dart';
 
@@ -61,7 +65,11 @@ const _readinessProbeInterval = Duration(seconds: 30);
 /// Proxy *endpoints* are deliberately not waited on. A relation whose backend
 /// is not running yet stays in the snapshot with no matching endpoint, which
 /// the extension blocks — so a slow Tor bootstrap costs the containers that use
-/// Tor their connectivity, not the whole browser its routing.
+/// Tor their connectivity, not the whole browser its routing. What the snapshot
+/// does carry is whether such an endpoint is still *coming*
+/// ([ProxyStartExpectation]), which is the difference between blocking a
+/// container and holding its requests for the second it takes its backend to
+/// finish starting.
 ///
 /// Waiting forever is a different matter: see [containerRoutingInputProviders].
 @Riverpod(keepAlive: true)
@@ -74,11 +82,48 @@ ContainerRoutingSnapshot? containerRoutingSnapshot(Ref ref) {
   final strictContexts = ref.watch(watchStrictContextAssignmentsProvider);
   final siteAssignments = ref.watch(watchAllAssignedSitesProvider);
 
-  if (!routingSettings.hasValue ||
-      !containers.hasValue ||
-      !isolationContexts.hasValue ||
-      !strictContexts.hasValue ||
-      !siteAssignments.hasValue) {
+  final inputs = <String, AsyncValue<Object?>>{
+    _routingSettingsInput: routingSettings,
+    _containersInput: containers,
+    _isolationContextsInput: isolationContexts,
+    _strictContextsInput: strictContexts,
+    _siteAssignmentsInput: siteAssignments,
+  };
+
+  final unresolved = [
+    for (final entry in inputs.entries)
+      if (!entry.value.hasValue) entry,
+  ];
+
+  if (unresolved.isNotEmpty) {
+    // Trace every change in the unresolved set. A gate that logs this once and
+    // never again is not waiting on its inputs — it is not being recomputed at
+    // all, which is a wiring fault rather than a database one, and the two look
+    // identical from the recovery timer.
+    final signature = unresolved.map((entry) => entry.key).join(',');
+    if (signature != _lastUnresolvedSignature) {
+      _lastUnresolvedSignature = signature;
+      logger.d('Container routing gate still waiting on: $signature');
+    }
+
+    // An input that *errored* is the one failure here that never resolves on
+    // its own, and it is otherwise completely silent: the error leaves
+    // `hasValue` false, this returns null, and `ProviderObserver.providerDidFail`
+    // only reports build failures, not errors a stream emits. Without this the
+    // symptom is a browser that blocks every request with nothing in the log
+    // saying why.
+    for (final entry in unresolved) {
+      final value = entry.value;
+      if (value.hasError) {
+        logger.e(
+          'Container routing input "${entry.key}" failed; until it produces a '
+          'value the extension blocks every request',
+          error: value.error,
+          stackTrace: value.stackTrace,
+        );
+      }
+    }
+
     return null;
   }
 
@@ -89,16 +134,30 @@ ContainerRoutingSnapshot? containerRoutingSnapshot(Ref ref) {
     proxyRoutingSettingsWithDefaultsProvider,
   );
 
+  final singboxRuntime = ref.watch(singboxProxyRuntimeRepositoryProvider).value;
+
   return computeContainerRoutingSnapshot(
-    torSocksPort: ref.watch(torProxyServiceProvider).value?.socksPort,
+    // `usableSocksPort`, not the raw port: Tor publishes one long before its
+    // bootstrap reaches 100%, and an endpoint in the snapshot is a promise that
+    // traffic sent there will be carried. Publishing it early would also end
+    // the extension's wait — the relation would resolve to a live proxy — and
+    // spend it on a port that cannot answer yet.
+    torSocksPort: ref.watch(torProxyServiceProvider).usableSocksPort,
+    // Endpoints only while the runtime says it is running. A stopped, stopping
+    // or errored runtime can still be carrying the addresses of its last run,
+    // and those name loopback ports nothing owns any more — or that something
+    // else has since taken. Dropping them blocks the relation instead, which is
+    // the fail-closed answer.
     singboxEndpoints:
-        ref.watch(singboxProxyRuntimeRepositoryProvider).value?.endpoints ??
-        const [],
+        singboxRuntime?.status == SingboxProxyRuntimeStatus.running
+        ? singboxRuntime!.endpoints
+        : const [],
     singboxProfileNames: {
       for (final profile in singboxProfiles)
         profile.proxyConnectionId: profile.name,
     },
     routingSettings: resolvedRoutingSettings,
+    startExpectation: ref.watch(proxyStartExpectationProvider),
     // Carried by the same settings partition as the rest of routing, so it is
     // already covered by the gate above.
     isolationContextRoutes: resolvedRoutingSettings.isolationContextRoutes,
@@ -127,6 +186,31 @@ final containerRoutingInputProviders = <ProviderOrFamily>[
   watchIsolatedContextContainerMapProvider,
   watchStrictContextAssignmentsProvider,
   watchAllAssignedSitesProvider,
+];
+
+/// Last set of unresolved inputs reported, so the trace only fires on change.
+String? _lastUnresolvedSignature;
+
+const _routingSettingsInput = 'proxyRoutingSettings';
+const _containersInput = 'containers';
+const _isolationContextsInput = 'isolationContexts';
+const _strictContextsInput = 'strictContexts';
+const _siteAssignmentsInput = 'siteAssignments';
+
+/// Which gate inputs have still not produced a value.
+///
+/// Reads rather than watches: [containerRoutingSnapshot] already subscribes
+/// every one of these whenever this is called, so this only samples what is
+/// there and adds no dependency of its own.
+List<String> unresolvedContainerRoutingInputs(Ref ref) => [
+  if (!ref.read(proxyRoutingSettingsRepositoryProvider).hasValue)
+    _routingSettingsInput,
+  if (!ref.read(watchContainersWithCountProvider).hasValue) _containersInput,
+  if (!ref.read(watchIsolatedContextContainerMapProvider).hasValue)
+    _isolationContextsInput,
+  if (!ref.read(watchStrictContextAssignmentsProvider).hasValue)
+    _strictContextsInput,
+  if (!ref.read(watchAllAssignedSitesProvider).hasValue) _siteAssignmentsInput,
 ];
 
 /// How long the inputs may stay unresolved before they are re-created.
@@ -217,7 +301,8 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
 
       logger.e(
         'Container routing inputs have not resolved after ${delay.inSeconds}s; '
-        'all traffic is blocked. Re-creating them.',
+        'all traffic is blocked. Still unresolved: '
+        '${unresolvedContainerRoutingInputs(ref).join(', ')}. Re-creating them.',
       );
 
       for (final provider in containerRoutingInputProviders) {

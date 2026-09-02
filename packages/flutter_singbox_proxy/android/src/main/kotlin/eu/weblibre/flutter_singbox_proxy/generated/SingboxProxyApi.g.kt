@@ -233,6 +233,30 @@ enum class SingboxProxyRuntimeStatus(val raw: Int) {
   }
 }
 
+/**
+ * sing-box `log.level` for the generated runtime config.
+ *
+ * Only the levels worth offering: everything below [warn] hides errors the
+ * user needs, and everything above [trace] does not exist. [warn] is the
+ * operating default — sing-box logs one or two lines per *connection* at
+ * [info] and above (`protocol/socks/inbound.go`, `dns/client_log.go`,
+ * `protocol/wireguard/endpoint.go`), and every one of those crosses to Dart
+ * over the platform channel on the main thread, so the verbose levels are for
+ * a diagnostic session and not for normal browsing.
+ */
+enum class SingboxProxyLogLevel(val raw: Int) {
+  WARN(0),
+  INFO(1),
+  DEBUG(2),
+  TRACE(3);
+
+  companion object {
+    fun ofRaw(raw: Int): SingboxProxyLogLevel? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
 /** Generated class from Pigeon that represents data sent in messages. */
 data class SingboxProxyProfile (
   val id: String,
@@ -316,7 +340,12 @@ data class SingboxProxyRuntimeOptions (
    * sing-box's stock `/etc/resolv.conf`/127.0.0.1:53 path runs — which is
    * broken on Android. Callers should always pass the browser DoH URL.
    */
-  val bootstrapDohUrl: String? = null
+  val bootstrapDohUrl: String? = null,
+  /**
+   * Verbosity of the generated config's `log` block. Defaults to
+   * [SingboxProxyLogLevel.warn]; raise it only for a diagnostic session.
+   */
+  val logLevel: SingboxProxyLogLevel
 )
  {
   companion object {
@@ -325,7 +354,8 @@ data class SingboxProxyRuntimeOptions (
       val blockUnmatchedTraffic = pigeonVar_list[1] as Boolean
       val dnsConfig = pigeonVar_list[2] as SingboxProxyDnsConfig?
       val bootstrapDohUrl = pigeonVar_list[3] as String?
-      return SingboxProxyRuntimeOptions(preferredBasePort, blockUnmatchedTraffic, dnsConfig, bootstrapDohUrl)
+      val logLevel = pigeonVar_list[4] as SingboxProxyLogLevel
+      return SingboxProxyRuntimeOptions(preferredBasePort, blockUnmatchedTraffic, dnsConfig, bootstrapDohUrl, logLevel)
     }
   }
   fun toList(): List<Any?> {
@@ -334,6 +364,7 @@ data class SingboxProxyRuntimeOptions (
       blockUnmatchedTraffic,
       dnsConfig,
       bootstrapDohUrl,
+      logLevel,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -344,7 +375,7 @@ data class SingboxProxyRuntimeOptions (
       return true
     }
     val other = other as SingboxProxyRuntimeOptions
-    return SingboxProxyApiPigeonUtils.deepEquals(this.preferredBasePort, other.preferredBasePort) && SingboxProxyApiPigeonUtils.deepEquals(this.blockUnmatchedTraffic, other.blockUnmatchedTraffic) && SingboxProxyApiPigeonUtils.deepEquals(this.dnsConfig, other.dnsConfig) && SingboxProxyApiPigeonUtils.deepEquals(this.bootstrapDohUrl, other.bootstrapDohUrl)
+    return SingboxProxyApiPigeonUtils.deepEquals(this.preferredBasePort, other.preferredBasePort) && SingboxProxyApiPigeonUtils.deepEquals(this.blockUnmatchedTraffic, other.blockUnmatchedTraffic) && SingboxProxyApiPigeonUtils.deepEquals(this.dnsConfig, other.dnsConfig) && SingboxProxyApiPigeonUtils.deepEquals(this.bootstrapDohUrl, other.bootstrapDohUrl) && SingboxProxyApiPigeonUtils.deepEquals(this.logLevel, other.logLevel)
   }
 
   override fun hashCode(): Int {
@@ -353,10 +384,11 @@ data class SingboxProxyRuntimeOptions (
     result = 31 * result + SingboxProxyApiPigeonUtils.deepHash(this.blockUnmatchedTraffic)
     result = 31 * result + SingboxProxyApiPigeonUtils.deepHash(this.dnsConfig)
     result = 31 * result + SingboxProxyApiPigeonUtils.deepHash(this.bootstrapDohUrl)
+    result = 31 * result + SingboxProxyApiPigeonUtils.deepHash(this.logLevel)
     return result
   }
   override fun toString(): String {
-    return "SingboxProxyRuntimeOptions(preferredBasePort=$preferredBasePort, blockUnmatchedTraffic=$blockUnmatchedTraffic, dnsConfig=$dnsConfig, bootstrapDohUrl=$bootstrapDohUrl)"
+    return "SingboxProxyRuntimeOptions(preferredBasePort=$preferredBasePort, blockUnmatchedTraffic=$blockUnmatchedTraffic, dnsConfig=$dnsConfig, bootstrapDohUrl=$bootstrapDohUrl, logLevel=$logLevel)"
   }
 }
 
@@ -702,41 +734,46 @@ private open class SingboxProxyApiPigeonCodec : StandardMessageCodec() {
         }
       }
       131.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          SingboxProxyProfile.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          SingboxProxyLogLevel.ofRaw(it.toInt())
         }
       }
       132.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SingboxProxyRuntimeOptions.fromList(it)
+          SingboxProxyProfile.fromList(it)
         }
       }
       133.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SingboxProxyDnsServerConfig.fromList(it)
+          SingboxProxyRuntimeOptions.fromList(it)
         }
       }
       134.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SingboxProxyDnsConfig.fromList(it)
+          SingboxProxyDnsServerConfig.fromList(it)
         }
       }
       135.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SingboxProxyRuntimeEndpoint.fromList(it)
+          SingboxProxyDnsConfig.fromList(it)
         }
       }
       136.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SingboxProxyRuntimeState.fromList(it)
+          SingboxProxyRuntimeEndpoint.fromList(it)
         }
       }
       137.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SingboxProxyConfigResult.fromList(it)
+          SingboxProxyRuntimeState.fromList(it)
         }
       }
       138.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          SingboxProxyConfigResult.fromList(it)
+        }
+      }
+      139.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           SingboxProxyLogMessage.fromList(it)
         }
@@ -754,36 +791,40 @@ private open class SingboxProxyApiPigeonCodec : StandardMessageCodec() {
         stream.write(130)
         writeValue(stream, value.raw.toLong())
       }
-      is SingboxProxyProfile -> {
+      is SingboxProxyLogLevel -> {
         stream.write(131)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is SingboxProxyRuntimeOptions -> {
+      is SingboxProxyProfile -> {
         stream.write(132)
         writeValue(stream, value.toList())
       }
-      is SingboxProxyDnsServerConfig -> {
+      is SingboxProxyRuntimeOptions -> {
         stream.write(133)
         writeValue(stream, value.toList())
       }
-      is SingboxProxyDnsConfig -> {
+      is SingboxProxyDnsServerConfig -> {
         stream.write(134)
         writeValue(stream, value.toList())
       }
-      is SingboxProxyRuntimeEndpoint -> {
+      is SingboxProxyDnsConfig -> {
         stream.write(135)
         writeValue(stream, value.toList())
       }
-      is SingboxProxyRuntimeState -> {
+      is SingboxProxyRuntimeEndpoint -> {
         stream.write(136)
         writeValue(stream, value.toList())
       }
-      is SingboxProxyConfigResult -> {
+      is SingboxProxyRuntimeState -> {
         stream.write(137)
         writeValue(stream, value.toList())
       }
-      is SingboxProxyLogMessage -> {
+      is SingboxProxyConfigResult -> {
         stream.write(138)
+        writeValue(stream, value.toList())
+      }
+      is SingboxProxyLogMessage -> {
+        stream.write(139)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)

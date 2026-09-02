@@ -10,8 +10,14 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import org.json.JSONObject
 
 class ContainerProxyFeatureTest {
@@ -265,6 +271,53 @@ class ContainerProxyFeatureTest {
     }
 
     /**
+     * A seed carries relations but no endpoints, so every context it routes
+     * through a proxy resolves to "blocked". In a process whose app half is
+     * about to push the live routing that is a startup window, not a decision,
+     * and the extension is told so it can hold those requests for the push
+     * instead of turning the first page load into a proxy error page.
+     */
+    @Test
+    fun aSeedInstalledWhereTheAppWillPushIsMarkedProvisional() {
+        ContainerProxyFeature.installPersistedRouting(
+            seed(),
+            profileChanged = false,
+            expectsAppPush = true,
+        )
+
+        ContainerProxyFeature.onPortConnected()
+        awaitMessages(1)
+
+        assertTrue(
+            messageAt(0).getJSONObject("args").getBoolean("provisional"),
+            "the extension must know a live push is following this seed",
+        )
+    }
+
+    /**
+     * The headless paths have no app half, so the seed is all the routing that
+     * process is ever going to get. Waiting for a push that cannot come could
+     * only delay the same answer.
+     */
+    @Test
+    fun aSeedInstalledWhereNothingWillPushIsFinal() {
+        ContainerProxyFeature.installPersistedRouting(
+            seed(),
+            profileChanged = false,
+            canReopenAssignedSites = false,
+            expectsAppPush = false,
+        )
+
+        ContainerProxyFeature.onPortConnected()
+        awaitMessages(1)
+
+        assertFalse(
+            messageAt(0).getJSONObject("args").getBoolean("provisional"),
+            "nothing follows a seed in a process with no app half",
+        )
+    }
+
+    /**
      * A seed is last-known routing, not routing this process asked for. Counting
      * it as installed would let the gates that wait for routing before opening a
      * proxied tab proceed on it.
@@ -326,6 +379,10 @@ class ContainerProxyFeatureTest {
             "container",
             stored.getJSONObject("relations").getJSONArray("work").getString(0),
             "the relation that decides what to block must survive",
+        )
+        assertFalse(
+            stored.has("provisional"),
+            "whether a start is still expected belongs to the process that pushed it",
         )
     }
 
@@ -446,6 +503,205 @@ class ContainerProxyFeatureTest {
         )
     }
 
+    /**
+     * The verdict a launch decision is made on must never be a snapshot the
+     * extension has not confirmed.
+     *
+     * A push installs the new snapshot and drops the previous acknowledgement,
+     * and the two used to be read from separate fields — so a reader could pair
+     * the just-pushed routing with the *previous* push's confirmation and report
+     * a confident verdict for routing nothing had answered for yet.
+     */
+    @Test
+    fun anUnacknowledgedPushDoesNotInheritTheLastOnesVerdict() {
+        ContainerProxyFeature.applySnapshot(routedSnapshot(1), 1L, noopConsumer())
+        awaitMessages(1)
+        ContainerProxyFeature.onExtensionReply(reply(messageAt(0).getInt("id")))
+
+        assertEquals(
+            RoutingVerdict.LIVE,
+            ContainerProxyFeature.installedRoutingVerdict("work"),
+            "the confirmed snapshot answers for itself",
+        )
+
+        // A second push, deliberately left unanswered: `work` now routes
+        // somewhere with no endpoint, which is a different verdict entirely.
+        ContainerProxyFeature.applySnapshot(snapshot(2), 2L, noopConsumer())
+        awaitMessages(2)
+
+        assertEquals(
+            RoutingVerdict.LIVE,
+            ContainerProxyFeature.installedRoutingVerdict("work"),
+            "an unconfirmed push must not be reported as installed routing",
+        )
+    }
+
+    /**
+     * A background-script restart is a disconnect immediately followed by a
+     * connect, and [replaySnapshot] puts the same routing straight back. To a
+     * caller asking "did the app half come up, and what did it install?" that
+     * gap is noise — and a launch that happened to ask inside one used to be
+     * told UNKNOWN and sent to the ordinary browser.
+     */
+    @Test
+    fun installedRoutingSurvivesAPortDisconnect() {
+        ContainerProxyFeature.applySnapshot(routedSnapshot(1), 1L, noopConsumer())
+        awaitMessages(1)
+        ContainerProxyFeature.onExtensionReply(reply(messageAt(0).getInt("id")))
+
+        ContainerProxyFeature.onPortDisconnected()
+
+        assertEquals(
+            RoutingVerdict.LIVE,
+            ContainerProxyFeature.installedRoutingVerdict("work"),
+            "a transient port drop is not the app half un-installing its routing",
+        )
+    }
+
+    /** A profile switch is: the outgoing profile's routing is not the incoming one's. */
+    @Test
+    fun installedRoutingIsDroppedWhenTheProfileChanges() {
+        ContainerProxyFeature.applySnapshot(routedSnapshot(1), 1L, noopConsumer())
+        awaitMessages(1)
+        ContainerProxyFeature.onExtensionReply(reply(messageAt(0).getInt("id")))
+
+        ContainerProxyFeature.installPersistedRouting(seed(), profileChanged = true)
+
+        assertEquals(
+            RoutingVerdict.UNKNOWN,
+            ContainerProxyFeature.installedRoutingVerdict("work"),
+            "the incoming profile has installed nothing",
+        )
+    }
+
+    /**
+     * The app half dying is not a transient gap: sing-box and Tor run in the
+     * Flutter isolate, so every endpoint in the installed snapshot names a
+     * loopback port nothing is listening on any more. Left installed, the next
+     * Custom Tab or PWA launch reads it as LIVE and is served headlessly into
+     * that dead window.
+     */
+    @Test
+    fun installedRoutingIsDroppedWhenTheAppHalfStops() {
+        ContainerProxyFeature.applySnapshot(routedSnapshot(1), 1L, noopConsumer())
+        awaitMessages(1)
+        ContainerProxyFeature.onExtensionReply(reply(messageAt(0).getInt("id")))
+
+        ContainerProxyFeature.onAppHalfStopped()
+
+        assertEquals(
+            RoutingVerdict.UNKNOWN,
+            ContainerProxyFeature.installedRoutingVerdict("work"),
+            "routing whose backends have stopped describes nothing",
+        )
+        assertNull(
+            ContainerProxyFeature.acknowledgedSnapshotGeneration(),
+            "nothing the extension confirmed to the dead isolate still holds",
+        )
+        assertFalse(
+            ContainerProxyFeature.hasPushedSnapshot(),
+            "a launch must not be patient with a push no live isolate made",
+        )
+    }
+
+    /**
+     * And what the extension gets on its next connect is the seed, not the ports
+     * the isolate that died was listening on.
+     */
+    @Test
+    fun aReconnectAfterTheAppHalfStopsReplaysTheSeedNotTheDeadEndpoints() {
+        ContainerProxyFeature.seedSnapshot = seed()
+        ContainerProxyFeature.applySnapshot(routedSnapshot(1), 1L, noopConsumer())
+        awaitMessages(1)
+        ContainerProxyFeature.onExtensionReply(reply(messageAt(0).getInt("id")))
+
+        ContainerProxyFeature.onAppHalfStopped()
+
+        ContainerProxyFeature.onPortConnected()
+        awaitMessages(2)
+
+        val replayed = messageAt(1).getJSONObject("args")
+        assertEquals(
+            0L,
+            replayed.getLong("generation"),
+            "a reconnect after the backends stopped must send the seed",
+        )
+        assertEquals(
+            0,
+            replayed.getJSONArray("proxies").length(),
+            "and the seed carries no endpoints",
+        )
+    }
+
+    /** A seed is not routing this process asked for, so it answers for nothing. */
+    @Test
+    fun aSeedIsNotInstalledRouting() {
+        ContainerProxyFeature.seedSnapshot = seed()
+
+        ContainerProxyFeature.onPortConnected()
+        awaitMessages(1)
+        ContainerProxyFeature.onExtensionReply(reply(messageAt(0).getInt("id")))
+
+        assertEquals(
+            RoutingVerdict.UNKNOWN,
+            ContainerProxyFeature.installedRoutingVerdict("work"),
+            "a seed carries no endpoints; deciding a launch on it strands proxied PWAs",
+        )
+    }
+
+    /** The wait resumes on the acknowledgement rather than a poll tick. */
+    @Test
+    fun theRoutingWaitResumesOnTheAcknowledgement() = runBlocking {
+        val waiting = async(Dispatchers.Default) {
+            ContainerProxyFeature.awaitInstalledRoutingVerdict("work")
+        }
+
+        ContainerProxyFeature.applySnapshot(routedSnapshot(1), 1L, noopConsumer())
+        awaitMessages(1)
+        ContainerProxyFeature.onExtensionReply(reply(messageAt(0).getInt("id")))
+
+        assertEquals(RoutingVerdict.LIVE, withTimeout(5_000) { waiting.await() })
+    }
+
+    /**
+     * The whole point of a demand: a launch asked for this proxy to be started,
+     * and the routing published before the app half could act on that says
+     * nothing about whether the request will be met. Ending the launch's wait
+     * on it hands the user "this route is blocked" about a backend that is at
+     * that moment being started for them.
+     */
+    @Test
+    fun aBlockedVerdictIsNotAnAnswerWhileADemandIsOutstanding() = runBlocking {
+        val acceptBlocked = java.util.concurrent.atomic.AtomicBoolean(false)
+        val waiting = async(Dispatchers.Default) {
+            ContainerProxyFeature.awaitInstalledRoutingVerdict("work") {
+                acceptBlocked.get()
+            }
+        }
+
+        ContainerProxyFeature.applySnapshot(blockedSnapshot(1), 1L, noopConsumer())
+        awaitMessages(1)
+        ContainerProxyFeature.onExtensionReply(reply(messageAt(0).getInt("id")))
+
+        assertNull(
+            withTimeoutOrNull(250) { waiting.await() },
+            "a block published before the app half could start anything is not an answer",
+        )
+
+        acceptBlocked.set(true)
+        // The wait re-enters on the caller's poll interval; the flow replays its
+        // current value to the new collector, so no further push is needed.
+        val reentered = async(Dispatchers.Default) {
+            ContainerProxyFeature.awaitInstalledRoutingVerdict("work") {
+                acceptBlocked.get()
+            }
+        }
+
+        assertEquals(RoutingVerdict.BLOCKED, withTimeout(5_000) { reentered.await() })
+        waiting.cancel()
+        Unit
+    }
+
     /** Nothing is filed until the extension confirms it holds the routing. */
     @Test
     fun anUnacknowledgedSnapshotIsNotPersisted() {
@@ -455,6 +711,107 @@ class ContainerProxyFeatureTest {
         assertTrue(
             synchronized(persisted) { persisted.isEmpty() },
             "a snapshot that never installed must not become the next start's routing",
+        )
+    }
+
+    /**
+     * The extension outlives the Flutter engine, so dropping our own bookkeeping
+     * is only half of a teardown: left alone its store keeps routing traffic to
+     * loopback ports whose backends died with the isolate, and a freed port can
+     * be taken by anything else on the device.
+     */
+    @Test
+    fun theExtensionIsPutBackOnTheSeedWhenTheAppHalfStops() {
+        ContainerProxyFeature.applySnapshot(routedSnapshot(1), 1L, noopConsumer())
+        awaitMessages(1)
+        ContainerProxyFeature.onExtensionReply(reply(messageAt(0).getInt("id")))
+
+        ContainerProxyFeature.onAppHalfStopped()
+        awaitMessages(2)
+
+        val replacement = messageAt(1).getJSONObject("args")
+        assertEquals(
+            0,
+            replacement.getJSONArray("proxies").length(),
+            "the endpoints the dead isolate opened must not still be routable",
+        )
+        assertFalse(
+            replacement.getBoolean("provisional"),
+            "nothing is going to push over this; a blocked request is answered now",
+        )
+        assertEquals(
+            0,
+            replacement.getJSONObject("siteAssignments").length(),
+            "cancelling a navigation needs the Dart half that reopens it",
+        )
+    }
+
+    /**
+     * A reply the dying isolate's push was still waiting for must not be read as
+     * an answer about the next one's. Dart counts generations from zero in every
+     * isolate, so the number alone cannot tell them apart — and a mismatched
+     * match would report routing installed that the extension never confirmed,
+     * then file it as this profile's seed.
+     */
+    @Test
+    fun aLateAcknowledgementFromTheStoppedAppHalfIsNotTheNewOnesAnswer() {
+        ContainerProxyFeature.applySnapshot(routedSnapshot(0), 0L, noopConsumer())
+        awaitMessages(1)
+        val staleRequestId = messageAt(0).getInt("id")
+
+        ContainerProxyFeature.onAppHalfStopped()
+
+        // A new isolate, counting from zero again.
+        ContainerProxyFeature.applySnapshot(routedSnapshot(0), 0L, noopConsumer())
+
+        ContainerProxyFeature.onExtensionReply(reply(staleRequestId))
+
+        assertEquals(
+            RoutingVerdict.UNKNOWN,
+            ContainerProxyFeature.installedRoutingVerdict("work"),
+            "the extension has not answered the new push yet",
+        )
+        assertTrue(
+            synchronized(persisted) { persisted.isEmpty() },
+            "and nothing it never confirmed may become the next start's routing",
+        )
+    }
+
+    /**
+     * The FxA state machine disconnects the account outright when its startup
+     * call fails, so it waits for routing before touching the network. A process
+     * outlives its app half — latched, the wait would return at once for the
+     * second one and start over endpoints that died with the first.
+     */
+    @Test
+    fun theRoutingWaitStartsOverWhenTheAppHalfStops() = runBlocking {
+        ContainerProxyFeature.applySnapshot(routedSnapshot(1), 1L, noopConsumer())
+        awaitMessages(1)
+        ContainerProxyFeature.onExtensionReply(reply(messageAt(0).getInt("id")))
+
+        assertTrue(
+            ContainerProxyFeature.awaitRoutingInstalled(5_000),
+            "the extension confirmed the push",
+        )
+
+        ContainerProxyFeature.onAppHalfStopped()
+
+        assertFalse(
+            ContainerProxyFeature.awaitRoutingInstalled(100),
+            "the routing that answered for is gone with the isolate that pushed it",
+        )
+
+        val waiting = async(Dispatchers.Default) {
+            ContainerProxyFeature.awaitRoutingInstalled(5_000)
+        }
+
+        ContainerProxyFeature.applySnapshot(routedSnapshot(0), 0L, noopConsumer())
+        awaitMessages(3)
+        ContainerProxyFeature.onExtensionReply(reply(messageAt(2).getInt("id")))
+
+        assertTrue(
+            withTimeout(5_000) { waiting.await() },
+            "and it is answered again by the routing the new half installs",
         )
     }
 
@@ -470,6 +827,13 @@ class ContainerProxyFeatureTest {
      * A snapshot routing the `work` context through a live proxy endpoint, with
      * `example.com` assigned to it and the context marked strict.
      */
+    /** Routes `work` through a proxy with no endpoint and nothing starting it. */
+    private fun blockedSnapshot(generation: Long): JSONObject {
+        return routedSnapshot(generation).apply {
+            put("proxies", org.json.JSONArray())
+        }
+    }
+
     private fun routedSnapshot(generation: Long): JSONObject {
         return JSONObject().apply {
             put("generation", generation)
@@ -496,12 +860,18 @@ class ContainerProxyFeatureTest {
                 "strictContexts",
                 JSONObject().put("work", org.json.JSONArray().put("https://example.com")),
             )
+            // Every app push carries this; whether a *restored* one is
+            // provisional is decided by the process that restores it.
+            put("provisional", true)
         }
     }
 
     /** What [routedSnapshot] looks like after a process restart. */
     private fun seed(): JSONObject {
-        return routedSnapshot(0).apply { put("proxies", org.json.JSONArray()) }
+        return routedSnapshot(0).apply {
+            put("proxies", org.json.JSONArray())
+            remove("provisional")
+        }
     }
 
     private fun reply(requestId: Int): JSONObject {
