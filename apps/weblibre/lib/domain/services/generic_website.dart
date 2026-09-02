@@ -58,11 +58,48 @@ class GenericWebsiteService extends _$GenericWebsiteService {
 
   GenericWebsiteService() : _browserIconCache = LRUCache(50);
 
+  /// The earliest time each origin's on-disk entry may be age-checked again.
+  ///
+  /// [refreshIconIfStale] is called every time a row resolves an icon, and each
+  /// call costs two database reads before it can conclude that a 7-to-30-day
+  /// TTL has not elapsed. Scrolling a list re-asks for the same origins over
+  /// and over, so the answer is remembered — but as a *deadline*, never as a
+  /// "done" flag. A fresh entry is suppressed exactly until its TTL expires,
+  /// and an attempt that wrote nothing (a resolver error, or a "missing" answer
+  /// for an origin that still holds a real icon) is retried after
+  /// [_staleRecheckBackoff]. Remembering "checked" instead would strand such an
+  /// origin on its old icon until the process restarted.
+  final _staleCheckNotBefore = <String, DateTime>{};
+
   @override
   void build() {
     _cacheRepository = ref.watch(cacheRepositoryProvider.notifier);
     _faviconResolver = ref.watch(faviconResolverProvider);
     _iconsService = ref.watch(geckoIconServiceProvider);
+
+    // The decoded-icon cache is keyed by origin with no notion of the row it
+    // came from, so it has to be dropped when that row is rewritten — otherwise
+    // a newly fetched favicon would sit behind the old decode until the entry
+    // happened to be evicted.
+    //
+    // The write paths below populate `_browserIconCache` *after* awaiting the
+    // repository write, and that ordering is what keeps them from being undone
+    // by their own invalidation: the announcement is delivered on a microtask
+    // queued before the awaiting continuation resumes, so the eviction lands
+    // first and the fresh decode survives it. Priming the cache before the
+    // write would silently invert that.
+    final sub = _cacheRepository.iconInvalidations.listen((event) {
+      final origin = event.origin;
+      if (origin == null) {
+        _browserIconCache.clear();
+        _staleCheckNotBefore.clear();
+      } else {
+        _browserIconCache.remove(origin);
+        _staleCheckNotBefore.remove(origin);
+      }
+    });
+
+    ref.onDispose(sub.cancel);
   }
 
   static bool _isHttpUrl(Uri url) => url.isHttpOrHttps;
@@ -206,30 +243,82 @@ class GenericWebsiteService extends _$GenericWebsiteService {
     await _cacheRepository.cacheIconIfAbsent(url, bytes);
   }
 
+  /// Deadlines held by [_staleCheckNotBefore] before it is pruned.
+  static const _maxStaleCheckEntries = 512;
+
+  /// How long to wait before re-checking an origin whose refresh attempt wrote
+  /// nothing.
+  static const _staleRecheckBackoff = Duration(minutes: 30);
+
   static const _iconStaleTtl = Duration(days: 30);
   static const _missingIconStaleTtl = Duration(days: 7);
 
   Future<void> refreshIconIfStale(Uri url) async {
-    if (!_isHttpUrl(url)) return;
-    if (_inFlightIconFetches.containsKey(url.origin)) return;
-
-    final rawIcon = await _cacheRepository.getCachedIconRaw(url.origin);
-    if (rawIcon == null) return;
-
-    final fetchedAt = await _cacheRepository.getCachedIconFetchDate(url.origin);
-    if (fetchedAt == null) return;
-
-    final ttl = _cacheRepository.isMissingIconBytes(rawIcon)
-        ? _missingIconStaleTtl
-        : _iconStaleTtl;
-    if (DateTime.now().difference(fetchedAt) < ttl) return;
+    // Nothing this method does can help an origin the resolver will not serve,
+    // and deciding that is pure — cheaper than the two reads it saves. It also
+    // guarantees the `url.origin` reads below cannot throw, since eligibility
+    // implies an http(s) url with a host.
     if (!_isResolverEligible(url)) return;
 
-    if (!ref.mounted) return;
-    await _resolveIconWithDdg(
-      url,
-      cacheMissing: _cacheRepository.isMissingIconBytes(rawIcon),
+    final origin = url.origin;
+    if (_inFlightIconFetches.containsKey(origin)) return;
+
+    final now = DateTime.now();
+    final notBefore = _staleCheckNotBefore[origin];
+    if (notBefore != null && now.isBefore(notBefore)) return;
+
+    final rawIcon = await _cacheRepository.getCachedIconRaw(origin);
+    final fetchedAt = rawIcon == null
+        ? null
+        : await _cacheRepository.getCachedIconFetchDate(origin);
+
+    if (rawIcon == null || fetchedAt == null) {
+      // Nothing cached to age out. Whatever eventually caches an icon here
+      // announces itself and clears this deadline, so a plain backoff is enough
+      // to stop every scroll pass from re-asking in the meantime.
+      _deferStaleCheck(origin, now.add(_staleRecheckBackoff));
+      return;
+    }
+
+    final isMissing = _cacheRepository.isMissingIconBytes(rawIcon);
+    final expiresAt = fetchedAt.add(
+      isMissing ? _missingIconStaleTtl : _iconStaleTtl,
     );
+
+    if (now.isBefore(expiresAt)) {
+      // Known fresh: there is nothing worth asking again until the TTL runs
+      // out, which is the whole point of remembering a deadline.
+      _deferStaleCheck(origin, expiresAt);
+      return;
+    }
+
+    // Bound the retry rate *before* the attempt. A resolver error, or a
+    // "missing" answer for an origin that still holds a real icon, writes
+    // nothing and therefore announces nothing — without this the next scroll
+    // pass would ask again immediately. A refresh that succeeds does write,
+    // which clears this deadline and lets the next check read the new fetch
+    // date instead.
+    _deferStaleCheck(origin, now.add(_staleRecheckBackoff));
+
+    if (!ref.mounted) return;
+    await _resolveIconWithDdg(url, cacheMissing: isMissing);
+  }
+
+  void _deferStaleCheck(String origin, DateTime notBefore) {
+    if (_staleCheckNotBefore.length >= _maxStaleCheckEntries &&
+        !_staleCheckNotBefore.containsKey(origin)) {
+      // Bounded rather than precise: drop the deadlines that have already
+      // passed, and start over if that frees nothing. Forgetting costs one more
+      // round of checks, whereas growing without limit would not.
+      final now = DateTime.now();
+      _staleCheckNotBefore.removeWhere((_, at) => !now.isBefore(at));
+
+      if (_staleCheckNotBefore.length >= _maxStaleCheckEntries) {
+        _staleCheckNotBefore.clear();
+      }
+    }
+
+    _staleCheckNotBefore[origin] = notBefore;
   }
 
   Future<BrowserIcon?> getUrlIcon(

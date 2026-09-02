@@ -68,14 +68,64 @@ class CacheDao extends DatabaseAccessor<UserDatabase> with $CacheDaoMixin {
     );
   }
 
-  Future<void> cacheIconIfAbsent(String origin, Uint8List bytes) async {
-    final existing = await getCachedIcon(origin).getSingleOrNull();
-    if (existing == null || isMissingIconMarker(existing)) {
+  /// Writes [bytes] for [origin] and reports whether what a reader would
+  /// render actually changed.
+  ///
+  /// `fetch_date` is refreshed either way — it records when the icon was last
+  /// *confirmed*, which is what the staleness check reads — but a
+  /// byte-identical rewrite is not a change anyone above the DAO can observe.
+  /// Gecko re-dispatches a page's favicon on essentially every navigation, so
+  /// reporting each one as a change would drop the decoded icon out of the
+  /// in-memory cache for the very site the user is looking at.
+  Future<bool> cacheIconReportingChange(String origin, Uint8List bytes) {
+    return transaction(() async {
+      final existing = await getCachedIcon(origin).getSingleOrNull();
       await cacheIcon(origin, bytes);
-    }
+      return !_rendersTheSame(existing, bytes);
+    });
   }
 
-  Future<int> cacheMissingIcon(String origin) {
-    return cacheIcon(origin, missingIconMarkerBytes);
+  /// Writes [bytes] only when [origin] has no real icon yet, reporting whether
+  /// that changed what a reader would render.
+  Future<bool> cacheIconIfAbsent(String origin, Uint8List bytes) {
+    return transaction(() async {
+      final existing = await getCachedIcon(origin).getSingleOrNull();
+      if (existing != null && !isMissingIconMarker(existing)) {
+        return false;
+      }
+
+      await cacheIcon(origin, bytes);
+      return !_rendersTheSame(existing, bytes);
+    });
+  }
+
+  Future<bool> cacheMissingIcon(String origin) {
+    return cacheIconReportingChange(origin, missingIconMarkerBytes);
+  }
+
+  /// Whether [stored] and [next] would put the same thing on screen.
+  ///
+  /// The missing-icon marker and an absent row are the same thing to every
+  /// reader above the DAO — no icon — so moving between them is not a change,
+  /// while replacing a real icon with the marker is.
+  static bool _rendersTheSame(Uint8List? stored, Uint8List next) {
+    final before = isMissingIconMarker(stored) ? null : stored;
+    final after = isMissingIconMarker(next) ? null : next;
+
+    if (before == null || after == null) {
+      return (before == null) == (after == null);
+    }
+
+    if (before.length != after.length) {
+      return false;
+    }
+
+    for (var i = 0; i < before.length; i++) {
+      if (before[i] != after[i]) {
+        return false;
+      }
+    }
+
+    return true;
   }
 }

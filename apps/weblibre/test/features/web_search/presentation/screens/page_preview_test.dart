@@ -67,8 +67,8 @@ void main() {
             ),
           ),
           webSearchTabOpenerProvider.overrideWithValue(opener),
-          watchCachedIconBytesProvider.overrideWith((ref, origin) {
-            return Stream.value(null);
+          iconCacheRevisionProvider.overrideWith((ref, origin) {
+            return Stream.value(0);
           }),
         ],
         child: MaterialApp(

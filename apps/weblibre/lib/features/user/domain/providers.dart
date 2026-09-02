@@ -17,8 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:typed_data';
-
 import 'package:exceptions/exceptions.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
@@ -44,9 +42,34 @@ Stream<double> iconCacheSizeMegabytes(Ref ref) {
   return repository.cacheDao.getIconCacheSize().watchSingle();
 }
 
+/// A change signal for [origin]'s entry in the favicon cache.
+///
+/// Emits the cache's revision number whenever that origin's icon changes or the
+/// whole cache is cleared, so a widget can key its icon lookup on this and be
+/// rebuilt when — and only when — the icon actually changes.
+///
+/// This exists instead of a provider that watches the icon row itself. Every
+/// row of every list renders a `UrlIcon`, so a reactive query here meant one
+/// live SQLite watch per visible row, created and destroyed on every scroll
+/// pass — against a table written only when a favicon is fetched. What is
+/// emitted is deliberately just a number: the icon itself comes from
+/// `GenericWebsiteService`'s in-memory cache, which this same signal evicts, so
+/// a warm icon costs no database read at all.
+///
+/// Not an `async*` generator, and with no initial value: a generator suspends
+/// on its first `yield` before it reaches the subscription, and an invalidation
+/// arriving in that window would be dropped. Returning the stream directly has
+/// Riverpod subscribe while the provider is being built; readers treat "no
+/// value yet" as "nothing has changed since I started looking".
+///
+/// See https://github.com/FaFre/WebLibre/issues/599.
 @Riverpod()
-Stream<Uint8List?> watchCachedIconBytes(Ref ref, String origin) {
-  return ref.watch(cacheRepositoryProvider.notifier).watchCachedIcon(origin);
+Stream<int> iconCacheRevision(Ref ref, String origin) {
+  final repository = ref.watch(cacheRepositoryProvider.notifier);
+
+  return repository.iconInvalidations
+      .where((event) => event.origin == null || event.origin == origin)
+      .map((event) => event.revision);
 }
 
 @Riverpod()

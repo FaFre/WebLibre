@@ -18,12 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/domain/services/generic_website.dart';
@@ -38,16 +36,6 @@ import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 const _bundledIconByOrigin = {
   'https://weblibre.eu': 'assets/icon/bang_icon.png',
 };
-
-Uint8List? selectFirstCachedIconBytes(Iterable<Uint8List?> cachedBytesByUrl) {
-  for (final cachedBytes in cachedBytesByUrl) {
-    if (cachedBytes != null) {
-      return cachedBytes;
-    }
-  }
-
-  return null;
-}
 
 class UrlIcon extends HookConsumerWidget {
   final double iconSize;
@@ -81,28 +69,27 @@ class UrlIcon extends HookConsumerWidget {
       }
     }
 
-    final cachedBytesByUrl = [
+    // Only a change signal, not the icon bytes: the lookup below is served
+    // from an in-memory cache whenever it can be, and this rebuilds the row on
+    // the rare occasion that the origin's stored favicon is replaced.
+    final cacheRevisions = [
       for (final url in eligibleUrls)
-        ref.watch(watchCachedIconBytesProvider(url.origin)).value,
+        ref.watch(iconCacheRevisionProvider(url.origin)).value ?? 0,
     ];
 
-    final cacheHashes = [
-      for (final bytes in cachedBytesByUrl)
-        bytes == null ? null : identityHashCode(bytes),
-    ];
-
-    final icon = useCachedFuture(
-      () => _resolveIcon(ref, eligibleUrls, cachedBytesByUrl),
-      [EquatableValue(urlList), ...cacheHashes, cacheOnly],
-    );
+    final icon = useCachedFuture(() => _resolveIcon(ref), [
+      EquatableValue(urlList),
+      ...cacheRevisions,
+      cacheOnly,
+    ]);
 
     return Skeletonizer(
       // Only show the skeleton on the *initial* resolve (no data yet).
       // When a fresh favicon arrives later, `useMemoized` produces a new
       // future and `useFuture` flips connectionState back to waiting while
       // preserving the previous data — without this guard, the existing
-      // icon would get a skeleton overlay for the brief async gap before
-      // BrowserIcon.fromBytes resolves, which reads as a flicker.
+      // icon would get a skeleton overlay for the brief async gap before the
+      // resolve completes, which reads as a flicker.
       enabled:
           icon.connectionState != ConnectionState.done && icon.data == null,
       child: SizedBox.square(
@@ -122,43 +109,30 @@ class UrlIcon extends HookConsumerWidget {
     );
   }
 
-  Future<BrowserIcon?> _resolveIcon(
-    WidgetRef ref,
-    List<Uri> eligibleUrls,
-    List<Uint8List?> cachedBytesByUrl,
-  ) async {
-    if (eligibleUrls.isEmpty) {
-      return null;
+  /// Resolves through [GenericWebsiteService] rather than decoding the stored
+  /// bytes here.
+  ///
+  /// The service holds the decoded icons in an LRU keyed by origin, so a row
+  /// that has been on screen before costs a map lookup instead of a database
+  /// read plus a full image decode — which is what it used to cost on every
+  /// scroll pass, since the widget decoded the bytes itself and never consulted
+  /// that cache. Correctness comes from the eviction side: the service drops an
+  /// origin's entry when its icon is rewritten, on the same signal that rebuilds
+  /// this widget.
+  Future<BrowserIcon?> _resolveIcon(WidgetRef ref) async {
+    final service = ref.read(genericWebsiteServiceProvider.notifier);
+
+    final icon = await service.getUrlIcon(urlList, cacheOnly: cacheOnly);
+
+    if (!cacheOnly) {
+      _scheduleStaleRefresh(service);
     }
 
-    final cachedBytes = selectFirstCachedIconBytes(cachedBytesByUrl);
-    if (cachedBytes != null) {
-      final decoded = await BrowserIcon.fromBytes(
-        cachedBytes,
-        dominantColor: null,
-        source: IconSource.disk,
-      );
-      if (decoded != null) {
-        if (!cacheOnly) {
-          _scheduleStaleRefresh(ref, eligibleUrls);
-        }
-        return decoded;
-      }
-    }
-
-    if (cacheOnly) {
-      return ref
-          .read(genericWebsiteServiceProvider.notifier)
-          .getUrlIcon(urlList, cacheOnly: true);
-    }
-
-    return ref.read(genericWebsiteServiceProvider.notifier).getUrlIcon(urlList);
+    return icon;
   }
 
-  void _scheduleStaleRefresh(WidgetRef ref, List<Uri> eligibleUrls) {
-    if (eligibleUrls.isEmpty) return;
-    final service = ref.read(genericWebsiteServiceProvider.notifier);
-    for (final url in eligibleUrls) {
+  void _scheduleStaleRefresh(GenericWebsiteService service) {
+    for (final url in urlList) {
       unawaited(service.refreshIconIfStale(url));
     }
   }

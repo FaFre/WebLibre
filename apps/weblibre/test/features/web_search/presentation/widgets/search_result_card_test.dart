@@ -41,8 +41,8 @@ void main() {
       ProviderScope(
         overrides: [
           ...webSearchTestOverrides(),
-          watchCachedIconBytesProvider.overrideWith((ref, origin) {
-            return Stream.value(null);
+          iconCacheRevisionProvider.overrideWith((ref, origin) {
+            return Stream.value(0);
           }),
           metaSearchControllerProvider.overrideWithValue(
             const MetaSearchState(status: WebSearchStatus.ready),
@@ -87,8 +87,8 @@ void main() {
         ProviderScope(
           overrides: [
             ...webSearchTestOverrides(),
-            watchCachedIconBytesProvider.overrideWith((ref, origin) {
-              return Stream.value(null);
+            iconCacheRevisionProvider.overrideWith((ref, origin) {
+              return Stream.value(0);
             }),
             metaSearchControllerProvider.overrideWithValue(
               MetaSearchState(

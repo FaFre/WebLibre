@@ -43,52 +43,112 @@ final class IconCacheSizeMegabytesProvider
 String _$iconCacheSizeMegabytesHash() =>
     r'5d7f5f6485060b08ce4fd8fa634f07bf8bfdbd2d';
 
-@ProviderFor(watchCachedIconBytes)
-final watchCachedIconBytesProvider = WatchCachedIconBytesFamily._();
+/// A change signal for [origin]'s entry in the favicon cache.
+///
+/// Emits the cache's revision number whenever that origin's icon changes or the
+/// whole cache is cleared, so a widget can key its icon lookup on this and be
+/// rebuilt when — and only when — the icon actually changes.
+///
+/// This exists instead of a provider that watches the icon row itself. Every
+/// row of every list renders a `UrlIcon`, so a reactive query here meant one
+/// live SQLite watch per visible row, created and destroyed on every scroll
+/// pass — against a table written only when a favicon is fetched. What is
+/// emitted is deliberately just a number: the icon itself comes from
+/// `GenericWebsiteService`'s in-memory cache, which this same signal evicts, so
+/// a warm icon costs no database read at all.
+///
+/// Not an `async*` generator, and with no initial value: a generator suspends
+/// on its first `yield` before it reaches the subscription, and an invalidation
+/// arriving in that window would be dropped. Returning the stream directly has
+/// Riverpod subscribe while the provider is being built; readers treat "no
+/// value yet" as "nothing has changed since I started looking".
+///
+/// See https://github.com/FaFre/WebLibre/issues/599.
 
-final class WatchCachedIconBytesProvider
-    extends
-        $FunctionalProvider<
-          AsyncValue<Uint8List?>,
-          Uint8List?,
-          Stream<Uint8List?>
-        >
-    with $FutureModifier<Uint8List?>, $StreamProvider<Uint8List?> {
-  WatchCachedIconBytesProvider._({
-    required WatchCachedIconBytesFamily super.from,
+@ProviderFor(iconCacheRevision)
+final iconCacheRevisionProvider = IconCacheRevisionFamily._();
+
+/// A change signal for [origin]'s entry in the favicon cache.
+///
+/// Emits the cache's revision number whenever that origin's icon changes or the
+/// whole cache is cleared, so a widget can key its icon lookup on this and be
+/// rebuilt when — and only when — the icon actually changes.
+///
+/// This exists instead of a provider that watches the icon row itself. Every
+/// row of every list renders a `UrlIcon`, so a reactive query here meant one
+/// live SQLite watch per visible row, created and destroyed on every scroll
+/// pass — against a table written only when a favicon is fetched. What is
+/// emitted is deliberately just a number: the icon itself comes from
+/// `GenericWebsiteService`'s in-memory cache, which this same signal evicts, so
+/// a warm icon costs no database read at all.
+///
+/// Not an `async*` generator, and with no initial value: a generator suspends
+/// on its first `yield` before it reaches the subscription, and an invalidation
+/// arriving in that window would be dropped. Returning the stream directly has
+/// Riverpod subscribe while the provider is being built; readers treat "no
+/// value yet" as "nothing has changed since I started looking".
+///
+/// See https://github.com/FaFre/WebLibre/issues/599.
+
+final class IconCacheRevisionProvider
+    extends $FunctionalProvider<AsyncValue<int>, int, Stream<int>>
+    with $FutureModifier<int>, $StreamProvider<int> {
+  /// A change signal for [origin]'s entry in the favicon cache.
+  ///
+  /// Emits the cache's revision number whenever that origin's icon changes or the
+  /// whole cache is cleared, so a widget can key its icon lookup on this and be
+  /// rebuilt when — and only when — the icon actually changes.
+  ///
+  /// This exists instead of a provider that watches the icon row itself. Every
+  /// row of every list renders a `UrlIcon`, so a reactive query here meant one
+  /// live SQLite watch per visible row, created and destroyed on every scroll
+  /// pass — against a table written only when a favicon is fetched. What is
+  /// emitted is deliberately just a number: the icon itself comes from
+  /// `GenericWebsiteService`'s in-memory cache, which this same signal evicts, so
+  /// a warm icon costs no database read at all.
+  ///
+  /// Not an `async*` generator, and with no initial value: a generator suspends
+  /// on its first `yield` before it reaches the subscription, and an invalidation
+  /// arriving in that window would be dropped. Returning the stream directly has
+  /// Riverpod subscribe while the provider is being built; readers treat "no
+  /// value yet" as "nothing has changed since I started looking".
+  ///
+  /// See https://github.com/FaFre/WebLibre/issues/599.
+  IconCacheRevisionProvider._({
+    required IconCacheRevisionFamily super.from,
     required String super.argument,
   }) : super(
          retry: null,
-         name: r'watchCachedIconBytesProvider',
+         name: r'iconCacheRevisionProvider',
          isAutoDispose: true,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
 
   @override
-  String debugGetCreateSourceHash() => _$watchCachedIconBytesHash();
+  String debugGetCreateSourceHash() => _$iconCacheRevisionHash();
 
   @override
   String toString() {
-    return r'watchCachedIconBytesProvider'
+    return r'iconCacheRevisionProvider'
         ''
         '($argument)';
   }
 
   @$internal
   @override
-  $StreamProviderElement<Uint8List?> $createElement($ProviderPointer pointer) =>
+  $StreamProviderElement<int> $createElement($ProviderPointer pointer) =>
       $StreamProviderElement(pointer);
 
   @override
-  Stream<Uint8List?> create(Ref ref) {
+  Stream<int> create(Ref ref) {
     final argument = this.argument as String;
-    return watchCachedIconBytes(ref, argument);
+    return iconCacheRevision(ref, argument);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is WatchCachedIconBytesProvider && other.argument == argument;
+    return other is IconCacheRevisionProvider && other.argument == argument;
   }
 
   @override
@@ -97,25 +157,68 @@ final class WatchCachedIconBytesProvider
   }
 }
 
-String _$watchCachedIconBytesHash() =>
-    r'65881670bd19f2d55e05e68118e1e23b28871c13';
+String _$iconCacheRevisionHash() => r'4fcad249668b71f087c3f65e19c8bbd739b8f68f';
 
-final class WatchCachedIconBytesFamily extends $Family
-    with $FunctionalFamilyOverride<Stream<Uint8List?>, String> {
-  WatchCachedIconBytesFamily._()
+/// A change signal for [origin]'s entry in the favicon cache.
+///
+/// Emits the cache's revision number whenever that origin's icon changes or the
+/// whole cache is cleared, so a widget can key its icon lookup on this and be
+/// rebuilt when — and only when — the icon actually changes.
+///
+/// This exists instead of a provider that watches the icon row itself. Every
+/// row of every list renders a `UrlIcon`, so a reactive query here meant one
+/// live SQLite watch per visible row, created and destroyed on every scroll
+/// pass — against a table written only when a favicon is fetched. What is
+/// emitted is deliberately just a number: the icon itself comes from
+/// `GenericWebsiteService`'s in-memory cache, which this same signal evicts, so
+/// a warm icon costs no database read at all.
+///
+/// Not an `async*` generator, and with no initial value: a generator suspends
+/// on its first `yield` before it reaches the subscription, and an invalidation
+/// arriving in that window would be dropped. Returning the stream directly has
+/// Riverpod subscribe while the provider is being built; readers treat "no
+/// value yet" as "nothing has changed since I started looking".
+///
+/// See https://github.com/FaFre/WebLibre/issues/599.
+
+final class IconCacheRevisionFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<int>, String> {
+  IconCacheRevisionFamily._()
     : super(
         retry: null,
-        name: r'watchCachedIconBytesProvider',
+        name: r'iconCacheRevisionProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
         isAutoDispose: true,
       );
 
-  WatchCachedIconBytesProvider call(String origin) =>
-      WatchCachedIconBytesProvider._(argument: origin, from: this);
+  /// A change signal for [origin]'s entry in the favicon cache.
+  ///
+  /// Emits the cache's revision number whenever that origin's icon changes or the
+  /// whole cache is cleared, so a widget can key its icon lookup on this and be
+  /// rebuilt when — and only when — the icon actually changes.
+  ///
+  /// This exists instead of a provider that watches the icon row itself. Every
+  /// row of every list renders a `UrlIcon`, so a reactive query here meant one
+  /// live SQLite watch per visible row, created and destroyed on every scroll
+  /// pass — against a table written only when a favicon is fetched. What is
+  /// emitted is deliberately just a number: the icon itself comes from
+  /// `GenericWebsiteService`'s in-memory cache, which this same signal evicts, so
+  /// a warm icon costs no database read at all.
+  ///
+  /// Not an `async*` generator, and with no initial value: a generator suspends
+  /// on its first `yield` before it reaches the subscription, and an invalidation
+  /// arriving in that window would be dropped. Returning the stream directly has
+  /// Riverpod subscribe while the provider is being built; readers treat "no
+  /// value yet" as "nothing has changed since I started looking".
+  ///
+  /// See https://github.com/FaFre/WebLibre/issues/599.
+
+  IconCacheRevisionProvider call(String origin) =>
+      IconCacheRevisionProvider._(argument: origin, from: this);
 
   @override
-  String toString() => r'watchCachedIconBytesProvider';
+  String toString() => r'iconCacheRevisionProvider';
 }
 
 @ProviderFor(incognitoModeEnabled)

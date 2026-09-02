@@ -13,22 +13,42 @@ import 'package:weblibre/domain/services/generic_website.dart';
 import 'package:weblibre/features/proxy/domain/services/app_routing_policy.dart';
 import 'package:weblibre/features/user/data/database/database.dart';
 import 'package:weblibre/features/user/data/providers.dart';
-import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('selectFirstCachedIconBytes preserves url-list fallback order', () {
-    final secondBytes = Uint8List.fromList([2, 3, 4]);
+  test('cached-icon lookup falls through to a later url in the list', () async {
+    final firstUrl = Uri.parse('https://first.example/result');
+    final secondUrl = Uri.parse('https://second.example/result');
+    final db = UserDatabase(
+      NativeDatabase.memory(
+        setup: (database) {
+          registerLexorankFunctions(database);
+        },
+      ),
+    );
+    addTearDown(db.close);
 
-    final selected = selectFirstCachedIconBytes([
-      null,
-      secondBytes,
-      Uint8List.fromList([9, 9, 9]),
-    ]);
+    // Only the *second* origin has a cached icon, so a resolver that stopped at
+    // the head of the list would fall through to the generated placeholder.
+    await db.cacheDao.cacheIcon(secondUrl.origin, _secondSvgBytes);
 
-    expect(selected, same(secondBytes));
+    final container = ProviderContainer(
+      overrides: [
+        userDatabaseProvider.overrideWith((ref) => db),
+        faviconResolverProvider.overrideWithValue(_NeverCalledResolver()),
+        geckoIconServiceProvider.overrideWithValue(_FakeGeckoIconService()),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final icon = await container
+        .read(genericWebsiteServiceProvider.notifier)
+        .getUrlIcon([firstUrl, secondUrl], cacheOnly: true);
+
+    expect(icon, isNotNull);
+    expect(icon!.source, IconSource.disk);
   });
 
   testWidgets('distinct cached icons do not collapse to one image', (
@@ -48,18 +68,15 @@ void main() {
       await db.close();
     });
 
+    await db.cacheDao.cacheIcon(firstUrl.origin, _firstSvgBytes);
+    await db.cacheDao.cacheIcon(secondUrl.origin, _secondSvgBytes);
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           userDatabaseProvider.overrideWith((ref) => db),
           faviconResolverProvider.overrideWithValue(_NeverCalledResolver()),
           geckoIconServiceProvider.overrideWithValue(_FakeGeckoIconService()),
-          watchCachedIconBytesProvider(
-            firstUrl.origin,
-          ).overrideWith((ref) => Stream.value(_firstSvgBytes)),
-          watchCachedIconBytesProvider(
-            secondUrl.origin,
-          ).overrideWith((ref) => Stream.value(_secondSvgBytes)),
         ],
         child: MaterialApp(
           home: Row(
