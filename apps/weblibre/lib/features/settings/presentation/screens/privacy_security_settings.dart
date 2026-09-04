@@ -158,6 +158,12 @@ const List<SettingsSectionDefinition> privacySecuritySettingsSections = [
         child: _ScreenshotProtectionTile(),
       ),
       SettingsEntryDefinition(
+        title: 'Allow screenshots in private tabs',
+        subtitle: 'Let the system capture private tabs',
+        keywords: ['screenshots', 'incognito', 'private'],
+        child: _AllowPrivateTabScreenshotsTile(),
+      ),
+      SettingsEntryDefinition(
         title: 'Global Privacy Control (GPC)',
         subtitle: 'Send a privacy preference signal to websites',
         keywords: ['gpc'],
@@ -554,6 +560,53 @@ class _ScreenshotProtectionTile extends HookConsumerWidget {
                   currentSettings.copyWith.screenshotProtectionEnabled(value),
             );
       },
+    );
+  }
+}
+
+/// Opt-out from the secure window that private tabs apply by default.
+///
+/// Inert while [_ScreenshotProtectionTile] is on: that setting blocks capture
+/// in every tab, so the stored preference here is shown but cannot take
+/// effect. The tile stays visible with an explanation rather than silently
+/// reverting the preference.
+class _AllowPrivateTabScreenshotsTile extends HookConsumerWidget {
+  const _AllowPrivateTabScreenshotsTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final allow = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.allowPrivateTabScreenshots,
+      ),
+    );
+    final overridden = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.screenshotProtectionEnabled,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: const Text('Allow screenshots in private tabs'),
+      subtitle: Text(
+        overridden
+            ? 'Overridden by screenshot protection, which blocks capture in '
+                  'every tab.'
+            : 'Private tabs can be screenshotted and recorded, and appear in '
+                  'the app switcher preview.',
+      ),
+      secondary: const Icon(MdiIcons.incognito),
+      value: allow,
+      onChanged: overridden
+          ? null
+          : (value) async {
+              await ref
+                  .read(saveGeneralSettingsControllerProvider.notifier)
+                  .save(
+                    (currentSettings) => currentSettings.copyWith
+                        .allowPrivateTabScreenshots(value),
+                  );
+            },
     );
   }
 }

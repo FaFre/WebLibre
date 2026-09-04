@@ -171,8 +171,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
     private fun updateSecureWindowState() {
         val tab = components.core.store.state.findCustomTabOrSelectedTab(sessionId)
-        val shouldSecure =
-            GlobalComponents.screenshotProtectionEnabled || tab?.content?.private == true
+        val shouldSecure = GlobalComponents.shouldSecureWindow(tab?.content?.private == true)
 
         if (shouldSecure) {
             requireActivity().window.addFlags(FLAG_SECURE)
@@ -373,7 +372,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
             GlobalComponents.onPullToRefreshEnabledChanged = { enabled ->
                 _binding?.swipeToRefresh?.isEnabled = enabled
             }
-            GlobalComponents.onScreenshotProtectionEnabledChanged = {
+            GlobalComponents.onSecureWindowSettingsChanged = {
                 updateSecureWindowState()
             }
             updateSecureWindowState()
@@ -569,8 +568,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     store = components.core.store,
                     customTabId = sessionId,
                     isSecure = { session ->
-                        session.content.private ||
-                            GlobalComponents.screenshotProtectionEnabled
+                        GlobalComponents.shouldSecureWindow(session.content.private)
                     },
                     clearFlagOnStop = false,
                 ),
@@ -840,7 +838,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         AppLifecycleFeature.clearVisibleSession(this)
 
         GlobalComponents.onPullToRefreshEnabledChanged = null
-        GlobalComponents.onScreenshotProtectionEnabledChanged = null
+        GlobalComponents.onSecureWindowSettingsChanged = null
         val engineView = fragmentEngineView
         engineView?.setActivityContext(null)
         // Read through `GlobalComponents` rather than the `components` lazy:

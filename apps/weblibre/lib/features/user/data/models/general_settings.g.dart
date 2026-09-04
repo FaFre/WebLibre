@@ -27,6 +27,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings screenshotProtectionEnabled(bool screenshotProtectionEnabled);
 
+  GeneralSettings allowPrivateTabScreenshots(bool allowPrivateTabScreenshots);
+
   GeneralSettings defaultSearchProvider(BangKey? defaultSearchProvider);
 
   GeneralSettings pinnedBangs(List<BangKey> pinnedBangs);
@@ -224,6 +226,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool enforceReadability,
     Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
     bool screenshotProtectionEnabled,
+    bool allowPrivateTabScreenshots,
     BangKey? defaultSearchProvider,
     List<BangKey> pinnedBangs,
     SearchSuggestionProviders defaultSearchSuggestionsProvider,
@@ -345,6 +348,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings screenshotProtectionEnabled(
     bool screenshotProtectionEnabled,
   ) => call(screenshotProtectionEnabled: screenshotProtectionEnabled);
+
+  @override
+  GeneralSettings allowPrivateTabScreenshots(bool allowPrivateTabScreenshots) =>
+      call(allowPrivateTabScreenshots: allowPrivateTabScreenshots);
 
   @override
   GeneralSettings defaultSearchProvider(BangKey? defaultSearchProvider) =>
@@ -689,6 +696,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? enforceReadability = const $CopyWithPlaceholder(),
     Object? deleteBrowsingDataOnQuit = const $CopyWithPlaceholder(),
     Object? screenshotProtectionEnabled = const $CopyWithPlaceholder(),
+    Object? allowPrivateTabScreenshots = const $CopyWithPlaceholder(),
     Object? defaultSearchProvider = const $CopyWithPlaceholder(),
     Object? pinnedBangs = const $CopyWithPlaceholder(),
     Object? defaultSearchSuggestionsProvider = const $CopyWithPlaceholder(),
@@ -818,6 +826,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.screenshotProtectionEnabled
           // ignore: cast_nullable_to_non_nullable
           : screenshotProtectionEnabled as bool,
+      allowPrivateTabScreenshots:
+          allowPrivateTabScreenshots == const $CopyWithPlaceholder() ||
+              allowPrivateTabScreenshots == null
+          ? _value.allowPrivateTabScreenshots
+          // ignore: cast_nullable_to_non_nullable
+          : allowPrivateTabScreenshots as bool,
       defaultSearchProvider:
           defaultSearchProvider == const $CopyWithPlaceholder()
           ? _value.defaultSearchProvider
@@ -1289,6 +1303,7 @@ GeneralSettings _$GeneralSettingsFromJson(
       ?.map((e) => $enumDecode(_$DeleteBrowsingDataTypeEnumMap, e))
       .toSet(),
   screenshotProtectionEnabled: json['screenshotProtectionEnabled'] as bool?,
+  allowPrivateTabScreenshots: json['allowPrivateTabScreenshots'] as bool?,
   defaultSearchProvider: const BangKeyConverter().fromJson(
     json['defaultSearchProvider'] as String?,
   ),
@@ -1455,6 +1470,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
       ?.map((e) => _$DeleteBrowsingDataTypeEnumMap[e]!)
       .toList(),
   'screenshotProtectionEnabled': instance.screenshotProtectionEnabled,
+  'allowPrivateTabScreenshots': instance.allowPrivateTabScreenshots,
   'defaultSearchProvider': const BangKeyConverter().toJson(
     instance.defaultSearchProvider,
   ),

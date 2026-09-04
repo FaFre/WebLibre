@@ -195,6 +195,13 @@ class GeckoEngineSettingsService {
     return _api.setScreenshotProtectionEnabled(enabled);
   }
 
+  /// Lifts the secure-window restriction that private tabs apply by default,
+  /// allowing system screenshots and screen recording of private tabs.
+  /// [setScreenshotProtectionEnabled] still wins when both are enabled.
+  Future<void> setAllowPrivateTabScreenshots(bool allow) {
+    return _api.setAllowPrivateTabScreenshots(allow);
+  }
+
   Future<void> setPullToRefreshEnabled(bool enabled) {
     return _api.setPullToRefreshEnabled(enabled);
   }

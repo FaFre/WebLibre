@@ -53,6 +53,7 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'enableReadability': DriftSqlType.bool,
   'enforceReadability': DriftSqlType.bool,
   'screenshotProtectionEnabled': DriftSqlType.bool,
+  'allowPrivateTabScreenshots': DriftSqlType.bool,
   'defaultSearchProvider': DriftSqlType.string,
   'defaultSearchSuggestionsProvider': DriftSqlType.string,
   'createChildTabsOption': DriftSqlType.bool,

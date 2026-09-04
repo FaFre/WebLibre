@@ -1551,6 +1551,11 @@ abstract class GeckoEngineSettingsApi {
   void setDefaultSettings(GeckoEngineSettings settings);
   void updateRuntimeSettings(GeckoEngineSettings settings);
   void setScreenshotProtectionEnabled(bool enabled);
+
+  /// Lifts the secure-window restriction that private tabs apply by default,
+  /// allowing system screenshots and screen recording of private tabs.
+  /// [setScreenshotProtectionEnabled] still wins when both are enabled.
+  void setAllowPrivateTabScreenshots(bool allow);
   void setPullToRefreshEnabled(bool enabled);
 
   /// Sets whether to use external download managers for downloads.

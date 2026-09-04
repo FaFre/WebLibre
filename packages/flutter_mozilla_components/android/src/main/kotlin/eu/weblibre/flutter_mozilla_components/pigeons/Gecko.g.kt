@@ -8693,6 +8693,12 @@ interface GeckoEngineSettingsApi {
   fun setDefaultSettings(settings: GeckoEngineSettings)
   fun updateRuntimeSettings(settings: GeckoEngineSettings)
   fun setScreenshotProtectionEnabled(enabled: Boolean)
+  /**
+   * Lifts the secure-window restriction that private tabs apply by default,
+   * allowing system screenshots and screen recording of private tabs.
+   * [setScreenshotProtectionEnabled] still wins when both are enabled.
+   */
+  fun setAllowPrivateTabScreenshots(allow: Boolean)
   fun setPullToRefreshEnabled(enabled: Boolean)
   /**
    * Sets whether to use external download managers for downloads.
@@ -8786,6 +8792,24 @@ interface GeckoEngineSettingsApi {
             val enabledArg = args[0] as Boolean
             val wrapped: List<Any?> = try {
               api.setScreenshotProtectionEnabled(enabledArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setAllowPrivateTabScreenshots$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val allowArg = args[0] as Boolean
+            val wrapped: List<Any?> = try {
+              api.setAllowPrivateTabScreenshots(allowArg)
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)

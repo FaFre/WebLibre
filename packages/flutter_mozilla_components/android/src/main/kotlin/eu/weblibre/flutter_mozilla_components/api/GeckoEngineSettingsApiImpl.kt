@@ -428,6 +428,10 @@ class GeckoEngineSettingsApiImpl(
         GlobalComponents.screenshotProtectionEnabled = enabled
     }
 
+    override fun setAllowPrivateTabScreenshots(allow: Boolean) {
+        GlobalComponents.allowPrivateTabScreenshots = allow
+    }
+
     override fun setUseExternalDownloadManager(enabled: Boolean) {
         GlobalComponents.useExternalDownloadManager = enabled
     }

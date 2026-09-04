@@ -147,6 +147,23 @@ class EngineSettingsReplicationService
     ref.listen(
       fireImmediately: true,
       generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.allowPrivateTabScreenshots,
+      ),
+      (previous, next) async {
+        await _service.setAllowPrivateTabScreenshots(next);
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to allowPrivateTabScreenshots',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+
+    ref.listen(
+      fireImmediately: true,
+      generalSettingsWithDefaultsProvider.select(
         (settings) => settings.pullToRefreshEnabled,
       ),
       (previous, next) async {

@@ -9190,6 +9190,29 @@ class GeckoEngineSettingsApi {
     );
   }
 
+  /// Lifts the secure-window restriction that private tabs apply by default,
+  /// allowing system screenshots and screen recording of private tabs.
+  /// [setScreenshotProtectionEnabled] still wins when both are enabled.
+  Future<void> setAllowPrivateTabScreenshots(bool allow) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setAllowPrivateTabScreenshots$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[allow],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
   Future<void> setPullToRefreshEnabled(bool enabled) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setPullToRefreshEnabled$pigeonVar_messageChannelSuffix';

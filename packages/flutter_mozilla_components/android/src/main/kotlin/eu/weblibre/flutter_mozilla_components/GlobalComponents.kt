@@ -129,13 +129,32 @@ object GlobalComponents {
 
     var onPullToRefreshEnabledChanged: ((Boolean) -> Unit)? = null
 
+    // Blocks system capture (screenshots, screen recording, the recents
+    // preview) in every tab, private or not.
     var screenshotProtectionEnabled: Boolean = false
         set(value) {
             field = value
-            onScreenshotProtectionEnabledChanged?.invoke(value)
+            onSecureWindowSettingsChanged?.invoke()
         }
 
-    var onScreenshotProtectionEnabledChanged: ((Boolean) -> Unit)? = null
+    // Lifts the secure-window restriction that private tabs apply by default.
+    // screenshotProtectionEnabled still wins when both are set, since it is
+    // the app-wide block.
+    var allowPrivateTabScreenshots: Boolean = false
+        set(value) {
+            field = value
+            onSecureWindowSettingsChanged?.invoke()
+        }
+
+    // Invoked when any input of shouldSecureWindow changes, so the hosting
+    // fragment can re-apply the flag without waiting for a store update.
+    var onSecureWindowSettingsChanged: (() -> Unit)? = null
+
+    // Whether the activity window must carry FLAG_SECURE for a tab with the
+    // given privacy. Single source of truth for both enforcement points in
+    // BaseBrowserFragment.
+    fun shouldSecureWindow(isPrivate: Boolean): Boolean =
+        screenshotProtectionEnabled || (isPrivate && !allowPrivateTabScreenshots)
 
     // Viewport events for keyboard visibility notifications
     var viewportEvents: GeckoViewportEvents? = null

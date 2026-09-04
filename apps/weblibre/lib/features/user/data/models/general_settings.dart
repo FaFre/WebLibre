@@ -210,6 +210,13 @@ class GeneralSettings with FastEquatable {
   final bool enforceReadability;
   final Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit;
   final bool screenshotProtectionEnabled;
+
+  /// Whether private tabs may be captured by the system (screenshots, screen
+  /// recording, the recents preview). Private tabs mark the window secure by
+  /// default; enabling this lifts that restriction. [screenshotProtectionEnabled]
+  /// still wins when both are on, because it blocks capture app-wide.
+  /// Defaults to false.
+  final bool allowPrivateTabScreenshots;
   @BangKeyConverter()
   final BangKey? defaultSearchProvider;
 
@@ -428,6 +435,7 @@ class GeneralSettings with FastEquatable {
     required this.enforceReadability,
     required this.deleteBrowsingDataOnQuit,
     required this.screenshotProtectionEnabled,
+    required this.allowPrivateTabScreenshots,
     required this.defaultSearchProvider,
     required this.pinnedBangs,
     required this.defaultSearchSuggestionsProvider,
@@ -515,6 +523,7 @@ class GeneralSettings with FastEquatable {
     bool? enforceReadability,
     this.deleteBrowsingDataOnQuit,
     bool? screenshotProtectionEnabled,
+    bool? allowPrivateTabScreenshots,
     BangKey? defaultSearchProvider,
     List<BangKey>? pinnedBangs,
     SearchSuggestionProviders? defaultSearchSuggestionsProvider,
@@ -598,6 +607,7 @@ class GeneralSettings with FastEquatable {
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
        screenshotProtectionEnabled = screenshotProtectionEnabled ?? false,
+       allowPrivateTabScreenshots = allowPrivateTabScreenshots ?? false,
        defaultSearchProvider = defaultSearchProvider ?? _fallbackSearchProvider,
        pinnedBangs = pinnedBangs ?? const [],
        defaultSearchSuggestionsProvider =
@@ -843,6 +853,7 @@ class GeneralSettings with FastEquatable {
     enforceReadability,
     deleteBrowsingDataOnQuit,
     screenshotProtectionEnabled,
+    allowPrivateTabScreenshots,
     defaultSearchProvider,
     pinnedBangs,
     defaultSearchSuggestionsProvider,
