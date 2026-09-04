@@ -304,29 +304,40 @@ class HistoryScreen extends HookConsumerWidget {
         title: textFilterEnabled.value
             ? TextField(
                 controller: textFilterController,
+                textAlignVertical: TextAlignVertical.center,
                 decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.only(top: 12),
+                  // Collapsed so the box is exactly the text: any asymmetric
+                  // content padding would offset the text from the centre the
+                  // app bar aligns the action icons to.
+                  isCollapsed: true,
                   border: InputBorder.none,
                   hintText: isDownloadsMode
                       ? 'Filter downloads...'
                       : 'Filter history...',
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      if (textFilterController.text.isNotEmpty) {
-                        textFilterController.clear();
-                      } else {
-                        textFilterEnabled.value = false;
-                      }
-                    },
-                    icon: const Icon(Icons.clear),
-                  ),
                 ),
               )
             : selectedItems.value.isEmpty
             ? Text(isDownloadsMode ? 'Downloads' : 'History')
             : Text('${selectedItems.value.length} selected'),
         actions: [
+          if (selectedItems.value.isEmpty)
+            IconButton(
+              tooltip: textFilterEnabled.value
+                  ? 'Clear search'
+                  : isDownloadsMode
+                  ? 'Search downloads'
+                  : 'Search history',
+              onPressed: () {
+                if (!textFilterEnabled.value) {
+                  textFilterEnabled.value = true;
+                } else if (textFilterController.text.isNotEmpty) {
+                  textFilterController.clear();
+                } else {
+                  textFilterEnabled.value = false;
+                }
+              },
+              icon: Icon(textFilterEnabled.value ? Icons.clear : Icons.search),
+            ),
           if (selectedItems.value.isNotEmpty)
             IconButton(
               onPressed: () async {
@@ -393,159 +404,153 @@ class HistoryScreen extends HookConsumerWidget {
               },
               icon: const Icon(Icons.delete),
             ),
-          MenuAnchor(
-            controller: menuController,
-            consumeOutsideTap: true,
-            menuChildren: [
-              MenuItemButton(
-                leadingIcon: const Icon(Icons.search),
-                child: const Text('Text Filter'),
-                onPressed: () {
-                  textFilterEnabled.value = true;
-                },
-              ),
-              MenuItemButton(
-                closeOnActivate: false,
-                leadingIcon: const Icon(MdiIcons.calendarRange),
-                trailingIcon: historyFilter.dateRange.mapNotNull(
-                  (_) => IconButton(
-                    onPressed: () {
-                      setDateRange(null);
-                    },
-                    icon: const Icon(Icons.clear),
-                  ),
-                ),
-                child:
-                    historyFilter.dateRange.mapNotNull(
-                      (range) => Text(
-                        '${DateFormat.yMd().format(range.start)} - ${DateFormat.yMd().format(range.end)}',
-                      ),
-                    ) ??
-                    const Text('Filter Date'),
-                onPressed: () async {
-                  final range = await showDateRangePicker(
-                    context: context,
-                    initialDateRange: historyFilter.dateRange,
-                    firstDate: DateTime.now().subtract(
-                      const Duration(days: 365),
+          if (selectedItems.value.isEmpty)
+            MenuAnchor(
+              controller: menuController,
+              consumeOutsideTap: true,
+              menuChildren: [
+                MenuItemButton(
+                  closeOnActivate: false,
+                  leadingIcon: const Icon(MdiIcons.calendarRange),
+                  trailingIcon: historyFilter.dateRange.mapNotNull(
+                    (_) => IconButton(
+                      onPressed: () {
+                        setDateRange(null);
+                      },
+                      icon: const Icon(Icons.clear),
                     ),
-                    lastDate: DateTime.now(),
-                  );
+                  ),
+                  child:
+                      historyFilter.dateRange.mapNotNull(
+                        (range) => Text(
+                          '${DateFormat.yMd().format(range.start)} - ${DateFormat.yMd().format(range.end)}',
+                        ),
+                      ) ??
+                      const Text('Filter Date'),
+                  onPressed: () async {
+                    final range = await showDateRangePicker(
+                      context: context,
+                      initialDateRange: historyFilter.dateRange,
+                      firstDate: DateTime.now().subtract(
+                        const Duration(days: 365),
+                      ),
+                      lastDate: DateTime.now(),
+                    );
 
-                  setDateRange(
-                    range.mapNotNull(
-                      (range) => DateTimeRange(
-                        start: range.start,
-                        // Make sure to include last day fully.
-                        end: range.end.add(
-                          const Duration(days: 1) -
-                              const Duration(milliseconds: 1),
+                    setDateRange(
+                      range.mapNotNull(
+                        (range) => DateTimeRange(
+                          start: range.start,
+                          // Make sure to include last day fully.
+                          end: range.end.add(
+                            const Duration(days: 1) -
+                                const Duration(milliseconds: 1),
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
-              ),
-              if (!isDownloadsMode) const Divider(),
-              if (!isDownloadsMode)
-                ...{VisitType.link, VisitType.reload, VisitType.download}.map(
-                  (type) => CheckboxMenuButton(
-                    closeOnActivate: false,
-                    value: historyFilter.visitTypes.contains(type),
-                    onChanged: (value) {
-                      if (value != null) {
-                        ref
-                            .read(historyVisitsFilterProvider.notifier)
-                            .updateVisitType(type, value);
-                      }
-                    },
-                    child: switch (type) {
-                      VisitType.link => const Text('Followed Links'),
-                      VisitType.typed => const Text('Typed Addresses'),
-                      VisitType.embed => const Text('Embedded Page Elements'),
-                      VisitType.redirectPermanent => const Text(
-                        'Temporary Redirects',
-                      ),
-                      VisitType.redirectTemporary => const Text(
-                        'Permanent Redirects',
-                      ),
-                      VisitType.download => const Text('Downloads'),
-                      VisitType.framedLink => const Text('Frames'),
-                      VisitType.reload => const Text('Page Reloads'),
-                      VisitType.bookmark => const Text('Bookmarks'),
-                    },
-                  ),
+                    );
+                  },
                 ),
-              if (!isDownloadsMode && (containers?.isNotEmpty ?? false)) ...[
-                const Divider(),
-                SubmenuButton(
-                  leadingIcon: const Icon(MdiIcons.folderMultipleOutline),
-                  menuChildren: [
-                    MenuItemButton(
-                      leadingIcon: Icon(
-                        historyFilter.containerId == null
-                            ? Icons.radio_button_checked
-                            : Icons.radio_button_unchecked,
-                      ),
-                      onPressed: () {
-                        ref
-                            .read(historyVisitsFilterProvider.notifier)
-                            .setContainer(null);
+                if (!isDownloadsMode) const Divider(),
+                if (!isDownloadsMode)
+                  ...{VisitType.link, VisitType.reload, VisitType.download}.map(
+                    (type) => CheckboxMenuButton(
+                      closeOnActivate: false,
+                      value: historyFilter.visitTypes.contains(type),
+                      onChanged: (value) {
+                        if (value != null) {
+                          ref
+                              .read(historyVisitsFilterProvider.notifier)
+                              .updateVisitType(type, value);
+                        }
                       },
-                      child: const Text('All Containers'),
+                      child: switch (type) {
+                        VisitType.link => const Text('Followed Links'),
+                        VisitType.typed => const Text('Typed Addresses'),
+                        VisitType.embed => const Text('Embedded Page Elements'),
+                        VisitType.redirectPermanent => const Text(
+                          'Temporary Redirects',
+                        ),
+                        VisitType.redirectTemporary => const Text(
+                          'Permanent Redirects',
+                        ),
+                        VisitType.download => const Text('Downloads'),
+                        VisitType.framedLink => const Text('Frames'),
+                        VisitType.reload => const Text('Page Reloads'),
+                        VisitType.bookmark => const Text('Bookmarks'),
+                      },
                     ),
-                    for (final container in containers!)
+                  ),
+                if (!isDownloadsMode && (containers?.isNotEmpty ?? false)) ...[
+                  const Divider(),
+                  SubmenuButton(
+                    leadingIcon: const Icon(MdiIcons.folderMultipleOutline),
+                    menuChildren: [
                       MenuItemButton(
                         leadingIcon: Icon(
-                          historyFilter.containerId == container.id
+                          historyFilter.containerId == null
                               ? Icons.radio_button_checked
                               : Icons.radio_button_unchecked,
-                          color: container.color,
                         ),
                         onPressed: () {
                           ref
                               .read(historyVisitsFilterProvider.notifier)
-                              .setContainer(container.id);
+                              .setContainer(null);
                         },
-                        child: Text(container.name ?? 'Container'),
+                        child: const Text('All Containers'),
                       ),
-                  ],
-                  child: Text(
-                    filterContainer != null
-                        ? 'Container: ${filterContainer.name ?? 'Container'}'
-                        : 'Filter Container',
+                      for (final container in containers!)
+                        MenuItemButton(
+                          leadingIcon: Icon(
+                            historyFilter.containerId == container.id
+                                ? Icons.radio_button_checked
+                                : Icons.radio_button_unchecked,
+                            color: container.color,
+                          ),
+                          onPressed: () {
+                            ref
+                                .read(historyVisitsFilterProvider.notifier)
+                                .setContainer(container.id);
+                          },
+                          child: Text(container.name ?? 'Container'),
+                        ),
+                    ],
+                    child: Text(
+                      filterContainer != null
+                          ? 'Container: ${filterContainer.name ?? 'Container'}'
+                          : 'Filter Container',
+                    ),
                   ),
+                ],
+                const Divider(),
+                MenuItemButton(
+                  leadingIcon: const Icon(MdiIcons.restore),
+                  child: const Text('Reset Filter'),
+                  onPressed: () {
+                    textFilterController.clear();
+                    textFilterEnabled.value = false;
+                    if (isDownloadsMode) {
+                      ref.read(historyDownloadsFilterProvider.notifier).reset();
+                    } else {
+                      ref.read(historyVisitsFilterProvider.notifier).reset();
+                    }
+                  },
                 ),
               ],
-              const Divider(),
-              MenuItemButton(
-                leadingIcon: const Icon(MdiIcons.restore),
-                child: const Text('Reset Filter'),
+              child: IconButton(
                 onPressed: () {
-                  textFilterController.clear();
-                  textFilterEnabled.value = false;
-                  if (isDownloadsMode) {
-                    ref.read(historyDownloadsFilterProvider.notifier).reset();
+                  if (menuController.isOpen) {
+                    menuController.close();
                   } else {
-                    ref.read(historyVisitsFilterProvider.notifier).reset();
+                    menuController.open();
                   }
                 },
-              ),
-            ],
-            child: IconButton(
-              onPressed: () {
-                if (menuController.isOpen) {
-                  menuController.close();
-                } else {
-                  menuController.open();
-                }
-              },
-              icon: Badge(
-                isLabelVisible: hasActiveFilter,
-                child: const Icon(MdiIcons.filter),
+                icon: Badge(
+                  isLabelVisible: hasActiveFilter,
+                  child: const Icon(MdiIcons.filter),
+                ),
               ),
             ),
-          ),
         ],
       ),
       body: SafeArea(
