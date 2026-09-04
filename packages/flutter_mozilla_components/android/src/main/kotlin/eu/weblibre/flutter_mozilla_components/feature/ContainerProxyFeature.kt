@@ -311,7 +311,27 @@ object ContainerProxyFeature {
      * snapshot no longer matches and is ignored.
      */
     @MainThread
-    fun onAppHalfStopped() {
+    fun onAppHalfStopped() = dropInstalledRouting(awaitSeed = false)
+
+    /**
+     * [onAppHalfStopped] for a half that is being replaced on the spot — a hot
+     * restart, where the next isolate arrives in this same engine.
+     *
+     * The same drop, except the seed is on the extension before this returns.
+     * Deferring the send is safe for a teardown with nothing behind it: anything
+     * that pushes afterwards is by construction the dying isolate's last word,
+     * which names the same dead ports and is discarded on purpose. A restart
+     * breaks that reasoning — the next push on this channel is the
+     * *replacement's* — and a deferred send that reached the lock after it would
+     * wipe routing the new half had already installed, leaving every proxied
+     * context blocked until something pushed again. Nothing marks that push as
+     * belonging to a newer half, so ordering is what has to settle it, and
+     * blocking here settles it: the replacement does not exist yet.
+     */
+    @MainThread
+    fun onAppHalfReplaced() = dropInstalledRouting(awaitSeed = true)
+
+    private fun dropInstalledRouting(awaitSeed: Boolean) {
         val stale = lastSnapshot
         if (lastSnapshotGeneration == null && installedRouting.value == null) return
 
@@ -339,7 +359,7 @@ object ContainerProxyFeature {
         // so a request the seed blocks is answered rather than held.
         seedAwaitsPush = false
 
-        blockDeadEndpoints(epoch)
+        blockDeadEndpoints(epoch, awaitSeed)
     }
 
     /**
@@ -355,25 +375,41 @@ object ContainerProxyFeature {
      * leaves the direct ones direct.
      *
      * Off the caller's thread because [onAppHalfStopped] runs on the main thread
-     * during teardown and this takes [mutex].
+     * during teardown and this takes [mutex] — unless a replacement half is
+     * already on its way, which is the one case that cannot tolerate this
+     * landing late. See [onAppHalfReplaced].
      */
-    private fun blockDeadEndpoints(epoch: Long) {
-        replayScope.launch {
-            mutex.withLock {
-                // A new app half has pushed since; its routing is live and this
-                // teardown is history.
-                if (epoch != appHalfEpoch.get()) return@withLock
-
-                // A last push from the dying isolate can have landed between the
-                // clear above and this lock. It names the same dead ports.
-                lastSnapshot = null
-                lastSnapshotGeneration = null
-                lastSnapshotProfileKey = null
-                acknowledged = null
-
-                sendSeedLocked()
+    private fun blockDeadEndpoints(epoch: Long, awaitSeed: Boolean) {
+        if (awaitSeed) {
+            // Holding the platform thread on this lock is what an app-driven
+            // push does already, and for the same span: everything under it
+            // queues a message rather than waiting for one.
+            runBlocking {
+                withContext(Dispatchers.Default) {
+                    mutex.withLock { blockDeadEndpointsLocked(epoch) }
+                }
             }
+            return
         }
+
+        replayScope.launch {
+            mutex.withLock { blockDeadEndpointsLocked(epoch) }
+        }
+    }
+
+    private fun blockDeadEndpointsLocked(epoch: Long) {
+        // A new app half has pushed since; its routing is live and this
+        // teardown is history.
+        if (epoch != appHalfEpoch.get()) return
+
+        // A last push from the dying isolate can have landed between the
+        // clear above and this lock. It names the same dead ports.
+        lastSnapshot = null
+        lastSnapshotGeneration = null
+        lastSnapshotProfileKey = null
+        acknowledged = null
+
+        sendSeedLocked()
     }
 
     /**

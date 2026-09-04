@@ -96,6 +96,17 @@ class GeckoProfileApiImpl(private val applicationContext: Context) : GeckoProfil
      */
     private val startupEngines = mutableSetOf<String>()
 
+    /**
+     * What the isolate a hot restart replaced was holding, still held in its
+     * name until its replacement asks for it. See [onEngineRestarting].
+     */
+    private class SupersededLeases {
+        val access = mutableSetOf<DartAccessOwner>()
+        val engines = mutableSetOf<String>()
+    }
+
+    private val superseded = SupersededLeases()
+
     override fun beginStartup(
         ownerType: ProfileStartupOwnerType,
         engineId: String,
@@ -108,6 +119,12 @@ class GeckoProfileApiImpl(private val applicationContext: Context) : GeckoProfil
             },
             engineId = engineId,
         )
+
+        // The lease a replaced isolate was granted is handed back here rather
+        // than when it died, for the reason [onEngineRestarting] gives — and
+        // here rather than in `claimProfileAccess` because this is the call it
+        // would otherwise be refused by.
+        abandonSupersededEngines(except = engineId)
 
         synchronized(startupEngines) { startupEngines += engineId }
 
@@ -315,8 +332,16 @@ class GeckoProfileApiImpl(private val applicationContext: Context) : GeckoProfil
         taskId: String?,
     ): Boolean {
         val owner = accessOwner(ownerType, engineId, taskId)
-        if (!DartProfileAccess.tryClaim(owner)) return false
 
+        // Everything a replaced isolate of *this* engine held. The arbiter
+        // refuses every other candidate, so the lease never stands open.
+        val replaced = synchronized(superseded) { superseded.access.toSet() }
+        if (!DartProfileAccess.tryClaim(owner, replaced)) return false
+
+        if (replaced.isNotEmpty()) {
+            synchronized(superseded) { superseded.access -= replaced }
+            synchronized(grantedAccess) { grantedAccess -= replaced }
+        }
         synchronized(grantedAccess) { grantedAccess += owner }
 
         // The earliest call Dart's startup makes, and so the first moment a
@@ -339,7 +364,8 @@ class GeckoProfileApiImpl(private val applicationContext: Context) : GeckoProfil
      * Releases whatever this engine still held.
      *
      * Called from `onDetachedFromEngine`, which is the last moment a dying
-     * engine is observable. Dart cannot do this for itself: the isolate is gone
+     * engine is observable — see [onEngineRestarting] for the other way an
+     * isolate stops existing. Dart cannot do this for itself: the isolate is gone
      * by the time anyone notices, and `release` checks owner identity, so no
      * later engine can drop the lease on its behalf either.
      *
@@ -348,6 +374,11 @@ class GeckoProfileApiImpl(private val applicationContext: Context) : GeckoProfil
      * `ProviderContainer` open, which is the only thing the lease protects.
      */
     fun onEngineDetached() {
+        synchronized(superseded) {
+            superseded.access.clear()
+            superseded.engines.clear()
+        }
+
         val held = synchronized(grantedAccess) {
             grantedAccess.toList().also { grantedAccess.clear() }
         }
@@ -365,6 +396,55 @@ class GeckoProfileApiImpl(private val applicationContext: Context) : GeckoProfil
         for (engineId in engines) {
             if (StartupArbiter.abandonEngine(engineId)) {
                 Log.i(TAG, "Handed back a startup lease held by a detached engine: $engineId")
+            }
+        }
+    }
+
+    /**
+     * Marks what this engine holds as the previous isolate's, for a hot restart.
+     *
+     * A restart replaces the isolate without touching the engine, so
+     * `onDetachedFromEngine` never runs — and yet the isolate that took these
+     * leases is exactly as gone as a detached one. The replacement introduces
+     * itself with a freshly generated engine id, which the arbiter can only read
+     * as a second owner arriving, so every debug hot restart used to land on
+     * "profile is in use" naming an owner that no longer existed, with nothing
+     * left alive to release it and no retry that could ever succeed.
+     *
+     * Marked rather than released, because the embedder is not finished yet:
+     * `onPreEngineRestart` runs before the old isolate is destroyed, so handing
+     * the lease back to *nobody* here would open it — briefly, but genuinely —
+     * to a headless engine starting elsewhere in the process, while the isolate
+     * that held it is still being torn down. Instead the lease stays taken and
+     * passes to the first claim from this same engine: one engine runs one
+     * isolate, so a claim arriving under a new id is the replacement, and by the
+     * time it runs the embedder has destroyed its predecessor. If none ever
+     * comes, [onEngineDetached] hands everything back the ordinary way.
+     */
+    fun onEngineRestarting() {
+        val held = synchronized(grantedAccess) { grantedAccess.toList() }
+        val engines = synchronized(startupEngines) { startupEngines.toList() }
+        if (held.isEmpty() && engines.isEmpty()) return
+
+        synchronized(superseded) {
+            superseded.access += held
+            superseded.engines += engines
+        }
+
+        Log.i(TAG, "A restarted engine's isolate held $held and arbitrated as $engines")
+    }
+
+    private fun abandonSupersededEngines(except: String) {
+        val engines = synchronized(superseded) {
+            (superseded.engines - except).also { superseded.engines -= it }
+        }
+        if (engines.isEmpty()) return
+
+        synchronized(startupEngines) { startupEngines -= engines }
+
+        for (engineId in engines) {
+            if (StartupArbiter.abandonEngine(engineId)) {
+                Log.i(TAG, "Handed back a startup lease held by a restarted engine: $engineId")
             }
         }
     }

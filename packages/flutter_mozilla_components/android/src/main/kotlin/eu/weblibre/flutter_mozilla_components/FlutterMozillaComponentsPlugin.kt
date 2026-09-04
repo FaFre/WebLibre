@@ -9,12 +9,15 @@ package eu.weblibre.flutter_mozilla_components
 import eu.weblibre.flutter_mozilla_components.api.GeckoBrowserApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoProfileApiImpl
+import eu.weblibre.flutter_mozilla_components.feature.ContainerProxyFeature
 import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureFeature
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoProfileApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPushApi
+import eu.weblibre.flutter_mozilla_components.startup.DartStartupProgress
 
+import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -26,10 +29,21 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
 
   /**
    * Held so the leases this engine took — profile access, and whatever the
-   * arbiter granted it — can be handed back when the engine goes away. See
-   * [GeckoProfileApiImpl.onEngineDetached].
+   * arbiter granted it — can be handed back when the isolate that took them
+   * stops existing: [GeckoProfileApiImpl.onEngineDetached] when the engine goes
+   * away, [GeckoProfileApiImpl.onEngineRestarting] when only the isolate does.
    */
   private var profileApi: GeckoProfileApiImpl? = null
+
+  /**
+   * The engine this plugin is attached to, and the hot-restart listener on it.
+   *
+   * Held only so the listener can be taken off again on detach: a plugin that
+   * left one behind would keep a destroyed engine reachable from its own
+   * listener set.
+   */
+  private var engine: FlutterEngine? = null
+  private var engineLifecycle: FlutterEngine.EngineLifecycleListener? = null
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     // Registered first, and unconditionally: this is the arbitration API Dart
@@ -39,6 +53,45 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     val profileApiImpl = GeckoProfileApiImpl(flutterPluginBinding.applicationContext)
     profileApi = profileApiImpl
     GeckoProfileApi.setUp(flutterPluginBinding.binaryMessenger, profileApiImpl)
+
+    // A hot restart throws the isolate away and runs another one inside this
+    // same engine. Nothing else reports that: the plugin is not re-attached, so
+    // the leases the dead isolate took would be held against its replacement for
+    // the life of the process, and a debug session would answer every restart
+    // with "profile is in use".
+    val lifecycle = object : FlutterEngine.EngineLifecycleListener {
+      override fun onPreEngineRestart() {
+        profileApi?.onEngineRestarting()
+        // A new isolate starts its own cold start, exactly as it does on a fresh
+        // engine; carrying the old one's progress into it would report a stage
+        // nothing has reached.
+        DartStartupProgress.reset()
+        // Replaced rather than merely disposed: the old instance holds the dead
+        // isolate's `nextRoutingDemand` waiter, which would take the next
+        // launch's demand and answer nobody — and an engine whose Gecko is
+        // already initialized never re-runs the setup that registers this, so
+        // leaving the channel bare would fail every routing call the
+        // replacement makes.
+        browserApi.reinstallContainerProxyApi()
+        // The routing on the extension was pushed by that same isolate, and the
+        // proxies its endpoints name are about to be restarted by another one.
+        // Until they are, the snapshot reads as live and would wave a launch
+        // through to ports that no longer mean what they meant; the seed this
+        // installs blocks the proxied contexts and leaves the direct ones
+        // direct. The replaced form, because it has to land before the
+        // replacement's first push rather than whenever it reaches the lock.
+        ContainerProxyFeature.onAppHalfReplaced()
+      }
+
+      // Destruction is followed by `onDetachedFromEngine`, which hands the same
+      // leases back with the binding still valid. Nothing to add here.
+      override fun onEngineWillDestroy() = Unit
+    }
+    flutterPluginBinding.engine().also {
+      engine = it
+      it.addEngineLifecycleListener(lifecycle)
+    }
+    engineLifecycle = lifecycle
 
     browserApi.attachBinding(flutterPluginBinding)
     GeckoBrowserApi.setUp(flutterPluginBinding.binaryMessenger, browserApi)
@@ -68,6 +121,9 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     // non-finishing destroy, so that is a routine event.
     profileApi?.onEngineDetached()
     profileApi = null
+    engineLifecycle?.let { listener -> engine?.removeEngineLifecycleListener(listener) }
+    engineLifecycle = null
+    engine = null
     SandboxCaptureFeature.detachFlutterEvents(binding.binaryMessenger)
     GeckoPushApi.setUp(binding.binaryMessenger, null)
     browserApi.disposePushApi()
@@ -100,4 +156,16 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
   override fun onDetachedFromActivity() {
     browserApi.detachActivity()
   }
+
+  /**
+   * The engine behind a binding.
+   *
+   * Deprecated in favour of the narrower accessors the binding also offers, and
+   * none of them reach the engine lifecycle a hot restart is reported on. If it
+   * is ever removed, the listener moves to whatever creates the engine —
+   * `FlutterEngineCoordinator` and `MainActivity` — which is strictly more
+   * wiring for the same callback.
+   */
+  @Suppress("DEPRECATION")
+  private fun FlutterPlugin.FlutterPluginBinding.engine(): FlutterEngine = flutterEngine
 }

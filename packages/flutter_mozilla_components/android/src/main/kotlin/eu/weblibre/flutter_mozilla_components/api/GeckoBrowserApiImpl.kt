@@ -192,6 +192,48 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         }
     }
 
+    /**
+     * Puts a fresh container-proxy API on the channel, replacing whatever is
+     * there.
+     *
+     * Its own method because [setupGeckoEngine] is not the only caller that
+     * needs it, and is the one place a second caller cannot borrow it from:
+     * [initialize] does nothing once [isGeckoInitialized] is true, which it
+     * stays for the life of the process.
+     */
+    private fun installContainerProxyApi() {
+        disposeContainerProxyApi()
+
+        val containerProxyApiImpl = GeckoContainerProxyApiImpl()
+        GeckoContainerProxyApi.setUp(
+            _flutterPluginBinding.binaryMessenger,
+            containerProxyApiImpl
+        )
+        containerProxyApi = containerProxyApiImpl
+    }
+
+    /**
+     * Hands the container-proxy API to a replacement isolate, after a hot
+     * restart.
+     *
+     * The instance left behind holds the dead isolate's `nextRoutingDemand`
+     * waiter, which would take the next launch's demand off the queue and answer
+     * an isolate that cannot hear it. Disposing it alone is not enough: nothing
+     * else would register the channel again short of destroying the engine, so
+     * every routing push and demand poll the replacement makes would land on a
+     * channel with no handler — Gecko is already initialized, and `initialize`
+     * is the call that would otherwise have set this up.
+     *
+     * A restart before the engine was ever set up is left alone: an unregistered
+     * channel is exactly what a cold start has until [initialize], and this API
+     * speaks for an extension that does not exist yet.
+     */
+    fun reinstallContainerProxyApi() {
+        if (containerProxyApi == null) return
+
+        installContainerProxyApi()
+    }
+
     fun detachActivity() {
         this.activity = null
     }
@@ -386,13 +428,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         GeckoCookieApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoCookieApiImpl())
         GeckoMlApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoMlApiImpl(_flutterPluginBinding.binaryMessenger, _flutterEvents))
         GeckoPrefApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoPrefApiImpl())
-        disposeContainerProxyApi()
-        val containerProxyApiImpl = GeckoContainerProxyApiImpl()
-        GeckoContainerProxyApi.setUp(
-            _flutterPluginBinding.binaryMessenger,
-            containerProxyApiImpl
-        )
-        containerProxyApi = containerProxyApiImpl
+        installContainerProxyApi()
         GeckoFindApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoFindApiImpl())
         GeckoSelectionActionController.setUp(
             _flutterPluginBinding.binaryMessenger, GeckoSelectionActionControllerImpl(

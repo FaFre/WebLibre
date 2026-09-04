@@ -60,13 +60,27 @@ object DartProfileAccess {
      * Re-claiming by the identical owner succeeds: a UI engine that reattaches
      * after an Activity recreation is the same isolate asking again, not a second
      * one arriving.
+     *
+     * [supersedes] names owners the caller can prove are finished — the isolates
+     * of its own engine that a hot restart replaced. It is not a way to take the
+     * lease from a live owner: only the engine an owner belongs to can name it,
+     * and only once the isolate asking is the one the embedder started in its
+     * place. Everyone else is still refused, which is what keeps the lease from
+     * standing open across a restart.
      */
     @Synchronized
-    fun tryClaim(candidate: DartAccessOwner): Boolean {
+    fun tryClaim(
+        candidate: DartAccessOwner,
+        supersedes: Set<DartAccessOwner> = emptySet(),
+    ): Boolean {
         val current = owner
         if (current != null && current != candidate) {
-            logger.info("Refusing profile access for $candidate; $current holds it")
-            return false
+            if (current !in supersedes) {
+                logger.info("Refusing profile access for $candidate; $current holds it")
+                return false
+            }
+
+            logger.info("Profile access passes from $current to $candidate")
         }
 
         owner = candidate
