@@ -27,7 +27,8 @@ import 'package:weblibre/core/maintenance/backup_archive_name.dart';
 import 'package:weblibre/core/maintenance/maintenance_outcome.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/entities/profile.dart';
-import 'package:weblibre/features/user/domain/presentation/dialogs/delete_profile_dialog.dart';
+import 'package:weblibre/features/user/domain/entities/restart_cost.dart';
+import 'package:weblibre/features/user/domain/presentation/dialogs/profile_maintenance_dialogs.dart';
 import 'package:weblibre/features/user/domain/presentation/utils/profile_labels.dart';
 import 'package:weblibre/features/user/domain/presentation/utils/profile_switch_handler.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
@@ -507,10 +508,18 @@ class ProfileRestoreScreen extends HookConsumerWidget {
                                 // straight off this button: pick from a dropdown, tap
                                 // once, and the app closes.
                                 final target = overwriteTarget.value!;
+
+                                // Before the dialog, so the counts are on it
+                                // the moment it appears rather than a frame
+                                // later, under the user's thumb.
+                                final restartCost = await readRestartCost(ref);
+                                if (!context.mounted) return;
+
                                 final confirmed =
                                     await showReplaceProfileDialog(
                                       context,
                                       profileName: labelFor(target),
+                                      restartCost: restartCost,
                                       sourceProfileName: mismatched
                                           ? archive.profileName
                                           : null,

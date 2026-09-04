@@ -30,7 +30,8 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
 import 'package:weblibre/features/user/data/models/auth_settings.dart';
-import 'package:weblibre/features/user/domain/presentation/dialogs/delete_profile_dialog.dart';
+import 'package:weblibre/features/user/domain/entities/restart_cost.dart';
+import 'package:weblibre/features/user/domain/presentation/dialogs/profile_maintenance_dialogs.dart';
 import 'package:weblibre/features/user/domain/presentation/utils/profile_switch_handler.dart';
 import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
@@ -356,9 +357,16 @@ class _ProfileActionsSection extends ConsumerWidget {
               label: const Text('Delete'),
               icon: const Icon(Icons.delete),
               onPressed: () async {
+                // Read before the dialog opens, not inside it: counts that
+                // arrive a frame late land on a dialog the user has already
+                // started tapping through.
+                final restartCost = await readRestartCost(ref);
+                if (!context.mounted) return;
+
                 final result = await showDeleteProfileDialog(
                   context,
                   profileName: profile.name,
+                  restartCost: restartCost,
                 );
 
                 if (result == true) {

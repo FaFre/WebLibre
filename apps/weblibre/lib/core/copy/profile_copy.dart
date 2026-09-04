@@ -49,9 +49,15 @@ const nothingChanged = 'Nothing has been changed.';
 /// Why a destructive action closes the browser first.
 const restartsToWork = 'WebLibre restarts to do this.';
 
+/// The password half of [restartsThenAsksPassword], on its own.
+///
+/// For screens that say the restart part in their own tile, so the two are not
+/// worded twice and cannot drift apart.
+const asksPasswordAfterRestart =
+    'It asks for the backup file password after restarting.';
+
 /// For archive operations, the password is entered after the restart.
-const restartsThenAsksPassword =
-    '$restartsToWork It asks for the backup file password after restarting.';
+const restartsThenAsksPassword = '$restartsToWork $asksPasswordAfterRestart';
 
 /// The only move a user has when startup will not continue.
 const reopenToContinue = 'Close WebLibre and open it again.';
@@ -85,3 +91,34 @@ const restartCouldNotBeScheduled =
 /// Android does not let an app recreate pinned shortcuts.
 const shortcutsNeedPinningAgain =
     'Pin home-screen shortcuts again after restore.';
+
+/// What ending the process costs, whichever profile the operation names.
+///
+/// Backup, delete and replace all leave through `exitApp`, and it tears down the
+/// profile this process is *serving* — not the profile the task happens to name.
+/// Backing up an idle profile still ends the private session of the one in front
+/// of you, and that is the half nobody pictures.
+/// Worded to follow [restartsToWork] rather than to stand alone: every screen
+/// that says this has already said WebLibre restarts, and repeating the subject
+/// made the pair read as two unrelated warnings.
+const restartClosesCurrentProfile =
+    'It also closes the profile you are using now, which is not always the '
+    'profile named here.';
+
+/// The floor under the counted warnings below, so they say what survives too.
+const restartKeepsOtherTabs = 'Your other tabs reopen afterwards.';
+
+/// Private browsing does not survive the process holding it.
+///
+/// Not a policy that could be softened: private tabs live in a memory-only
+/// session context, and `exitApp` closes them explicitly before the engine goes
+/// down. Said only when there are some — a line that prints on every backup is
+/// one people learn to tap past, and then it is not there when it matters.
+String privateTabsClosedByRestart(int count) => count == 1
+    ? '1 private tab closes and its browsing data is cleared.'
+    : '$count private tabs close and their browsing data is cleared.';
+
+/// A maintenance restart is an exit, so containers set to clear on exit clear.
+String containersClearedByRestart(int count) => count == 1
+    ? '1 container set to clear data on exit is cleared.'
+    : '$count containers set to clear data on exit are cleared.';

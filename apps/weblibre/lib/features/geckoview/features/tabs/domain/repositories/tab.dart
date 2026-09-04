@@ -224,6 +224,20 @@ class TabDataRepository extends _$TabDataRepository {
         .moveTabAmongSiblings(tabId, down: down);
   }
 
+  /// How many private tabs are open across every container.
+  ///
+  /// The same set `exitApp` closes on the way out, asked ahead of time so a
+  /// confirmation can say what leaving costs instead of finding out afterwards.
+  Future<int> countPrivateTabs() async {
+    final tabIds = await ref
+        .read(tabDatabaseProvider)
+        .containerDao
+        .getAllTabIds(includeRegular: false, includeIsolated: false)
+        .get();
+
+    return tabIds.length;
+  }
+
   Future<int> closeAllTabs({
     bool includeRegular = true,
     bool includePrivate = true,

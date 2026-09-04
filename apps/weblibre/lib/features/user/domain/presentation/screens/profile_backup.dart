@@ -27,6 +27,8 @@ import 'package:weblibre/core/maintenance/maintenance_outcome.dart';
 import 'package:weblibre/core/maintenance/saf_archive_target.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/entities/profile.dart';
+import 'package:weblibre/features/user/domain/entities/restart_cost.dart';
+import 'package:weblibre/features/user/domain/presentation/dialogs/profile_maintenance_dialogs.dart';
 import 'package:weblibre/features/user/domain/providers/backup_directory.dart';
 import 'package:weblibre/features/user/domain/services/user_backup.dart';
 import 'package:weblibre/utils/exit_app.dart';
@@ -79,6 +81,22 @@ class ProfileBackupScreen extends HookConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
           child: ListView(
             children: [
+              // First, and on its own. It used to be the subtitle of the
+              // password tile below, where it read as logistics rather than as
+              // "your session ends when you tap this" — and it said "the
+              // profile is closed", which is only half of it: the profile that
+              // closes is *this* one, whether or not it is the one being
+              // backed up.
+              const ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.restart_alt),
+                title: Text('WebLibre restarts to do this'),
+                subtitle: Text(
+                  '$restartClosesCurrentProfile The backup is then taken with '
+                  'nothing writing to the profile it copies, which is what '
+                  'makes it consistent.',
+                ),
+              ),
               const ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: Icon(Icons.lock_outline),
@@ -86,10 +104,7 @@ class ProfileBackupScreen extends HookConsumerWidget {
                 // Asked for after the restart instead of here. A password is
                 // the one thing that must not be written into the durable task
                 // record that survives it.
-                subtitle: Text(
-                  '$restartsThenAsksPassword The profile is closed while the '
-                  'backup is created.',
-                ),
+                subtitle: Text(asksPasswordAfterRestart),
               ),
               const SizedBox(height: 16),
               SwitchListTile(
@@ -168,6 +183,24 @@ class ProfileBackupScreen extends HookConsumerWidget {
                           .read(backupDirectoryUriProvider.notifier)
                           .set(Uri.parse(dir.uri));
                     }
+
+                    // Confirmed last, after the folder is settled: a
+                    // dialog answered and then followed by a system folder
+                    // picker is a confirmation for something else.
+                    //
+                    // Backup is the only maintenance action that destroys
+                    // nothing it names, which is exactly why it needs asking:
+                    // it still leaves through `exitApp`, and that takes the
+                    // current profile's private tabs with it.
+                    final restartCost = await readRestartCost(ref);
+                    if (!context.mounted) return;
+
+                    final confirmed = await showBackupProfileDialog(
+                      context,
+                      profileName: profile.name,
+                      restartCost: restartCost,
+                    );
+                    if (confirmed != true) return;
 
                     // Queues the work and restarts. The archive is written
                     // by the next process, where nothing has the profile

@@ -19,7 +19,9 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:weblibre/core/copy/profile_copy.dart';
+import 'package:weblibre/features/user/domain/entities/restart_cost.dart';
 
 /// Confirms deleting [profileName], including the restart it needs.
 ///
@@ -32,6 +34,10 @@ import 'package:weblibre/core/copy/profile_copy.dart';
 Future<bool?> showDeleteProfileDialog(
   BuildContext context, {
   required String profileName,
+
+  /// What closing this process costs the profile in front of the user, which is
+  /// never the one being deleted — deletion is not offered for the active one.
+  required RestartCost restartCost,
 }) {
   return showDialog<bool?>(
     context: context,
@@ -41,14 +47,18 @@ Future<bool?> showDeleteProfileDialog(
       return AlertDialog(
         icon: Icon(Icons.delete_forever, color: theme.colorScheme.error),
         title: Text('Delete "$profileName"?'),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Its $profileDataDescription are removed. $cannotBeUndone'),
-            SizedBox(height: 16),
+            const Text(
+              'Its $profileDataDescription are removed. $cannotBeUndone',
+            ),
+            const SizedBox(height: 16),
             _RestartNote(
-              '$restartsToWork The profile is closed before it is deleted.',
+              '$restartsToWork $restartClosesCurrentProfile The profile '
+              'being deleted is closed first.',
+              cost: restartCost,
             ),
           ],
         ),
@@ -84,6 +94,11 @@ Future<bool?> showDeleteProfileDialog(
 Future<bool?> showReplaceProfileDialog(
   BuildContext context, {
   required String profileName,
+
+  /// What closing this process costs the session in front of the user, which is
+  /// a separate loss from the one this dialog is about even when the profile
+  /// being replaced is the active one.
+  required RestartCost restartCost,
 
   /// Set when the backup came from a different user, so the confirmation says
   /// whose data is arriving rather than leaving the user to infer it.
@@ -146,8 +161,10 @@ Future<bool?> showReplaceProfileDialog(
               ),
             ],
             const SizedBox(height: 16),
-            const _RestartNote(
-              '$restartsThenAsksPassword Nothing is replaced before that.',
+            _RestartNote(
+              '$restartsThenAsksPassword Nothing is replaced before that. '
+              '$restartClosesCurrentProfile',
+              cost: restartCost,
             ),
           ],
         ),
@@ -170,33 +187,131 @@ Future<bool?> showReplaceProfileDialog(
   );
 }
 
-/// The shared "this takes a restart" footnote used by both dialogs here.
+/// Confirms backing up [profileName], including what the restart costs.
+///
+/// Backup is the odd one out among these three: it destroys nothing it names,
+/// so it used to run straight off a button press with the restart mentioned only
+/// in a subtitle about passwords. But it leaves through the same `exitApp` as
+/// delete and replace, and that ends the private session of whatever profile is
+/// open — so the harmless-sounding action was the one taking a session down
+/// without asking, and for a profile the user may not even have been backing up.
+///
+/// Returns true if the user confirms, false if cancelled, null if dismissed.
+Future<bool?> showBackupProfileDialog(
+  BuildContext context, {
+  required String profileName,
+  required RestartCost restartCost,
+}) {
+  return showDialog<bool?>(
+    context: context,
+    builder: (BuildContext context) {
+      // Not error-coloured, unlike the two below it. Nothing in the named
+      // profile is lost, and dressing a backup as a destructive action is how
+      // the colour stops meaning anything on the screens where it does.
+      return AlertDialog(
+        icon: const Icon(MdiIcons.safe),
+        title: Text('Back up "$profileName"?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'The backup is taken with the profile closed, so nothing in it '
+              'changes.',
+            ),
+            const SizedBox(height: 16),
+            _RestartNote(
+              '$restartsToWork $restartClosesCurrentProfile',
+              cost: restartCost,
+            ),
+          ],
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Back up and restart'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+/// The shared "this takes a restart" footnote used by the dialogs here.
+///
+/// [cost] is what leaving actually discards. It is listed only when there is
+/// something in it: most restarts cost nothing, and a warning that prints every
+/// time is one people learn to tap past.
 class _RestartNote extends StatelessWidget {
-  const _RestartNote(this.text);
+  const _RestartNote(this.text, {required this.cost});
 
   final String text;
+  final RestartCost cost;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Row(
+    final losses = [
+      if (cost.privateTabs > 0) privateTabsClosedByRestart(cost.privateTabs),
+      if (cost.containersClearedOnExit > 0)
+        containersClearedByRestart(cost.containersClearedOnExit),
+    ];
+
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          Icons.restart_alt,
-          size: 18,
-          color: theme.colorScheme.onSurfaceVariant,
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            text,
-            style: theme.textTheme.bodySmall?.copyWith(
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.restart_alt,
+              size: 18,
               color: theme.colorScheme.onSurfaceVariant,
             ),
-          ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                text,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ],
         ),
+        if (losses.isNotEmpty)
+          // Indented under the footnote and coloured apart from it: these are
+          // the only sentences here describing something that does not come
+          // back, and on the backup dialog they are the only warning at all.
+          Padding(
+            padding: const EdgeInsets.only(left: 26, top: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final loss in losses)
+                  Text(
+                    loss,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.error,
+                    ),
+                  ),
+                const SizedBox(height: 4),
+                // The floor under the list. Without it, "your tabs close" is
+                // what people read, and they stop taking backups.
+                Text(
+                  restartKeepsOtherTabs,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
       ],
     );
   }
