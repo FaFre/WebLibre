@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Search-bar app widget palette, light configuration.
+
+  The widget is drawn by the launcher, not by Flutter, so it cannot read the
+  app's theme. It follows the *system* day/night setting instead, which is what
+  a home screen surface should do, and it does it the only way a widget reliably
+  can: through resource qualifiers, resolved in the host process every time the
+  RemoteViews are applied.
+
+  Values are the Material 3 baseline (surfaceVariant / outline / onSurfaceVariant);
+  values-v31 swaps them for the device's dynamic palette. Keep the four files in
+  sync — SearchBarWidgetProvider pairs `widget_search_field_hint` with Glance's
+  own `onSurfaceVariant`, which uses exactly these tones.
+-->
+<resources>
+    <color name="widget_search_field_background">#FFE7E0EC</color>
+    <color name="widget_search_field_outline">#FF79747E</color>
+    <color name="widget_search_field_hint">#FF49454F</color>
+</resources>

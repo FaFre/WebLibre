@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Background of the search-bar app widget. The colors are day/night resources so
+  the launcher resolves them against its own configuration when it applies the
+  RemoteViews — the widget follows the system theme on every API level, without
+  the app being alive. See values/widget_colors.xml.
+-->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#333237"/> <!-- Background color -->
-    <corners android:radius="32dp"/> <!-- Rounded corners -->
-    <stroke android:width="1dp" android:color="#BDBDBD"/> <!-- Border -->
+    <solid android:color="@color/widget_search_field_background"/>
+    <corners android:radius="32dp"/>
+    <stroke android:width="1dp" android:color="@color/widget_search_field_outline"/>
 </shape>

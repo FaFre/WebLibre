@@ -3,12 +3,12 @@ package eu.weblibre.gecko
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.GlanceTheme
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.action.Action
@@ -25,13 +25,19 @@ import androidx.glance.layout.padding
 import androidx.glance.layout.wrapContentHeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
-import androidx.glance.unit.ColorProvider
 
 class SearchBarGlanceWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
-            SearchBarContent(context)
+            // Glance's default color providers are backed by day/night (and, on
+            // Android 12+, dynamic) color resources, so the launcher resolves
+            // them against its own configuration. Everything the widget paints
+            // has to come from a resource for that to hold — see
+            // values/widget_colors.xml.
+            GlanceTheme {
+                SearchBarContent(context)
+            }
         }
     }
 }
@@ -58,7 +64,12 @@ private fun SearchBarContent(context: Context) {
         Text(
             text = "Search with WebLibre...",
             style = TextStyle(
-                color = ColorProvider(Color(0xFF848388)),
+                // Matches @color/widget_search_field_hint, which tints the
+                // microphone; keep the two in step. On Android 12+ this is
+                // resolved by the launcher, so it tracks a theme switch with no
+                // widget update at all; below that Glance bakes in the color the
+                // app process saw when the widget was last composed.
+                color = GlanceTheme.colors.onSurfaceVariant,
                 fontSize = 16.sp
             ),
             maxLines = 1,

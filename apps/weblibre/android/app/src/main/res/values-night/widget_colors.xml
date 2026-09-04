@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Search-bar app widget palette, dark configuration. See values/widget_colors.xml. -->
+<resources>
+    <color name="widget_search_field_background">#FF49454F</color>
+    <color name="widget_search_field_outline">#FF938F99</color>
+    <color name="widget_search_field_hint">#FFCAC4D0</color>
+</resources>

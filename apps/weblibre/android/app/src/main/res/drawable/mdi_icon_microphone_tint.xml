@@ -1,1 +1,16 @@
-<!-- drawable/microphone.xml --><vector xmlns:android="http://schemas.android.com/apk/res/android" android:height="24dp" android:tint="#848388" android:width="24dp" android:viewportWidth="24" android:viewportHeight="24"><path android:fillColor="#000000" android:pathData="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z" /></vector>
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Microphone icon for the search-bar app widget. Tinted from a day/night color
+  resource rather than a literal, so the launcher resolves it against its own
+  configuration. See values/widget_colors.xml.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="@color/widget_search_field_hint">
+    <path
+        android:fillColor="#000000"
+        android:pathData="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z" />
+</vector>

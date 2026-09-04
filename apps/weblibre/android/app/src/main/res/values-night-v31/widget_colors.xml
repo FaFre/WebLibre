@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Search-bar app widget palette, dark configuration on Android 12+, where the
+  dynamic (Material You) palette exists. See values/widget_colors.xml.
+-->
+<resources>
+    <color name="widget_search_field_background">@android:color/system_neutral2_700</color>
+    <color name="widget_search_field_outline">@android:color/system_neutral2_400</color>
+    <color name="widget_search_field_hint">@android:color/system_neutral2_200</color>
+</resources>
