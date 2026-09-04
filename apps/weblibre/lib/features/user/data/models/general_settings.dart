@@ -129,6 +129,32 @@ enum TabBarPosition {
 
 enum TabBarLayout { withTitle, compact }
 
+/// Which tab chips in the quick tab switcher and the tab bar carry a close
+/// button.
+///
+/// [activeTabOnly] is the historic behavior: the chip the user is already on
+/// can be closed in place, every other chip only through its long-press menu.
+/// [all] puts a button on every chip and [never] on none — the last matters
+/// once the active tab is on the bar at all (container-tabs stacking), where
+/// the button sits right beside the chip the user taps to go back to it.
+///
+/// No mode removes a way to close a tab: the chip long-press menu and the tab
+/// bar swipe action are untouched throughout. The narrow vertical rail has no
+/// room for a close button beside an icon-only chip and behaves as [never]
+/// whatever this says.
+enum TabChipCloseButtonMode {
+  activeTabOnly,
+  all,
+  never;
+
+  /// Whether the chip for a tab shows its close button.
+  bool showsFor({required bool isActive}) => switch (this) {
+    TabChipCloseButtonMode.activeTabOnly => isActive,
+    TabChipCloseButtonMode.all => true,
+    TabChipCloseButtonMode.never => false,
+  };
+}
+
 /// Where the browser home surface offers its entry into search.
 ///
 /// The home surface has no address field of its own, so exactly one of these
@@ -286,9 +312,9 @@ class GeneralSettings with FastEquatable {
   /// Max width (logical px) for chip titles in the quick tab switcher.
   final double quickTabSwitcherTitleWidth;
 
-  /// Whether every tab chip in the quick tab switcher shows a close button.
-  /// The selected tab's chip always shows one regardless of this setting.
-  final bool quickTabSwitcherShowCloseButtonOnAllTabs;
+  /// Which tab chips show a close button in the quick tab switcher and the
+  /// tab bar.
+  final TabChipCloseButtonMode quickTabSwitcherCloseButtonMode;
   final String syncServerOverride;
   final String syncTokenServerOverride;
   final bool urlCleanerEnabled;
@@ -444,7 +470,7 @@ class GeneralSettings with FastEquatable {
     required this.quickTabSwitcherHierarchyGlyphs,
     required this.quickTabSwitcherShowHistorySuggestions,
     required this.quickTabSwitcherTitleWidth,
-    required this.quickTabSwitcherShowCloseButtonOnAllTabs,
+    required this.quickTabSwitcherCloseButtonMode,
     required this.syncServerOverride,
     required this.syncTokenServerOverride,
     required this.urlCleanerEnabled,
@@ -531,7 +557,7 @@ class GeneralSettings with FastEquatable {
     int? quickTabSwitcherHierarchyGlyphs,
     bool? quickTabSwitcherShowHistorySuggestions,
     double? quickTabSwitcherTitleWidth,
-    bool? quickTabSwitcherShowCloseButtonOnAllTabs,
+    TabChipCloseButtonMode? quickTabSwitcherCloseButtonMode,
     String? syncServerOverride,
     String? syncTokenServerOverride,
     bool? urlCleanerEnabled,
@@ -639,8 +665,9 @@ class GeneralSettings with FastEquatable {
            quickTabSwitcherShowHistorySuggestions ?? true,
        quickTabSwitcherTitleWidth =
            quickTabSwitcherTitleWidth ?? defaultQuickTabSwitcherTitleWidth,
-       quickTabSwitcherShowCloseButtonOnAllTabs =
-           quickTabSwitcherShowCloseButtonOnAllTabs ?? false,
+       quickTabSwitcherCloseButtonMode =
+           quickTabSwitcherCloseButtonMode ??
+           TabChipCloseButtonMode.activeTabOnly,
        syncServerOverride = syncServerOverride ?? '',
        syncTokenServerOverride = syncTokenServerOverride ?? '',
        urlCleanerEnabled = urlCleanerEnabled ?? true,
@@ -710,6 +737,18 @@ class GeneralSettings with FastEquatable {
       } else if (legacySwitcherMode != null) {
         json['tabBarStackingMode'] = legacySwitcherMode;
       }
+    }
+
+    // Migrate the legacy `quickTabSwitcherShowCloseButtonOnAllTabs` toggle to
+    // the three-state `quickTabSwitcherCloseButtonMode`. The toggle could only
+    // spell out `all` and `activeTabOnly`; `never` is new, so an unset mode
+    // with the toggle off is just the default.
+    // TODO: Drop this fallback (and the legacy row in the user settings DB)
+    // once enough releases have shipped that rolling back to a version
+    // without `quickTabSwitcherCloseButtonMode` is no longer a concern.
+    if (json['quickTabSwitcherCloseButtonMode'] == null &&
+        json['quickTabSwitcherShowCloseButtonOnAllTabs'] == true) {
+      json['quickTabSwitcherCloseButtonMode'] = 'all';
     }
 
     return _$GeneralSettingsFromJson(json);
@@ -846,7 +885,7 @@ class GeneralSettings with FastEquatable {
     quickTabSwitcherHierarchyGlyphs,
     quickTabSwitcherShowHistorySuggestions,
     quickTabSwitcherTitleWidth,
-    quickTabSwitcherShowCloseButtonOnAllTabs,
+    quickTabSwitcherCloseButtonMode,
     syncServerOverride,
     syncTokenServerOverride,
     urlCleanerEnabled,

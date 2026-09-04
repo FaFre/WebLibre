@@ -221,8 +221,7 @@ class TabBarPreviewCard extends HookWidget {
         showIsolatedTabUi: settings.showIsolatedTabUi,
         hierarchyGlyphs: settings.quickTabSwitcherHierarchyGlyphs,
         titleMaxWidth: settings.quickTabSwitcherTitleWidth,
-        showCloseButtonOnAllTabs:
-            settings.quickTabSwitcherShowCloseButtonOnAllTabs,
+        closeButtonMode: settings.quickTabSwitcherCloseButtonMode,
         enablePinTabInMenu: false,
         onSelected: (_) async {},
         onCloseItem: (_) async {},

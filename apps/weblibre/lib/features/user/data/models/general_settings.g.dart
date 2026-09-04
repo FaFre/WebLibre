@@ -129,8 +129,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings quickTabSwitcherTitleWidth(double quickTabSwitcherTitleWidth);
 
-  GeneralSettings quickTabSwitcherShowCloseButtonOnAllTabs(
-    bool quickTabSwitcherShowCloseButtonOnAllTabs,
+  GeneralSettings quickTabSwitcherCloseButtonMode(
+    TabChipCloseButtonMode quickTabSwitcherCloseButtonMode,
   );
 
   GeneralSettings syncServerOverride(String syncServerOverride);
@@ -266,7 +266,7 @@ abstract class _$GeneralSettingsCWProxy {
     int quickTabSwitcherHierarchyGlyphs,
     bool quickTabSwitcherShowHistorySuggestions,
     double quickTabSwitcherTitleWidth,
-    bool quickTabSwitcherShowCloseButtonOnAllTabs,
+    TabChipCloseButtonMode quickTabSwitcherCloseButtonMode,
     String syncServerOverride,
     String syncTokenServerOverride,
     bool urlCleanerEnabled,
@@ -533,12 +533,9 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   ) => call(quickTabSwitcherTitleWidth: quickTabSwitcherTitleWidth);
 
   @override
-  GeneralSettings quickTabSwitcherShowCloseButtonOnAllTabs(
-    bool quickTabSwitcherShowCloseButtonOnAllTabs,
-  ) => call(
-    quickTabSwitcherShowCloseButtonOnAllTabs:
-        quickTabSwitcherShowCloseButtonOnAllTabs,
-  );
+  GeneralSettings quickTabSwitcherCloseButtonMode(
+    TabChipCloseButtonMode quickTabSwitcherCloseButtonMode,
+  ) => call(quickTabSwitcherCloseButtonMode: quickTabSwitcherCloseButtonMode);
 
   @override
   GeneralSettings syncServerOverride(String syncServerOverride) =>
@@ -736,8 +733,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? quickTabSwitcherShowHistorySuggestions =
         const $CopyWithPlaceholder(),
     Object? quickTabSwitcherTitleWidth = const $CopyWithPlaceholder(),
-    Object? quickTabSwitcherShowCloseButtonOnAllTabs =
-        const $CopyWithPlaceholder(),
+    Object? quickTabSwitcherCloseButtonMode = const $CopyWithPlaceholder(),
     Object? syncServerOverride = const $CopyWithPlaceholder(),
     Object? syncTokenServerOverride = const $CopyWithPlaceholder(),
     Object? urlCleanerEnabled = const $CopyWithPlaceholder(),
@@ -1068,13 +1064,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.quickTabSwitcherTitleWidth
           // ignore: cast_nullable_to_non_nullable
           : quickTabSwitcherTitleWidth as double,
-      quickTabSwitcherShowCloseButtonOnAllTabs:
-          quickTabSwitcherShowCloseButtonOnAllTabs ==
-                  const $CopyWithPlaceholder() ||
-              quickTabSwitcherShowCloseButtonOnAllTabs == null
-          ? _value.quickTabSwitcherShowCloseButtonOnAllTabs
+      quickTabSwitcherCloseButtonMode:
+          quickTabSwitcherCloseButtonMode == const $CopyWithPlaceholder() ||
+              quickTabSwitcherCloseButtonMode == null
+          ? _value.quickTabSwitcherCloseButtonMode
           // ignore: cast_nullable_to_non_nullable
-          : quickTabSwitcherShowCloseButtonOnAllTabs as bool,
+          : quickTabSwitcherCloseButtonMode as TabChipCloseButtonMode,
       syncServerOverride:
           syncServerOverride == const $CopyWithPlaceholder() ||
               syncServerOverride == null
@@ -1390,8 +1385,10 @@ GeneralSettings _$GeneralSettingsFromJson(
       json['quickTabSwitcherShowHistorySuggestions'] as bool?,
   quickTabSwitcherTitleWidth: (json['quickTabSwitcherTitleWidth'] as num?)
       ?.toDouble(),
-  quickTabSwitcherShowCloseButtonOnAllTabs:
-      json['quickTabSwitcherShowCloseButtonOnAllTabs'] as bool?,
+  quickTabSwitcherCloseButtonMode: $enumDecodeNullable(
+    _$TabChipCloseButtonModeEnumMap,
+    json['quickTabSwitcherCloseButtonMode'],
+  ),
   syncServerOverride: json['syncServerOverride'] as String?,
   syncTokenServerOverride: json['syncTokenServerOverride'] as String?,
   urlCleanerEnabled: json['urlCleanerEnabled'] as bool?,
@@ -1513,8 +1510,9 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'quickTabSwitcherShowHistorySuggestions':
       instance.quickTabSwitcherShowHistorySuggestions,
   'quickTabSwitcherTitleWidth': instance.quickTabSwitcherTitleWidth,
-  'quickTabSwitcherShowCloseButtonOnAllTabs':
-      instance.quickTabSwitcherShowCloseButtonOnAllTabs,
+  'quickTabSwitcherCloseButtonMode':
+      _$TabChipCloseButtonModeEnumMap[instance
+          .quickTabSwitcherCloseButtonMode]!,
   'syncServerOverride': instance.syncServerOverride,
   'syncTokenServerOverride': instance.syncTokenServerOverride,
   'urlCleanerEnabled': instance.urlCleanerEnabled,
@@ -1650,6 +1648,12 @@ const _$TabBarStackingModeEnumMap = {
   TabBarStackingMode.accordion: 'accordion',
   TabBarStackingMode.twoLevel: 'twoLevel',
   TabBarStackingMode.disabled: 'disabled',
+};
+
+const _$TabChipCloseButtonModeEnumMap = {
+  TabChipCloseButtonMode.activeTabOnly: 'activeTabOnly',
+  TabChipCloseButtonMode.all: 'all',
+  TabChipCloseButtonMode.never: 'never',
 };
 
 const _$IntentSourcePolicyEnumMap = {

@@ -89,9 +89,9 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
         (s) => s.quickTabSwitcherTitleWidth,
       ),
     );
-    final showCloseButtonOnAllTabs = ref.watch(
+    final closeButtonMode = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (s) => s.quickTabSwitcherShowCloseButtonOnAllTabs,
+        (s) => s.quickTabSwitcherCloseButtonMode,
       ),
     );
 
@@ -188,7 +188,7 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
       final canClose =
           !isVertical &&
           !item.isPlaceholder &&
-          (showCloseButtonOnAllTabs || item.isActive);
+          closeButtonMode.showsFor(isActive: item.isActive);
 
       final chip = QuickTabSwitcherChip(
         item: item,

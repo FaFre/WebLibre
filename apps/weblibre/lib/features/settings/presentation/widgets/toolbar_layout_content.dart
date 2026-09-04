@@ -99,10 +99,10 @@ const List<SettingsSectionDefinition> toolbarLayoutSettingsSections = [
         child: _CustomizeQuickSwitcherButtonsTile(),
       ),
       SettingsEntryDefinition(
-        title: 'Close Buttons on All Tabs',
-        subtitle: 'Show a close button on every switcher chip',
-        keywords: ['close', 'x button'],
-        child: _QuickTabSwitcherCloseButtonsTile(),
+        title: 'Close Buttons on Tab Chips',
+        subtitle: 'Which switcher chips show a close button',
+        keywords: ['close', 'x button', 'active tab'],
+        child: _QuickTabSwitcherCloseButtonsSection(),
       ),
       SettingsEntryDefinition(
         title: 'History Fallback in Quick Tab Switcher',
@@ -441,14 +441,14 @@ class _TabBarStackingModeSection extends HookConsumerWidget {
   }
 }
 
-class _QuickTabSwitcherCloseButtonsTile extends HookConsumerWidget {
-  const _QuickTabSwitcherCloseButtonsTile();
+class _QuickTabSwitcherCloseButtonsSection extends HookConsumerWidget {
+  const _QuickTabSwitcherCloseButtonsSection();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final showCloseButtonOnAllTabs = ref.watch(
+    final closeButtonMode = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (s) => s.quickTabSwitcherShowCloseButtonOnAllTabs,
+        (s) => s.quickTabSwitcherCloseButtonMode,
       ),
     );
     final switcherEnabled = ref.watch(
@@ -457,24 +457,60 @@ class _QuickTabSwitcherCloseButtonsTile extends HookConsumerWidget {
       ),
     );
 
-    return SwitchListTile.adaptive(
-      title: const Text('Close Buttons on All Tabs'),
-      subtitle: const Text(
-        "Show a close button on every switcher chip; the active tab's chip "
-        "always has one",
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const ListTile(
+            title: Text('Close Buttons on Tab Chips'),
+            subtitle: Text('Which switcher chips show a close button'),
+            leading: Icon(MdiIcons.closeCircleOutline),
+            contentPadding: EdgeInsets.zero,
+          ),
+          RadioGroup(
+            groupValue: closeButtonMode,
+            onChanged: (value) async {
+              if (value != null) {
+                await ref
+                    .read(saveGeneralSettingsControllerProvider.notifier)
+                    .save(
+                      (currentSettings) => currentSettings.copyWith
+                          .quickTabSwitcherCloseButtonMode(value),
+                    );
+              }
+            },
+            child: Column(
+              children: [
+                RadioListTile.adaptive(
+                  value: TabChipCloseButtonMode.activeTabOnly,
+                  enabled: switcherEnabled,
+                  title: const Text('Active Tab Only'),
+                  subtitle: const Text(
+                    'Only the chip of the tab currently open',
+                  ),
+                ),
+                RadioListTile.adaptive(
+                  value: TabChipCloseButtonMode.all,
+                  enabled: switcherEnabled,
+                  title: const Text('All Tabs'),
+                  subtitle: const Text('Every chip on the bar'),
+                ),
+                RadioListTile.adaptive(
+                  value: TabChipCloseButtonMode.never,
+                  enabled: switcherEnabled,
+                  title: const Text('Never'),
+                  subtitle: const Text(
+                    'No close buttons; close tabs from the long press menu '
+                    'or by swiping the bar',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
-      secondary: const Icon(MdiIcons.closeCircleOutline),
-      value: showCloseButtonOnAllTabs,
-      onChanged: switcherEnabled
-          ? (value) async {
-              await ref
-                  .read(saveGeneralSettingsControllerProvider.notifier)
-                  .save(
-                    (currentSettings) => currentSettings.copyWith
-                        .quickTabSwitcherShowCloseButtonOnAllTabs(value),
-                  );
-            }
-          : null,
     );
   }
 }

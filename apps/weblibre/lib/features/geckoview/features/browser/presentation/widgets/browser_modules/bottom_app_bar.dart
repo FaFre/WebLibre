@@ -869,9 +869,9 @@ class QuickTabSwitcher extends HookConsumerWidget {
         (s) => s.quickTabSwitcherTitleWidth,
       ),
     );
-    final showCloseButtonOnAllTabs = ref.watch(
+    final closeButtonMode = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (s) => s.quickTabSwitcherShowCloseButtonOnAllTabs,
+        (s) => s.quickTabSwitcherCloseButtonMode,
       ),
     );
     final tabBarDirection = ref.watch(
@@ -1023,7 +1023,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
         showIsolatedTabUi: showIsolatedTabUi,
         hierarchyGlyphs: hierarchyGlyphs,
         titleMaxWidth: titleMaxWidth,
-        showCloseButtonOnAllTabs: showCloseButtonOnAllTabs,
+        closeButtonMode: closeButtonMode,
         enablePinTabInMenu:
             quickTabSwitcherMode == QuickTabSwitcherMode.containerTabs,
         onCloseItem: (item) =>
@@ -1100,7 +1100,7 @@ class QuickTabSwitcherView extends StatelessWidget {
     required this.showIsolatedTabUi,
     this.hierarchyGlyphs = defaultQuickTabSwitcherHierarchyGlyphs,
     this.titleMaxWidth = defaultQuickTabSwitcherTitleWidth,
-    this.showCloseButtonOnAllTabs = false,
+    this.closeButtonMode = TabChipCloseButtonMode.activeTabOnly,
     required this.enablePinTabInMenu,
     required this.onSelected,
     this.onCloseItem,
@@ -1129,7 +1129,7 @@ class QuickTabSwitcherView extends StatelessWidget {
 
   /// Whether every tab chip shows a close button. The active tab's chip
   /// always shows one when [onCloseItem] is set.
-  final bool showCloseButtonOnAllTabs;
+  final TabChipCloseButtonMode closeButtonMode;
 
   final bool enablePinTabInMenu;
   final Future<void> Function(QuickTabSwitcherItem item) onSelected;
@@ -1157,7 +1157,7 @@ class QuickTabSwitcherView extends StatelessWidget {
       onCloseItem != null &&
       !item.isHistory &&
       !item.isPlaceholder &&
-      (showCloseButtonOnAllTabs || item.isActive);
+      closeButtonMode.showsFor(isActive: item.isActive);
 
   bool get _isVertical => axis == Axis.vertical;
 
