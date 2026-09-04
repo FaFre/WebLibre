@@ -41,6 +41,7 @@ import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/wallpaper/presentation/widgets/wallpaper_backdrop.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
+import 'package:weblibre/presentation/widgets/sliver_center_on_underflow.dart';
 
 /// The home surface creates tabs of the user's configured default type; the
 /// child type is meaningless here because there is no tab to be a child of.
@@ -154,25 +155,46 @@ class BrowserHome extends ConsumerWidget {
               child: CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
-                  const SliverToBoxAdapter(child: SizedBox(height: 20)),
-                  const SliverToBoxAdapter(child: _HomeHeader()),
-                  // Pinned, because under [HomeSearchBarPlacement.top] the
-                  // browser toolbar's address field is suppressed while home is
-                  // showing: this is then the only way into search, so it has to
-                  // survive scrolling. Pinning it above the section headers also
-                  // gives them something to slide under.
-                  const _HomeSearchPillSliver(),
-                  const SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: SupporterHomeBanner(),
+                  // Centred as one block while it all fits, so a home page cut
+                  // back to a couple of sections reads as a page rather than as
+                  // content stranded against the top edge. The pill travels
+                  // with it: under [HomeSearchBarPlacement.top] the brand mark,
+                  // the search entry and the sections are one composition, and
+                  // leaving the pill pinned at the top while the rest sank to
+                  // the middle would split it in two.
+                  //
+                  // The trailing spacer is inside the block, which is what
+                  // makes the result land in the middle of what the user can
+                  // *see*: it carries the toolbar inset, so the content ends up
+                  // centred in the viewport minus the toolbar rather than
+                  // centred behind it.
+                  SliverCenterOnUnderflow(
+                    sliver: SliverMainAxisGroup(
+                      slivers: [
+                        const SliverToBoxAdapter(child: SizedBox(height: 20)),
+                        const SliverToBoxAdapter(child: _HomeHeader()),
+                        // Pinned, because under [HomeSearchBarPlacement.top]
+                        // the browser toolbar's address field is suppressed
+                        // while home is showing: this is then the only way into
+                        // search, so it has to survive scrolling. Pinning it
+                        // above the section headers also gives them something
+                        // to slide under. Nothing scrolls while the block is
+                        // centred, so the two never fight.
+                        const _HomeSearchPillSliver(),
+                        const SliverToBoxAdapter(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            child: SupporterHomeBanner(),
+                          ),
+                        ),
+                        ModuleSurfaceSliverList(
+                          surface: ModuleSurface.home,
+                          callbacks: callbacks,
+                        ),
+                        const _HomeBottomInsetSpacer(),
+                      ],
                     ),
                   ),
-                  ModuleSurfaceSliverList(
-                    surface: ModuleSurface.home,
-                    callbacks: callbacks,
-                  ),
-                  const _HomeBottomInsetSpacer(),
                 ],
               ),
             ),

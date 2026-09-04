@@ -46,6 +46,18 @@ class SearchModuleHeader extends StatelessWidget {
   /// Called when the header is long-pressed (e.g. to enter reorder mode).
   final VoidCallback? onLongPress;
 
+  /// Optional widget between the collapse chevron and the title.
+  final Widget? leading;
+
+  /// Titles the section as an object rather than as a list: sentence case at
+  /// [TextTheme.titleMedium] instead of the uppercase micro-label, and flush
+  /// insets so it sits correctly inside a card that supplies its own padding.
+  ///
+  /// The uppercase label is a list heading — it works because it is one of
+  /// several running down a feed. On its own inside a card it reads as a
+  /// caption for something missing.
+  final bool emphasized;
+
   const SearchModuleHeader({
     super.key,
     required this.title,
@@ -57,6 +69,8 @@ class SearchModuleHeader extends StatelessWidget {
     this.previewLimit = 3,
     this.showPagination = true,
     this.onLongPress,
+    this.leading,
+    this.emphasized = false,
   });
 
   @override
@@ -67,8 +81,10 @@ class SearchModuleHeader extends StatelessWidget {
     final showTrailing =
         showPagination && !isCollapsed && totalCount > previewLimit;
 
+    final theme = Theme.of(context);
+
     return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
+      padding: EdgeInsets.only(right: emphasized ? 0.0 : 8.0),
       child: Row(
         children: [
           Expanded(
@@ -85,7 +101,7 @@ class SearchModuleHeader extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const SizedBox(width: 4),
+                    if (!emphasized) const SizedBox(width: 4),
                     AnimatedRotation(
                       turns: isCollapsed ? -0.25 : 0,
                       duration: disableAnimations
@@ -94,16 +110,27 @@ class SearchModuleHeader extends StatelessWidget {
                       child: Icon(
                         Icons.expand_more,
                         size: 20,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      title.toUpperCase(),
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.8,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    if (leading != null) ...[
+                      leading!,
+                      const SizedBox(width: 12),
+                    ],
+                    Flexible(
+                      child: Text(
+                        emphasized ? title : title.toUpperCase(),
+                        overflow: TextOverflow.ellipsis,
+                        style: emphasized
+                            ? theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              )
+                            : theme.textTheme.labelMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.8,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
                       ),
                     ),
                   ],

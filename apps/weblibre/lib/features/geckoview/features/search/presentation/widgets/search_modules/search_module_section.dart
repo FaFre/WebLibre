@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sliver_tools/sliver_tools.dart';
+import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_module_order.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/module_surface_scope.dart';
@@ -81,6 +82,22 @@ class SearchModuleSection extends ConsumerWidget {
   /// tests that render a section without a host.
   final ModuleSurface? surface;
 
+  /// Draws the section as a single self-contained card — header included —
+  /// instead of a bare heading over content on the page background.
+  ///
+  /// For modules that are one object rather than a list of them. A list wants
+  /// the page's own background so its rows read as part of the surface; a
+  /// standalone card wants an edge, because there is nothing else to tell the
+  /// reader where it ends.
+  ///
+  /// Pass [headerLeading] to put a mark in front of the title, and prefer an
+  /// [IconButton.filledTonal] for [headerTrailing]: inside a card the borderless
+  /// header buttons lose the surrounding whitespace that made them legible.
+  final bool card;
+
+  /// Optional mark between the collapse chevron and the title.
+  final Widget? headerLeading;
+
   const SearchModuleSection({
     super.key,
     required this.title,
@@ -92,6 +109,8 @@ class SearchModuleSection extends ConsumerWidget {
     this.hideWhenEmpty = false,
     this.showPagination = true,
     this.surface,
+    this.card = false,
+    this.headerLeading,
   });
 
   @override
@@ -124,9 +143,15 @@ class SearchModuleSection extends ConsumerWidget {
 
     // A section rendered without a host (tests) behaves like the search
     // screen, which is the surface that has one.
-    final pinnedBackground = scope == null
-        ? Theme.of(context).canvasColor
-        : scope.pinnedHeaderBackgroundColor;
+    //
+    // A card never pins: the decoration is painted across the section's own
+    // extent, so a header that detached from it and stuck to the top of the
+    // viewport would leave the card behind and float over the sections below.
+    final pinnedBackground = card
+        ? null
+        : (scope == null
+              ? Theme.of(context).canvasColor
+              : scope.pinnedHeaderBackgroundColor);
 
     final header = SearchModuleHeader(
       title: title,
@@ -153,7 +178,43 @@ class SearchModuleSection extends ConsumerWidget {
           .toggleExpansion(),
       onLongPress: () =>
           ref.read(searchReorderModeProvider(surface).notifier).activate(),
+      leading: headerLeading,
+      emphasized: card,
     );
+
+    if (card) {
+      final colorScheme = Theme.of(context).colorScheme;
+
+      return SliverPadding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+        sliver: DecoratedSliver(
+          decoration: BoxDecoration(
+            // Not fully opaque: the home surface's aura gradient and any
+            // wallpaper behind it should still read through the card.
+            color: colorScheme.surfaceContainer.withValues(alpha: 0.9),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: Color.alphaBlend(
+                AppColors.brandGrey.withValues(alpha: 0.18),
+                colorScheme.outlineVariant,
+              ),
+            ),
+          ),
+          sliver: SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: MultiSliver(
+              children: [
+                SliverToBoxAdapter(child: header),
+                ...contentSliverBuilder(
+                  isCollapsed: isCollapsed,
+                  visibleCount: visibleCount,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     return MultiSliver(
       pushPinnedChildren: pinnedBackground != null,
