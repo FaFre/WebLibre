@@ -116,6 +116,18 @@ enum GestureAction {
     MdiIcons.pin,
     GestureActionCategory.tabs,
   ),
+  nextContainer(
+    'Next Container',
+    'Switch to the next container and its last used tab',
+    MdiIcons.folderArrowRightOutline,
+    GestureActionCategory.tabs,
+  ),
+  previousContainer(
+    'Previous Container',
+    'Switch to the previous container and its last used tab',
+    MdiIcons.folderArrowLeftOutline,
+    GestureActionCategory.tabs,
+  ),
 
   // Page tools
   toggleReaderMode(
@@ -178,6 +190,12 @@ enum GestureAction {
     'Bookmarks',
     'Open bookmarks',
     MdiIcons.bookmarkMultiple,
+    GestureActionCategory.open,
+  ),
+  showContainers(
+    'Containers',
+    'Open the container list',
+    MdiIcons.folderMultipleOutline,
     GestureActionCategory.open,
   ),
 

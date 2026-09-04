@@ -40,6 +40,7 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
+import 'package:weblibre/presentation/widgets/single_finger_horizontal_drag.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -903,18 +904,18 @@ class SingleGridTabPreview extends HookConsumerWidget {
       ),
     );
 
-    return GestureDetector(
-      onHorizontalDragStart: (details) {
+    return SingleFingerHorizontalDrag(
+      onStart: (details) {
         dragStartPosition.value = details.globalPosition;
         draggedDistance.value = 0.0;
       },
-      onHorizontalDragUpdate: (details) {
+      onUpdate: (details) {
         draggedDistance.value = math.min(
           (dragStartPosition.value - details.globalPosition).dx.abs(),
           deleteThreshold,
         );
       },
-      onHorizontalDragEnd: (details) async {
+      onEnd: (details) async {
         if (draggedDistance.value >= deleteThreshold) {
           if (!await _confirmIsolatedTabCloseIfNeeded(context, ref, tabId)) {
             draggedDistance.value = 0.0;
@@ -1068,18 +1069,18 @@ class SingleListTabPreview extends HookConsumerWidget {
       ),
     );
 
-    return GestureDetector(
-      onHorizontalDragStart: (details) {
+    return SingleFingerHorizontalDrag(
+      onStart: (details) {
         dragStartPosition.value = details.globalPosition;
         draggedDistance.value = 0.0;
       },
-      onHorizontalDragUpdate: (details) {
+      onUpdate: (details) {
         draggedDistance.value = math.min(
           (dragStartPosition.value - details.globalPosition).dx.abs(),
           deleteThreshold,
         );
       },
-      onHorizontalDragEnd: (details) async {
+      onEnd: (details) async {
         if (draggedDistance.value >= deleteThreshold) {
           if (!await _confirmIsolatedTabCloseIfNeeded(context, ref, tabId)) {
             draggedDistance.value = 0.0;

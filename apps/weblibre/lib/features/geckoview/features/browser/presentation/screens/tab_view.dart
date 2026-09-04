@@ -25,6 +25,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_grid_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_list_view.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_gestures.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tree_view.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -60,33 +61,35 @@ class TabViewScreen extends HookConsumerWidget {
     return Dialog.fullscreen(
       child: Scaffold(
         body: SafeArea(
-          child: switch (effectiveTabsViewMode) {
-            TabsViewMode.list => ViewTabListWidget(
-              key: ValueKey(tabsReorderable),
-              scrollController: scrollController,
-              tabsReorderable: tabsReorderable,
-              showNewTabFab: false,
-              onClose: () {
-                const BrowserRoute().go(context);
-              },
-            ),
-            TabsViewMode.grid => ViewTabGridWidget(
-              key: ValueKey(tabsReorderable),
-              scrollController: scrollController,
-              tabsReorderable: tabsReorderable,
-              showNewTabFab: false,
-              onClose: () {
-                const BrowserRoute().go(context);
-              },
-            ),
-            TabsViewMode.tree => ViewTabTreesWidget(
-              scrollController: scrollController,
-              showNewTabFab: false,
-              onClose: () {
-                const BrowserRoute().go(context);
-              },
-            ),
-          },
+          child: TabTrayGestures(
+            child: switch (effectiveTabsViewMode) {
+              TabsViewMode.list => ViewTabListWidget(
+                key: ValueKey(tabsReorderable),
+                scrollController: scrollController,
+                tabsReorderable: tabsReorderable,
+                showNewTabFab: false,
+                onClose: () {
+                  const BrowserRoute().go(context);
+                },
+              ),
+              TabsViewMode.grid => ViewTabGridWidget(
+                key: ValueKey(tabsReorderable),
+                scrollController: scrollController,
+                tabsReorderable: tabsReorderable,
+                showNewTabFab: false,
+                onClose: () {
+                  const BrowserRoute().go(context);
+                },
+              ),
+              TabsViewMode.tree => ViewTabTreesWidget(
+                scrollController: scrollController,
+                showNewTabFab: false,
+                onClose: () {
+                  const BrowserRoute().go(context);
+                },
+              ),
+            },
+          ),
         ),
         floatingActionButton: isSyncedScope
             ? null

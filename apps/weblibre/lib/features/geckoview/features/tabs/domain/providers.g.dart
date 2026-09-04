@@ -51,6 +51,74 @@ final class WatchContainersWithCountProvider
 String _$watchContainersWithCountHash() =>
     r'50d8e9b39cb589b0b5f50d79cbe20b8d10d7a504';
 
+/// The destinations a container-cycling gesture steps through, in the order
+/// the container chips render them: the unassigned pseudo-container (`null`)
+/// first, then the containers themselves.
+///
+/// Synced tabs and the group-suggestions chip are deliberately left out — they
+/// are not containers, and landing on them mid-swipe would be a dead end.
+
+@ProviderFor(containerCycleOrder)
+final containerCycleOrderProvider = ContainerCycleOrderProvider._();
+
+/// The destinations a container-cycling gesture steps through, in the order
+/// the container chips render them: the unassigned pseudo-container (`null`)
+/// first, then the containers themselves.
+///
+/// Synced tabs and the group-suggestions chip are deliberately left out — they
+/// are not containers, and landing on them mid-swipe would be a dead end.
+
+final class ContainerCycleOrderProvider
+    extends
+        $FunctionalProvider<
+          List<ContainerData?>,
+          List<ContainerData?>,
+          List<ContainerData?>
+        >
+    with $Provider<List<ContainerData?>> {
+  /// The destinations a container-cycling gesture steps through, in the order
+  /// the container chips render them: the unassigned pseudo-container (`null`)
+  /// first, then the containers themselves.
+  ///
+  /// Synced tabs and the group-suggestions chip are deliberately left out — they
+  /// are not containers, and landing on them mid-swipe would be a dead end.
+  ContainerCycleOrderProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'containerCycleOrderProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$containerCycleOrderHash();
+
+  @$internal
+  @override
+  $ProviderElement<List<ContainerData?>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  List<ContainerData?> create(Ref ref) {
+    return containerCycleOrder(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(List<ContainerData?> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<List<ContainerData?>>(value),
+    );
+  }
+}
+
+String _$containerCycleOrderHash() =>
+    r'dd732a8717b1ebe7055776d2b7800e587f552438';
+
 @ProviderFor(matchSortedContainersWithCount)
 final matchSortedContainersWithCountProvider =
     MatchSortedContainersWithCountFamily._();

@@ -340,11 +340,42 @@ final class GestureServiceProvider
 
 String _$gestureServiceHash() => r'81e90a1adb64f596190b52aba0e2ab9dcab3c5e7';
 
+/// Whether native has reported that the engine and its components are up.
+///
+/// Native reports this once `GeckoBrowserApi.initialize` has built the
+/// components, and again whenever a Flutter view attaches (a restarted Dart
+/// half has lost the first report). It says nothing about tabs: the pull-based
+/// `syncEvents` catch-ups that gate on it need the engine, not a session.
+///
+/// It used to be inferred from a reader-view action, which AC only dispatches
+/// once a tab is selected — so a start that landed on the home surface never
+/// reported ready and every catch-up sat out the timeout below instead.
+
 @ProviderFor(EngineReadyState)
 final engineReadyStateProvider = EngineReadyStateProvider._();
 
+/// Whether native has reported that the engine and its components are up.
+///
+/// Native reports this once `GeckoBrowserApi.initialize` has built the
+/// components, and again whenever a Flutter view attaches (a restarted Dart
+/// half has lost the first report). It says nothing about tabs: the pull-based
+/// `syncEvents` catch-ups that gate on it need the engine, not a session.
+///
+/// It used to be inferred from a reader-view action, which AC only dispatches
+/// once a tab is selected — so a start that landed on the home surface never
+/// reported ready and every catch-up sat out the timeout below instead.
 final class EngineReadyStateProvider
     extends $NotifierProvider<EngineReadyState, bool> {
+  /// Whether native has reported that the engine and its components are up.
+  ///
+  /// Native reports this once `GeckoBrowserApi.initialize` has built the
+  /// components, and again whenever a Flutter view attaches (a restarted Dart
+  /// half has lost the first report). It says nothing about tabs: the pull-based
+  /// `syncEvents` catch-ups that gate on it need the engine, not a session.
+  ///
+  /// It used to be inferred from a reader-view action, which AC only dispatches
+  /// once a tab is selected — so a start that landed on the home surface never
+  /// reported ready and every catch-up sat out the timeout below instead.
   EngineReadyStateProvider._()
     : super(
         from: null,
@@ -372,7 +403,18 @@ final class EngineReadyStateProvider
   }
 }
 
-String _$engineReadyStateHash() => r'8582b3961f100e1c668db39912423f8bdf42b980';
+String _$engineReadyStateHash() => r'a2e27024215df2b00167192365cb9b2581ef41fd';
+
+/// Whether native has reported that the engine and its components are up.
+///
+/// Native reports this once `GeckoBrowserApi.initialize` has built the
+/// components, and again whenever a Flutter view attaches (a restarted Dart
+/// half has lost the first report). It says nothing about tabs: the pull-based
+/// `syncEvents` catch-ups that gate on it need the engine, not a session.
+///
+/// It used to be inferred from a reader-view action, which AC only dispatches
+/// once a tab is selected — so a start that landed on the home surface never
+/// reported ready and every catch-up sat out the timeout below instead.
 
 abstract class _$EngineReadyState extends $Notifier<bool> {
   bool build();

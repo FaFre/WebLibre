@@ -56,6 +56,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/view_tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_grid_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_list_view.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_gestures.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tree_view.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
@@ -2235,39 +2236,41 @@ class _ViewTabsSheet extends HookConsumerWidget {
             topRight: Radius.circular(28),
           ),
           clipBehavior: Clip.antiAlias,
-          child: switch (effectiveTabsViewMode) {
-            TabsViewMode.list => ViewTabListWidget(
-              scrollController: scrollController,
-              showNewTabFab: true,
-              tabsReorderable: tabsReorderable,
-              draggableScrollableController: draggableScrollableController,
-              onClose: () {
-                ref
-                    .read(bottomSheetControllerProvider.notifier)
-                    .requestDismiss();
-              },
-            ),
-            TabsViewMode.grid => ViewTabGridWidget(
-              scrollController: scrollController,
-              showNewTabFab: true,
-              tabsReorderable: tabsReorderable,
-              draggableScrollableController: draggableScrollableController,
-              onClose: () {
-                ref
-                    .read(bottomSheetControllerProvider.notifier)
-                    .requestDismiss();
-              },
-            ),
-            TabsViewMode.tree => ViewTabTreesWidget(
-              scrollController: scrollController,
-              showNewTabFab: true,
-              onClose: () {
-                ref
-                    .read(bottomSheetControllerProvider.notifier)
-                    .requestDismiss();
-              },
-            ),
-          },
+          child: TabTrayGestures(
+            child: switch (effectiveTabsViewMode) {
+              TabsViewMode.list => ViewTabListWidget(
+                scrollController: scrollController,
+                showNewTabFab: true,
+                tabsReorderable: tabsReorderable,
+                draggableScrollableController: draggableScrollableController,
+                onClose: () {
+                  ref
+                      .read(bottomSheetControllerProvider.notifier)
+                      .requestDismiss();
+                },
+              ),
+              TabsViewMode.grid => ViewTabGridWidget(
+                scrollController: scrollController,
+                showNewTabFab: true,
+                tabsReorderable: tabsReorderable,
+                draggableScrollableController: draggableScrollableController,
+                onClose: () {
+                  ref
+                      .read(bottomSheetControllerProvider.notifier)
+                      .requestDismiss();
+                },
+              ),
+              TabsViewMode.tree => ViewTabTreesWidget(
+                scrollController: scrollController,
+                showNewTabFab: true,
+                onClose: () {
+                  ref
+                      .read(bottomSheetControllerProvider.notifier)
+                      .requestDismiss();
+                },
+              ),
+            },
+          ),
         );
       },
     );

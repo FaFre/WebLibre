@@ -39,6 +39,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/contro
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/translation_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_cycle.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -181,6 +182,10 @@ class GestureControlService extends _$GestureControlService {
         await ref
             .read(tabDataRepositoryProvider.notifier)
             .setPinned(tabId, pinned: !pinned);
+      case GestureAction.nextContainer:
+        await _switchContainer(ContainerCycleDirection.next);
+      case GestureAction.previousContainer:
+        await _switchContainer(ContainerCycleDirection.previous);
       case GestureAction.toggleReaderMode:
         final readerActive =
             ref.read(tabStateProvider(tabId))?.readerableState.active ?? false;
@@ -215,6 +220,8 @@ class GestureControlService extends _$GestureControlService {
         await _pushLocation(
           BookmarkListRoute(entryGuid: BookmarkRoot.root.id).location,
         );
+      case GestureAction.showContainers:
+        await _pushLocation(const ContainerListRoute().location);
       case GestureAction.toggleBookmark:
         await _toggleBookmark(tabId);
       case GestureAction.translatePage:
@@ -233,6 +240,48 @@ class GestureControlService extends _$GestureControlService {
           }
         }
     }
+  }
+
+  /// Moves the selection one container along the chip order, wrapping at the
+  /// ends, and resumes that container's most recently used tab.
+  ///
+  /// Resuming a tab is what makes this useful from web content: leaving the
+  /// selected tab behind in another container would only ever land on the home
+  /// screen (see [shouldShowBrowserHome]), which is still what happens when the
+  /// target container has no tabs left.
+  ///
+  /// Unlike the tray's two-finger swipe this cannot offer to start the
+  /// container's proxy — a stroke gesture has no context to host the dialog —
+  /// so it relies on [SelectedContainer.setContainerId] refusing a container
+  /// whose routing is not ready, like the quick tab switcher does.
+  Future<void> _switchContainer(ContainerCycleDirection direction) async {
+    // Containers are hidden entirely when their UI is off, and stepping through
+    // them would move browsing state the user cannot see.
+    if (!ref.read(generalSettingsWithDefaultsProvider).showContainerUi) return;
+
+    final cycleOrder = ref.read(containerCycleOrderProvider);
+    final index = adjacentContainerIndex(
+      cycleOrder.map((container) => container?.id).toList(),
+      ref.read(selectedContainerProvider),
+      direction,
+    );
+    if (index == null) return;
+
+    final container = cycleOrder[index];
+    if (container == null) {
+      ref.read(selectedContainerProvider.notifier).clearContainer();
+    } else {
+      final result = await ref
+          .read(selectedContainerProvider.notifier)
+          .setContainerId(container.id);
+      if (result == SetContainerResult.failed) return;
+    }
+
+    if (!ref.mounted) return;
+
+    await ref
+        .read(tabRepositoryProvider.notifier)
+        .resumeLatestContainerTab(container?.id);
   }
 
   /// Adds the current page to bookmarks, or removes it if already bookmarked,

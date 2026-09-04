@@ -38,6 +38,21 @@ Stream<List<ContainerDataWithCount>> watchContainersWithCount(Ref ref) {
   return db.definitionsDrift.containersWithCount().watch();
 }
 
+/// The destinations a container-cycling gesture steps through, in the order
+/// the container chips render them: the unassigned pseudo-container (`null`)
+/// first, then the containers themselves.
+///
+/// Synced tabs and the group-suggestions chip are deliberately left out — they
+/// are not containers, and landing on them mid-swipe would be a dead end.
+@Riverpod()
+List<ContainerData?> containerCycleOrder(Ref ref) {
+  final containers = ref.watch(
+    watchContainersWithCountProvider.select((value) => value.value),
+  );
+
+  return [null, ...?containers];
+}
+
 @Riverpod()
 AsyncValue<List<ContainerDataWithCount>> matchSortedContainersWithCount(
   Ref ref,

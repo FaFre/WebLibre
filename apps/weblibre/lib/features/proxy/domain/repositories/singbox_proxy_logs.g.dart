@@ -62,7 +62,7 @@ final class SingboxProxyLogsProvider
   }
 }
 
-String _$singboxProxyLogsHash() => r'd2560aae320f2e96ad738a9a9a3eca6ff6f43e35';
+String _$singboxProxyLogsHash() => r'e82b73c50b8f9c295bc6286fcaf0a998be075977';
 
 /// Ring buffer of proxy/Tor log lines.
 ///
