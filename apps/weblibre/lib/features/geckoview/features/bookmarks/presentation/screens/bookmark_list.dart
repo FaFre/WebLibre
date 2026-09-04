@@ -384,32 +384,36 @@ class BookmarkListScreen extends HookConsumerWidget {
       title: textFilterEnabled.value
           ? TextField(
               controller: textFilterController,
-              decoration: InputDecoration(
-                contentPadding: const EdgeInsets.only(top: 12),
+              textAlignVertical: TextAlignVertical.center,
+              decoration: const InputDecoration(
+                // Collapsed so the box is exactly the text: any asymmetric
+                // content padding would offset the text from the centre the
+                // app bar aligns the action icons to.
+                isCollapsed: true,
                 border: InputBorder.none,
                 hintText: 'Filter bookmarks...',
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                suffixIcon: IconButton(
-                  onPressed: () {
-                    if (textFilterController.text.isNotEmpty) {
-                      textFilterController.clear();
-                    } else {
-                      textFilterEnabled.value = false;
-                    }
-                  },
-                  icon: const Icon(Icons.clear),
-                ),
               ),
             )
           : const Text('Bookmarks'),
       actions: [
-        if (!textFilterEnabled.value)
-          IconButton(
-            onPressed: () {
-              textFilterEnabled.value = !textFilterEnabled.value;
-            },
-            icon: const Icon(Icons.search),
-          ),
+        // One button, one slot: it opens the search, then clears it, then
+        // closes it. A clear button attached to the field would sit left of
+        // this slot and appear to jump when the field opens.
+        IconButton(
+          tooltip: textFilterEnabled.value
+              ? 'Clear search'
+              : 'Search bookmarks',
+          onPressed: () {
+            if (!textFilterEnabled.value) {
+              textFilterEnabled.value = true;
+            } else if (textFilterController.text.isNotEmpty) {
+              textFilterController.clear();
+            } else {
+              textFilterEnabled.value = false;
+            }
+          },
+          icon: Icon(textFilterEnabled.value ? Icons.clear : Icons.search),
+        ),
         MenuAnchor(
           menuChildren: [
             // Adding is otherwise only reachable from a child folder's row
