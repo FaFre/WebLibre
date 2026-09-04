@@ -34,6 +34,7 @@ import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_id.dart';
@@ -911,15 +912,16 @@ class QuickTabSwitcher extends HookConsumerWidget {
 
     final tabDepthById = ref
         .watch(
-          groupedTabListItemsProvider(containerId: hierarchyContainerId).select(
-            (value) {
-              return EquatableValue(<String, int>{
-                if (showHierarchicalTabs)
-                  for (final item in value.value)
-                    if (item is TabListChildItem) item.tabId: item.depth,
-              });
-            },
-          ),
+          groupedTabListItemsProvider(
+            containerId: hierarchyContainerId,
+            scope: TabListScope.presentation,
+          ).select((value) {
+            return EquatableValue(<String, int>{
+              if (showHierarchicalTabs)
+                for (final item in value.value)
+                  if (item is TabListChildItem) item.tabId: item.depth,
+            });
+          }),
         )
         .value;
 

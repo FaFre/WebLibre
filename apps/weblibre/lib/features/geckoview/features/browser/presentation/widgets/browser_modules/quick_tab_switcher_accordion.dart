@@ -30,6 +30,7 @@ import 'package:weblibre/features/geckoview/domain/providers/restore_complete.da
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_chip.dart';
@@ -129,9 +130,10 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
         .value;
     final tabDepthById = ref
         .watch(
-          groupedTabListItemsProvider(containerId: selectedContainerId).select((
-            value,
-          ) {
+          groupedTabListItemsProvider(
+            containerId: selectedContainerId,
+            scope: TabListScope.presentation,
+          ).select((value) {
             return EquatableValue(<String, int>{
               if (hierarchyGlyphs > 0)
                 for (final item in value.value)

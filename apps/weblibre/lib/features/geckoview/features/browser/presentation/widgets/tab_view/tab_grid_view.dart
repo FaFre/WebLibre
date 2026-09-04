@@ -33,6 +33,7 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/drag_data.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_view_reorder.dart';
@@ -223,7 +224,10 @@ class _TabGridView extends HookConsumerWidget {
       ];
     } else {
       final visibleItems = ref.watch(
-        visibleTabListItemsProvider(containerId: containerId),
+        visibleTabListItemsProvider(
+          containerId: containerId,
+          scope: TabListScope.tray,
+        ),
       );
       primaryRows = [
         for (final item in visibleItems.value)

@@ -23,6 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:weblibre/core/sort_field.dart';
 import 'package:weblibre/data/database/converters/date_time_range.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 
 part 'tab_view_filter_options.g.dart';
@@ -130,6 +131,28 @@ class TabViewFilterOptions with FastEquatable {
     }
     return true;
   }
+
+  /// The same options with everything the tray owns stripped back to its
+  /// default, for surfaces outside the tray ([TabListScope.presentation]).
+  ///
+  /// The tab-type filter, the date range and the title/URL/date sort are
+  /// controls the user can only reach with the tray open, yet they persist well
+  /// past it. Neutralising them here — rather than branching at each of the
+  /// half-dozen places the grouping code reads them — is what stops them
+  /// reordering or hiding rows on a surface that is on screen while the tray is
+  /// closed.
+  ///
+  /// [sortPinnedFirst] and [showHierarchicalTabs] deliberately survive: they
+  /// describe how tabs are structured everywhere, not what the tray is
+  /// currently showing.
+  TabViewFilterOptions toPresentationScope() => TabViewFilterOptions(
+    tabTypeFilter: TabTypeFilter.all,
+    sortType: TabSortType.manual,
+    sortPinnedFirst: sortPinnedFirst,
+    showHierarchicalTabs: showHierarchicalTabs,
+    dateRange: null,
+    quickInterval: null,
+  );
 
   @override
   List<Object?> get hashParameters => [

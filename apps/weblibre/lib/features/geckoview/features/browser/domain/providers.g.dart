@@ -588,7 +588,7 @@ final class SelectedContainerTabStatesWithContainerProvider
 }
 
 String _$selectedContainerTabStatesWithContainerHash() =>
-    r'6e215f983140f7980d84e3f3d05a8afe95e6f1e7';
+    r'dc0a972179813671331c798f40a6a5083b684e67';
 
 @ProviderFor(quickTabSwitcherTabStates)
 final quickTabSwitcherTabStatesProvider = QuickTabSwitcherTabStatesFamily._();
@@ -1121,24 +1121,34 @@ final class FilteredTabPreviewsFamily extends $Family
   String toString() => r'filteredTabPreviewsProvider';
 }
 
-/// Grouped flat-list rendering for the list and grid views.
+/// Grouped flat-list rendering shared by every surface that lays tabs out in
+/// one ordered sequence.
 ///
 /// Parent rows always render before their descendants. [TabDirection]
 /// applies both to root group ordering and to sibling ordering below each
 /// parent, so parent-child pairs stay together while child order still follows
 /// the configured direction.
+///
+/// [scope] decides which of the tray's controls take part and which direction
+/// setting applies — see [TabListScope]. Both scopes run the same grouping,
+/// so a tab's place relative to its parent never depends on who is asking.
 ///
 /// Returns `null` when the input data is not yet available (loading).
 
 @ProviderFor(groupedTabListItems)
 final groupedTabListItemsProvider = GroupedTabListItemsFamily._();
 
-/// Grouped flat-list rendering for the list and grid views.
+/// Grouped flat-list rendering shared by every surface that lays tabs out in
+/// one ordered sequence.
 ///
 /// Parent rows always render before their descendants. [TabDirection]
 /// applies both to root group ordering and to sibling ordering below each
 /// parent, so parent-child pairs stay together while child order still follows
 /// the configured direction.
+///
+/// [scope] decides which of the tray's controls take part and which direction
+/// setting applies — see [TabListScope]. Both scopes run the same grouping,
+/// so a tab's place relative to its parent never depends on who is asking.
 ///
 /// Returns `null` when the input data is not yet available (loading).
 
@@ -1150,17 +1160,22 @@ final class GroupedTabListItemsProvider
           EquatableValue<List<TabListItemEntity>>
         >
     with $Provider<EquatableValue<List<TabListItemEntity>>> {
-  /// Grouped flat-list rendering for the list and grid views.
+  /// Grouped flat-list rendering shared by every surface that lays tabs out in
+  /// one ordered sequence.
   ///
   /// Parent rows always render before their descendants. [TabDirection]
   /// applies both to root group ordering and to sibling ordering below each
   /// parent, so parent-child pairs stay together while child order still follows
   /// the configured direction.
   ///
+  /// [scope] decides which of the tray's controls take part and which direction
+  /// setting applies — see [TabListScope]. Both scopes run the same grouping,
+  /// so a tab's place relative to its parent never depends on who is asking.
+  ///
   /// Returns `null` when the input data is not yet available (loading).
   GroupedTabListItemsProvider._({
     required GroupedTabListItemsFamily super.from,
-    required String? super.argument,
+    required ({String? containerId, TabListScope scope}) super.argument,
   }) : super(
          retry: null,
          name: r'groupedTabListItemsProvider',
@@ -1176,7 +1191,7 @@ final class GroupedTabListItemsProvider
   String toString() {
     return r'groupedTabListItemsProvider'
         ''
-        '($argument)';
+        '$argument';
   }
 
   @$internal
@@ -1187,8 +1202,13 @@ final class GroupedTabListItemsProvider
 
   @override
   EquatableValue<List<TabListItemEntity>> create(Ref ref) {
-    final argument = this.argument as String?;
-    return groupedTabListItems(ref, containerId: argument);
+    final argument =
+        this.argument as ({String? containerId, TabListScope scope});
+    return groupedTabListItems(
+      ref,
+      containerId: argument.containerId,
+      scope: argument.scope,
+    );
   }
 
   /// {@macro riverpod.override_with_value}
@@ -1212,14 +1232,19 @@ final class GroupedTabListItemsProvider
 }
 
 String _$groupedTabListItemsHash() =>
-    r'd7158c50ca34014d63044e7fb52a7197245c59ad';
+    r'a231614ae43e3c7c2171c76208767e3f7e657345';
 
-/// Grouped flat-list rendering for the list and grid views.
+/// Grouped flat-list rendering shared by every surface that lays tabs out in
+/// one ordered sequence.
 ///
 /// Parent rows always render before their descendants. [TabDirection]
 /// applies both to root group ordering and to sibling ordering below each
 /// parent, so parent-child pairs stay together while child order still follows
 /// the configured direction.
+///
+/// [scope] decides which of the tray's controls take part and which direction
+/// setting applies — see [TabListScope]. Both scopes run the same grouping,
+/// so a tab's place relative to its parent never depends on who is asking.
 ///
 /// Returns `null` when the input data is not yet available (loading).
 
@@ -1227,7 +1252,7 @@ final class GroupedTabListItemsFamily extends $Family
     with
         $FunctionalFamilyOverride<
           EquatableValue<List<TabListItemEntity>>,
-          String?
+          ({String? containerId, TabListScope scope})
         > {
   GroupedTabListItemsFamily._()
     : super(
@@ -1238,40 +1263,64 @@ final class GroupedTabListItemsFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Grouped flat-list rendering for the list and grid views.
+  /// Grouped flat-list rendering shared by every surface that lays tabs out in
+  /// one ordered sequence.
   ///
   /// Parent rows always render before their descendants. [TabDirection]
   /// applies both to root group ordering and to sibling ordering below each
   /// parent, so parent-child pairs stay together while child order still follows
   /// the configured direction.
   ///
+  /// [scope] decides which of the tray's controls take part and which direction
+  /// setting applies — see [TabListScope]. Both scopes run the same grouping,
+  /// so a tab's place relative to its parent never depends on who is asking.
+  ///
   /// Returns `null` when the input data is not yet available (loading).
 
-  GroupedTabListItemsProvider call({required String? containerId}) =>
-      GroupedTabListItemsProvider._(argument: containerId, from: this);
+  GroupedTabListItemsProvider call({
+    required String? containerId,
+    required TabListScope scope,
+  }) => GroupedTabListItemsProvider._(
+    argument: (containerId: containerId, scope: scope),
+    from: this,
+  );
 
   @override
   String toString() => r'groupedTabListItemsProvider';
 }
 
-/// The final row order the tab tray renders, i.e.
-/// [groupedTabListItemsProvider] plus the flat-mode post-processing: with
-/// hierarchy display turned off there are no groups to keep together, so
-/// pinned tabs move ahead of unpinned ones across the whole list.
+/// The final row order a surface renders, i.e. [groupedTabListItemsProvider]
+/// plus the flat post-processing: where there are no visible groups to keep
+/// together, pinned tabs move ahead of unpinned ones across the whole list.
 ///
-/// Shared by the list view, the grid view and sequential tab navigation so all
-/// three agree on what "the tab after this one" means.
+/// That flattening applies to the tray only with hierarchy display turned off,
+/// but always in [TabListScope.presentation] — the quick tab switcher and the
+/// tab bar are single strips of chips that draw hierarchy as an indent glyph
+/// rather than as position, so a pinned tab belongs at the front there whether
+/// or not it happens to sit under a parent.
+///
+/// This is the single order every non-tray surface reads: the switcher, the tab
+/// bar and sequential tab navigation all take the presentation scope, so
+/// "the tab after this one" cannot mean one thing to the eye and another to a
+/// swipe.
 
 @ProviderFor(visibleTabListItems)
 final visibleTabListItemsProvider = VisibleTabListItemsFamily._();
 
-/// The final row order the tab tray renders, i.e.
-/// [groupedTabListItemsProvider] plus the flat-mode post-processing: with
-/// hierarchy display turned off there are no groups to keep together, so
-/// pinned tabs move ahead of unpinned ones across the whole list.
+/// The final row order a surface renders, i.e. [groupedTabListItemsProvider]
+/// plus the flat post-processing: where there are no visible groups to keep
+/// together, pinned tabs move ahead of unpinned ones across the whole list.
 ///
-/// Shared by the list view, the grid view and sequential tab navigation so all
-/// three agree on what "the tab after this one" means.
+/// That flattening applies to the tray only with hierarchy display turned off,
+/// but always in [TabListScope.presentation] — the quick tab switcher and the
+/// tab bar are single strips of chips that draw hierarchy as an indent glyph
+/// rather than as position, so a pinned tab belongs at the front there whether
+/// or not it happens to sit under a parent.
+///
+/// This is the single order every non-tray surface reads: the switcher, the tab
+/// bar and sequential tab navigation all take the presentation scope, so
+/// "the tab after this one" cannot mean one thing to the eye and another to a
+/// swipe.
 
 final class VisibleTabListItemsProvider
     extends
@@ -1281,16 +1330,23 @@ final class VisibleTabListItemsProvider
           EquatableValue<List<TabListItemEntity>>
         >
     with $Provider<EquatableValue<List<TabListItemEntity>>> {
-  /// The final row order the tab tray renders, i.e.
-  /// [groupedTabListItemsProvider] plus the flat-mode post-processing: with
-  /// hierarchy display turned off there are no groups to keep together, so
-  /// pinned tabs move ahead of unpinned ones across the whole list.
+  /// The final row order a surface renders, i.e. [groupedTabListItemsProvider]
+  /// plus the flat post-processing: where there are no visible groups to keep
+  /// together, pinned tabs move ahead of unpinned ones across the whole list.
   ///
-  /// Shared by the list view, the grid view and sequential tab navigation so all
-  /// three agree on what "the tab after this one" means.
+  /// That flattening applies to the tray only with hierarchy display turned off,
+  /// but always in [TabListScope.presentation] — the quick tab switcher and the
+  /// tab bar are single strips of chips that draw hierarchy as an indent glyph
+  /// rather than as position, so a pinned tab belongs at the front there whether
+  /// or not it happens to sit under a parent.
+  ///
+  /// This is the single order every non-tray surface reads: the switcher, the tab
+  /// bar and sequential tab navigation all take the presentation scope, so
+  /// "the tab after this one" cannot mean one thing to the eye and another to a
+  /// swipe.
   VisibleTabListItemsProvider._({
     required VisibleTabListItemsFamily super.from,
-    required String? super.argument,
+    required ({String? containerId, TabListScope scope}) super.argument,
   }) : super(
          retry: null,
          name: r'visibleTabListItemsProvider',
@@ -1306,7 +1362,7 @@ final class VisibleTabListItemsProvider
   String toString() {
     return r'visibleTabListItemsProvider'
         ''
-        '($argument)';
+        '$argument';
   }
 
   @$internal
@@ -1317,8 +1373,13 @@ final class VisibleTabListItemsProvider
 
   @override
   EquatableValue<List<TabListItemEntity>> create(Ref ref) {
-    final argument = this.argument as String?;
-    return visibleTabListItems(ref, containerId: argument);
+    final argument =
+        this.argument as ({String? containerId, TabListScope scope});
+    return visibleTabListItems(
+      ref,
+      containerId: argument.containerId,
+      scope: argument.scope,
+    );
   }
 
   /// {@macro riverpod.override_with_value}
@@ -1342,21 +1403,28 @@ final class VisibleTabListItemsProvider
 }
 
 String _$visibleTabListItemsHash() =>
-    r'5249a3e7e1f0b24e408987956856926d0958b0db';
+    r'df52784bf71442e7f3c76b665e7a343276d78cf2';
 
-/// The final row order the tab tray renders, i.e.
-/// [groupedTabListItemsProvider] plus the flat-mode post-processing: with
-/// hierarchy display turned off there are no groups to keep together, so
-/// pinned tabs move ahead of unpinned ones across the whole list.
+/// The final row order a surface renders, i.e. [groupedTabListItemsProvider]
+/// plus the flat post-processing: where there are no visible groups to keep
+/// together, pinned tabs move ahead of unpinned ones across the whole list.
 ///
-/// Shared by the list view, the grid view and sequential tab navigation so all
-/// three agree on what "the tab after this one" means.
+/// That flattening applies to the tray only with hierarchy display turned off,
+/// but always in [TabListScope.presentation] — the quick tab switcher and the
+/// tab bar are single strips of chips that draw hierarchy as an indent glyph
+/// rather than as position, so a pinned tab belongs at the front there whether
+/// or not it happens to sit under a parent.
+///
+/// This is the single order every non-tray surface reads: the switcher, the tab
+/// bar and sequential tab navigation all take the presentation scope, so
+/// "the tab after this one" cannot mean one thing to the eye and another to a
+/// swipe.
 
 final class VisibleTabListItemsFamily extends $Family
     with
         $FunctionalFamilyOverride<
           EquatableValue<List<TabListItemEntity>>,
-          String?
+          ({String? containerId, TabListScope scope})
         > {
   VisibleTabListItemsFamily._()
     : super(
@@ -1367,16 +1435,28 @@ final class VisibleTabListItemsFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// The final row order the tab tray renders, i.e.
-  /// [groupedTabListItemsProvider] plus the flat-mode post-processing: with
-  /// hierarchy display turned off there are no groups to keep together, so
-  /// pinned tabs move ahead of unpinned ones across the whole list.
+  /// The final row order a surface renders, i.e. [groupedTabListItemsProvider]
+  /// plus the flat post-processing: where there are no visible groups to keep
+  /// together, pinned tabs move ahead of unpinned ones across the whole list.
   ///
-  /// Shared by the list view, the grid view and sequential tab navigation so all
-  /// three agree on what "the tab after this one" means.
+  /// That flattening applies to the tray only with hierarchy display turned off,
+  /// but always in [TabListScope.presentation] — the quick tab switcher and the
+  /// tab bar are single strips of chips that draw hierarchy as an indent glyph
+  /// rather than as position, so a pinned tab belongs at the front there whether
+  /// or not it happens to sit under a parent.
+  ///
+  /// This is the single order every non-tray surface reads: the switcher, the tab
+  /// bar and sequential tab navigation all take the presentation scope, so
+  /// "the tab after this one" cannot mean one thing to the eye and another to a
+  /// swipe.
 
-  VisibleTabListItemsProvider call({required String? containerId}) =>
-      VisibleTabListItemsProvider._(argument: containerId, from: this);
+  VisibleTabListItemsProvider call({
+    required String? containerId,
+    required TabListScope scope,
+  }) => VisibleTabListItemsProvider._(
+    argument: (containerId: containerId, scope: scope),
+    from: this,
+  );
 
   @override
   String toString() => r'visibleTabListItemsProvider';
@@ -1386,16 +1466,24 @@ final class VisibleTabListItemsFamily extends $Family
 /// action and the next/previous tab gestures.
 ///
 /// Navigation follows the rendered order instead of the raw storage
-/// `order_key`, so it carries the active sort type, tree grouping, collapsed
-/// groups, pinned-first handling and the tab-type/date filter — stepping to the
-/// tab the user sees next to the current one rather than to an unrelated
+/// `order_key`, so it carries tree grouping and pinned-first handling — stepping
+/// to the tab the user sees next to the current one rather than to an unrelated
 /// `order_key` neighbour.
+///
+/// The order it follows is [TabListScope.presentation], the one the quick tab
+/// switcher and the tab bar draw, *not* the tray's. Both gestures are only
+/// reachable with the tray closed, so the tray's filters, collapsed groups and
+/// title/URL/date sort describe a list nobody is looking at while they fire;
+/// letting them through made the swipe skip chips that were plainly on screen
+/// and, when they hid the current tab outright, jump to the far end of the
+/// strip (issue #603). Sharing one provider with those surfaces is what keeps
+/// the two from drifting apart again.
 ///
 /// With `sequentialTabNavigationCrossContainers` on (the default) it spans
 /// **all** containers, keeping the boundary-crossing reach the storage-order
-/// walk had: each container contributes the rows its tray would render, and the
-/// containers follow one another in the order the quick tab switcher lays them
-/// out — the unassigned bucket first, then containers by pinned/`order_key`.
+/// walk had: each container contributes the rows its switcher would render, and
+/// the containers follow one another in the order the quick tab switcher lays
+/// them out — the unassigned bucket first, then containers by pinned/`order_key`.
 /// Stepping off the end of one container therefore continues into the next, and
 /// selecting that tab moves the selected container along with it. Named
 /// containers holding no tabs are skipped so their tree query never runs.
@@ -1405,18 +1493,17 @@ final class VisibleTabListItemsFamily extends $Family
 /// edge — the containers themselves are then only switched deliberately.
 ///
 /// "Previous" is a step towards the top of that order and "next" a step
-/// towards its end, so direction follows `tabListDirection` (baked into the
-/// order) rather than `tabBarDirection`. The two only disagree when the user
-/// sets them apart, and the rendered order is the one the sequence is built
-/// from.
+/// towards its end, so direction follows `tabBarDirection` (baked into the
+/// order) rather than `tabListDirection` — the bar is what the step is read
+/// against, and the two only disagree when the user sets them apart.
 ///
 /// The tray's own search results are deliberately not part of this: the swipe
 /// and the gestures are only reachable with the tray closed.
 ///
 /// `null` means the underlying tree data has not arrived yet — the only state
 /// in which the caller may fall back to storage order. An empty list is a real
-/// answer ("the filter leaves nothing to move to") and must not be mistaken for
-/// a missing one, or the filter the user set would be bypassed.
+/// answer ("this container holds nothing to move to") and must not be mistaken
+/// for a missing one.
 ///
 /// Kept alive and actively listened to by [TabRepository]: it is consumed by a
 /// synchronous `ref.read` at the moment of the swipe/gesture, from outside the
@@ -1436,16 +1523,24 @@ final sequentialTabNavigationOrderProvider =
 /// action and the next/previous tab gestures.
 ///
 /// Navigation follows the rendered order instead of the raw storage
-/// `order_key`, so it carries the active sort type, tree grouping, collapsed
-/// groups, pinned-first handling and the tab-type/date filter — stepping to the
-/// tab the user sees next to the current one rather than to an unrelated
+/// `order_key`, so it carries tree grouping and pinned-first handling — stepping
+/// to the tab the user sees next to the current one rather than to an unrelated
 /// `order_key` neighbour.
+///
+/// The order it follows is [TabListScope.presentation], the one the quick tab
+/// switcher and the tab bar draw, *not* the tray's. Both gestures are only
+/// reachable with the tray closed, so the tray's filters, collapsed groups and
+/// title/URL/date sort describe a list nobody is looking at while they fire;
+/// letting them through made the swipe skip chips that were plainly on screen
+/// and, when they hid the current tab outright, jump to the far end of the
+/// strip (issue #603). Sharing one provider with those surfaces is what keeps
+/// the two from drifting apart again.
 ///
 /// With `sequentialTabNavigationCrossContainers` on (the default) it spans
 /// **all** containers, keeping the boundary-crossing reach the storage-order
-/// walk had: each container contributes the rows its tray would render, and the
-/// containers follow one another in the order the quick tab switcher lays them
-/// out — the unassigned bucket first, then containers by pinned/`order_key`.
+/// walk had: each container contributes the rows its switcher would render, and
+/// the containers follow one another in the order the quick tab switcher lays
+/// them out — the unassigned bucket first, then containers by pinned/`order_key`.
 /// Stepping off the end of one container therefore continues into the next, and
 /// selecting that tab moves the selected container along with it. Named
 /// containers holding no tabs are skipped so their tree query never runs.
@@ -1455,18 +1550,17 @@ final sequentialTabNavigationOrderProvider =
 /// edge — the containers themselves are then only switched deliberately.
 ///
 /// "Previous" is a step towards the top of that order and "next" a step
-/// towards its end, so direction follows `tabListDirection` (baked into the
-/// order) rather than `tabBarDirection`. The two only disagree when the user
-/// sets them apart, and the rendered order is the one the sequence is built
-/// from.
+/// towards its end, so direction follows `tabBarDirection` (baked into the
+/// order) rather than `tabListDirection` — the bar is what the step is read
+/// against, and the two only disagree when the user sets them apart.
 ///
 /// The tray's own search results are deliberately not part of this: the swipe
 /// and the gestures are only reachable with the tray closed.
 ///
 /// `null` means the underlying tree data has not arrived yet — the only state
 /// in which the caller may fall back to storage order. An empty list is a real
-/// answer ("the filter leaves nothing to move to") and must not be mistaken for
-/// a missing one, or the filter the user set would be bypassed.
+/// answer ("this container holds nothing to move to") and must not be mistaken
+/// for a missing one.
 ///
 /// Kept alive and actively listened to by [TabRepository]: it is consumed by a
 /// synchronous `ref.read` at the moment of the swipe/gesture, from outside the
@@ -1490,16 +1584,24 @@ final class SequentialTabNavigationOrderProvider
   /// action and the next/previous tab gestures.
   ///
   /// Navigation follows the rendered order instead of the raw storage
-  /// `order_key`, so it carries the active sort type, tree grouping, collapsed
-  /// groups, pinned-first handling and the tab-type/date filter — stepping to the
-  /// tab the user sees next to the current one rather than to an unrelated
+  /// `order_key`, so it carries tree grouping and pinned-first handling — stepping
+  /// to the tab the user sees next to the current one rather than to an unrelated
   /// `order_key` neighbour.
+  ///
+  /// The order it follows is [TabListScope.presentation], the one the quick tab
+  /// switcher and the tab bar draw, *not* the tray's. Both gestures are only
+  /// reachable with the tray closed, so the tray's filters, collapsed groups and
+  /// title/URL/date sort describe a list nobody is looking at while they fire;
+  /// letting them through made the swipe skip chips that were plainly on screen
+  /// and, when they hid the current tab outright, jump to the far end of the
+  /// strip (issue #603). Sharing one provider with those surfaces is what keeps
+  /// the two from drifting apart again.
   ///
   /// With `sequentialTabNavigationCrossContainers` on (the default) it spans
   /// **all** containers, keeping the boundary-crossing reach the storage-order
-  /// walk had: each container contributes the rows its tray would render, and the
-  /// containers follow one another in the order the quick tab switcher lays them
-  /// out — the unassigned bucket first, then containers by pinned/`order_key`.
+  /// walk had: each container contributes the rows its switcher would render, and
+  /// the containers follow one another in the order the quick tab switcher lays
+  /// them out — the unassigned bucket first, then containers by pinned/`order_key`.
   /// Stepping off the end of one container therefore continues into the next, and
   /// selecting that tab moves the selected container along with it. Named
   /// containers holding no tabs are skipped so their tree query never runs.
@@ -1509,18 +1611,17 @@ final class SequentialTabNavigationOrderProvider
   /// edge — the containers themselves are then only switched deliberately.
   ///
   /// "Previous" is a step towards the top of that order and "next" a step
-  /// towards its end, so direction follows `tabListDirection` (baked into the
-  /// order) rather than `tabBarDirection`. The two only disagree when the user
-  /// sets them apart, and the rendered order is the one the sequence is built
-  /// from.
+  /// towards its end, so direction follows `tabBarDirection` (baked into the
+  /// order) rather than `tabListDirection` — the bar is what the step is read
+  /// against, and the two only disagree when the user sets them apart.
   ///
   /// The tray's own search results are deliberately not part of this: the swipe
   /// and the gestures are only reachable with the tray closed.
   ///
   /// `null` means the underlying tree data has not arrived yet — the only state
   /// in which the caller may fall back to storage order. An empty list is a real
-  /// answer ("the filter leaves nothing to move to") and must not be mistaken for
-  /// a missing one, or the filter the user set would be bypassed.
+  /// answer ("this container holds nothing to move to") and must not be mistaken
+  /// for a missing one.
   ///
   /// Kept alive and actively listened to by [TabRepository]: it is consumed by a
   /// synchronous `ref.read` at the moment of the swipe/gesture, from outside the
@@ -1568,4 +1669,4 @@ final class SequentialTabNavigationOrderProvider
 }
 
 String _$sequentialTabNavigationOrderHash() =>
-    r'c83869b0cd594aee53656340d21866a12f41aca8';
+    r'b12d52fa5733aa93a414e934aa8813e78ae7cf89';

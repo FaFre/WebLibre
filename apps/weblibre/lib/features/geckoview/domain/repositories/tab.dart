@@ -72,6 +72,47 @@ ContainerData? resolveAssignedContainerForTabOpen({
   };
 }
 
+/// The tab one step from [currentTabId] in [order], or `null` when there is no
+/// step to take.
+///
+/// Kept as a pure function so the whole of sequential navigation's decision
+/// making can be exercised without an engine: which tab is next is settled
+/// here, and the repository only carries out the selection.
+///
+/// Returns `null` — never a fallback pick — in each case where the sequence
+/// gives no answer:
+///
+/// - [currentTabId] is absent from [order]: it is out of this walk's reach
+///   (another container, or a tab the engine has not reported yet), so nothing
+///   in [order] is "adjacent" to it. Entering at an end instead is what made a
+///   swipe jump across the strip in issue #603;
+/// - the step falls off an end and [loop] is off;
+/// - [order] holds fewer than two tabs, where even a wrap would land back on
+///   the tab the user is already looking at, which is not a step.
+@visibleForTesting
+String? adjacentTabIdInOrder({
+  required List<String> order,
+  required String currentTabId,
+  required bool selectPrevious,
+  required bool loop,
+}) {
+  final index = order.indexOf(currentTabId);
+  if (index < 0 || order.length < 2) {
+    return null;
+  }
+
+  final targetIndex = selectPrevious ? index - 1 : index + 1;
+
+  if (targetIndex < 0) {
+    return loop ? order.last : null;
+  }
+  if (targetIndex >= order.length) {
+    return loop ? order.first : null;
+  }
+
+  return order[targetIndex];
+}
+
 sealed class TabBackPromptBehavior {
   const TabBackPromptBehavior();
 }
@@ -496,18 +537,24 @@ class TabRepository extends _$TabRepository {
   /// [containerId]) — the tab bar swipe and the next/previous tab gestures —
   /// step through the *rendered* order
   /// ([sequentialTabNavigationOrderProvider]) so navigation matches the tabs the
-  /// user sees, including the tray's sort type, grouping, filters and
-  /// pinned-first handling. That order spans every populated container while
-  /// `sequentialTabNavigationCrossContainers` is on, so this keeps walking past
-  /// a container boundary exactly like the storage-order walk did; with the
-  /// setting off it holds the selected container only and the walk ends there.
-  /// It is authoritative once it exists, and every outcome stays inside it:
+  /// user sees: the same grouping and pinned-first handling the quick tab
+  /// switcher and the tab bar draw, and deliberately none of the tray's own
+  /// filters, collapsed groups or sort (see [TabListScope]). That order spans
+  /// every populated container while `sequentialTabNavigationCrossContainers` is
+  /// on, so this keeps walking past a container boundary exactly like the
+  /// storage-order walk did; with the setting off it holds the selected
+  /// container only and the walk ends there. It is authoritative once it
+  /// exists, and every outcome stays inside it:
   ///
   /// - current tab in the order: step one row, stopping at either end — or
   ///   continuing at the opposite end when `sequentialTabNavigationLoop` is on;
-  /// - current tab outside it — hidden by the active filter, or folded into a
-  ///   collapsed group — enter the visible sequence from the end the step comes
-  ///   from, rather than jumping to a tab the filter excludes;
+  /// - current tab outside it: do nothing. Since the order excludes nothing,
+  ///   the current tab is missing only when it is not in this walk's reach at
+  ///   all — another container with cross-container navigation off, or a tab the
+  ///   engine has not reported yet. Neither says anything about which tab is
+  ///   "next", so there is no step to take; selecting an end of the order
+  ///   instead (as this did before #603) turned a swipe into a jump across the
+  ///   whole strip.
   /// - nothing visible at all: do nothing.
   ///
   /// Looping is deliberately confined to this path: the storage-order fallback
@@ -527,34 +574,18 @@ class TabRepository extends _$TabRepository {
       final visibleOrder = ref.read(sequentialTabNavigationOrderProvider).value;
 
       if (visibleOrder != null) {
-        if (visibleOrder.isEmpty) {
-          return false;
-        }
-
-        final index = visibleOrder.indexOf(tabId);
-
-        if (index < 0) {
-          return selectTab(
-            selectPrevious ? visibleOrder.last : visibleOrder.first,
-          );
-        }
-
-        var targetIndex = selectPrevious ? index - 1 : index + 1;
-
-        if (targetIndex < 0 || targetIndex >= visibleOrder.length) {
-          final loop = ref
+        final targetTabId = adjacentTabIdInOrder(
+          order: visibleOrder,
+          currentTabId: tabId,
+          selectPrevious: selectPrevious,
+          loop: ref
               .read(generalSettingsWithDefaultsProvider)
-              .sequentialTabNavigationLoop;
+              .sequentialTabNavigationLoop,
+        );
 
-          // A single visible tab would wrap onto itself, which is not a step.
-          if (!loop || visibleOrder.length < 2) {
-            return false;
-          }
-
-          targetIndex = targetIndex < 0 ? visibleOrder.length - 1 : 0;
-        }
-
-        return selectTab(visibleOrder[targetIndex]);
+        // The rendered order is authoritative once it exists: having no step to
+        // take within it is an answer, not a reason to consult storage order.
+        return targetTabId != null && await selectTab(targetTabId);
       }
     }
 

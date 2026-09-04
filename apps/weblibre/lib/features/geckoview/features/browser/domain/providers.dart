@@ -32,6 +32,7 @@ import 'package:weblibre/features/geckoview/domain/providers/restore_complete.da
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
@@ -310,72 +311,18 @@ selectedContainerTabStatesWithContainer(Ref ref) {
     return null;
   }
 
-  final groupedItems = ref
-      .watch(groupedTabListItemsProvider(containerId: filter.containerId))
+  // The single order every non-tray surface shares. It already carries the tab
+  // bar direction, hierarchy grouping and pinned-first handling, so none of
+  // that is redone here — and because the presentation scope drops no rows,
+  // every tab this switcher renders has an index in it.
+  final orderedItems = ref
+      .watch(
+        visibleTabListItemsProvider(
+          containerId: filter.containerId,
+          scope: TabListScope.presentation,
+        ),
+      )
       .value;
-
-  final tabListDirection = ref.watch(
-    generalSettingsWithDefaultsProvider.select((s) => s.tabListDirection),
-  );
-  final tabBarDirection = ref.watch(
-    generalSettingsWithDefaultsProvider.select((s) => s.tabBarDirection),
-  );
-  final pinnedTabIds = ref.watch(
-    watchPinnedTabIdsProvider.select(
-      (value) => value.value ?? const <String>{},
-    ),
-  );
-  final sortPinnedFirst = ref.watch(
-    tabViewFilterControllerProvider.select((v) => v.sortPinnedFirst),
-  );
-
-  // Build an order map from groupedItems. When the tab bar direction differs
-  // from the tab list direction, reverse root group order within each
-  // pinned/unpinned partition so the bar respects the user's direction
-  // preference while keeping parent–child groups intact.
-  List<TabListItemEntity> orderedItems = groupedItems;
-  if (tabBarDirection != tabListDirection) {
-    // Split groupedItems into root groups (each: root + its children).
-    final rootGroups = <(bool isPinned, List<TabListItemEntity>)>[];
-    var currentGroup = <TabListItemEntity>[];
-    for (final item in groupedItems) {
-      final isRoot =
-          item is TabListStandaloneItem || item is TabListParentGroup;
-      if (isRoot && currentGroup.isNotEmpty) {
-        final isPinned =
-            sortPinnedFirst && pinnedTabIds.contains(currentGroup.first.tabId);
-        rootGroups.add((isPinned, currentGroup));
-        currentGroup = [];
-      }
-      currentGroup.add(item);
-    }
-    if (currentGroup.isNotEmpty) {
-      final isPinned =
-          sortPinnedFirst && pinnedTabIds.contains(currentGroup.first.tabId);
-      rootGroups.add((isPinned, currentGroup));
-    }
-
-    // Reverse root groups within each partition (pinned / unpinned).
-    final result = <TabListItemEntity>[];
-    if (sortPinnedFirst) {
-      final pinned = rootGroups
-          .where((g) => g.$1)
-          .toList()
-          .reversed
-          .expand((g) => g.$2);
-      final unpinned = rootGroups
-          .where((g) => !g.$1)
-          .toList()
-          .reversed
-          .expand((g) => g.$2);
-      result
-        ..addAll(pinned)
-        ..addAll(unpinned);
-    } else {
-      result.addAll(rootGroups.reversed.expand((g) => g.$2));
-    }
-    orderedItems = result;
-  }
 
   final groupedOrder = {
     for (var i = 0; i < orderedItems.length; i++) orderedItems[i].tabId: i,
@@ -407,8 +354,20 @@ selectedContainerTabStatesWithContainer(Ref ref) {
     return (orderKeyById[a.$1.id] ?? '').compareTo(orderKeyById[b.$1.id] ?? '');
   });
 
-  // Flat pinned-first: move all pinned tabs before unpinned regardless of
-  // hierarchy, preserving relative order within each partition.
+  // Flat pinned-first, for the pre-restore window only: until the engine
+  // reports its tab list the shared order is empty, so every chip here is a
+  // placeholder ordered by `order_key` alone and would otherwise show pinned
+  // tabs out of place until restore completes. Once the shared order exists it
+  // has already partitioned them, and re-partitioning a partitioned list is a
+  // no-op — so this can never pull the switcher away from it.
+  final pinnedTabIds = ref.watch(
+    watchPinnedTabIdsProvider.select(
+      (value) => value.value ?? const <String>{},
+    ),
+  );
+  final sortPinnedFirst = ref.watch(
+    tabViewFilterControllerProvider.select((v) => v.sortPinnedFirst),
+  );
   if (sortPinnedFirst && pinnedTabIds.isNotEmpty) {
     final pinned = items.where((i) => pinnedTabIds.contains(i.$1.id)).toList();
     final unpinned = items
@@ -907,18 +866,24 @@ EquatableValue<List<TabPreview>> filteredTabPreviews(
   );
 }
 
-/// Grouped flat-list rendering for the list and grid views.
+/// Grouped flat-list rendering shared by every surface that lays tabs out in
+/// one ordered sequence.
 ///
 /// Parent rows always render before their descendants. [TabDirection]
 /// applies both to root group ordering and to sibling ordering below each
 /// parent, so parent-child pairs stay together while child order still follows
 /// the configured direction.
 ///
+/// [scope] decides which of the tray's controls take part and which direction
+/// setting applies — see [TabListScope]. Both scopes run the same grouping,
+/// so a tab's place relative to its parent never depends on who is asking.
+///
 /// Returns `null` when the input data is not yet available (loading).
 @Riverpod()
 EquatableValue<List<TabListItemEntity>> groupedTabListItems(
   Ref ref, {
   required String? containerId,
+  required TabListScope scope,
 }) {
   final tabsWithRoot = ref.watch(
     watchTabsWithRootAndDepthProvider(
@@ -936,16 +901,29 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
   // filtering) and the title/url (for sorting) — none of which change more
   // often than once per navigation.
   final tabSortKeys = ref.watch(tabSortKeysProvider).value;
-  final filterOptions = ref.watch(tabViewFilterControllerProvider);
+  // Reduced before it is compared, so the presentation scope does not rebuild
+  // when the user changes a tray control that cannot affect it.
+  final filterOptions = ref.watch(
+    tabViewFilterControllerProvider.select(
+      (options) => scope.isTray ? options : options.toPresentationScope(),
+    ),
+  );
   final pinnedTabIds = ref.watch(
     watchPinnedTabIdsProvider.select(
       (value) => value.value ?? const <String>{},
     ),
   );
-  final tabListDirection = ref.watch(
-    generalSettingsWithDefaultsProvider.select((s) => s.tabListDirection),
+  final direction = ref.watch(
+    generalSettingsWithDefaultsProvider.select(
+      (s) => scope.isTray ? s.tabListDirection : s.tabBarDirection,
+    ),
   );
-  final collapsedGroups = ref.watch(collapsedGroupsProvider);
+  // Collapsing is a tray gesture on tray rows: outside it there is nothing to
+  // expand a hidden row back open with, so folded descendants would be
+  // unreachable rather than merely tucked away.
+  final collapsedGroups = scope.isTray
+      ? ref.watch(collapsedGroupsProvider)
+      : const <String>{};
 
   final needsTimestamps =
       filterOptions.effectiveDateRange != null ||
@@ -1084,7 +1062,7 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
   // order_key ASC; newest-first reverses the group list. Pinned and
   // unpinned partitions are reversed independently so pinned-first stays
   // intact while still flipping the relative order within each partition.
-  if (sortField == null && tabListDirection == TabDirection.newestFirst) {
+  if (sortField == null && direction == TabDirection.newestFirst) {
     if (filterOptions.sortPinnedFirst) {
       final pinned = groupRecords.where((g) => g.isPinned).toList()
         ..sort((a, b) => b.rootOrderKey.compareTo(a.rootOrderKey));
@@ -1163,7 +1141,7 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
             .toList();
         int cmp(_GroupedRow a, _GroupedRow b) =>
             a.row.orderKey.compareTo(b.row.orderKey);
-        final directionCmp = tabListDirection == TabDirection.newestFirst
+        final directionCmp = direction == TabDirection.newestFirst
             ? (_GroupedRow a, _GroupedRow b) => -cmp(a, b)
             : cmp;
         pinned.sort(directionCmp);
@@ -1175,7 +1153,7 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
       } else {
         children.sort((a, b) {
           final cmp = a.row.orderKey.compareTo(b.row.orderKey);
-          return tabListDirection == TabDirection.newestFirst ? -cmp : cmp;
+          return direction == TabDirection.newestFirst ? -cmp : cmp;
         });
       }
     }
@@ -1211,24 +1189,37 @@ EquatableValue<List<TabListItemEntity>> groupedTabListItems(
   return EquatableValue(result);
 }
 
-/// The final row order the tab tray renders, i.e.
-/// [groupedTabListItemsProvider] plus the flat-mode post-processing: with
-/// hierarchy display turned off there are no groups to keep together, so
-/// pinned tabs move ahead of unpinned ones across the whole list.
+/// The final row order a surface renders, i.e. [groupedTabListItemsProvider]
+/// plus the flat post-processing: where there are no visible groups to keep
+/// together, pinned tabs move ahead of unpinned ones across the whole list.
 ///
-/// Shared by the list view, the grid view and sequential tab navigation so all
-/// three agree on what "the tab after this one" means.
+/// That flattening applies to the tray only with hierarchy display turned off,
+/// but always in [TabListScope.presentation] — the quick tab switcher and the
+/// tab bar are single strips of chips that draw hierarchy as an indent glyph
+/// rather than as position, so a pinned tab belongs at the front there whether
+/// or not it happens to sit under a parent.
+///
+/// This is the single order every non-tray surface reads: the switcher, the tab
+/// bar and sequential tab navigation all take the presentation scope, so
+/// "the tab after this one" cannot mean one thing to the eye and another to a
+/// swipe.
 @Riverpod()
 EquatableValue<List<TabListItemEntity>> visibleTabListItems(
   Ref ref, {
   required String? containerId,
+  required TabListScope scope,
 }) {
   final groupedItems = ref
-      .watch(groupedTabListItemsProvider(containerId: containerId))
+      .watch(
+        groupedTabListItemsProvider(containerId: containerId, scope: scope),
+      )
       .value;
 
   final filterOptions = ref.watch(tabViewFilterControllerProvider);
-  if (filterOptions.showHierarchicalTabs || !filterOptions.sortPinnedFirst) {
+  final flattenPinned =
+      filterOptions.sortPinnedFirst &&
+      (!scope.isTray || !filterOptions.showHierarchicalTabs);
+  if (!flattenPinned) {
     return EquatableValue(groupedItems);
   }
 
@@ -1248,16 +1239,24 @@ EquatableValue<List<TabListItemEntity>> visibleTabListItems(
 /// action and the next/previous tab gestures.
 ///
 /// Navigation follows the rendered order instead of the raw storage
-/// `order_key`, so it carries the active sort type, tree grouping, collapsed
-/// groups, pinned-first handling and the tab-type/date filter — stepping to the
-/// tab the user sees next to the current one rather than to an unrelated
+/// `order_key`, so it carries tree grouping and pinned-first handling — stepping
+/// to the tab the user sees next to the current one rather than to an unrelated
 /// `order_key` neighbour.
+///
+/// The order it follows is [TabListScope.presentation], the one the quick tab
+/// switcher and the tab bar draw, *not* the tray's. Both gestures are only
+/// reachable with the tray closed, so the tray's filters, collapsed groups and
+/// title/URL/date sort describe a list nobody is looking at while they fire;
+/// letting them through made the swipe skip chips that were plainly on screen
+/// and, when they hid the current tab outright, jump to the far end of the
+/// strip (issue #603). Sharing one provider with those surfaces is what keeps
+/// the two from drifting apart again.
 ///
 /// With `sequentialTabNavigationCrossContainers` on (the default) it spans
 /// **all** containers, keeping the boundary-crossing reach the storage-order
-/// walk had: each container contributes the rows its tray would render, and the
-/// containers follow one another in the order the quick tab switcher lays them
-/// out — the unassigned bucket first, then containers by pinned/`order_key`.
+/// walk had: each container contributes the rows its switcher would render, and
+/// the containers follow one another in the order the quick tab switcher lays
+/// them out — the unassigned bucket first, then containers by pinned/`order_key`.
 /// Stepping off the end of one container therefore continues into the next, and
 /// selecting that tab moves the selected container along with it. Named
 /// containers holding no tabs are skipped so their tree query never runs.
@@ -1267,18 +1266,17 @@ EquatableValue<List<TabListItemEntity>> visibleTabListItems(
 /// edge — the containers themselves are then only switched deliberately.
 ///
 /// "Previous" is a step towards the top of that order and "next" a step
-/// towards its end, so direction follows `tabListDirection` (baked into the
-/// order) rather than `tabBarDirection`. The two only disagree when the user
-/// sets them apart, and the rendered order is the one the sequence is built
-/// from.
+/// towards its end, so direction follows `tabBarDirection` (baked into the
+/// order) rather than `tabListDirection` — the bar is what the step is read
+/// against, and the two only disagree when the user sets them apart.
 ///
 /// The tray's own search results are deliberately not part of this: the swipe
 /// and the gestures are only reachable with the tray closed.
 ///
 /// `null` means the underlying tree data has not arrived yet — the only state
 /// in which the caller may fall back to storage order. An empty list is a real
-/// answer ("the filter leaves nothing to move to") and must not be mistaken for
-/// a missing one, or the filter the user set would be bypassed.
+/// answer ("this container holds nothing to move to") and must not be mistaken
+/// for a missing one.
 ///
 /// Kept alive and actively listened to by [TabRepository]: it is consumed by a
 /// synchronous `ref.read` at the moment of the swipe/gesture, from outside the
@@ -1328,7 +1326,12 @@ EquatableValue<List<String>?> sequentialTabNavigationOrder(Ref ref) {
     }
 
     final visibleItems = ref
-        .watch(visibleTabListItemsProvider(containerId: containerId))
+        .watch(
+          visibleTabListItemsProvider(
+            containerId: containerId,
+            scope: TabListScope.presentation,
+          ),
+        )
         .value;
 
     order.addAll(visibleItems.map((item) => item.tabId));
