@@ -81,7 +81,18 @@ class DesktopMode extends _$DesktopMode {
       final nextHost = next?.url.host;
       if (nextHost == null || nextHost.isEmpty) return;
       if (previous?.url.host != nextHost) {
-        state = _resolveForHost(next?.url);
+        final resolved = _resolveForHost(next?.url);
+        // Guard the assignment: `listenSelf` (below) fires on every `state =`
+        // regardless of equality — Riverpod's equality-based skip only covers
+        // the regular watch/listen dependents, not listenSelf. Without this,
+        // every cross-host navigation reapplies the *same* desktop-mode value
+        // and still pays `requestDesktopSite`'s unconditional reload, which is
+        // exactly what was turning ordinary back/forward navigation between
+        // two unruled hosts into a full page reload instead of an (often
+        // bfcache-eligible) restore.
+        if (resolved != state) {
+          state = resolved;
+        }
       }
     });
 

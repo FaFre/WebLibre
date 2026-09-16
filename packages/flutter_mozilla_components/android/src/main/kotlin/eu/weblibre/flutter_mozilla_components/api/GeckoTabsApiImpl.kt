@@ -130,7 +130,13 @@ class GeckoTabsApiImpl : GeckoTabsApi {
         }
     }
 
-    private suspend fun handleIconChange(tab: SessionState) {
+    // [sequence] is captured by the caller, synchronously, before this
+    // suspends: encode/IO here can finish out of order across overlapping
+    // calls for different tabs (or the same tab called again before the
+    // first finishes), so grabbing EventSequence.next() in here would let a
+    // slower, older change claim a higher sequence number than a faster,
+    // newer one — see FlutterEventMiddleware for the same fix.
+    private suspend fun handleIconChange(tab: SessionState, sequence: Long) {
         try {
             val iconBytes: ByteArray?
             if (tab.content.icon != null) {
@@ -141,7 +147,7 @@ class GeckoTabsApiImpl : GeckoTabsApi {
 
             withContext(Dispatchers.Main) {
                 components.flutterEvents.onIconChange(
-                    EventSequence.next(),
+                    sequence,
                     tab.id,
                     iconBytes
                 ) { }
@@ -151,7 +157,7 @@ class GeckoTabsApiImpl : GeckoTabsApi {
         }
     }
 
-    private suspend fun handleThumbnailChange(tab: SessionState) {
+    private suspend fun handleThumbnailChange(tab: SessionState, sequence: Long) {
         try {
             val bitmap = components.core.thumbnailStorage.loadThumbnail(
                 ImageLoadRequest(
@@ -165,7 +171,7 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                 val bytes = it.toWebPBytes()
                 withContext(Dispatchers.Main) {
                     components.flutterEvents.onThumbnailChange(
-                        EventSequence.next(),
+                        sequence,
                         tab.id,
                         bytes
                     ) { }
@@ -237,7 +243,8 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                 }
 
                 if (onIconChange) {
-                    coroutineScope.launch { handleIconChange(tab) }
+                    val sequence = EventSequence.next()
+                    coroutineScope.launch { handleIconChange(tab, sequence) }
                 }
 
                 if (onSecurityInfoStateChange) {
@@ -293,7 +300,8 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                 }
 
                 if (onThumbnailChange) {
-                    coroutineScope.launch { handleThumbnailChange(tab) }
+                    val sequence = EventSequence.next()
+                    coroutineScope.launch { handleThumbnailChange(tab, sequence) }
                 }
             }
 

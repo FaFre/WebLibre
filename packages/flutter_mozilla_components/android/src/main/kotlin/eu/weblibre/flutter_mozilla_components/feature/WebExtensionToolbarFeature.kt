@@ -229,6 +229,12 @@ class WebExtensionToolbarFeature(
     }
 
     private fun loadIcon(extensionId: String, action: Action, isPageAction: Boolean) {
+        // Captured synchronously, before the coroutine starts: action.loadIcon
+        // is a genuine suspend call (icon decode/IO), so two overlapping loads
+        // for the same extensionId can finish out of order — grabbing the
+        // sequence after that work would let a slower, older load claim a
+        // higher sequence number than a faster, newer one.
+        val sequence = EventSequence.next()
         CoroutineScope(iconJobDispatcher).launch {
             try {
                 val icon = action.loadIcon?.invoke(128)
@@ -236,7 +242,7 @@ class WebExtensionToolbarFeature(
                     val imageBytes = icon.toWebPBytes()
                     runOnUiThread {
                         addonEvents.onUpdateWebExtensionIcon(
-                            sequenceArg = EventSequence.next(),
+                            sequenceArg = sequence,
                             extensionIdArg = extensionId,
                             actionTypeArg = if (isPageAction) WebExtensionActionType.PAGE else WebExtensionActionType.BROWSER,
                             iconArg = imageBytes

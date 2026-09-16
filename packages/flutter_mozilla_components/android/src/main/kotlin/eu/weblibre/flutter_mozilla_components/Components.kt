@@ -48,7 +48,11 @@ class Components(val profileApplicationContext: ProfileContext,
                  private val extensionEvents: BrowserExtensionEvents,
                  private val syncStateEvents: GeckoSyncStateEvents?,
 ) {
-    val core by lazy { Core(profileApplicationContext, this, flutterEvents, extensionEvents) }
+    private val coreDelegate = lazy { Core(profileApplicationContext, this, flutterEvents, extensionEvents) }
+    val core: Core
+        get() = coreDelegate.value
+    internal val existingCore: Core?
+        get() = coreDelegate.takeIf { it.isInitialized() }?.value
     val backgroundServices by lazy {
         BackgroundServices(
             context = profileApplicationContext,

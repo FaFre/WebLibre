@@ -57,6 +57,12 @@ class GeckoSuggestionApiImpl(
 
     override fun querySuggestions(text: String, providers: List<GeckoSuggestionType>) {
         for(provider in providers) {
+            // Captured synchronously, before the coroutine starts: each
+            // provider's onInputChanged is async (history/session storage
+            // lookups), so a slower older query for the same provider can
+            // finish after a faster newer one — grabbing the sequence after
+            // that work would let its stale results win on the Dart side.
+            val sequence = EventSequence.next()
             coroutineScope.launch {
                 val results = when(provider) {
                     GeckoSuggestionType.SESSION -> components.search.sessionSuggestions.onInputChanged(text)
@@ -78,7 +84,7 @@ class GeckoSuggestionApiImpl(
 
                 runOnUiThread {
                     suggestionEvents.onSuggestionResult(
-                        EventSequence.next(),
+                        sequence,
                         provider,
                         mappedResults
                     ) { }

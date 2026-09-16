@@ -18,6 +18,13 @@ import eu.weblibre.flutter_mozilla_components.pigeons.ImageSrcHitResult
 import eu.weblibre.flutter_mozilla_components.pigeons.PhoneHitResult
 import eu.weblibre.flutter_mozilla_components.pigeons.UnknownHitResult
 import eu.weblibre.flutter_mozilla_components.pigeons.VideoHitResult
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.launch
 import mozilla.components.browser.state.action.BrowserAction
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.action.LastAccessAction
@@ -39,6 +46,32 @@ import kotlin.reflect.typeOf
  * the thumbnail to the disk cache.
  */
 class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Middleware<BrowserState, BrowserAction> {
+    // Bitmap resize + WebP encoding is CPU-bound (measured 12-50ms for a single
+    // thumbnail/icon) and Gecko dispatches BrowserActions on the main thread —
+    // doing this work inline here was stealing that thread from GeckoView's own
+    // navigation work often enough to lose the back/forward-cache restore race
+    // on back navigation. mozilla-components' own ThumbnailsMiddleware defers
+    // its own Bitmap handling to a coroutine the same way (see
+    // ThumbnailStorage.saveThumbnail), so holding onto the Bitmap across the
+    // async boundary here follows the same precedent.
+    private val encodingScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    /**
+     * Cancels any in-flight encode.
+     *
+     * Each components set builds its own [FlutterEventMiddleware], so without
+     * this an encode started before a profile switch would outlive the profile
+     * it belongs to and still call [GeckoStateEvents.onIconUpdate] /
+     * [GeckoStateEvents.onThumbnailChange] into the *next* profile's Dart
+     * state. [EventSequence] is process-global and strictly increasing, so
+     * those stale events would not be filtered out by Dart's
+     * `addWhenMoreRecent` gate either — they would land as entries for tab ids
+     * the new profile does not have. Called from `GlobalComponents.tearDown`.
+     */
+    fun close() {
+        encodingScope.cancel()
+    }
+
     @Suppress("ComplexMethod")
     override fun invoke(
         store: Store<BrowserState, BrowserAction>,
@@ -47,11 +80,38 @@ class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Midd
     ) {
         when (action) {
             is ContentAction.UpdateThumbnailAction -> {
-                val resized = action.thumbnail.resize(maxWidth = 1280, maxHeight = 800);
-                val bytes = resized.toWebPBytes()
+                val sessionId = action.sessionId
+                val thumbnail = action.thumbnail
+                // Captured synchronously, in dispatch order, before the async
+                // encode: Dispatchers.Default gives no ordering guarantee
+                // between concurrent encodes, so an older thumbnail that takes
+                // longer to encode than a newer one for the same tab must not
+                // be allowed to claim a higher sequence number — Dart's
+                // addWhenMoreRecent trusts this value to reflect native order.
+                val sequence = EventSequence.next()
+                encodingScope.launch {
+                    // Resizing and encoding can fail on input the store is happy
+                    // to hold (an extreme aspect ratio makes `resize` compute a
+                    // zero dimension, and `createScaledBitmap`/`compress` can go
+                    // OOM). Inline, that threw back at whoever dispatched the
+                    // action — `GeckoSessionApiImpl.requestScreenshot` catches it
+                    // and returns a failed Result. From a coroutine it would
+                    // instead reach the thread's default uncaught handler and
+                    // take the process down, so it has to be caught here.
+                    try {
+                        val bytes = thumbnail.resize(maxWidth = 1280, maxHeight = 800).toWebPBytes()
 
-                runOnUiThread {
-                    flutterEvents.onThumbnailChange(EventSequence.next(), action.sessionId, bytes) { _ -> }
+                        ensureActive()
+                        runOnUiThread {
+                            flutterEvents.onThumbnailChange(sequence, sessionId, bytes) { _ -> }
+                        }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        logger.error("$TAG: Failed to encode thumbnail for tab $sessionId", e)
+                    } catch (e: OutOfMemoryError) {
+                        logger.error("$TAG: Out of memory encoding thumbnail for tab $sessionId", e)
+                    }
                 }
             }
             is TabListAction.AddTabAction -> {
@@ -63,14 +123,30 @@ class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Midd
                 }
             }
             is ContentAction.UpdateIconAction -> {
-                val bytes = action.icon.toWebPBytes()
+                val pageUrl = action.pageUrl
+                val icon = action.icon
+                // See the matching comment in UpdateThumbnailAction above.
+                val sequence = EventSequence.next()
+                encodingScope.launch {
+                    // See the matching try/catch in UpdateThumbnailAction above.
+                    try {
+                        val bytes = icon.toWebPBytes()
 
-                runOnUiThread {
-                    flutterEvents.onIconUpdate(
-                        EventSequence.next(),
-                        action.pageUrl,
-                        bytes
-                    ) { _ -> }
+                        ensureActive()
+                        runOnUiThread {
+                            flutterEvents.onIconUpdate(
+                                sequence,
+                                pageUrl,
+                                bytes
+                            ) { _ -> }
+                        }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        logger.error("$TAG: Failed to encode icon for $pageUrl", e)
+                    } catch (e: OutOfMemoryError) {
+                        logger.error("$TAG: Out of memory encoding icon for $pageUrl", e)
+                    }
                 }
             }
             is ContentAction.UpdateHitResultAction -> {
@@ -133,5 +209,9 @@ class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Midd
             }
         }
         next(action)
+    }
+
+    companion object {
+        private const val TAG = "FlutterEventMiddleware"
     }
 }
