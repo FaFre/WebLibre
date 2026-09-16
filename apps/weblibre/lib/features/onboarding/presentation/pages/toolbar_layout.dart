@@ -19,6 +19,8 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/window_size_class.dart';
+import 'package:weblibre/core/providers/window_size_class.dart';
 import 'package:weblibre/features/settings/presentation/widgets/toolbar_layout_content.dart';
 import 'package:weblibre/features/settings/presentation/widgets/toolbar_preview.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -50,6 +52,7 @@ class ToolbarLayoutPage extends HookConsumerWidget {
             pinned: true,
             delegate: TabBarPreviewHeaderDelegate(
               settings: settings,
+              window: ref.watch(windowSizeClassControllerProvider),
               backgroundColor: Colors.transparent,
               compact: true,
               padding: const EdgeInsets.symmetric(
@@ -63,7 +66,9 @@ class ToolbarLayoutPage extends HookConsumerWidget {
             sliver: SliverToBoxAdapter(
               child: Center(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 560),
+                  constraints: const BoxConstraints(
+                    maxWidth: ContentWidth.form,
+                  ),
                   child: const ListTileTheme(
                     contentPadding: EdgeInsets.zero,
                     child: ToolbarLayoutContent(),

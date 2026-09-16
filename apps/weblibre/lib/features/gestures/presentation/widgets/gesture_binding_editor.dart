@@ -19,12 +19,13 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:weblibre/features/gestures/data/models/gesture_action.dart';
+import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_stroke.dart';
 import 'package:weblibre/features/gestures/presentation/widgets/gesture_action_picker.dart';
 import 'package:weblibre/features/gestures/presentation/widgets/gesture_stroke_view.dart';
 
-typedef GestureBindingResult = ({GestureStroke stroke, GestureAction action});
+typedef GestureBindingResult = ({GestureStroke stroke, BrowserAction action});
 
 /// Opens the gesture binding editor as a full-screen page.
 ///
@@ -36,8 +37,8 @@ typedef GestureBindingResult = ({GestureStroke stroke, GestureAction action});
 Future<GestureBindingResult?> showGestureBindingEditor(
   BuildContext context, {
   GestureStroke? initialStroke,
-  GestureAction? initialAction,
-  Map<String, GestureAction> existingBindings = const {},
+  BrowserAction? initialAction,
+  Map<String, BrowserAction> existingBindings = const {},
   int maxFingers = 1,
 }) {
   return Navigator.of(context).push<GestureBindingResult>(
@@ -54,8 +55,8 @@ Future<GestureBindingResult?> showGestureBindingEditor(
 
 class _GestureBindingEditor extends HookWidget {
   final GestureStroke? initialStroke;
-  final GestureAction? initialAction;
-  final Map<String, GestureAction> existingBindings;
+  final BrowserAction? initialAction;
+  final Map<String, BrowserAction> existingBindings;
   final int maxFingers;
 
   const _GestureBindingEditor({
@@ -67,7 +68,7 @@ class _GestureBindingEditor extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final action = useState(initialAction ?? GestureAction.values.first);
+    final action = useState(initialAction ?? BrowserAction.values.first);
     final startPosition = useState(
       initialStroke?.startPosition ?? GestureStartPosition.anywhere,
     );
@@ -98,6 +99,7 @@ class _GestureBindingEditor extends HookWidget {
       if (collisionAction != null) {
         final confirmed = await showDialog<bool>(
           context: context,
+          anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
           builder: (context) => AlertDialog(
             icon: const Icon(Icons.warning_amber),
             title: const Text('Replace existing gesture?'),
@@ -330,7 +332,7 @@ class _GestureBindingEditor extends HookWidget {
 /// Inline warning shown in the editor's save bar when the current stroke would
 /// overwrite another binding.
 class _CollisionWarning extends StatelessWidget {
-  final GestureAction action;
+  final BrowserAction action;
 
   const _CollisionWarning({required this.action});
 

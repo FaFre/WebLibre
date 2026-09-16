@@ -23,6 +23,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 /// How long an item has to be held before it is "picked up": the context menu
 /// opens and the item becomes draggable. Matches the platform long-press
@@ -416,4 +417,69 @@ void _revealFully(BuildContext context) {
       curve: Curves.easeOutCubic,
     ),
   );
+}
+
+/// Explains why an item that looks draggable does not move.
+///
+/// Watches for the gesture that would have dragged the item — a hold of
+/// [kItemLongPressDelay] followed by a move past [kTouchSlop] — and shows
+/// [message] once for it. Passive, a raw [Listener], so the menu, tap and
+/// scroll gestures underneath keep working exactly as they do without it.
+class HoldDragDisabledHint extends HookWidget {
+  final String message;
+  final Widget child;
+
+  const HoldDragDisabledHint({
+    required this.message,
+    required this.child,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final holdTimer = useRef<Timer?>(null);
+    final held = useRef(false);
+    final shown = useRef(false);
+    final downPosition = useRef(Offset.zero);
+
+    useEffect(
+      () =>
+          () => holdTimer.value?.cancel(),
+      const [],
+    );
+
+    void reset() {
+      holdTimer.value?.cancel();
+      holdTimer.value = null;
+      held.value = false;
+    }
+
+    return Listener(
+      onPointerDown: (event) {
+        reset();
+        shown.value = false;
+        downPosition.value = event.position;
+        holdTimer.value = Timer(kItemLongPressDelay, () {
+          holdTimer.value = null;
+          held.value = true;
+        });
+      },
+      onPointerMove: (event) {
+        if ((event.position - downPosition.value).distance <= kTouchSlop) {
+          return;
+        }
+        // Moving before the hold completed is a scroll, not a drag attempt.
+        if (!held.value) {
+          reset();
+          return;
+        }
+        if (shown.value || !context.mounted) return;
+        shown.value = true;
+        ui_helper.showInfoMessage(context, message);
+      },
+      onPointerUp: (_) => reset(),
+      onPointerCancel: (_) => reset(),
+      child: child,
+    );
+  }
 }

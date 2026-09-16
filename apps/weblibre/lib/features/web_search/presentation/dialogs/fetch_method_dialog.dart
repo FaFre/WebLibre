@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/web_search/domain/controllers/search_controller.dart';
 import 'package:weblibre/features/web_search/domain/entities/captured_page_state.dart';
 import 'package:weblibre/features/web_search/domain/entities/fetch_method.dart';
@@ -15,6 +16,7 @@ Future<void> showFetchMethodSheet(
 }) {
   return showModalBottomSheet<void>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     isScrollControlled: true,
     useSafeArea: true,
     showDragHandle: true,

@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_settings.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/setting_groups_serializer.dart';
@@ -64,6 +65,7 @@ class WebEngineHardeningScreen extends HookConsumerWidget {
               onPressed: () async {
                 final confirmed = await showDialog<bool>(
                   context: context,
+                  anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
                   builder: (context) => AlertDialog(
                     title: const Text('Reset all preferences?'),
                     content: const Text(

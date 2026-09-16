@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:weblibre/core/design/display_features.dart';
 
 /// Shows a confirmation dialog for switching user profiles.
 ///
@@ -29,6 +30,7 @@ Future<bool?> showSwitchProfileDialog(
 }) {
   return showDialog<bool>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) {
       final theme = Theme.of(context);
 

@@ -18,20 +18,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:weblibre/features/gestures/data/models/gesture_action.dart';
+import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
 import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
 
-/// Shows a modal bottom sheet listing every [GestureAction] grouped by category,
+/// Shows a modal bottom sheet listing every [BrowserAction] grouped by category,
 /// each with its icon, title and description, and returns the chosen action (or
 /// null if dismissed). Mirrors the icon + subtitle selection sheets used
 /// elsewhere in the app (e.g. the contextual toolbar pickers).
-Future<GestureAction?> showGestureActionPicker(
+Future<BrowserAction?> showGestureActionPicker(
   BuildContext context, {
-  required GestureAction selected,
+  required BrowserAction selected,
 }) {
-  return showModalBottomSheet<GestureAction>(
+  return showModalBottomSheet<BrowserAction>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     isScrollControlled: true,
     useSafeArea: true,
     shape: const RoundedRectangleBorder(
@@ -42,7 +44,7 @@ Future<GestureAction?> showGestureActionPicker(
 }
 
 class _GestureActionPicker extends StatelessWidget {
-  final GestureAction selected;
+  final BrowserAction selected;
 
   const _GestureActionPicker({required this.selected});
 
@@ -51,8 +53,8 @@ class _GestureActionPicker extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    final byCategory = <GestureActionCategory, List<GestureAction>>{};
-    for (final action in GestureAction.values) {
+    final byCategory = <BrowserActionCategory, List<BrowserAction>>{};
+    for (final action in BrowserAction.values) {
       byCategory.putIfAbsent(action.category, () => []).add(action);
     }
 
@@ -80,7 +82,7 @@ class _GestureActionPicker extends StatelessWidget {
                 controller: scrollController,
                 padding: const EdgeInsets.only(bottom: 8),
                 children: [
-                  for (final category in GestureActionCategory.values)
+                  for (final category in BrowserActionCategory.values)
                     if (byCategory[category] case final actions?
                         when actions.isNotEmpty) ...[
                       Padding(

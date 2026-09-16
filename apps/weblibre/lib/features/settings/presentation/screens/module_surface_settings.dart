@@ -138,7 +138,7 @@ class _HomeSearchBarRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final stored = settings.homeSearchBarPlacement;
-    final resolved = settings.effectiveHomeSearchBarPlacement();
+    final resolved = ref.watch(effectiveHomeSearchBarPlacementProvider);
 
     return MenuAnchor(
       menuChildren: [

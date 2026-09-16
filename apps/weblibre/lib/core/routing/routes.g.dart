@@ -756,6 +756,12 @@ RouteBase get $browserRoute => GoRouteData.$route(
       factory: $TabViewRoute._fromState,
     ),
     GoRouteData.$route(
+      path: 'keyboard_shortcuts',
+      name: 'KeyboardShortcutsOverviewRoute',
+      hasOverriddenOnExit: false,
+      factory: $KeyboardShortcutsOverviewRoute._fromState,
+    ),
+    GoRouteData.$route(
       path: 'context_menu',
       name: 'ContextMenuRoute',
       hasOverriddenOnExit: false,
@@ -896,6 +902,27 @@ mixin $TabViewRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/browser/tab_view');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $KeyboardShortcutsOverviewRoute on GoRouteData {
+  static KeyboardShortcutsOverviewRoute _fromState(GoRouterState state) =>
+      const KeyboardShortcutsOverviewRoute();
+
+  @override
+  String get location => GoRouteData.$location('/browser/keyboard_shortcuts');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -1623,6 +1650,12 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       factory: $GestureSettingsRoute._fromState,
     ),
     GoRouteData.$route(
+      path: 'keyboard_shortcuts',
+      name: 'KeyboardShortcutSettingsRoute',
+      hasOverriddenOnExit: false,
+      factory: $KeyboardShortcutSettingsRoute._fromState,
+    ),
+    GoRouteData.$route(
       path: 'privacy_security',
       name: 'PrivacySecuritySettingsRoute',
       hasOverriddenOnExit: false,
@@ -1940,6 +1973,27 @@ mixin $GestureSettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/gestures');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $KeyboardShortcutSettingsRoute on GoRouteData {
+  static KeyboardShortcutSettingsRoute _fromState(GoRouterState state) =>
+      const KeyboardShortcutSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/keyboard_shortcuts');
 
   @override
   void go(BuildContext context) => context.go(location);

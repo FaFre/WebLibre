@@ -18,10 +18,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:weblibre/core/design/display_features.dart';
 
 /// A dialog page with Material entrance and exit animations, modal barrier color,
 /// and modal barrier behavior (dialog is dismissible with a tap on the barrier).
 class DialogPage<T> extends Page<T> {
+  /// Which sub-screen to use when a hinge or fold divides the window.
+  ///
+  /// When left null, resolved in [createRoute] from the window's display
+  /// features rather than falling back to Flutter's top-left default.
   final Offset? anchorPoint;
   final Color? barrierColor;
   final bool barrierDismissible;
@@ -49,7 +54,7 @@ class DialogPage<T> extends Page<T> {
     context: context,
     settings: this,
     builder: builder,
-    anchorPoint: anchorPoint,
+    anchorPoint: anchorPoint ?? preferredAnchorPoint(MediaQuery.of(context)),
     barrierColor:
         barrierColor ??
         DialogTheme.of(context).barrierColor ??

@@ -23,6 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/ublock_asset.dart';
@@ -281,6 +282,7 @@ Future<void> _confirmAndRun(
 }) async {
   final confirmed = await showDialog<bool>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => AlertDialog(
       title: Text(title),
       content: Text(message),
@@ -1069,6 +1071,7 @@ Future<UBlockExternalList?> _promptForExternalList(
 }) {
   return showDialog<UBlockExternalList>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) =>
         _ExternalListDialog(existing: existing, initial: initial),
   );

@@ -81,7 +81,7 @@ class GestureSettingsRepository extends _$GestureSettingsRepository {
       'excludedSites': settings['excludedSites']
           ?.readAs(DriftSqlType.string, db.typeMapping)
           .mapNotNull(jsonDecode),
-      'bindings': settings['bindings']
+      'bindingOverrides': settings['bindingOverrides']
           ?.readAs(DriftSqlType.string, db.typeMapping)
           .mapNotNull(jsonDecode),
     });

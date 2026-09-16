@@ -217,11 +217,7 @@ class _HomeSearchPillSliver extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final placement = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.effectiveHomeSearchBarPlacement(),
-      ),
-    );
+    final placement = ref.watch(effectiveHomeSearchBarPlacementProvider);
 
     if (placement == HomeSearchBarPlacement.tabBar) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());

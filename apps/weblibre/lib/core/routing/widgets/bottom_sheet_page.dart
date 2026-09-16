@@ -18,11 +18,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:weblibre/core/design/display_features.dart';
 
 /// A bottom sheet page with Material entrance and exit animations.
 /// Similar to DialogPage but displays content as a modal bottom sheet.
 class BottomSheetPage<T> extends Page<T> {
   final WidgetBuilder builder;
+
+  /// Which sub-screen to use when a hinge or fold divides the window.
+  ///
+  /// Left null by callers: resolved in [createRoute] from the window's display
+  /// features, so no call site has to think about foldables.
+  final Offset? anchorPoint;
   final Color? barrierColor;
   final bool barrierDismissible;
   final String? barrierLabel;
@@ -31,6 +38,7 @@ class BottomSheetPage<T> extends Page<T> {
 
   const BottomSheetPage({
     required this.builder,
+    this.anchorPoint,
     this.barrierColor,
     this.barrierDismissible = true,
     this.barrierLabel,
@@ -46,6 +54,7 @@ class BottomSheetPage<T> extends Page<T> {
   Route<T> createRoute(BuildContext context) => ModalBottomSheetRoute<T>(
     settings: this,
     builder: builder,
+    anchorPoint: anchorPoint ?? preferredAnchorPoint(MediaQuery.of(context)),
     barrierLabel:
         barrierLabel ??
         MaterialLocalizations.of(context).modalBarrierDismissLabel,

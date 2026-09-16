@@ -28,6 +28,7 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/addons/domain/providers.dart';
 import 'package:weblibre/features/addons/extensions/addon_info.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
+import 'package:weblibre/presentation/widgets/web_content_keyboard.dart';
 
 Future<void> openAddonSettingsFlow(
   BuildContext context,
@@ -130,24 +131,26 @@ class _AddonSettingsPlatformView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PlatformViewLink(
-      viewType: 'eu.weblibre/addon_settings',
-      surfaceFactory: (context, controller) =>
-          PointerInputSurface(controller: controller),
-      onCreatePlatformView: (params) {
-        final controller = PlatformViewsService.initExpensiveAndroidView(
-          id: params.id,
-          viewType: 'eu.weblibre/addon_settings',
-          layoutDirection: TextDirection.ltr,
-          creationParams: <String, Object?>{'optionsPageUrl': optionsPageUrl},
-          creationParamsCodec: const StandardMessageCodec(),
-        );
-        controller.addOnPlatformViewCreatedListener(
-          params.onPlatformViewCreated,
-        );
-        unawaited(controller.create());
-        return controller;
-      },
+    return WebContentKeyPassthrough(
+      child: PlatformViewLink(
+        viewType: 'eu.weblibre/addon_settings',
+        surfaceFactory: (context, controller) =>
+            PointerInputSurface(controller: controller),
+        onCreatePlatformView: (params) {
+          final controller = PlatformViewsService.initExpensiveAndroidView(
+            id: params.id,
+            viewType: 'eu.weblibre/addon_settings',
+            layoutDirection: TextDirection.ltr,
+            creationParams: <String, Object?>{'optionsPageUrl': optionsPageUrl},
+            creationParamsCodec: const StandardMessageCodec(),
+          );
+          controller.addOnPlatformViewCreatedListener(
+            params.onPlatformViewCreated,
+          );
+          unawaited(controller.create());
+          return controller;
+        },
+      ),
     );
   }
 }

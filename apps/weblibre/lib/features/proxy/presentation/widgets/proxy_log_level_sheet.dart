@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/user/data/models/proxy_diagnostics_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/proxy_diagnostics_settings.dart';
 
@@ -30,6 +31,7 @@ import 'package:weblibre/features/user/domain/repositories/proxy_diagnostics_set
 Future<void> showProxyLogLevelSheet(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     showDragHandle: true,
     isScrollControlled: true,
     builder: (context) => const _ProxyLogLevelSheet(),

@@ -19,7 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/gestures/data/models/gesture_action.dart';
+import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_stroke.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
@@ -29,7 +29,7 @@ import 'package:weblibre/features/gestures/presentation/widgets/gesture_stroke_v
 /// One candidate completion shown in the overlay.
 typedef _Suggestion = ({
   GestureStroke stroke,
-  GestureAction action,
+  BrowserAction action,
   bool exact,
 });
 

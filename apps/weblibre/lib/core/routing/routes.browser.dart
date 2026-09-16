@@ -28,6 +28,10 @@ part of 'routes.dart';
       path: 'search/:tabType/:searchText',
     ),
     TypedGoRoute<TabViewRoute>(name: 'TabViewRoute', path: 'tab_view'),
+    TypedGoRoute<KeyboardShortcutsOverviewRoute>(
+      name: 'KeyboardShortcutsOverviewRoute',
+      path: 'keyboard_shortcuts',
+    ),
     TypedGoRoute<ContextMenuRoute>(
       name: 'ContextMenuRoute',
       path: 'context_menu',
@@ -284,6 +288,18 @@ class TabViewRoute extends GoRouteData with $TabViewRoute {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return DialogPage(builder: (_) => const TabViewScreen());
+  }
+}
+
+class KeyboardShortcutsOverviewRoute extends GoRouteData
+    with $KeyboardShortcutsOverviewRoute {
+  const KeyboardShortcutsOverviewRoute();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return DialogPage(
+      builder: (_) => const KeyboardShortcutsOverviewDialog(),
+    );
   }
 }
 

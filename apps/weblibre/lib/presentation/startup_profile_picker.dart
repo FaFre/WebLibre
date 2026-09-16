@@ -17,6 +17,7 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid_value.dart';
 import 'package:weblibre/core/copy/profile_copy.dart';
+import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/core/startup/profile_discovery.dart';
 import 'package:weblibre/features/user/domain/presentation/utils/profile_labels.dart';
 
@@ -59,7 +60,7 @@ class StartupProfilePicker extends StatelessWidget {
 
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 520),
+        constraints: const BoxConstraints(maxWidth: ContentWidth.form),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

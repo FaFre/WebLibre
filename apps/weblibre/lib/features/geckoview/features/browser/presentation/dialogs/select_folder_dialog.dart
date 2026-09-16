@@ -18,12 +18,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import 'dart:math' as math;
+
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/widgets/folder_tree_picker.dart';
 
 /// Bottom sheet to select a bookmark folder.
@@ -31,6 +34,7 @@ import 'package:weblibre/features/geckoview/features/bookmarks/presentation/widg
 Future<String?> showSelectFolderDialog(BuildContext context) {
   return showModalBottomSheet<String>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     isScrollControlled: true,
     builder: (context) => const _SelectFolderSheet(),
   );
@@ -55,21 +59,32 @@ class _SelectFolderSheet extends HookConsumerWidget {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
-            ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.5,
-              ),
-              child: FadingScroll(
-                fadingSize: 25,
-                builder: (context, controller) {
-                  return SingleChildScrollView(
-                    controller: controller,
-                    child: FolderTreePicker(
-                      selectedFolderGuid: selectedFolderGuid,
-                      entryGuid: BookmarkRoot.root.id,
-                    ),
-                  );
-                },
+            // Flexible, so a window too short for the whole sheet shrinks the
+            // list instead of overflowing: the floor below is only a
+            // preference.
+            Flexible(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  // Half the window on a phone. That leaves too little to pick
+                  // from in a short freeform or split-screen window, so the list
+                  // gets a floor there.
+                  maxHeight: math.max(
+                    240.0,
+                    MediaQuery.of(context).size.height * 0.5,
+                  ),
+                ),
+                child: FadingScroll(
+                  fadingSize: 25,
+                  builder: (context, controller) {
+                    return SingleChildScrollView(
+                      controller: controller,
+                      child: FolderTreePicker(
+                        selectedFolderGuid: selectedFolderGuid,
+                        entryGuid: BookmarkRoot.root.id,
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 16),

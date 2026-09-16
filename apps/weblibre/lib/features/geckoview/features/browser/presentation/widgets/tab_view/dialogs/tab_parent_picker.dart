@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -63,6 +64,7 @@ Future<void> showTabParentPicker({
 
   final selection = await showModalBottomSheet<_ParentPickerSelection>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     isScrollControlled: true,
     showDragHandle: true,
     builder: (context) => _TabParentPickerSheet(tabId: tabId),

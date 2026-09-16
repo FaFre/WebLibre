@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/proxy/data/models/proxy_share.dart';
@@ -197,6 +198,7 @@ class ProfileTile extends ConsumerWidget {
     if (!context.mounted) return;
     await showDialog<void>(
       context: context,
+      anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
       builder: (context) =>
           ShareProfileDialog(profileName: profile.name, shareUri: shareUri),
     );
@@ -205,6 +207,7 @@ class ProfileTile extends ConsumerWidget {
   Future<void> _handleDelete(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(
       context: context,
+      anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
       builder: (context) => AlertDialog(
         title: const Text('Delete Profile?'),
         content: Text(

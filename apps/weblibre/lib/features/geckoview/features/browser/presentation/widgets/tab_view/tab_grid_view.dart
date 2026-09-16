@@ -160,11 +160,24 @@ class _TabDraggable extends HookConsumerWidget {
 }
 
 class _TabGridView extends HookConsumerWidget {
+  /// Width actually available to the grid.
+  ///
+  /// Supplied by the caller from a `LayoutBuilder` rather than read from
+  /// `MediaQuery` here: the tray is hosted both full-screen and inside a
+  /// bottom sheet, and the sheet is width-capped and can sit beside a side
+  /// rail. Measuring the window would over-count columns and overflow.
+  ///
+  /// It is a field rather than a `LayoutBuilder` inside this build because the
+  /// column count feeds hooks, and hooks may not be created inside a
+  /// `LayoutBuilder` callback.
+  final double availableWidth;
+
   final ScrollController scrollController;
   final bool tabsReorderable;
   final VoidCallback onClose;
 
   const _TabGridView({
+    required this.availableWidth,
     required this.scrollController,
     required this.tabsReorderable,
     required this.onClose,
@@ -172,7 +185,7 @@ class _TabGridView extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = availableWidth;
     final disableAnimations = MediaQuery.disableAnimationsOf(context);
     final canManualReorder = ref.watch(canManualTabReorderProvider);
     final containerId = ref.watch(selectedContainerProvider);
@@ -318,7 +331,9 @@ class _TabGridView extends HookConsumerWidget {
       });
 
       return null;
-    }, [activeTab, primaryRows.length]);
+      // See tab_tree_view.dart: the offset depends on the column count and the
+      // tile size, so both have to retrigger the centring after a resize.
+    }, [activeTab, primaryRows.length, crossAxisCount, itemSize]);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -619,10 +634,13 @@ class ViewTabGridWidget extends HookConsumerWidget {
                   ),
             ),
           ],
-          body: _TabGridView(
-            scrollController: scrollController,
-            tabsReorderable: tabsReorderable,
-            onClose: onClose,
+          body: LayoutBuilder(
+            builder: (context, constraints) => _TabGridView(
+              availableWidth: constraints.maxWidth,
+              scrollController: scrollController,
+              tabsReorderable: tabsReorderable,
+              onClose: onClose,
+            ),
           ),
         ),
         if (showNewTabFab)

@@ -262,11 +262,21 @@ EquatableValue<List<TabStateWithContainer>> fifoTabStates(Ref ref) {
 @Riverpod()
 EquatableValue<List<TabStateWithContainer>>
 selectedContainerTabStatesWithContainer(Ref ref) {
-  final filter = ref.watch(
-    selectedContainerProvider.select(
-      (value) => ContainerFilterById(containerId: value),
-    ),
-  );
+  final containerId = ref.watch(selectedContainerProvider);
+  return ref.watch(containerTabStatesWithContainerProvider(containerId));
+}
+
+/// The tabs of [containerId] (null for unassigned tabs) with their container
+/// data, in the order every non-tray surface shares.
+///
+/// A family rather than a read of the selected container, so the accordion can
+/// list the tabs of several expanded groups at once without selecting them.
+@Riverpod()
+EquatableValue<List<TabStateWithContainer>> containerTabStatesWithContainer(
+  Ref ref,
+  String? containerId,
+) {
+  final filter = ContainerFilterById(containerId: containerId);
 
   final containerData = ref
       .watch(watchContainersWithCountProvider.select((value) => value.value))
@@ -477,11 +487,7 @@ AsyncValue<bool> _quickTabSwitcherRowHasResults(
 /// 0 hides the bar; feeds the toolbar height / GeckoView viewport math.
 @Riverpod()
 AsyncValue<int> quickTabSwitcherRowCount(Ref ref) {
-  final stackingMode = ref.watch(
-    generalSettingsWithDefaultsProvider.select(
-      (settings) => settings.effectiveTabBarStackingMode(),
-    ),
-  );
+  final stackingMode = ref.watch(effectiveTabBarStackingModeProvider);
 
   switch (stackingMode) {
     case TabBarStackingMode.disabled:

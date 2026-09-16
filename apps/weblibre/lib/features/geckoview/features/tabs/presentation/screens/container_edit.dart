@@ -25,6 +25,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/uuid.dart';
 import 'package:weblibre/features/app_links/presentation/widgets/container_app_link_settings_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
@@ -200,6 +201,7 @@ class ContainerEditScreen extends HookConsumerWidget {
     Future<void> openColorPicker() async {
       final result = await showDialog<ColorPickerResult?>(
         context: context,
+        anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
         builder: (context) => ColorPickerDialog(
           selectedColor.value,
           initialUseCustomColor: useCustomColor.value,
@@ -215,6 +217,7 @@ class ContainerEditScreen extends HookConsumerWidget {
     Future<void> openIconPicker() async {
       final icon = await showModalBottomSheet<IconData>(
         context: context,
+        anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
         isScrollControlled: true,
         useSafeArea: true,
         builder: (context) => FractionallySizedBox(
@@ -236,6 +239,7 @@ class ContainerEditScreen extends HookConsumerWidget {
     Future<void> openAppearanceMenu() async {
       await showModalBottomSheet<void>(
         context: context,
+        anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
         useSafeArea: true,
         builder: (context) {
           return SafeArea(
@@ -776,6 +780,9 @@ class ContainerEditScreen extends HookConsumerWidget {
                             onTap: () async {
                               await showDialog<void>(
                                 context: context,
+                                anchorPoint: preferredAnchorPoint(
+                                  MediaQuery.of(context),
+                                ),
                                 builder: (context) =>
                                     ContainerAppLinkSettingsDialog(
                                       contextId: initialContainer

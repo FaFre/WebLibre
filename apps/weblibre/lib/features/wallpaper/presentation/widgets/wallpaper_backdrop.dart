@@ -40,9 +40,7 @@ class HomeWallpaperBackdrop extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tabBarPosition = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.tabBarPosition),
-    );
+    final tabBarPosition = ref.watch(effectiveTabBarPositionProvider);
 
     return WallpaperBackdrop(
       wallpaper: ref.watch(resolvedHomeWallpaperProvider),

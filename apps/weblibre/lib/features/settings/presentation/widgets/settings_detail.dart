@@ -21,6 +21,7 @@ import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/features/settings/domain/providers/pending_settings_highlight.dart';
 
 /// Default total-entry count at or below which [SettingsDetailScaffold] hides
@@ -117,42 +118,59 @@ class SettingsDetailScaffold extends HookWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: FadingScroll(
-          fadingSize: 25,
-          builder: (context, controller) {
-            return CustomScrollView(
-              controller: controller,
-              slivers: [
-                SliverAppBar.large(
-                  centerTitle: false,
-                  title: Text(title),
-                  actions: actions,
-                ),
-                if (showSearch)
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                    sliver: SliverToBoxAdapter(
-                      child: SettingsSearchField(
-                        controller: search.controller,
-                        hintText: searchHintText,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Settings rows run edge to edge otherwise: a switch stranded
+            // 900dp from its label is no easier to read than prose is. The app
+            // bar stays full-bleed, so only the content is centred.
+            final inset = centeringInset(
+              constraints.maxWidth,
+              maxWidth: ContentWidth.list,
+            );
+
+            return FadingScroll(
+              fadingSize: 25,
+              builder: (context, controller) {
+                return CustomScrollView(
+                  controller: controller,
+                  slivers: [
+                    SliverAppBar.large(
+                      centerTitle: false,
+                      title: Text(title),
+                      actions: actions,
+                    ),
+                    if (showSearch)
+                      SliverPadding(
+                        padding: EdgeInsets.fromLTRB(
+                          16 + inset,
+                          8,
+                          16 + inset,
+                          0,
+                        ),
+                        sliver: SliverToBoxAdapter(
+                          child: SettingsSearchField(
+                            controller: search.controller,
+                            hintText: searchHintText,
+                          ),
+                        ),
+                      ),
+                    SliverPadding(
+                      padding: EdgeInsets.fromLTRB(
+                        16 + inset,
+                        showSearch ? 24 : 16,
+                        16 + inset,
+                        20,
+                      ),
+                      sliver: SliverToBoxAdapter(
+                        child: SettingsSectionList(
+                          sections: filteredSections,
+                          query: showSearch ? search.rawQuery : '',
+                        ),
                       ),
                     ),
-                  ),
-                SliverPadding(
-                  padding: EdgeInsets.fromLTRB(
-                    16,
-                    showSearch ? 24 : 16,
-                    16,
-                    20,
-                  ),
-                  sliver: SliverToBoxAdapter(
-                    child: SettingsSectionList(
-                      sections: filteredSections,
-                      query: showSearch ? search.rawQuery : '',
-                    ),
-                  ),
-                ),
-              ],
+                  ],
+                );
+              },
             );
           },
         ),
@@ -184,29 +202,48 @@ class SettingsCustomScrollScaffold extends StatelessWidget {
     return Scaffold(
       floatingActionButton: floatingActionButton,
       body: SafeArea(
-        child: FadingScroll(
-          fadingSize: 25,
-          builder: (context, controller) {
-            return CustomScrollView(
-              controller: controller,
-              slivers: [
-                SliverAppBar.large(
-                  centerTitle: false,
-                  title: Text(title),
-                  actions: actions,
-                ),
-                if (searchController != null)
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                    sliver: SliverToBoxAdapter(
-                      child: SettingsSearchField(
-                        controller: searchController!,
-                        hintText: searchHintText,
-                      ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final inset = centeringInset(
+              constraints.maxWidth,
+              maxWidth: ContentWidth.list,
+            );
+
+            return FadingScroll(
+              fadingSize: 25,
+              builder: (context, controller) {
+                return CustomScrollView(
+                  controller: controller,
+                  slivers: [
+                    SliverAppBar.large(
+                      centerTitle: false,
+                      title: Text(title),
+                      actions: actions,
                     ),
-                  ),
-                ...slivers,
-              ],
+                    if (searchController != null)
+                      SliverPadding(
+                        padding: EdgeInsets.fromLTRB(
+                          16 + inset,
+                          8,
+                          16 + inset,
+                          0,
+                        ),
+                        sliver: SliverToBoxAdapter(
+                          child: SettingsSearchField(
+                            controller: searchController!,
+                            hintText: searchHintText,
+                          ),
+                        ),
+                      ),
+                    // Caller slivers bring their own padding; this only adds
+                    // the centring amount, which is zero on a phone.
+                    SliverPadding(
+                      padding: EdgeInsets.symmetric(horizontal: inset),
+                      sliver: SliverMainAxisGroup(slivers: slivers),
+                    ),
+                  ],
+                );
+              },
             );
           },
         ),

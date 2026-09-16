@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/providers/window_size_class.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/settings/presentation/widgets/toolbar_layout_content.dart';
 import 'package:weblibre/features/settings/presentation/widgets/toolbar_preview.dart';
@@ -42,6 +43,7 @@ class ToolbarLayoutSettingsScreen extends HookConsumerWidget {
           pinned: true,
           delegate: TabBarPreviewHeaderDelegate(
             settings: settings,
+            window: ref.watch(windowSizeClassControllerProvider),
             compact: true,
           ),
         ),

@@ -11,6 +11,7 @@ import android.os.Looper
 import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
+import android.view.PointerIcon
 import android.view.View
 import android.widget.FrameLayout
 import eu.weblibre.flutter_mozilla_components.pigeons.PointerHitTest
@@ -20,6 +21,8 @@ import java.time.Duration
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import org.junit.After
 import org.junit.Test
@@ -702,5 +705,58 @@ class PointerInputRouterTest {
         assertTrue(host.hitTests.isEmpty())
         assertTrue(displacedChild.events.isEmpty())
         assertTrue(flutterEvents.isEmpty())
+    }
+
+    @Test
+    fun pointerIconAnswersOnlyWhileTheSurfaceHoldsTheCursor() {
+        val (root, child) = root(1)
+        // What the page asked for, the way GeckoView applies a CSS cursor.
+        val pageIcon = PointerIcon.getSystemIcon(context, PointerIcon.TYPE_HAND)
+        child.pointerIcon = pageIcon
+        val hover = event(MotionEvent.ACTION_HOVER_MOVE)
+
+        // Nothing has been decided yet, so the page may not shape the cursor.
+        assertNull(root.onResolvePointerIcon(hover, 0))
+
+        root.dispatchGenericMotionEvent(hover)
+        host.answer(0, revision = 1, target = target(1))
+        assertSame(pageIcon, root.onResolvePointerIcon(hover, 0))
+
+        // Chrome drawn over the page takes the cursor: the page's icon stops
+        // at its edge, even though the cursor is still over the surface.
+        hoverTarget(2, null)
+        assertNull(root.onResolvePointerIcon(hover, 0))
+    }
+
+    @Test
+    fun surfaceDoesNotAnswerForACursorAnotherSurfaceHolds() {
+        val (root, child) = root(1)
+        val (sibling, siblingChild) = root(2)
+        val icon = PointerIcon.getSystemIcon(context, PointerIcon.TYPE_HAND)
+        child.pointerIcon = icon
+        siblingChild.pointerIcon = PointerIcon.getSystemIcon(context, PointerIcon.TYPE_TEXT)
+        val hover = event(MotionEvent.ACTION_HOVER_MOVE)
+
+        root.dispatchGenericMotionEvent(hover)
+        host.answer(0, revision = 1, target = target(1))
+
+        assertSame(icon, root.onResolvePointerIcon(hover, 0))
+        assertNull(sibling.onResolvePointerIcon(hover, 0))
+    }
+
+    @Test
+    fun stylusHoverResolvesTheWayAndroidWouldWithoutArbitration() {
+        val (root, child) = root(1)
+        val icon = PointerIcon.getSystemIcon(context, PointerIcon.TYPE_CROSSHAIR)
+        child.pointerIcon = icon
+
+        // Never arbitrated, so never answered for: the cursor it shapes is not
+        // the one this router hands around.
+        val stylus = event(
+            MotionEvent.ACTION_HOVER_MOVE,
+            source = InputDevice.SOURCE_STYLUS,
+            tool = MotionEvent.TOOL_TYPE_STYLUS,
+        )
+        assertSame(icon, root.onResolvePointerIcon(stylus, 0))
     }
 }

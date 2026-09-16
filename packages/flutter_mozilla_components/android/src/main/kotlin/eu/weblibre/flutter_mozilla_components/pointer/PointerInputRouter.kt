@@ -37,6 +37,10 @@ import java.util.ArrayDeque
  * does not, and the answer carries geometry, so chrome *beside* the page
  * blocks only the area it actually covers.
  *
+ * The *shape* of the cursor is a second question Android answers by itself,
+ * with a walk of that same native hierarchy that no dispatch decision reaches;
+ * [resolvesPointerIcon] is what ties it back to the answer Dart gave.
+ *
  * A native winner receives the original event with its wheel axes and modifiers
  * intact, because Gecko has to scroll the element under the cursor rather than
  * the document. A Flutter winner goes through the embedding's ordinary pointer
@@ -297,6 +301,36 @@ class PointerInputRouter internal constructor(private val host: PointerInputHost
             replayToFlutter = false,
         )
     }
+
+    // ---- Cursor icon ------------------------------------------------------
+
+    /**
+     * Whether [root] answers for the shape of the cursor over [event].
+     *
+     * The icon is resolved beside everything else here: after dispatching a
+     * mouse event the window walks the *native* hierarchy itself, looking for
+     * the deepest view under the cursor that carries an icon, and it does that
+     * whatever this router decided about the event. The engine view carries one
+     * — the page sets it from the CSS cursor — and sits deeper than the Flutter
+     * view, so a page that asked for a grabbing hand keeps the cursor shaped
+     * that way under everything Flutter composites over it. Chrome that
+     * reserves space beside the surface is only spared because the walk does
+     * not reach the surface at all there.
+     *
+     * So the surface answers only while it actually holds the cursor. Otherwise
+     * the walk falls through to the Flutter view, whose icon the framework sets
+     * from what the cursor is really over.
+     *
+     * Input this router does not arbitrate — a stylus — resolves the way it
+     * would without this class, as does anything at all once the router is
+     * [disposed] and there is no Flutter tree left to answer for.
+     */
+    internal fun resolvesPointerIcon(
+        root: PointerInputFrameLayout,
+        event: MotionEvent,
+    ): Boolean = disposed ||
+        !event.isArbitratedMouseInput() ||
+        hover.owner?.view === root
 
     // ---- Arbitration ------------------------------------------------------
 

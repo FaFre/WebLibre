@@ -19,12 +19,14 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:weblibre/core/design/display_features.dart';
 
 /// Dialog to confirm password during backup creation.
 /// Returns the entered password string if confirmed, null if cancelled or dismissed.
 Future<String?> showPasswordConfirmationDialog(BuildContext context) {
   return showDialog<String>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) {
       final controller = TextEditingController();
 

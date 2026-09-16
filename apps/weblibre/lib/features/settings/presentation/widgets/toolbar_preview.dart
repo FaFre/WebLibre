@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/security.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_bar_buttons.dart';
@@ -36,6 +37,7 @@ import 'package:weblibre/features/user/data/models/general_settings.dart';
 class TabBarPreviewHeaderDelegate extends SliverPersistentHeaderDelegate {
   const TabBarPreviewHeaderDelegate({
     required this.settings,
+    required this.window,
     this.backgroundColor,
     this.compact = false,
     this.padding = const EdgeInsets.symmetric(horizontal: 12.0),
@@ -46,6 +48,12 @@ class TabBarPreviewHeaderDelegate extends SliverPersistentHeaderDelegate {
   static const _kHeaderHeight = 72.0;
 
   final GeneralSettings settings;
+
+  /// The window the preview is being drawn for.
+  ///
+  /// The preview has to resolve the same way the real toolbar does, or it
+  /// would show a bottom bar while the browser behind it renders a rail.
+  final WindowSizeClass window;
   final Color? backgroundColor;
   final bool compact;
   final EdgeInsets padding;
@@ -57,8 +65,9 @@ class TabBarPreviewHeaderDelegate extends SliverPersistentHeaderDelegate {
       height += BrowserTabBar.contextualToolabarHeight;
     }
 
-    final quickTabSwitcherRows = switch (settings
-        .effectiveTabBarStackingMode()) {
+    final quickTabSwitcherRows = switch (settings.effectiveTabBarStackingMode(
+      window: window,
+    )) {
       TabBarStackingMode.disabled => 0,
       TabBarStackingMode.twoLevel => 2,
       _ => 1,
@@ -77,7 +86,8 @@ class TabBarPreviewHeaderDelegate extends SliverPersistentHeaderDelegate {
   static const _kRailPreviewHeight = 220.0;
   static const _kCompactRailPreviewHeight = 140.0;
 
-  double get _contentHeight => settings.tabBarPosition.isVertical
+  double get _contentHeight =>
+      settings.effectiveTabBarPosition(window: window).isVertical
       ? (compact ? _kCompactRailPreviewHeight : _kRailPreviewHeight)
       : _baseHeight + _toolbarHeight;
 
@@ -97,7 +107,11 @@ class TabBarPreviewHeaderDelegate extends SliverPersistentHeaderDelegate {
       color: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
       child: Padding(
         padding: padding,
-        child: TabBarPreviewCard(settings: settings, compact: compact),
+        child: TabBarPreviewCard(
+          settings: settings,
+          window: window,
+          compact: compact,
+        ),
       ),
     );
   }
@@ -106,7 +120,8 @@ class TabBarPreviewHeaderDelegate extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(covariant TabBarPreviewHeaderDelegate oldDelegate) {
     return oldDelegate.settings != settings ||
         oldDelegate.backgroundColor != backgroundColor ||
-        oldDelegate.compact != compact;
+        oldDelegate.compact != compact ||
+        oldDelegate.window != window;
   }
 }
 
@@ -114,10 +129,17 @@ class TabBarPreviewCard extends HookWidget {
   const TabBarPreviewCard({
     super.key,
     required this.settings,
+    required this.window,
     this.compact = false,
   });
 
   final GeneralSettings settings;
+
+  /// The window the preview is being drawn for.
+  ///
+  /// The preview has to resolve the same way the real toolbar does, or it
+  /// would show a bottom bar while the browser behind it renders a rail.
+  final WindowSizeClass window;
   final bool compact;
 
   @override
@@ -145,7 +167,7 @@ class TabBarPreviewCard extends HookWidget {
         tabMode: TabMode.regular,
         isHistory: false,
         isPinned:
-            settings.effectiveTabBarStackingMode() ==
+            settings.effectiveTabBarStackingMode(window: window) ==
             TabBarStackingMode.containerTabs,
         url: Uri.parse('https://example.com/news'),
         color: settings.showContainerUi ? colorScheme.primary : null,
@@ -210,14 +232,18 @@ class TabBarPreviewCard extends HookWidget {
     Widget buildQuickTabSwitcherRow(
       ScrollController scrollController, {
       Axis axis = Axis.horizontal,
+      double railWidth = BrowserTabBar.compactRailWidth,
     }) {
       return QuickTabSwitcherView(
         availableItems: previewQuickItems,
         activeItem: previewQuickItems.firstWhere((item) => item.isActive),
         scrollController: scrollController,
         axis: axis,
+        railWidth: railWidth,
         showTitles:
-            axis != Axis.vertical && settings.quickTabSwitcherShowTitles,
+            (axis != Axis.vertical ||
+                BrowserTabBar.isWideRailWidth(railWidth)) &&
+            settings.quickTabSwitcherShowTitles,
         showIsolatedTabUi: settings.showIsolatedTabUi,
         hierarchyGlyphs: settings.quickTabSwitcherHierarchyGlyphs,
         titleMaxWidth: settings.quickTabSwitcherTitleWidth,
@@ -228,40 +254,64 @@ class TabBarPreviewCard extends HookWidget {
       );
     }
 
-    Widget buildQuickTabSwitcher({Axis axis = Axis.horizontal}) {
+    Widget buildQuickTabSwitcher({
+      Axis axis = Axis.horizontal,
+      double railWidth = BrowserTabBar.compactRailWidth,
+    }) {
       // The accordion preview reuses the single-row layout; container header
       // chips need live container data that the static preview doesn't have.
-      if (settings.effectiveTabBarStackingMode() ==
+      if (settings.effectiveTabBarStackingMode(window: window) ==
           TabBarStackingMode.twoLevel) {
         final rows = [
-          buildQuickTabSwitcherRow(quickTabsController, axis: axis),
-          buildQuickTabSwitcherRow(quickTabsSecondRowController, axis: axis),
+          buildQuickTabSwitcherRow(
+            quickTabsController,
+            axis: axis,
+            railWidth: railWidth,
+          ),
+          buildQuickTabSwitcherRow(
+            quickTabsSecondRowController,
+            axis: axis,
+            railWidth: railWidth,
+          ),
         ];
         return axis == Axis.vertical
             ? Column(children: [for (final row in rows) Expanded(child: row)])
             : Column(mainAxisSize: MainAxisSize.min, children: rows);
       }
-      return buildQuickTabSwitcherRow(quickTabsController, axis: axis);
+      return buildQuickTabSwitcherRow(
+        quickTabsController,
+        axis: axis,
+        railWidth: railWidth,
+      );
     }
 
-    Widget buildContextualToolbar({Axis axis = Axis.horizontal}) {
+    Widget buildContextualToolbar({
+      Axis axis = Axis.horizontal,
+      bool wrap = false,
+      bool includeButtons = true,
+      List<Widget> trailing = const [],
+    }) {
       return ContextualToolbarView(
         axis: axis,
+        wrap: wrap,
+        trailing: trailing,
         buttons: [
-          NavigateBackButtonView(
-            canGoBack: true,
-            isLoading: false,
-            onPressed: () {},
-            onLongPress: () {},
-          ),
-          NavigateForwardButtonView(
-            canGoForward: true,
-            onPressed: () {},
-            onLongPress: () {},
-          ),
-          AddTabButtonView(onPressed: () {}, onLongPress: () {}),
-          tabCountButton,
-          NavigationMenuButtonView(onTap: () {}),
+          if (includeButtons) ...[
+            NavigateBackButtonView(
+              canGoBack: true,
+              isLoading: false,
+              onPressed: () {},
+              onLongPress: () {},
+            ),
+            NavigateForwardButtonView(
+              canGoForward: true,
+              onPressed: () {},
+              onLongPress: () {},
+            ),
+            AddTabButtonView(onPressed: () {}, onLongPress: () {}),
+            tabCountButton,
+            NavigationMenuButtonView(onTap: () {}),
+          ],
         ],
       );
     }
@@ -272,7 +322,8 @@ class TabBarPreviewCard extends HookWidget {
     ];
 
     final showQuickTabSwitcherBar =
-        settings.effectiveTabBarStackingMode() != TabBarStackingMode.disabled;
+        settings.effectiveTabBarStackingMode(window: window) !=
+        TabBarStackingMode.disabled;
 
     final bottomCombinedToolbar = BrowserTabBarView(
       showMainToolbar: true,
@@ -319,11 +370,26 @@ class TabBarPreviewCard extends HookWidget {
       contextualToolbar: buildContextualToolbar(),
     );
 
-    final isRailPreview = settings.tabBarPosition.isVertical;
+    final isRailPreview = settings
+        .effectiveTabBarPosition(window: window)
+        .isVertical;
+
+    final railPreviewWidth = BrowserTabBar.railWidthFor(
+      window,
+      hasTabList:
+          settings.effectiveTabBarStackingMode(window: window) !=
+          TabBarStackingMode.disabled,
+      preferredWidth: settings.sideRailWidth,
+      windowWidth: MediaQuery.sizeOf(context).width,
+    );
+    final railPreviewIsWide = BrowserTabBar.isWideRailWidth(railPreviewWidth);
 
     final railToolbar = BrowserTabBarView(
       axis: Axis.vertical,
-      railOnLeft: settings.tabBarPosition == TabBarPosition.left,
+      isWideRail: railPreviewIsWide,
+      railOnLeft:
+          settings.effectiveTabBarPosition(window: window) ==
+          TabBarPosition.left,
       showMainToolbar: true,
       showContextualToolbar: settings.tabBarShowContextualBar,
       showQuickTabSwitcherBar: showQuickTabSwitcherBar,
@@ -331,13 +397,34 @@ class TabBarPreviewCard extends HookWidget {
       displayQuickTabSwitcher: true,
       backgroundColor:
           previewContainerPalette?.surfaceColor ?? colorScheme.surfaceContainer,
-      title: _RailPreviewTitle(
-        tabState: previewTabState,
-        quarterTurns: settings.tabBarPosition == TabBarPosition.left ? 3 : 1,
+      // A wide rail shows the address field upright, exactly as the real one
+      // does, so the preview doesn't promise sideways text the browser will
+      // not render.
+      title: railPreviewIsWide
+          ? (settings.tabBarLayout == TabBarLayout.compact
+                ? _CompactPreviewTitle(tabState: previewTabState)
+                : _RegularPreviewTitle(tabState: previewTabState))
+          : _RailPreviewTitle(
+              tabState: previewTabState,
+              quarterTurns:
+                  settings.effectiveTabBarPosition(window: window) ==
+                      TabBarPosition.left
+                  ? 3
+                  : 1,
+            ),
+      // Mirrors the real panel: one wrap of every action at the top.
+      actions: railPreviewIsWide ? const [] : mainToolbarActions,
+      quickTabSwitcher: buildQuickTabSwitcher(
+        axis: Axis.vertical,
+        railWidth: railPreviewWidth,
       ),
-      actions: mainToolbarActions,
-      quickTabSwitcher: buildQuickTabSwitcher(axis: Axis.vertical),
-      contextualToolbar: buildContextualToolbar(axis: Axis.vertical),
+      contextualToolbar: railPreviewIsWide
+          ? buildContextualToolbar(
+              wrap: true,
+              includeButtons: settings.tabBarShowContextualBar,
+              trailing: mainToolbarActions,
+            )
+          : buildContextualToolbar(axis: Axis.vertical),
     );
 
     final pageContentBox = Container(
@@ -360,11 +447,10 @@ class TabBarPreviewCard extends HookWidget {
 
     final Widget previewContent;
     if (isRailPreview) {
-      final rail = SizedBox(
-        width: BrowserTabBar.sideRailWidth,
-        child: railToolbar,
-      );
-      final railOnLeft = settings.tabBarPosition == TabBarPosition.left;
+      final rail = SizedBox(width: railPreviewWidth, child: railToolbar);
+      final railOnLeft =
+          settings.effectiveTabBarPosition(window: window) ==
+          TabBarPosition.left;
       previewContent = Container(
         clipBehavior: Clip.antiAlias,
         height: compact ? 140 : 220,
@@ -393,9 +479,12 @@ class TabBarPreviewCard extends HookWidget {
         ),
         child: Column(
           children: [
-            if (settings.tabBarPosition == TabBarPosition.top) topMainToolbar,
+            if (settings.effectiveTabBarPosition(window: window) ==
+                TabBarPosition.top)
+              topMainToolbar,
             SizedBox(height: compact ? 40 : 72, child: pageContentBox),
-            if (settings.tabBarPosition == TabBarPosition.top)
+            if (settings.effectiveTabBarPosition(window: window) ==
+                TabBarPosition.top)
               topBottomToolbar
             else
               bottomCombinedToolbar,

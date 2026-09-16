@@ -9314,7 +9314,13 @@ interface GeckoTabsApi {
   fun removeTabs(ids: List<String>)
   fun removeNormalTabs()
   fun removePrivateTabs()
-  fun undo()
+  /**
+   * Restores the most recently closed tabs, if the engine still has them.
+   *
+   * Returns whether any tabs are being restored. When none are, the tab list
+   * does not change at all.
+   */
+  fun undo(): Boolean
   fun restoreTabsByList(tabs: List<RecoverableTab>, selectTabId: String?, restoreLocation: RestoreLocation)
   /**
    * Selects an already existing tab with the matching [HistoryMetadataKey] or otherwise
@@ -9523,8 +9529,7 @@ interface GeckoTabsApi {
         if (api != null) {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
-              api.undo()
-              listOf(null)
+              listOf(api.undo())
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
             }

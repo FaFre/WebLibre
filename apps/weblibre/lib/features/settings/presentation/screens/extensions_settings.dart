@@ -23,6 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
@@ -252,6 +253,7 @@ class _AllowUnsignedExtensionsTile extends ConsumerWidget {
 Future<bool?> _showAllowUnsignedConfirmationDialog(BuildContext context) {
   return showDialog<bool>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => const _AllowUnsignedConfirmationDialog(),
   );
 }

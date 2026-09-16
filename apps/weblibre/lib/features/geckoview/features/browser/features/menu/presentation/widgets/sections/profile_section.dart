@@ -24,8 +24,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
+import 'package:weblibre/features/keyboard_shortcuts/presentation/widgets/keyboard_shortcut_hint.dart';
 import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
@@ -85,6 +87,7 @@ class ProfileSection extends HookConsumerWidget {
           tiles[item] = ListTile(
             leading: const Icon(Icons.settings),
             title: Text(item.label),
+            trailing: const KeyboardShortcutHint(BrowserAction.openSettings),
             onTap: () async {
               Navigator.pop(context);
               await SettingsRoute().push(context);
@@ -98,6 +101,7 @@ class ProfileSection extends HookConsumerWidget {
               item.label,
               style: TextStyle(color: theme.colorScheme.error),
             ),
+            trailing: const KeyboardShortcutHint(BrowserAction.quitBrowser),
             onTap: () async {
               // Read the container before popping: dismissing the sheet
               // disposes this widget while the dialog is still up, and a `ref`

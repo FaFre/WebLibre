@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
@@ -67,6 +68,7 @@ Future<ProxyPickerOutcome?> showProxyConnectionPicker(
 }) {
   return showModalBottomSheet<ProxyPickerOutcome>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     showDragHandle: true,
     builder: (context) => ProxyConnectionPickerSheet(
       selectedProxyConnectionId: selectedProxyConnectionId,

@@ -23,13 +23,25 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/account/data/models/settings_sync_envelope.dart';
 import 'package:weblibre/features/account/data/repositories/account_sync_repository.dart';
 import 'package:weblibre/features/account/domain/services/sync_document_service.dart';
+import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
+import 'package:weblibre/features/keyboard_shortcuts/domain/repositories/keyboard_shortcut_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 
 part 'settings_sync_service.g.dart';
 
-const _schemaVersion = 1;
+/// Bumped to 2 when [TabBarPositionSetting.auto] was introduced.
+///
+/// The generated settings decoder throws on an enum string it does not know,
+/// so a build that predates a new value would otherwise accept the envelope
+/// (its own version check only rejects *higher* versions) and then fail deep
+/// inside `fromJson`. Raising the version makes an older build refuse the
+/// document up front, with a message that says why.
+///
+/// Bump this whenever a new value is added to an enum that settings sync
+/// carries.
+const _schemaVersion = 3;
 
 @Riverpod(keepAlive: true)
 class SettingsSyncService extends _$SettingsSyncService
@@ -45,16 +57,23 @@ class SettingsSyncService extends _$SettingsSyncService
 
   @override
   Future<List<int>> serializeCurrent() async {
-    final (general, engine, tor) = await (
+    final (general, engine, tor, gestures) = await (
       ref.read(generalSettingsRepositoryProvider.notifier).fetchSettings(),
       ref.read(engineSettingsRepositoryProvider.notifier).fetchSettings(),
       ref.read(torSettingsRepositoryProvider.notifier).fetchSettings(),
+      ref.read(gestureSettingsRepositoryProvider.notifier).fetchSettings(),
     ).wait;
 
     final envelope = SettingsSyncEnvelope(
       schemaVersion: _schemaVersion,
       exportedAt: DateTime.now().toUtc().toIso8601String(),
-      payload: SettingsSyncPayload(general: general, engine: engine, tor: tor),
+      payload: SettingsSyncPayload(
+        general: general,
+        engine: engine,
+        tor: tor,
+        gestures: gestures,
+        keyboardShortcuts: ref.read(keyboardShortcutSettingsRepositoryProvider),
+      ),
     );
 
     return utf8.encode(jsonEncode(envelope.toJson()));
@@ -88,6 +107,16 @@ class SettingsSyncService extends _$SettingsSyncService
       await ref
           .read(torSettingsRepositoryProvider.notifier)
           .updateSettings((_) => payload.tor!);
+    }
+    if (payload.gestures != null) {
+      await ref
+          .read(gestureSettingsRepositoryProvider.notifier)
+          .updateSettings((_) => payload.gestures!);
+    }
+    if (payload.keyboardShortcuts != null) {
+      ref
+          .read(keyboardShortcutSettingsRepositoryProvider.notifier)
+          .replace(payload.keyboardShortcuts!);
     }
   }
 }

@@ -23,6 +23,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/onboarding/domain/entities/onboarding_mode.dart';
 import 'package:weblibre/features/onboarding/domain/providers.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
@@ -383,6 +384,7 @@ class _EulaCheckbox extends StatelessWidget {
 
     await showModalBottomSheet(
       context: context,
+      anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
       isScrollControlled: true,
       useSafeArea: true,
       builder: (context) => PointerScrollableSheet(

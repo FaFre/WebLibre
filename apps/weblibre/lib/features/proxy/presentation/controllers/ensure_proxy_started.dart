@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
@@ -84,6 +85,7 @@ Future<bool> _ensureTorStarted(BuildContext context, WidgetRef ref) async {
 
   final dialogResult = await showDialog<bool>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => const TorDialog(),
   );
 
@@ -134,6 +136,7 @@ Future<bool> _maybeStartSingboxProxy(
 
   final shouldStart = await showDialog<bool>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => AlertDialog(
       icon: const Icon(Icons.route_outlined),
       title: const Text('Start Proxy Connection?'),

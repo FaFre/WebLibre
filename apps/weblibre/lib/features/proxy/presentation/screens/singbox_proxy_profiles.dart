@@ -24,6 +24,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
@@ -194,6 +195,7 @@ void _pruneLatencyCache(WidgetRef ref) {
 Future<void> _showAddSheet(BuildContext context) async {
   final action = await showModalBottomSheet<AddProxyAction>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     isScrollControlled: true,
     showDragHandle: true,
     builder: (_) => const AddProxyMethodSheet(),

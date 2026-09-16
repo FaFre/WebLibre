@@ -17,6 +17,14 @@ SettingsSyncPayload _$SettingsSyncPayloadFromJson(Map<String, dynamic> json) =>
       tor: json['tor'] == null
           ? null
           : TorSettings.fromJson(json['tor'] as Map<String, dynamic>),
+      gestures: json['gestures'] == null
+          ? null
+          : GestureSettings.fromJson(json['gestures'] as Map<String, dynamic>),
+      keyboardShortcuts: json['keyboardShortcuts'] == null
+          ? null
+          : KeyboardShortcutSettings.fromJson(
+              json['keyboardShortcuts'] as Map<String, dynamic>,
+            ),
     );
 
 Map<String, dynamic> _$SettingsSyncPayloadToJson(
@@ -25,6 +33,8 @@ Map<String, dynamic> _$SettingsSyncPayloadToJson(
   'general': instance.general?.toJson(),
   'engine': instance.engine?.toJson(),
   'tor': instance.tor?.toJson(),
+  'gestures': instance.gestures?.toJson(),
+  'keyboardShortcuts': instance.keyboardShortcuts?.toJson(),
 };
 
 SettingsSyncEnvelope _$SettingsSyncEnvelopeFromJson(

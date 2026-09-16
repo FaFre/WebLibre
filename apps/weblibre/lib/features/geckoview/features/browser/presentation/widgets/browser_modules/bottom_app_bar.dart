@@ -26,7 +26,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/addons/domain/providers.dart'
+    show pinnedAddonIdsProvider;
 import 'package:weblibre/features/addons/presentation/widgets/pinned_addon_bar.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
@@ -49,6 +52,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/utils/
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_accordion.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_chip.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/side_rail_resize_handle.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_context_menu_draggable.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/toolbar_button.dart';
@@ -178,14 +182,25 @@ class BrowserSideRail extends ConsumerWidget {
   final int quickTabSwitcherRowCount;
   final bool isSmallWebMode;
 
+  /// Resolved by the caller, which already knows the window size class and
+  /// must hand the *same* value to the instance it renders and to the one it
+  /// builds off-tree to measure. A mismatch would inset the browser for a rail
+  /// of a different width than the one drawn.
+  final double railWidth;
+
   /// Which edge the rail is docked to ([TabBarPosition.left] or
   /// [TabBarPosition.right]).
   final TabBarPosition position;
 
   final bool suppressMainToolbar;
 
+  /// Whether the rail carries a handle on its inner edge for resizing it.
+  final bool resizable;
+
   late final BrowserTabBar _tabBar;
-  late final _size = Size.fromWidth(_tabBar.getToolbarWidth());
+
+  /// The rail's footprint, which the browser screen insets the page by.
+  late final _size = Size.fromWidth(railWidth);
 
   BrowserSideRail({
     super.key,
@@ -193,7 +208,9 @@ class BrowserSideRail extends ConsumerWidget {
     required this.quickTabSwitcherRowCount,
     required this.isSmallWebMode,
     required this.position,
+    required this.railWidth,
     this.suppressMainToolbar = false,
+    this.resizable = false,
   }) {
     _tabBar = BrowserTabBar(
       displayedSheet: null,
@@ -202,6 +219,7 @@ class BrowserSideRail extends ConsumerWidget {
       quickTabSwitcherRowCount: quickTabSwitcherRowCount,
       isSmallWebMode: isSmallWebMode,
       enableGestures: true,
+      railWidth: railWidth,
       hideMainToolbarButtonsDuplicatedInContextualToolbar:
           showContextualToolbar,
       suppressMainToolbar: suppressMainToolbar,
@@ -247,7 +265,32 @@ class BrowserSideRail extends ConsumerWidget {
       child: SafeArea(
         left: isLeft,
         right: !isLeft,
-        child: SizedBox(width: _size.width, child: _tabBar),
+        child: SizedBox(
+          width: _size.width,
+          child: resizable
+              ? Stack(
+                  children: [
+                    Positioned.fill(child: _tabBar),
+                    // Inside the rail rather than straddling its edge, so the
+                    // handle never takes touches meant for the page. It draws
+                    // inside the [BrowserTabBar.panelInset] the panel already
+                    // holds clear on this edge, so it costs the tab list no
+                    // width and covers none of it; see [SideRailResizeHandle].
+                    Positioned(
+                      top: 0,
+                      bottom: 0,
+                      left: isLeft ? null : 0,
+                      right: isLeft ? 0 : null,
+                      width: SideRailResizeHandle.hitWidth,
+                      child: SideRailResizeHandle(
+                        railOnLeft: isLeft,
+                        railWidth: railWidth,
+                      ),
+                    ),
+                  ],
+                )
+              : _tabBar,
+        ),
       ),
     );
   }
@@ -263,6 +306,11 @@ class BrowserTabBar extends HookConsumerWidget {
   final bool hideMainToolbarButtonsDuplicatedInContextualToolbar;
   final bool isSmallWebMode;
   final bool enableGestures;
+
+  /// Width of the rail this bar is rendered in, when it is a rail at all.
+  ///
+  /// Ignored by the horizontal bars, which flow along their width.
+  final double railWidth;
 
   /// Drops the main toolbar row entirely — not just its contents.
   ///
@@ -288,6 +336,7 @@ class BrowserTabBar extends HookConsumerWidget {
     required this.quickTabSwitcherRowCount,
     required this.isSmallWebMode,
     required this.enableGestures,
+    this.railWidth = compactRailWidth,
     this.hideMainToolbarButtonsDuplicatedInContextualToolbar = false,
     this.suppressMainToolbar = false,
   });
@@ -295,13 +344,136 @@ class BrowserTabBar extends HookConsumerWidget {
   static const contextualToolabarHeight = 54.0;
   static const quickTabSwitcherHeight = 48.0;
 
-  /// Content width of the vertical side rail (excludes the system safe-area
-  /// inset on the rail's outer edge, which is added by the caller). Kept equal
-  /// to [kToolbarHeight] so the rail reuses the same base sizing as the
-  /// horizontal bar.
-  static const sideRailWidth = kToolbarHeight;
+  /// Rail width on a window too narrow to spare more, and the width the rail
+  /// had before it could vary. Equal to [kToolbarHeight] so the rail reuses
+  /// the same base sizing as the horizontal bar: a single column of icons.
+  static const compactRailWidth = kToolbarHeight;
 
-  double getToolbarWidth() => sideRailWidth;
+  /// Rail width once the window can spare it, but not enough for titles.
+  ///
+  /// Matches Material's collapsed navigation rail (80), which is the width at
+  /// which an icon gets a comfortable touch target and some breathing room
+  /// rather than filling its column edge to edge.
+  static const mediumRailWidth = 80.0;
+
+  /// Width of the tab panel before the user resizes it.
+  ///
+  /// Matches Material's *extended* navigation rail (256).
+  static const expandedRailWidth = defaultSideRailWidth;
+
+  /// Narrowest the tab panel can be resized to while still carrying titled,
+  /// closable rows and an upright address field.
+  static const minExpandedRailWidth = 200.0;
+
+  /// Widest the tab panel can be resized to. Past this a tab list gains
+  /// nothing but empty space after its titles.
+  static const maxExpandedRailWidth = 480.0;
+
+  /// Dragged narrower than this, the panel snaps to the icon rail.
+  static const railCollapseThreshold = 140.0;
+
+  /// The inset between the panel's edges and what it lays out inside them.
+  ///
+  /// The one number for the whole panel: the tab list's slices
+  /// (`_TraySlice`) and the toolbar-and-address block above them both use it,
+  /// which is what makes their left and right edges line up.
+  static const panelInset = 4.0;
+
+  /// Content width of the vertical side rail for [window] (excludes the system
+  /// safe-area inset on the rail's outer edge, which is added by the caller).
+  ///
+  /// Deliberately a pure static function rather than anything that reads a
+  /// `BuildContext`: `browser.dart` builds these bar widgets *outside* the tree
+  /// purely to read `preferredSize` for its Stack inset math, so the width has
+  /// to be knowable without a context. The caller passes in what it read.
+  ///
+  /// [hasTabList] is false when the quick tab switcher is switched off
+  /// entirely ([TabBarStackingMode.disabled]). The panel exists to hold a list
+  /// of tabs; without one, a column of address field and buttons is just width
+  /// taken from the page, so it stays at the medium rail instead.
+  ///
+  /// [preferredWidth] is the width the user resized the panel to (or is
+  /// dragging it to), and [windowWidth] the window it has to fit; see
+  /// [panelWidthFor].
+  static double railWidthFor(
+    WindowSizeClass window, {
+    required bool hasTabList,
+    required double preferredWidth,
+    required double windowWidth,
+  }) {
+    if (canResizeRail(window, hasTabList: hasTabList)) {
+      return panelWidthFor(preferredWidth, windowWidth: windowWidth);
+    }
+    // By width alone, unlike where the auto position puts the bar: a rail the
+    // user placed in a wide but short window still has the width for it.
+    if (window.width != WindowWidthClass.compact) return mediumRailWidth;
+    return compactRailWidth;
+  }
+
+  /// Whether [window] shows the resizable tab panel, or the icon rail it was
+  /// collapsed to, rather than a rail of fixed width.
+  static bool canResizeRail(
+    WindowSizeClass window, {
+    required bool hasTabList,
+  }) => window.allowsWideRail && hasTabList;
+
+  /// The width a panel the user sized to [preferredWidth] gets in a window
+  /// [windowWidth] wide.
+  ///
+  /// Anything below [minExpandedRailWidth] is the collapsed icon rail.
+  /// Otherwise the width is clamped between the panel limits and to half the
+  /// window, so the page always keeps at least as much room as the panel. The
+  /// panel only exists in windows at least 840dp wide, whose half already
+  /// clears the minimum, so the clamp cannot invert.
+  static double panelWidthFor(
+    double preferredWidth, {
+    required double windowWidth,
+  }) {
+    if (preferredWidth < minExpandedRailWidth) return mediumRailWidth;
+
+    final halfWindow = windowWidth / 2;
+    final upper = halfWindow < maxExpandedRailWidth
+        ? halfWindow
+        : maxExpandedRailWidth;
+    if (upper <= minExpandedRailWidth) return minExpandedRailWidth;
+
+    return preferredWidth.clamp(minExpandedRailWidth, upper);
+  }
+
+  /// The width a resize drag that has reached [rawWidth] shows, and saves if
+  /// released there.
+  ///
+  /// Below [railCollapseThreshold] it is the icon rail. Between that and
+  /// [minExpandedRailWidth] it holds at the minimum, which is what makes the
+  /// snap a detent rather than a flicker between the two layouts.
+  static double draggedRailWidth(
+    double rawWidth, {
+    required double windowWidth,
+  }) {
+    if (rawWidth < railCollapseThreshold) return mediumRailWidth;
+    return panelWidthFor(
+      rawWidth < minExpandedRailWidth ? minExpandedRailWidth : rawWidth,
+      windowWidth: windowWidth,
+    );
+  }
+
+  /// Whether a rail of [width] lists tabs as titled rows with close buttons
+  /// under an upright address field.
+  ///
+  /// The single home of this threshold. The rail's contents are spread across
+  /// three widgets that each have to make the same call — this view, the
+  /// switcher view, and the accordion — and a copy of the comparison in each
+  /// is how one of them ends up disagreeing.
+  ///
+  /// Keyed on the width actually in force rather than on the size class, so a
+  /// caller that pins a width (the settings preview) gets a rail that looks
+  /// the way that width would really look.
+  static bool isWideRailWidth(double width) => width >= minExpandedRailWidth;
+
+  /// Whether this bar's [railWidth] is wide enough to be a tab panel.
+  bool get isWideRail => isWideRailWidth(railWidth);
+
+  double getToolbarWidth() => railWidth;
 
   bool get displayAppBar =>
       showMainToolbar &&
@@ -372,10 +544,13 @@ class BrowserTabBar extends HookConsumerWidget {
       ).select((data) => data.value?.metadata.useCustomColor ?? false),
     );
 
-    final stackingMode = settings.effectiveTabBarStackingMode();
+    final stackingMode = ref.watch(effectiveTabBarStackingModeProvider);
 
-    final tabBarPosition = settings.tabBarPosition;
+    final tabBarPosition = ref.watch(effectiveTabBarPositionProvider);
     final isVertical = tabBarPosition.isVertical;
+    // Only a vertical rail has a width to be wide; the horizontal bars leave
+    // railWidth at its compact default and never take these branches.
+    final wideRail = isVertical && isWideRail;
     final switcherAxis = tabBarPosition.axis;
     // Left rail reads bottom-to-top, right rail top-to-bottom.
     final railQuarterTurns = tabBarPosition == TabBarPosition.left ? 3 : 1;
@@ -457,8 +632,38 @@ class BrowserTabBar extends HookConsumerWidget {
           )
         : null;
 
+    final mainActions = <Widget>[
+      // A panel lays its actions out in rows, so its add-ons go in a row too.
+      // It also spaces them evenly, where the empty box this renders with
+      // nothing pinned would still take a share of the gaps.
+      if (!wideRail || ref.watch(pinnedAddonIdsProvider).isNotEmpty)
+        PinnedAddonBar(axis: wideRail ? Axis.horizontal : switcherAxis),
+      if (isSmallWebMode)
+        ReaderButton(
+          buttonBuilder: (isLoading, readerActive, icon) => ToolbarButton(
+            onTap: isLoading
+                ? null
+                : () async {
+                    await ref
+                        .read(readerableScreenControllerProvider.notifier)
+                        .toggleReaderView(!readerActive);
+                  },
+            child: icon,
+          ),
+        ),
+      if (showMainToolbarTabsCount)
+        TabsCountButton(
+          selectedTabId: selectedTabId,
+          displayedSheet: displayedSheet,
+          showLongPressMenu: true,
+        ),
+      if (showMainToolbarNavigationButton)
+        NavigationMenuButton(selectedTabId: selectedTabId),
+    ];
+
     return BrowserTabBarView(
       axis: switcherAxis,
+      isWideRail: wideRail,
       railOnLeft: tabBarPosition == TabBarPosition.left,
       showMainToolbar: showMainToolbar,
       showContextualToolbar: showContextualToolbar,
@@ -467,7 +672,11 @@ class BrowserTabBar extends HookConsumerWidget {
       displayQuickTabSwitcher: displayQuickTabSwitcher,
       backgroundColor: effectiveContainerPalette?.surfaceColor,
       title: showTabTitle
-          ? isVertical
+          // A wide rail takes the ordinary horizontal title. RailAppBarTitle
+          // exists to survive a 56dp column by rotating 90 degrees; at panel
+          // width there is nothing to survive and a sideways URL would just be
+          // hard to read.
+          ? (isVertical && !wideRail)
                 ? RailAppBarTitle(
                     quarterTurns: railQuarterTurns,
                     containerColor: effectiveContainerColor,
@@ -483,30 +692,9 @@ class BrowserTabBar extends HookConsumerWidget {
                     useCustomColor: effectiveUseCustomColor,
                   )
           : null,
-      actions: [
-        PinnedAddonBar(axis: switcherAxis),
-        if (isSmallWebMode)
-          ReaderButton(
-            buttonBuilder: (isLoading, readerActive, icon) => ToolbarButton(
-              onTap: isLoading
-                  ? null
-                  : () async {
-                      await ref
-                          .read(readerableScreenControllerProvider.notifier)
-                          .toggleReaderView(!readerActive);
-                    },
-              child: icon,
-            ),
-          ),
-        if (showMainToolbarTabsCount)
-          TabsCountButton(
-            selectedTabId: selectedTabId,
-            displayedSheet: displayedSheet,
-            showLongPressMenu: true,
-          ),
-        if (showMainToolbarNavigationButton)
-          NavigationMenuButton(selectedTabId: selectedTabId),
-      ],
+      // A panel wraps these together with the contextual buttons instead; see
+      // the contextual toolbar below.
+      actions: wideRail ? const [] : mainActions,
       quickTabSwitcher: _wrapQuickTabSwitcherWithButtonRow(
         axis: switcherAxis,
         // The button row lives on the switcher bar; when stacking is disabled
@@ -516,43 +704,81 @@ class BrowserTabBar extends HookConsumerWidget {
             : QuickSwitcherButtonRow(
                 selectedTabId: selectedTabId,
                 displayedSheet: displayedSheet,
-                axis: switcherAxis,
+                axis: wideRail ? Axis.horizontal : switcherAxis,
+                wrap: wideRail,
               ),
         child: switch (stackingMode) {
           TabBarStackingMode.disabled => const SizedBox.shrink(),
           TabBarStackingMode.lastUsedTabs => QuickTabSwitcher(
             quickTabSwitcherMode: QuickTabSwitcherMode.lastUsedTabs,
             axis: switcherAxis,
+            railWidth: railWidth,
           ),
           TabBarStackingMode.containerTabs => QuickTabSwitcher(
             quickTabSwitcherMode: QuickTabSwitcherMode.containerTabs,
             axis: switcherAxis,
+            railWidth: railWidth,
           ),
           TabBarStackingMode.accordion => AccordionQuickTabSwitcher(
             axis: switcherAxis,
+            railWidth: railWidth,
           ),
-          // History fallback only on the MRU row, so empty-state history
-          // chips don't show twice. Only reached on the horizontal bar:
-          // effectiveTabBarStackingMode() degrades twoLevel to containerTabs
-          // on the narrow vertical rail, where two stacked rows don't fit.
-          TabBarStackingMode.twoLevel => const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              QuickTabSwitcher(
-                quickTabSwitcherMode: QuickTabSwitcherMode.containerTabs,
-                enableHistoryFallback: false,
-              ),
-              QuickTabSwitcher(
-                quickTabSwitcherMode: QuickTabSwitcherMode.lastUsedTabs,
-              ),
-            ],
-          ),
+          // History fallback only on the MRU row, so empty-state history chips
+          // don't show twice.
+          //
+          // Reachable on a *wide* rail as well as the horizontal bars:
+          // effectiveTabBarStackingMode degrades twoLevel to accordion only on
+          // a narrow rail. Vertically the two rows have to share the rail's
+          // height with Expanded — each switcher fills its axis, so a
+          // min-sized Column would overflow.
+          TabBarStackingMode.twoLevel =>
+            switcherAxis == Axis.vertical
+                ? Column(
+                    children: [
+                      Expanded(
+                        child: QuickTabSwitcher(
+                          quickTabSwitcherMode:
+                              QuickTabSwitcherMode.containerTabs,
+                          enableHistoryFallback: false,
+                          axis: switcherAxis,
+                          railWidth: railWidth,
+                        ),
+                      ),
+                      Expanded(
+                        child: QuickTabSwitcher(
+                          quickTabSwitcherMode:
+                              QuickTabSwitcherMode.lastUsedTabs,
+                          axis: switcherAxis,
+                          railWidth: railWidth,
+                        ),
+                      ),
+                    ],
+                  )
+                : const Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      QuickTabSwitcher(
+                        quickTabSwitcherMode:
+                            QuickTabSwitcherMode.containerTabs,
+                        enableHistoryFallback: false,
+                      ),
+                      QuickTabSwitcher(
+                        quickTabSwitcherMode: QuickTabSwitcherMode.lastUsedTabs,
+                      ),
+                    ],
+                  ),
         },
       ),
+      // On a panel this is one wrap holding every configured action — the
+      // contextual buttons, when that bar is enabled, followed by the main
+      // toolbar's — so all of them stay visible without a row of height each.
       contextualToolbar: ContextualToolbar(
         selectedTabId: selectedTabId,
         displayedSheet: displayedSheet,
-        axis: switcherAxis,
+        axis: wideRail ? Axis.horizontal : switcherAxis,
+        wrap: wideRail,
+        showConfiguredButtons: !wideRail || showContextualToolbar,
+        trailing: wideRail && displayAppBar ? mainActions : const [],
       ),
       onHorizontalDragStart: !enableGestures
           ? null
@@ -656,6 +882,7 @@ class BrowserTabBarView extends StatelessWidget {
     required this.quickTabSwitcher,
     required this.contextualToolbar,
     this.axis = Axis.horizontal,
+    this.isWideRail = false,
     this.railOnLeft = true,
     this.onHorizontalDragStart,
     this.onHorizontalDragEnd,
@@ -665,6 +892,12 @@ class BrowserTabBarView extends StatelessWidget {
 
   /// Layout orientation. Vertical renders the side-rail form.
   final Axis axis;
+
+  /// Whether the vertical rail is wide enough to be a tab panel.
+  ///
+  /// Changes how the rail divides its height and how the action buttons are
+  /// arranged; the narrow rail has room for exactly one control per row.
+  final bool isWideRail;
 
   /// For the vertical rail, whether it is docked to the left edge (affects
   /// nothing structural here yet; reserved for edge-specific tweaks).
@@ -691,6 +924,60 @@ class BrowserTabBarView extends StatelessWidget {
     final effectiveBackgroundColor =
         backgroundColor ?? colorScheme.surfaceContainer;
 
+    if (axis == Axis.vertical && isWideRail) {
+      return GestureDetector(
+        onHorizontalDragStart: onHorizontalDragStart,
+        onHorizontalDragEnd: onHorizontalDragEnd,
+        onVerticalDragStart: onVerticalDragStart,
+        onVerticalDragEnd: onVerticalDragEnd,
+        child: ColoredBox(
+          color: effectiveBackgroundColor,
+          child: Column(
+            children: [
+              // Actions and address field at the top, where a large-screen
+              // browser keeps them: in a desktop window the top edge is where
+              // the eye already is. The tab list takes everything below.
+              //
+              // Inset by [panelInset], not by the 8dp the narrow rail uses:
+              // the toolbar row and the address field have to line up with the
+              // tab rows under them, and those are laid out by the tray slices
+              // at that inset. Two different insets read as the top of the
+              // panel being narrower than the rest of it.
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  BrowserTabBar.panelInset,
+                  4.0,
+                  BrowserTabBar.panelInset,
+                  4.0,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    contextualToolbar,
+                    if (showMainToolbar && title != null)
+                      Visibility(
+                        visible: displayAppBar,
+                        maintainState: true,
+                        child: title!,
+                      ),
+                  ],
+                ),
+              ),
+              if (showQuickTabSwitcherBar)
+                Expanded(
+                  child: Visibility(
+                    visible: displayQuickTabSwitcher,
+                    maintainState: true,
+                    child: quickTabSwitcher,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    }
+
     if (axis == Axis.vertical) {
       return GestureDetector(
         onHorizontalDragStart: onHorizontalDragStart,
@@ -705,6 +992,8 @@ class BrowserTabBarView extends StatelessWidget {
               // the switcher is the flexible scroll region.
               if (showQuickTabSwitcherBar)
                 Expanded(
+                  // The narrow rail stacks its actions vertically and needs a
+                  // real share of the column for them.
                   flex: 3,
                   child: Visibility(
                     visible: displayQuickTabSwitcher,
@@ -718,9 +1007,9 @@ class BrowserTabBarView extends StatelessWidget {
                   child: Visibility(
                     visible: displayAppBar,
                     maintainState: true,
-                    // Horizontal inset so the URL pile and action buttons don't
-                    // sit flush against the rail edges, matching the breathing
-                    // room the horizontal bar's title/actions get.
+                    // Horizontal inset so the URL pile and action buttons
+                    // don't sit flush against the rail edges, matching the
+                    // breathing room the horizontal bar's title/actions get.
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: Column(
@@ -845,12 +1134,22 @@ class QuickTabSwitcher extends HookConsumerWidget {
   /// Direction the chips list flows. Vertical for the side rail.
   final Axis axis;
 
+  /// Width of the rail this switcher is rendered in, when [axis] is vertical.
+  ///
+  /// Drives whether chips can afford titles and close buttons.
+  final double railWidth;
+
   const QuickTabSwitcher({
     super.key,
     required this.quickTabSwitcherMode,
     this.enableHistoryFallback = true,
     this.axis = Axis.horizontal,
+    this.railWidth = BrowserTabBar.compactRailWidth,
   });
+
+  /// Whether a vertical rail is wide enough to carry titled chips.
+  bool get isWideRail =>
+      axis == Axis.vertical && BrowserTabBar.isWideRailWidth(railWidth);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -862,8 +1161,11 @@ class QuickTabSwitcher extends HookConsumerWidget {
         (s) => s.quickTabSwitcherShowTitles,
       ),
     );
-    // Titles can't fit the narrow vertical rail; force icon-only chips there.
-    final showTitles = axis != Axis.vertical && showTitlesSetting;
+    // Titles can't fit a *narrow* vertical rail, so icon-only chips are
+    // forced there. A rail wide enough to be a tab panel has room for them,
+    // and without titles a 256dp column of bare icons would be absurd.
+    final showTitles =
+        (axis != Axis.vertical || isWideRail) && showTitlesSetting;
     final titleMaxWidth = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (s) => s.quickTabSwitcherTitleWidth,
@@ -1019,6 +1321,14 @@ class QuickTabSwitcher extends HookConsumerWidget {
         scrollKey: scrollKey,
         activeItemKey: activeItemKey.value,
         axis: axis,
+        railWidth: railWidth,
+        // Reordering the container tabs row is off while the tab view is
+        // filtered or searched; say so instead of silently not dragging.
+        reorderBlockedMessage:
+            quickTabSwitcherMode == QuickTabSwitcherMode.containerTabs &&
+                !canManualReorder
+            ? tabReorderBlockedMessage
+            : null,
         showTitles: showTitles,
         showIsolatedTabUi: showIsolatedTabUi,
         hierarchyGlyphs: hierarchyGlyphs,
@@ -1107,10 +1417,19 @@ class QuickTabSwitcherView extends StatelessWidget {
     this.onReorderItem,
     this.reorderableItemCount = 0,
     this.axis = Axis.horizontal,
+    this.railWidth = BrowserTabBar.compactRailWidth,
+    this.reorderBlockedMessage,
   });
 
   /// Direction the chips flow. Vertical for the side rail.
   final Axis axis;
+
+  /// Width of the rail this view is rendered in, when [axis] is vertical.
+  final double railWidth;
+
+  /// Shown when a tab is held and dragged while reordering is switched off for
+  /// a reason the user can act on. Null when there is nothing to explain.
+  final String? reorderBlockedMessage;
 
   final List<QuickTabSwitcherItem> availableItems;
   final QuickTabSwitcherItem? activeItem;
@@ -1153,13 +1472,19 @@ class QuickTabSwitcherView extends StatelessWidget {
   /// rail: an icon-only chip has no room for a close button beside it (it
   /// overflows). Closing stays available via the long-press menu.
   bool _canShowCloseButton(QuickTabSwitcherItem item) =>
-      !_isVertical &&
+      (!_isVertical || _isWideRail) &&
       onCloseItem != null &&
       !item.isHistory &&
       !item.isPlaceholder &&
       closeButtonMode.showsFor(isActive: item.isActive);
 
   bool get _isVertical => axis == Axis.vertical;
+
+  /// A rail wide enough for a chip to carry a title *and* a close button
+  /// beside it. On the narrow rail the chip is a bare icon with nowhere to put
+  /// one.
+  bool get _isWideRail =>
+      _isVertical && BrowserTabBar.isWideRailWidth(railWidth);
 
   @override
   Widget build(BuildContext context) {
@@ -1169,7 +1494,7 @@ class QuickTabSwitcherView extends StatelessWidget {
       // On the rail the cross-axis width is fixed and the (vertical) list
       // fills the available height.
       return _isVertical
-          ? const SizedBox(width: 48)
+          ? SizedBox(width: railWidth)
           : const SizedBox(height: 48);
     }
 
@@ -1184,8 +1509,48 @@ class QuickTabSwitcherView extends StatelessWidget {
         width: double.maxFinite,
         child: _reorderEnabled
             ? _buildReorderableList(context)
+            : _isWideRail
+            ? _buildRows(context)
             : _buildSelectableChips(context),
       ),
+    );
+  }
+
+  /// A panel's tab list: one full-width row per item.
+  Widget _buildRows(BuildContext context) {
+    return ListView.builder(
+      key: scrollKey,
+      controller: scrollController,
+      scrollCacheExtent: const ScrollCacheExtent.pixels(500),
+      itemCount: availableItems.length,
+      itemBuilder: (context, index) {
+        final item = availableItems[index];
+        final isSelected = activeItem?.id == item.id;
+        final row = _row(item, isSelected);
+
+        return KeyedSubtree(
+          key: isSelected && activeItemKey != null
+              ? activeItemKey
+              : ValueKey(item.id),
+          child: item.isHistory
+              ? row
+              : _withBlockedHint(_wrapWithMenu(item: item, child: row)),
+        );
+      },
+    );
+  }
+
+  Widget _row(QuickTabSwitcherItem item, bool isSelected) {
+    return QuickTabSwitcherRow(
+      item: item,
+      isSelected: isSelected,
+      showIsolatedTabUi: showIsolatedTabUi,
+      showTitles: showTitles,
+      hierarchyGlyphs: hierarchyGlyphs,
+      onTap: () => unawaited(onSelected(item)),
+      onDelete: _canShowCloseButton(item)
+          ? () => unawaited(onCloseItem!(item))
+          : null,
     );
   }
 
@@ -1208,8 +1573,9 @@ class QuickTabSwitcherView extends StatelessWidget {
       onDeleted: (item) {
         unawaited(onCloseItem?.call(item));
       },
-      itemWrap: (child, item) =>
-          item.isHistory ? child : _wrapWithMenu(item: item, child: child),
+      itemWrap: (child, item) => item.isHistory
+          ? child
+          : _withBlockedHint(_wrapWithMenu(item: item, child: child)),
       availableItems: availableItems,
     );
   }
@@ -1236,15 +1602,19 @@ class QuickTabSwitcherView extends StatelessWidget {
       itemBuilder: (context, index) {
         final item = availableItems[index];
         final isSelected = activeItem?.id == item.id;
-        final chip = QuickTabSwitcherChip(
-          item: item,
-          isSelected: isSelected,
-          selectedBorderColor: Theme.of(context).colorScheme.primary,
-          decoration: _chipDecoration(context),
-          label: _chipLabel(context, item, isSelected),
-          onTap: () => onSelected(item),
-          onDelete: _canShowCloseButton(item) ? () => onCloseItem!(item) : null,
-        );
+        final chip = _isWideRail
+            ? _row(item, isSelected)
+            : QuickTabSwitcherChip(
+                item: item,
+                isSelected: isSelected,
+                selectedBorderColor: Theme.of(context).colorScheme.primary,
+                decoration: _chipDecoration(context),
+                label: _chipLabel(context, item, isSelected),
+                onTap: () => onSelected(item),
+                onDelete: _canShowCloseButton(item)
+                    ? () => onCloseItem!(item)
+                    : null,
+              );
         final keyedForActive = isSelected && activeItemKey != null
             ? KeyedSubtree(key: activeItemKey, child: chip)
             : chip;
@@ -1267,6 +1637,13 @@ class QuickTabSwitcherView extends StatelessWidget {
       },
       onReorderItem: onReorderItem,
     );
+  }
+
+  Widget _withBlockedHint(Widget child) {
+    final message = reorderBlockedMessage;
+    return message == null
+        ? child
+        : HoldDragDisabledHint(message: message, child: child);
   }
 
   Widget _wrapWithMenu({

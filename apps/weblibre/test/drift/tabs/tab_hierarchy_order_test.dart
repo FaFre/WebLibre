@@ -155,6 +155,57 @@ void main() {
   );
 
   test(
+    'moveTabAmongSiblings toEdge moves the subtree to either end of its siblings',
+    () async {
+      await _insertTabs(db, const [
+        _TabFixture('parent'),
+        _TabFixture('first', parentId: 'parent'),
+        _TabFixture('first-child', parentId: 'first'),
+        _TabFixture('second', parentId: 'parent'),
+        _TabFixture('third', parentId: 'parent'),
+      ]);
+
+      expect(
+        await db.tabDao.moveTabAmongSiblings('first', down: true, toEdge: true),
+        isTrue,
+      );
+      expect(await _orderedTabIds(db), [
+        'parent',
+        'second',
+        'third',
+        'first',
+        'first-child',
+      ]);
+
+      expect(
+        await db.tabDao.moveTabAmongSiblings(
+          'third',
+          down: false,
+          toEdge: true,
+        ),
+        isTrue,
+      );
+      expect(await _orderedTabIds(db), [
+        'parent',
+        'third',
+        'second',
+        'first',
+        'first-child',
+      ]);
+
+      // Already there: nothing to move.
+      expect(
+        await db.tabDao.moveTabAmongSiblings(
+          'third',
+          down: false,
+          toEdge: true,
+        ),
+        isFalse,
+      );
+    },
+  );
+
+  test(
     'moveTabAmongSiblings uses the rendered cross-container root scope',
     () async {
       await _insertContainers(db, const [

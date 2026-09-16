@@ -40,7 +40,7 @@ final class LogFilterProvider extends $NotifierProvider<LogFilter, Level> {
   }
 }
 
-String _$logFilterHash() => r'b2ee125735571998293b0396907938c38a54d0b5';
+String _$logFilterHash() => r'40c47ffa2b628950b94ad7b27a141ce6e01c2e78';
 
 abstract class _$LogFilter extends $Notifier<Level> {
   Level build();

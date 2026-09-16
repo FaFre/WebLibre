@@ -39,6 +39,10 @@ part of 'routes.dart';
       name: 'GestureSettingsRoute',
       path: 'gestures',
     ),
+    TypedGoRoute<KeyboardShortcutSettingsRoute>(
+      name: 'KeyboardShortcutSettingsRoute',
+      path: 'keyboard_shortcuts',
+    ),
     TypedGoRoute<PrivacySecuritySettingsRoute>(
       name: 'PrivacySecuritySettingsRoute',
       path: 'privacy_security',
@@ -209,6 +213,16 @@ class GestureSettingsRoute extends GoRouteData with $GestureSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const GestureSettingsScreen();
+  }
+}
+
+class KeyboardShortcutSettingsRoute extends GoRouteData
+    with $KeyboardShortcutSettingsRoute {
+  const KeyboardShortcutSettingsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const KeyboardShortcutsScreen();
   }
 }
 

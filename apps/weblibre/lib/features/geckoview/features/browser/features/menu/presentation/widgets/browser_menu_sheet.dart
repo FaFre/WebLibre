@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/providers/menu_layout.dart';
@@ -39,6 +40,7 @@ import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
 Future<void> showBrowserMenuSheet(BuildContext context) {
   return showModalBottomSheet(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     isScrollControlled: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),

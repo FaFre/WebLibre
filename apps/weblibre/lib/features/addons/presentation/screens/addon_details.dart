@@ -22,6 +22,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/addons/domain/providers.dart';
 import 'package:weblibre/features/addons/extensions/addon_info.dart';
@@ -394,6 +395,7 @@ Future<bool?> _showConfirmUninstallDialog(
 ) {
   return showDialog<bool>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => AlertDialog(
       title: const Text('Remove extension?'),
       content: Text('Remove ${addon.displayName} from WebLibre?'),
@@ -540,6 +542,7 @@ Future<bool?> _confirmUpdateDialog(
 ) {
   return showDialog<bool>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => AlertDialog(
       title: const Text('Update available'),
       content: Text(

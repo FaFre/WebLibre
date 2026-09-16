@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:weblibre/core/design/display_features.dart';
 
 /// Shows a confirmation dialog before clearing site data.
 ///
@@ -29,6 +30,7 @@ Future<bool?> showClearSiteDataDialog(
 }) {
   return showDialog<bool>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => AlertDialog(
       icon: const Icon(Icons.warning),
       title: const Text('Clear Site Data'),

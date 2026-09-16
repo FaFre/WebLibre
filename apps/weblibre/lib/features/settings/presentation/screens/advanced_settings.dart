@@ -27,6 +27,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/providers/app_state.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
@@ -351,6 +352,7 @@ class _MlCacheTile extends HookWidget {
   Future<bool> _confirmClear(BuildContext context) async {
     final result = await showDialog<bool>(
       context: context,
+      anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
       builder: (context) => AlertDialog(
         title: const Text('Clear ML downloads?'),
         content: const Text(

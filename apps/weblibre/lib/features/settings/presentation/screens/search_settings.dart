@@ -22,6 +22,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
@@ -492,6 +493,7 @@ class _LocalIndexStatsTile extends HookConsumerWidget {
   Future<bool?> _confirmClear(BuildContext context) {
     return showDialog<bool>(
       context: context,
+      anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
       builder: (context) => AlertDialog(
         title: const Text('Clear local search index?'),
         content: const Text(

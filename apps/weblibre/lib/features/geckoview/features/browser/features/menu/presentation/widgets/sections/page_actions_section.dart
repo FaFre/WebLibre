@@ -25,6 +25,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
@@ -35,6 +36,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/pwa/presentation/widgets/pwa_install_button.dart';
+import 'package:weblibre/features/keyboard_shortcuts/presentation/widgets/keyboard_shortcut_hint.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 
@@ -78,6 +80,7 @@ class PageActionsSection extends HookConsumerWidget {
           tiles[item] = ListTile(
             leading: const Icon(MdiIcons.bookmarkPlus),
             title: Text(item.label),
+            trailing: const KeyboardShortcutHint(BrowserAction.toggleBookmark),
             onTap: () async {
               final tabState = ref.read(tabStateProvider(selectedTabId))!;
               final bookmarkUrl =
@@ -101,6 +104,7 @@ class PageActionsSection extends HookConsumerWidget {
           tiles[item] = ListTile(
             leading: const Icon(Icons.search),
             title: Text(item.label),
+            trailing: const KeyboardShortcutHint(BrowserAction.findInPage),
             onTap: () {
               ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
               ref

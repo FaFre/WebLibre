@@ -18,13 +18,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_test/flutter_test.dart';
+import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+
+/// A window wide and tall enough for the side rail to become a tab panel.
+const expandedWindow = WindowSizeClass(
+  width: WindowWidthClass.expanded,
+  height: WindowHeightClass.medium,
+);
+
+/// A window wide enough for a rail but too narrow to widen it.
+const mediumWindow = WindowSizeClass(
+  width: WindowWidthClass.medium,
+  height: WindowHeightClass.medium,
+);
 
 void main() {
   group('effectiveHomeSearchBarPlacement', () {
     GeneralSettings settingsWith({
       HomeSearchBarPlacement? placement,
-      required TabBarPosition position,
+      required TabBarPositionSetting position,
     }) => GeneralSettings.withDefaults(
       homeSearchBarPlacement: placement,
       tabBarPosition: position,
@@ -40,20 +53,22 @@ void main() {
     test('auto follows a bottom tab bar into the tab bar', () {
       expect(
         settingsWith(
-          position: TabBarPosition.bottom,
-        ).effectiveHomeSearchBarPlacement(),
+          position: TabBarPositionSetting.bottom,
+        ).effectiveHomeSearchBarPlacement(window: WindowSizeClass.compact),
         HomeSearchBarPlacement.tabBar,
       );
     });
 
     test('auto resolves to the pill for every other tab bar position', () {
       for (final position in const [
-        TabBarPosition.top,
-        TabBarPosition.left,
-        TabBarPosition.right,
+        TabBarPositionSetting.top,
+        TabBarPositionSetting.left,
+        TabBarPositionSetting.right,
       ]) {
         expect(
-          settingsWith(position: position).effectiveHomeSearchBarPlacement(),
+          settingsWith(
+            position: position,
+          ).effectiveHomeSearchBarPlacement(window: WindowSizeClass.compact),
           HomeSearchBarPlacement.top,
           reason: 'tab bar at $position',
         );
@@ -64,15 +79,15 @@ void main() {
       expect(
         settingsWith(
           placement: HomeSearchBarPlacement.top,
-          position: TabBarPosition.bottom,
-        ).effectiveHomeSearchBarPlacement(),
+          position: TabBarPositionSetting.bottom,
+        ).effectiveHomeSearchBarPlacement(window: WindowSizeClass.compact),
         HomeSearchBarPlacement.top,
       );
       expect(
         settingsWith(
           placement: HomeSearchBarPlacement.tabBar,
-          position: TabBarPosition.top,
-        ).effectiveHomeSearchBarPlacement(),
+          position: TabBarPositionSetting.top,
+        ).effectiveHomeSearchBarPlacement(window: WindowSizeClass.compact),
         HomeSearchBarPlacement.tabBar,
       );
     });
@@ -83,16 +98,44 @@ void main() {
     // deciding for themselves, which is how both end up off.
     test('never resolves to auto', () {
       for (final placement in HomeSearchBarPlacement.values) {
-        for (final position in TabBarPosition.values) {
-          expect(
-            settingsWith(
-              placement: placement,
-              position: position,
-            ).effectiveHomeSearchBarPlacement(),
-            isNot(HomeSearchBarPlacement.auto),
-          );
+        for (final position in TabBarPositionSetting.values) {
+          for (final window in const [
+            WindowSizeClass.compact,
+            mediumWindow,
+            expandedWindow,
+          ]) {
+            expect(
+              settingsWith(
+                placement: placement,
+                position: position,
+              ).effectiveHomeSearchBarPlacement(window: window),
+              isNot(HomeSearchBarPlacement.auto),
+              reason: '$placement at $position in $window',
+            );
+          }
         }
       }
+    });
+
+    // The placement resolves against the tab bar's *resolved* position, so an
+    // auto tab bar that becomes a rail on a large screen has to move the
+    // search entry to the pill -- the rail's address field is rotated 90
+    // degrees and is a poor thing to hand someone as their only search entry.
+    test('auto placement follows an auto tab bar onto the rail', () {
+      final settings = settingsWith(position: TabBarPositionSetting.auto);
+
+      expect(
+        settings.effectiveHomeSearchBarPlacement(
+          window: WindowSizeClass.compact,
+        ),
+        HomeSearchBarPlacement.tabBar,
+        reason: 'auto is a bottom bar on a phone, which keeps the field',
+      );
+      expect(
+        settings.effectiveHomeSearchBarPlacement(window: expandedWindow),
+        HomeSearchBarPlacement.top,
+        reason: 'auto is a rail on a tablet, so the pill takes over',
+      );
     });
   });
 }

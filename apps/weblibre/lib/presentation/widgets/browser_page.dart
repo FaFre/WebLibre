@@ -23,6 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
+import 'package:weblibre/core/design/window_size_class.dart';
 
 class BrowserPage extends ConsumerWidget {
   final Widget child;
@@ -218,7 +219,7 @@ class BrowserPageContent extends StatelessWidget {
             ),
             child: Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 560),
+                constraints: const BoxConstraints(maxWidth: ContentWidth.form),
                 child: child,
               ),
             ),

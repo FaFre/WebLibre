@@ -19,6 +19,23 @@
  */
 import 'dart:ui';
 
+/// Target width of one tab preview tile. Columns are packed to fit.
+const _targetTileWidth = 180.0;
+
+/// Upper bound on columns.
+///
+/// Purely a packing calculation, an 1800dp window yields ten columns, and a
+/// tab preview shrunk to a tenth of a desktop window is no longer a preview of
+/// anything. Wider windows get wider tiles instead of more of them.
+const _maxCrossAxisCount = 6;
+
+/// Columns that fit in [availableWidth], at least one and at most
+/// [_maxCrossAxisCount].
+///
+/// Callers must pass the width of the *grid*, not of the window: the tab tray
+/// is shown both full-screen and inside a width-capped sheet, which can also
+/// sit beside a side rail. Measuring the window there over-counts columns and
+/// the tiles overflow.
 int calculateCrossAxisItemCount({
   required double screenWidth,
   required double horizontalPadding,
@@ -28,9 +45,9 @@ int calculateCrossAxisItemCount({
   final availableWidth =
       screenWidth - totalHorizontalPadding - crossAxisSpacing;
 
-  final crossAxisCount = availableWidth ~/ 180.0;
+  final crossAxisCount = availableWidth ~/ _targetTileWidth;
 
-  return crossAxisCount;
+  return crossAxisCount.clamp(1, _maxCrossAxisCount);
 }
 
 Size calculateItemSize({

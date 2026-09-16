@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
 /// Edits an existing shortcut, or — with both initial values omitted — creates
@@ -31,6 +32,7 @@ Future<({String title, Uri url})?> showEditTopSiteDialog(
 }) {
   return showDialog<({String title, Uri url})>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => _EditTopSiteDialog(
       initialTitle: initialTitle,
       initialUrl: initialUrl,

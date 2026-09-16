@@ -29,7 +29,9 @@ abstract class _$GestureSettingsCWProxy {
 
   GestureSettings excludedSites(List<String> excludedSites);
 
-  GestureSettings bindings(Map<String, GestureAction> bindings);
+  GestureSettings bindingOverrides(
+    Map<String, BrowserAction?> bindingOverrides,
+  );
 
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GestureSettings(...).copyWith.fieldName(value)`.
@@ -50,7 +52,7 @@ abstract class _$GestureSettingsCWProxy {
     bool suggestNext,
     int minSuggestionStroke,
     List<String> excludedSites,
-    Map<String, GestureAction> bindings,
+    Map<String, BrowserAction?> bindingOverrides,
   });
 }
 
@@ -100,8 +102,9 @@ class _$GestureSettingsCWProxyImpl implements _$GestureSettingsCWProxy {
       call(excludedSites: excludedSites);
 
   @override
-  GestureSettings bindings(Map<String, GestureAction> bindings) =>
-      call(bindings: bindings);
+  GestureSettings bindingOverrides(
+    Map<String, BrowserAction?> bindingOverrides,
+  ) => call(bindingOverrides: bindingOverrides);
 
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GestureSettings(...).copyWith.fieldName(value)`.
@@ -123,7 +126,7 @@ class _$GestureSettingsCWProxyImpl implements _$GestureSettingsCWProxy {
     Object? suggestNext = const $CopyWithPlaceholder(),
     Object? minSuggestionStroke = const $CopyWithPlaceholder(),
     Object? excludedSites = const $CopyWithPlaceholder(),
-    Object? bindings = const $CopyWithPlaceholder(),
+    Object? bindingOverrides = const $CopyWithPlaceholder(),
   }) {
     return GestureSettings(
       enabled: enabled == const $CopyWithPlaceholder() || enabled == null
@@ -180,10 +183,12 @@ class _$GestureSettingsCWProxyImpl implements _$GestureSettingsCWProxy {
           ? _value.excludedSites
           // ignore: cast_nullable_to_non_nullable
           : excludedSites as List<String>,
-      bindings: bindings == const $CopyWithPlaceholder() || bindings == null
-          ? _value.bindings
+      bindingOverrides:
+          bindingOverrides == const $CopyWithPlaceholder() ||
+              bindingOverrides == null
+          ? _value.bindingOverrides
           // ignore: cast_nullable_to_non_nullable
-          : bindings as Map<String, GestureAction>,
+          : bindingOverrides as Map<String, BrowserAction?>,
     );
   }
 }
@@ -214,9 +219,11 @@ GestureSettings _$GestureSettingsFromJson(Map<String, dynamic> json) =>
       excludedSites: (json['excludedSites'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
-      bindings: (json['bindings'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, $enumDecode(_$GestureActionEnumMap, e)),
-      ),
+      bindingOverrides: (json['bindingOverrides'] as Map<String, dynamic>?)
+          ?.map(
+            (k, e) =>
+                MapEntry(k, $enumDecodeNullable(_$BrowserActionEnumMap, e)),
+          ),
     );
 
 Map<String, dynamic> _$GestureSettingsToJson(GestureSettings instance) =>
@@ -232,40 +239,67 @@ Map<String, dynamic> _$GestureSettingsToJson(GestureSettings instance) =>
       'suggestNext': instance.suggestNext,
       'minSuggestionStroke': instance.minSuggestionStroke,
       'excludedSites': instance.excludedSites,
-      'bindings': instance.bindings.map(
-        (k, e) => MapEntry(k, _$GestureActionEnumMap[e]!),
+      'bindingOverrides': instance.bindingOverrides.map(
+        (k, e) => MapEntry(k, _$BrowserActionEnumMap[e]),
       ),
     };
 
-const _$GestureActionEnumMap = {
-  GestureAction.back: 'back',
-  GestureAction.forward: 'forward',
-  GestureAction.reload: 'reload',
-  GestureAction.scrollTop: 'scrollTop',
-  GestureAction.scrollBottom: 'scrollBottom',
-  GestureAction.pageUp: 'pageUp',
-  GestureAction.pageDown: 'pageDown',
-  GestureAction.newTab: 'newTab',
-  GestureAction.closeTab: 'closeTab',
-  GestureAction.duplicateTab: 'duplicateTab',
-  GestureAction.nextTab: 'nextTab',
-  GestureAction.previousTab: 'previousTab',
-  GestureAction.lastUsedTab: 'lastUsedTab',
-  GestureAction.togglePinTab: 'togglePinTab',
-  GestureAction.nextContainer: 'nextContainer',
-  GestureAction.previousContainer: 'previousContainer',
-  GestureAction.toggleReaderMode: 'toggleReaderMode',
-  GestureAction.toggleDesktopMode: 'toggleDesktopMode',
-  GestureAction.findInPage: 'findInPage',
-  GestureAction.increaseFontSize: 'increaseFontSize',
-  GestureAction.decreaseFontSize: 'decreaseFontSize',
-  GestureAction.toggleBookmark: 'toggleBookmark',
-  GestureAction.translatePage: 'translatePage',
-  GestureAction.showHome: 'showHome',
-  GestureAction.showHistory: 'showHistory',
-  GestureAction.showBookmarks: 'showBookmarks',
-  GestureAction.showContainers: 'showContainers',
-  GestureAction.toggleTabBar: 'toggleTabBar',
-  GestureAction.moveToBackground: 'moveToBackground',
-  GestureAction.quitBrowser: 'quitBrowser',
+const _$BrowserActionEnumMap = {
+  BrowserAction.focusAddressBar: 'focusAddressBar',
+  BrowserAction.back: 'back',
+  BrowserAction.forward: 'forward',
+  BrowserAction.reload: 'reload',
+  BrowserAction.hardReload: 'hardReload',
+  BrowserAction.scrollTop: 'scrollTop',
+  BrowserAction.scrollBottom: 'scrollBottom',
+  BrowserAction.pageUp: 'pageUp',
+  BrowserAction.pageDown: 'pageDown',
+  BrowserAction.newTab: 'newTab',
+  BrowserAction.newPrivateTab: 'newPrivateTab',
+  BrowserAction.closeTab: 'closeTab',
+  BrowserAction.reopenClosedTab: 'reopenClosedTab',
+  BrowserAction.duplicateTab: 'duplicateTab',
+  BrowserAction.nextTab: 'nextTab',
+  BrowserAction.previousTab: 'previousTab',
+  BrowserAction.lastUsedTab: 'lastUsedTab',
+  BrowserAction.selectTab1: 'selectTab1',
+  BrowserAction.selectTab2: 'selectTab2',
+  BrowserAction.selectTab3: 'selectTab3',
+  BrowserAction.selectTab4: 'selectTab4',
+  BrowserAction.selectTab5: 'selectTab5',
+  BrowserAction.selectTab6: 'selectTab6',
+  BrowserAction.selectTab7: 'selectTab7',
+  BrowserAction.selectTab8: 'selectTab8',
+  BrowserAction.selectLastTab: 'selectLastTab',
+  BrowserAction.togglePinTab: 'togglePinTab',
+  BrowserAction.moveTabBackward: 'moveTabBackward',
+  BrowserAction.moveTabForward: 'moveTabForward',
+  BrowserAction.moveTabToStart: 'moveTabToStart',
+  BrowserAction.moveTabToEnd: 'moveTabToEnd',
+  BrowserAction.nextContainer: 'nextContainer',
+  BrowserAction.previousContainer: 'previousContainer',
+  BrowserAction.toggleReaderMode: 'toggleReaderMode',
+  BrowserAction.toggleDesktopMode: 'toggleDesktopMode',
+  BrowserAction.findInPage: 'findInPage',
+  BrowserAction.findNext: 'findNext',
+  BrowserAction.findPrevious: 'findPrevious',
+  BrowserAction.increaseFontSize: 'increaseFontSize',
+  BrowserAction.decreaseFontSize: 'decreaseFontSize',
+  BrowserAction.resetFontSize: 'resetFontSize',
+  BrowserAction.toggleBookmark: 'toggleBookmark',
+  BrowserAction.translatePage: 'translatePage',
+  BrowserAction.printPage: 'printPage',
+  BrowserAction.showHome: 'showHome',
+  BrowserAction.showHistory: 'showHistory',
+  BrowserAction.showBookmarks: 'showBookmarks',
+  BrowserAction.showContainers: 'showContainers',
+  BrowserAction.showTabView: 'showTabView',
+  BrowserAction.showDownloads: 'showDownloads',
+  BrowserAction.showAddons: 'showAddons',
+  BrowserAction.openSettings: 'openSettings',
+  BrowserAction.showKeyboardShortcuts: 'showKeyboardShortcuts',
+  BrowserAction.toggleTabBar: 'toggleTabBar',
+  BrowserAction.clearBrowsingData: 'clearBrowsingData',
+  BrowserAction.moveToBackground: 'moveToBackground',
+  BrowserAction.quitBrowser: 'quitBrowser',
 };

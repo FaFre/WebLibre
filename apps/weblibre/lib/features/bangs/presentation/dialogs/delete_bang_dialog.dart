@@ -19,12 +19,14 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:weblibre/core/design/display_features.dart';
 
 /// Dialog to confirm bang deletion.
 /// Returns true if user confirms deletion, false if cancelled, null if dismissed.
 Future<bool?> showDeleteBangDialog(BuildContext context) {
   return showDialog<bool?>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (BuildContext context) {
       return AlertDialog(
         icon: const Icon(Icons.warning),

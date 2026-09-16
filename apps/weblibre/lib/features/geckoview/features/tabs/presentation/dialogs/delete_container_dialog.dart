@@ -20,6 +20,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:weblibre/core/design/display_features.dart';
 
 /// Result of the delete-container confirmation.
 class DeleteContainerDecision {
@@ -38,6 +39,7 @@ Future<DeleteContainerDecision?> showDeleteContainerDialog(
 ) {
   return showDialog<DeleteContainerDecision?>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => const _DeleteContainerDialog(),
   );
 }

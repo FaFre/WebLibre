@@ -24,6 +24,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/addons/domain/providers.dart';
 import 'package:weblibre/features/addons/presentation/widgets/addon_listing_card.dart';
 import 'package:weblibre/features/addons/utils/permissions.dart';
@@ -252,6 +253,7 @@ class _ScreenshotsSection extends StatelessWidget {
               return GestureDetector(
                 onTap: () => showDialog<void>(
                   context: context,
+                  anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
                   barrierColor: Colors.black87,
                   builder: (context) => Dialog(
                     backgroundColor: Colors.transparent,

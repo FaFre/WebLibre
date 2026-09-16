@@ -1062,12 +1062,24 @@ class TabRepository extends _$TabRepository {
     }
   }
 
-  Future<void> undoClose() {
+  Future<void> undoClose() async {
     // Suppress the next reclose pass: undo can resurrect a tab whose
     // tombstone is still on disk (from a previous session); without this
     // flag the listener would immediately re-close it.
+    //
+    // Armed before the call, so the restored list cannot arrive first, and
+    // disarmed when nothing is restored. The undo history is short-lived and
+    // often empty, and then no tab list change ever comes to consume the flag.
+    // Left armed, it would take the next unrelated change for an undo -- at
+    // startup, the session restore itself -- skip the reclose pass and delete
+    // the tombstones of tabs the user had closed, bringing them back for good.
     _suppressNextReclose = true;
-    return _tabsService.undo();
+    var restoresTabs = false;
+    try {
+      restoresTabs = await _tabsService.undo();
+    } finally {
+      if (!restoresTabs) _suppressNextReclose = false;
+    }
   }
 
   Future<bool> _recloseRestoredClosedTabs(List<String> tabIds) async {

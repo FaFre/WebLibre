@@ -23,6 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/app_links/domain/services/app_links_coordinator.dart';
 import 'package:weblibre/features/app_links/presentation/widgets/app_link_open_banner.dart';
 import 'package:weblibre/features/app_links/presentation/widgets/app_link_prompt_dialog.dart';
@@ -135,6 +136,7 @@ class AppLinkPromptHost extends HookConsumerWidget {
         unawaited(
           showDialog<void>(
             context: context,
+            anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
             builder: (dialogContext) {
               shownModalRoute.value = ModalRoute.of<void>(dialogContext);
               return AppLinkPromptDialog(request: request.request);

@@ -103,7 +103,11 @@ class GeckoTabService {
     return _api.removePrivateTabs();
   }
 
-  Future<void> undo() {
+  /// Restores the most recently closed tabs, if the engine still has them.
+  ///
+  /// Returns whether any tabs are being restored. When none are, the tab list
+  /// does not change at all.
+  Future<bool> undo() {
     return _api.undo();
   }
 

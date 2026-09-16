@@ -25,6 +25,7 @@ import 'package:flutter/foundation.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/providers/window_size_class.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 
@@ -69,6 +70,8 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'bookmarkOpenSetting': DriftSqlType.string,
   'backgroundTabOpenAction': DriftSqlType.string,
   'autoHideTabBar': DriftSqlType.bool,
+  'sideRailWidth': DriftSqlType.double,
+  'sideRailAutoHide': DriftSqlType.bool,
   'tabBarSwipeAction': DriftSqlType.string,
   'sequentialTabNavigationCrossContainers': DriftSqlType.bool,
   'sequentialTabNavigationLoop': DriftSqlType.bool,
@@ -216,6 +219,57 @@ GeneralSettings generalSettingsWithDefaults(Ref ref) {
   return ref.watch(
     generalSettingsRepositoryProvider.select(
       (value) => value.value ?? GeneralSettings.withDefaults(),
+    ),
+  );
+}
+
+/// The tab bar edge to actually render on, with
+/// [TabBarPositionSetting.auto] already resolved against the current window.
+///
+/// Lives beside [generalSettingsWithDefaults] rather than in the browser
+/// feature because three features need it — the browser shell, the settings
+/// preview and the home wallpaper — and none of them should have to know how
+/// the resolution works or remember to perform it.
+///
+/// Watch this instead of `settings.tabBarPosition` anywhere the value drives
+/// layout. The raw setting is only for the settings screen that writes it.
+@Riverpod(keepAlive: true)
+TabBarPosition effectiveTabBarPosition(Ref ref) {
+  final window = ref.watch(windowSizeClassControllerProvider);
+
+  return ref.watch(
+    generalSettingsWithDefaultsProvider.select(
+      (settings) => settings.effectiveTabBarPosition(window: window),
+    ),
+  );
+}
+
+/// [GeneralSettings.effectiveTabBarStackingMode] resolved against the current
+/// window.
+///
+/// Watching this rather than resolving at each call site also narrows
+/// rebuilds: it fires when the *resolved* mode changes, not whenever any
+/// setting or the window class does.
+@Riverpod(keepAlive: true)
+TabBarStackingMode effectiveTabBarStackingMode(Ref ref) {
+  final window = ref.watch(windowSizeClassControllerProvider);
+
+  return ref.watch(
+    generalSettingsWithDefaultsProvider.select(
+      (settings) => settings.effectiveTabBarStackingMode(window: window),
+    ),
+  );
+}
+
+/// [GeneralSettings.effectiveHomeSearchBarPlacement] resolved against the
+/// current window.
+@Riverpod(keepAlive: true)
+HomeSearchBarPlacement effectiveHomeSearchBarPlacement(Ref ref) {
+  final window = ref.watch(windowSizeClassControllerProvider);
+
+  return ref.watch(
+    generalSettingsWithDefaultsProvider.select(
+      (settings) => settings.effectiveHomeSearchBarPlacement(window: window),
     ),
   );
 }

@@ -24,6 +24,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/format.dart';
 import 'package:weblibre/features/qr_scanner/presentation/dialogs/qr_scanner_dialog.dart';
@@ -430,6 +431,7 @@ class SyncSettingsScreen extends HookConsumerWidget {
   static Future<bool?> _showSignOutConfirmation(BuildContext context) {
     return showDialog<bool>(
       context: context,
+      anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
       builder: (context) {
         return AlertDialog(
           title: const Text('Sign out?'),
@@ -459,6 +461,7 @@ class SyncSettingsScreen extends HookConsumerWidget {
     final controller = TextEditingController(text: currentName);
     await showDialog<void>(
       context: context,
+      anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
       builder: (context) {
         return AlertDialog(
           title: const Text('Device Name'),
@@ -530,6 +533,7 @@ class SyncSettingsScreen extends HookConsumerWidget {
     final controller = TextEditingController(text: initialValue);
     await showDialog<void>(
       context: context,
+      anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
       builder: (context) {
         return AlertDialog(
           title: Text(title),

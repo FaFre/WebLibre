@@ -588,7 +588,134 @@ final class SelectedContainerTabStatesWithContainerProvider
 }
 
 String _$selectedContainerTabStatesWithContainerHash() =>
-    r'fa0704da36c068fa4585175807d9da7cbee0b70e';
+    r'6446b8bddb92102c6a64027341d8a3f664fc3ba2';
+
+/// The tabs of [containerId] (null for unassigned tabs) with their container
+/// data, in the order every non-tray surface shares.
+///
+/// A family rather than a read of the selected container, so the accordion can
+/// list the tabs of several expanded groups at once without selecting them.
+
+@ProviderFor(containerTabStatesWithContainer)
+final containerTabStatesWithContainerProvider =
+    ContainerTabStatesWithContainerFamily._();
+
+/// The tabs of [containerId] (null for unassigned tabs) with their container
+/// data, in the order every non-tray surface shares.
+///
+/// A family rather than a read of the selected container, so the accordion can
+/// list the tabs of several expanded groups at once without selecting them.
+
+final class ContainerTabStatesWithContainerProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<List<TabStateWithContainer>>,
+          EquatableValue<List<TabStateWithContainer>>,
+          EquatableValue<List<TabStateWithContainer>>
+        >
+    with $Provider<EquatableValue<List<TabStateWithContainer>>> {
+  /// The tabs of [containerId] (null for unassigned tabs) with their container
+  /// data, in the order every non-tray surface shares.
+  ///
+  /// A family rather than a read of the selected container, so the accordion can
+  /// list the tabs of several expanded groups at once without selecting them.
+  ContainerTabStatesWithContainerProvider._({
+    required ContainerTabStatesWithContainerFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'containerTabStatesWithContainerProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$containerTabStatesWithContainerHash();
+
+  @override
+  String toString() {
+    return r'containerTabStatesWithContainerProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<List<TabStateWithContainer>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<List<TabStateWithContainer>> create(Ref ref) {
+    final argument = this.argument as String?;
+    return containerTabStatesWithContainer(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(
+    EquatableValue<List<TabStateWithContainer>> value,
+  ) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<EquatableValue<List<TabStateWithContainer>>>(
+            value,
+          ),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ContainerTabStatesWithContainerProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$containerTabStatesWithContainerHash() =>
+    r'3597f8f35c75eb2ac62ef1cb737d97e112b890d6';
+
+/// The tabs of [containerId] (null for unassigned tabs) with their container
+/// data, in the order every non-tray surface shares.
+///
+/// A family rather than a read of the selected container, so the accordion can
+/// list the tabs of several expanded groups at once without selecting them.
+
+final class ContainerTabStatesWithContainerFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          EquatableValue<List<TabStateWithContainer>>,
+          String?
+        > {
+  ContainerTabStatesWithContainerFamily._()
+    : super(
+        retry: null,
+        name: r'containerTabStatesWithContainerProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// The tabs of [containerId] (null for unassigned tabs) with their container
+  /// data, in the order every non-tray surface shares.
+  ///
+  /// A family rather than a read of the selected container, so the accordion can
+  /// list the tabs of several expanded groups at once without selecting them.
+
+  ContainerTabStatesWithContainerProvider call(String? containerId) =>
+      ContainerTabStatesWithContainerProvider._(
+        argument: containerId,
+        from: this,
+      );
+
+  @override
+  String toString() => r'containerTabStatesWithContainerProvider';
+}
 
 @ProviderFor(quickTabSwitcherTabStates)
 final quickTabSwitcherTabStatesProvider = QuickTabSwitcherTabStatesFamily._();
@@ -816,7 +943,7 @@ final class QuickTabSwitcherRowCountProvider
 }
 
 String _$quickTabSwitcherRowCountHash() =>
-    r'81a2bfbdc4dc88fdf2c66dd9f5bfd6d1ce73a073';
+    r'ae545b29d8b86bfd64d870ca456c6708dacf5458';
 
 @ProviderFor(suggestedTabEntities)
 final suggestedTabEntitiesProvider = SuggestedTabEntitiesFamily._();

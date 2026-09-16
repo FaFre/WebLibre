@@ -218,11 +218,15 @@ class TabDataRepository extends _$TabDataRepository {
     return ref.read(tabDatabaseProvider).tabDao.promoteChildToParent(childId);
   }
 
-  Future<bool> moveTabAmongSiblings(String tabId, {required bool down}) {
+  Future<bool> moveTabAmongSiblings(
+    String tabId, {
+    required bool down,
+    bool toEdge = false,
+  }) {
     return ref
         .read(tabDatabaseProvider)
         .tabDao
-        .moveTabAmongSiblings(tabId, down: down);
+        .moveTabAmongSiblings(tabId, down: down, toEdge: toEdge);
   }
 
   /// How many private tabs are open across every container.

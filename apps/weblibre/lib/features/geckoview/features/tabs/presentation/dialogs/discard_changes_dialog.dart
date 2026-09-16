@@ -19,12 +19,14 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:weblibre/core/design/display_features.dart';
 
 enum DiscardChangesChoice { discard, save }
 
 Future<DiscardChangesChoice?> showDiscardChangesDialog(BuildContext context) {
   return showDialog<DiscardChangesChoice?>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (BuildContext context) {
       return AlertDialog(
         icon: const Icon(Icons.warning),

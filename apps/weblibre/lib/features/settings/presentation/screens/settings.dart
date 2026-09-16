@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/settings/domain/providers/pending_settings_highlight.dart';
 import 'package:weblibre/features/settings/presentation/screens/advanced_settings.dart';
@@ -54,35 +55,54 @@ class SettingsScreen extends HookWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: FadingScroll(
-          fadingSize: 25,
-          builder: (context, controller) {
-            return CustomScrollView(
-              controller: controller,
-              slivers: [
-                const SliverAppBar.large(
-                  centerTitle: false,
-                  title: Text('Settings'),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                  sliver: SliverToBoxAdapter(
-                    child: SettingsSearchField(
-                      controller: search.controller,
-                      hintText: 'Search all settings',
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final inset = centeringInset(
+              constraints.maxWidth,
+              maxWidth: ContentWidth.list,
+            );
+
+            return FadingScroll(
+              fadingSize: 25,
+              builder: (context, controller) {
+                return CustomScrollView(
+                  controller: controller,
+                  slivers: [
+                    const SliverAppBar.large(
+                      centerTitle: false,
+                      title: Text('Settings'),
                     ),
-                  ),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
-                  sliver: SliverToBoxAdapter(
-                    child: SettingsSectionList(
-                      sections: sections,
-                      query: search.rawQuery,
+                    SliverPadding(
+                      padding: EdgeInsets.fromLTRB(
+                        16 + inset,
+                        8,
+                        16 + inset,
+                        0,
+                      ),
+                      sliver: SliverToBoxAdapter(
+                        child: SettingsSearchField(
+                          controller: search.controller,
+                          hintText: 'Search all settings',
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ],
+                    SliverPadding(
+                      padding: EdgeInsets.fromLTRB(
+                        16 + inset,
+                        24,
+                        16 + inset,
+                        20,
+                      ),
+                      sliver: SliverToBoxAdapter(
+                        child: SettingsSectionList(
+                          sections: sections,
+                          query: search.rawQuery,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
             );
           },
         ),
@@ -138,6 +158,13 @@ _CategoryGroups _buildCategories() {
       icon: MdiIcons.gestureSwipe,
       keywords: const ['gesture', 'swipe', 'stroke'],
       onTap: (context) => GestureSettingsRoute().push(context),
+    ),
+    _SettingsCategoryDefinition(
+      title: 'Keyboard Shortcuts',
+      subtitle: 'Hardware keyboard keys for browser actions',
+      icon: MdiIcons.keyboardOutline,
+      keywords: const ['keyboard', 'shortcut', 'hotkey', 'key binding'],
+      onTap: (context) => const KeyboardShortcutSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
       title: 'Toolbar & Layout',

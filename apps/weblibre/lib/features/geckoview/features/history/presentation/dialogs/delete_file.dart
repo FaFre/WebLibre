@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:path/path.dart' as p;
+import 'package:weblibre/core/design/display_features.dart';
 
 typedef DeleteDecision = ({bool delete, bool remember});
 
@@ -31,6 +32,7 @@ Future<DeleteDecision?> showDeleteFileDialog(
 }) {
   return showDialog<DeleteDecision>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) {
       final fileName = p.basename(filePath);
 

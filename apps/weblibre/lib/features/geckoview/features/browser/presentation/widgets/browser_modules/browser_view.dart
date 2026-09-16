@@ -27,6 +27,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:quick_actions/quick_actions.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/device_info.dart';
 import 'package:weblibre/core/providers/router.dart';
@@ -72,6 +73,7 @@ import 'package:weblibre/features/wallpaper/domain/providers.dart';
 import 'package:weblibre/features/web_feed/domain/providers/add_dialog_blocking.dart';
 import 'package:weblibre/features/web_feed/domain/services/article_content_processor.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
+import 'package:weblibre/presentation/widgets/web_content_keyboard.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 class BrowserView extends StatefulHookConsumerWidget {
@@ -393,90 +395,102 @@ class _BrowserViewState extends ConsumerState<BrowserView>
             offstage: showHome,
             child: Visibility(
               visible: isGeckoViewVisible,
-              child: GeckoView(
-                // Reports when the native container enters the window, which
-                // under the [Offstage] above is not until the home surface is
-                // dismissed. [GeckoView] attaches the browser fragment on every
-                // such report, so an engine kept alive but unpainted for the
-                // whole of startup still gets its fragment the moment it is
-                // shown. See https://github.com/FaFre/WebLibre/issues/557.
-                viewReadyEvents: ref
-                    .read(eventServiceProvider)
-                    .viewReadyStateEvents,
-                isPainted: isEnginePainted,
-                postInitializationStep: () async {
-                  await widget.postInitializationStep?.call();
+              // Keys the page should get would otherwise be taken by the
+              // app's default shortcuts; see [WebContentKeyPassthrough].
+              child: WebContentKeyPassthrough(
+                child: GeckoView(
+                  // Reports when the native container enters the window, which
+                  // under the [Offstage] above is not until the home surface is
+                  // dismissed. [GeckoView] attaches the browser fragment on every
+                  // such report, so an engine kept alive but unpainted for the
+                  // whole of startup still gets its fragment the moment it is
+                  // shown. See https://github.com/FaFre/WebLibre/issues/557.
+                  viewReadyEvents: ref
+                      .read(eventServiceProvider)
+                      .viewReadyStateEvents,
+                  isPainted: isEnginePainted,
+                  postInitializationStep: () async {
+                    await widget.postInitializationStep?.call();
 
-                  if (!_initializationCompleter.isCompleted) {
-                    _initializationCompleter.complete();
+                    if (!_initializationCompleter.isCompleted) {
+                      _initializationCompleter.complete();
 
-                    const quickActions = QuickActions();
+                      const quickActions = QuickActions();
 
-                    //Debounce: https://github.com/flutter/flutter/issues/131121
-                    DateTime? lastAction;
-                    await quickActions.initialize((type) async {
-                      if (lastAction == null ||
-                          DateTime.now().difference(lastAction!) >
-                              const Duration(seconds: 5)) {
-                        if (type == 'new_tab') {
-                          lastAction = DateTime.now();
+                      //Debounce: https://github.com/flutter/flutter/issues/131121
+                      DateTime? lastAction;
+                      await quickActions.initialize((type) async {
+                        if (lastAction == null ||
+                            DateTime.now().difference(lastAction!) >
+                                const Duration(seconds: 5)) {
+                          if (type == 'new_tab') {
+                            lastAction = DateTime.now();
 
-                          final router = await ref.read(routerProvider.future);
-                          const route = SearchRoute(tabType: TabType.regular);
+                            final router = await ref.read(
+                              routerProvider.future,
+                            );
+                            const route = SearchRoute(tabType: TabType.regular);
 
-                          await router.push(route.location);
-                        } else if (type == 'new_private_tab') {
-                          lastAction = DateTime.now();
+                            await router.push(route.location);
+                          } else if (type == 'new_private_tab') {
+                            lastAction = DateTime.now();
 
-                          final router = await ref.read(routerProvider.future);
-                          const route = SearchRoute(tabType: TabType.private);
+                            final router = await ref.read(
+                              routerProvider.future,
+                            );
+                            const route = SearchRoute(tabType: TabType.private);
 
-                          await router.push(route.location);
-                        } else if (type == 'new_isolated_tab') {
-                          final settings = ref.read(
-                            generalSettingsWithDefaultsProvider,
-                          );
-                          if (!settings.showIsolatedTabUi) {
-                            return;
+                            await router.push(route.location);
+                          } else if (type == 'new_isolated_tab') {
+                            final settings = ref.read(
+                              generalSettingsWithDefaultsProvider,
+                            );
+                            if (!settings.showIsolatedTabUi) {
+                              return;
+                            }
+
+                            lastAction = DateTime.now();
+
+                            final router = await ref.read(
+                              routerProvider.future,
+                            );
+                            const route = SearchRoute(
+                              tabType: TabType.isolated,
+                            );
+
+                            await router.push(route.location);
+                          } else {
+                            throw UnimplementedError(
+                              'Unknown quick action shortcut type',
+                            );
                           }
-
-                          lastAction = DateTime.now();
-
-                          final router = await ref.read(routerProvider.future);
-                          const route = SearchRoute(tabType: TabType.isolated);
-
-                          await router.push(route.location);
-                        } else {
-                          throw UnimplementedError(
-                            'Unknown quick action shortcut type',
-                          );
                         }
-                      }
-                    });
+                      });
 
-                    final settings = ref.read(
-                      generalSettingsWithDefaultsProvider,
-                    );
-                    await quickActions.setShortcutItems([
-                      const ShortcutItem(
-                        type: 'new_tab',
-                        localizedTitle: 'New Tab',
-                        icon: 'mdi_icon_tab',
-                      ),
-                      const ShortcutItem(
-                        type: 'new_private_tab',
-                        localizedTitle: 'New Private Tab',
-                        icon: 'mdi_icon_domino_mask',
-                      ),
-                      if (settings.showIsolatedTabUi)
+                      final settings = ref.read(
+                        generalSettingsWithDefaultsProvider,
+                      );
+                      await quickActions.setShortcutItems([
                         const ShortcutItem(
-                          type: 'new_isolated_tab',
-                          localizedTitle: 'New Isolated Tab',
-                          icon: 'mdi_icon_snowflake',
+                          type: 'new_tab',
+                          localizedTitle: 'New Tab',
+                          icon: 'mdi_icon_tab',
                         ),
-                    ]);
-                  }
-                },
+                        const ShortcutItem(
+                          type: 'new_private_tab',
+                          localizedTitle: 'New Private Tab',
+                          icon: 'mdi_icon_domino_mask',
+                        ),
+                        if (settings.showIsolatedTabUi)
+                          const ShortcutItem(
+                            type: 'new_isolated_tab',
+                            localizedTitle: 'New Isolated Tab',
+                            icon: 'mdi_icon_snowflake',
+                          ),
+                      ]);
+                    }
+                  },
+                ),
               ),
             ),
           ),
@@ -566,6 +580,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
         final outcome = await showDialog<DialogOutcome>(
           context: context,
+          anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
           builder: (context) => IntentGatekeeperDialog(request: request),
         );
 

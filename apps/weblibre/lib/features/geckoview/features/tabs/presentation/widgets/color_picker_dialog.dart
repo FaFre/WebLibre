@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/custom_color_picker_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/color_palette.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
@@ -43,6 +44,7 @@ class ColorPickerDialog extends HookWidget {
     Future<void> openCustomPicker() async {
       final result = await showDialog<Color?>(
         context: context,
+        anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
         builder: (_) => CustomColorPickerDialog(selectedColor.value),
       );
       if (result != null) {

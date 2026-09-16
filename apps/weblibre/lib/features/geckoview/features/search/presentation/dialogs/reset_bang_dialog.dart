@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:weblibre/core/design/display_features.dart';
 
 /// Shows a confirmation dialog for resetting a bang's usage frequency.
 ///
@@ -28,6 +29,7 @@ Future<bool?> showResetBangDialog(
 }) {
   return showDialog<bool>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => AlertDialog(
       title: Text('Reset usage frequency of $triggerName?'),
       content: const Text('This will remove the Bang from quick select.'),

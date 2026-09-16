@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:weblibre/core/design/display_features.dart';
 
 /// Shows a confirmation dialog for deleting all tracking protection exceptions.
 ///
@@ -25,6 +26,7 @@ import 'package:flutter/material.dart';
 Future<bool?> showDeleteAllExceptionsDialog(BuildContext context) {
   return showDialog<bool>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => AlertDialog(
       title: const Text('Delete All Exceptions?'),
       content: const Text(

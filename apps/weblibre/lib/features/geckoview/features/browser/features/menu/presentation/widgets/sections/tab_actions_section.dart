@@ -31,6 +31,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
@@ -51,6 +52,7 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/c
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/domain/repositories/top_site_repository.dart';
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
+import 'package:weblibre/features/keyboard_shortcuts/presentation/widgets/keyboard_shortcut_hint.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
@@ -790,6 +792,7 @@ class _ExportExpansion extends ConsumerWidget {
           MenuItemType.printPage: () => buildMenuSubTile(
             'Print',
             icon: MdiIcons.printer,
+            trailing: const KeyboardShortcutHint(BrowserAction.printPage),
             onTap: () async {
               try {
                 await ref

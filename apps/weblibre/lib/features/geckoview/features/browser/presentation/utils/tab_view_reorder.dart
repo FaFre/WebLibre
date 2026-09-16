@@ -359,3 +359,9 @@ String _rootIdFor(String tabId, Map<String, String?> parentById) {
 
   return rootId;
 }
+
+/// Shown when a tab is held and dragged while reordering is switched off
+/// because the tab view is filtered or searched, where the order a drop lands
+/// in would be ambiguous.
+const tabReorderBlockedMessage =
+    'Clear the tab view filter or search to reorder tabs';

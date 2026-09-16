@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
@@ -91,6 +92,7 @@ class _ResetBehaviorButton extends ConsumerWidget {
       onPressed: () async {
         final confirmed = await showDialog<bool>(
           context: context,
+          anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
           builder: (context) => AlertDialog(
             icon: const Icon(Icons.settings_backup_restore),
             title: const Text('Reset behavior & timing?'),

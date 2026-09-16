@@ -46,7 +46,15 @@ android {
         // Whether the Flutter engine renders via Impeller or Skia. Read by
         // io.flutter.embedding.android.EnableImpeller in AndroidManifest.xml.
         // Skia is the default; comparison flavors override this below.
-        manifestPlaceholders = [enableImpeller: "false"]
+        //
+        // enableHcpp is read by io.flutter.embedding.android.EnableHcpp and only
+        // matters under Impeller on API 34+. On by default; pass
+        // -PenableHcpp=false (flutter: --android-project-arg enableHcpp=false)
+        // to build the other half of the #450 comparison.
+        manifestPlaceholders = [
+            enableImpeller: "false",
+            enableHcpp: project.findProperty("enableHcpp") ?: "true",
+        ]
     }
 
     flavorDimensions "track"

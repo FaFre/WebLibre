@@ -250,7 +250,7 @@ class _HomeSearchBarPlacementTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final resolved = settings.effectiveHomeSearchBarPlacement();
+    final resolved = ref.watch(effectiveHomeSearchBarPlacementProvider);
 
     return RadioGroup<HomeSearchBarPlacement>(
       groupValue: settings.homeSearchBarPlacement,

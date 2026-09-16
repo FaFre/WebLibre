@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/small_web/data/database/definitions.drift.dart';
 import 'package:weblibre/features/small_web/data/models/kagi_small_web_mode.dart';
 import 'package:weblibre/features/small_web/data/models/small_web_source_kind.dart';
@@ -88,6 +89,7 @@ class SmallWebHistoryHeader extends ConsumerWidget {
               onPressed: () async {
                 final confirmed = await showDialog<bool>(
                   context: context,
+                  anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
                   builder: (context) => AlertDialog(
                     title: const Text('Clear all discoveries?'),
                     content: const Text(

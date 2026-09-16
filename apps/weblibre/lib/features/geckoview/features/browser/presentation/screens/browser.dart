@@ -24,8 +24,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/global_drop.dart';
+import 'package:weblibre/core/providers/pointer_device.dart';
+import 'package:weblibre/core/providers/window_size_class.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/drag_data.dart';
 import 'package:weblibre/extensions/media_query.dart';
@@ -43,6 +46,7 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/proxy_settings_replication.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/side_rail.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/keep_tab_dialog.dart';
@@ -66,6 +70,7 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/sea
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/keyboard_shortcuts/presentation/widgets/browser_keyboard_shortcuts.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/repositories/container_proxy.dart';
 import 'package:weblibre/features/proxy/domain/services/container_routing_snapshot.dart';
@@ -266,11 +271,7 @@ class _TabBar extends HookConsumerWidget {
     final suppressMainToolbar = _suppressMainToolbarForHome(
       showBrowserHome: ref.watch(shouldShowBrowserHomeProvider),
       showContextualToolbar: showContextualToolbar,
-      placement: ref.watch(
-        generalSettingsWithDefaultsProvider.select(
-          (settings) => settings.effectiveHomeSearchBarPlacement(),
-        ),
-      ),
+      placement: ref.watch(effectiveHomeSearchBarPlacementProvider),
     );
 
     // Return the toolbar widget - parent handles animation.
@@ -298,6 +299,20 @@ class _TabBar extends HookConsumerWidget {
         showContextualToolbar: showContextualToolbar,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         isSmallWebMode: isSmallWebMode,
+        railWidth: BrowserTabBar.railWidthFor(
+          ref.watch(windowSizeClassControllerProvider),
+          hasTabList:
+              ref.watch(effectiveTabBarStackingModeProvider) !=
+              TabBarStackingMode.disabled,
+          preferredWidth:
+              ref.watch(sideRailDragWidthProvider) ??
+              ref.watch(
+                generalSettingsWithDefaultsProvider.select(
+                  (s) => s.sideRailWidth,
+                ),
+              ),
+          windowWidth: MediaQuery.sizeOf(context).width,
+        ),
         suppressMainToolbar: suppressMainToolbar,
       ),
     };
@@ -385,17 +400,26 @@ class _BrowserScaffoldTheme extends ConsumerWidget {
 
     final theme = Theme.of(context);
 
+    // The width a sheet may span here. Material's own default caps sheets at
+    // 640, and every route *outside* the browser already gets that; this
+    // override exists to defeat it so a sheet spans a phone edge to edge.
+    // Above compact width that is no longer what anyone wants, so the override
+    // stops at the same cap Material would have applied.
+    final safeAreaWidth =
+        MediaQuery.of(context).size.width -
+        math.max(
+          MediaQuery.of(context).padding.left * 2,
+          MediaQuery.of(context).padding.right * 2,
+        );
+    final sheetMaxWidth = math.min(
+      safeAreaWidth,
+      ref.watch(windowSizeClassControllerProvider).sheetMaxWidth,
+    );
+
     return Theme(
       data: theme.copyWith(
         bottomSheetTheme: theme.bottomSheetTheme.copyWith(
-          constraints: BoxConstraints(
-            maxWidth:
-                MediaQuery.of(context).size.width -
-                math.max(
-                  MediaQuery.of(context).padding.left * 2,
-                  MediaQuery.of(context).padding.right * 2,
-                ),
-          ),
+          constraints: BoxConstraints(maxWidth: sheetMaxWidth),
         ),
         snackBarTheme: theme.snackBarTheme.copyWith(
           behavior: SnackBarBehavior.floating,
@@ -671,6 +695,10 @@ class _SideRailToolbarLayer extends StatelessWidget {
   final bool sheetDisplayed;
   final bool tabInFullScreen;
   final TabBarPosition tabBarPosition;
+
+  /// Resolved by [BrowserScreen] so the rail is drawn at exactly the width the
+  /// browser content was inset for.
+  final double railWidth;
   final bool showContextualToolbar;
   final int quickTabSwitcherRowCount;
   final String? selectedTabId;
@@ -680,10 +708,19 @@ class _SideRailToolbarLayer extends StatelessWidget {
   /// main toolbar row only in the rail positions.
   final bool suppressMainToolbar;
 
+  /// Whether the rail shows its resize handle.
+  final bool resizable;
+
+  /// Whether the rail auto-hides over the page instead of sitting beside it.
+  final bool overlay;
+
   const _SideRailToolbarLayer({
     required this.sheetDisplayed,
     required this.tabInFullScreen,
     required this.tabBarPosition,
+    required this.railWidth,
+    required this.resizable,
+    required this.overlay,
     required this.showContextualToolbar,
     required this.quickTabSwitcherRowCount,
     required this.selectedTabId,
@@ -692,18 +729,130 @@ class _SideRailToolbarLayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rail = BrowserSideRail(
+      position: tabBarPosition,
+      showContextualToolbar: showContextualToolbar,
+      quickTabSwitcherRowCount: quickTabSwitcherRowCount,
+      isSmallWebMode: false,
+      railWidth: railWidth,
+      suppressMainToolbar: suppressMainToolbar,
+      resizable: resizable,
+    );
+
+    if (overlay) {
+      return _SideRailOverlayAnimator(
+        position: tabBarPosition,
+        selectedTabId: selectedTabId,
+        tabInFullScreen: tabInFullScreen,
+        child: rail,
+      );
+    }
+
     return _ToolbarVisibilityAnimator(
       position: tabBarPosition,
       selectedTabId: selectedTabId,
       sheetDisplayed: sheetDisplayed,
       tabInFullScreen: tabInFullScreen,
-      child: BrowserSideRail(
-        position: tabBarPosition,
-        showContextualToolbar: showContextualToolbar,
-        quickTabSwitcherRowCount: quickTabSwitcherRowCount,
-        isSmallWebMode: false,
-        suppressMainToolbar: suppressMainToolbar,
+      child: rail,
+    );
+  }
+}
+
+/// Slides an auto-hiding side rail in and out over the page.
+///
+/// Unlike [_ToolbarVisibilityAnimator] an open sheet does not force it into
+/// view: the sheet spans the page under it, and a panel the user did not ask
+/// for would cover part of the sheet.
+class _SideRailOverlayAnimator extends ConsumerWidget {
+  final TabBarPosition position;
+  final String? selectedTabId;
+  final bool tabInFullScreen;
+  final Widget child;
+
+  const _SideRailOverlayAnimator({
+    required this.position,
+    required this.selectedTabId,
+    required this.tabInFullScreen,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final revealed = ref.watch(sideRailRevealedProvider);
+    // A rail dismissed by swipe stays dismissed; the cursor does not override
+    // it.
+    final toolbarVisible =
+        ref.watch(toolbarVisibilityControllerProvider(selectedTabId)) ==
+        ToolbarVisibility.visible;
+
+    return _AnimatedToolbar(
+      position: position,
+      visible: revealed && toolbarVisible && !tabInFullScreen,
+      child: DecoratedBox(
+        decoration: BoxDecoration(boxShadow: kElevationToShadow[3]),
+        child: child,
       ),
+    );
+  }
+}
+
+/// Reveals the auto-hiding side rail when the cursor reaches its window edge,
+/// and hides it again once the cursor has rested on the page.
+///
+/// Hides on hovering the page rather than on leaving the rail. Anything the
+/// rail opens — a tab menu, a container menu — is drawn above this region, so
+/// while the cursor is over it the region hears nothing and the rail stays;
+/// leaving the rail by itself would collapse it under an open menu.
+///
+/// Translucent to hit testing: the web page under it still receives the
+/// cursor and the wheel, and the native pointer router still names the page as
+/// the target.
+class _SideRailRevealRegion extends HookConsumerWidget {
+  final bool railOnLeft;
+
+  /// How long the cursor rests on the page before the rail hides, so a cursor
+  /// that overshoots the panel edge does not collapse it.
+  static const _hideDelay = Duration(milliseconds: 400);
+
+  const _SideRailRevealRegion({required this.railOnLeft});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final hideTimer = useRef<Timer?>(null);
+
+    void cancelHide() {
+      hideTimer.value?.cancel();
+      hideTimer.value = null;
+    }
+
+    useEffect(() => cancelHide, const []);
+
+    return MouseRegion(
+      opaque: false,
+      hitTestBehavior: HitTestBehavior.translucent,
+      onHover: (event) {
+        final notifier = ref.read(sideRailRevealedProvider.notifier);
+
+        if (!ref.read(sideRailRevealedProvider)) {
+          final width = context.size?.width;
+          if (width != null &&
+              isAtSideRailEdge(
+                dx: event.localPosition.dx,
+                width: width,
+                railOnLeft: railOnLeft,
+              )) {
+            notifier.reveal();
+          }
+          return;
+        }
+
+        hideTimer.value ??= Timer(_hideDelay, () {
+          hideTimer.value = null;
+          notifier.hide();
+        });
+      },
+      // Over the rail, a menu, or out of the window: not resting on the page.
+      onExit: (_) => cancelHide(),
     );
   }
 }
@@ -1137,11 +1286,7 @@ class BrowserScreen extends HookConsumerWidget {
 
     final tabBarPosition = isSmallWebActive
         ? TabBarPosition.top
-        : ref.watch(
-            generalSettingsWithDefaultsProvider.select(
-              (value) => value.tabBarPosition,
-            ),
-          );
+        : ref.watch(effectiveTabBarPositionProvider);
 
     final showContextualToolbar =
         !isSmallWebActive &&
@@ -1158,6 +1303,41 @@ class BrowserScreen extends HookConsumerWidget {
     // Vertical side rail (left/right). Auto-hide is not supported on the rail;
     // it is reserved via a plain content offset and dismissed only by gesture.
     final isRail = tabBarPosition.isVertical;
+
+    // Resolved once here and threaded down, rather than read again inside the
+    // rail: this same number insets the browser content, and a rail drawn at a
+    // different width than the one reserved would either overlap the page or
+    // leave a gap beside it.
+    final window = ref.watch(windowSizeClassControllerProvider);
+    final hasTabList =
+        ref.watch(effectiveTabBarStackingModeProvider) !=
+        TabBarStackingMode.disabled;
+    final canResizeRail =
+        isRail && BrowserTabBar.canResizeRail(window, hasTabList: hasTabList);
+    final railWidth = BrowserTabBar.railWidthFor(
+      window,
+      hasTabList: hasTabList,
+      // A resize in progress wins over the saved width, so the panel and the
+      // page follow the handle while it moves.
+      preferredWidth:
+          ref.watch(sideRailDragWidthProvider) ??
+          ref.watch(
+            generalSettingsWithDefaultsProvider.select((s) => s.sideRailWidth),
+          ),
+      windowWidth: MediaQuery.sizeOf(context).width,
+    );
+
+    // The auto-hiding rail slides in over the page instead of sitting beside
+    // it, so the page keeps its full width and never reflows on reveal. Gated
+    // on the cursor being the input in use: only the cursor can reveal it, so
+    // the moment the user touches the screen the rail goes back beside the
+    // page, where touch can reach it.
+    final railOverlay =
+        isRail &&
+        ref.watch(
+          generalSettingsWithDefaultsProvider.select((s) => s.sideRailAutoHide),
+        ) &&
+        ref.watch(cursorInUseProvider);
 
     final autoHideTabBar =
         !isSmallWebActive &&
@@ -1261,11 +1441,7 @@ class BrowserScreen extends HookConsumerWidget {
     final suppressMainToolbarForHome = _suppressMainToolbarForHome(
       showBrowserHome: ref.watch(shouldShowBrowserHomeProvider),
       showContextualToolbar: showContextualToolbar,
-      placement: ref.watch(
-        generalSettingsWithDefaultsProvider.select(
-          (settings) => settings.effectiveHomeSearchBarPlacement(),
-        ),
-      ),
+      placement: ref.watch(effectiveHomeSearchBarPlacementProvider),
     );
 
     // Calculate bottom toolbar size for FAB and sheet positioning
@@ -1317,15 +1493,16 @@ class BrowserScreen extends HookConsumerWidget {
     final viewportBottomAppBarTotalHeight =
         viewportBottomAppBarContentSize.height + bottomSafeArea;
 
-    // Side rail width reservation (vertical positions only): the fixed content
-    // width plus the system safe-area inset on the rail's outer edge.
+    // Side rail width reservation (vertical positions only): the content width
+    // plus the system safe-area inset on the rail's outer edge. Nothing is
+    // reserved for a rail that overlays the page.
     final horizontalSafeArea = switch (tabBarPosition) {
       TabBarPosition.left => MediaQuery.of(context).padding.left,
       TabBarPosition.right => MediaQuery.of(context).padding.right,
       _ => 0.0,
     };
-    final sideRailTotalWidth = isRail
-        ? BrowserTabBar.sideRailWidth + horizontalSafeArea
+    final sideRailTotalWidth = isRail && !railOverlay
+        ? railWidth + horizontalSafeArea
         : 0.0;
     // Horizontal insets used to keep overlays (progress, find-in-page) clear of
     // the rail on its docked edge.
@@ -1544,7 +1721,7 @@ class BrowserScreen extends HookConsumerWidget {
       ],
     );
 
-    return PopScope(
+    final screen = PopScope(
       //We need this for BackButtonListener to work downstream
       //No direct pop result will be handled here
       canPop: false,
@@ -1591,6 +1768,16 @@ class BrowserScreen extends HookConsumerWidget {
                   child: BrowserSystemBars(
                     topInset: topSafeArea,
                     bottomInset: bottomSafeArea,
+                  ),
+                ),
+
+              // Layer 0.6: cursor tracking for the auto-hiding side rail. Below
+              // everything else Flutter draws, so it only hears the cursor
+              // while it is over the page itself.
+              if (railOverlay && !tabInFullScreen)
+                Positioned.fill(
+                  child: _SideRailRevealRegion(
+                    railOnLeft: tabBarPosition == TabBarPosition.left,
                   ),
                 ),
 
@@ -1658,6 +1845,9 @@ class BrowserScreen extends HookConsumerWidget {
                     sheetDisplayed: sheetDisplayed,
                     tabInFullScreen: tabInFullScreen,
                     tabBarPosition: tabBarPosition,
+                    railWidth: railWidth,
+                    resizable: canResizeRail,
+                    overlay: railOverlay,
                     showContextualToolbar: showContextualToolbar,
                     quickTabSwitcherRowCount: quickTabSwitcherRowCount,
                     selectedTabId: selectedTabId,
@@ -1723,6 +1913,8 @@ class BrowserScreen extends HookConsumerWidget {
         ),
       ),
     );
+
+    return BrowserKeyboardShortcutScope(child: screen);
   }
 }
 
@@ -1782,9 +1974,19 @@ class _SheetContainer extends HookConsumerWidget {
       return false;
     }
 
+    // This sheet is hosted in the browser's own Stack, not by a
+    // ModalBottomSheetRoute, so it never sees bottomSheetTheme.constraints and
+    // has to cap itself.
+    final sheetMaxWidth = ref
+        .watch(windowSizeClassControllerProvider)
+        .sheetMaxWidth;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final available = constraints.maxHeight;
+        final sheetWidth = math.min(constraints.maxWidth, sheetMaxWidth);
+        // Empty on a phone, where the sheet still spans the window.
+        final gutter = (constraints.maxWidth - sheetWidth) / 2;
 
         return Stack(
           children: [
@@ -1810,13 +2012,37 @@ class _SheetContainer extends HookConsumerWidget {
                         (available * (1.0 - extent) + _sheetCornerOverlap)
                             .clamp(0.0, available);
 
-                    return Align(
-                      alignment: Alignment.topCenter,
-                      child: SizedBox(
-                        height: scrimHeight,
-                        width: double.infinity,
-                        child: ColoredBox(color: modalBarrierColor),
-                      ),
+                    return Stack(
+                      children: [
+                        Align(
+                          alignment: Alignment.topCenter,
+                          child: SizedBox(
+                            height: scrimHeight,
+                            width: double.infinity,
+                            child: ColoredBox(color: modalBarrierColor),
+                          ),
+                        ),
+                        // Beside a width-capped sheet the page would otherwise
+                        // stay unscrimmed all the way down, reading as live
+                        // content next to a modal surface. Painted full height
+                        // because the sheet never reaches into the gutters.
+                        if (gutter > 0) ...[
+                          Positioned(
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            width: gutter,
+                            child: ColoredBox(color: modalBarrierColor),
+                          ),
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            bottom: 0,
+                            width: gutter,
+                            child: ColoredBox(color: modalBarrierColor),
+                          ),
+                        ],
+                      ],
                     );
                   },
                 ),
@@ -1828,9 +2054,12 @@ class _SheetContainer extends HookConsumerWidget {
             Positioned.fill(
               child: Align(
                 alignment: Alignment.bottomCenter,
-                child: NotificationListener<DraggableScrollableNotification>(
-                  onNotification: onSheetNotification,
-                  child: sheet,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: sheetWidth),
+                  child: NotificationListener<DraggableScrollableNotification>(
+                    onNotification: onSheetNotification,
+                    child: sheet,
+                  ),
                 ),
               ),
             ),

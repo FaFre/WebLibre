@@ -28,6 +28,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/extensions/uri.dart';
@@ -1165,6 +1166,7 @@ class BookmarkListScreen extends HookConsumerWidget {
 
       final progressDialog = showDialog<void>(
         context: context,
+        anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
         barrierDismissible: false,
         builder: (context) => ImportProgressDialog(progress: progress),
       );

@@ -21,6 +21,7 @@ import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/small_web/data/models/kagi_category.dart';
 import 'package:weblibre/features/small_web/data/models/kagi_small_web_mode.dart';
 import 'package:weblibre/features/small_web/data/models/small_web_source_kind.dart';
@@ -60,6 +61,7 @@ Future<void> openSmallWebMenuFlow(BuildContext context) async {
 Future<SmallWebSheetRequest?> showSmallWebMenuSheet(BuildContext context) {
   return showModalBottomSheet<SmallWebSheetRequest>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     isScrollControlled: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),

@@ -8,6 +8,7 @@ package eu.weblibre.flutter_mozilla_components.widget
 
 import android.content.Context
 import android.view.MotionEvent
+import android.view.PointerIcon
 import android.view.View
 import android.widget.FrameLayout
 import eu.weblibre.flutter_mozilla_components.pointer.PointerInputRouter
@@ -48,4 +49,17 @@ open class PointerInputFrameLayout(
 
     override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean =
         router.intercept(this, event) || super.dispatchGenericMotionEvent(event)
+
+    /**
+     * Answers for the shape of the cursor only while this surface holds it; see
+     * [PointerInputRouter.resolvesPointerIcon]. Null leaves the question to the
+     * Flutter view this surface is composited into, which is what the cursor is
+     * over when this surface does not hold it.
+     */
+    override fun onResolvePointerIcon(event: MotionEvent, pointerIndex: Int): PointerIcon? =
+        if (router.resolvesPointerIcon(this, event)) {
+            super.onResolvePointerIcon(event, pointerIndex)
+        } else {
+            null
+        }
 }

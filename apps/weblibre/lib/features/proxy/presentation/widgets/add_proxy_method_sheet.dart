@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/branding/proxy_brands.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/proxy/data/models/proxy_profile_seed.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_input_consumer.dart';
 import 'package:weblibre/features/qr_scanner/presentation/dialogs/qr_scanner_dialog.dart';
@@ -95,6 +96,7 @@ class AddProxyMethodSheet extends ConsumerWidget {
     Future<void> importFromFile() async {
       final kind = await showModalBottomSheet<ProxyFileImportKind>(
         context: context,
+        anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
         showDragHandle: true,
         builder: (_) => const _FileKindPicker(),
       );

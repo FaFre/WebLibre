@@ -83,6 +83,10 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings autoHideTabBar(bool autoHideTabBar);
 
+  GeneralSettings sideRailWidth(double sideRailWidth);
+
+  GeneralSettings sideRailAutoHide(bool sideRailAutoHide);
+
   GeneralSettings tabBarSwipeAction(TabBarSwipeAction tabBarSwipeAction);
 
   GeneralSettings sequentialTabNavigationCrossContainers(
@@ -97,7 +101,7 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings tabBarShowContextualBar(bool tabBarShowContextualBar);
 
-  GeneralSettings tabBarPosition(TabBarPosition tabBarPosition);
+  GeneralSettings tabBarPosition(TabBarPositionSetting tabBarPosition);
 
   GeneralSettings tabBarLayout(TabBarLayout tabBarLayout);
 
@@ -249,13 +253,15 @@ abstract class _$GeneralSettingsCWProxy {
     BookmarkOpenSetting bookmarkOpenSetting,
     BackgroundTabOpenAction backgroundTabOpenAction,
     bool autoHideTabBar,
+    double sideRailWidth,
+    bool sideRailAutoHide,
     TabBarSwipeAction tabBarSwipeAction,
     bool sequentialTabNavigationCrossContainers,
     bool sequentialTabNavigationLoop,
     Duration historyAutoCleanInterval,
     bool tabViewBottomSheet,
     bool tabBarShowContextualBar,
-    TabBarPosition tabBarPosition,
+    TabBarPositionSetting tabBarPosition,
     TabBarLayout tabBarLayout,
     TabBarStackingMode tabBarStackingMode,
     bool pullToRefreshEnabled,
@@ -448,6 +454,14 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(autoHideTabBar: autoHideTabBar);
 
   @override
+  GeneralSettings sideRailWidth(double sideRailWidth) =>
+      call(sideRailWidth: sideRailWidth);
+
+  @override
+  GeneralSettings sideRailAutoHide(bool sideRailAutoHide) =>
+      call(sideRailAutoHide: sideRailAutoHide);
+
+  @override
   GeneralSettings tabBarSwipeAction(TabBarSwipeAction tabBarSwipeAction) =>
       call(tabBarSwipeAction: tabBarSwipeAction);
 
@@ -477,7 +491,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(tabBarShowContextualBar: tabBarShowContextualBar);
 
   @override
-  GeneralSettings tabBarPosition(TabBarPosition tabBarPosition) =>
+  GeneralSettings tabBarPosition(TabBarPositionSetting tabBarPosition) =>
       call(tabBarPosition: tabBarPosition);
 
   @override
@@ -719,6 +733,8 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? bookmarkOpenSetting = const $CopyWithPlaceholder(),
     Object? backgroundTabOpenAction = const $CopyWithPlaceholder(),
     Object? autoHideTabBar = const $CopyWithPlaceholder(),
+    Object? sideRailWidth = const $CopyWithPlaceholder(),
+    Object? sideRailAutoHide = const $CopyWithPlaceholder(),
     Object? tabBarSwipeAction = const $CopyWithPlaceholder(),
     Object? sequentialTabNavigationCrossContainers =
         const $CopyWithPlaceholder(),
@@ -957,6 +973,17 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.autoHideTabBar
           // ignore: cast_nullable_to_non_nullable
           : autoHideTabBar as bool,
+      sideRailWidth:
+          sideRailWidth == const $CopyWithPlaceholder() || sideRailWidth == null
+          ? _value.sideRailWidth
+          // ignore: cast_nullable_to_non_nullable
+          : sideRailWidth as double,
+      sideRailAutoHide:
+          sideRailAutoHide == const $CopyWithPlaceholder() ||
+              sideRailAutoHide == null
+          ? _value.sideRailAutoHide
+          // ignore: cast_nullable_to_non_nullable
+          : sideRailAutoHide as bool,
       tabBarSwipeAction:
           tabBarSwipeAction == const $CopyWithPlaceholder() ||
               tabBarSwipeAction == null
@@ -999,7 +1026,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
               tabBarPosition == null
           ? _value.tabBarPosition
           // ignore: cast_nullable_to_non_nullable
-          : tabBarPosition as TabBarPosition,
+          : tabBarPosition as TabBarPositionSetting,
       tabBarLayout:
           tabBarLayout == const $CopyWithPlaceholder() || tabBarLayout == null
           ? _value.tabBarLayout
@@ -1325,6 +1352,7 @@ GeneralSettings _$GeneralSettingsFromJson(
   homeSearchBarPlacement: $enumDecodeNullable(
     _$HomeSearchBarPlacementEnumMap,
     json['homeSearchBarPlacement'],
+    unknownValue: HomeSearchBarPlacement.auto,
   ),
   homeWallpaperFile: json['homeWallpaperFile'] as String?,
   homeWallpaperBlur: (json['homeWallpaperBlur'] as num?)?.toDouble(),
@@ -1354,6 +1382,8 @@ GeneralSettings _$GeneralSettingsFromJson(
     json['backgroundTabOpenAction'],
   ),
   autoHideTabBar: json['autoHideTabBar'] as bool?,
+  sideRailWidth: (json['sideRailWidth'] as num?)?.toDouble(),
+  sideRailAutoHide: json['sideRailAutoHide'] as bool?,
   tabBarSwipeAction: $enumDecodeNullable(
     _$TabBarSwipeActionEnumMap,
     json['tabBarSwipeAction'],
@@ -1369,8 +1399,9 @@ GeneralSettings _$GeneralSettingsFromJson(
   tabViewBottomSheet: json['tabViewBottomSheet'] as bool?,
   tabBarShowContextualBar: json['tabBarShowContextualBar'] as bool?,
   tabBarPosition: $enumDecodeNullable(
-    _$TabBarPositionEnumMap,
+    _$TabBarPositionSettingEnumMap,
     json['tabBarPosition'],
+    unknownValue: TabBarPositionSetting.auto,
   ),
   tabBarLayout: $enumDecodeNullable(
     _$TabBarLayoutEnumMap,
@@ -1502,6 +1533,8 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'backgroundTabOpenAction':
       _$BackgroundTabOpenActionEnumMap[instance.backgroundTabOpenAction]!,
   'autoHideTabBar': instance.autoHideTabBar,
+  'sideRailWidth': instance.sideRailWidth,
+  'sideRailAutoHide': instance.sideRailAutoHide,
   'tabBarSwipeAction': _$TabBarSwipeActionEnumMap[instance.tabBarSwipeAction]!,
   'sequentialTabNavigationCrossContainers':
       instance.sequentialTabNavigationCrossContainers,
@@ -1509,7 +1542,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'historyAutoCleanInterval': instance.historyAutoCleanInterval.inMicroseconds,
   'tabViewBottomSheet': instance.tabViewBottomSheet,
   'tabBarShowContextualBar': instance.tabBarShowContextualBar,
-  'tabBarPosition': _$TabBarPositionEnumMap[instance.tabBarPosition]!,
+  'tabBarPosition': _$TabBarPositionSettingEnumMap[instance.tabBarPosition]!,
   'tabBarLayout': _$TabBarLayoutEnumMap[instance.tabBarLayout]!,
   'tabBarStackingMode':
       _$TabBarStackingModeEnumMap[instance.tabBarStackingMode]!,
@@ -1646,11 +1679,12 @@ const _$TabBarSwipeActionEnumMap = {
   TabBarSwipeAction.navigateOrderedTabs: 'navigateOrderedTabs',
 };
 
-const _$TabBarPositionEnumMap = {
-  TabBarPosition.top: 'top',
-  TabBarPosition.bottom: 'bottom',
-  TabBarPosition.left: 'left',
-  TabBarPosition.right: 'right',
+const _$TabBarPositionSettingEnumMap = {
+  TabBarPositionSetting.auto: 'auto',
+  TabBarPositionSetting.top: 'top',
+  TabBarPositionSetting.bottom: 'bottom',
+  TabBarPositionSetting.left: 'left',
+  TabBarPositionSetting.right: 'right',
 };
 
 const _$TabBarLayoutEnumMap = {

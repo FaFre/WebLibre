@@ -548,7 +548,8 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
             return false
         }
 
-        fragmentActivity.findViewById<View>(FRAGMENT_CONTAINER_ID) ?: return false
+        val container =
+            fragmentActivity.findViewById<View>(FRAGMENT_CONTAINER_ID) ?: return false
 
         val fm = fragmentActivity.supportFragmentManager
 
@@ -559,7 +560,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         val existingFragment = fm.findFragmentById(FRAGMENT_CONTAINER_ID)
         if (existingFragment is BrowserFragment) {
             // Check if fragment needs engine refresh instead of full replacement
-            if (!isFragmentCorrupted(existingFragment)) {
+            if (!isFragmentCorrupted(existingFragment, container)) {
                 return true
             }
         }
@@ -572,21 +573,23 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         return true
     }
 
-    private fun isFragmentCorrupted(fragment: BrowserFragment): Boolean {
+    private fun isFragmentCorrupted(fragment: BrowserFragment, container: View): Boolean {
         if (!fragment.isAdded || fragment.isDetached || fragment.isRemoving) {
             return true
         }
 
         val view = fragment.view ?: return true
-        if (view.visibility != View.VISIBLE || view.width == 0 || view.height == 0) {
+        if (view.visibility != View.VISIBLE || !view.isAttachedToWindow) {
             return true
         }
 
-        if (!view.isAttachedToWindow) {
-            return true
-        }
-
-        return false
+        return isCollapsedWithoutCause(
+            viewWidth = view.width,
+            viewHeight = view.height,
+            containerWidth = container.width,
+            containerHeight = container.height,
+            layoutPending = view.isLayoutRequested,
+        )
     }
 
     override fun onTrimMemory(level: Long) {
@@ -728,4 +731,26 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         isGeckoInitialized = false
     }
 
+}
+
+/**
+ * Whether a browser fragment's view is zero-sized for a reason that attaching
+ * again would fix.
+ *
+ * The view fills its container, so zero is only wrong when the container has
+ * room and no layout is on its way. A container that is itself 0x0 — a freeform
+ * window minimised, a platform view between layouts during a resize — gives the
+ * fragment nothing to fill, and treating that as corruption replaces the
+ * fragment and reloads the page for no gain.
+ */
+internal fun isCollapsedWithoutCause(
+    viewWidth: Int,
+    viewHeight: Int,
+    containerWidth: Int,
+    containerHeight: Int,
+    layoutPending: Boolean,
+): Boolean {
+    val viewCollapsed = viewWidth == 0 || viewHeight == 0
+    val containerHasRoom = containerWidth > 0 && containerHeight > 0
+    return viewCollapsed && containerHasRoom && !layoutPending
 }

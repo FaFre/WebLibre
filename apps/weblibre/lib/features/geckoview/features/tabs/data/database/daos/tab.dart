@@ -944,11 +944,16 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   }
 
   /// Moves [tabId] one sibling slot up (or down) within its parent scope,
-  /// carrying its whole subtree as an atomic block.
+  /// carrying its whole subtree as an atomic block. With [toEdge] it moves all
+  /// the way to the first (or last) slot instead.
   ///
   /// Returns `false` when the tab is unknown or already at the relevant
   /// end of its sibling list.
-  Future<bool> moveTabAmongSiblings(String tabId, {required bool down}) {
+  Future<bool> moveTabAmongSiblings(
+    String tabId, {
+    required bool down,
+    bool toEdge = false,
+  }) {
     // Transactional so the sibling-list read, subtree resolution, and the
     // anchor lookup all observe the same DB snapshot. `reorderTabs` opens
     // a nested savepoint internally, which is fine.
@@ -977,8 +982,13 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
       if (idx < 0) {
         return false;
       }
-      final newIdx = down ? idx + 1 : idx - 1;
-      if (newIdx < 0 || newIdx >= siblingIds.length) {
+      final newIdx = switch ((down, toEdge)) {
+        (true, false) => idx + 1,
+        (false, false) => idx - 1,
+        (true, true) => siblingIds.length - 1,
+        (false, true) => 0,
+      };
+      if (newIdx == idx || newIdx < 0 || newIdx >= siblingIds.length) {
         return false;
       }
 

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/account/data/repositories/account_sync_repository.dart';
 
 // -- Metadata display helpers ------------------------------------------------
@@ -68,6 +69,7 @@ Future<String?> showStoreLabelDialog(BuildContext context) {
 
   return showDialog<String?>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => AlertDialog(
       title: const Text('Store Snapshot'),
       content: TextField(
@@ -105,6 +107,7 @@ Future<String?> showEditLabelDialog(
 
   return showDialog<String?>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => AlertDialog(
       title: const Text('Edit Label'),
       content: TextField(
@@ -139,6 +142,7 @@ Future<bool?> showRestoreConfirmation(
 }) {
   return showDialog<bool>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => AlertDialog(
       title: const Text('Restore Snapshot'),
       content: Column(
@@ -186,6 +190,7 @@ Future<bool?> showDeleteConfirmation(
 
   return showDialog<bool>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => AlertDialog(
       title: const Text('Delete Snapshot'),
       content: Text('Are you sure you want to delete $label?'),

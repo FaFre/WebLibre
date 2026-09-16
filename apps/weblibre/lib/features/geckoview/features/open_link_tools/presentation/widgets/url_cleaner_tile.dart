@@ -21,6 +21,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/entities/url_cleaner_result.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_service.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/dialogs/tracking_details_dialog.dart';
@@ -99,6 +100,7 @@ class UrlCleanerTile extends StatelessWidget {
               unawaited(
                 showDialog(
                   context: context,
+                  anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
                   builder: (context) => TrackingDetailsDialog(
                     currentUrl: currentUrl,
                     result: result,

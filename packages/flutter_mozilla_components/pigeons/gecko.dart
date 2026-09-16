@@ -1748,7 +1748,11 @@ abstract class GeckoTabsApi {
 
   void removePrivateTabs();
 
-  void undo();
+  /// Restores the most recently closed tabs, if the engine still has them.
+  ///
+  /// Returns whether any tabs are being restored. When none are, the tab list
+  /// does not change at all.
+  bool undo();
 
   //restoreTabs invokes splitted
   void restoreTabsByList({

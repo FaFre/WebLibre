@@ -27,6 +27,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
@@ -522,6 +523,7 @@ Future<void> _showUnshortenerInfoDialog(BuildContext context) {
 
   return showDialog<void>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => AlertDialog(
       title: const Text('Unshortener Attribution'),
       content: SingleChildScrollView(

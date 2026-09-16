@@ -32,34 +32,62 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/accordion_expansion.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/accordion_drop.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_view_reorder.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_chip.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/container_menu.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_context_menu_draggable.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart'
+    as tab_data;
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chip_content.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/scroll_to_active_chip.dart';
 import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
+import 'package:weblibre/presentation/widgets/reorderable_hold_drag.dart';
+import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 /// Accordion stacking mode for the quick tab switcher bar: every available
-/// container renders as a header chip and the selected container is
-/// "expanded" — its tabs appear inline right after its header. Tapping
-/// another header selects that container, collapsing the previous group.
+/// container renders as a header, and an expanded group's tabs appear inline
+/// right after its header.
+///
+/// Tapping a header only expands or collapses its group; it never selects the
+/// container. Selecting one of the group's tabs does that, as it does
+/// everywhere. See [AccordionExpansion] for which groups are open: several at
+/// once on a wide side panel, one at a time in a single row or narrow rail.
 class AccordionQuickTabSwitcher extends HookConsumerWidget {
-  const AccordionQuickTabSwitcher({super.key, this.axis = Axis.horizontal});
+  const AccordionQuickTabSwitcher({
+    super.key,
+    this.axis = Axis.horizontal,
+    this.railWidth = BrowserTabBar.compactRailWidth,
+  });
 
   /// Direction the accordion flows. Vertical for the side rail.
   final Axis axis;
 
+  /// Width of the rail this accordion is rendered in, when [axis] is vertical.
+  ///
+  /// The accordion carries its own copy of the rail's width guards because it
+  /// is a separate widget from [QuickTabSwitcherView] with its own chip
+  /// layout; both have to widen together or accordion stacking would stay
+  /// icon-only inside a 256dp panel.
+  final double railWidth;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isVertical = axis == Axis.vertical;
+    final isWideRail = isVertical && BrowserTabBar.isWideRailWidth(railWidth);
     final scrollController = useScrollController();
     final activeChipKey = useRef(GlobalKey());
     final isUserScrolling = useRef(false);
@@ -74,8 +102,9 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
         (s) => s.quickTabSwitcherShowTitles,
       ),
     );
-    // Titles can't fit the narrow vertical rail; force icon-only chips there.
-    final showTitles = !isVertical && showTitlesSetting;
+    // Titles can't fit a *narrow* vertical rail; force icon-only chips there.
+    // A rail wide enough to be a tab panel has room for them.
+    final showTitles = (!isVertical || isWideRail) && showTitlesSetting;
     final showIsolatedTabUi = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.showIsolatedTabUi),
     );
@@ -110,9 +139,11 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
       ).select((value) => value.value ?? 0),
     );
 
-    final expandedTabStates = ref.watch(
-      selectedContainerTabStatesWithContainerProvider,
-    );
+    // A side panel has the height to show several groups open at once; a
+    // single row or a narrow rail does not.
+    final expandedIds = ref
+        .watch(accordionExpansionControllerProvider)
+        .displayed(multiple: isWideRail);
     final pinnedTabIds = ref.watch(
       watchPinnedTabIdsProvider.select(
         (value) => value.value ?? const <String>{},
@@ -128,36 +159,56 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
           ),
         )
         .value;
-    final tabDepthById = ref
-        .watch(
-          groupedTabListItemsProvider(
-            containerId: selectedContainerId,
-            scope: TabListScope.presentation,
-          ).select((value) {
-            return EquatableValue(<String, int>{
-              if (hierarchyGlyphs > 0)
-                for (final item in value.value)
-                  if (item is TabListChildItem) item.tabId: item.depth,
-            });
-          }),
-        )
-        .value;
 
-    final expandedItems = expandedTabStates.value
-        .map(
-          (state) => QuickTabSwitcherItem.tab(
-            state,
-            selectedTabId: selectedTabId,
-            pinnedTabIds: pinnedTabIds,
-            tabDepthById: tabDepthById,
-            sandboxSourceUri: parseSandboxSource(
-              sandboxCaptureMap[state.$1.id],
+    // A filter or search in the tab view makes the order a drop lands in
+    // ambiguous, and tabs still restoring are unknown to the engine, so either
+    // switches dragging off.
+    final canManualReorder = ref.watch(canManualTabReorderProvider);
+    final canReorder = canManualReorder && restoreComplete;
+    final tabBarDirection = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.tabBarDirection),
+    );
+    final sortPinnedFirst = ref.watch(
+      tabViewFilterControllerProvider.select((v) => v.sortPinnedFirst),
+    );
+
+    /// The tabs of an expanded group. Only called for groups shown open, so
+    /// collapsed containers subscribe to nothing.
+    List<QuickTabSwitcherItem> itemsFor(String? containerId) {
+      final tabStates = ref.watch(
+        containerTabStatesWithContainerProvider(containerId),
+      );
+      final tabDepthById = ref
+          .watch(
+            groupedTabListItemsProvider(
+              containerId: containerId,
+              scope: TabListScope.presentation,
+            ).select((value) {
+              return EquatableValue(<String, int>{
+                if (hierarchyGlyphs > 0)
+                  for (final item in value.value)
+                    if (item is TabListChildItem) item.tabId: item.depth,
+              });
+            }),
+          )
+          .value;
+
+      return tabStates.value
+          .map(
+            (state) => QuickTabSwitcherItem.tab(
+              state,
+              selectedTabId: selectedTabId,
+              pinnedTabIds: pinnedTabIds,
+              tabDepthById: tabDepthById,
+              sandboxSourceUri: parseSandboxSource(
+                sandboxCaptureMap[state.$1.id],
+              ),
+              isPlaceholder:
+                  !restoreComplete && !nativeTabIds.contains(state.$1.id),
             ),
-            isPlaceholder:
-                !restoreComplete && !nativeTabIds.contains(state.$1.id),
-          ),
-        )
-        .toList();
+          )
+          .toList();
+    }
 
     final decoration = buildQuickTabSwitcherChipDecoration(
       context,
@@ -170,27 +221,45 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
       thickContainerSelectedBorder: true,
     );
 
-    Future<void> selectContainer(String? containerId) async {
-      if (containerId != null) {
-        await ref
-            .read(selectedContainerProvider.notifier)
-            .setContainerId(containerId);
-      } else {
-        ref.read(selectedContainerProvider.notifier).clearContainer();
-      }
+    void toggleGroup(String? containerId) {
+      ref
+          .read(accordionExpansionControllerProvider.notifier)
+          .toggle(containerId, multiple: isWideRail);
     }
 
-    Widget buildTabChip(QuickTabSwitcherItem item) {
+    Widget buildTabContent(QuickTabSwitcherItem item) {
       final isSelected = item.isActive;
       // The narrow rail can't fit a close button beside the icon-only chip; it
       // overflows (and the active tab's thick border makes it worse). Closing
-      // stays available via the long-press menu.
+      // stays available via the long-press menu. A wide rail has the room.
       final canClose =
-          !isVertical &&
+          (!isVertical || isWideRail) &&
           !item.isPlaceholder &&
           closeButtonMode.showsFor(isActive: item.isActive);
 
-      final chip = QuickTabSwitcherChip(
+      if (isWideRail) {
+        return QuickTabSwitcherRow(
+          item: item,
+          isSelected: isSelected,
+          showIsolatedTabUi: showIsolatedTabUi,
+          showTitles: showTitles,
+          hierarchyGlyphs: hierarchyGlyphs,
+          onTap: () {
+            if (!item.isActive) {
+              unawaited(
+                ref.read(tabRepositoryProvider.notifier).selectTab(item.id),
+              );
+            }
+          },
+          onDelete: canClose
+              ? () => unawaited(
+                  closeTabWithConfirmationAndUndo(context, ref, item.id),
+                )
+              : null,
+        );
+      }
+
+      return QuickTabSwitcherChip(
         item: item,
         isSelected: isSelected,
         selectedBorderColor: Theme.of(context).colorScheme.primary,
@@ -218,35 +287,69 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
             ? () => closeTabWithConfirmationAndUndo(context, ref, item.id)
             : null,
       );
+    }
 
-      return wrapQuickTabSwitcherChipWithMenu(
+    Widget buildTabEntry(QuickTabSwitcherItem item, int index) {
+      final content = buildTabContent(item);
+
+      // Not backed by an engine session yet: no menu and nothing to move.
+      if (item.isPlaceholder) return content;
+
+      if (canReorder) {
+        // Long press opens the menu, long press and move picks the tab up —
+        // the same contract as the tab list and the container tabs row.
+        return ReorderableHoldDragListener(
+          index: index,
+          child: TabContextMenuDraggable(
+            tabId: item.id,
+            feedbackSize: Size.zero,
+            externalDrag: true,
+            enableCloseTab: true,
+            child: content,
+          ),
+        );
+      }
+
+      // Without a drag recognizer the long press has to claim the gesture
+      // itself, or the tab would also be selected when the finger lifts off the
+      // menu it just opened.
+      final withMenu = wrapQuickTabSwitcherChipWithMenu(
         itemId: item.id,
-        enabled: !item.isPlaceholder,
+        enabled: true,
         enablePinTab: true,
-        child: chip,
+        child: content,
       );
+      return canManualReorder
+          ? withMenu
+          : HoldDragDisabledHint(
+              message: tabReorderBlockedMessage,
+              child: withMenu,
+            );
     }
 
     final showUnassignedGroup =
-        unassignedTabCount > 0 || selectedContainerId == null;
+        unassignedTabCount > 0 ||
+        selectedContainerId == null ||
+        expandedIds.contains(null);
 
     final entries = <_AccordionEntry>[
-      if (showUnassignedGroup)
+      if (showUnassignedGroup) ...[
         _AccordionEntry.header(
           container: null,
           tabCount: unassignedTabCount,
-          isExpanded: selectedContainerId == null,
+          isExpanded: expandedIds.contains(null),
         ),
-      if (selectedContainerId == null)
-        ...expandedItems.map(_AccordionEntry.tab),
+        if (expandedIds.contains(null))
+          ...itemsFor(null).map(_AccordionEntry.tab),
+      ],
       for (final container in containers) ...[
         _AccordionEntry.header(
           container: container,
           tabCount: container.tabCount ?? 0,
-          isExpanded: container.id == selectedContainerId,
+          isExpanded: expandedIds.contains(container.id),
         ),
-        if (container.id == selectedContainerId)
-          ...expandedItems.map(_AccordionEntry.tab),
+        if (expandedIds.contains(container.id))
+          ...itemsFor(container.id).map(_AccordionEntry.tab),
       ],
     ];
 
@@ -272,25 +375,26 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
         },
     ];
 
-    // The expanded group's tray is filled with the container's color so the
+    // Each expanded group's tray is filled with its container's color so the
     // whole group reads as "this container". The unassigned group has no color
-    // and falls back to a neutral surface.
-    ContainerDataWithCount? expandedContainer;
-    for (final container in containers) {
-      if (container.id == selectedContainerId) {
-        expandedContainer = container;
-        break;
-      }
-    }
+    // and falls back to a neutral surface. Several groups can be open, so the
+    // fill is worked out per entry from the header it belongs to.
     final scheme = Theme.of(context).colorScheme;
-    final trayPalette = expandedContainer != null
-        ? ContainerColors.palette(
-            context,
-            expandedContainer.color,
-            useCustomColor: expandedContainer.metadata.useCustomColor,
-          )
-        : null;
-    final trayFill = trayPalette?.containerColor ?? scheme.surfaceContainerHigh;
+    final trayFills = <Color>[];
+    var groupFill = scheme.surfaceContainerHigh;
+    for (final entry in entries) {
+      if (entry is _AccordionHeaderEntry) {
+        final container = entry.container;
+        groupFill = container != null
+            ? ContainerColors.palette(
+                context,
+                container.color,
+                useCustomColor: container.metadata.useCustomColor,
+              ).containerColor
+            : scheme.surfaceContainerHigh;
+      }
+      trayFills.add(groupFill);
+    }
 
     // The chip to keep centered: the active tab when it is part of the
     // expanded group, otherwise the expanded container header as a fallback.
@@ -305,6 +409,102 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
     }
     final activeEntryId = hasActiveTab ? activeTabEntryId : expandedHeaderId;
 
+    // The entry list only implies each tab's group by position; a drop needs it
+    // spelled out.
+    final slots = <AccordionSlot>[];
+    String? slotGroup;
+    for (final entry in entries) {
+      switch (entry) {
+        case _AccordionHeaderEntry(:final container):
+          slotGroup = container?.id;
+          slots.add(AccordionHeaderSlot(slotGroup));
+        case _AccordionTabEntry(:final item):
+          slots.add(AccordionTabSlot(item.id, containerId: slotGroup));
+      }
+    }
+
+    // Read up front: a drop rebuilds this widget, and moving a tab into another
+    // container can unmount the entry it was dragged from before the awaits
+    // below return.
+    final tabData = ref.read(tab_data.tabDataRepositoryProvider.notifier);
+
+    void showCannotMove() {
+      if (context.mounted) {
+        ui_helper.showInfoMessage(context, 'Tab cannot be moved here');
+      }
+    }
+
+    Future<void> reorderWithin(List<String> tabIds, int from, int to) async {
+      final result = buildTabViewReorderResult(
+        visibleItems: [
+          for (final tabId in tabIds) TabViewItem.standalone(tabId: tabId),
+        ],
+        treeRows: const [],
+        collapsedGroups: const {},
+        pinnedTabIds: pinnedTabIds,
+        oldIndex: from,
+        newIndex: to,
+        tabListDirection: tabBarDirection,
+        hierarchical: false,
+        sortPinnedFirst: sortPinnedFirst,
+      );
+      if (result == null) {
+        showCannotMove();
+        return;
+      }
+
+      await tabData.reorderTabs(
+        movingTabIds: result.movingTabIds,
+        previousTabId: result.previousTabId,
+        nextTabId: result.nextTabId,
+        parentChange: result.parentChange,
+      );
+    }
+
+    Future<void> handleDrop(int oldIndex, int newIndex) async {
+      switch (resolveAccordionDrop(
+        slots,
+        oldIndex: oldIndex,
+        newIndex: newIndex,
+      )) {
+        case null:
+          showCannotMove();
+
+        case final AccordionReorderDrop drop:
+          if (drop.isNoop) return;
+          await reorderWithin(drop.groupTabIds, drop.oldIndex, drop.newIndex);
+
+        case final AccordionMoveDrop drop:
+          final targetId = drop.targetContainerId;
+          if (targetId == null) {
+            await tabData.unassignContainer(drop.tabId);
+          } else {
+            ContainerDataWithCount? target;
+            for (final container in containers) {
+              if (container.id == targetId) {
+                target = container;
+                break;
+              }
+            }
+            if (target == null) return;
+            await tabData.assignContainer(drop.tabId, target);
+          }
+
+          // A move that keeps the Gecko context keeps the tab, and it can be
+          // put where it was dropped. One that changes the context replaces
+          // the tab with a new one, placed by the repository; the old row then
+          // still names the old container, and there is nothing to position.
+          final moved = await tabData.getTabDataById(drop.tabId);
+          if (moved?.containerId != targetId) return;
+
+          await reorderWithin(
+            [...drop.groupTabIds, drop.tabId],
+            drop.groupTabIds.length,
+            drop.index,
+          );
+      }
+    }
+
     // Keep the active chip (or expanded header fallback) centered when the
     // selection or ordering changes, unless the user is scrolling themselves.
     useScrollToActiveChip<String>(
@@ -316,10 +516,10 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
     );
 
     if (entries.isEmpty) {
-      // Hold the 48px slot; the bar visibility is decided upstream by
+      // Hold the slot; the bar visibility is decided upstream by
       // quickTabSwitcherRowCountProvider.
       return isVertical
-          ? const SizedBox(width: 48)
+          ? SizedBox(width: railWidth)
           : const SizedBox(height: 48);
     }
 
@@ -338,17 +538,22 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
             : const EdgeInsets.symmetric(horizontal: 4.0),
         child: SizedBox(
           height: isVertical ? double.maxFinite : 48,
-          width: isVertical ? 48 : double.maxFinite,
+          width: isVertical ? railWidth : double.maxFinite,
           child: FadingScroll(
             controller: scrollController,
             fadingSize: 15,
             builder: (context, controller) {
-              return ListView.builder(
+              return ReorderableListView.builder(
                 key: const PageStorageKey('quick_tab_switcher_accordion'),
-                controller: controller,
+                scrollController: controller,
                 scrollDirection: axis,
+                // Tabs carry their own hold-to-drag listener; headers carry
+                // none, so they stay put while tabs move past them.
+                buildDefaultDragHandles: false,
                 scrollCacheExtent: const ScrollCacheExtent.pixels(500),
                 itemCount: entries.length,
+                onReorderItem: (oldIndex, newIndex) =>
+                    unawaited(handleDrop(oldIndex, newIndex)),
                 itemBuilder: (context, index) {
                   final entry = entries[index];
                   final child = switch (entry) {
@@ -368,8 +573,10 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
                         entry: entry,
                         // The narrow rail can't fit the container title;
                         // show the container icon avatar + count badge only.
-                        showTitle: !isVertical,
-                        onSelected: () => selectContainer(entry.container?.id),
+                        // A wide rail can.
+                        showTitle: !isVertical || isWideRail,
+                        fullWidth: isWideRail,
+                        onSelected: () => toggleGroup(entry.container?.id),
                         onLongPress: () {
                           if (controller.isOpen) {
                             controller.close();
@@ -379,19 +586,27 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
                         },
                       ),
                     ),
-                    _AccordionTabEntry(:final item) => buildTabChip(item),
+                    _AccordionTabEntry(:final item) => buildTabEntry(
+                      item,
+                      index,
+                    ),
                   };
 
+                  final slice = _TraySlice(
+                    position: trayPositions[index],
+                    fill: trayFills[index],
+                    axis: axis,
+                    fullWidth: isWideRail,
+                    child: child,
+                  );
+
+                  // A reorderable list needs a stable key on the item itself,
+                  // so the active entry's scroll-to key goes one level down.
                   return KeyedSubtree(
-                    key: entry.id == activeEntryId
-                        ? activeChipKey.value
-                        : ValueKey(entry.id),
-                    child: _TraySlice(
-                      position: trayPositions[index],
-                      fill: trayFill,
-                      axis: axis,
-                      child: child,
-                    ),
+                    key: ValueKey(entry.id),
+                    child: entry.id == activeEntryId
+                        ? KeyedSubtree(key: activeChipKey.value, child: slice)
+                        : slice,
                   );
                 },
               );
@@ -458,11 +673,15 @@ class _AccordionHeaderChip extends StatelessWidget {
   /// and only the icon avatar + count badge are shown, so the chip fits.
   final bool showTitle;
 
+  /// Renders a full-width row for a side panel instead of a chip.
+  final bool fullWidth;
+
   const _AccordionHeaderChip({
     required this.entry,
     required this.onSelected,
     this.onLongPress,
     this.showTitle = true,
+    this.fullWidth = false,
   });
 
   @override
@@ -524,6 +743,64 @@ class _AccordionHeaderChip extends StatelessWidget {
         onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(8.0),
         child: chip,
+      );
+    }
+
+    if (fullWidth) {
+      return Material(
+        color: fill,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onSelected,
+          onLongPress: onLongPress,
+          child: SizedBox(
+            height: 44.0,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: Row(
+                children: [
+                  if (iconAvatar != null) ...[
+                    iconAvatar,
+                    const SizedBox(width: 12.0),
+                  ],
+                  Expanded(
+                    child: container != null
+                        ? Align(
+                            alignment: AlignmentDirectional.centerStart,
+                            child: buildContainerChipLabel(
+                              context,
+                              container,
+                              true,
+                              trailing: countBadge,
+                            ),
+                          )
+                        : Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  'Unassigned',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(color: nullForeground),
+                                ),
+                              ),
+                              if (countBadge != null) ...[
+                                const SizedBox(width: 6.0),
+                                countBadge,
+                              ],
+                            ],
+                          ),
+                  ),
+                  Icon(
+                    entry.isExpanded ? Icons.expand_less : Icons.expand_more,
+                    color: nullForeground,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       );
     }
 
@@ -611,11 +888,15 @@ class _TraySlice extends StatelessWidget {
   final Widget child;
   final Axis axis;
 
+  /// Spans the side panel's width instead of hugging a 44dp chip column.
+  final bool fullWidth;
+
   const _TraySlice({
     required this.position,
     required this.fill,
     required this.child,
     this.axis = Axis.horizontal,
+    this.fullWidth = false,
   });
 
   /// Corner radius of the chips, matched by the tray so it hugs the first and
@@ -625,6 +906,43 @@ class _TraySlice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isVertical = axis == Axis.vertical;
+
+    if (isVertical && fullWidth) {
+      // The panel's inset, shared with the toolbar-and-address block above the
+      // list so the two line up; see [BrowserTabBar.panelInset].
+      const inset = BrowserTabBar.panelInset;
+
+      if (position == _TrayPosition.none) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(inset, 0.0, inset, 4.0),
+          child: child,
+        );
+      }
+
+      final isTrailingEdge =
+          position == _TrayPosition.end || position == _TrayPosition.solo;
+      return Padding(
+        padding: EdgeInsets.fromLTRB(
+          inset,
+          0.0,
+          inset,
+          isTrailingEdge ? 4.0 : 0.0,
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: fill,
+            borderRadius: switch (position) {
+              _TrayPosition.solo => const BorderRadius.all(_radius),
+              _TrayPosition.start => const BorderRadius.vertical(top: _radius),
+              _TrayPosition.end => const BorderRadius.vertical(bottom: _radius),
+              _TrayPosition.middle || _TrayPosition.none => BorderRadius.zero,
+            },
+          ),
+          padding: EdgeInsets.only(bottom: isTrailingEdge ? 4.0 : 0.0),
+          child: child,
+        ),
+      );
+    }
 
     if (position == _TrayPosition.none) {
       // Standalone container header: regular inter-chip spacing, centered

@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:json_annotation/json_annotation.dart';
+import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
+import 'package:weblibre/features/keyboard_shortcuts/data/models/keyboard_shortcut_settings.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/models/tor_settings.dart';
@@ -29,8 +31,16 @@ class SettingsSyncPayload {
   final GeneralSettings? general;
   final EngineSettings? engine;
   final TorSettings? tor;
+  final GestureSettings? gestures;
+  final KeyboardShortcutSettings? keyboardShortcuts;
 
-  SettingsSyncPayload({this.general, this.engine, this.tor});
+  SettingsSyncPayload({
+    this.general,
+    this.engine,
+    this.tor,
+    this.gestures,
+    this.keyboardShortcuts,
+  });
 
   factory SettingsSyncPayload.fromJson(Map<String, dynamic> json) =>
       _$SettingsSyncPayloadFromJson(json);

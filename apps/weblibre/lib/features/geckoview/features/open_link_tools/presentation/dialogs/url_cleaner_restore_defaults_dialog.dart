@@ -18,10 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:weblibre/core/design/display_features.dart';
 
 Future<bool?> showUrlCleanerRestoreDefaultsDialog(BuildContext context) {
   return showDialog<bool>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => AlertDialog(
       title: const Text('Restore defaults?'),
       content: const Text(

@@ -33,6 +33,7 @@ import 'package:nullability/nullability.dart';
 import 'package:path/path.dart' as p;
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/delete_data.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/entities/history_entry.dart';
@@ -270,6 +271,7 @@ class HistoryScreen extends HookConsumerWidget {
     Future<void> clearContainerHistory(ContainerData container) async {
       final confirmed = await showDialog<bool>(
         context: context,
+        anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
         builder: (context) => AlertDialog(
           icon: const Icon(Icons.warning),
           title: const Text('Clear Container History'),

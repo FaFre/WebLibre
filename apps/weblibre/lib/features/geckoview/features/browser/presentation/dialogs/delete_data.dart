@@ -22,6 +22,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 
@@ -32,6 +33,7 @@ Future<void> showDeleteDataDialog(
 }) {
   return showModalBottomSheet(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     isScrollControlled: true,
     builder: (context) => _DeleteDataSheet(initialSettings: initialSettings),
   );

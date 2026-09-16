@@ -22,6 +22,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
@@ -265,6 +266,7 @@ Future<CustomDohProvider?> _promptForResolver(
 }) {
   return showDialog<CustomDohProvider>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) =>
         _CustomResolverDialog(existing: existing, initial: initial),
   );

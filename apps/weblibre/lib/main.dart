@@ -44,6 +44,7 @@ import 'package:logger/logger.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/design/app_colors.dart';
+import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/core/error_observer.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/logger.dart';
@@ -638,6 +639,12 @@ class _MainWidget extends HookConsumerWidget {
                 : null,
             dialogTheme: DialogThemeData(
               barrierColor: showModalBarrier ? null : Colors.transparent,
+              // Material specifies a maximum dialog width but Flutter does not
+              // apply one, so a dialog with long content stretches to fill a
+              // tablet or desktop window. Unconditional because it cannot bind
+              // on a phone: the dialog's own inset padding already leaves less
+              // than this.
+              constraints: const BoxConstraints(maxWidth: ContentWidth.dialog),
             ),
             bottomSheetTheme: BottomSheetThemeData(
               modalBarrierColor: showModalBarrier ? null : Colors.transparent,
@@ -652,6 +659,12 @@ class _MainWidget extends HookConsumerWidget {
                 : null,
             dialogTheme: DialogThemeData(
               barrierColor: showModalBarrier ? null : Colors.transparent,
+              // Material specifies a maximum dialog width but Flutter does not
+              // apply one, so a dialog with long content stretches to fill a
+              // tablet or desktop window. Unconditional because it cannot bind
+              // on a phone: the dialog's own inset padding already leaves less
+              // than this.
+              constraints: const BoxConstraints(maxWidth: ContentWidth.dialog),
             ),
             bottomSheetTheme: BottomSheetThemeData(
               modalBarrierColor: showModalBarrier ? null : Colors.transparent,

@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:nullability/nullability.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/utils/clipboard.dart';
 
@@ -293,6 +294,7 @@ Future<bool> confirmIsolatedTabClose(
 
   final result = await showDialog<bool>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => AlertDialog(
       title: const Text('Close isolated tabs?'),
       content: Text(message),

@@ -19,10 +19,12 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:weblibre/core/design/display_features.dart';
 
 Future<bool?> showEnableAiTabSuggestionsDialog(BuildContext context) {
   return showDialog<bool?>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (BuildContext context) {
       return AlertDialog(
         icon: const Icon(MdiIcons.download),

@@ -24,6 +24,8 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:secure_archive/secure_archive.dart';
 import 'package:weblibre/core/copy/profile_copy.dart';
+import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/maintenance/maintenance_journal_store.dart';
 import 'package:weblibre/core/maintenance/maintenance_lease.dart';
@@ -463,7 +465,7 @@ class StartupMaintenanceScreen extends HookWidget {
 
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 520),
+        constraints: const BoxConstraints(maxWidth: ContentWidth.form),
         child: SingleChildScrollView(
           // Room for the keyboard: the password field sits low on the screen and
           // this used to be a centered column that simply overflowed.
@@ -802,6 +804,7 @@ class _UnresolvedEvidencePanel extends StatelessWidget {
 /// those against each other — so they are told exactly what is unknown.
 Future<bool?> _confirmDiscardEvidence(BuildContext context) => showDialog<bool>(
   context: context,
+  anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
   builder: (context) => AlertDialog(
     icon: const Icon(Icons.report_problem_outlined),
     title: const Text('Discard the interrupted record?'),

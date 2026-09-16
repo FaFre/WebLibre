@@ -21,6 +21,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/font_size_constants.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
@@ -29,6 +30,7 @@ import 'package:weblibre/features/user/domain/repositories/engine_settings.dart'
 Future<void> showFontSizeBottomSheet(BuildContext context) {
   return showModalBottomSheet(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),

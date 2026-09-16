@@ -52,6 +52,7 @@ class QuickSwitcherButtonRow extends HookConsumerWidget {
     required this.selectedTabId,
     required this.displayedSheet,
     this.axis = Axis.horizontal,
+    this.wrap = false,
   });
 
   final String? selectedTabId;
@@ -59,6 +60,10 @@ class QuickSwitcherButtonRow extends HookConsumerWidget {
 
   /// Layout direction of the switcher bar; vertical for the side rail.
   final Axis axis;
+
+  /// Lays the buttons out in wrapping rows instead of a scrolling strip, for
+  /// a side panel wide enough to show them all.
+  final bool wrap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -100,6 +105,18 @@ class QuickSwitcherButtonRow extends HookConsumerWidget {
     final buttons = resolvedButtons
         .map((button) => _buildButton(scope, context, ref, button))
         .toList();
+
+    if (wrap) {
+      return Wrap(
+        children: [
+          for (final button in buttons)
+            SizedBox.square(
+              dimension: _switcherExtent,
+              child: FittedBox(fit: BoxFit.scaleDown, child: button),
+            ),
+        ],
+      );
+    }
 
     // Bound each button to the bar's cross-axis extent and scale down (never
     // clip) so a taller [ToolbarButton] can't overflow the switcher bar.

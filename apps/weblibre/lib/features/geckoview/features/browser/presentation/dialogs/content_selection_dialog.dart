@@ -19,6 +19,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 
 /// Dialog to select between extracted or full content for sharing.
@@ -32,6 +33,7 @@ Future<void> showContentSelectionDialog(
 }) async {
   await showDialog(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => SimpleDialog(
       title: title,
       children: [

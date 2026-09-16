@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:weblibre/core/design/display_features.dart';
 
 class ClearContainerDataResult {
   final bool confirmed;
@@ -37,6 +38,7 @@ Future<ClearContainerDataResult?> showClearContainerDataDialog(
 ) {
   return showDialog<ClearContainerDataResult?>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (BuildContext context) {
       return _ClearContainerDataDialog(tabCount: tabCount);
     },

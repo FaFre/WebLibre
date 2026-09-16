@@ -23,6 +23,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/web_push/domain/providers.dart';
 import 'package:weblibre/utils/ui_helper.dart';
@@ -223,6 +224,7 @@ class _DistributorTile extends HookConsumerWidget {
 
     final selected = await showDialog<PushDistributor>(
       context: context,
+      anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
       builder: (context) => SimpleDialog(
         title: const Text('Choose distributor'),
         children: [

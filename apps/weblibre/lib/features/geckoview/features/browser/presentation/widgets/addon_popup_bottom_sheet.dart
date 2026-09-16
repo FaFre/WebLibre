@@ -24,8 +24,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
 import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
+import 'package:weblibre/presentation/widgets/web_content_keyboard.dart';
 
 const _viewType = 'eu.weblibre/addon_popup';
 
@@ -36,6 +38,7 @@ Future<void> showAddonPopupBottomSheet(
 }) {
   return showModalBottomSheet<void>(
     context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     isScrollControlled: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -83,28 +86,30 @@ class _AddonPopupPlatformView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PlatformViewLink(
-      viewType: _viewType,
-      surfaceFactory: (context, controller) => PointerInputSurface(
-        controller: controller,
-        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{
-          Factory<EagerGestureRecognizer>(EagerGestureRecognizer.new),
+    return WebContentKeyPassthrough(
+      child: PlatformViewLink(
+        viewType: _viewType,
+        surfaceFactory: (context, controller) => PointerInputSurface(
+          controller: controller,
+          gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{
+            Factory<EagerGestureRecognizer>(EagerGestureRecognizer.new),
+          },
+        ),
+        onCreatePlatformView: (params) {
+          final controller = PlatformViewsService.initExpensiveAndroidView(
+            id: params.id,
+            viewType: _viewType,
+            layoutDirection: TextDirection.ltr,
+            creationParams: <String, Object?>{'extensionId': extensionId},
+            creationParamsCodec: const StandardMessageCodec(),
+          );
+          controller.addOnPlatformViewCreatedListener(
+            params.onPlatformViewCreated,
+          );
+          unawaited(controller.create());
+          return controller;
         },
       ),
-      onCreatePlatformView: (params) {
-        final controller = PlatformViewsService.initExpensiveAndroidView(
-          id: params.id,
-          viewType: _viewType,
-          layoutDirection: TextDirection.ltr,
-          creationParams: <String, Object?>{'extensionId': extensionId},
-          creationParamsCodec: const StandardMessageCodec(),
-        );
-        controller.addOnPlatformViewCreatedListener(
-          params.onPlatformViewCreated,
-        );
-        unawaited(controller.create());
-        return controller;
-      },
     );
   }
 }

@@ -12,7 +12,7 @@ part of 'gesture_control.dart';
 ///
 /// On build it (1) keeps the native recognizer's [GestureConfig] in sync with
 /// the user's [GestureSettings], and (2) subscribes to recognized gestures and
-/// dispatches the bound [GestureAction] against the currently selected tab.
+/// hands the bound [BrowserAction] to [BrowserActionDispatcher].
 ///
 /// Must be kept alive (eagerly listened to from the browser view) for the
 /// lifetime of the browser so the subscription stays active.
@@ -24,7 +24,7 @@ final gestureControlServiceProvider = GestureControlServiceProvider._();
 ///
 /// On build it (1) keeps the native recognizer's [GestureConfig] in sync with
 /// the user's [GestureSettings], and (2) subscribes to recognized gestures and
-/// dispatches the bound [GestureAction] against the currently selected tab.
+/// hands the bound [BrowserAction] to [BrowserActionDispatcher].
 ///
 /// Must be kept alive (eagerly listened to from the browser view) for the
 /// lifetime of the browser so the subscription stays active.
@@ -34,7 +34,7 @@ final class GestureControlServiceProvider
   ///
   /// On build it (1) keeps the native recognizer's [GestureConfig] in sync with
   /// the user's [GestureSettings], and (2) subscribes to recognized gestures and
-  /// dispatches the bound [GestureAction] against the currently selected tab.
+  /// hands the bound [BrowserAction] to [BrowserActionDispatcher].
   ///
   /// Must be kept alive (eagerly listened to from the browser view) for the
   /// lifetime of the browser so the subscription stays active.
@@ -66,13 +66,13 @@ final class GestureControlServiceProvider
 }
 
 String _$gestureControlServiceHash() =>
-    r'4c2f881b31cdb5f76951857f2242d64929089466';
+    r'22dfb2851aa89a905e6b22f962fb089f6aeed69f';
 
 /// Bridges gesture settings and recognized-gesture events to app actions.
 ///
 /// On build it (1) keeps the native recognizer's [GestureConfig] in sync with
 /// the user's [GestureSettings], and (2) subscribes to recognized gestures and
-/// dispatches the bound [GestureAction] against the currently selected tab.
+/// hands the bound [BrowserAction] to [BrowserActionDispatcher].
 ///
 /// Must be kept alive (eagerly listened to from the browser view) for the
 /// lifetime of the browser so the subscription stays active.

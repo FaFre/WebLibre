@@ -620,10 +620,15 @@ class GeckoTabsApiImpl : GeckoTabsApi {
         }
     }
 
-    override fun undo() {
+    override fun undo(): Boolean {
         try {
+            // Read before dispatching, the way UndoMiddleware.restore reads it. Only tabs change
+            // the tab list: with none recoverable (the history is empty, or its timeout cleared
+            // it) the undo is a no-op and the app hears nothing back.
+            val restoresTabs = components.core.store.state.undoHistory.tabs.isNotEmpty()
             components.useCases.tabsUseCases.undo()
-            logger.debug("$TAG: Performed undo operation")
+            logger.debug("$TAG: Performed undo operation (restores tabs: $restoresTabs)")
+            return restoresTabs
         } catch (e: Exception) {
             logger.error("$TAG: Failed to perform undo", e)
             throw e
