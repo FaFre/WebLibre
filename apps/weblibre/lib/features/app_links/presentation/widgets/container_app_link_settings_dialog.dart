@@ -148,7 +148,7 @@ class ContainerAppLinkSettingsDialog extends ConsumerWidget {
                         ? MdiIcons.openInApp
                         : Icons.public,
                   ),
-                  title: Text(_displayScope(key)),
+                  title: Text(displayAppLinkScope(key)),
                   subtitle: Text(
                     value.decision == AppLinkRuleDecision.alwaysOpen
                         ? 'Always open in the app'
@@ -171,10 +171,4 @@ class ContainerAppLinkSettingsDialog extends ConsumerWidget {
       ),
     );
   }
-}
-
-String _displayScope(String scope) {
-  if (scope.startsWith('host:')) return scope.substring('host:'.length);
-  if (scope.startsWith('pkg:')) return scope.substring('pkg:'.length);
-  return scope;
 }

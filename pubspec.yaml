@@ -102,9 +102,10 @@ melos:
         # project, which `flutter build`/`flutter run` produces — run one first
         # on a clean checkout.
         cd apps/weblibre/android
-        # --continue: one applinks test fails permanently (see CLAUDE.md), and
-        # without it that failure would stop the modules after it from running
-        # at all. Read the XML reports, not the exit status.
+        # --continue: a failure in one module would otherwise stop the modules
+        # after it from running at all, which hides everything behind the first
+        # break. Read the XML reports under
+        # apps/weblibre/build/<module>/test-results/, not just the exit status.
         ./gradlew --continue \
           :flutter_mozilla_components:testDebugUnitTest \
           :flutter_singbox_proxy:testDebugUnitTest \

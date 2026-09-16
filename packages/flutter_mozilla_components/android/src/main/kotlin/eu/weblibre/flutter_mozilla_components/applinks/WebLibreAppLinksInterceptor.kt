@@ -8,7 +8,6 @@ package eu.weblibre.flutter_mozilla_components.applinks
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import androidx.core.net.toUri
 import eu.weblibre.flutter_mozilla_components.Components
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
@@ -20,8 +19,6 @@ import mozilla.components.browser.state.state.SessionState
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.request.RequestInterceptor
 import mozilla.components.support.base.log.logger.Logger
-import mozilla.components.support.ktx.kotlin.tryGetHostFromUrl
-import java.util.Locale
 
 /**
  * The WebLibre-owned §2.4 interception tail (APP_LINKS_OWN_IMPLEMENTATION_PLAN.md Phase 5). Replaces
@@ -108,7 +105,7 @@ class WebLibreAppLinksInterceptor(
         // round trip. Gated on the policy so turning the carve-out off restores the plain §2.4
         // eligibility rules rather than only skipping the launch below.
         val authExceptionsAllowed = policy.authExceptionsEnabled && isPossibleAuthentication(session)
-        val isSameDomainNavigation = isSameDomain(lastUri, uri)
+        val isSameDomainNavigation = AppLinkEligibility.isSameDomain(lastUri, uri)
 
         // The generation a hold raised here answers for. Read, not advanced: the bump belongs to
         // [onLoadRequest], after the outcome is known, so that only navigations which actually
@@ -117,7 +114,7 @@ class WebLibreAppLinksInterceptor(
             ?.let { pendingStoreFor(components).currentNavGeneration(it) } ?: 0L
 
         // Step 2 — navigation eligibility. Any hit lets the engine proceed normally.
-        if (!isEligible(
+        if (!AppLinkEligibility.isEligible(
                 uriScheme,
                 engineSupportsScheme,
                 hasUserGesture,
@@ -135,7 +132,13 @@ class WebLibreAppLinksInterceptor(
 
         // Fallback re-entry guard (§2.7): a fallback we issued has come back around. Keep it in the
         // browser — never let it bounce out to an app. Consulted before resolution/classification.
-        if (pendingStore.isFallbackReentry(canonicalReentryKey(uri))) {
+        //
+        // A fallback is deliberately loaded as an *ordinary* navigation rather than one that skips
+        // the navigation delegate, because it is a page-supplied URL that no structural guard has
+        // vetted yet: skipping the delegate would take `AppRequestInterceptor`'s sandbox-capture,
+        // PWA/TWA and `weblibre://` checks out of its path along with this one. So it does come back
+        // through here, and this is what keeps it from being classified as a fresh app link.
+        if (pendingStore.isFallbackReentry(session?.id, canonicalReentryKey(uri))) {
             return null
         }
 
@@ -148,7 +151,12 @@ class WebLibreAppLinksInterceptor(
         val effectiveMode = override?.globalMode ?: policy.globalMode
         val effectiveRules = override?.rules ?: policy.rules
 
-        val isProtectedNavigation = isProtected(policy, session, uri)
+        val isProtectedNavigation = AppLinkProtectionMatcher.isProtected(
+            policy,
+            session?.contextId,
+            uri,
+            resolved.intentDataUrl,
+        )
         val isPrivateNavigation = session?.content?.private ?: false
         val isWalletNavigation = AppLinkSchemes.isWallet(resolved.originalScheme) ||
             AppLinkSchemes.isWallet(resolved.intentDataScheme)
@@ -159,6 +167,23 @@ class WebLibreAppLinksInterceptor(
         // only set for an unambiguous handler.
         val authTargetPackage = if (resolved.isAmbiguous) null else resolved.packageName
         val isAuthCallback = isAuthenticationCallback(session, authTargetPackage)
+
+        // Nothing has loaded in this tab yet (`lastUri` is null only for a session's first load)
+        // and the target resolves back to the very app that opened it. Handing it back would bounce
+        // in place, and the `Deny` that goes with a launch would leave the tab blank — so the tab an
+        // app just opened for us would show nothing at all. Keep it here instead. AC declines for
+        // the same reason, and deliberately without regard to the user's mode: an auto-launch under
+        // `always` produces the identical empty tab.
+        //
+        // Only an engine-supported target is waved through. An unsupported scheme has no page to
+        // show either way, so it keeps its prompt rather than becoming an error page.
+        if (lastUri == null && isAuthCallback && resolved.engineSupportsScheme) {
+            logger.info(
+                "initial load resolves back to caller ${callerPackage(session)}; " +
+                    "keeping it in the browser rather than bouncing to a blank tab",
+            )
+            return null
+        }
 
         // Re-apply the same-domain guard now that the target is known (AC parity: `AppLinksInterceptor`
         // re-checks after resolution for exactly this reason). Eligibility waived it on the mere
@@ -172,7 +197,12 @@ class WebLibreAppLinksInterceptor(
 
         val matchingRule = effectiveRules[resolved.scopeKey]
         val fingerprint = targetFingerprint(uri, resolved)
-        val suppressionHit = session != null && pendingStore.isSuppressed(session.id, fingerprint)
+        // Suppression is answered per site, dedupe per exact target — see [appLinkSuppressionKey].
+        val suppressionHit = session != null &&
+            pendingStore.isSuppressed(
+                session.id,
+                appLinkSuppressionKey(resolved.scopeKey, fingerprint),
+            )
 
         // §2.4 authentication carve-out (AC parity): a tab opened *by* the app the navigation
         // targets is a sign-in round trip rather than a general app link, so it returns to its
@@ -264,11 +294,15 @@ class WebLibreAppLinksInterceptor(
                 when (result) {
                     AppLinkLaunchResult.LAUNCHED -> RequestInterceptor.InterceptionResponse.Deny
 
-                    // A remembered `alwaysOpen` rule whose package no longer resolves must not
-                    // silently launch a different app: fall through to a prompt (§2.5). Reclassify
-                    // once with the rule removed so the global mode decides.
+                    // A remembered `alwaysOpen` rule whose package no longer resolves — or which
+                    // now shares the link with another handler — must not silently launch a
+                    // different app. Reclassify once with the rule dropped *and* the substitution
+                    // flagged, so the retry asks the user rather than letting the global mode
+                    // answer: under `always`, simply dropping the rule would auto-launch whatever
+                    // resolves now, which is exactly what the rule's package binding prevents.
                     AppLinkLaunchResult.PACKAGE_MISMATCH -> {
-                        val withoutRule = input.copy(matchingRule = null)
+                        val withoutRule =
+                            input.copy(matchingRule = null, rememberedTargetChanged = true)
                         execute(
                             AppLinkClassifier.classify(withoutRule),
                             components, pendingStore, session, uri, lastUri, withoutRule, hasUserGesture,
@@ -407,21 +441,29 @@ class WebLibreAppLinksInterceptor(
     }
 
     /**
-     * Issue [fallbackUrl] as the replacement load, or keep the current page when this tab already
-     * had the same fallback issued inside the window (§2.7,
+     * Issue [fallbackUrl] as the replacement load, or keep the current page when this tab has
+     * already been sent to the same fallback inside the window (§2.7,
      * [PendingAppLinkStore.claimFallbackIssue]).
      *
      * Without the claim this is an unbounded reload loop on any page that re-fires its `intent:`
      * URL every time its own `browser_fallback_url` page loads — Google Maps place links do, so
      * under `never` (or with the target app absent) the tab reloaded roughly once a second for as
-     * long as it stayed open. The re-entry map cannot catch that: it is keyed on the fallback URL
-     * and consulted for the *fallback's* load, while the load that regenerates it arrives under the
-     * `intent:` URL.
+     * long as it stayed open. Nothing on the *fallback's* own load can catch that: the load that
+     * regenerates the loop arrives under the `intent:` URL, not the fallback URL.
      *
      * The claim is keyed on the URL native hands out rather than the one that comes back, so a
      * fallback rewritten in flight (a redirect dropping a campaign parameter) is still recognised —
      * and on origin + path rather than the whole URL, because the same page grows a query parameter
      * on every bounce. See [PendingAppLinkStore.claimFallbackIssue] for both bounds.
+     *
+     * The flags are explicit, and both differences from the AC default are deliberate:
+     * - no `EXTERNAL`, which would push Gecko through a content-process switch and surface a
+     *   transient `about:blank` for a page that is not arriving from another app;
+     * - no `LOAD_FLAGS_BYPASS_LOAD_URI_DELEGATE`, which the AC default *does* set. A fallback is a
+     *   page-supplied URL that has passed no structural check yet, and skipping the delegate would
+     *   take `AppRequestInterceptor`'s sandbox-capture, PWA/TWA and `weblibre://` guards out of its
+     *   path — a sandbox tab could reach the live web through an `intent:` link's fallback. The
+     *   re-entry map is what keeps the returning load from being re-classified as an app link.
      */
     private fun fallbackResponse(
         pendingStore: PendingAppLinkStore,
@@ -435,8 +477,11 @@ class WebLibreAppLinksInterceptor(
             // instead: deny and leave the fallback page already on screen standing.
             return RequestInterceptor.InterceptionResponse.Deny
         }
-        pendingStore.recordFallbackReentry(canonicalReentryKey(fallbackUrl))
-        return RequestInterceptor.InterceptionResponse.Url(fallbackUrl)
+        pendingStore.recordFallbackReentry(tabId, canonicalReentryKey(fallbackUrl))
+        return RequestInterceptor.InterceptionResponse.Url(
+            fallbackUrl,
+            flags = FALLBACK_LOAD_FLAGS,
+        )
     }
 
     /**
@@ -471,93 +516,6 @@ class WebLibreAppLinksInterceptor(
         }
     }
 
-    // ---- Eligibility (§2.4 step 2) ----
-
-    private fun isEligible(
-        uriScheme: String?,
-        engineSupportsScheme: Boolean,
-        hasUserGesture: Boolean,
-        isRedirect: Boolean,
-        isDirectNavigation: Boolean,
-        isSubframeRequest: Boolean,
-        isSameDomainNavigation: Boolean,
-        authExceptionsAllowed: Boolean,
-    ): Boolean {
-        if (uriScheme == null) return false
-        // A subframe request not triggered by the user and outside the allowlist stays in-page.
-        if (!hasUserGesture && isSubframeRequest && !AppLinkSchemes.isSubframeAllowed(uriScheme)) return false
-
-        val isAllowedRedirect = isRedirect && !isSubframeRequest
-        val isIntentionalNavigation = hasUserGesture || isAllowedRedirect || isDirectNavigation
-        // Unintentional engine-supported navigation continues in the browser.
-        if (engineSupportsScheme && !isIntentionalNavigation) return false
-        // Same-domain engine-supported navigation continues in the browser (AC subdomain stripping),
-        // unless this tab could be hosting an authentication round trip whose callback is an http
-        // app link on the same site. That "could be" is provisional — it only knows the tab was
-        // opened by *some* app, not that this navigation targets it — so the guard is re-applied in
-        // [onLoadRequest] once resolution reveals the actual target package.
-        if (engineSupportsScheme && isSameDomainNavigation && !authExceptionsAllowed) return false
-        // Always-denied schemes never resolve or launch externally.
-        if (AppLinkSchemes.isAlwaysDenied(uriScheme)) return false
-        return true
-    }
-
-    private fun isSameDomain(url1: String?, url2: String?): Boolean {
-        return stripCommonSubDomains(url1?.tryGetHostFromUrl()) ==
-            stripCommonSubDomains(url2?.tryGetHostFromUrl())
-    }
-
-    private fun stripCommonSubDomains(host: String?): String? {
-        return when {
-            host == null -> null
-            host.startsWith(WWW) -> host.replaceFirst(WWW, "")
-            host.startsWith(M) -> host.replaceFirst(M, "")
-            host.startsWith(MOBILE) -> host.replaceFirst(MOBILE, "")
-            host.startsWith(MAPS) -> host.replaceFirst(MAPS, "")
-            else -> host
-        }
-    }
-
-    // ---- Protection model (§2.3) ----
-
-    private fun isProtected(policy: AppLinkPolicy, session: SessionState?, uri: String): Boolean {
-        val contextId = session?.contextId
-        val protectedByContext = if (contextId == null) {
-            policy.protectGeneralContext
-        } else {
-            contextId in policy.protectedContextIds || contextId in policy.strictContextIds
-        }
-        if (protectedByContext) return true
-        return matchesProtectedTarget(policy.protectedTargetPatterns, uri)
-    }
-
-    private fun matchesProtectedTarget(patterns: List<ProtectedTargetPattern>, uri: String): Boolean {
-        if (patterns.isEmpty()) return false
-        val parsed = runCatching { Uri.parse(uri) }.getOrNull() ?: return false
-        val scheme = parsed.scheme?.lowercase(Locale.ROOT) ?: return false
-        val host = AppLinkHostNormalizer.normalizeHost(parsed.host) ?: return false
-        val effectivePort = if (parsed.port != -1) parsed.port else defaultPortForScheme(scheme)
-
-        return patterns.any { pattern ->
-            if (pattern.scheme.lowercase(Locale.ROOT) != scheme) return@any false
-            val patternHost = AppLinkHostNormalizer.normalizeHost(pattern.hostOrSuffix) ?: return@any false
-            if (pattern.includeSubdomains) {
-                // Wildcard entries match apex + subdomains and ignore port (§2.3).
-                host == patternHost || host.endsWith(".$patternHost")
-            } else {
-                // Exact entries compare scheme + origin including effective port.
-                host == patternHost && effectivePort == (pattern.port ?: defaultPortForScheme(scheme))
-            }
-        }
-    }
-
-    private fun defaultPortForScheme(scheme: String): Int = when (scheme) {
-        "http", "ws" -> 80
-        "https", "wss" -> 443
-        "ftp" -> 21
-        else -> -1
-    }
-
     // ---- Helpers ----
 
     /**
@@ -584,12 +542,5 @@ class WebLibreAppLinksInterceptor(
 
     private fun pendingStoreFor(components: Components): PendingAppLinkStore {
         return PendingAppLinkStores.forProfile(components.profileApplicationContext.relativePath)
-    }
-
-    companion object {
-        private const val WWW = "www."
-        private const val M = "m."
-        private const val MOBILE = "mobile."
-        private const val MAPS = "maps."
     }
 }

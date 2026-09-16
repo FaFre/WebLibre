@@ -69,12 +69,12 @@ class AppLinkNavigationReleaseTest {
     fun releaseLoadsBypassTheNavigationDelegate() {
         // Without this the release re-enters the interceptor and prompts for the answer just given.
         assertTrue(
-            RELEASE_LOAD_FLAGS.contains(
+            SELF_ISSUED_LOAD_FLAGS.contains(
                 EngineSession.LoadUrlFlags.LOAD_FLAGS_BYPASS_LOAD_URI_DELEGATE,
             ),
         )
         // Explicitly *not* EXTERNAL: it sends Gecko through a process switch whose transient
         // `about:blank` location change makes URL watchers act on a page that has not arrived.
-        assertFalse(RELEASE_LOAD_FLAGS.contains(EngineSession.LoadUrlFlags.EXTERNAL))
+        assertFalse(SELF_ISSUED_LOAD_FLAGS.contains(EngineSession.LoadUrlFlags.EXTERNAL))
     }
 }

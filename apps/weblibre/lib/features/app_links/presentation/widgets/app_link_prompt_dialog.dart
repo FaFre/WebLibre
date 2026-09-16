@@ -23,6 +23,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
 import 'package:weblibre/features/app_links/domain/services/app_links_coordinator.dart';
+import 'package:weblibre/features/app_links/presentation/widgets/app_link_prompt_details.dart';
 
 /// Build the `alwaysOpen` rule for a target, or null when it cannot be remembered
 /// (ambiguous resolution / no bound package).
@@ -103,17 +104,16 @@ class AppLinkPromptDialog extends HookConsumerWidget {
         children: [
           const Text('This link is handled by an app outside WebLibre.'),
           const SizedBox(height: 8),
-          Text(
-            _displayScope(target.scopeKey),
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
+          AppLinkPromptDetails(request: request),
           if (request.canRemember)
             CheckboxListTile(
               contentPadding: EdgeInsets.zero,
               controlAffinity: ListTileControlAffinity.leading,
               value: remember.value,
               onChanged: (value) => remember.value = value ?? false,
-              title: const Text('Remember my choice for this site'),
+              title: Text(
+                'Remember my choice for ${displayAppLinkScope(target.scopeKey)}',
+              ),
             ),
         ],
       ),
@@ -129,10 +129,4 @@ class AppLinkPromptDialog extends HookConsumerWidget {
       ],
     );
   }
-}
-
-String _displayScope(String scope) {
-  if (scope.startsWith('host:')) return scope.substring('host:'.length);
-  if (scope.startsWith('pkg:')) return scope.substring('pkg:'.length);
-  return scope;
 }

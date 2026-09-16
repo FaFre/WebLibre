@@ -73,7 +73,14 @@ class AppLinkLauncher(
                 if (!resolved.hasExternalApp || resolved.appIntent == null) {
                     return AppLinkLaunchResult.NO_APP
                 }
-                if (expectedPackage != null && resolved.packageName != expectedPackage) {
+                if (expectedPackage != null &&
+                    (resolved.isAmbiguous || resolved.packageName != expectedPackage)
+                ) {
+                    // Ambiguity counts as a mismatch even when the expected package is still the
+                    // first candidate. A remembered `alwaysOpen` names one app; if a second handler
+                    // has since appeared, honouring the rule would raise a chooser offering the
+                    // other one — which is not what the user agreed to. §2.5 sends that back to a
+                    // prompt instead.
                     return AppLinkLaunchResult.PACKAGE_MISMATCH
                 }
                 resolved.appIntent
@@ -94,10 +101,15 @@ class AppLinkLauncher(
             }
         }
 
+        // The mode's flags belong to the intent that reaches the app, so they are applied before
+        // any chooser is wrapped around it. Putting them on the chooser instead would give the
+        // chooser activity the separate-document/task treatment a manual open is asking for and
+        // leave the app itself without it.
         applyLaunchFlags(intent, mode)
+        val launchIntent = chooserIfUnbound(intent, resolved, mode)
 
         return try {
-            startActivity(intent)
+            startActivity(launchIntent)
             lastLaunch = Pair(targetPackage, clock.elapsedRealtime())
             AppLinkLaunchResult.LAUNCHED
         } catch (e: ActivityNotFoundException) {
@@ -106,6 +118,43 @@ class AppLinkLauncher(
         } catch (e: SecurityException) {
             logger.error("not permitted to start external app activity", e)
             AppLinkLaunchResult.FAILED
+        }
+    }
+
+    /**
+     * Send an unbound intent through an explicit chooser that cannot offer WebLibre or any other
+     * browser, instead of letting `startActivity` resolve it implicitly.
+     *
+     * An ambiguous resolution deliberately leaves the component unbound so the user picks the app.
+     * Handing that to `startActivity` does not ask anyone: for an http(s) target it resolves like
+     * any ordinary web link and lands on the default browser — which, for this app's users, is
+     * usually WebLibre. The link would then reopen the browser it was trying to leave, and under
+     * `always` the original navigation is denied as well, because relaunching ourselves counts as a
+     * successful launch. Filtering browsers out of the candidate list during discovery does not
+     * prevent this; it never constrained the intent that is actually started.
+     *
+     * A bound intent already names its target, and a marketplace intent names its package, so both
+     * are started as they are.
+     */
+    private fun chooserIfUnbound(
+        intent: Intent,
+        resolved: ResolvedAppLink,
+        mode: AppLinkLaunchMode,
+    ): Intent {
+        if (mode == AppLinkLaunchMode.MARKETPLACE) return intent
+        // `isAmbiguous` is the resolver saying it deliberately left the component unbound; every
+        // other resolution names its target and resolves to nothing else.
+        if (!resolved.isAmbiguous) return intent
+
+        return Intent.createChooser(intent, null).apply {
+            val excluded = resolved.excludedComponents
+            if (excluded.isNotEmpty()) {
+                putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, excluded.toTypedArray())
+            }
+            // The chooser's own requirement, and the only flag it needs: every launch here goes
+            // through the process-level application context. The target keeps the mode's flags,
+            // which were applied to it before this wrapping.
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
     }
 

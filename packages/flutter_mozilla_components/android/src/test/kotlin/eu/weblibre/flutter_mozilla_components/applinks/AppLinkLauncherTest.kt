@@ -34,6 +34,8 @@ class AppLinkLauncherTest {
             scopeKey = "pkg:$packageName",
             originalScheme = "zoommtg",
             intentDataScheme = "zoommtg",
+            intentDataUrl = "zoommtg://x",
+            excludedComponents = emptyList(),
         )
     }
 
@@ -85,6 +87,8 @@ class AppLinkLauncherTest {
             scopeKey = "pkg:com.example.app",
             originalScheme = "example",
             intentDataScheme = "example",
+            intentDataUrl = "example://callback",
+            excludedComponents = emptyList(),
         )
         var startedIntent: Intent? = null
         val l = launcher(resolved, FakeClock()) { startedIntent = it }

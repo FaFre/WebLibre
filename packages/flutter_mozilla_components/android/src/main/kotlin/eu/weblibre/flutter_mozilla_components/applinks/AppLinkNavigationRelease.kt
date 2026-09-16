@@ -16,25 +16,52 @@ import mozilla.components.support.base.log.logger.Logger
 private val logger = Logger("AppLinkNavigationRelease")
 
 /**
- * The flags a released navigation is re-issued with.
+ * The flags for re-issuing a navigation the user chose to keep in the browser.
  *
  * [EngineSession.LoadUrlFlags.LOAD_FLAGS_BYPASS_LOAD_URI_DELEGATE] is load-bearing, not decoration:
  * GeckoView skips the navigation delegate entirely for a load carrying it
- * (`GeckoSession.shouldLoadUri`), so the release never re-enters [WebLibreAppLinksInterceptor] and
+ * (`GeckoSession.shouldLoadUri`), so the load never re-enters [WebLibreAppLinksInterceptor] and
  * cannot raise a second prompt for the answer the user just gave. Suppression alone would not do it
  * — [AppLinkNavigationMiddleware] clears a tab's suppression on every `LoadUrlAction`, so a plain
  * re-issue would wipe the very decision it is acting on and prompt again, forever. The middleware
  * exempts loads carrying this flag for the same reason.
  *
- * Mozilla AC's `AppLinksFeature` also sets `EXTERNAL` on its re-issue; we deliberately do not. The
- * load is not arriving from another app — it is the page the user just asked to stay in the browser
+ * **Only a URL the structural guards have already vetted may carry this.** Skipping the delegate
+ * skips all of `AppRequestInterceptor`, not just the app-links tail: sandbox capture, PWA/TWA and
+ * `weblibre://` go with it. A released navigation qualifies because it is the very URL that reached
+ * the app-links tail a moment ago, which means those guards already let it through. A
+ * page-supplied `browser_fallback_url` does not — see [FALLBACK_LOAD_FLAGS].
+ *
+ * `EXTERNAL` is deliberately absent, and that is a departure from the AC default rather than an
+ * oversight: `RequestInterceptor.InterceptionResponse.Url` and AC's `AppLinksFeature` both set it.
+ * The load is not arriving from another app — it is the page the user asked to stay in the browser
  * for — and marking it external pushes Gecko through a content-process switch, which surfaces as a
  * transient `about:blank` location change before the real target commits. Anything watching the
  * tab's URL then reacts to a page that is not there yet.
  */
-internal val RELEASE_LOAD_FLAGS: EngineSession.LoadUrlFlags = EngineSession.LoadUrlFlags.select(
+internal val SELF_ISSUED_LOAD_FLAGS: EngineSession.LoadUrlFlags = EngineSession.LoadUrlFlags.select(
     EngineSession.LoadUrlFlags.LOAD_FLAGS_BYPASS_LOAD_URI_DELEGATE,
 )
+
+/**
+ * The flags for loading a `browser_fallback_url`, from the interceptor and from either prompt.
+ *
+ * Plain, and both omissions matter. `EXTERNAL` is dropped for the reason given above. The bypass
+ * flag is dropped because a fallback URL comes from the page: nothing has checked it yet, and a
+ * load that skips the navigation delegate skips every structural guard in
+ * `AppRequestInterceptor` — a sandbox-capture tab could reach the live web simply by offering an
+ * `intent:` link whose fallback points there. The fallback therefore arrives as an ordinary
+ * navigation and is recognised on the way back in by
+ * [PendingAppLinkStore.isFallbackReentry], which stops it being re-classified as a fresh app link
+ * without stopping anything else from inspecting it.
+ *
+ * One consequence is deliberate: a fallback issued from a prompt goes through `SessionUseCases`, so
+ * [AppLinkNavigationMiddleware] sees its `LoadUrlAction` and clears the tab's suppression and
+ * fallback claims. That is the right reading — the user tapped "open", the app would not open, and
+ * this is the page they get instead — and the re-entry map, not the claim budget, is what keeps the
+ * load itself from being offered straight back to an app.
+ */
+internal val FALLBACK_LOAD_FLAGS: EngineSession.LoadUrlFlags = EngineSession.LoadUrlFlags.none()
 
 /**
  * Load the navigation [request] was holding, if it was holding one and the tab is still where the
@@ -121,12 +148,12 @@ internal fun releaseHeldNavigation(
     }
 
     logger.info(
-        "release LOADING ($reason) tab=${request.tabId} url=${request.url} flags=${RELEASE_LOAD_FLAGS.value}",
+        "release LOADING ($reason) tab=${request.tabId} url=${request.url} flags=${SELF_ISSUED_LOAD_FLAGS.value}",
     )
     sessionUseCases.loadUrl(
         url = request.url,
         sessionId = request.tabId,
-        flags = RELEASE_LOAD_FLAGS,
+        flags = SELF_ISSUED_LOAD_FLAGS,
     )
 }
 

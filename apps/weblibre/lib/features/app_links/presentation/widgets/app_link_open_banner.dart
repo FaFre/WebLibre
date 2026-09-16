@@ -22,7 +22,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
 import 'package:weblibre/features/app_links/domain/services/app_links_coordinator.dart';
+import 'package:weblibre/features/app_links/presentation/widgets/app_link_prompt_details.dart';
 import 'package:weblibre/features/app_links/presentation/widgets/app_link_prompt_dialog.dart';
 
 /// Non-modal banner for an http(s) app link (§2.2). The page is allowed to load
@@ -76,11 +78,19 @@ class AppLinkOpenBanner extends HookConsumerWidget {
                 const Icon(Icons.open_in_new, size: 20),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    appName != null
-                        ? 'Open this link in $appName?'
-                        : 'Open this link in an app?',
-                    style: theme.textTheme.bodyMedium,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        appName != null
+                            ? 'Open this link in $appName?'
+                            : 'Open this link in an app?',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 2),
+                      AppLinkPromptDetails(request: request, dense: true),
+                    ],
                   ),
                 ),
                 IconButton(
@@ -98,7 +108,11 @@ class AppLinkOpenBanner extends HookConsumerWidget {
                     value: remember.value,
                     onChanged: (value) => remember.value = value ?? false,
                   ),
-                  const Flexible(child: Text('Remember for this site')),
+                  Flexible(
+                    child: Text(
+                      'Remember for ${displayAppLinkScope(target.scopeKey)}',
+                    ),
+                  ),
                 ],
               ),
             Align(

@@ -40,6 +40,25 @@ data class ResolvedAppLink(
     val scopeKey: String,
     val originalScheme: String?,
     val intentDataScheme: String?,
+    /**
+     * Handlers that must never receive this link, for a launch that cannot bind a component.
+     *
+     * An ambiguous resolution leaves [appIntent] unbound so the system chooser decides, and an
+     * unbound `ACTION_VIEW` on an http(s) URI resolves like any other web link — straight to the
+     * default browser, which for this app is very often itself. Discovery filtered browsers out of
+     * the candidate list, but that filtering says nothing about what the eventual implicit intent
+     * resolves to; these components have to be excluded from the chooser explicitly.
+     *
+     * Empty whenever the intent is bound, which is every non-ambiguous resolution.
+     */
+    val excludedComponents: List<ComponentName>,
+    /**
+     * The parsed intent's data URI, which for an `intent:` URL is the real target and is invisible
+     * in the navigation URI itself. Callers that match the *target* — protected-site patterns, in
+     * particular — have to look here as well, or an `intent://host/…` link escapes every rule
+     * written against `host`. Equal to the navigation URI for an ordinary http(s) link.
+     */
+    val intentDataUrl: String?,
 )
 
 /**
@@ -57,13 +76,24 @@ class ExternalAppResolver(
     private val packages: PackageResolver,
     private val clock: MonotonicClock = MonotonicClock.SYSTEM,
     private val cacheTtlMs: Long = APP_LINKS_CACHE_INTERVAL,
+    private val cacheSize: Int = CACHE_SIZE,
 ) {
     private val logger = Logger("ExternalAppResolver")
 
-    private data class CacheEntry(val timestamp: Long, val key: Int, val value: ResolvedAppLink)
+    private data class CacheEntry(val timestamp: Long, val value: ResolvedAppLink)
 
-    @Volatile
-    private var cache: CacheEntry? = null
+    /**
+     * Access-ordered LRU, keyed by the full request rather than its hash.
+     *
+     * A single slot is not a cache here: the interceptor resolves on the navigation path while
+     * five Dart entry points resolve whatever the menu or sheet is showing, so one shared slot is
+     * evicted by whichever ran last and almost never hits. Keying on the string also removes the
+     * chance that two different URLs sharing a hash return each other's resolution.
+     */
+    private val cache = object : LinkedHashMap<String, CacheEntry>(cacheSize, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, CacheEntry>) =
+            size > cacheSize
+    }
 
     /**
      * Resolve [url] against installed apps.
@@ -79,25 +109,69 @@ class ExternalAppResolver(
         includeHttpAppLinks: Boolean,
         useCache: Boolean = true,
     ): ResolvedAppLink {
-        val key = (url + "|" + includeHttpAppLinks).hashCode()
+        // Bound the page-controlled string before it reaches `Intent.parseUri`, which AC caps for
+        // the same reason ("absurdly long URLs put unneeded pressure on the system and can even
+        // lead to crashes") — and this runs on the engine's synchronous navigation path.
+        //
+        // Refused, not truncated. A truncated URL parses into a *different* target: a long
+        // `mailto:` loses its body, an `intent:` loses metadata, a query loses parameters. The
+        // prompt would still show the original, so the user would approve one thing and the app
+        // would receive another. Declining to resolve leaves the link to the engine, which is both
+        // predictable and what happens today for anything with no handler.
+        if (url.length > MAX_URL_LENGTH) {
+            logger.error("refusing to resolve an oversized app link (${url.length} chars)")
+            return oversized(url)
+        }
+        val key = "$url|$includeHttpAppLinks"
         val now = clock.elapsedRealtime()
         if (useCache) {
-            cache?.let { entry ->
-                if (entry.key == key && now <= entry.timestamp + cacheTtlMs) {
-                    return entry.value
+            synchronized(cache) {
+                cache[key]?.let { entry ->
+                    if (now <= entry.timestamp + cacheTtlMs) return entry.value
+                    cache.remove(key)
                 }
             }
         }
 
         val result = resolveUncached(url, includeHttpAppLinks)
         if (useCache) {
-            cache = CacheEntry(now, key, result)
+            synchronized(cache) { cache[key] = CacheEntry(now, result) }
         }
         return result
     }
 
     fun clearCache() {
-        cache = null
+        synchronized(cache) { cache.clear() }
+    }
+
+    /**
+     * The result for a URL too long to resolve: no app, no fallback, no marketplace.
+     *
+     * The scheme is still read, from a short prefix rather than by parsing the whole string, and it
+     * is the one field that matters. The classifier lets an engine-supported target load normally
+     * and denies anything else — so an oversized http(s) link simply opens in the browser, exactly
+     * as it would if no app were installed, while an oversized custom scheme is refused rather than
+     * launched with a mangled payload.
+     */
+    private fun oversized(url: String): ResolvedAppLink {
+        val scheme = url.substringBefore(':', missingDelimiterValue = "")
+            .takeIf { it.isNotEmpty() && it.length <= MAX_SCHEME_LENGTH }
+            ?.lowercase(Locale.ROOT)
+        return ResolvedAppLink(
+            hasExternalApp = false,
+            appIntent = null,
+            packageName = null,
+            appName = null,
+            fallbackUrl = null,
+            marketplaceIntent = null,
+            isAmbiguous = false,
+            engineSupportsScheme = AppLinkSchemes.isEngineSupported(scheme),
+            scopeKey = "",
+            originalScheme = scheme,
+            intentDataScheme = null,
+            intentDataUrl = null,
+            excludedComponents = emptyList(),
+        )
     }
 
     private fun resolveUncached(url: String, includeHttpAppLinks: Boolean): ResolvedAppLink {
@@ -109,7 +183,11 @@ class ExternalAppResolver(
         val engineSupported = AppLinkSchemes.isEngineSupported(originalScheme)
         val hostScope = AppLinkHostNormalizer.hostScopeKey(runCatching { url.toUri().host }.getOrNull())
 
-        fun empty(scope: String, intentDataScheme: String? = null) = ResolvedAppLink(
+        fun empty(
+            scope: String,
+            intentDataScheme: String? = null,
+            intentDataUrl: String? = null,
+        ) = ResolvedAppLink(
             hasExternalApp = false,
             appIntent = null,
             packageName = null,
@@ -121,6 +199,8 @@ class ExternalAppResolver(
             scopeKey = scope,
             originalScheme = originalScheme,
             intentDataScheme = intentDataScheme,
+            intentDataUrl = intentDataUrl,
+            excludedComponents = emptyList(),
         )
 
         // Always-denied schemes never resolve or launch externally (§2.2). Return early so no
@@ -131,10 +211,11 @@ class ExternalAppResolver(
 
         val parsed = safeParseUri(url) ?: return empty(hostScope ?: "")
         val dataScheme = parsed.data?.scheme?.lowercase(Locale.ROOT)
+        val dataUrl = parsed.data?.toString()
 
         // Reject a sanitised intent whose data scheme is itself always-denied.
         if (parsed.data == null || AppLinkSchemes.isAlwaysDenied(dataScheme)) {
-            return empty(hostScope ?: "", dataScheme)
+            return empty(hostScope ?: "", dataScheme, dataUrl)
         }
 
         val requestedPackage = parsed.`package`
@@ -149,6 +230,7 @@ class ExternalAppResolver(
         var resolvedPackage: String? = null
         var resolvedActivityName: String? = null
         var resolvedInfo: ResolveInfo? = null
+        var excludedComponents: List<ComponentName> = emptyList()
 
         val defaultInfo = packages.resolveDefaultActivity(appIntent)
         val defaultPackage = defaultInfo?.activityInfo?.packageName
@@ -163,20 +245,38 @@ class ExternalAppResolver(
                 resolvedActivityName = defaultInfo?.activityInfo?.name
                 resolvedInfo = defaultInfo
             }
-            // A page must not relaunch WebLibre through the app-link path: if WebLibre itself is the
-            // default handler, keep the load in-browser rather than hunting for other apps.
-            defaultPackage == packages.selfPackageName -> {
+            // A page must not relaunch WebLibre through the app-link path: an `intent:` URL whose
+            // default handler is WebLibre itself keeps the load in-browser rather than hunting for
+            // some other app to hand it to.
+            //
+            // Engine-supported schemes are deliberately excluded from that shortcut. Holding the
+            // browser role is the ordinary state for this app, and `resolveDefaultActivity` then
+            // answers "WebLibre" for every http(s) link — so short-circuiting here would hide every
+            // http app link (youtube, reddit) on exactly the devices where WebLibre is the default,
+            // while a *different* default browser fell through and surfaced them. The candidate
+            // search below already filters WebLibre out along with every other browser.
+            !engineSupported && defaultPackage == packages.selfPackageName -> {
                 resolvedPackage = null
             }
             // No usable default (none / chooser / a browser for an http link): pick a non-browser
             // handler. A single one launches directly (rememberable); several stay ambiguous (chooser).
             else -> {
-                val candidates = packages.queryActivities(appIntent).filter { info ->
+                val handlers = packages.queryActivities(appIntent)
+                fun isBrowserOrSelf(pkg: String) =
+                    pkg == packages.selfPackageName ||
+                        (engineSupported && packages.isInstalledBrowser(pkg))
+
+                val candidates = handlers.filter { info ->
                     val pkg = info.activityInfo?.packageName
-                    info.filter != null &&
-                        pkg != null &&
-                        pkg != packages.selfPackageName &&
-                        !(engineSupported && packages.isInstalledBrowser(pkg))
+                    info.filter != null && pkg != null && !isBrowserOrSelf(pkg)
+                }
+                // Everything the chooser must not offer if the launch ends up unbound. Collected
+                // here because this is the only place the full handler list is known.
+                excludedComponents = handlers.mapNotNull { info ->
+                    val activity = info.activityInfo ?: return@mapNotNull null
+                    val pkg = activity.packageName ?: return@mapNotNull null
+                    val name = activity.name ?: return@mapNotNull null
+                    if (isBrowserOrSelf(pkg)) ComponentName(pkg, name) else null
                 }
                 candidates.firstOrNull()?.let { chosen ->
                     resolvedPackage = chosen.activityInfo?.packageName
@@ -202,7 +302,10 @@ class ExternalAppResolver(
             appIntent.component = ComponentName(resolvedPackage, resolvedActivityName)
         }
 
-        val appName = if (hasExternalApp && resolvedInfo != null) {
+        // Only a single, bound handler may be named. With several candidates `resolvedInfo` is
+        // whichever one the PackageManager listed first, but the launch raises the system chooser —
+        // so naming it would promise an app the tap does not open.
+        val appName = if (hasExternalApp && !isAmbiguous && resolvedInfo != null) {
             sanitizeAppLabel(packages.applicationLabel(resolvedInfo))
         } else {
             null
@@ -237,6 +340,9 @@ class ExternalAppResolver(
             scopeKey = scopeKey,
             originalScheme = originalScheme,
             intentDataScheme = dataScheme,
+            intentDataUrl = dataUrl,
+            // Only meaningful while the intent stays unbound; a bound component ignores them.
+            excludedComponents = if (hasExternalApp && isAmbiguous) excludedComponents else emptyList(),
         )
     }
 
@@ -340,5 +446,17 @@ class ExternalAppResolver(
 
     companion object {
         const val APP_LINKS_CACHE_INTERVAL = 30 * 1000L
+
+        /** Distinct (url, includeHttpAppLinks) resolutions kept alive at once. */
+        const val CACHE_SIZE = 16
+
+        /**
+         * Upper bound on a page-controlled URL entering resolution, matching AC's `MAX_URI_LENGTH`.
+         * Anything longer is refused outright rather than shortened — see [oversized].
+         */
+        const val MAX_URL_LENGTH = 25000
+
+        /** Longest prefix read to recover the scheme of a URL that is refused for length. */
+        private const val MAX_SCHEME_LENGTH = 64
     }
 }

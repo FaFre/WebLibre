@@ -8,6 +8,7 @@ package eu.weblibre.flutter_mozilla_components.applinks
 
 import java.net.IDN
 import java.net.InetAddress
+import java.net.UnknownHostException
 import java.util.Locale
 
 /**
@@ -27,7 +28,15 @@ object AppLinkHostNormalizer {
      * - strip a single trailing dot,
      * - `IDN.toASCII` for non-ASCII hosts,
      * - reject empty/invalid hosts and IPv6 zone IDs,
-     * - canonicalise IP literals.
+     * - expand a bracketed IPv6 literal to its full form.
+     *
+     * IPv6 is expanded because the same address has many spellings and they have to compare equal:
+     * `[::1]` and `[0:0:0:0:0:0:0:1]` name one host, and a remembered rule or a protected-site
+     * pattern written one way must match a navigation written the other.
+     *
+     * IPv4 and everything else is left to lowercase + IDN. Running those through
+     * `InetAddress.getByName` too would inherit Java's legacy parsing, under which `1.2.3` becomes
+     * `1.2.0.3` and a purely numeric hostname is read as an address.
      *
      * @return the canonical host, or `null` if the host is empty or invalid.
      */
@@ -47,15 +56,14 @@ object AppLinkHostNormalizer {
         }
         if (host.isEmpty()) return null
 
-        // IPv6 literal in brackets: canonicalise the address inside.
+        // IPv6 literal in brackets: expand to the full form so every spelling of one address gives
+        // one key. It must not go through IDN, which rejects the colons.
         if (host.startsWith("[") && host.endsWith("]")) {
             val inner = host.substring(1, host.length - 1)
-            if (inner.contains('%')) return null
-            return canonicalizeIpLiteral(inner)?.let { "[$it]" } ?: return null
+            if (inner.isEmpty() || inner.contains('%')) return null
+            val expanded = expandIpv6(inner) ?: return null
+            return "[$expanded]"
         }
-
-        // Try to canonicalise as an IP literal first (IPv4 / bare IPv6).
-        canonicalizeIpLiteral(host)?.let { return it }
 
         val lowered = host.lowercase(Locale.ROOT)
 
@@ -68,20 +76,28 @@ object AppLinkHostNormalizer {
     }
 
     /**
-     * Canonicalise an IP literal (numeric address only). Returns `null` when [value] is not a
-     * numeric IP literal, so callers can fall through to hostname handling.
+     * Canonicalise a bracketed IPv6 literal — normally to its uncompressed lowercase form, and for
+     * an IPv4-mapped address to the dotted quad `InetAddress` reduces it to. Null when [value] is
+     * not a literal at all.
+     *
+     * Scoped tightly to hex-and-colon input so a hostname can never fall in here: `InetAddress` is
+     * happy to resolve names and to read `1.2.3` as `1.2.0.3`, and neither belongs in a scope key.
      */
-    private fun canonicalizeIpLiteral(value: String): String? {
-        if (value.isEmpty()) return null
-        // Only treat clearly-numeric forms as IP literals; a real hostname must go through IDN.
-        val looksNumeric = value.all { it.isDigit() || it == '.' } ||
-            (value.contains(':') && value.all { it.isDigit() || it == ':' || it in 'a'..'f' || it in 'A'..'F' })
-        if (!looksNumeric) return null
+    private fun expandIpv6(value: String): String? {
+        if (!value.contains(':')) return null
+        val isHexOrColon = value.all {
+            it == ':' || it == '.' || it.isDigit() || it in 'a'..'f' || it in 'A'..'F'
+        }
+        if (!isHexOrColon) return null
 
         return try {
-            val address = InetAddress.getByName(value)
-            address.hostAddress?.lowercase(Locale.ROOT)
-        } catch (e: Exception) {
+            // An IPv4-mapped address (`::ffff:192.0.2.1`, `::ffff:c000:201`) parses to an
+            // Inet4Address, so insisting on Inet6Address here would reject a perfectly valid
+            // literal and drop the host scope with it. Take whatever canonical form comes back; the
+            // brackets are kept by the caller, so a mapped address never silently compares equal to
+            // the bare IPv4 origin, which is a different host as far as the web is concerned.
+            InetAddress.getByName(value).hostAddress?.substringBefore('%')?.lowercase(Locale.ROOT)
+        } catch (e: UnknownHostException) {
             null
         }
     }

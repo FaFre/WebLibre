@@ -32,6 +32,8 @@ class AppLinkClassifierTest {
         scopeKey = "host:example.com",
         originalScheme = if (engineSupportsScheme) "https" else "zoommtg",
         intentDataScheme = if (engineSupportsScheme) "https" else "zoommtg",
+        intentDataUrl = if (engineSupportsScheme) "https://example.com/" else "zoommtg://example.com/",
+        excludedComponents = emptyList(),
     )
 
     private fun input(
@@ -44,6 +46,7 @@ class AppLinkClassifierTest {
         matchingRule: AppLinkRule? = null,
         globalMode: AppLinkMode = AppLinkMode.ASK,
         marketplaceFallbackEnabled: Boolean = false,
+        rememberedTargetChanged: Boolean = false,
     ) = ClassifierInput(
         resolved = resolved,
         isProtected = isProtected,
@@ -54,7 +57,49 @@ class AppLinkClassifierTest {
         matchingRule = matchingRule,
         globalMode = globalMode,
         marketplaceFallbackEnabled = marketplaceFallbackEnabled,
+        rememberedTargetChanged = rememberedTargetChanged,
     )
+
+    @Test
+    fun `a changed remembered target asks again even under always`() {
+        // The user agreed to one app. When the fresh resolution no longer names it — gone, or now
+        // sharing the link with another handler — `always` must not answer on their behalf and
+        // launch whatever resolves instead; that substitution is what the rule's package binding
+        // exists to prevent.
+        val decision = AppLinkClassifier.classify(
+            input(
+                resolved(engineSupportsScheme = true),
+                globalMode = AppLinkMode.ALWAYS,
+                rememberedTargetChanged = true,
+            ),
+        )
+        assertTrue(decision is AppLinkDecision.Prompt)
+    }
+
+    @Test
+    fun `a changed remembered target still yields to suppression`() {
+        val decision = AppLinkClassifier.classify(
+            input(
+                resolved(engineSupportsScheme = true),
+                globalMode = AppLinkMode.ALWAYS,
+                rememberedTargetChanged = true,
+                suppressionHit = true,
+            ),
+        )
+        assertEquals(AppLinkDecision.AllowEngine, decision)
+    }
+
+    @Test
+    fun `an ambiguous changed target cannot be remembered again`() {
+        val decision = AppLinkClassifier.classify(
+            input(
+                resolved(engineSupportsScheme = true, isAmbiguous = true),
+                globalMode = AppLinkMode.ALWAYS,
+                rememberedTargetChanged = true,
+            ),
+        )
+        assertEquals(false, (decision as AppLinkDecision.Prompt).canRemember)
+    }
 
     // ---- §2.2 table: engine-supported (http) scheme, app resolves ----
 

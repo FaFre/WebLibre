@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
@@ -24,6 +26,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
+import 'package:weblibre/features/app_links/domain/entities/context_app_link_policy.dart';
+import 'package:weblibre/features/app_links/presentation/widgets/container_app_link_settings_dialog.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
@@ -1098,8 +1104,96 @@ class _AppLinksModeSection extends HookConsumerWidget {
             },
           ),
           _AppLinkRulesSubsection(rules: rules),
+          const _ContainerAppLinkOverridesSubsection(),
         ],
       ),
+    );
+  }
+}
+
+/// Containers running their own app-link policy (§ container isolation).
+///
+/// Their settings fully replace everything above for their tabs, and until now
+/// the only way to reach one was through that container's own edit dialog — so a
+/// container quietly set to "always" was invisible from the screen that claims to
+/// govern app links. Listing them here says which containers are not covered by
+/// the settings above, and opens the same editor.
+class _ContainerAppLinkOverridesSubsection extends ConsumerWidget {
+  const _ContainerAppLinkOverridesSubsection();
+
+  static String _containerLabel(ContainerDataWithCount container) =>
+      container.name ?? 'Container';
+
+  String _modeLabel(AppLinksMode mode) => switch (mode) {
+    AppLinksMode.always => 'Always open in apps',
+    AppLinksMode.ask => 'Asks before opening',
+    AppLinksMode.never => 'Always keeps links in the browser',
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final containers =
+        ref.watch(watchContainersWithCountProvider).value ?? const [];
+    final overrides = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.appLinkContextOverrides,
+      ),
+    );
+
+    final isolated =
+        containers
+            .where(
+              (container) =>
+                  container.metadata.isolatedAppLinkSettings &&
+                  container.metadata.contextualIdentity != null,
+            )
+            .toList()
+          ..sort((a, b) => _containerLabel(a).compareTo(_containerLabel(b)));
+
+    if (isolated.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(top: 16, bottom: 4),
+          child: Text('Containers with their own app-link settings'),
+        ),
+        for (final container in isolated)
+          Builder(
+            builder: (context) {
+              final contextId = container.metadata.contextualIdentity!;
+              final policy =
+                  overrides[contextId] ?? ContextAppLinkPolicy.blank();
+              final ruleCount = policy.rules.length;
+              return ListTile(
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+                leading: const Icon(MdiIcons.circleOutline),
+                title: Text(_containerLabel(container)),
+                subtitle: Text(
+                  ruleCount == 0
+                      ? _modeLabel(policy.mode)
+                      : '${_modeLabel(policy.mode)} · $ruleCount remembered '
+                            '${ruleCount == 1 ? 'rule' : 'rules'}',
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => unawaited(
+                  showDialog<void>(
+                    context: context,
+                    builder: (_) => ContainerAppLinkSettingsDialog(
+                      contextId: contextId,
+                      containerName: container.name,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+      ],
     );
   }
 }
@@ -1110,12 +1204,6 @@ class _AppLinkRulesSubsection extends ConsumerWidget {
   final Map<String, PersistedAppLinkRule> rules;
 
   const _AppLinkRulesSubsection({required this.rules});
-
-  String _displayScope(String scope) {
-    if (scope.startsWith('host:')) return scope.substring('host:'.length);
-    if (scope.startsWith('pkg:')) return scope.substring('pkg:'.length);
-    return scope;
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1143,7 +1231,7 @@ class _AppLinkRulesSubsection extends ConsumerWidget {
                   ? MdiIcons.openInApp
                   : Icons.public,
             ),
-            title: Text(_displayScope(key)),
+            title: Text(displayAppLinkScope(key)),
             subtitle: Text(
               value.decision == AppLinkRuleDecision.alwaysOpen
                   ? 'Always open in the app'

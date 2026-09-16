@@ -142,6 +142,12 @@ data class ClassifierInput(
     val matchingRule: AppLinkRule?,
     val globalMode: AppLinkMode,
     val marketplaceFallbackEnabled: Boolean,
+    /**
+     * A remembered `alwaysOpen` rule named an app the fresh resolution no longer agrees on — it is
+     * gone, or it is now one of several handlers. The rule cannot be honoured, and the user has to
+     * be asked again rather than have the decision made for them (§2.5).
+     */
+    val rememberedTargetChanged: Boolean = false,
 )
 
 /**
@@ -186,6 +192,14 @@ object AppLinkClassifier {
         // Step 5 — suppression hit: never launch, never prompt.
         if (input.suppressionHit) {
             return safeNonLaunch(resolved)
+        }
+
+        // Step 5b — the remembered app is not the app this would open any more. The user agreed to
+        // one specific target, so this is not a question the global mode may answer on their
+        // behalf: under `always` it would launch whatever now resolves, which is the substitution
+        // the rule's package binding exists to prevent. Ask again instead.
+        if (input.rememberedTargetChanged) {
+            return promptFor(resolved, canRemember = canRemember(resolved))
         }
 
         // Step 6 — a matching remembered rule for this scope.

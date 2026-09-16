@@ -29,6 +29,7 @@ class PendingAppLinkStoreTest {
         engineSupportsScheme: Boolean = false,
         heldNavigation: Boolean = false,
         isUserGesture: Boolean = false,
+        scopeKey: String = "pkg:com.app",
     ) = NewAppLinkRequest(
         owner = owner,
         tabId = tabId,
@@ -48,7 +49,7 @@ class PendingAppLinkStoreTest {
         targetFingerprint = fingerprint,
         appName = "App",
         packageName = "com.app",
-        scopeKey = "pkg:com.app",
+        scopeKey = scopeKey,
         heldNavigation = heldNavigation,
         isUserGesture = isUserGesture,
     )
@@ -231,15 +232,83 @@ class PendingAppLinkStoreTest {
     }
 
     @Test
+    fun suppressionIsAnsweredPerSiteRatherThanPerUrl() {
+        val store = PendingAppLinkStore(FakeClock())
+        // "Stay in browser" on one page of a site answers for the site: the user was asked about
+        // reddit.com, not about one path on it, and asking again on the next page is the same
+        // question. AC keys its do-not-intercept cache on the host too.
+        val first = store.createRequest(
+            newRequest(fingerprint = "reddit-a", scopeKey = "host:reddit.com"),
+        )
+        val second = newRequest(fingerprint = "reddit-b", scopeKey = "host:reddit.com")
+
+        store.recordSuppression(first.tabId, first.suppressionKey)
+
+        assertTrue(
+            store.isSuppressed(
+                second.tabId,
+                appLinkSuppressionKey(second.scopeKey, second.targetFingerprint),
+            ),
+        )
+        // A different site is a different question.
+        assertFalse(store.isSuppressed("tab1", appLinkSuppressionKey("host:other.example", "fp")))
+        // And so is the same site in another tab.
+        assertFalse(store.isSuppressed("tab2", appLinkSuppressionKey("host:reddit.com", "fp")))
+    }
+
+    @Test
+    fun aScopelessTargetFallsBackToItsFingerprint() {
+        val store = PendingAppLinkStore(FakeClock())
+        val request = store.createRequest(newRequest(fingerprint = "fp1", scopeKey = ""))
+
+        // An empty key would be a prefix of every suppression entry for the tab and would swallow
+        // unrelated prompts, so a resolution with no derivable scope keeps the exact target.
+        assertEquals("fp1", request.suppressionKey)
+        store.recordSuppression(request.tabId, request.suppressionKey)
+        assertTrue(store.isSuppressed("tab1", "fp1"))
+        assertFalse(store.isSuppressed("tab1", appLinkSuppressionKey("", "fp2")))
+    }
+
+    @Test
     fun fallbackReentryIsReusableInWindowAndExpires() {
         val clock = FakeClock()
         val store = PendingAppLinkStore(clock, fallbackReentryMs = 10_000L)
-        store.recordFallbackReentry("https://fallback.example/")
-        assertTrue(store.isFallbackReentry("https://fallback.example/"))
+        // A fallback loads as an ordinary navigation so the structural guards still see it, which
+        // means it comes back through the app-links tail; this is what stops it being classified as
+        // a fresh app link on the way in.
+        store.recordFallbackReentry("tab1", "https://fallback.example/")
+        assertTrue(store.isFallbackReentry("tab1", "https://fallback.example/"))
         // Reusable within its window (does not consume).
-        assertTrue(store.isFallbackReentry("https://fallback.example/"))
+        assertTrue(store.isFallbackReentry("tab1", "https://fallback.example/"))
         clock.now = 10_001L
-        assertFalse(store.isFallbackReentry("https://fallback.example/"))
+        assertFalse(store.isFallbackReentry("tab1", "https://fallback.example/"))
+    }
+
+    @Test
+    fun fallbackReentryDoesNotExemptOtherTabs() {
+        val store = PendingAppLinkStore(FakeClock())
+        store.recordFallbackReentry("tab1", "https://fallback.example/")
+
+        // The exemption says "this tab is already being sent there", not "this address is exempt
+        // everywhere". A navigation to the same URL in another tab must still be classified, or it
+        // silently loses its prompt — and under blockWhilePrompting loads instead of waiting.
+        assertFalse(store.isFallbackReentry("tab2", "https://fallback.example/"))
+        assertFalse(store.isFallbackReentry(null, "https://fallback.example/"))
+        assertTrue(store.isFallbackReentry("tab1", "https://fallback.example/"))
+    }
+
+    @Test
+    fun tabCloseDropsItsFallbackExemptions() {
+        val store = PendingAppLinkStore(FakeClock())
+        store.recordFallbackReentry("tab1", "https://fallback.example/")
+        store.recordFallbackReentry("tab2", "https://fallback.example/")
+
+        store.invalidateTab("tab1")
+        assertFalse(store.isFallbackReentry("tab1", "https://fallback.example/"))
+        assertTrue(store.isFallbackReentry("tab2", "https://fallback.example/"))
+
+        store.retainTabs(emptySet())
+        assertFalse(store.isFallbackReentry("tab2", "https://fallback.example/"))
     }
 
     @Test

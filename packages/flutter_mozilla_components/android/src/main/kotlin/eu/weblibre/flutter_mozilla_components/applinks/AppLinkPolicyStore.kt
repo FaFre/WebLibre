@@ -18,8 +18,13 @@ import java.util.concurrent.atomic.AtomicReference
 /**
  * Process-level registry of profile-scoped [AppLinkPolicyStore] singletons
  * (APP_LINKS_OWN_IMPLEMENTATION_PLAN.md §2.10). Keyed only by native's canonical
- * [ProfileContext.relativePath]; created on first use, torn down on profile
- * replacement. Survives `GlobalComponents.setUp()` replacing the `Components`.
+ * [ProfileContext.relativePath]; created on first use. Survives `GlobalComponents.setUp()`
+ * replacing the `Components`.
+ *
+ * Entries are never evicted, and deliberately so: the key is the profile path, so a stale entry can
+ * only ever be served back to the profile that created it, and switching profiles inside one
+ * process retains one small object per profile visited. The eviction hook this used to expose had
+ * no caller and no teardown point to hang one on.
  */
 object AppLinkPolicyStores {
     private val stores = ConcurrentHashMap<String, AppLinkPolicyStore>()
@@ -28,11 +33,6 @@ object AppLinkPolicyStores {
         return stores.getOrPut(profileContext.relativePath) {
             AppLinkPolicyStore(profileContext)
         }
-    }
-
-    /** Remove a torn-down profile's store (profile replacement/deletion). */
-    fun remove(relativePath: String) {
-        stores.remove(relativePath)
     }
 }
 

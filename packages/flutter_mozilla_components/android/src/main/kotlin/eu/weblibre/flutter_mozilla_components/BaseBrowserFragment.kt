@@ -458,6 +458,9 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                         browserStore = components.core.store,
                         launcher = AppLinkRuntime.get(profileContext).launcher,
                         sessionUseCases = components.useCases.sessionUseCases,
+                        // The fragment root is the CoordinatorLayout the non-modal banner
+                        // (a Snackbar) anchors itself to.
+                        rootView = view,
                     ),
                     owner = this,
                     view = view,

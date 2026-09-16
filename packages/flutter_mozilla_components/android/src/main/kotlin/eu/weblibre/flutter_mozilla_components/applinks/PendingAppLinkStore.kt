@@ -21,6 +21,21 @@ enum class AppLinkUrlClass {
 }
 
 /**
+ * What a "stay in the browser" answer silences, per tab.
+ *
+ * The rule scope — `host:youtube.com` or `pkg:com.example` — not the full target fingerprint. The
+ * fingerprint identifies one exact URL, so suppressing on it means declining on `reddit.com/r/a`
+ * and then following a link to `reddit.com/r/b` asks all over again; the user answered a question
+ * about a *site*, and that is what the scope names. AC's do-not-intercept cache is keyed the same
+ * way (package, or scheme, or host) and for an hour.
+ *
+ * A resolution with no derivable scope falls back to the fingerprint. An empty key would be a
+ * prefix of every other suppression entry for the tab and would swallow unrelated prompts.
+ */
+internal fun appLinkSuppressionKey(scopeKey: String, targetFingerprint: String): String =
+    scopeKey.ifEmpty { targetFingerprint }
+
+/**
  * A pending prompt, stored until resolved/invalidated/expired (§2.6). Holds only
  * stable identifiers and sanitised data — never a Components/EngineSession/store
  * reference. Carries everything needed both to render the prompt and to perform
@@ -82,6 +97,9 @@ data class PendingAppLinkRequest(
     val navGeneration: Long,
     val createdAt: Long,
 ) {
+    /** See [appLinkSuppressionKey]. */
+    val suppressionKey: String get() = appLinkSuppressionKey(scopeKey, targetFingerprint)
+
     fun toPigeon(expiresInMs: Long): AppLinkPromptRequest = AppLinkPromptRequest(
         requestId = requestId,
         owner = owner,
@@ -141,16 +159,16 @@ data class NewAppLinkRequest(
 /**
  * Process-level registry of profile-scoped [PendingAppLinkStore] singletons (§2.10).
  * Keyed by native's canonical profile relative path; survives `GlobalComponents.setUp()`.
+ *
+ * Entries are never evicted. The key is the profile path, so a stale entry can only be served back
+ * to the profile that created it, and every prompt inside one expires on its own deadline anyway.
+ * The eviction hook this used to expose had no caller and no teardown point to hang one on.
  */
 object PendingAppLinkStores {
     private val stores = ConcurrentHashMap<String, PendingAppLinkStore>()
 
     fun forProfile(relativePath: String): PendingAppLinkStore =
         stores.getOrPut(relativePath) { PendingAppLinkStore() }
-
-    fun remove(relativePath: String) {
-        stores.remove(relativePath)
-    }
 }
 
 /**
@@ -447,6 +465,7 @@ class PendingAppLinkStore(
             requests.values.removeAll { it.tabId == tabId }
             navGeneration.remove(tabId)
             suppression.keys.removeAll { it.startsWith("$tabId\u0000") }
+            fallbackReentry.keys.removeAll { it.startsWith("$tabId\u0000") }
             fallbackIssued.keys.removeAll { it.startsWith(fallbackIssueKey(tabId, "")) }
             fallbackBudget.remove(tabId)
             return owners
@@ -455,17 +474,19 @@ class PendingAppLinkStore(
 
     // ---- Suppression (§2.6) ----
 
-    fun recordSuppression(tabId: String, fingerprint: String) {
+    /** @param key the target's [appLinkSuppressionKey], not its full fingerprint. */
+    fun recordSuppression(tabId: String, key: String) {
         synchronized(lock) {
-            suppression[suppressionKey(tabId, fingerprint)] =
+            suppression[suppressionKey(tabId, key)] =
                 clock.elapsedRealtime() + suppressionExpiryMs
         }
     }
 
-    fun isSuppressed(tabId: String, fingerprint: String): Boolean {
+    /** @param key the target's [appLinkSuppressionKey], not its full fingerprint. */
+    fun isSuppressed(tabId: String, key: String): Boolean {
         synchronized(lock) {
             sweepExpiredLocked()
-            val expiresAt = suppression[suppressionKey(tabId, fingerprint)] ?: return false
+            val expiresAt = suppression[suppressionKey(tabId, key)] ?: return false
             return clock.elapsedRealtime() <= expiresAt
         }
     }
@@ -495,6 +516,7 @@ class PendingAppLinkStore(
                 tabId.isNotEmpty() && tabId !in liveTabIds
             }
             suppression.keys.removeAll(dead)
+            fallbackReentry.keys.removeAll(dead)
             fallbackIssued.keys.removeAll(dead)
             fallbackBudget.keys.removeAll { it.isNotEmpty() && it !in liveTabIds }
             navGeneration.keys.removeAll { it !in liveTabIds }
@@ -511,19 +533,43 @@ class PendingAppLinkStore(
 
     // ---- Fallback re-entry map (§2.7) ----
 
-    fun recordFallbackReentry(canonicalUrl: String) {
+    /**
+     * Remember that [canonicalUrl] is a fallback *we* issued into [tabId], so the app-links tail
+     * lets that load through instead of offering to hand it straight back to an app.
+     *
+     * A fallback is a page-supplied http(s) URL, so it goes into the tab as an ordinary load and
+     * runs the full navigation delegate — that is what keeps the structural guards
+     * (`AppRequestInterceptor`: sandbox capture, PWA/TWA, `weblibre://`, FxA) in front of it. This
+     * map is what stops that same load from being re-classified as a fresh app link and prompting
+     * again. Skipping the delegate instead would silence the prompt and the guards together.
+     *
+     * **Scoped to the tab that issued it.** Keyed on the URL alone, an exemption earned in one tab
+     * applied to every tab in the profile for its whole window: an unrelated navigation to the same
+     * address elsewhere would skip classification entirely, losing its prompt or its app handoff,
+     * and under `blockWhilePrompting` loading immediately instead of waiting. A fallback is always
+     * loaded into the tab it was issued for, so nothing needs the wider reach.
+     */
+    fun recordFallbackReentry(tabId: String?, canonicalUrl: String) {
         synchronized(lock) {
-            fallbackReentry[canonicalUrl] = clock.elapsedRealtime() + fallbackReentryMs
+            fallbackReentry[reentryKey(tabId, canonicalUrl)] =
+                clock.elapsedRealtime() + fallbackReentryMs
         }
     }
 
-    fun isFallbackReentry(canonicalUrl: String): Boolean {
+    fun isFallbackReentry(tabId: String?, canonicalUrl: String): Boolean {
         synchronized(lock) {
             sweepExpiredLocked()
-            val expiresAt = fallbackReentry[canonicalUrl] ?: return false
+            val expiresAt = fallbackReentry[reentryKey(tabId, canonicalUrl)] ?: return false
             return clock.elapsedRealtime() <= expiresAt
         }
     }
+
+    // Same tab-scoped composite shape as [suppressionKey]; a sessionless navigation keys under the
+    // empty tab, which is its own bucket and not a wildcard.
+    private fun reentryKey(tabId: String?, canonicalUrl: String) =
+        suppressionKey(tabId.orEmpty(), canonicalUrl)
+
+    // ---- Fallback issue budget (§2.7) ----
 
     /**
      * Claim the right to *issue* [fallbackUrl] as a load in [tabId].
@@ -532,9 +578,11 @@ class PendingAppLinkStore(
      * already-issued fallback load past the app-links tail, this one bounds how often a fallback
      * may be issued at all. App-promotion pages re-fire their `intent:` URL on every load of their
      * own `browser_fallback_url` page (Google Maps place links do), so issuing the fallback
-     * unconditionally reloads that page for as long as the tab is open.
+     * unconditionally reloads that page for as long as the tab is open. The re-entry map cannot
+     * catch that on its own: the load that regenerates the loop arrives under the `intent:` URL.
      *
-     * Two independent bounds, because the first one alone assumes more than the web provides:
+     * The claim itself applies two independent bounds, because the first alone assumes more than
+     * the web provides:
      * 1. per [fallbackIdentity]: the first claim in a window wins, repeats are refused;
      * 2. per tab: at most [fallbackIssueBudget] fallback loads per budget window, whatever their
      *    identity — this one holds even against a page that mutates its fallback URL on every

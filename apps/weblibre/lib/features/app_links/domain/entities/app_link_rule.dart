@@ -25,6 +25,23 @@ part 'app_link_rule.g.dart';
 
 enum AppLinkRuleDecision { alwaysOpen, neverOpen }
 
+/// Canonical scope-key prefixes, as native builds them (`AppLinkHostNormalizer`).
+const appLinkHostScopePrefix = 'host:';
+const appLinkPackageScopePrefix = 'pkg:';
+
+/// The part of a canonical scope key worth showing a user: the host, or the
+/// package name for a custom scheme. Scope keys are opaque to Dart, so this only
+/// ever strips the prefix and never reconstructs one.
+String displayAppLinkScope(String scope) {
+  if (scope.startsWith(appLinkHostScopePrefix)) {
+    return scope.substring(appLinkHostScopePrefix.length);
+  }
+  if (scope.startsWith(appLinkPackageScopePrefix)) {
+    return scope.substring(appLinkPackageScopePrefix.length);
+  }
+  return scope;
+}
+
 /// A remembered per-scope app-link rule (persistence contract, §2.5/§2.9).
 ///
 /// Stored in `GeneralSettings.appLinkRules` as `Map<String, PersistedAppLinkRule>`
@@ -59,7 +76,8 @@ class PersistedAppLinkRule with FastEquatable {
   bool get isValid {
     if (scope.isEmpty) return false;
     final hasKnownPrefix =
-        scope.startsWith('host:') || scope.startsWith('pkg:');
+        scope.startsWith(appLinkHostScopePrefix) ||
+        scope.startsWith(appLinkPackageScopePrefix);
     if (!hasKnownPrefix) return false;
     if (decision == AppLinkRuleDecision.alwaysOpen &&
         (packageName == null || packageName!.isEmpty)) {

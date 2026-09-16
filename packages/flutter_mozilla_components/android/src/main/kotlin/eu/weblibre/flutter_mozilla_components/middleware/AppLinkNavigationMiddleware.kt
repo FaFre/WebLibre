@@ -160,7 +160,7 @@ class AppLinkNavigationMiddleware(
     /**
      * A new user-initiated/direct navigation releases the tab's suppression and fallback claims —
      * unless it is a navigation *we* re-issued to release a held prompt
-     * ([RELEASE_LOAD_FLAGS]), which is the opposite of a fresh user intent: it is the tab finally
+     * ([SELF_ISSUED_LOAD_FLAGS]), which is the opposite of a fresh user intent: it is the tab finally
      * loading the page the user chose the browser for.
      *
      * Without the exemption blocking mode is an infinite prompt loop. Declining records suppression
