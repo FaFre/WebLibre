@@ -28,7 +28,11 @@ import 'package:weblibre/features/geckoview/features/pwa/presentation/dialogs/pw
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
-/// Shows install bottom sheet for sites with a valid PWA manifest (existing flow).
+/// Shows the install bottom sheet for sites with a valid PWA manifest.
+///
+/// The manifest supplies the default name; the sheet itself offers both
+/// "Install as App" and a plain shortcut, so the choice comes back in
+/// [ShortcutInstallConfig.type].
 Future<void> showPwaInstallDialog(BuildContext context, WidgetRef ref) async {
   final selectedTabId = ref.read(selectedTabProvider);
   final manifest = ref.read(currentTabManifestProvider);
@@ -47,39 +51,13 @@ Future<void> showPwaInstallDialog(BuildContext context, WidgetRef ref) async {
   if (!context.mounted) return;
   if (config == null) return;
 
-  final name = config.name;
-
-  try {
-    final success = await ref.read(
-      installCurrentWebAppProvider(
-        overrideName: name == defaultName ? null : name,
-        contextId: config.contextId,
-      ).future,
-    );
-
-    if (context.mounted) {
-      if (success) {
-        showInfoMessage(context, '$name added to home screen');
-      } else {
-        showErrorMessage(
-          context,
-          'Failed to add $name. The site may not support installation.',
-        );
-      }
-    }
-  } catch (e, stackTrace) {
-    logger.e('Failed to install PWA', error: e, stackTrace: stackTrace);
-
-    if (context.mounted) {
-      var errorMessage = 'Failed to add $name to home screen';
-
-      if (e is StateError) {
-        errorMessage = 'No tab selected. Please try again.';
-      }
-
-      showErrorMessage(context, errorMessage);
-    }
-  }
+  await _performInstall(
+    context,
+    ref,
+    config: config,
+    defaultName: defaultName,
+    manifestBacked: true,
+  );
 }
 
 /// Shows choice dialog for sites without a manifest.
@@ -110,8 +88,40 @@ Future<void> showShortcutInstallDialog(
   if (!context.mounted) return;
   if (config == null) return;
 
+  await _performInstall(
+    context,
+    ref,
+    config: config,
+    defaultName: defaultName,
+    manifestBacked: false,
+  );
+}
+
+/// Runs the install the user picked and reports the outcome.
+///
+/// Shared by both sheets: with a manifest present or not, the same two
+/// install types can come back, so the dispatch lives in one place.
+/// [manifestBacked] says which sheet asked, which the failure copy needs.
+Future<void> _performInstall(
+  BuildContext context,
+  WidgetRef ref, {
+  required ShortcutInstallConfig config,
+  required String defaultName,
+  required bool manifestBacked,
+}) async {
   final name = config.name;
-  final overrideName = name == defaultName ? null : name;
+
+  // A null override leaves the label to native's own fallback, which is not
+  // the same string for both installs. `installWebApp` falls back to the
+  // manifest's `short_name ?? name` — exactly what the sheet put in the field
+  // — so an unchanged name can still be nulled there. `installBasicShortcut`
+  // falls back to the *tab title*, which on a manifest site is a different
+  // string than the manifest name the user just confirmed, so the shortcut
+  // path always sends the chosen name.
+  final overrideName = switch (config.type) {
+    ShortcutInstallType.shortcut => name,
+    ShortcutInstallType.app => name == defaultName ? null : name,
+  };
 
   try {
     final bool success;
@@ -136,20 +146,23 @@ Future<void> showShortcutInstallDialog(
       if (success) {
         showInfoMessage(context, '$name added to home screen');
       } else {
-        showErrorMessage(context, 'Failed to add $name to home screen');
+        showErrorMessage(context, switch (config.type) {
+          ShortcutInstallType.app when manifestBacked =>
+            'Failed to add $name. The site may not support installation.',
+          _ => 'Failed to add $name to home screen',
+        });
       }
     }
   } catch (e, stackTrace) {
-    logger.e('Failed to create shortcut', error: e, stackTrace: stackTrace);
+    logger.e('Failed to add to home screen', error: e, stackTrace: stackTrace);
 
     if (context.mounted) {
-      var errorMessage = 'Failed to add $name to home screen';
-
-      if (e is StateError) {
-        errorMessage = 'No tab selected. Please try again.';
-      }
-
-      showErrorMessage(context, errorMessage);
+      showErrorMessage(
+        context,
+        e is StateError
+            ? 'No tab selected. Please try again.'
+            : 'Failed to add $name to home screen',
+      );
     }
   }
 }
