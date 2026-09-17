@@ -8,7 +8,6 @@ package eu.weblibre.flutter_mozilla_components
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.Environment
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -111,14 +110,14 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
                 requireContext(),
                 components.useCases.contextMenuUseCases,
                 downloadsLocation = {
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+                    DownloadLocationPreference.read(requireContext())
                 },
             ),
             ContextMenuCandidate.createSaveVideoAudioCandidate(
                 requireContext(),
                 components.useCases.contextMenuUseCases,
                 downloadsLocation = {
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+                    DownloadLocationPreference.read(requireContext())
                 },
             ),
             ContextMenuCandidate.createCopyImageLocationCandidate(requireContext(), view),

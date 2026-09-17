@@ -111,6 +111,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings useExternalDownloadManager(bool useExternalDownloadManager);
 
+  GeneralSettings downloadDirectoryUri(String? downloadDirectoryUri);
+
   GeneralSettings doubleBackCloseTab(bool doubleBackCloseTab);
 
   GeneralSettings unassignedTabsAutoCleanInterval(
@@ -266,6 +268,7 @@ abstract class _$GeneralSettingsCWProxy {
     TabBarStackingMode tabBarStackingMode,
     bool pullToRefreshEnabled,
     bool useExternalDownloadManager,
+    String? downloadDirectoryUri,
     bool doubleBackCloseTab,
     Duration unassignedTabsAutoCleanInterval,
     int maxSearchHistoryEntries,
@@ -511,6 +514,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(useExternalDownloadManager: useExternalDownloadManager);
 
   @override
+  GeneralSettings downloadDirectoryUri(String? downloadDirectoryUri) =>
+      call(downloadDirectoryUri: downloadDirectoryUri);
+
+  @override
   GeneralSettings doubleBackCloseTab(bool doubleBackCloseTab) =>
       call(doubleBackCloseTab: doubleBackCloseTab);
 
@@ -747,6 +754,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? tabBarStackingMode = const $CopyWithPlaceholder(),
     Object? pullToRefreshEnabled = const $CopyWithPlaceholder(),
     Object? useExternalDownloadManager = const $CopyWithPlaceholder(),
+    Object? downloadDirectoryUri = const $CopyWithPlaceholder(),
     Object? doubleBackCloseTab = const $CopyWithPlaceholder(),
     Object? unassignedTabsAutoCleanInterval = const $CopyWithPlaceholder(),
     Object? maxSearchHistoryEntries = const $CopyWithPlaceholder(),
@@ -1050,6 +1058,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.useExternalDownloadManager
           // ignore: cast_nullable_to_non_nullable
           : useExternalDownloadManager as bool,
+      downloadDirectoryUri: downloadDirectoryUri == const $CopyWithPlaceholder()
+          ? _value.downloadDirectoryUri
+          // ignore: cast_nullable_to_non_nullable
+          : downloadDirectoryUri as String?,
       doubleBackCloseTab:
           doubleBackCloseTab == const $CopyWithPlaceholder() ||
               doubleBackCloseTab == null
@@ -1413,6 +1425,7 @@ GeneralSettings _$GeneralSettingsFromJson(
   ),
   pullToRefreshEnabled: json['pullToRefreshEnabled'] as bool?,
   useExternalDownloadManager: json['useExternalDownloadManager'] as bool?,
+  downloadDirectoryUri: json['downloadDirectoryUri'] as String?,
   doubleBackCloseTab: json['doubleBackCloseTab'] as bool?,
   unassignedTabsAutoCleanInterval:
       json['unassignedTabsAutoCleanInterval'] == null
@@ -1548,6 +1561,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
       _$TabBarStackingModeEnumMap[instance.tabBarStackingMode]!,
   'pullToRefreshEnabled': instance.pullToRefreshEnabled,
   'useExternalDownloadManager': instance.useExternalDownloadManager,
+  'downloadDirectoryUri': instance.downloadDirectoryUri,
   'doubleBackCloseTab': instance.doubleBackCloseTab,
   'unassignedTabsAutoCleanInterval':
       instance.unassignedTabsAutoCleanInterval.inMicroseconds,

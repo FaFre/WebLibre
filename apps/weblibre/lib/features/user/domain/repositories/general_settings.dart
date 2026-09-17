@@ -87,6 +87,7 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'tabBarStackingMode': DriftSqlType.string,
   'pullToRefreshEnabled': DriftSqlType.bool,
   'useExternalDownloadManager': DriftSqlType.bool,
+  'downloadDirectoryUri': DriftSqlType.string,
   'doubleBackCloseTab': DriftSqlType.bool,
   'unassignedTabsAutoCleanInterval': DriftSqlType.int,
   'maxSearchHistoryEntries': DriftSqlType.int,

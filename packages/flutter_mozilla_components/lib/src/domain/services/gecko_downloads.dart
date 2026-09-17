@@ -80,4 +80,10 @@ class GeckoDownloadsService {
   }) {
     return _api.openDownloadedFile(fileName, directoryPath, contentType);
   }
+
+  /// Replicates the folder downloads are written to; null means the public
+  /// Downloads folder.
+  Future<void> setDownloadDirectory(String? directoryUri) {
+    return _api.setDownloadDirectory(directoryUri);
+  }
 }

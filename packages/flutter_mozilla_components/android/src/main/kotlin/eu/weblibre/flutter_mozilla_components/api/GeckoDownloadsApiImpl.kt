@@ -6,7 +6,9 @@
 
 package eu.weblibre.flutter_mozilla_components.api
 
+import android.content.Context
 import android.os.Environment
+import eu.weblibre.flutter_mozilla_components.DownloadLocationPreference
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.pigeons.DownloadState
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoDownloadsApi
@@ -18,9 +20,18 @@ import mozilla.components.browser.state.state.content.ShareResourceState
 import mozilla.components.support.utils.DefaultDownloadFileUtils
 import java.util.UUID
 
-class GeckoDownloadsApiImpl : GeckoDownloadsApi {
+/**
+ * [context] is passed rather than taken from [components] because the download
+ * folder is written before anything reads it: Dart replicates the setting at
+ * startup, and the components that consult it may not exist yet.
+ */
+class GeckoDownloadsApiImpl(private val context: Context) : GeckoDownloadsApi {
     private val components by lazy {
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
+    }
+
+    override fun setDownloadDirectory(directoryUri: String?) {
+        DownloadLocationPreference.write(context, directoryUri)
     }
 
     override fun requestDownload(tabId: String, state: DownloadState) {
@@ -48,7 +59,7 @@ class GeckoDownloadsApiImpl : GeckoDownloadsApi {
         return DefaultDownloadFileUtils(
             context = components.profileApplicationContext,
             downloadLocation = {
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+                DownloadLocationPreference.read(components.profileApplicationContext)
             },
         ).openFile(
             fileName = fileName,
@@ -76,9 +87,15 @@ class GeckoDownloadsApiImpl : GeckoDownloadsApi {
             currentBytesCopied = currentBytesCopied ?: 0L,
             status = status?.toMozillaStatus() ?: mozilla.components.browser.state.state.content.DownloadState.Status.INITIATED,
             userAgent = userAgent,
-            directoryPath = directoryPath ?: Environment.getExternalStoragePublicDirectory(
-                destinationDirectory ?: Environment.DIRECTORY_DOWNLOADS
-            ).path,
+            // A caller that named neither gets the configured download folder.
+            // Both context-menu saves come through here without either, so
+            // resolving to the public directory would leave "Save image" and
+            // "Save link" ignoring the setting.
+            directoryPath = directoryPath
+                ?: destinationDirectory?.let {
+                    Environment.getExternalStoragePublicDirectory(it).path
+                }
+                ?: DownloadLocationPreference.read(context),
             referrerUrl = referrerUrl,
             skipConfirmation = skipConfirmation ?: false,
             openInApp = openInApp ?: false,

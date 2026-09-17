@@ -393,6 +393,16 @@ class GeneralSettings with FastEquatable {
   final TabBarStackingMode tabBarStackingMode;
   final bool pullToRefreshEnabled;
   final bool useExternalDownloadManager;
+
+  /// Where downloads are saved: a Storage Access Framework tree URI
+  /// (`content://…`) the app holds a persisted write grant for, or null for the
+  /// system's public Downloads folder.
+  ///
+  /// Stored as the URI the picker returned rather than a path, because that is
+  /// what a SAF grant is addressed by and what Mozilla's download writer
+  /// expects. Replicated to native, which resolves it without Flutter — see
+  /// `DownloadLocationPreference`.
+  final String? downloadDirectoryUri;
   final bool doubleBackCloseTab;
   final Duration unassignedTabsAutoCleanInterval;
   final int maxSearchHistoryEntries;
@@ -563,6 +573,7 @@ class GeneralSettings with FastEquatable {
     required this.tabBarStackingMode,
     required this.pullToRefreshEnabled,
     required this.useExternalDownloadManager,
+    required this.downloadDirectoryUri,
     required this.doubleBackCloseTab,
     required this.unassignedTabsAutoCleanInterval,
     required this.maxSearchHistoryEntries,
@@ -653,6 +664,7 @@ class GeneralSettings with FastEquatable {
     TabBarStackingMode? tabBarStackingMode,
     bool? pullToRefreshEnabled,
     bool? useExternalDownloadManager,
+    this.downloadDirectoryUri,
     bool? doubleBackCloseTab,
     Duration? unassignedTabsAutoCleanInterval,
     int? maxSearchHistoryEntries,
@@ -1015,6 +1027,7 @@ class GeneralSettings with FastEquatable {
     tabBarStackingMode,
     pullToRefreshEnabled,
     useExternalDownloadManager,
+    downloadDirectoryUri,
     doubleBackCloseTab,
     unassignedTabsAutoCleanInterval,
     maxSearchHistoryEntries,

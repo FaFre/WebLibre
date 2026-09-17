@@ -8,9 +8,9 @@ package eu.weblibre.flutter_mozilla_components.components
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.os.Environment
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
+import eu.weblibre.flutter_mozilla_components.DownloadLocationPreference
 import eu.weblibre.flutter_mozilla_components.ColorSchemePreference
 import eu.weblibre.flutter_mozilla_components.Components
 import eu.weblibre.flutter_mozilla_components.interceptor.AppRequestInterceptor
@@ -141,9 +141,7 @@ class Core(
             downloadDelegate = EngineDownloadDelegate(
                 context = context,
                 downloadLocation = {
-                    Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_DOWNLOADS,
-                    ).path
+                    DownloadLocationPreference.read(context)
                 },
             ),
             useContentBlockingDatabase =
@@ -262,7 +260,7 @@ class Core(
                     downloadFileUtils = DefaultDownloadFileUtils(
                         context = context,
                         downloadLocation = {
-                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+                            DownloadLocationPreference.read(context)
                         },
                     ),
                 ),

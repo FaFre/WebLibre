@@ -5,7 +5,7 @@
 package eu.weblibre.flutter_mozilla_components.components
 
 import android.content.Context
-import android.os.Environment
+import eu.weblibre.flutter_mozilla_components.DownloadLocationPreference
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.Engine
 import mozilla.components.feature.contextmenu.ContextMenuUseCases
@@ -53,7 +53,7 @@ class UseCases(
             downloadFileUtils = DefaultDownloadFileUtils(
                 context = context,
                 downloadLocation = {
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+                    DownloadLocationPreference.read(context)
                 },
             ),
         )

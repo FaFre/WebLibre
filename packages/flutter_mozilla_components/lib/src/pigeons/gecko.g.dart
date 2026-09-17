@@ -13431,6 +13431,33 @@ class GeckoDownloadsApi {
     );
     return pigeonVar_replyValue! as bool;
   }
+
+  /// Sets the folder new downloads are written to.
+  ///
+  /// [directoryUri] is a Storage Access Framework tree URI (`content://…`) the
+  /// app holds a persisted write grant for, or null for the public Downloads
+  /// folder. Replicated rather than asked for: the download service and the
+  /// Custom Tab / PWA activity resolve the folder with no Flutter engine
+  /// attached, so native keeps its own copy of the choice.
+  Future<void> setDownloadDirectory(String? directoryUri) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoDownloadsApi.setDownloadDirectory$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[directoryUri],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
 }
 
 abstract class BrowserExtensionEvents {

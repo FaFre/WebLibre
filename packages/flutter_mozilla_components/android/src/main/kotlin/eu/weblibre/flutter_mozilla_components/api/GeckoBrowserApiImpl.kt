@@ -457,7 +457,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
             _flutterPluginBinding.binaryMessenger,
             GeckoDeleteBrowsingDataControllerImpl()
         )
-        GeckoDownloadsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoDownloadsApiImpl())
+        GeckoDownloadsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoDownloadsApiImpl(profileApplicationContext))
         GeckoBrowserExtensionApi.setUp(
             _flutterPluginBinding.binaryMessenger,
             GeckoBrowserExtensionApiImpl()

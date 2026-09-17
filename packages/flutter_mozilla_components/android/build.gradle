@@ -172,4 +172,8 @@ dependencies {
     // android.jar's org.json is a stub that throws; unit tests that exercise
     // JSON-shaped APIs need the real implementation on the test classpath.
     testImplementation("org.json:json:20260814")
+    // Test-only: DownloadLocationPreferenceTest asserts against the real
+    // DocumentFile.fromTreeUri, which is how the picked folder's URI is built.
+    // Production code reaches DocumentFile only through Mozilla's components.
+    testImplementation("androidx.documentfile:documentfile:1.1.0")
 }

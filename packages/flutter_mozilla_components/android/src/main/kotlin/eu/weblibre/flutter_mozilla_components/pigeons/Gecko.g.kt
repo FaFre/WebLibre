@@ -12177,6 +12177,16 @@ interface GeckoDownloadsApi {
   fun copyInternetResource(tabId: String, state: ShareInternetResourceState)
   fun shareInternetResource(tabId: String, state: ShareInternetResourceState)
   fun openDownloadedFile(fileName: String, directoryPath: String, contentType: String?): Boolean
+  /**
+   * Sets the folder new downloads are written to.
+   *
+   * [directoryUri] is a Storage Access Framework tree URI (`content://…`) the
+   * app holds a persisted write grant for, or null for the public Downloads
+   * folder. Replicated rather than asked for: the download service and the
+   * Custom Tab / PWA activity resolve the folder with no Flutter engine
+   * attached, so native keeps its own copy of the choice.
+   */
+  fun setDownloadDirectory(directoryUri: String?)
 
   companion object {
     /** The codec used by GeckoDownloadsApi. */
@@ -12254,6 +12264,24 @@ interface GeckoDownloadsApi {
             val contentTypeArg = args[2] as String?
             val wrapped: List<Any?> = try {
               listOf(api.openDownloadedFile(fileNameArg, directoryPathArg, contentTypeArg))
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoDownloadsApi.setDownloadDirectory$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val directoryUriArg = args[0] as String?
+            val wrapped: List<Any?> = try {
+              api.setDownloadDirectory(directoryUriArg)
+              listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
             }

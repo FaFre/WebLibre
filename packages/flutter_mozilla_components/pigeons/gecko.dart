@@ -2517,6 +2517,15 @@ abstract class GeckoDownloadsApi {
     String directoryPath,
     String? contentType,
   );
+
+  /// Sets the folder new downloads are written to.
+  ///
+  /// [directoryUri] is a Storage Access Framework tree URI (`content://…`) the
+  /// app holds a persisted write grant for, or null for the public Downloads
+  /// folder. Replicated rather than asked for: the download service and the
+  /// Custom Tab / PWA activity resolve the folder with no Flutter engine
+  /// attached, so native keeps its own copy of the choice.
+  void setDownloadDirectory(String? directoryUri);
 }
 
 @FlutterApi()
