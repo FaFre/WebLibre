@@ -113,18 +113,41 @@ String? adjacentTabIdInOrder({
   return order[targetIndex];
 }
 
-sealed class TabBackPromptBehavior {
-  const TabBackPromptBehavior();
+/// What back does once a tab has run out of page history.
+///
+/// Only for tabs that were opened from somewhere the user expects back to
+/// return them to. Without one, back falls through to the double-back-to-close
+/// handling, which is right for a tab opened from another tab — its opener is
+/// underneath it — and wrong for one opened from a surface that is no longer
+/// on screen.
+sealed class TabBackBehavior {
+  const TabBackBehavior();
 }
 
-final class BackgroundAppTabBackPromptBehavior extends TabBackPromptBehavior {
-  const BackgroundAppTabBackPromptBehavior();
+/// Asks whether to keep the tab, then leaves the app.
+///
+/// For a tab an external app launched: back belongs to whoever sent us here.
+final class BackgroundAppTabBackBehavior extends TabBackBehavior {
+  const BackgroundAppTabBackBehavior();
 }
 
-final class ReturnToSearchTabBackPromptBehavior extends TabBackPromptBehavior {
+/// Asks whether to keep the tab, then reopens the search screen.
+final class ReturnToSearchTabBackBehavior extends TabBackBehavior {
   final TabType tabType;
 
-  const ReturnToSearchTabBackPromptBehavior({required this.tabType});
+  const ReturnToSearchTabBackBehavior({required this.tabType});
+}
+
+/// Shows the browser home surface again, keeping the tab.
+///
+/// For a tab opened from home — a shortcut, a bookmark, a history entry. Unlike
+/// the two above this asks nothing and closes nothing: home is a surface over
+/// the selected tab rather than a place the tab has to be given up to reach, and
+/// the tab is one tap away again from the tab bar. Back on a shortcut used to
+/// land in the double-back-to-close prompt, which offered to throw the page away
+/// but never led home (#623).
+final class ReturnToBrowserHomeTabBackBehavior extends TabBackBehavior {
+  const ReturnToBrowserHomeTabBackBehavior();
 }
 
 @Riverpod(keepAlive: true)
@@ -135,7 +158,7 @@ class TabRepository extends _$TabRepository {
   bool _reclosing = false;
   bool _suppressNextReclose = false;
 
-  final _tabBackPromptBehavior = <String, TabBackPromptBehavior>{};
+  final _tabBackBehavior = <String, TabBackBehavior>{};
   final _closeLock = Lock();
   final _pendingIsolationCleanup = <String>{};
 
@@ -148,16 +171,16 @@ class TabRepository extends _$TabRepository {
   /// engine has already left.
   final _latestAssignmentRequests = <String, String>{};
 
-  TabBackPromptBehavior? backPromptBehaviorFor(String? tabId) {
+  TabBackBehavior? backBehaviorFor(String? tabId) {
     if (tabId == null) {
       return null;
     }
 
-    return _tabBackPromptBehavior[tabId];
+    return _tabBackBehavior[tabId];
   }
 
-  void clearBackPromptBehavior(String tabId) {
-    _tabBackPromptBehavior.remove(tabId);
+  void clearBackBehavior(String tabId) {
+    _tabBackBehavior.remove(tabId);
   }
 
   /// Validates the opener of a tab that is about to be created.
@@ -198,7 +221,7 @@ class TabRepository extends _$TabRepository {
     TabContainerSelection containerSelection =
         const TabContainerSelection.useSelected(),
     bool launchedFromIntent = false,
-    TabBackPromptBehavior? promptOnBackBehavior,
+    TabBackBehavior? onBackBehavior,
   }) async {
     final tabDao = ref.read(tabDatabaseProvider).tabDao;
 
@@ -262,10 +285,10 @@ class TabRepository extends _$TabRepository {
     );
 
     if (launchedFromIntent) {
-      _tabBackPromptBehavior[newTabId] =
-          promptOnBackBehavior ?? const BackgroundAppTabBackPromptBehavior();
-    } else if (promptOnBackBehavior != null) {
-      _tabBackPromptBehavior[newTabId] = promptOnBackBehavior;
+      _tabBackBehavior[newTabId] =
+          onBackBehavior ?? const BackgroundAppTabBackBehavior();
+    } else if (onBackBehavior != null) {
+      _tabBackBehavior[newTabId] = onBackBehavior;
     }
 
     if (selectTab && ref.mounted) {
@@ -941,7 +964,7 @@ class TabRepository extends _$TabRepository {
       }
 
       for (final tabId in tabIds) {
-        _tabBackPromptBehavior.remove(tabId);
+        _tabBackBehavior.remove(tabId);
         final isolationContextId = ref
             .read(tabStatesProvider)[tabId]
             ?.isolationContextId;

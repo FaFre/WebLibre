@@ -66,7 +66,7 @@ final class _DefaultWebSearchTabOpener implements WebSearchTabOpener {
           url: uri,
           tabMode: target.tabMode,
           parentId: target.parentId,
-          promptOnBackBehavior: ReturnToSearchTabBackPromptBehavior(
+          onBackBehavior: ReturnToSearchTabBackBehavior(
             tabType: target.tabMode.toTabType(),
           ),
           selectTab: true,
@@ -106,7 +106,7 @@ final class _DefaultWebSearchTabOpener implements WebSearchTabOpener {
           tabMode: target.tabMode,
           parentId: target.parentId,
           containerSelection: target.containerSelection,
-          promptOnBackBehavior: ReturnToSearchTabBackPromptBehavior(
+          onBackBehavior: ReturnToSearchTabBackBehavior(
             tabType: target.tabMode.toTabType(),
           ),
           selectTab: true,

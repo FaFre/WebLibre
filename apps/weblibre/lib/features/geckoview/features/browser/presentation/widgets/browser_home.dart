@@ -106,6 +106,11 @@ class BrowserHome extends ConsumerWidget {
               containerSelection: container == null
                   ? const TabContainerSelection.unassigned()
                   : TabContainerSelection.specific(container),
+              // Home is where this tab came from, so that is where back leads
+              // once it runs out of page history — a shortcut used to be a
+              // one-way trip (#623). Covers every module that opens an address
+              // from here, not just the shortcuts grid.
+              onBackBehavior: const ReturnToBrowserHomeTabBackBehavior(),
             );
       },
       onTabSelected: (tabId) async {

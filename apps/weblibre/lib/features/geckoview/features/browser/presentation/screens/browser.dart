@@ -2167,9 +2167,9 @@ class _Browser extends HookConsumerWidget {
             child: BackButtonListener(
               onBackButtonPressed: () async {
                 final tabState = ref.read(selectedTabStateProvider);
-                final promptOnBackBehavior = ref
+                final onBackBehavior = ref
                     .read(tabRepositoryProvider.notifier)
-                    .backPromptBehaviorFor(tabState?.id);
+                    .backBehaviorFor(tabState?.id);
 
                 final tabCount = ref.read(
                   tabListProvider.select((tabs) => tabs.value.length),
@@ -2261,7 +2261,23 @@ class _Browser extends HookConsumerWidget {
                   return true;
                 }
 
-                if (promptOnBackBehavior != null) {
+                if (onBackBehavior case ReturnToBrowserHomeTabBackBehavior()) {
+                  // Answered here rather than through the keep-or-close
+                  // question below: home is a layer over the selected tab, so
+                  // going back to it costs the user nothing and asking would be
+                  // about a tab they are not leaving.
+                  //
+                  // Only while the tab is what's on screen. Once home is
+                  // showing, back belongs to the double-back handling further
+                  // down — that is what leaves the app, and re-requesting home
+                  // from here would swallow every press instead.
+                  if (!ref.read(shouldShowBrowserHomeProvider)) {
+                    lastBackButtonPress.value = null;
+
+                    ref.read(forceBrowserHomeProvider.notifier).request();
+                    return true;
+                  }
+                } else if (onBackBehavior != null) {
                   if (!context.mounted) return false;
 
                   final keep = await showKeepTabDialog(context);
@@ -2275,7 +2291,7 @@ class _Browser extends HookConsumerWidget {
                     }
                     ref
                         .read(tabRepositoryProvider.notifier)
-                        .clearBackPromptBehavior(tabState.id);
+                        .clearBackBehavior(tabState.id);
                   } else if (tabState != null) {
                     if (!await confirmIsolatedTabCloseIfNeeded(tabState.id)) {
                       return true;
@@ -2288,14 +2304,17 @@ class _Browser extends HookConsumerWidget {
 
                   if (!context.mounted) return true;
 
-                  switch (promptOnBackBehavior) {
-                    case BackgroundAppTabBackPromptBehavior():
+                  switch (onBackBehavior) {
+                    case BackgroundAppTabBackBehavior():
                       await moveToBackground();
-                    case ReturnToSearchTabBackPromptBehavior(:final tabType):
+                    case ReturnToSearchTabBackBehavior(:final tabType):
                       ref
                           .read(searchAutofocusSuppressionProvider.notifier)
                           .suppressNext();
                       await SearchRoute(tabType: tabType).push(context);
+                    case ReturnToBrowserHomeTabBackBehavior():
+                      // Never prompts, so it never reaches this block.
+                      break;
                   }
 
                   return true;
