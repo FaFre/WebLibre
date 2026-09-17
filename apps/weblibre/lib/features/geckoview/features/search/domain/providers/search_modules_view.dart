@@ -17,7 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:riverpod/experimental/persist.dart';
+import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/user/data/providers.dart';
 
 part 'search_modules_view.g.dart';
 
@@ -172,7 +175,34 @@ enum ModuleSurface {
 
 enum SearchModuleDisplayState { preview, expanded, collapsed }
 
-@Riverpod()
+/// Reads back a persisted [SearchModuleDisplayState].
+///
+/// Defensive about the name, like the module order's own decode: a state
+/// written by a build that had a value this one does not is a reason to fall
+/// back to the default, not to lose the whole surface's layout.
+SearchModuleDisplayState parseSearchModuleDisplayState(String? name) {
+  return SearchModuleDisplayState.values.firstWhere(
+    (value) => value.name == name,
+    orElse: () => SearchModuleDisplayState.preview,
+  );
+}
+
+/// The storage key for one module's display state on one surface.
+///
+/// Built from [ModuleSurface.key], which is already a compatibility contract —
+/// see its own doc.
+String searchModuleDisplayStateKey(
+  ModuleSurface surface,
+  SearchModuleType module,
+) => '${surface.key}:${module.name}:display';
+
+/// How much of one module is shown, and for how long.
+///
+/// Persisted: "Show all" is how the user says a section is worth the room, and
+/// having to say it again on every visit made the affordance look broken
+/// (#623). Collapsing persists by the same argument, and stays recoverable
+/// because a collapsed section keeps its header — see [SearchModuleSection].
+@Riverpod(keepAlive: true)
 class SearchModuleDisplayStateController
     extends _$SearchModuleDisplayStateController {
   void cycle() {
@@ -198,15 +228,31 @@ class SearchModuleDisplayStateController
     };
   }
 
+  /// Puts the module back to the surface's default.
+  ///
+  /// For "Reset to Defaults", which resets the order and visibility and would
+  /// otherwise leave a section the user had collapsed or expanded exactly as it
+  /// was — a reset that visibly does not reset.
+  void reset() => state = SearchModuleDisplayState.preview;
+
   /// Keyed by surface as well as module: the same module can be on screen on
   /// two surfaces at once (home stays mounted underneath the pushed search
   /// screen), and collapsing it in one place must not collapse it in the other.
+  /// The storage key carries both for the same reason.
   @override
   SearchModuleDisplayState build(
     ModuleSurface surface,
     SearchModuleType module,
   ) {
-    return SearchModuleDisplayState.preview;
+    persist(
+      ref.watch(riverpodDatabaseStorageProvider),
+      key: searchModuleDisplayStateKey(surface, module),
+      options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
+      encode: (state) => state.name,
+      decode: parseSearchModuleDisplayState,
+    );
+
+    return stateOrNull ?? SearchModuleDisplayState.preview;
   }
 }
 

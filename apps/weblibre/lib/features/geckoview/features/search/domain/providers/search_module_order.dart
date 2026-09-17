@@ -87,8 +87,25 @@ class SearchModuleOrder extends _$SearchModuleOrder {
   }
 
   /// Discards the user's layout for this surface and returns to its defaults.
+  ///
+  /// Display state included: it persists too, so resetting only the order and
+  /// visibility would hand back a "default" home with a section still collapsed
+  /// or still expanded from before.
   void resetToDefaults() {
     state = mergeModuleOrderWithDefaults(null, surface.defaultModules);
+
+    for (final module in SearchModuleType.values) {
+      if (surface.offers(module)) {
+        ref
+            .read(
+              searchModuleDisplayStateControllerProvider(
+                surface,
+                module,
+              ).notifier,
+            )
+            .reset();
+      }
+    }
   }
 
   @override

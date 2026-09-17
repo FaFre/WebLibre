@@ -20,10 +20,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:riverpod/experimental/persist.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_module_order.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
+import 'package:weblibre/features/user/data/providers.dart';
 
 /// The persisted order without its storage: [SearchModuleOrder.build] normally
 /// goes through `persist()` and a database this test has no use for.
@@ -45,6 +47,11 @@ void main() {
           searchModuleOrderProvider(
             ModuleSurface.search,
           ).overrideWith(_FixedOrder.new),
+          // The section's display state persists; without a storage of its own
+          // it would reach for the profile's database.
+          riverpodDatabaseStorageProvider.overrideWith(
+            (ref) => Storage.inMemory(),
+          ),
         ],
         child: MaterialApp(
           home: Scaffold(

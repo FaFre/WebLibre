@@ -8,24 +8,42 @@ part of 'search_modules_view.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// How much of one module is shown, and for how long.
+///
+/// Persisted: "Show all" is how the user says a section is worth the room, and
+/// having to say it again on every visit made the affordance look broken
+/// (#623). Collapsing persists by the same argument, and stays recoverable
+/// because a collapsed section keeps its header — see [SearchModuleSection].
 
 @ProviderFor(SearchModuleDisplayStateController)
 final searchModuleDisplayStateControllerProvider =
     SearchModuleDisplayStateControllerFamily._();
 
+/// How much of one module is shown, and for how long.
+///
+/// Persisted: "Show all" is how the user says a section is worth the room, and
+/// having to say it again on every visit made the affordance look broken
+/// (#623). Collapsing persists by the same argument, and stays recoverable
+/// because a collapsed section keeps its header — see [SearchModuleSection].
 final class SearchModuleDisplayStateControllerProvider
     extends
         $NotifierProvider<
           SearchModuleDisplayStateController,
           SearchModuleDisplayState
         > {
+  /// How much of one module is shown, and for how long.
+  ///
+  /// Persisted: "Show all" is how the user says a section is worth the room, and
+  /// having to say it again on every visit made the affordance look broken
+  /// (#623). Collapsing persists by the same argument, and stays recoverable
+  /// because a collapsed section keeps its header — see [SearchModuleSection].
   SearchModuleDisplayStateControllerProvider._({
     required SearchModuleDisplayStateControllerFamily super.from,
     required (ModuleSurface, SearchModuleType) super.argument,
   }) : super(
          retry: null,
          name: r'searchModuleDisplayStateControllerProvider',
-         isAutoDispose: true,
+         isAutoDispose: false,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
@@ -67,7 +85,14 @@ final class SearchModuleDisplayStateControllerProvider
 }
 
 String _$searchModuleDisplayStateControllerHash() =>
-    r'6e17f17c4dee1ad560560b81e9c4c9cade8aeec4';
+    r'8b331cd8e7f26b1e3bb9f6342bc274a767c168cf';
+
+/// How much of one module is shown, and for how long.
+///
+/// Persisted: "Show all" is how the user says a section is worth the room, and
+/// having to say it again on every visit made the affordance look broken
+/// (#623). Collapsing persists by the same argument, and stays recoverable
+/// because a collapsed section keeps its header — see [SearchModuleSection].
 
 final class SearchModuleDisplayStateControllerFamily extends $Family
     with
@@ -84,8 +109,15 @@ final class SearchModuleDisplayStateControllerFamily extends $Family
         name: r'searchModuleDisplayStateControllerProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
-        isAutoDispose: true,
+        isAutoDispose: false,
       );
+
+  /// How much of one module is shown, and for how long.
+  ///
+  /// Persisted: "Show all" is how the user says a section is worth the room, and
+  /// having to say it again on every visit made the affordance look broken
+  /// (#623). Collapsing persists by the same argument, and stays recoverable
+  /// because a collapsed section keeps its header — see [SearchModuleSection].
 
   SearchModuleDisplayStateControllerProvider call(
     ModuleSurface surface,
@@ -98,6 +130,13 @@ final class SearchModuleDisplayStateControllerFamily extends $Family
   @override
   String toString() => r'searchModuleDisplayStateControllerProvider';
 }
+
+/// How much of one module is shown, and for how long.
+///
+/// Persisted: "Show all" is how the user says a section is worth the room, and
+/// having to say it again on every visit made the affordance look broken
+/// (#623). Collapsing persists by the same argument, and stays recoverable
+/// because a collapsed section keeps its header — see [SearchModuleSection].
 
 abstract class _$SearchModuleDisplayStateController
     extends $Notifier<SearchModuleDisplayState> {
