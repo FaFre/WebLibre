@@ -603,63 +603,75 @@ class _BrowserViewState extends ConsumerState<BrowserView>
             case TabIntentOpenSetting.regular:
             case TabIntentOpenSetting.private:
             case TabIntentOpenSetting.isolated:
-              await ref
-                  .read(engineReadyStateProvider.notifier)
-                  .waitUntilReady();
+              // Claimed before the first await, so that a cold start knows a
+              // launch is coming while this is still waiting for the engine.
+              // Read now and held in a local: the release must not depend on
+              // this widget's ref still being usable after the awaits below.
+              final launchClaim = ref.read(intentLaunchClaimProvider.notifier)
+                ..claim();
 
-              final tabMode = switch (settings.effectiveTabIntentOpenSetting) {
-                TabIntentOpenSetting.private => TabMode.private,
-                TabIntentOpenSetting.isolated => TabMode.newIsolated(),
-                _ => TabMode.regular,
-              };
+              try {
+                await ref
+                    .read(engineReadyStateProvider.notifier)
+                    .waitUntilReady();
 
-              switch (sharedContent) {
-                case SharedUrl():
-                  final containerSelection =
-                      settings.effectiveTabIntentOpenSetting ==
-                          TabIntentOpenSetting.isolated
-                      ? const TabContainerSelection.unassigned()
-                      : await _resolveContainerSelection(
-                          ref,
-                          sharedContent.contextId,
-                          sharedContent.containerMode,
+                final tabMode =
+                    switch (settings.effectiveTabIntentOpenSetting) {
+                      TabIntentOpenSetting.private => TabMode.private,
+                      TabIntentOpenSetting.isolated => TabMode.newIsolated(),
+                      _ => TabMode.regular,
+                    };
+
+                switch (sharedContent) {
+                  case SharedUrl():
+                    final containerSelection =
+                        settings.effectiveTabIntentOpenSetting ==
+                            TabIntentOpenSetting.isolated
+                        ? const TabContainerSelection.unassigned()
+                        : await _resolveContainerSelection(
+                            ref,
+                            sharedContent.contextId,
+                            sharedContent.containerMode,
+                          );
+
+                    await ref
+                        .read(tabRepositoryProvider.notifier)
+                        .addTab(
+                          url: sharedContent.url,
+                          tabMode: tabMode,
+                          launchedFromIntent: true,
+                          selectTab: true,
+                          containerSelection: containerSelection,
                         );
+                  case SharedText():
+                    final bang =
+                        ref.read(selectedBangDataProvider()) ??
+                        await ref.read(defaultSearchBangProvider.future);
 
-                  await ref
-                      .read(tabRepositoryProvider.notifier)
-                      .addTab(
-                        url: sharedContent.url,
-                        tabMode: tabMode,
-                        launchedFromIntent: true,
-                        selectTab: true,
-                        containerSelection: containerSelection,
+                    if (bang != null && isWebSearchBang(bang)) {
+                      final router = await ref.read(routerProvider.future);
+                      await router.push(
+                        SearchRoute(
+                          tabType: tabMode.toTabType(),
+                          searchText: sharedContent.text,
+                          launchedFromIntent: true,
+                          autoSubmitSearch: true,
+                        ).location,
                       );
-                case SharedText():
-                  final bang =
-                      ref.read(selectedBangDataProvider()) ??
-                      await ref.read(defaultSearchBangProvider.future);
+                      break;
+                    }
 
-                  if (bang != null && isWebSearchBang(bang)) {
-                    final router = await ref.read(routerProvider.future);
-                    await router.push(
-                      SearchRoute(
-                        tabType: tabMode.toTabType(),
-                        searchText: sharedContent.text,
-                        launchedFromIntent: true,
-                        autoSubmitSearch: true,
-                      ).location,
-                    );
-                    break;
-                  }
-
-                  await ref
-                      .read(tabRepositoryProvider.notifier)
-                      .addTab(
-                        url: bang?.getTemplateUrl(sharedContent.text),
-                        tabMode: tabMode,
-                        launchedFromIntent: true,
-                        selectTab: true,
-                      );
+                    await ref
+                        .read(tabRepositoryProvider.notifier)
+                        .addTab(
+                          url: bang?.getTemplateUrl(sharedContent.text),
+                          tabMode: tabMode,
+                          launchedFromIntent: true,
+                          selectTab: true,
+                        );
+                }
+              } finally {
+                launchClaim.release();
               }
             case TabIntentOpenSetting.ask:
               final router = await ref.read(routerProvider.future);

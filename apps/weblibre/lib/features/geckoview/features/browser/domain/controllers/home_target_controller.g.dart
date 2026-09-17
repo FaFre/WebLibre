@@ -45,7 +45,7 @@ final class HomeTargetControllerProvider
 }
 
 String _$homeTargetControllerHash() =>
-    r'db486c85ce71b99a67fde8ca142da43aef402973';
+    r'561c7977bf8b2d76cf44a5dae1017d92b1a5a1ff';
 
 /// Applies the configured [HomeTarget] when the browser has nothing to show.
 

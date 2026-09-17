@@ -28,6 +28,7 @@ import 'package:weblibre/features/geckoview/domain/providers/restore_complete.da
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/home_target.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/providers/intent.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
@@ -201,9 +202,24 @@ class HomeTargetController extends _$HomeTargetController {
 
   /// Runs the configured target at cold start, unless the engine restored a
   /// selection of its own — the user is then already looking at a page.
+  ///
+  /// An external launch counts as a selection the session is about to have, and
+  /// it loses this race on its own: opening it waits for the engine, while the
+  /// window below is a few hundred milliseconds. The target then latched the
+  /// home surface over the page the launch opened, or resumed a different tab
+  /// entirely (#623), so a claimed launch is waited for instead — twice, since
+  /// one that arrives while the window below is open has the same claim on the
+  /// startup surface as one that was already in flight.
   Future<void> _applyStartupTarget() async {
-    if (await _hasRestoredSelection()) return;
-    if (!ref.mounted) return;
+    final launchClaim = ref.read(intentLaunchClaimProvider.notifier);
+
+    do {
+      await launchClaim.waitUntilSettled();
+      if (!ref.mounted) return;
+
+      if (await _hasRestoredSelection()) return;
+      if (!ref.mounted) return;
+    } while (ref.read(intentLaunchClaimProvider));
 
     await applyTarget();
   }

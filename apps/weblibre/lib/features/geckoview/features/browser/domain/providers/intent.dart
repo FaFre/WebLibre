@@ -50,6 +50,100 @@ final _contentParserTransformer =
       },
     );
 
+/// Whether an external launch is on its way to a tab.
+///
+/// Held from the moment the launch is delivered — synchronously, before the
+/// engine-readiness wait — until its tab exists, so that startup logic which
+/// would otherwise conclude the browser has nothing to show waits for it
+/// instead.
+///
+/// The two are far apart on a cold start. Opening the launch means waiting for
+/// the engine, resolving a container and writing the tab DB, while
+/// `HomeTargetController` gives a restored selection ~300ms before it decides
+/// the session is empty and latches the home surface (or resumes some other
+/// tab) over whatever the launch opens next. The launch then loaded behind the
+/// home screen, looking like it had been dropped (#623). "Ask" never showed it,
+/// because the dialog defers the tab to a tap that lands long after startup has
+/// settled.
+@Riverpod(keepAlive: true)
+class IntentLaunchClaim extends _$IntentLaunchClaim {
+  /// Bounds a claim whose holder never releases it. Generous, because the
+  /// holder's own wait for the engine already runs to 10s and expiring early
+  /// would reintroduce the race it exists to close; the cost of being late is
+  /// only that a target which opens or resumes a tab does so later, against a
+  /// home surface that is already on screen.
+  static const _maxHold = Duration(seconds: 15);
+
+  var _outstanding = 0;
+  Timer? _expiry;
+  final _settled = <Completer<void>>[];
+
+  /// Takes a claim. Every call must be matched by a [release], including on the
+  /// failure paths — hence the `finally` at the call site.
+  void claim() {
+    _outstanding++;
+    _expiry?.cancel();
+    _expiry = Timer(_maxHold, _settle);
+
+    if (ref.mounted) {
+      state = true;
+    }
+  }
+
+  void release() {
+    if (_outstanding == 0) {
+      return;
+    }
+
+    _outstanding--;
+
+    if (_outstanding == 0) {
+      _settle();
+    }
+  }
+
+  /// Completes once nothing is outstanding, immediately if nothing is.
+  ///
+  /// Never throws and never waits forever: an expired claim settles the same way
+  /// a released one does.
+  Future<void> waitUntilSettled() {
+    if (!state) {
+      return Future.value();
+    }
+
+    final completer = Completer<void>();
+    _settled.add(completer);
+
+    return completer.future;
+  }
+
+  void _settle() {
+    _outstanding = 0;
+    _expiry?.cancel();
+    _expiry = null;
+
+    if (ref.mounted) {
+      state = false;
+    }
+
+    for (final completer in _settled) {
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
+    }
+    _settled.clear();
+  }
+
+  @override
+  bool build() {
+    // Waiters outlive nothing: a container torn down mid-launch must not leave
+    // a startup sequence parked on a future that can no longer complete.
+    ref.onDispose(_settle);
+
+    return false;
+  }
+}
+
 @Riverpod()
 class EngineBoundIntentStream extends _$EngineBoundIntentStream {
   @override
