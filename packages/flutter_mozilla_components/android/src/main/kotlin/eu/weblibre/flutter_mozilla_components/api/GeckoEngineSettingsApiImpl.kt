@@ -386,7 +386,10 @@ class GeckoEngineSettingsApiImpl(
     }
 
     override fun setPullToRefreshEnabled(enabled: Boolean) {
-        GlobalComponents.pullToRefreshEnabled = enabled
+        // Through GlobalComponents, which also mirrors the value to the current
+        // profile's native-readable store, for the window a cold start puts on
+        // screen before this call arrives (see BrowserSettingsPreferences).
+        GlobalComponents.setPullToRefreshEnabled(enabled)
     }
 
     override fun setScreenshotProtectionEnabled(enabled: Boolean) {

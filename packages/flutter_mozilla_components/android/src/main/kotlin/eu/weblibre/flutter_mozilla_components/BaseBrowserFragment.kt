@@ -10,6 +10,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
@@ -24,6 +25,7 @@ import androidx.annotation.CallSuper
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
+import com.google.android.material.color.MaterialColors
 import eu.weblibre.flutter_mozilla_components.databinding.FragmentBrowserBinding
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
@@ -160,6 +162,12 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         promptFeature,
         webAuthnFeature
     )
+
+    // Held as fields so this fragment can unregister exactly its own
+    // registration: a Custom Tab window and the main browser window are alive
+    // at the same time, and neither may take the other's off GlobalComponents.
+    private val pullToRefreshSettingListener: (Boolean) -> Unit = { updatePullToRefreshEnabled() }
+    private val secureWindowSettingsListener: () -> Unit = { updateSecureWindowState() }
 
     protected abstract fun createEngine(components: Components): EngineView
 
@@ -363,19 +371,21 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     components.core.store,
                     components.useCases.sessionUseCases.reload,
                     binding.swipeToRefresh,
+                    // Without this a pull in a Custom Tab or PWA window resolves
+                    // to the *selected* tab — it would reload a background
+                    // browser tab and sync the throbber to that tab's loading
+                    // state. Same argument the SessionFeature above gets.
+                    tabId = sessionId,
                 ),
                 owner = this,
                 view = view,
             )
 
             // Apply pull-to-refresh setting
+            applyPullToRefreshTheme()
             updatePullToRefreshEnabled()
-            GlobalComponents.onPullToRefreshEnabledChanged = {
-                updatePullToRefreshEnabled()
-            }
-            GlobalComponents.onSecureWindowSettingsChanged = {
-                updateSecureWindowState()
-            }
+            GlobalComponents.addPullToRefreshListener(pullToRefreshSettingListener)
+            GlobalComponents.addSecureWindowSettingsListener(secureWindowSettingsListener)
             updateSecureWindowState()
 
             shareResourceFeature.set(
@@ -720,7 +730,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
      * arms the throbber and reloads the page on release.
      */
     private fun shouldPullToRefreshBeEnabled(inFullScreen: Boolean): Boolean =
-        GlobalComponents.pullToRefreshEnabled && !inFullScreen
+        GlobalComponents.isPullToRefreshEnabled() && !inFullScreen
 
     /**
      * Re-applies [shouldPullToRefreshBeEnabled] to the layout. Called from both
@@ -729,13 +739,40 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
      * [inFullScreen] defaults to the tab's own state, so a view recreated while
      * a tab is already fullscreen does not come back with pull-to-refresh on.
      * Read from the store rather than from [fullScreenFeature], because the
-     * initial call runs before that feature is bound.
+     * initial call runs before that feature is bound — and through
+     * `GlobalComponents` rather than the `components` lazy, since the default
+     * argument is evaluated even when there is no longer a view to apply it to.
      */
     private fun updatePullToRefreshEnabled(
-        inFullScreen: Boolean = components.core.store.state
-            .findTabOrCustomTabOrSelectedTab(sessionId)?.content?.fullScreen == true,
+        inFullScreen: Boolean = GlobalComponents.components
+            ?.core?.store?.state
+            ?.findTabOrCustomTabOrSelectedTab(sessionId)?.content?.fullScreen == true,
     ) {
-        _binding?.swipeToRefresh?.isEnabled = shouldPullToRefreshBeEnabled(inFullScreen)
+        val layout = _binding?.swipeToRefresh ?: return
+        layout.isEnabled = shouldPullToRefreshBeEnabled(inFullScreen)
+    }
+
+    /**
+     * Themes the pull-to-refresh throbber, as Fenix does. Without it the
+     * spinner keeps the framework default — a near-white circle with a fixed
+     * arrow colour — over every page, including dark and AMOLED content.
+     */
+    private fun applyPullToRefreshTheme() {
+        val layout = _binding?.swipeToRefresh ?: return
+        layout.setColorSchemeColors(
+            MaterialColors.getColor(
+                layout,
+                com.google.android.material.R.attr.colorOnSurface,
+                Color.BLACK,
+            ),
+        )
+        layout.setProgressBackgroundColorSchemeColor(
+            MaterialColors.getColor(
+                layout,
+                com.google.android.material.R.attr.colorSurfaceContainerLowest,
+                Color.WHITE,
+            ),
+        )
     }
 
     private fun viewportFitChanged(viewportFit: Int) {
@@ -859,8 +896,8 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
         AppLifecycleFeature.clearVisibleSession(this)
 
-        GlobalComponents.onPullToRefreshEnabledChanged = null
-        GlobalComponents.onSecureWindowSettingsChanged = null
+        GlobalComponents.removePullToRefreshListener(pullToRefreshSettingListener)
+        GlobalComponents.removeSecureWindowSettingsListener(secureWindowSettingsListener)
         val engineView = fragmentEngineView
         engineView?.setActivityContext(null)
         // Read through `GlobalComponents` rather than the `components` lazy:

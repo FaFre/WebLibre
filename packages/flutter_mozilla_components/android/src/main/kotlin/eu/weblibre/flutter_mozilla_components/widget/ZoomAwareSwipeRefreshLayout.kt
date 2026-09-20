@@ -11,6 +11,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
+import androidx.annotation.VisibleForTesting
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlin.math.abs
 
@@ -56,7 +57,10 @@ class ZoomAwareSwipeRefreshLayout @JvmOverloads constructor(
      *
      * Cleared on ACTION_DOWN rather than on ACTION_UP, so it is still readable
      * while this layout runs its own up-handling — which is where a pull past
-     * the threshold turns into a reload.
+     * the threshold turns into a reload. ACTION_CANCEL clears it too: that
+     * event can never reach [OnRefreshListener.onRefresh] (SwipeRefreshLayout
+     * finishes the spinner from ACTION_UP only), so there is nothing left to
+     * guard and the flag should not read `true` between strokes.
      */
     var strokeIsZoomGesture: Boolean = false
         private set
@@ -64,15 +68,19 @@ class ZoomAwareSwipeRefreshLayout @JvmOverloads constructor(
     private val doubleTapTimeoutMs = ViewConfiguration.getDoubleTapTimeout().toLong()
     private val doubleTapSlopSquare =
         ViewConfiguration.get(context).scaledDoubleTapSlop.toLong().let { it * it }
+    private val touchSlopSquare =
+        ViewConfiguration.get(context).scaledTouchSlop.toLong().let { it * it }
 
-    // Where the stroke in flight started, and whether it has had a second
-    // pointer down. Promoted to the `previous*` fields below once it ends.
+    // Where the stroke in flight started, whether it has had a second pointer
+    // down, and whether it has travelled far enough to be a drag rather than a
+    // tap. Promoted to the `previous*` fields below once it ends.
     private var downX = 0f
     private var downY = 0f
     private var strokeHadMultiplePointers = false
+    private var strokeLeftTapRegion = false
 
-    // The last stroke that ended in an ACTION_UP with a single pointer: where
-    // it *started*, and when it ended.
+    // The last stroke that ended in an ACTION_UP as a single-pointer *tap*:
+    // where it started, and when it ended.
     private var previousDownX = 0f
     private var previousDownY = 0f
     private var previousUpTime = 0L
@@ -80,9 +88,24 @@ class ZoomAwareSwipeRefreshLayout @JvmOverloads constructor(
 
     private var previousX = 0f
     private var previousY = 0f
-    private var disallowInterceptTouchEvent = false
+
+    @VisibleForTesting
+    internal var disallowInterceptTouchEvent = false
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        // Any multi-pointer event marks the stroke, not just the
+        // ACTION_POINTER_DOWN that introduced the second finger — upstream
+        // checks `pointerCount` for the same reason. A stroke can reach this
+        // layout already carrying two pointers when the stream was
+        // re-dispatched or synthesised further up (which the browser container
+        // above does), and then the ACTION_POINTER_DOWN never arrives here at
+        // all. Runs before the branches below so ACTION_DOWN — always a single
+        // pointer — still resets, and so a cancelled pinch still clears.
+        if (ev.pointerCount > 1) {
+            strokeIsZoomGesture = true
+            strokeHadMultiplePointers = true
+        }
+
         when (ev.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 // Against the previous stroke, before this one overwrites it.
@@ -90,24 +113,54 @@ class ZoomAwareSwipeRefreshLayout @JvmOverloads constructor(
                 downX = ev.x
                 downY = ev.y
                 strokeHadMultiplePointers = false
+                strokeLeftTapRegion = false
+                // A new stroke cannot inherit the previous one's disallow.
+                // NestedGeckoView lifts its own on the terminating ACTION_UP /
+                // ACTION_CANCEL, but that event does not always arrive here:
+                // Flutter's platform-view pipeline drops ACTION_CANCEL on some
+                // devices, which is the whole reason BackGestureFilterFrameLayout
+                // exists. Left latched, the flag would silently kill
+                // pull-to-refresh for every later stroke, with nothing on screen
+                // to explain it.
+                disallowInterceptTouchEvent = false
             }
 
-            MotionEvent.ACTION_POINTER_DOWN -> {
-                strokeIsZoomGesture = true
-                strokeHadMultiplePointers = true
+            MotionEvent.ACTION_MOVE -> {
+                // Past touch slop this stroke is a drag, and a drag is not a
+                // tap — see [strokeLeftTapRegion]'s use at ACTION_UP.
+                if (!strokeLeftTapRegion) {
+                    val dx = (ev.x - downX).toLong()
+                    val dy = (ev.y - downY).toLong()
+                    if (dx * dx + dy * dy > touchSlopSquare) {
+                        strokeLeftTapRegion = true
+                    }
+                }
             }
 
             MotionEvent.ACTION_UP -> {
-                // A pinch is not the first tap of a double tap, so a stroke
-                // that had a second pointer does not seed one.
-                hasPreviousStroke = !strokeHadMultiplePointers
+                // Only a single-pointer *tap* can be the first tap of a double
+                // tap. A pinch is not one, and neither is a drag: without the
+                // tap-region check, every completed scroll would seed a
+                // candidate, and a second pull starting near where the first one
+                // started — a perfectly ordinary way to retry a pull-to-refresh
+                // — would be read as a double tap and silently suppressed.
+                // GestureDetector drops its own double-tap candidacy the moment
+                // a stroke starts scrolling, for the same reason.
+                hasPreviousStroke = !strokeHadMultiplePointers && !strokeLeftTapRegion
                 previousDownX = downX
                 previousDownY = downY
                 previousUpTime = ev.eventTime
             }
 
-            // A cancelled stroke never produced a tap either.
-            MotionEvent.ACTION_CANCEL -> hasPreviousStroke = false
+            MotionEvent.ACTION_CANCEL -> {
+                // A cancelled stroke never produced a tap either, and it can no
+                // longer reach onRefresh, so the zoom verdict is released here
+                // rather than held until the next ACTION_DOWN.
+                hasPreviousStroke = false
+                strokeIsZoomGesture = false
+                strokeHadMultiplePointers = false
+                strokeLeftTapRegion = false
+            }
         }
 
         return super.dispatchTouchEvent(ev)
@@ -164,7 +217,8 @@ class ZoomAwareSwipeRefreshLayout @JvmOverloads constructor(
      * Whether `ev` is the second tap of a double tap, following
      * `GestureDetectorCompat#isConsideredDoubleTap`: the gap is measured from
      * the previous stroke's ACTION_UP, but the distance is measured between the
-     * two ACTION_DOWNs.
+     * two ACTION_DOWNs — and the previous stroke has to have been a tap at all,
+     * which is what `hasPreviousStroke` records.
      *
      * Comparing against where the previous stroke *ended* instead would call
      * any touch that lands near the end of a scroll or a pinch a double tap,
