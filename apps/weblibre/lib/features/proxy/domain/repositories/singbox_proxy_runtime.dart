@@ -59,8 +59,6 @@ abstract interface class SingboxProxyClient {
   Future<void> stopAll();
 
   Future<SingboxProxyRuntimeState> getState();
-
-  Future<void> dispose();
 }
 
 class FlutterSingboxProxyClient implements SingboxProxyClient {
@@ -101,9 +99,6 @@ class FlutterSingboxProxyClient implements SingboxProxyClient {
 
   @override
   Future<SingboxProxyRuntimeState> getState() => _plugin.getState();
-
-  @override
-  Future<void> dispose() => _plugin.dispose();
 }
 
 @Riverpod(keepAlive: true)
@@ -445,7 +440,6 @@ class SingboxProxyRuntimeRepository extends _$SingboxProxyRuntimeRepository {
 
     ref.onDispose(() {
       unawaited(stateSubscription.cancel());
-      unawaited(plugin.dispose());
     });
 
     return plugin.getState();

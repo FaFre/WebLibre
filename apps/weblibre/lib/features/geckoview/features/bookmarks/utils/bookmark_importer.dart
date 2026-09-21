@@ -113,7 +113,7 @@ class _ImportProgressReceiver extends GeckoBookmarksEvents {
   final void Function(int insertedItemCount) _onProgress;
 
   @override
-  void onImportProgress(int insertedItemCount) =>
+  Future<void> onImportProgress(int insertedItemCount) async =>
       _onProgress(insertedItemCount);
 }
 

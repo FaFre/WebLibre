@@ -76,17 +76,17 @@ class GeckoGestureService extends GeckoGestureEvents {
   // GeckoGestureEvents implementation
 
   @override
-  void onGestureRecognized(int sequence, String gestureKey) {
+  Future<void> onGestureRecognized(int sequence, String gestureKey) async {
     _recognizedGestureSubject.addWhenMoreRecent(sequence, null, gestureKey);
   }
 
   @override
-  void onGestureProgress(int sequence, String partialKey) {
+  Future<void> onGestureProgress(int sequence, String partialKey) async {
     _gestureProgressSubject.addWhenMoreRecent(sequence, null, partialKey);
   }
 
   @override
-  void onGestureReset(int sequence) {
+  Future<void> onGestureReset(int sequence) async {
     _gestureProgressSubject.addWhenMoreRecent(sequence, null, null);
   }
 

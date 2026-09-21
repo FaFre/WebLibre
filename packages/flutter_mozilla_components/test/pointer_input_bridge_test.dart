@@ -78,7 +78,7 @@ void main() {
   }
 
   /// Asks the bridge what the native router would ask, in physical pixels.
-  PointerHitTest hitTest(
+  Future<PointerHitTest> hitTest(
     WidgetTester tester,
     Offset logicalPosition, {
     bool tracksHover = false,
@@ -102,7 +102,7 @@ void main() {
     await pump(tester, _surface(1));
     expect(host.resets, hasLength(1));
     expect(
-      hitTest(tester, const Offset(100, 120)).target,
+      (await hitTest(tester, const Offset(100, 120))).target,
       isTarget(1, 200, 240),
     );
   });
@@ -123,9 +123,9 @@ void main() {
         ],
       ),
     );
-    expect(hitTest(tester, const Offset(50, 50)).target, isNull);
+    expect((await hitTest(tester, const Offset(50, 50))).target, isNull);
     expect(
-      hitTest(tester, const Offset(50, 150)).target,
+      (await hitTest(tester, const Offset(50, 150))).target,
       isTarget(1, 100, 300),
     );
   });
@@ -144,7 +144,10 @@ void main() {
         ],
       ),
     );
-    expect(hitTest(tester, const Offset(50, 50)).target, isTarget(1, 100, 100));
+    expect(
+      (await hitTest(tester, const Offset(50, 50))).target,
+      isTarget(1, 100, 100),
+    );
   });
 
   testWidgets('a popup body is distinct from its Flutter handle and scrim', (
@@ -175,10 +178,10 @@ void main() {
         ],
       ),
     );
-    expect(hitTest(tester, const Offset(50, 50)).target, isNull);
-    expect(hitTest(tester, const Offset(150, 125)).target, isNull);
+    expect((await hitTest(tester, const Offset(50, 50))).target, isNull);
+    expect((await hitTest(tester, const Offset(150, 125))).target, isNull);
     expect(
-      hitTest(tester, const Offset(150, 200)).target,
+      (await hitTest(tester, const Offset(150, 200))).target,
       isTarget(2, 100, 100),
     );
   });
@@ -203,10 +206,10 @@ void main() {
       ),
     );
     expect(
-      hitTest(tester, const Offset(125, 150)).target,
+      (await hitTest(tester, const Offset(125, 150))).target,
       isTarget(1, 100, 200),
     );
-    expect(hitTest(tester, const Offset(250, 250)).target, isNull);
+    expect((await hitTest(tester, const Offset(250, 250))).target, isNull);
   });
 
   testWidgets('an unregistered platform view covers the surface below it', (
@@ -221,7 +224,7 @@ void main() {
         ],
       ),
     );
-    expect(hitTest(tester, const Offset(100, 100)).target, isNull);
+    expect((await hitTest(tester, const Offset(100, 100))).target, isNull);
   });
 
   testWidgets('a menu overlay blocks the surface without a route change', (
@@ -253,11 +256,14 @@ void main() {
     menu.open();
     await tester.pumpAndSettle();
     expect(
-      hitTest(tester, tester.getCenter(find.text('Overlay item'))).target,
+      (await hitTest(
+        tester,
+        tester.getCenter(find.text('Overlay item')),
+      )).target,
       isNull,
     );
     expect(
-      hitTest(tester, const Offset(600, 400)).target,
+      (await hitTest(tester, const Offset(600, 400))).target,
       isTarget(1, 1200, 800),
     );
   });
@@ -274,18 +280,18 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(
-      hitTest(tester, tester.getCenter(find.text('Dialog'))).target,
+      (await hitTest(tester, tester.getCenter(find.text('Dialog')))).target,
       isNull,
     );
-    expect(hitTest(tester, const Offset(20, 20)).target, isNull);
+    expect((await hitTest(tester, const Offset(20, 20))).target, isNull);
   });
 
   testWidgets('revisions increase across every answer the bridge gives', (
     tester,
   ) async {
     await pump(tester, _surface(1));
-    final first = hitTest(tester, const Offset(100, 100));
-    final second = hitTest(tester, const Offset(100, 100));
+    final first = await hitTest(tester, const Offset(100, 100));
+    final second = await hitTest(tester, const Offset(100, 100));
     expect(second.revision, greaterThan(first.revision));
   });
 
@@ -293,7 +299,7 @@ void main() {
     tester,
   ) async {
     await pump(tester, _surface(1));
-    final before = hitTest(tester, const Offset(100, 100));
+    final before = await hitTest(tester, const Offset(100, 100));
 
     // Every registration gone and back again: the surface is unmounted under a
     // full-screen route and mounted when it closes. The router hears the new
@@ -304,7 +310,7 @@ void main() {
     expect(PointerInputBridge.instance, isNull);
     await pump(tester, _surface(1));
 
-    final after = hitTest(tester, const Offset(100, 100));
+    final after = await hitTest(tester, const Offset(100, 100));
     expect(after.revision, greaterThan(before.revision));
   });
 
@@ -330,7 +336,11 @@ void main() {
         },
       ),
     );
-    final initial = hitTest(tester, const Offset(100, 100), tracksHover: true);
+    final initial = await hitTest(
+      tester,
+      const Offset(100, 100),
+      tracksHover: true,
+    );
 
     update(() => covered = true);
     await tester.pumpAndSettle();
@@ -346,7 +356,7 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     // Once the cursor has left, nothing is watched any more.
-    PointerInputBridge.instance!.pointerExit();
+    await PointerInputBridge.instance!.pointerExit();
     host.hoverTargets.clear();
     update(() => covered = true);
     await tester.pumpAndSettle();
@@ -372,7 +382,7 @@ void main() {
         ],
       ),
     );
-    expect(hitTest(tester, const Offset(100, 100)).target, isNull);
+    expect((await hitTest(tester, const Offset(100, 100))).target, isNull);
 
     tester.binding.handlePointerEvent(
       const PointerScrollEvent(
@@ -411,7 +421,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: _surface(1)));
     expect(host.resets, hasLength(3));
     expect(
-      hitTest(tester, const Offset(100, 100)).target,
+      (await hitTest(tester, const Offset(100, 100))).target,
       isTarget(1, 200, 200),
     );
   });
@@ -422,7 +432,7 @@ void main() {
     await pump(tester, _surface(1));
     await tester.pumpWidget(MaterialApp(home: _surface(2)));
     expect(
-      hitTest(tester, const Offset(100, 100)).target,
+      (await hitTest(tester, const Offset(100, 100))).target,
       isTarget(2, 200, 200),
     );
   });

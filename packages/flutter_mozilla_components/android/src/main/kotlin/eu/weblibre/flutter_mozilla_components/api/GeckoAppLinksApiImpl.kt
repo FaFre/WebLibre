@@ -28,11 +28,8 @@ import eu.weblibre.flutter_mozilla_components.pigeons.AppLinkTarget
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAppLinksApi
 import mozilla.components.browser.state.selector.findTabOrCustomTab
 import mozilla.components.support.base.log.logger.Logger
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import androidx.annotation.MainThread
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -44,7 +41,6 @@ class GeckoAppLinksApiImpl(
     private val context: Context,
 ) : GeckoAppLinksApi {
     companion object {
-        private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
         private val logger = Logger("GeckoAppLinksApi")
     }
 
@@ -54,73 +50,54 @@ class GeckoAppLinksApiImpl(
     private val resolver get() = AppLinkRuntime.get(context).resolver
     private val launcher get() = AppLinkRuntime.get(context).launcher
 
-    override fun setAppLinkPolicy(
-        snapshot: AppLinkPolicySnapshot,
-        callback: (Result<Unit>) -> Unit,
-    ) {
-        coroutineScope.launch {
-            try {
-                // A profile must be bound before policy can be applied. The Dart
-                // replicator retries after initialisation (§2.8, §2.10).
-                val profileContext = GlobalComponents.components?.profileApplicationContext
-                    ?: throw IllegalStateException("No profile bound for app-link policy")
-                val store = AppLinkPolicyStores.forProfile(profileContext)
-                val persisted = store.setPolicy(snapshot.toAppLinkPolicy())
-                if (persisted) {
-                    callback(Result.success(Unit))
-                } else {
-                    callback(Result.failure(IllegalStateException("Failed to persist app-link policy")))
-                }
-            } catch (e: Exception) {
-                callback(Result.failure(e))
+    override suspend fun setAppLinkPolicy(snapshot: AppLinkPolicySnapshot) {
+        withContext(Dispatchers.Default) {
+            // A profile must be bound before policy can be applied. The Dart
+            // replicator retries after initialisation (§2.8, §2.10).
+            val profileContext = GlobalComponents.components?.profileApplicationContext
+                ?: throw IllegalStateException("No profile bound for app-link policy")
+            val store = AppLinkPolicyStores.forProfile(profileContext)
+            val persisted = store.setPolicy(snapshot.toAppLinkPolicy())
+            if (!persisted) {
+                throw IllegalStateException("Failed to persist app-link policy")
             }
         }
     }
 
-    override fun resolveAppLink(
+    override suspend fun resolveAppLink(
         url: String,
         includeHttpAppLinks: Boolean,
-        callback: (Result<AppLinkTarget?>) -> Unit,
-    ) {
-        coroutineScope.launch {
-            try {
-                val resolved = resolver.resolve(url, includeHttpAppLinks = includeHttpAppLinks)
-                if (!resolved.hasExternalApp) {
-                    callback(Result.success(null))
-                    return@launch
-                }
-                callback(
-                    Result.success(
-                        AppLinkTarget(
-                            url = url,
-                            appName = resolved.appName,
-                            packageName = resolved.packageName,
-                            fallbackUrl = resolved.fallbackUrl,
-                            isMarketplace = false,
-                            isAmbiguous = resolved.isAmbiguous,
-                            engineSupportsScheme = resolved.engineSupportsScheme,
-                            scopeKey = resolved.scopeKey,
-                        ),
-                    ),
-                )
-            } catch (e: Exception) {
-                // Uniform failure semantics (§2.8): callers cannot distinguish "nothing installed"
-                // from "resolution failed".
-                callback(Result.success(null))
+    ): AppLinkTarget? = withContext(Dispatchers.Default) {
+        try {
+            val resolved = resolver.resolve(url, includeHttpAppLinks = includeHttpAppLinks)
+            if (!resolved.hasExternalApp) {
+                return@withContext null
             }
+            AppLinkTarget(
+                url = url,
+                appName = resolved.appName,
+                packageName = resolved.packageName,
+                fallbackUrl = resolved.fallbackUrl,
+                isMarketplace = false,
+                isAmbiguous = resolved.isAmbiguous,
+                engineSupportsScheme = resolved.engineSupportsScheme,
+                scopeKey = resolved.scopeKey,
+            )
+        } catch (e: Exception) {
+            // Uniform failure semantics (§2.8): callers cannot distinguish "nothing installed"
+            // from "resolution failed".
+            null
         }
     }
 
-    override fun launchAppLink(url: String, callback: (Result<Boolean>) -> Unit) {
-        coroutineScope.launch {
-            try {
-                val result = launcher.launch(url, mode = AppLinkLaunchMode.MANUAL)
-                logger.info("launchAppLink($url) -> $result")
-                callback(Result.success(result == AppLinkLaunchResult.LAUNCHED))
-            } catch (e: Exception) {
-                logger.error("launchAppLink($url) failed", e)
-                callback(Result.success(false))
-            }
+    override suspend fun launchAppLink(url: String): Boolean = withContext(Dispatchers.Default) {
+        try {
+            val result = launcher.launch(url, mode = AppLinkLaunchMode.MANUAL)
+            logger.info("launchAppLink($url) -> $result")
+            result == AppLinkLaunchResult.LAUNCHED
+        } catch (e: Exception) {
+            logger.error("launchAppLink($url) failed", e)
+            false
         }
     }
 
@@ -130,94 +107,86 @@ class GeckoAppLinksApiImpl(
         )
     }
 
-    override fun getPendingAppLinkPrompts(
+    override suspend fun getPendingAppLinkPrompts(
         owner: AppLinkPromptOwner,
-        callback: (Result<List<AppLinkPromptRequest>>) -> Unit,
-    ) {
-        coroutineScope.launch {
-            try {
-                val components = GlobalComponents.components
-                val list = components
-                    ?.let {
-                        val store = pendingStoreFor(it)
-                        val pending = store.getPending(owner).map { request ->
-                            request.toPigeon(store.expiresInMs(request))
-                        }
-                        pending
+    ): List<AppLinkPromptRequest> = withContext(Dispatchers.Default) {
+        try {
+            val components = GlobalComponents.components
+            components
+                ?.let {
+                    val store = pendingStoreFor(it)
+                    val pending = store.getPending(owner).map { request ->
+                        request.toPigeon(store.expiresInMs(request))
                     }
-                    ?: emptyList()
-
-                callback(Result.success(list))
-            } catch (e: Exception) {
-                callback(Result.success(emptyList()))
-            }
+                    pending
+                }
+                ?: emptyList()
+        } catch (e: Exception) {
+            emptyList()
         }
     }
 
-    override fun resolvePendingAppLink(
+    override suspend fun resolvePendingAppLink(
         requestId: Long,
         decision: AppLinkDecision,
-        callback: (Result<AppLinkResolutionResult>) -> Unit,
-    ) {
-        coroutineScope.launch {
-            try {
-                val components = GlobalComponents.components
-                    ?: return@launch callback(Result.success(stale()))
-                val store = pendingStoreFor(components)
+    ): AppLinkResolutionResult = withContext(Dispatchers.Default) resolve@{
+        try {
+            val components = GlobalComponents.components
+                ?: return@resolve stale()
+            val store = pendingStoreFor(components)
 
-                // Consume atomically; the store lock is released before any side effect.
-                val request = store.consume(requestId)
-                if (request == null) {
-                    // The request was invalidated (navigation/tab close/expiry) before the user
-                    // resolved it — the prompt shown was stale. No launch, no page change.
-                    logger.info("resolvePendingAppLink($requestId, $decision) -> stale (no pending request)")
-                    return@launch callback(Result.success(stale()))
-                }
-
-                // This scope is `Dispatchers.Default`, and everything below reaches the engine:
-                // launching, loading a fallback, and claiming a held navigation. Navigation itself
-                // runs on the UI thread, so claiming from here would race it — and would hand the
-                // engine session a load from the wrong thread besides.
-                val result = withContext(Dispatchers.Main) {
-                    // Never launch into a session that no longer exists — checked here rather than
-                    // before the thread handoff, because the tab can close during the handoff and a
-                    // check that stale would let an external app open for a tab that is gone.
-                    val tabAlive = components.core.store.state
-                        .findTabOrCustomTab(request.tabId) != null
-                    if (!tabAlive) {
-                        logger.info(
-                            "resolvePendingAppLink($requestId) -> dead_session (${request.tabId})",
-                        )
-                        return@withContext AppLinkResolutionResult(false, false, "dead_session")
-                    }
-
-                    when (decision) {
-                        AppLinkDecision.OPEN -> handleOpen(components, request)
-                        AppLinkDecision.CANCEL -> {
-                            store.recordSuppression(request.tabId, request.suppressionKey)
-                            // Under `blockWhilePrompting` the page never loaded; declining is the
-                            // user asking for it in the browser, so it is owed to them now. A no-op
-                            // on the non-blocking path, where the page is already on screen.
-                            releaseHeldNavigation(
-                                store,
-                                components.core.store,
-                                components.useCases.sessionUseCases,
-                                request,
-                                reason = "cancel",
-                            )
-                            AppLinkResolutionResult(false, false, null)
-                        }
-                        // Closing the prompt is not a choice between the app and browser. Consume
-                        // the request, but otherwise leave both the current page and future prompts
-                        // untouched.
-                        AppLinkDecision.DISMISS -> AppLinkResolutionResult(false, false, null)
-                    }
-                }
-                logger.info("resolvePendingAppLink id=$requestId -> $result")
-                callback(Result.success(result))
-            } catch (e: Exception) {
-                callback(Result.success(AppLinkResolutionResult(false, false, "launch_failed")))
+            // Consume atomically; the store lock is released before any side effect.
+            val request = store.consume(requestId)
+            if (request == null) {
+                // The request was invalidated (navigation/tab close/expiry) before the user
+                // resolved it — the prompt shown was stale. No launch, no page change.
+                logger.info("resolvePendingAppLink($requestId, $decision) -> stale (no pending request)")
+                return@resolve stale()
             }
+
+            // This runs on `Dispatchers.Default`, and everything below reaches the engine:
+            // launching, loading a fallback, and claiming a held navigation. Navigation itself
+            // runs on the UI thread, so claiming from here would race it — and would hand the
+            // engine session a load from the wrong thread besides.
+            val result = withContext(Dispatchers.Main) {
+                // Never launch into a session that no longer exists — checked here rather than
+                // before the thread handoff, because the tab can close during the handoff and a
+                // check that stale would let an external app open for a tab that is gone.
+                val tabAlive = components.core.store.state
+                    .findTabOrCustomTab(request.tabId) != null
+                if (!tabAlive) {
+                    logger.info(
+                        "resolvePendingAppLink($requestId) -> dead_session (${request.tabId})",
+                    )
+                    return@withContext AppLinkResolutionResult(false, false, "dead_session")
+                }
+
+                when (decision) {
+                    AppLinkDecision.OPEN -> handleOpen(components, request)
+                    AppLinkDecision.CANCEL -> {
+                        store.recordSuppression(request.tabId, request.suppressionKey)
+                        // Under `blockWhilePrompting` the page never loaded; declining is the
+                        // user asking for it in the browser, so it is owed to them now. A no-op
+                        // on the non-blocking path, where the page is already on screen.
+                        releaseHeldNavigation(
+                            store,
+                            components.core.store,
+                            components.useCases.sessionUseCases,
+                            request,
+                            reason = "cancel",
+                        )
+                        AppLinkResolutionResult(false, false, null)
+                    }
+                    // Closing the prompt is not a choice between the app and browser. Consume
+                    // the request, but otherwise leave both the current page and future prompts
+                    // untouched.
+                    AppLinkDecision.DISMISS -> AppLinkResolutionResult(false, false, null)
+                }
+            }
+            logger.info("resolvePendingAppLink id=$requestId -> $result")
+            result
+        } catch (e: Exception) {
+            AppLinkResolutionResult(false, false, "launch_failed")
         }
     }
 

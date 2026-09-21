@@ -8,7 +8,6 @@ package eu.weblibre.flutter_mozilla_components.api
 
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
-import eu.weblibre.flutter_mozilla_components.api.GeckoDeleteBrowsingDataControllerImpl.Companion
 import eu.weblibre.flutter_mozilla_components.ext.toWebPBytes
 import eu.weblibre.flutter_mozilla_components.pigeons.AutocompleteResult
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSuggestion
@@ -19,7 +18,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import mozilla.components.concept.engine.Engine
 import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
 
@@ -34,25 +32,16 @@ class GeckoSuggestionApiImpl(
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
     }
 
-    override fun getAutocompleteSuggestion(
-        query: String,
-        callback: (Result<AutocompleteResult?>) -> Unit
-    ) {
-        coroutineScope.launch {
-            withContext(Dispatchers.Main) {
-                val suggestion = components.core.historyStorage.getAutocompleteSuggestion(query)
+    override suspend fun getAutocompleteSuggestion(query: String): AutocompleteResult? {
+        val suggestion = components.core.historyStorage.getAutocompleteSuggestion(query)
 
-                callback(Result.success( suggestion?.let { AutocompleteResult(
-                    input = it.input,
-                    url = it.url,
-                    text = it.text,
-                    totalItems = it.totalItems.toLong(),
-                    source = it.source
-                )}
-
-                ))
-            }
-        }
+        return suggestion?.let { AutocompleteResult(
+            input = it.input,
+            url = it.url,
+            text = it.text,
+            totalItems = it.totalItems.toLong(),
+            source = it.source
+        )}
     }
 
     override fun querySuggestions(text: String, providers: List<GeckoSuggestionType>) {

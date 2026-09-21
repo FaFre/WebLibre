@@ -11,86 +11,56 @@ import eu.weblibre.flutter_mozilla_components.pigeons.AutoplayStatus
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSitePermissionsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.SitePermissionStatus
 import eu.weblibre.flutter_mozilla_components.pigeons.SitePermissions as PigeonSitePermissions
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import mozilla.components.concept.engine.permission.SitePermissions as MozillaSitePermissions
 import mozilla.components.concept.engine.permission.SitePermissions.Status as MozillaStatus
 import mozilla.components.concept.engine.permission.SitePermissions.AutoplayStatus as MozillaAutoplayStatus
 
 class GeckoSitePermissionsApiImpl : GeckoSitePermissionsApi {
-    companion object {
-        private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    }
-
     private val components by lazy {
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
     }
 
-    override fun getSitePermissions(
+    override suspend fun getSitePermissions(
         origin: String,
-        private: Boolean,
-        callback: (Result<PigeonSitePermissions?>) -> Unit
-    ) {
-        coroutineScope.launch {
-            try {
-                val permissions = withContext(Dispatchers.IO) {
-                    components.core.permissionStorage.findSitePermissionsBy(origin, private)
-                }
-                callback(Result.success(permissions?.toPigeonSitePermissions()))
-            } catch (e: Exception) {
-                callback(Result.failure(e))
-            }
+        private: Boolean
+    ): PigeonSitePermissions? {
+        val permissions = withContext(Dispatchers.IO) {
+            components.core.permissionStorage.findSitePermissionsBy(origin, private)
         }
+        return permissions?.toPigeonSitePermissions()
     }
 
-    override fun setSitePermissions(
+    override suspend fun setSitePermissions(
         permissions: PigeonSitePermissions,
-        private: Boolean,
-        callback: (Result<Unit>) -> Unit
+        private: Boolean
     ) {
-        coroutineScope.launch {
-            try {
-                val existingPermissions = withContext(Dispatchers.IO) {
-                    components.core.permissionStorage.findSitePermissionsBy(permissions.origin, private)
-                }
+        val existingPermissions = withContext(Dispatchers.IO) {
+            components.core.permissionStorage.findSitePermissionsBy(permissions.origin, private)
+        }
 
-                val mozillaPermissions = permissions.toMozillaSitePermissions(existingPermissions)
+        val mozillaPermissions = permissions.toMozillaSitePermissions(existingPermissions)
 
-                withContext(Dispatchers.IO) {
-                    if (existingPermissions != null) {
-                        components.core.permissionStorage.updateSitePermissions(mozillaPermissions, private)
-                    } else {
-                        components.core.permissionStorage.add(mozillaPermissions, private)
-                    }
-                }
-                callback(Result.success(Unit))
-            } catch (e: Exception) {
-                callback(Result.failure(e))
+        withContext(Dispatchers.IO) {
+            if (existingPermissions != null) {
+                components.core.permissionStorage.updateSitePermissions(mozillaPermissions, private)
+            } else {
+                components.core.permissionStorage.add(mozillaPermissions, private)
             }
         }
     }
 
-    override fun deleteSitePermissions(
+    override suspend fun deleteSitePermissions(
         origin: String,
-        private: Boolean,
-        callback: (Result<Unit>) -> Unit
+        private: Boolean
     ) {
-        coroutineScope.launch {
-            try {
-                val permissions = withContext(Dispatchers.IO) {
-                    components.core.permissionStorage.findSitePermissionsBy(origin, private)
-                }
-                if (permissions != null) {
-                    withContext(Dispatchers.IO) {
-                        components.core.permissionStorage.deleteSitePermissions(permissions, private)
-                    }
-                }
-                callback(Result.success(Unit))
-            } catch (e: Exception) {
-                callback(Result.failure(e))
+        val permissions = withContext(Dispatchers.IO) {
+            components.core.permissionStorage.findSitePermissionsBy(origin, private)
+        }
+        if (permissions != null) {
+            withContext(Dispatchers.IO) {
+                components.core.permissionStorage.deleteSitePermissions(permissions, private)
             }
         }
     }

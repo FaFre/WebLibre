@@ -8,12 +8,12 @@ import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyProfileType
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyRuntimeOptions
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyRuntimeState
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyRuntimeStatus
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.mockito.Mockito.mock
 
 internal class SingboxRuntimeManagerTest {
@@ -192,17 +192,8 @@ private fun SingboxRuntimeManager.awaitStart(
         blockUnmatchedTraffic = true,
         logLevel = SingboxProxyLogLevel.WARN
     ),
-): Result<SingboxProxyRuntimeState> {
-    val latch = CountDownLatch(1)
-    var result: Result<SingboxProxyRuntimeState>? = null
-
-    start(profiles, options) {
-        result = it
-        latch.countDown()
-    }
-
-    assertTrue(latch.await(5, TimeUnit.SECONDS), "Timed out waiting for start callback")
-    return result!!
+): Result<SingboxProxyRuntimeState> = runBlocking {
+    withTimeout(5_000) { runCatching { start(profiles, options) } }
 }
 
 private class FakeLibboxRuntime(

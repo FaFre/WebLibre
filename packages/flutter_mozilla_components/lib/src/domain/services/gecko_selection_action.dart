@@ -38,7 +38,7 @@ class GeckoSelectionActionService extends GeckoSelectionActionEvents {
   }
 
   @override
-  void performSelectionAction(String id, String selectedText) {
+  Future<void> performSelectionAction(String id, String selectedText) async {
     _actions.firstWhere((x) => x.id == id).performAction(selectedText);
   }
 }

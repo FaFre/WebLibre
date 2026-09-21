@@ -10,11 +10,6 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoFetchRedircet
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoFetchRequest
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoFetchResponse
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoHeader
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import mozilla.components.concept.fetch.MutableHeaders
 import mozilla.components.concept.fetch.Request
 import java.util.concurrent.TimeUnit
@@ -24,15 +19,8 @@ class GeckoFetchApiImpl : GeckoFetchApi {
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
     }
 
-    companion object {
-        private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-    }
-
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    override fun fetch(
-        request: GeckoFetchRequest,
-        callback: (Result<GeckoFetchResponse>) -> Unit
-    ) {
+    override suspend fun fetch(request: GeckoFetchRequest): GeckoFetchResponse {
         val headers = MutableHeaders()
         for (header in request.headers) {
             headers.append(header.key, header.value)
@@ -75,18 +63,12 @@ class GeckoFetchApiImpl : GeckoFetchApi {
             conservative = request.conservative
         )
 
-        coroutineScope.launch {
-            withContext(Dispatchers.Main) {
-                val response = components.core.client.fetch(request)
-                callback(
-                    Result.success(
-                    GeckoFetchResponse(
-                    url = response.url,
-                    status = response.status.toLong(),
-                    body = response.body.useStream { stream -> stream.readBytes() },
-                    headers = response.headers.map { it -> GeckoHeader(it.name, it.value) }
-                )))
-            }
-        }
+        val response = components.core.client.fetch(request)
+        return GeckoFetchResponse(
+            url = response.url,
+            status = response.status.toLong(),
+            body = response.body.useStream { stream -> stream.readBytes() },
+            headers = response.headers.map { it -> GeckoHeader(it.name, it.value) }
+        )
     }
 }

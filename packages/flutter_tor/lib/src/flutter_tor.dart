@@ -1,36 +1,25 @@
-import 'dart:async';
-
 import 'package:flutter_tor/src/tor_api.g.dart';
 
 /// Flutter Tor implementation
 /// Provides a clean Dart API over the Pigeon-generated code
 class FlutterTor {
-  FlutterTor() {
-    _torLogApi = _TorLogApiImpl(
-      onLog: _logController.add,
-      onStatus: _statusController.add,
-      onBootstrap: _bootstrapController.add,
-    );
-
-    // Register the Flutter API handler so native can call us
-    TorLogApi.setUp(_torLogApi);
-  }
-
   final _torApi = TorApi();
-  late final _TorLogApiImpl _torLogApi;
 
-  final _logController = StreamController<TorLogMessage>.broadcast();
-  final _statusController = StreamController<TorStatus>.broadcast();
-  final _bootstrapController = StreamController<int>.broadcast();
+  // Every call to a generated stream function opens an event channel of its
+  // own, and native keeps only the newest listener on a channel. Each stream is
+  // therefore created once, and every subscriber shares it.
+  late final Stream<TorLogMessage> _logs = streamLogs();
+  late final Stream<TorStatus> _status = streamStatus();
 
   /// Stream of log messages from Tor
-  Stream<TorLogMessage> get logStream => _logController.stream;
+  Stream<TorLogMessage> get logStream => _logs;
 
   /// Stream of status changes
-  Stream<TorStatus> get statusStream => _statusController.stream;
+  Stream<TorStatus> get statusStream => _status;
 
   /// Stream of bootstrap progress updates (0-100)
-  Stream<int> get bootstrapProgressStream => _bootstrapController.stream;
+  Stream<int> get bootstrapProgressStream =>
+      _status.map((status) => status.bootstrapProgress).distinct();
 
   /// Start Tor with the given configuration
   Future<int> start(TorConfiguration config) async {
@@ -50,38 +39,5 @@ class FlutterTor {
   /// Request a new Tor identity (new circuit)
   Future<void> requestNewIdentity() async {
     await _torApi.requestNewIdentity();
-  }
-
-  /// Dispose resources
-  void dispose() {
-    // Unregister the Flutter API handler
-    TorLogApi.setUp(null);
-
-    unawaited(_logController.close());
-    unawaited(_statusController.close());
-    unawaited(_bootstrapController.close());
-  }
-}
-
-/// Implementation of TorLogApi for receiving callbacks from native
-class _TorLogApiImpl extends TorLogApi {
-  _TorLogApiImpl({
-    required this.onLog,
-    required this.onStatus,
-    required this.onBootstrap,
-  });
-
-  final void Function(TorLogMessage) onLog;
-  final void Function(TorStatus) onStatus;
-  final void Function(int) onBootstrap;
-
-  @override
-  void onLogMessage(TorLogMessage log) {
-    onLog(log);
-  }
-
-  @override
-  void onStatusChanged(TorStatus status) {
-    onStatus(status);
   }
 }

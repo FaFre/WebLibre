@@ -14,6 +14,8 @@ import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyRuntimeState
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyRuntimeStatus
 import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.Executors
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.withContext
 
 class SingboxRuntimeManager(
     context: Context,
@@ -37,6 +39,9 @@ class SingboxRuntimeManager(
     private val runtimeExecutor = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "singbox-runtime").apply { isDaemon = true }
     }
+    // The suspend entry points hop onto the same single thread, so start / stop
+    // keep running one at a time in the order Dart issued them.
+    private val runtimeDispatcher = runtimeExecutor.asCoroutineDispatcher()
 
     private var state = SingboxProxyRuntimeState(
         status = SingboxProxyRuntimeStatus.STOPPED,
@@ -160,33 +165,24 @@ class SingboxRuntimeManager(
         profileId = null
     )
 
-    override fun validateProfile(
-        profile: SingboxProxyProfile,
-        callback: (Result<String?>) -> Unit
-    ) {
-        callback(Result.success(configBuilder.validateProfile(profile)))
-    }
+    override suspend fun validateProfile(profile: SingboxProxyProfile): String? =
+        configBuilder.validateProfile(profile)
 
-    override fun buildConfig(
+    override suspend fun buildConfig(
         profiles: List<SingboxProxyProfile>,
-        options: SingboxProxyRuntimeOptions,
-        callback: (Result<SingboxProxyConfigResult>) -> Unit
-    ) {
+        options: SingboxProxyRuntimeOptions
+    ): SingboxProxyConfigResult =
         // Feed the running runtime's endpoints back in so the previewed
         // listen_ports match what is actually bound instead of allocating a
         // fresh throwaway set on every call.
-        runCatching { configBuilder.build(profiles, options, reusableEndpoints()) }
-            .onSuccess { callback(Result.success(it)) }
-            .onFailure { callback(Result.failure(it)) }
-    }
+        configBuilder.build(profiles, options, reusableEndpoints())
 
-    override fun start(
+    override suspend fun start(
         profiles: List<SingboxProxyProfile>,
-        options: SingboxProxyRuntimeOptions,
-        callback: (Result<SingboxProxyRuntimeState>) -> Unit
-    ) {
-        runtimeExecutor.execute {
-            val result = synchronized(stateLock) {
+        options: SingboxProxyRuntimeOptions
+    ): SingboxProxyRuntimeState {
+        return withContext(runtimeDispatcher) {
+            synchronized(stateLock) {
                 val previousState = state
                 runCatching {
                     updateStateLocked(
@@ -245,14 +241,13 @@ class SingboxRuntimeManager(
                         error.message ?: error::class.java.simpleName
                     )
                 }
-            }
-            dispatchToMain { callback(result) }
+            }.getOrThrow()
         }
     }
 
-    override fun stop(profileIds: List<String>, callback: (Result<Unit>) -> Unit) {
-        runtimeExecutor.execute {
-            val result = synchronized(stateLock) {
+    override suspend fun stop(profileIds: List<String>) {
+        withContext(runtimeDispatcher) {
+            synchronized(stateLock) {
                 runCatching {
                     val remaining = activeProfiles.filterNot { profile ->
                         profile.id in profileIds
@@ -291,14 +286,13 @@ class SingboxRuntimeManager(
                         error.message ?: error::class.java.simpleName
                     )
                 }
-            }
-            dispatchToMain { callback(result) }
+            }.getOrThrow()
         }
     }
 
-    override fun stopAll(callback: (Result<Unit>) -> Unit) {
-        runtimeExecutor.execute {
-            val result = synchronized(stateLock) {
+    override suspend fun stopAll() {
+        withContext(runtimeDispatcher) {
+            synchronized(stateLock) {
                 runCatching {
                     libboxRuntime.stopService()
                     activeProfiles = emptyList()
@@ -316,8 +310,7 @@ class SingboxRuntimeManager(
                         error.message ?: error::class.java.simpleName
                     )
                 }
-            }
-            dispatchToMain { callback(result) }
+            }.getOrThrow()
         }
     }
 

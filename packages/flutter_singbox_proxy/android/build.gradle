@@ -74,6 +74,11 @@ dependencies {
 
     implementation("com.squareup.okhttp3:okhttp:5.5.0")
 
+    // Pigeon's generated Kotlin drives @async host methods and the main-thread
+    // dispatch through coroutines.
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0")
+
     testImplementation("org.json:json:20260814")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.mockito:mockito-core:5.23.0")

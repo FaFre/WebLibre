@@ -126,11 +126,11 @@ class GeckoAddonService extends GeckoAddonEvents {
   }
 
   @override
-  void onRemoveWebExtensionAction(
+  Future<void> onRemoveWebExtensionAction(
     int sequence,
     String extensionId,
     WebExtensionActionType actionType,
-  ) {
+  ) async {
     switch (actionType) {
       case WebExtensionActionType.browser:
         _browserExtensionSubject.addWhenMoreRecent(sequence, extensionId, (
@@ -146,12 +146,12 @@ class GeckoAddonService extends GeckoAddonEvents {
   }
 
   @override
-  void onUpdateWebExtensionIcon(
+  Future<void> onUpdateWebExtensionIcon(
     int sequence,
     String extensionId,
     WebExtensionActionType actionType,
     Uint8List icon,
-  ) {
+  ) async {
     switch (actionType) {
       case WebExtensionActionType.browser:
         _browserIconSubject.addWhenMoreRecent(sequence, extensionId, (
@@ -167,12 +167,12 @@ class GeckoAddonService extends GeckoAddonEvents {
   }
 
   @override
-  void onUpsertWebExtensionAction(
+  Future<void> onUpsertWebExtensionAction(
     int sequence,
     String extensionId,
     WebExtensionActionType actionType,
     WebExtensionData extensionData,
-  ) {
+  ) async {
     switch (actionType) {
       case WebExtensionActionType.browser:
         _browserExtensionSubject.addWhenMoreRecent(sequence, extensionId, (
@@ -188,12 +188,15 @@ class GeckoAddonService extends GeckoAddonEvents {
   }
 
   @override
-  void onWebExtensionPopupRequested(String extensionId, String extensionName) {
+  Future<void> onWebExtensionPopupRequested(
+    String extensionId,
+    String extensionName,
+  ) async {
     _popupSubject.add((extensionId: extensionId, extensionName: extensionName));
   }
 
   @override
-  void onOpenAddonSettingsRequested(String addonId) {
+  Future<void> onOpenAddonSettingsRequested(String addonId) async {
     _openAddonSettingsSubject.add(addonId);
   }
 

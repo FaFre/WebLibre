@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_singbox_proxy/src/singbox_proxy_api.g.dart';
 
 export 'src/singbox_proxy_api.g.dart'
@@ -16,19 +14,19 @@ export 'src/singbox_proxy_api.g.dart'
         SingboxProxyRuntimeState,
         SingboxProxyRuntimeStatus;
 
-class FlutterSingboxProxy implements SingboxProxyEventsApi {
-  FlutterSingboxProxy({SingboxProxyApi? api})
-    : _api = api ?? SingboxProxyApi() {
-    SingboxProxyEventsApi.setUp(this);
-  }
+class FlutterSingboxProxy {
+  FlutterSingboxProxy({SingboxProxyApi? api}) : _api = api ?? SingboxProxyApi();
 
   final SingboxProxyApi _api;
-  final _stateController =
-      StreamController<SingboxProxyRuntimeState>.broadcast();
-  final _logController = StreamController<SingboxProxyLogMessage>.broadcast();
 
-  Stream<SingboxProxyRuntimeState> get stateStream => _stateController.stream;
-  Stream<SingboxProxyLogMessage> get logStream => _logController.stream;
+  // Every call to a generated stream function opens an event channel of its
+  // own, and native keeps only the newest listener on a channel. Each stream is
+  // therefore created once, and every subscriber shares it.
+  late final Stream<SingboxProxyRuntimeState> _states = streamState();
+  late final Stream<SingboxProxyLogMessage> _logs = streamLogs();
+
+  Stream<SingboxProxyRuntimeState> get stateStream => _states;
+  Stream<SingboxProxyLogMessage> get logStream => _logs;
 
   Future<String?> validateProfile(SingboxProxyProfile profile) {
     return _api.validateProfile(profile);
@@ -53,20 +51,4 @@ class FlutterSingboxProxy implements SingboxProxyEventsApi {
   Future<void> stopAll() => _api.stopAll();
 
   Future<SingboxProxyRuntimeState> getState() => _api.getState();
-
-  @override
-  void onStateChanged(SingboxProxyRuntimeState state) {
-    _stateController.add(state);
-  }
-
-  @override
-  void onLogMessage(SingboxProxyLogMessage message) {
-    _logController.add(message);
-  }
-
-  Future<void> dispose() async {
-    SingboxProxyEventsApi.setUp(null);
-    await _stateController.close();
-    await _logController.close();
-  }
 }

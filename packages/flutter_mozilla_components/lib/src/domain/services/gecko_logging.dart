@@ -23,7 +23,7 @@ class GeckoLoggingService extends GeckoLogging {
   }
 
   @override
-  void onLog(LogLevel level, String message) {
+  Future<void> onLog(LogLevel level, String message) async {
     handleLog(level, message);
   }
 }

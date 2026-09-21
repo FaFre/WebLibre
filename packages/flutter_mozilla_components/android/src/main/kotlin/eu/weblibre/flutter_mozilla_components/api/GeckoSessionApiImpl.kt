@@ -20,6 +20,8 @@ import mozilla.components.concept.engine.EngineView
 import mozilla.components.concept.engine.translate.TranslationOptions
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.addons.logger
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import eu.weblibre.flutter_mozilla_components.pigeons.TranslationOptions as PigeonTranslationOptions
 
 /**
@@ -271,41 +273,42 @@ class GeckoSessionApiImpl : GeckoSessionApi {
         }
     }
 
-    override fun requestScreenshot(sendBack: Boolean, callback: (Result<ByteArray?>) -> Unit) {
-        try {
-            val tab = components.core.store.state.selectedTab
-            if (tab == null) {
-                logger.warn("$TAG: No selected tab for screenshot")
-                callback(Result.failure(IllegalStateException("No selected tab for screenshot")))
-                return
-            }
-
-            components.mainBrowserEngineView?.captureThumbnail { bitmap ->
-                try {
-                    if (bitmap != null) {
-                        components.core.store.dispatch(ContentAction.UpdateThumbnailAction(tab.id, bitmap))
-                        if (sendBack) {
-                            val compressed = bitmap.toWebPBytes()
-                            logger.debug("$TAG: Screenshot captured successfully")
-                            callback(Result.success(compressed))
-                        } else {
-                            callback(Result.success(null))
-                        }
-                    } else {
-                        logger.warn("$TAG: Failed to capture screenshot - null bitmap")
-                        callback(Result.success(null))
-                    }
-                } catch (e: Exception) {
-                    logger.error("$TAG: Failed to process screenshot", e)
-                    callback(Result.failure(e))
+    override suspend fun requestScreenshot(sendBack: Boolean): ByteArray? =
+        suspendCancellableCoroutine { continuation ->
+            try {
+                val tab = components.core.store.state.selectedTab
+                if (tab == null) {
+                    logger.warn("$TAG: No selected tab for screenshot")
+                    continuation.resumeWithException(IllegalStateException("No selected tab for screenshot"))
+                    return@suspendCancellableCoroutine
                 }
-            } ?: run {
-                logger.warn("$TAG: No engine view available for screenshot")
-                callback(Result.failure(IllegalStateException("No engine view available")))
+
+                components.mainBrowserEngineView?.captureThumbnail { bitmap ->
+                    try {
+                        if (bitmap != null) {
+                            components.core.store.dispatch(ContentAction.UpdateThumbnailAction(tab.id, bitmap))
+                            if (sendBack) {
+                                val compressed = bitmap.toWebPBytes()
+                                logger.debug("$TAG: Screenshot captured successfully")
+                                continuation.resume(compressed)
+                            } else {
+                                continuation.resume(null)
+                            }
+                        } else {
+                            logger.warn("$TAG: Failed to capture screenshot - null bitmap")
+                            continuation.resume(null)
+                        }
+                    } catch (e: Exception) {
+                        logger.error("$TAG: Failed to process screenshot", e)
+                        continuation.resumeWithException(e)
+                    }
+                } ?: run {
+                    logger.warn("$TAG: No engine view available for screenshot")
+                    continuation.resumeWithException(IllegalStateException("No engine view available"))
+                }
+            } catch (e: Exception) {
+                logger.error("$TAG: Failed to request screenshot", e)
+                continuation.resumeWithException(e)
             }
-        } catch (e: Exception) {
-            logger.error("$TAG: Failed to request screenshot", e)
-            callback(Result.failure(e))
         }
-    }
 }

@@ -665,7 +665,11 @@ class _SandboxHostEventsHandler implements fmc.SandboxCaptureHostEvents {
   SandboxCaptureController? controller;
 
   @override
-  void onSandboxLinkClick(int sequence, String parentTabId, String targetUrl) {
+  Future<void> onSandboxLinkClick(
+    int sequence,
+    String parentTabId,
+    String targetUrl,
+  ) async {
     final uri = Uri.tryParse(targetUrl);
     final c = controller;
     if (uri == null || c == null) return;
@@ -673,12 +677,12 @@ class _SandboxHostEventsHandler implements fmc.SandboxCaptureHostEvents {
   }
 
   @override
-  void onSandboxNewTab(
+  Future<void> onSandboxNewTab(
     int sequence,
     String parentTabId,
     String newTabId,
     String targetUrl,
-  ) {
+  ) async {
     final uri = Uri.tryParse(targetUrl);
     final c = controller;
     if (uri == null || c == null) return;

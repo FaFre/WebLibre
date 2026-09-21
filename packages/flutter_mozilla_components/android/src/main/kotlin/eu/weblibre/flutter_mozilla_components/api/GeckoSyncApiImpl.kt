@@ -11,10 +11,8 @@ import eu.weblibre.flutter_mozilla_components.pigeons.SyncIncomingTab
 import eu.weblibre.flutter_mozilla_components.pigeons.SyncRemoteTab
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import mozilla.components.concept.sync.ConstellationState
 import mozilla.components.concept.sync.DeviceCapability
 import mozilla.components.concept.sync.DeviceCommandOutgoing
@@ -27,8 +25,6 @@ import mozilla.components.service.fxa.sync.SyncReason
 
 class GeckoSyncApiImpl : GeckoSyncApi {
     companion object {
-        private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
         /**
          * `SyncWorkerName.Immediate.name` from mozilla-components.
          *
@@ -43,348 +39,263 @@ class GeckoSyncApiImpl : GeckoSyncApi {
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
     }
 
-    override fun getAccountInfo(callback: (Result<SyncAccountInfo>) -> Unit) {
-        coroutineScope.launch {
-            runCatching {
-                // The account manager reports `FxaState.Uninitialized` until `start()`
-                // has restored the account from disk, and `authenticatedAccount()`
-                // answers null in that state. Reading before then is what made a
-                // signed-in profile come back signed out after a restart.
-                //
-                // Tolerant of the wait failing: if the account manager cannot start
-                // (no network for the device check, a 10s timeout), the best answer is
-                // still whatever it currently knows, not an error that leaves the sync
-                // screen with no state at all. The auth-state event corrects it once
-                // the start does complete.
-                runCatching { components.backgroundServices.awaitStarted() }
+    override suspend fun getAccountInfo(): SyncAccountInfo = withContext(Dispatchers.IO) {
+        // The account manager reports `FxaState.Uninitialized` until `start()`
+        // has restored the account from disk, and `authenticatedAccount()`
+        // answers null in that state. Reading before then is what made a
+        // signed-in profile come back signed out after a restart.
+        //
+        // Tolerant of the wait failing: if the account manager cannot start
+        // (no network for the device check, a 10s timeout), the best answer is
+        // still whatever it currently knows, not an error that leaves the sync
+        // screen with no state at all. The auth-state event corrects it once
+        // the start does complete.
+        runCatching { components.backgroundServices.awaitStarted() }
 
-                components.backgroundServices.currentAccountInfo()
-            }.fold(
-                onSuccess = { callback(Result.success(it)) },
-                onFailure = { callback(Result.failure(it)) },
+        components.backgroundServices.currentAccountInfo()
+    }
+
+    override suspend fun beginAuthentication() {
+        withContext(Dispatchers.IO) {
+            components.backgroundServices.awaitStarted()
+            components.services.accountsAuthFeature.beginAuthentication(
+                context = components.profileApplicationContext,
+                entrypoint = WebLibreFxAEntryPoint.Settings,
+                scopes = setOf(SCOPE_PROFILE, SCOPE_SYNC),
             )
         }
     }
 
-    override fun beginAuthentication(callback: (Result<Unit>) -> Unit) {
-        coroutineScope.launch {
-            runCatching {
-                components.backgroundServices.awaitStarted()
-                components.services.accountsAuthFeature.beginAuthentication(
-                    context = components.profileApplicationContext,
-                    entrypoint = WebLibreFxAEntryPoint.Settings,
-                    scopes = setOf(SCOPE_PROFILE, SCOPE_SYNC),
-                )
-            }.fold(
-                onSuccess = { callback(Result.success(Unit)) },
-                onFailure = { callback(Result.failure(it)) },
-            )
-        }
-    }
-
-    override fun beginPairingAuthentication(
-        pairingUrl: String,
-        callback: (Result<Unit>) -> Unit,
+    override suspend fun beginPairingAuthentication(
+        pairingUrl: String
     ) {
-        coroutineScope.launch {
-            runCatching {
-                components.backgroundServices.awaitStarted()
-                components.services.accountsAuthFeature.beginPairingAuthentication(
-                    context = components.profileApplicationContext,
-                    pairingUrl = pairingUrl,
-                    entrypoint = WebLibreFxAEntryPoint.Settings,
-                    scopes = setOf(SCOPE_PROFILE, SCOPE_SYNC),
-                )
-            }.fold(
-                onSuccess = { callback(Result.success(Unit)) },
-                onFailure = { callback(Result.failure(it)) },
+        withContext(Dispatchers.IO) {
+            components.backgroundServices.awaitStarted()
+            components.services.accountsAuthFeature.beginPairingAuthentication(
+                context = components.profileApplicationContext,
+                pairingUrl = pairingUrl,
+                entrypoint = WebLibreFxAEntryPoint.Settings,
+                scopes = setOf(SCOPE_PROFILE, SCOPE_SYNC),
             )
         }
     }
 
-    override fun logout(callback: (Result<Unit>) -> Unit) {
-        coroutineScope.launch {
-            runCatching {
-                // Tolerant: a user who asked to sign out must not be held back by an
-                // account manager that cannot finish starting.
-                runCatching { components.backgroundServices.awaitStarted() }
-                components.backgroundServices.accountManager.logout()
-            }.fold(
-                onSuccess = { callback(Result.success(Unit)) },
-                onFailure = { callback(Result.failure(it)) },
-            )
+    override suspend fun logout() {
+        withContext(Dispatchers.IO) {
+            // Tolerant: a user who asked to sign out must not be held back by an
+            // account manager that cannot finish starting.
+            runCatching { components.backgroundServices.awaitStarted() }
+            components.backgroundServices.accountManager.logout()
         }
     }
 
-    override fun syncNow(callback: (Result<Unit>) -> Unit) {
-        coroutineScope.launch {
-            runCatching {
-                // Not tolerant, unlike the read paths: `syncNow` on an unstarted
-                // account manager logs "not in the right state" and returns, so
-                // without this the button reported success and did nothing.
-                components.backgroundServices.awaitStarted()
-                clearStalledImmediateSync()
-                components.backgroundServices.accountManager.syncNow(SyncReason.User)
-            }.fold(
-                onSuccess = { callback(Result.success(Unit)) },
-                onFailure = { callback(Result.failure(it)) },
-            )
+    override suspend fun syncNow() {
+        withContext(Dispatchers.IO) {
+            // Not tolerant, unlike the read paths: `syncNow` on an unstarted
+            // account manager logs "not in the right state" and returns, so
+            // without this the button reported success and did nothing.
+            components.backgroundServices.awaitStarted()
+            clearStalledImmediateSync()
+            components.backgroundServices.accountManager.syncNow(SyncReason.User)
         }
     }
 
-    override fun setEngineEnabled(
+    override suspend fun setEngineEnabled(
         engine: SyncEngineValue,
-        enabled: Boolean,
-        callback: (Result<Unit>) -> Unit,
+        enabled: Boolean
     ) {
-        coroutineScope.launch {
-            runCatching {
-                val mapped = when (engine) {
-                    SyncEngineValue.HISTORY -> SyncEngine.History
-                    SyncEngineValue.BOOKMARKS -> SyncEngine.Bookmarks
-                    SyncEngineValue.TABS -> SyncEngine.Tabs
-                }
+        withContext(Dispatchers.IO) {
+            val mapped = when (engine) {
+                SyncEngineValue.HISTORY -> SyncEngine.History
+                SyncEngineValue.BOOKMARKS -> SyncEngine.Bookmarks
+                SyncEngineValue.TABS -> SyncEngine.Tabs
+            }
 
-                // setEngineEnabled persists the choice and triggers the propagating
-                // sync itself; it does not require the account manager to be started.
-                components.backgroundServices.accountManager.setEngineEnabled(mapped, enabled)
-            }.fold(
-                onSuccess = { callback(Result.success(Unit)) },
-                onFailure = { callback(Result.failure(it)) },
-            )
+            // setEngineEnabled persists the choice and triggers the propagating
+            // sync itself; it does not require the account manager to be started.
+            components.backgroundServices.accountManager.setEngineEnabled(mapped, enabled)
         }
     }
 
-    override fun getSyncedTabs(callback: (Result<List<SyncDeviceTabs>>) -> Unit) {
-        coroutineScope.launch {
-            runCatching {
-                val deviceNames = deviceDisplayNames()
-                components.core.remoteTabsStorage.getAll().entries.mapNotNull { (client, tabs) ->
-                    // A client with no name is a device that has left the
-                    // constellation. Dropped, as Fenix does — the name map is backed
-                    // by the cache, so "we know no names at all" is not the failure
-                    // this has to survive.
-                    val deviceName = deviceNames[client.id] ?: return@mapNotNull null
+    override suspend fun getSyncedTabs(): List<SyncDeviceTabs> = withContext(Dispatchers.IO) {
+        val deviceNames = deviceDisplayNames()
+        components.core.remoteTabsStorage.getAll().entries.mapNotNull { (client, tabs) ->
+            // A client with no name is a device that has left the
+            // constellation. Dropped, as Fenix does — the name map is backed
+            // by the cache, so "we know no names at all" is not the failure
+            // this has to survive.
+            val deviceName = deviceNames[client.id] ?: return@mapNotNull null
 
-                    SyncDeviceTabs(
-                        deviceId = client.id,
-                        deviceName = deviceName,
-                        tabs = tabs.map { tab ->
-                            val active = tab.active()
-                            SyncRemoteTab(
-                                title = active.title,
-                                url = active.url,
-                                iconUrl = active.iconUrl,
-                                lastUsed = tab.lastUsed,
-                                inactive = tab.inactive,
-                            )
-                        }.sortedByDescending { it.lastUsed },
+            SyncDeviceTabs(
+                deviceId = client.id,
+                deviceName = deviceName,
+                tabs = tabs.map { tab ->
+                    val active = tab.active()
+                    SyncRemoteTab(
+                        title = active.title,
+                        url = active.url,
+                        iconUrl = active.iconUrl,
+                        lastUsed = tab.lastUsed,
+                        inactive = tab.inactive,
                     )
-                }.sortedBy { it.deviceName.lowercase() }
-            }.fold(
-                onSuccess = { callback(Result.success(it)) },
-                onFailure = { callback(Result.failure(it)) },
+                }.sortedByDescending { it.lastUsed },
             )
-        }
+        }.sortedBy { it.deviceName.lowercase() }
     }
 
-    override fun getDevices(callback: (Result<List<SyncDevice>>) -> Unit) {
-        coroutineScope.launch {
-            runCatching {
-                components.backgroundServices.awaitStarted()
-                if (components.backgroundServices.accountManager.authenticatedAccount() == null) {
-                    return@runCatching emptyList()
-                }
-
-                // Forced: this is the device list, and a device added, removed or
-                // renamed on another client only ever reaches us by asking.
-                val state = constellationState(forceRefresh = true)
-
-                val devices = if (state != null) {
-                    (listOfNotNull(state.currentDevice) + state.otherDevices).map { device ->
-                        SyncDevice(
-                            deviceId = device.id,
-                            // Same override as `getDeviceName`, so the list and the
-                            // setting cannot disagree about this device's name.
-                            displayName = if (device.isCurrentDevice) {
-                                components.backgroundServices.pendingDeviceName
-                                    ?: device.displayName
-                            } else {
-                                device.displayName
-                            },
-                            isCurrentDevice = device.isCurrentDevice,
-                            canSendTab = device.capabilities.contains(DeviceCapability.SEND_TAB),
-                        )
-                    }
-                } else {
-                    // The fetch failed and nothing is in memory. The last constellation
-                    // we saw is a far better answer than an empty list, which reads as
-                    // "you have no other devices".
-                    components.backgroundServices.syncStateCache.devices().map { device ->
-                        SyncDevice(
-                            deviceId = device.deviceId,
-                            displayName = device.displayName,
-                            isCurrentDevice = device.isCurrentDevice,
-                            canSendTab = device.canSendTab,
-                        )
-                    }
-                }
-
-                devices.sortedBy { it.displayName.lowercase() }
-            }.fold(
-                onSuccess = { callback(Result.success(it)) },
-                onFailure = { callback(Result.failure(it)) },
-            )
+    override suspend fun getDevices(): List<SyncDevice> = withContext(Dispatchers.IO) {
+        components.backgroundServices.awaitStarted()
+        if (components.backgroundServices.accountManager.authenticatedAccount() == null) {
+            return@withContext emptyList()
         }
+
+        // Forced: this is the device list, and a device added, removed or
+        // renamed on another client only ever reaches us by asking.
+        val state = constellationState(forceRefresh = true)
+
+        val devices = if (state != null) {
+            (listOfNotNull(state.currentDevice) + state.otherDevices).map { device ->
+                SyncDevice(
+                    deviceId = device.id,
+                    // Same override as `getDeviceName`, so the list and the
+                    // setting cannot disagree about this device's name.
+                    displayName = if (device.isCurrentDevice) {
+                        components.backgroundServices.pendingDeviceName
+                            ?: device.displayName
+                    } else {
+                        device.displayName
+                    },
+                    isCurrentDevice = device.isCurrentDevice,
+                    canSendTab = device.capabilities.contains(DeviceCapability.SEND_TAB),
+                )
+            }
+        } else {
+            // The fetch failed and nothing is in memory. The last constellation
+            // we saw is a far better answer than an empty list, which reads as
+            // "you have no other devices".
+            components.backgroundServices.syncStateCache.devices().map { device ->
+                SyncDevice(
+                    deviceId = device.deviceId,
+                    displayName = device.displayName,
+                    isCurrentDevice = device.isCurrentDevice,
+                    canSendTab = device.canSendTab,
+                )
+            }
+        }
+
+        devices.sortedBy { it.displayName.lowercase() }
     }
 
-    override fun sendTabToDevice(
+    override suspend fun sendTabToDevice(
         deviceId: String,
         title: String,
         url: String,
-        private: Boolean,
-        callback: (Result<Boolean>) -> Unit
-    ) {
-        coroutineScope.launch {
-            runCatching {
-                components.backgroundServices.awaitStarted()
-                val account = components.backgroundServices.accountManager.authenticatedAccount()
-                    ?: return@runCatching false
+        private: Boolean
+    ): Boolean = withContext(Dispatchers.IO) {
+        components.backgroundServices.awaitStarted()
+        val account = components.backgroundServices.accountManager.authenticatedAccount()
+            ?: return@withContext false
 
-                val constellation = account.deviceConstellation()
-                val target = constellationState(forceRefresh = false)?.otherDevices?.firstOrNull {
-                    it.id == deviceId && it.capabilities.contains(DeviceCapability.SEND_TAB)
-                } ?: return@runCatching false
+        val constellation = account.deviceConstellation()
+        val target = constellationState(forceRefresh = false)?.otherDevices?.firstOrNull {
+            it.id == deviceId && it.capabilities.contains(DeviceCapability.SEND_TAB)
+        } ?: return@withContext false
 
-                constellation.sendCommandToDevice(
-                    target.id,
-                    DeviceCommandOutgoing.SendTab(
-                        title = title,
-                        url = url,
-                        privacy = if (private) TabPrivacy.Private else TabPrivacy.Normal,
-                    ),
-                )
-            }.fold(
-                onSuccess = { callback(Result.success(it)) },
-                onFailure = { callback(Result.failure(it)) },
+        constellation.sendCommandToDevice(
+            target.id,
+            DeviceCommandOutgoing.SendTab(
+                title = title,
+                url = url,
+                privacy = if (private) TabPrivacy.Private else TabPrivacy.Normal,
+            ),
+        )
+    }
+
+    override suspend fun refreshDevices() {
+        withContext(Dispatchers.IO) {
+            components.backgroundServices.awaitStarted()
+            val account = components.backgroundServices.accountManager.authenticatedAccount()
+                ?: return@withContext
+
+            val constellation = account.deviceConstellation()
+            constellation.refreshDevices()
+            constellation.state()?.let(components.backgroundServices::cacheConstellation)
+        }
+    }
+
+    override suspend fun pollDeviceCommands() {
+        withContext(Dispatchers.IO) {
+            components.backgroundServices.awaitStarted()
+            val account = components.backgroundServices.accountManager.authenticatedAccount()
+                ?: return@withContext
+
+            account.deviceConstellation().pollForCommands()
+        }
+    }
+
+    override suspend fun drainIncomingTabs(): List<SyncIncomingTab> = withContext(Dispatchers.IO) {
+        components.backgroundServices.drainIncomingTabs().map {
+            SyncIncomingTab(
+                title = it.title,
+                url = it.url,
+                fromDeviceId = it.fromDeviceId,
+                fromDeviceName = it.fromDeviceName,
             )
         }
     }
 
-    override fun refreshDevices(callback: (Result<Unit>) -> Unit) {
-        coroutineScope.launch {
-            runCatching {
-                components.backgroundServices.awaitStarted()
-                val account = components.backgroundServices.accountManager.authenticatedAccount()
-                    ?: return@runCatching
-
-                val constellation = account.deviceConstellation()
-                constellation.refreshDevices()
-                constellation.state()?.let(components.backgroundServices::cacheConstellation)
-            }.fold(
-                onSuccess = { callback(Result.success(Unit)) },
-                onFailure = { callback(Result.failure(it)) },
-            )
+    override suspend fun getDeviceName(): String? = withContext(Dispatchers.IO) {
+        components.backgroundServices.awaitStarted()
+        if (components.backgroundServices.accountManager.authenticatedAccount() == null) {
+            return@withContext null
         }
+
+        // A rename this process made outranks the constellation, because the
+        // constellation cannot confirm it — see `pendingDeviceName`. After
+        // that, live state, and the cache only as a fallback: reading the
+        // cache first let it *shadow* reality, so a name that had changed
+        // elsewhere could never be seen.
+        components.backgroundServices.pendingDeviceName
+            ?: constellationState(forceRefresh = false)?.currentDevice?.displayName
+            ?: components.backgroundServices.syncStateCache.currentDeviceName()
+            // Never "Unknown": this device always has a name it registered
+            // itself under, which is what Fenix falls back to as well.
+            ?: components.backgroundServices.localDeviceName()
     }
 
-    override fun pollDeviceCommands(callback: (Result<Unit>) -> Unit) {
-        coroutineScope.launch {
-            runCatching {
-                components.backgroundServices.awaitStarted()
-                val account = components.backgroundServices.accountManager.authenticatedAccount()
-                    ?: return@runCatching
-
-                account.deviceConstellation().pollForCommands()
-            }.fold(
-                onSuccess = { callback(Result.success(Unit)) },
-                onFailure = { callback(Result.failure(it)) },
-            )
+    override suspend fun setDeviceName(
+        newName: String
+    ): Boolean = withContext(Dispatchers.IO) {
+        val trimmed = newName.trim()
+        if (trimmed.isEmpty()) {
+            return@withContext false
         }
-    }
 
-    override fun drainIncomingTabs(callback: (Result<List<SyncIncomingTab>>) -> Unit) {
-        coroutineScope.launch {
-            runCatching {
-                components.backgroundServices.drainIncomingTabs().map {
-                    SyncIncomingTab(
-                        title = it.title,
-                        url = it.url,
-                        fromDeviceId = it.fromDeviceId,
-                        fromDeviceName = it.fromDeviceName,
-                    )
-                }
-            }.fold(
-                onSuccess = { callback(Result.success(it)) },
-                onFailure = { callback(Result.failure(it)) },
-            )
+        components.backgroundServices.awaitStarted()
+        val account = components.backgroundServices.accountManager.authenticatedAccount()
+            ?: return@withContext false
+
+        val renamed = account.deviceConstellation()
+            .setDeviceName(trimmed, components.profileApplicationContext)
+
+        // AC folds the rename and the refresh that follows it into a single
+        // boolean (`rename && refreshDevices()`), so a rename that reached the
+        // server still reports failure if the refresh after it did not. Ask
+        // the server what the name is now and let that decide — which also
+        // reloads the constellation and the cache behind it.
+        val observed = constellationState(forceRefresh = true)
+            ?.currentDevice
+            ?.displayName
+
+        val succeeded = renamed || observed == trimmed
+        if (succeeded) {
+            // Held until a refresh reports the new name. The refresh above
+            // usually will not: it reads a device list app-services has
+            // cached, so it answers with the name from before the rename.
+            components.backgroundServices.recordDeviceRename(trimmed)
         }
-    }
 
-    override fun getDeviceName(callback: (Result<String?>) -> Unit) {
-        coroutineScope.launch {
-            runCatching {
-                components.backgroundServices.awaitStarted()
-                if (components.backgroundServices.accountManager.authenticatedAccount() == null) {
-                    return@runCatching null
-                }
-
-                // A rename this process made outranks the constellation, because the
-                // constellation cannot confirm it — see `pendingDeviceName`. After
-                // that, live state, and the cache only as a fallback: reading the
-                // cache first let it *shadow* reality, so a name that had changed
-                // elsewhere could never be seen.
-                components.backgroundServices.pendingDeviceName
-                    ?: constellationState(forceRefresh = false)?.currentDevice?.displayName
-                    ?: components.backgroundServices.syncStateCache.currentDeviceName()
-                    // Never "Unknown": this device always has a name it registered
-                    // itself under, which is what Fenix falls back to as well.
-                    ?: components.backgroundServices.localDeviceName()
-            }.fold(
-                onSuccess = { callback(Result.success(it)) },
-                onFailure = { callback(Result.failure(it)) },
-            )
-        }
-    }
-
-    override fun setDeviceName(newName: String, callback: (Result<Boolean>) -> Unit) {
-        coroutineScope.launch {
-            runCatching {
-                val trimmed = newName.trim()
-                if (trimmed.isEmpty()) {
-                    return@runCatching false
-                }
-
-                components.backgroundServices.awaitStarted()
-                val account = components.backgroundServices.accountManager.authenticatedAccount()
-                    ?: return@runCatching false
-
-                val renamed = account.deviceConstellation()
-                    .setDeviceName(trimmed, components.profileApplicationContext)
-
-                // AC folds the rename and the refresh that follows it into a single
-                // boolean (`rename && refreshDevices()`), so a rename that reached the
-                // server still reports failure if the refresh after it did not. Ask
-                // the server what the name is now and let that decide — which also
-                // reloads the constellation and the cache behind it.
-                val observed = constellationState(forceRefresh = true)
-                    ?.currentDevice
-                    ?.displayName
-
-                val succeeded = renamed || observed == trimmed
-                if (succeeded) {
-                    // Held until a refresh reports the new name. The refresh above
-                    // usually will not: it reads a device list app-services has
-                    // cached, so it answers with the name from before the rename.
-                    components.backgroundServices.recordDeviceRename(trimmed)
-                }
-
-                succeeded
-            }.fold(
-                onSuccess = { callback(Result.success(it)) },
-                onFailure = { callback(Result.failure(it)) },
-            )
-        }
+        succeeded
     }
 
     /**

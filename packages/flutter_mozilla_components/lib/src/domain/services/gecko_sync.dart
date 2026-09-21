@@ -84,22 +84,25 @@ class GeckoSyncStateService extends GeckoSyncStateEvents {
   Stream<String?> get syncErrorEvents => _syncErrorSubject.stream;
 
   @override
-  void onAuthStateChanged(int sequence, SyncAccountInfo accountInfo) {
+  Future<void> onAuthStateChanged(
+    int sequence,
+    SyncAccountInfo accountInfo,
+  ) async {
     _authStateSubject.addWhenMoreRecent(sequence, null, accountInfo);
   }
 
   @override
-  void onSyncStarted(int sequence) {
+  Future<void> onSyncStarted(int sequence) async {
     _syncStartedSubject.addWhenMoreRecent(sequence, null, null);
   }
 
   @override
-  void onSyncCompleted(int sequence) {
+  Future<void> onSyncCompleted(int sequence) async {
     _syncCompletedSubject.addWhenMoreRecent(sequence, null, null);
   }
 
   @override
-  void onSyncError(int sequence, String? errorMessage) {
+  Future<void> onSyncError(int sequence, String? errorMessage) async {
     _syncErrorSubject.addWhenMoreRecent(sequence, null, errorMessage);
   }
 

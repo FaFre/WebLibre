@@ -9,7 +9,9 @@ package eu.weblibre.flutter_mozilla_components.api
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTrackingProtectionApi
 import eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionException
+import kotlinx.coroutines.suspendCancellableCoroutine
 import mozilla.components.concept.engine.content.blocking.TrackingProtectionException as MozillaTrackingProtectionException
+import kotlin.coroutines.resume
 
 /**
  * Implementation of GeckoTrackingProtectionApi that manages per-site
@@ -21,15 +23,12 @@ class GeckoTrackingProtectionApiImpl : GeckoTrackingProtectionApi {
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
     }
 
-    override fun containsException(tabId: String, callback: (Result<Boolean>) -> Unit) {
-        try {
+    override suspend fun containsException(tabId: String): Boolean =
+        suspendCancellableCoroutine { continuation ->
             components.useCases.trackingProtectionUseCases.containsException(tabId) { hasException ->
-                callback(Result.success(hasException))
+                continuation.resume(hasException)
             }
-        } catch (e: Exception) {
-            callback(Result.failure(e))
         }
-    }
 
     override fun addException(tabId: String) {
         components.useCases.trackingProtectionUseCases.addException(tabId)
@@ -39,40 +38,30 @@ class GeckoTrackingProtectionApiImpl : GeckoTrackingProtectionApi {
         components.useCases.trackingProtectionUseCases.removeException(tabId)
     }
 
-    override fun removeExceptionByUrl(url: String, callback: (Result<Unit>) -> Unit) {
-        try {
-            // Create a simple TrackingProtectionException implementation for removal
-            val exception = object : MozillaTrackingProtectionException {
-                override val url: String = url
-            }
-            components.useCases.trackingProtectionUseCases.removeException(exception)
-            // The Mozilla API is synchronous, callback immediately after completion
-            callback(Result.success(Unit))
-        } catch (e: Exception) {
-            callback(Result.failure(e))
+    override suspend fun removeExceptionByUrl(url: String) {
+        // Create a simple TrackingProtectionException implementation for removal
+        val exception = object : MozillaTrackingProtectionException {
+            override val url: String = url
         }
+        // The Mozilla API is synchronous, so this is done once the call returns
+        components.useCases.trackingProtectionUseCases.removeException(exception)
     }
 
-    override fun fetchExceptions(callback: (Result<List<TrackingProtectionException>>) -> Unit) {
-        try {
+    override suspend fun fetchExceptions(): List<TrackingProtectionException> =
+        suspendCancellableCoroutine { continuation ->
             components.useCases.trackingProtectionUseCases.fetchExceptions { mozillaExceptions ->
                 val pigeonExceptions = mozillaExceptions.map { mozillaException ->
                     TrackingProtectionException(url = mozillaException.url)
                 }
-                callback(Result.success(pigeonExceptions))
+                continuation.resume(pigeonExceptions)
             }
-        } catch (e: Exception) {
-            callback(Result.failure(e))
         }
-    }
 
-    override fun removeAllExceptions(callback: (Result<Unit>) -> Unit) {
-        try {
+    override suspend fun removeAllExceptions() {
+        suspendCancellableCoroutine<Unit> { continuation ->
             components.useCases.trackingProtectionUseCases.removeAllExceptions {
-                callback(Result.success(Unit))
+                continuation.resume(Unit)
             }
-        } catch (e: Exception) {
-            callback(Result.failure(e))
         }
     }
 }

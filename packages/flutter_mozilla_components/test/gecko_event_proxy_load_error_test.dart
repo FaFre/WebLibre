@@ -25,7 +25,7 @@ void main() {
 
       // The cold-start shape: routing is not installed yet, the load fails, and
       // the browser screen has not been built to subscribe.
-      service.onProxyLoadError(1, error('tab-1', 'https://example.org/'));
+      await service.onProxyLoadError(1, error('tab-1', 'https://example.org/'));
 
       await expectLater(
         service.proxyLoadErrorEvents,
@@ -38,9 +38,9 @@ void main() {
     final service = GeckoEventService.setUp();
     addTearDown(service.dispose);
 
-    service.onProxyLoadError(1, error('tab-1', 'https://example.org/'));
-    service.onProxyLoadError(2, error('tab-1', 'https://example.com/'));
-    service.onProxyLoadError(3, error('tab-2', 'https://example.net/'));
+    await service.onProxyLoadError(1, error('tab-1', 'https://example.org/'));
+    await service.onProxyLoadError(2, error('tab-1', 'https://example.com/'));
+    await service.onProxyLoadError(3, error('tab-2', 'https://example.net/'));
 
     await expectLater(
       service.proxyLoadErrorEvents,
@@ -65,8 +65,8 @@ void main() {
 
     // Nothing promises platform-channel delivery order, which is what the
     // sequence is for: 10 arrives after 11 and describes an older load.
-    service.onProxyLoadError(11, error('tab-1', 'https://example.com/'));
-    service.onProxyLoadError(10, error('tab-1', 'https://example.org/'));
+    await service.onProxyLoadError(11, error('tab-1', 'https://example.com/'));
+    await service.onProxyLoadError(10, error('tab-1', 'https://example.org/'));
 
     await expectLater(
       service.proxyLoadErrorEvents,
@@ -92,7 +92,7 @@ void main() {
     // the time a later screen subscribes, and replaying it would reload a page
     // that has long since loaded fine.
     await subscription.cancel();
-    service.onProxyLoadError(1, error('tab-1', 'https://example.org/'));
+    await service.onProxyLoadError(1, error('tab-1', 'https://example.org/'));
 
     final secondRun = <ProxyLoadError>[];
     final resubscription = service.proxyLoadErrorEvents.listen(secondRun.add);

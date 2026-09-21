@@ -236,8 +236,9 @@ abstract class SingboxProxyApi {
   SingboxProxyRuntimeState getState();
 }
 
-@FlutterApi()
+@EventChannelApi()
 abstract class SingboxProxyEventsApi {
-  void onStateChanged(SingboxProxyRuntimeState state);
-  void onLogMessage(SingboxProxyLogMessage message);
+  SingboxProxyRuntimeState streamState();
+
+  SingboxProxyLogMessage streamLogs();
 }

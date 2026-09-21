@@ -2,7 +2,7 @@ package eu.weblibre.flutter_mozilla_components.api
 
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.feature.MLEngineFeature
-import eu.weblibre.flutter_mozilla_components.feature.ResultConsumer
+import eu.weblibre.flutter_mozilla_components.feature.awaitResult
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoMlApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.MlProgressData
@@ -86,61 +86,32 @@ class GeckoMlApiImpl(
         }
     }
 
-    override fun predictDocumentTopic(documents: List<String>, callback: (Result<String>) -> Unit) {
-        MLEngineFeature.scheduleRequest("predictDocumentTopic", documents.toJson(), object : ResultConsumer<JSONObject> {
-            override fun success(result: JSONObject) {
-                callback(Result.success(result.getString("result")))
-            }
+    override suspend fun predictDocumentTopic(documents: List<String>): String =
+        awaitResult({ MLEngineFeature.scheduleRequest("predictDocumentTopic", documents.toJson(), it) }) { result ->
+            result.getString("result")
+        }
 
-            override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-                callback(Result.failure(Exception("$errorCode $errorMessage $errorDetails")))
-            }
-        })
-    }
+    override suspend fun generateDocumentEmbeddings(documents: List<String>): List<Any?> =
+        awaitResult({ MLEngineFeature.scheduleRequest("generateDocumentEmbeddings", documents.toJson(), it) }) { result ->
+            val encodedResult = result.getString("result")
+            val decodedJsonArray = JSONArray(encodedResult)
+            val embeddings = mutableListOf<List<Double>>()
 
-    override fun generateDocumentEmbeddings(
-        documents: List<String>,
-        callback: (Result<List<Any?>>) -> Unit
-    ) {
-        MLEngineFeature.scheduleRequest("generateDocumentEmbeddings", documents.toJson(), object : ResultConsumer<JSONObject> {
-            override fun success(result: JSONObject) {
-                try {
-                    val encodedResult = result.getString("result")
-                    val decodedJsonArray = JSONArray(encodedResult)
-                    val embeddings = mutableListOf<List<Double>>()
+            for (i in 0 until decodedJsonArray.length()) {
+                val embeddingArray = decodedJsonArray.getJSONArray(i)
+                val embedding = mutableListOf<Double>()
 
-                    for (i in 0 until decodedJsonArray.length()) {
-                        val embeddingArray = decodedJsonArray.getJSONArray(i)
-                        val embedding = mutableListOf<Double>()
-
-                        for (j in 0 until embeddingArray.length()) {
-                            embedding.add(embeddingArray.getDouble(j))
-                        }
-                        embeddings.add(embedding)
-                    }
-
-                    callback(Result.success(embeddings))
-                } catch (e: Exception) {
-                    callback(Result.failure(e))
+                for (j in 0 until embeddingArray.length()) {
+                    embedding.add(embeddingArray.getDouble(j))
                 }
+                embeddings.add(embedding)
             }
 
-            override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-                callback(Result.failure(Exception("$errorCode $errorMessage $errorDetails")))
-            }
-        })
-    }
+            embeddings
+        }
 
-    override fun clearMlCache(callback: (Result<Unit>) -> Unit) {
-        MLEngineFeature.scheduleRequest("clearMlCache", JSONObject(), object : ResultConsumer<JSONObject> {
-            override fun success(result: JSONObject) {
-                callback(Result.success(Unit))
-            }
-
-            override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-                callback(Result.failure(Exception("$errorCode $errorMessage $errorDetails")))
-            }
-        })
+    override suspend fun clearMlCache() {
+        awaitResult({ MLEngineFeature.scheduleRequest("clearMlCache", JSONObject(), it) }) { }
     }
 
 }

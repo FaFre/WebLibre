@@ -87,7 +87,7 @@ class SpeechToTextDialog implements SpeechToTextEvents {
   }
 
   @override
-  void onTextReceived(String text) {
+  Future<void> onTextReceived(String text) async {
     if (!_disposed) {
       _textStreamController.add(text);
     }

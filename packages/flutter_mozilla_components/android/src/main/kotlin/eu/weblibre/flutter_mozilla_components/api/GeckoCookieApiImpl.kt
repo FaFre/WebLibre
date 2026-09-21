@@ -7,7 +7,7 @@
 package eu.weblibre.flutter_mozilla_components.api
 
 import eu.weblibre.flutter_mozilla_components.feature.CookieManagerFeature
-import eu.weblibre.flutter_mozilla_components.feature.ResultConsumer
+import eu.weblibre.flutter_mozilla_components.feature.awaitResult
 import eu.weblibre.flutter_mozilla_components.pigeons.*
 import org.json.JSONObject
 
@@ -82,74 +82,47 @@ class GeckoCookieApiImpl : GeckoCookieApi {
         put("url", url)
     }
 
-    private fun handleRequest(
-        action: String,
-        args: JSONObject,
-        callback: (Result<Unit>) -> Unit
-    ) {
-        CookieManagerFeature.scheduleRequest(action, args, object : ResultConsumer<JSONObject> {
-            override fun success(result: JSONObject) {
-                callback(Result.success(Unit))
-            }
-
-            override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-                callback(Result.failure(Exception("$errorCode $errorMessage $errorDetails")))
-            }
-        })
+    private suspend fun handleRequest(action: String, args: JSONObject) {
+        awaitResult({ CookieManagerFeature.scheduleRequest(action, args, it) }) { }
     }
 
-    override fun getCookie(
+    override suspend fun getCookie(
         firstPartyDomain: String?,
         name: String,
         partitionKey: CookiePartitionKey?,
         storeId: String?,
-        url: String,
-        callback: (Result<Cookie>) -> Unit
-    ) {
+        url: String
+    ): Cookie {
         val args = createBaseArgs(firstPartyDomain, partitionKey, storeId, url).apply {
             put("name", name)
         }
 
-        CookieManagerFeature.scheduleRequest("get", args, object : ResultConsumer<JSONObject> {
-            override fun success(result: JSONObject) {
-                callback(Result.success(cookieFromJSON(result.getJSONObject("result"))))
-            }
-
-            override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-                callback(Result.failure(Exception("$errorCode $errorMessage $errorDetails")))
-            }
-        })
+        return awaitResult({ CookieManagerFeature.scheduleRequest("get", args, it) }) { result ->
+            cookieFromJSON(result.getJSONObject("result"))
+        }
     }
 
-    override fun getAllCookies(
+    override suspend fun getAllCookies(
         domain: String?,
         firstPartyDomain: String?,
         name: String?,
         partitionKey: CookiePartitionKey?,
         storeId: String?,
-        url: String,
-        callback: (Result<List<Cookie>>) -> Unit
-    ) {
+        url: String
+    ): List<Cookie> {
         val args = createBaseArgs(firstPartyDomain, partitionKey, storeId, url).apply {
             putNullable("domain", domain)
             putNullable("name", name)
         }
 
-        CookieManagerFeature.scheduleRequest("getAll", args, object : ResultConsumer<JSONObject> {
-            override fun success(result: JSONObject) {
-                val cookies = result.getJSONArray("result").let { jsonArray ->
-                    List(jsonArray.length()) { cookieFromJSON(jsonArray.getJSONObject(it)) }
-                }
-                callback(Result.success(cookies))
+        return awaitResult({ CookieManagerFeature.scheduleRequest("getAll", args, it) }) { result ->
+            result.getJSONArray("result").let { jsonArray ->
+                List(jsonArray.length()) { cookieFromJSON(jsonArray.getJSONObject(it)) }
             }
-
-            override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-                callback(Result.failure(Exception("$errorCode $errorMessage $errorDetails")))
-            }
-        })
+        }
     }
 
-    override fun setCookie(
+    override suspend fun setCookie(
         domain: String?,
         expirationDate: Long?,
         firstPartyDomain: String?,
@@ -161,8 +134,7 @@ class GeckoCookieApiImpl : GeckoCookieApi {
         secure: Boolean?,
         storeId: String?,
         url: String,
-        value: String?,
-        callback: (Result<Unit>) -> Unit
+        value: String?
     ) {
         val args = createBaseArgs(firstPartyDomain, partitionKey, storeId, url).apply {
             putNullable("domain", domain)
@@ -175,21 +147,20 @@ class GeckoCookieApiImpl : GeckoCookieApi {
             putNullable("value", value)
         }
 
-        handleRequest("set", args, callback)
+        handleRequest("set", args)
     }
 
-    override fun removeCookie(
+    override suspend fun removeCookie(
         firstPartyDomain: String?,
         name: String,
         partitionKey: CookiePartitionKey?,
         storeId: String?,
-        url: String,
-        callback: (Result<Unit>) -> Unit
+        url: String
     ) {
         val args = createBaseArgs(firstPartyDomain, partitionKey, storeId, url).apply {
             put("name", name)
         }
 
-        handleRequest("remove", args, callback)
+        handleRequest("remove", args)
     }
 }

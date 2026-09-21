@@ -38,7 +38,10 @@ class _AppLinkEventsReceiver extends GeckoAppLinkEvents {
   final void Function(AppLinkPromptOwner owner) _onAvailable;
 
   @override
-  void onAppLinkPromptAvailable(int sequence, AppLinkPromptOwner owner) {
+  Future<void> onAppLinkPromptAvailable(
+    int sequence,
+    AppLinkPromptOwner owner,
+  ) async {
     _onAvailable(owner);
   }
 }

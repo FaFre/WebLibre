@@ -469,9 +469,6 @@ class _FakeSingboxProxyClient implements SingboxProxyClient {
   }) async {
     return SingboxProxyConfigResult(configJson: '{}', endpoints: const []);
   }
-
-  @override
-  Future<void> dispose() => _stateController.close();
 }
 
 class _FakeProfilesRepository extends SingboxProxyProfilesRepository {

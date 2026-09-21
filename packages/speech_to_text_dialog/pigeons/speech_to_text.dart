@@ -55,5 +55,6 @@ abstract class SpeechToTextEvents {
   ///
   /// [text] contains the recognized speech text. May be empty if
   /// recognition failed or was cancelled.
+  @asyncCallback
   void onTextReceived(String text);
 }

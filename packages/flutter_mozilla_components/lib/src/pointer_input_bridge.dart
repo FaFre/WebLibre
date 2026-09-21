@@ -100,7 +100,7 @@ class PointerInputBridge implements PointerInputFlutterApi {
   }
 
   @override
-  PointerHitTest hitTest(double x, double y, bool tracksHover) {
+  Future<PointerHitTest> hitTest(double x, double y, bool tracksHover) async {
     final position = Offset(x, y);
     final target = _targetAt(position);
 
@@ -114,7 +114,7 @@ class PointerInputBridge implements PointerInputFlutterApi {
   }
 
   @override
-  void pointerExit() {
+  Future<void> pointerExit() async {
     _hoverPosition = null;
     _hoverTarget = null;
   }

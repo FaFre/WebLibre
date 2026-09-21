@@ -17,10 +17,16 @@ void main() {
     final subscription = service.statusChanges.listen(statuses.add);
     addTearDown(subscription.cancel);
 
-    service.onPushStatusChanged(0, _status(PushDistributorStatus.pending));
-    service.onPushStatusChanged(0, _status(PushDistributorStatus.ready));
-    service.onPushStatusChanged(-1, _status(PushDistributorStatus.unavailable));
-    service.onPushStatusChanged(2, _status(PushDistributorStatus.ready));
+    await service.onPushStatusChanged(
+      0,
+      _status(PushDistributorStatus.pending),
+    );
+    await service.onPushStatusChanged(0, _status(PushDistributorStatus.ready));
+    await service.onPushStatusChanged(
+      -1,
+      _status(PushDistributorStatus.unavailable),
+    );
+    await service.onPushStatusChanged(2, _status(PushDistributorStatus.ready));
     await pumpEventQueue();
 
     expect(statuses.map((status) => status.status), [
@@ -65,7 +71,10 @@ void main() {
         sequence: 2,
         status: _status(PushDistributorStatus.unavailable),
       );
-      service.onPushStatusChanged(3, _status(PushDistributorStatus.pending));
+      await service.onPushStatusChanged(
+        3,
+        _status(PushDistributorStatus.pending),
+      );
       service.setUp();
       await pumpEventQueue();
 

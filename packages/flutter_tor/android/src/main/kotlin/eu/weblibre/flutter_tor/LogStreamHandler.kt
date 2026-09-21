@@ -3,23 +3,65 @@ package eu.weblibre.flutter_tor
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import eu.weblibre.flutter_tor.generated.TorLogApi
+import eu.weblibre.flutter_tor.generated.PigeonEventSink
+import eu.weblibre.flutter_tor.generated.StreamLogsStreamHandler
+import eu.weblibre.flutter_tor.generated.StreamStatusStreamHandler
 import eu.weblibre.flutter_tor.generated.TorLogMessage
 import eu.weblibre.flutter_tor.generated.TorStatus
 import io.flutter.plugin.common.BinaryMessenger
 
 /**
  * Handles streaming logs and status updates from Tor to Flutter
- * All Flutter API calls are posted to the main thread to avoid threading issues
+ * Events only go out while Dart is listening, and are always posted to the main thread
+ * to avoid threading issues
  */
-class LogStreamHandler(messenger: BinaryMessenger) {
+class LogStreamHandler {
 
     companion object {
         private const val TAG = "LogStreamHandler"
     }
 
-    private val torLogApi = TorLogApi(messenger)
     private val mainHandler = Handler(Looper.getMainLooper())
+
+    // Dart's listen and cancel arrive on the main thread, and every send is posted
+    // there, so the sinks need no locking.
+    private var logSink: PigeonEventSink<TorLogMessage>? = null
+    private var statusSink: PigeonEventSink<TorStatus>? = null
+
+    /**
+     * Expose the log and status streams on [messenger]
+     *
+     * Must happen when the engine attaches: an event channel cannot be listened to before
+     * its handler exists, and Dart may subscribe long before TorService has connected.
+     */
+    fun register(messenger: BinaryMessenger) {
+        StreamLogsStreamHandler.register(messenger, object : StreamLogsStreamHandler() {
+            override fun onListen(p0: Any?, sink: PigeonEventSink<TorLogMessage>) {
+                logSink = sink
+            }
+
+            override fun onCancel(p0: Any?) {
+                logSink = null
+            }
+        })
+        StreamStatusStreamHandler.register(messenger, object : StreamStatusStreamHandler() {
+            override fun onListen(p0: Any?, sink: PigeonEventSink<TorStatus>) {
+                statusSink = sink
+            }
+
+            override fun onCancel(p0: Any?) {
+                statusSink = null
+            }
+        })
+    }
+
+    /**
+     * Drop the listeners of an engine that is going away
+     */
+    fun detach() {
+        logSink = null
+        statusSink = null
+    }
 
     /**
      * Send a log message to Flutter
@@ -28,6 +70,7 @@ class LogStreamHandler(messenger: BinaryMessenger) {
      */
     fun sendLog(severity: String, message: String) {
         mainHandler.post {
+            val sink = logSink ?: return@post
             try {
                 val logMessage = TorLogMessage(
                     severity = severity,
@@ -35,7 +78,7 @@ class LogStreamHandler(messenger: BinaryMessenger) {
                     timestamp = System.currentTimeMillis()
                 )
 
-                torLogApi.onLogMessage(logMessage) { }
+                sink.success(logMessage)
             } catch (e: Exception) {
                 Log.e(TAG, "Error sending log to Flutter: ${e.message}", e)
             }
@@ -48,8 +91,9 @@ class LogStreamHandler(messenger: BinaryMessenger) {
      */
     fun sendStatusChange(status: TorStatus) {
         mainHandler.post {
+            val sink = statusSink ?: return@post
             try {
-                torLogApi.onStatusChanged(status) { }
+                sink.success(status)
             } catch (e: Exception) {
                 Log.e(TAG, "Error sending status to Flutter: ${e.message}", e)
             }

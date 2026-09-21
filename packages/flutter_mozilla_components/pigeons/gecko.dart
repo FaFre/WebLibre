@@ -2166,63 +2166,91 @@ class ProxyLoadError {
 
 @FlutterApi()
 abstract class GeckoStateEvents {
+  @asyncCallback
   void onViewReadyStateChange(int sequence, bool state);
+  @asyncCallback
   void onEngineReadyStateChange(int sequence, bool state);
+  @asyncCallback
   void onIconUpdate(int sequence, String url, Uint8List bytes);
 
+  @asyncCallback
   void onTabAdded(int sequence, String tabId);
 
+  @asyncCallback
   void onTabListChange(int sequence, List<String> tabIds);
+  @asyncCallback
   void onSelectedTabChange(int sequence, String? id);
 
   /// Mirrors `BrowserState.restoreComplete`: false until the native session
   /// restore has dispatched all persisted tabs into the store.
+  @asyncCallback
   void onRestoreCompleteChange(int sequence, bool restoreComplete);
 
+  @asyncCallback
   void onTabContentStateChange(int sequence, TabContentState state);
+  @asyncCallback
   void onHistoryStateChange(int sequence, String id, HistoryState state);
+  @asyncCallback
   void onReaderableStateChange(int sequence, String id, ReaderableState state);
+  @asyncCallback
   void onSecurityInfoStateChange(
     int sequence,
     String id,
     SecurityInfoState state,
   );
+  @asyncCallback
   void onIconChange(int sequence, String id, Uint8List? bytes);
+  @asyncCallback
   void onThumbnailChange(int sequence, String id, Uint8List? bytes);
 
+  @asyncCallback
   void onFindResults(int sequence, String id, List<FindResultState> results);
+  @asyncCallback
   void onLongPress(int sequence, String id, HitResult hitResult);
 
   // void onScrollChange(int sequence, String tabId, int scrollY);
+  @asyncCallback
   void onPreferenceChange(int sequence, GeckoPref value);
 
+  @asyncCallback
   void onContainerSiteAssignment(int sequence, ContainerSiteAssignment details);
 
+  @asyncCallback
   void onProxyLoadError(int sequence, ProxyLoadError details);
 
+  @asyncCallback
   void onMlProgress(int sequence, MlProgressData progress);
 
+  @asyncCallback
   void onDownloadStopped(int sequence, DownloadState state);
 
+  @asyncCallback
   void onManifestUpdate(int sequence, String tabId, PwaManifest? manifest);
 
+  @asyncCallback
   void onTranslationEngineStateChange(
     int sequence,
     TranslationEngineStateData state,
   );
+  @asyncCallback
   void onTabTranslationStateChange(int sequence, TabTranslationStateData state);
 }
 
 @FlutterApi()
 abstract class GeckoSyncStateEvents {
+  @asyncCallback
   void onAuthStateChanged(int sequence, SyncAccountInfo accountInfo);
+  @asyncCallback
   void onSyncStarted(int sequence);
+  @asyncCallback
   void onSyncCompleted(int sequence);
+  @asyncCallback
   void onSyncError(int sequence, String? errorMessage);
 }
 
 @FlutterApi()
 abstract class GeckoLogging {
+  @asyncCallback
   void onLog(LogLevel level, String message);
 }
 
@@ -2234,6 +2262,7 @@ abstract class ReaderViewEvents {
 
 @FlutterApi()
 abstract class ReaderViewController {
+  @asyncCallback
   void appearanceButtonVisibility(int sequence, bool visible);
 }
 
@@ -2244,6 +2273,7 @@ abstract class GeckoSelectionActionController {
 
 @FlutterApi()
 abstract class GeckoSelectionActionEvents {
+  @asyncCallback
   void performSelectionAction(String id, String selectedText);
 }
 
@@ -2307,6 +2337,7 @@ abstract class GeckoAddonsApi {
 
 @FlutterApi()
 abstract class GeckoAddonEvents {
+  @asyncCallback
   void onUpsertWebExtensionAction(
     int sequence,
     String extensionId,
@@ -2314,12 +2345,14 @@ abstract class GeckoAddonEvents {
     WebExtensionData extensionData,
   );
 
+  @asyncCallback
   void onRemoveWebExtensionAction(
     int sequence,
     String extensionId,
     WebExtensionActionType actionType,
   );
 
+  @asyncCallback
   void onUpdateWebExtensionIcon(
     int sequence,
     String extensionId,
@@ -2327,8 +2360,10 @@ abstract class GeckoAddonEvents {
     Uint8List icon,
   );
 
+  @asyncCallback
   void onWebExtensionPopupRequested(String extensionId, String extensionName);
 
+  @asyncCallback
   void onOpenAddonSettingsRequested(String addonId);
 }
 
@@ -2341,6 +2376,7 @@ abstract class GeckoSuggestionApi {
 
 @FlutterApi()
 abstract class GeckoSuggestionEvents {
+  @asyncCallback
   void onSuggestionResult(
     int sequence,
     GeckoSuggestionType suggestionType,
@@ -2350,6 +2386,7 @@ abstract class GeckoSuggestionEvents {
 
 @FlutterApi()
 abstract class GeckoTabContentEvents {
+  @asyncCallback
   void onContentUpdate(int sequence, TabContent content);
 }
 
@@ -2403,6 +2440,7 @@ abstract class GeckoHistoryEvents {
   /// the tab to its WebLibre container and writes the visit→container relation,
   /// keyed on ([url], [visitTime]) to join back to the Places visit. A tab
   /// WebLibre has no row for (custom tab, not yet synced) simply stays untagged.
+  @asyncCallback
   void onVisitRecorded(String url, int visitTime, String tabId);
 }
 
@@ -2530,6 +2568,7 @@ abstract class GeckoDownloadsApi {
 
 @FlutterApi()
 abstract class BrowserExtensionEvents {
+  @asyncCallback
   void onFeedRequested(int sequence, String url);
 }
 
@@ -2680,6 +2719,7 @@ abstract class GeckoBookmarksEvents {
   /// [insertedItemCount] is the running number of bookmark items written by the
   /// insertion currently in progress, counted from the start of that one call.
   /// Dart adds the offset of any earlier calls to get an overall figure.
+  @asyncCallback
   void onImportProgress(int insertedItemCount);
 }
 
@@ -2751,6 +2791,7 @@ abstract class GeckoViewportEvents {
   /// [heightPx] Keyboard height in pixels (0 when hidden).
   /// [isVisible] Whether the keyboard is currently visible.
   /// [isAnimating] Whether the keyboard is currently animating.
+  @asyncCallback
   void onKeyboardVisibilityChanged(
     int sequence,
     int heightPx,
@@ -2764,6 +2805,7 @@ abstract class GeckoViewportEvents {
   /// [isHandling] True when browser content can consume scrolling for
   /// dynamic toolbar behavior. False when content is not scrollable or
   /// the page consumed touch input.
+  @asyncCallback
   void onBrowserHandlingScrollChanged(int sequence, bool isHandling);
 }
 
@@ -3302,6 +3344,7 @@ abstract class GeckoAppLinksApi {
 /// source of truth; surfaces query on attach/resume and dedupe by requestId.
 @FlutterApi()
 abstract class GeckoAppLinkEvents {
+  @asyncCallback
   void onAppLinkPromptAvailable(int sequence, AppLinkPromptOwner owner);
 }
 
@@ -3532,6 +3575,7 @@ abstract class SandboxCaptureHostEvents {
   /// Emitted when a sandbox tab attempted to navigate to a non-loopback,
   /// non-source URL (e.g., user clicked a link or typed a new URL into the
   /// address bar). Dart should open a new sandbox tab and capture [targetUrl].
+  @asyncCallback
   void onSandboxLinkClick(int sequence, String parentTabId, String targetUrl);
 
   /// Emitted when GeckoView created a new tab (via `window.open`,
@@ -3539,6 +3583,7 @@ abstract class SandboxCaptureHostEvents {
   /// The native middleware has already rewritten the new tab's URL to
   /// `about:blank`; Dart should register it as sandbox and run the capture
   /// pipeline for [targetUrl].
+  @asyncCallback
   void onSandboxNewTab(
     int sequence,
     String parentTabId,
@@ -3606,6 +3651,7 @@ abstract class GeckoGestureApi {
 abstract class GeckoGestureEvents {
   /// [sequence] Event sequence number for ordering.
   /// [gestureKey] Canonical key of the recognized gesture, e.g. `D-R`.
+  @asyncCallback
   void onGestureRecognized(int sequence, String gestureKey);
 
   /// Emitted while a stroke is being drawn, each time a new direction arrow is
@@ -3614,12 +3660,14 @@ abstract class GeckoGestureEvents {
   /// [sequence] Event sequence number for ordering.
   /// [partialKey] Current partial canonical key including start/finger
   /// prefixes, e.g. `R:D`.
+  @asyncCallback
   void onGestureProgress(int sequence, String partialKey);
 
   /// Emitted when an in-progress stroke ends (release, cancel or idle timeout)
   /// so the live feedback overlay can be hidden.
   ///
   /// [sequence] Event sequence number for ordering.
+  @asyncCallback
   void onGestureReset(int sequence);
 }
 
@@ -3726,5 +3774,6 @@ abstract class GeckoPushApi {
 @FlutterApi()
 abstract class GeckoPushEvents {
   /// [sequence] Event sequence number for ordering.
+  @asyncCallback
   void onPushStatusChanged(int sequence, PushStatus status);
 }

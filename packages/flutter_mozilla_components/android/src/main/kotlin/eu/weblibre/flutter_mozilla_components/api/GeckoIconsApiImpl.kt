@@ -35,7 +35,6 @@ private typealias MozillaIconResourceType = mozilla.components.browser.icons.Ico
 class GeckoIconsApiImpl : GeckoIconsApi {
     companion object {
         private const val TAG = "GeckoIconsApi"
-        private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     }
 
     private val components by lazy {
@@ -65,24 +64,18 @@ class GeckoIconsApiImpl : GeckoIconsApi {
         )
     }
 
-    override fun loadIcon(request: IconRequest, callback: (Result<IconResult>) -> Unit) {
-        coroutineScope.launch {
+    override suspend fun loadIcon(request: IconRequest): IconResult =
+        withContext(Dispatchers.Default) {
             try {
                 val mozillaRequest = request.toMozillaIconRequest()
                 logger.debug("$TAG: Loading icon for URL: ${request.url}")
 
-                val result = loadIconAsync(mozillaRequest)
-                withContext(Dispatchers.Main) {
-                    callback(Result.success(result))
-                }
+                loadIconAsync(mozillaRequest)
             } catch (e: Exception) {
                 logger.error("$TAG: Failed to load icon", e)
-                withContext(Dispatchers.Main) {
-                    callback(Result.failure(e))
-                }
+                throw e
             }
         }
-    }
 
     private suspend fun loadIconAsync(request: MozillaIconRequest): IconResult {
         return try {

@@ -10,11 +10,10 @@ import eu.weblibre.flutter_mozilla_components.pigeons.PushStatus
 import eu.weblibre.flutter_mozilla_components.pigeons.PushSubscription
 import eu.weblibre.flutter_mozilla_components.push.toPigeon
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** UnifiedPush distributor management for the settings UI. */
@@ -24,57 +23,37 @@ class GeckoPushApiImpl : GeckoPushApi {
     private val push
         get() = requireNotNull(GlobalComponents.components) { "Components not initialized" }.push
 
-    override fun getPushStatus(callback: (Result<PushStatus>) -> Unit) {
-        respond(callback) {
-            withContext(Dispatchers.IO) { push.status() }.toPigeon()
-        }
+    override suspend fun getPushStatus(): PushStatus = inScope {
+        withContext(Dispatchers.IO) { push.status() }.toPigeon()
     }
 
-    override fun setDistributor(packageName: String, callback: (Result<Unit>) -> Unit) {
-        respond(callback) {
-            withContext(Dispatchers.IO) { push.setDistributor(packageName) }
-        }
+    override suspend fun setDistributor(packageName: String) {
+        inScope { withContext(Dispatchers.IO) { push.setDistributor(packageName) } }
     }
 
-    override fun removeDistributor(callback: (Result<Unit>) -> Unit) {
-        respond(callback) {
-            withContext(Dispatchers.IO) { push.removeDistributor() }
-        }
+    override suspend fun removeDistributor() {
+        inScope { withContext(Dispatchers.IO) { push.removeDistributor() } }
     }
 
-    override fun renewRegistration(callback: (Result<Unit>) -> Unit) {
-        respond(callback) {
-            withContext(Dispatchers.IO) { push.renewRegistration() }
-        }
+    override suspend fun renewRegistration() {
+        inScope { withContext(Dispatchers.IO) { push.renewRegistration() } }
     }
 
-    override fun suspendPushForRestart(callback: (Result<Unit>) -> Unit) {
-        respond(callback) {
-            withContext(Dispatchers.IO) { push.suspendForRestart() }
-        }
+    override suspend fun suspendPushForRestart() {
+        inScope { withContext(Dispatchers.IO) { push.suspendForRestart() } }
     }
 
-    override fun getSubscriptions(callback: (Result<List<PushSubscription>>) -> Unit) {
-        respond(callback) {
-            withContext(Dispatchers.IO) {
-                push.subscriptions().map {
-                    PushSubscription(scope = it.scope, hasEndpoint = it.hasEndpoint)
-                }
+    override suspend fun getSubscriptions(): List<PushSubscription> = inScope {
+        withContext(Dispatchers.IO) {
+            push.subscriptions().map {
+                PushSubscription(scope = it.scope, hasEndpoint = it.hasEndpoint)
             }
         }
     }
 
-    private fun <T> respond(callback: (Result<T>) -> Unit, block: suspend () -> T) {
-        coroutineScope.launch {
-            try {
-                callback(Result.success(block()))
-            } catch (error: CancellationException) {
-                throw error
-            } catch (error: Throwable) {
-                callback(Result.failure(error))
-            }
-        }
-    }
+    /** Runs [block] in [coroutineScope] rather than the caller's coroutine, so [dispose] cancels it. */
+    private suspend fun <T> inScope(block: suspend () -> T): T =
+        coroutineScope.async { block() }.await()
 
     fun dispose() {
         coroutineScope.cancel()

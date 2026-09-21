@@ -87,7 +87,7 @@ class GeckoPushService extends GeckoPushEvents {
   // GeckoPushEvents implementation
 
   @override
-  void onPushStatusChanged(int sequence, PushStatus status) {
+  Future<void> onPushStatusChanged(int sequence, PushStatus status) async {
     if (_disposed ||
         (_lastStatusSequence != null && sequence <= _lastStatusSequence!)) {
       return;

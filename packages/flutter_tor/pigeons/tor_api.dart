@@ -125,14 +125,14 @@ abstract class TorApi {
   void requestNewIdentity();
 }
 
-/// Flutter API (Native -> Flutter)
-@FlutterApi()
-abstract class TorLogApi {
-  /// Called when a log message is received
-  void onLogMessage(TorLogMessage log);
+/// Event streams (Native -> Flutter)
+@EventChannelApi()
+abstract class TorEventsApi {
+  /// Log messages from Tor
+  TorLogMessage streamLogs();
 
-  /// Called when status changes
-  void onStatusChanged(TorStatus status);
+  /// Status changes
+  TorStatus streamStatus();
 }
 
 @HostApi()

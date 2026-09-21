@@ -5,8 +5,6 @@
 package eu.weblibre.flutter_mozilla_components.api
 
 import eu.weblibre.flutter_mozilla_components.feature.RoutingDemands
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -16,6 +14,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 
 class GeckoContainerProxyApiImplTest {
     @BeforeTest
@@ -31,23 +32,20 @@ class GeckoContainerProxyApiImplTest {
     }
 
     @Test
-    fun disposeFailsPendingRoutingDemandWaiter() {
-        val callbackCalled = CountDownLatch(1)
-        var callbackResult: Result<*>? = null
+    fun disposeFailsPendingRoutingDemandWaiter() = runBlocking {
         val api = GeckoContainerProxyApiImpl(
             CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
         )
 
-        api.nextRoutingDemand { result ->
-            callbackResult = result
-            callbackCalled.countDown()
+        val waiter = async(Dispatchers.Unconfined) {
+            runCatching { api.nextRoutingDemand() }
         }
         api.dispose()
 
         RoutingDemands.record("general", listOf("singbox:wg"))
 
-        assertTrue(callbackCalled.await(100, TimeUnit.MILLISECONDS))
-        assertTrue(callbackResult?.exceptionOrNull() is CancellationException)
+        val result = withTimeout(100) { waiter.await() }
+        assertTrue(result.exceptionOrNull() is CancellationException)
         assertEquals("general", RoutingDemands.take()?.contextId)
     }
 }

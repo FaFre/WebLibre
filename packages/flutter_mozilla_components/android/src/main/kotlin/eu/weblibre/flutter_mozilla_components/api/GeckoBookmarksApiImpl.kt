@@ -80,193 +80,92 @@ class GeckoBookmarksApiImpl() : GeckoBookmarksApi {
     }
 
 
-    override fun getTree(
-        guid: String,
-        recursive: Boolean,
-        callback: (Result<BookmarkNode?>) -> Unit
-    ) {
-        coroutineScope.launch {
-            withContext(Dispatchers.Main) {
-                val node = components.core.bookmarksStorage.getTree(guid, recursive)
-                node.fold(
-                    { node ->
-                        callback(Result.success(node?.toPigeonBookmarkNode()))
-                    },
-                    { e -> callback(Result.failure(e)) })
-            }
-        }
+    override suspend fun getTree(guid: String, recursive: Boolean): BookmarkNode? =
+        components.core.bookmarksStorage.getTree(guid, recursive).getOrThrow()
+            ?.toPigeonBookmarkNode()
 
-    }
+    override suspend fun getBookmark(guid: String): BookmarkNode? =
+        components.core.bookmarksStorage.getBookmark(guid).getOrThrow()
+            ?.toPigeonBookmarkNode()
 
-    override fun getBookmark(
-        guid: String,
-        callback: (Result<BookmarkNode?>) -> Unit
-    ) {
-        coroutineScope.launch {
-            withContext(Dispatchers.Main) {
-                components.core.bookmarksStorage.getBookmark(guid).fold(
-                    { node -> callback(Result.success(node?.toPigeonBookmarkNode())) },
-                    { e -> callback(Result.failure(e)) }
-                )
-            }
-        }
-    }
+    override suspend fun getBookmarksWithUrl(url: String): List<BookmarkNode> =
+        components.core.bookmarksStorage.getBookmarksWithUrl(url).getOrThrow()
+            .map { it.toPigeonBookmarkNode() }
 
-    override fun getBookmarksWithUrl(
-        url: String,
-        callback: (Result<List<BookmarkNode>>) -> Unit
-    ) {
-        coroutineScope.launch {
-            withContext(Dispatchers.Main) {
-                components.core.bookmarksStorage.getBookmarksWithUrl(url).fold(
-                    { nodes -> callback(Result.success(nodes.map { it.toPigeonBookmarkNode() })) },
-                    { e -> callback(Result.failure(e)) }
-                )
-            }
-        }
-    }
-
-    override fun getRecentBookmarks(
+    override suspend fun getRecentBookmarks(
         limit: Long,
         maxAge: Long?,
-        currentTime: Long,
-        callback: (Result<List<BookmarkNode>>) -> Unit
-    ) {
-        coroutineScope.launch {
-            withContext(Dispatchers.Main) {
-                components.core.bookmarksStorage.getRecentBookmarks(
-                    limit = limit.toInt(),
-                    maxAge = maxAge
-                ).fold(
-                    { nodes -> callback(Result.success(nodes.map { it.toPigeonBookmarkNode() })) },
-                    { e -> callback(Result.failure(e)) }
-                )
-            }
-        }
-    }
+        currentTime: Long
+    ): List<BookmarkNode> =
+        components.core.bookmarksStorage.getRecentBookmarks(
+            limit = limit.toInt(),
+            maxAge = maxAge
+        ).getOrThrow().map { it.toPigeonBookmarkNode() }
 
-    override fun searchBookmarks(
-        query: String,
-        limit: Long,
-        callback: (Result<List<BookmarkNode>>) -> Unit
-    ) {
-        coroutineScope.launch {
-            withContext(Dispatchers.Main) {
-                components.core.bookmarksStorage.searchBookmarks(query, limit.toInt()).fold(
-                    { nodes -> callback(Result.success(nodes.map { it.toPigeonBookmarkNode() })) },
-                    { e -> callback(Result.failure(e)) }
-                )
-            }
-        }
-    }
+    override suspend fun searchBookmarks(query: String, limit: Long): List<BookmarkNode> =
+        components.core.bookmarksStorage.searchBookmarks(query, limit.toInt()).getOrThrow()
+            .map { it.toPigeonBookmarkNode() }
 
-    override fun addItem(
+    override suspend fun addItem(
         parentGuid: String,
         url: String,
         title: String,
-        position: Long?,
-        callback: (Result<String>) -> Unit
-    ) {
-        coroutineScope.launch {
-            withContext(Dispatchers.Main) {
-                val result =
-                    components.core.bookmarksStorage.addItem(parentGuid, url, title, position?.toUInt())
-                result.fold(
-                    { guid -> callback(Result.success(guid)) },
-                    { e -> callback(Result.failure(e)) }
-                )
-                emitCreated(result.getOrNull())
-            }
-        }
+        position: Long?
+    ): String {
+        val guid = components.core.bookmarksStorage
+            .addItem(parentGuid, url, title, position?.toUInt())
+            .getOrThrow()
+        emitCreated(guid)
+        return guid
     }
 
-    override fun addFolder(
+    override suspend fun addFolder(
         parentGuid: String,
         title: String,
-        position: Long?,
-        callback: (Result<String>) -> Unit
-    ) {
-        coroutineScope.launch {
-            withContext(Dispatchers.Main) {
-                val result =
-                    components.core.bookmarksStorage.addFolder(parentGuid, title, position?.toUInt())
-                result.fold(
-                    { guid -> callback(Result.success(guid)) },
-                    { e -> callback(Result.failure(e)) }
-                )
-                emitCreated(result.getOrNull())
+        position: Long?
+    ): String {
+        val guid = components.core.bookmarksStorage
+            .addFolder(parentGuid, title, position?.toUInt())
+            .getOrThrow()
+        emitCreated(guid)
+        return guid
+    }
+
+    override suspend fun updateNode(guid: String, info: BookmarkInfo) {
+        val conceptInfo = mozilla.components.concept.storage.BookmarkInfo(
+            parentGuid = info.parentGuid,
+            position = info.position?.toUInt(),
+            title = info.title,
+            url = info.url
+        )
+        val oldNode = components.core.bookmarksStorage.getBookmark(guid).getOrNull()
+        components.core.bookmarksStorage.updateNode(guid, conceptInfo).getOrThrow()
+        components.core.bookmarksStorage.getBookmark(guid).getOrNull()?.let { node ->
+            if (info.title != null || info.url != null) {
+                GeckoBookmarksExtensionBridge.emitChanged(node, oldNode)
+            }
+            if (info.parentGuid != null || info.position != null) {
+                GeckoBookmarksExtensionBridge.emitMoved(node, oldNode)
             }
         }
     }
 
-    override fun updateNode(
-        guid: String,
-        info: BookmarkInfo,
-        callback: (Result<Unit>) -> Unit
-    ) {
-        coroutineScope.launch {
-            withContext(Dispatchers.Main) {
-                val conceptInfo = mozilla.components.concept.storage.BookmarkInfo(
-                    parentGuid = info.parentGuid,
-                    position = info.position?.toUInt(),
-                    title = info.title,
-                    url = info.url
-                )
-                val oldNode = components.core.bookmarksStorage.getBookmark(guid).getOrNull()
-                val result = components.core.bookmarksStorage.updateNode(guid, conceptInfo)
-                result.fold(
-                    { callback(Result.success(Unit)) },
-                    { e -> callback(Result.failure(e)) }
-                )
-                if (result.isSuccess) {
-                    components.core.bookmarksStorage.getBookmark(guid).getOrNull()?.let { node ->
-                        if (info.title != null || info.url != null) {
-                            GeckoBookmarksExtensionBridge.emitChanged(node, oldNode)
-                        }
-                        if (info.parentGuid != null || info.position != null) {
-                            GeckoBookmarksExtensionBridge.emitMoved(node, oldNode)
-                        }
-                    }
-                }
-            }
+    override suspend fun deleteNode(guid: String): Boolean {
+        val node = components.core.bookmarksStorage.getBookmark(guid).getOrNull()
+        val deleted = components.core.bookmarksStorage.deleteNode(guid).getOrThrow()
+        if (deleted && node != null) {
+            GeckoBookmarksExtensionBridge.emitRemoved(node)
         }
+        return deleted
     }
 
-    override fun deleteNode(
-        guid: String,
-        callback: (Result<Boolean>) -> Unit
-    ) {
-        coroutineScope.launch {
-            withContext(Dispatchers.Main) {
-                val node = components.core.bookmarksStorage.getBookmark(guid).getOrNull()
-                components.core.bookmarksStorage.deleteNode(guid).fold(
-                    { deleted ->
-                        callback(Result.success(deleted))
-                        if (deleted && node != null) {
-                            GeckoBookmarksExtensionBridge.emitRemoved(node)
-                        }
-                    },
-                    { e -> callback(Result.failure(e)) }
-                )
-            }
-        }
-    }
-
-    override fun insertTree(
+    override suspend fun insertTree(
         parentGuid: String,
-        children: List<BookmarkImportNode>,
-        callback: (Result<BookmarkInsertTreeResult>) -> Unit
-    ) {
-        coroutineScope.launch {
-            // Imports can carry tens of thousands of nodes, so the whole batch runs
-            // off the main thread. Only the callback returns to it, because Pigeon
-            // replies must be delivered on the platform thread.
-            val result = withContext(Dispatchers.IO) {
-                runCatching { insertImportNodes(parentGuid, children) }
-            }
-            callback(result)
-        }
-    }
+        children: List<BookmarkImportNode>
+    ): BookmarkInsertTreeResult =
+        // Imports can carry tens of thousands of nodes, so the whole batch runs
+        // off the main thread.
+        withContext(Dispatchers.IO) { insertImportNodes(parentGuid, children) }
 
     /**
      * Appends [nodes] underneath [parentGuid].
@@ -498,19 +397,10 @@ class GeckoBookmarksApiImpl() : GeckoBookmarksApi {
         }
     }
 
-    override fun countBookmarksInTrees(
-        guids: List<String>,
-        callback: (Result<Long>) -> Unit
-    ) {
-        coroutineScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                runCatching {
-                    components.core.bookmarksStorage.countBookmarksInTrees(guids).toLong()
-                }
-            }
-            callback(result)
+    override suspend fun countBookmarksInTrees(guids: List<String>): Long =
+        withContext(Dispatchers.IO) {
+            components.core.bookmarksStorage.countBookmarksInTrees(guids).toLong()
         }
-    }
 
     private fun BookmarkImportNode.toInsertableFolder(position: UInt?) =
         InsertableBookmarkTreeNode.Folder(

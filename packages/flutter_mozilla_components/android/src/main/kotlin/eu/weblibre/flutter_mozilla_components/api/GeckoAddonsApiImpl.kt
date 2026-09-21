@@ -23,9 +23,11 @@ import eu.weblibre.flutter_mozilla_components.pigeons.AddonUpdateStatus
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.WebExtensionActionType
 import org.json.JSONArray
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.completeWith
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -81,112 +83,78 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
         storeInfoCache[addonId] = StoreInfoCacheEntry(info, System.currentTimeMillis())
     }
 
-    override fun getAddons(allowCache: Boolean, callback: (Result<List<AddonInfo>>) -> Unit) {
-        scope.launch {
-            runCatching {
-                components.core.addonManager.getAddons(allowCache = allowCache)
-                    .map { addon ->
-                        addon.toPigeon(
-                            context = context,
-                            isAutoUpdateEnabled = isAutoUpdateEffectivelyEnabledForAddon(addon.id),
-                            isLocalFileInstalled = isLocalFileInstalledAddon(addon.id),
-                        )
-                    }
-            }.fold(
-                onSuccess = { callback(Result.success(it)) },
-                onFailure = { callback(Result.failure(it)) },
-            )
-        }
-    }
-
-    override fun getAddonById(
-        addonId: String,
-        allowCache: Boolean,
-        callback: (Result<AddonInfo?>) -> Unit,
-    ) {
-        scope.launch {
-            runCatching {
-                val installedAddon = components.core.addonManager.getAddonByID(addonId)
-                val resolved = installedAddon ?: components.core.addonManager.getAddons(
-                    allowCache = allowCache,
-                ).find { it.id == addonId }
-
-                val isLocalFile = isLocalFileInstalledAddon(addonId)
-                val storeInfo = if (resolved != null && resolved.isInstalled() && !isLocalFile &&
-                    resolved.needsAmoEnrichment()
-                ) {
-                    runCatching { fetchAddonStoreInfo(addonId) }.getOrNull()
-                } else {
-                    null
-                }
-
-                resolved?.toPigeon(
+    override suspend fun getAddons(
+        allowCache: Boolean
+    ): List<AddonInfo> = withContext(Dispatchers.IO) {
+        components.core.addonManager.getAddons(allowCache = allowCache)
+            .map { addon ->
+                addon.toPigeon(
                     context = context,
-                    isAutoUpdateEnabled = isAutoUpdateEffectivelyEnabledForAddon(addonId),
-                    isLocalFileInstalled = isLocalFile,
-                    storeInfo = storeInfo,
+                    isAutoUpdateEnabled = isAutoUpdateEffectivelyEnabledForAddon(addon.id),
+                    isLocalFileInstalled = isLocalFileInstalledAddon(addon.id),
                 )
-            }.fold(
-                onSuccess = { callback(Result.success(it)) },
-                onFailure = { callback(Result.failure(it)) },
-            )
-        }
+            }
     }
 
-    override fun getAddonStoreInfo(addonId: String, callback: (Result<AddonStoreInfo?>) -> Unit) {
-        scope.launch {
-            runCatching {
-                fetchAddonStoreInfo(addonId)
-            }.fold(
-                onSuccess = { callback(Result.success(it)) },
-                onFailure = { callback(Result.failure(it)) },
-            )
+    override suspend fun getAddonById(
+        addonId: String,
+        allowCache: Boolean
+    ): AddonInfo? = withContext(Dispatchers.IO) {
+        val installedAddon = components.core.addonManager.getAddonByID(addonId)
+        val resolved = installedAddon ?: components.core.addonManager.getAddons(
+            allowCache = allowCache,
+        ).find { it.id == addonId }
+
+        val isLocalFile = isLocalFileInstalledAddon(addonId)
+        val storeInfo = if (resolved != null && resolved.isInstalled() && !isLocalFile &&
+            resolved.needsAmoEnrichment()
+        ) {
+            runCatching { fetchAddonStoreInfo(addonId) }.getOrNull()
+        } else {
+            null
         }
+
+        resolved?.toPigeon(
+            context = context,
+            isAutoUpdateEnabled = isAutoUpdateEffectivelyEnabledForAddon(addonId),
+            isLocalFileInstalled = isLocalFile,
+            storeInfo = storeInfo,
+        )
     }
 
-    override fun searchAddonListings(
+    override suspend fun getAddonStoreInfo(
+        addonId: String
+    ): AddonStoreInfo? = withContext(Dispatchers.IO) {
+        fetchAddonStoreInfo(addonId)
+    }
+
+    override suspend fun searchAddonListings(
         query: String,
         app: AddonStoreApp,
         page: Long,
-        pageSize: Long,
-        callback: (Result<List<AddonListing>>) -> Unit,
-    ) {
-        scope.launch {
-            runCatching {
-                fetchAddonListings(
-                    query = query.ifBlank { null },
-                    app = app,
-                    page = page.toInt().coerceAtLeast(1),
-                    pageSize = pageSize.toInt().coerceIn(1, 50),
-                    sort = if (query.isBlank()) "users" else null,
-                )
-            }.fold(
-                onSuccess = { callback(Result.success(it)) },
-                onFailure = { callback(Result.failure(it)) },
-            )
-        }
+        pageSize: Long
+    ): List<AddonListing> = withContext(Dispatchers.IO) {
+        fetchAddonListings(
+            query = query.ifBlank { null },
+            app = app,
+            page = page.toInt().coerceAtLeast(1),
+            pageSize = pageSize.toInt().coerceIn(1, 50),
+            sort = if (query.isBlank()) "users" else null,
+        )
     }
 
-    override fun getFeaturedAddonListings(
+    override suspend fun getFeaturedAddonListings(
         app: AddonStoreApp,
-        pageSize: Long,
-        callback: (Result<List<AddonListing>>) -> Unit,
-    ) {
-        scope.launch {
-            runCatching {
-                fetchAddonListings(
-                    query = null,
-                    app = app,
-                    page = 1,
-                    pageSize = pageSize.toInt().coerceIn(1, 50),
-                    sort = "users",
-                    promoted = "recommended",
-                )
-            }.fold(
-                onSuccess = { callback(Result.success(it)) },
-                onFailure = { callback(Result.failure(it)) },
-            )
-        }
+        pageSize: Long
+    ): List<AddonListing> = withContext(Dispatchers.IO) {
+        fetchAddonListings(
+            query = null,
+            app = app,
+            page = 1,
+            pageSize = pageSize.toInt().coerceIn(1, 50),
+            sort = "users",
+            promoted = "recommended",
+        )
     }
 
     override fun invokeAddonAction(extensionId: String, actionType: WebExtensionActionType) {
@@ -200,8 +168,8 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
         }
     }
 
-    override fun enableAddon(addonId: String, callback: (Result<AddonInfo>) -> Unit) {
-        withInstalledAddon(addonId, callback) { addon, result ->
+    override suspend fun enableAddon(addonId: String): AddonInfo {
+        return withInstalledAddon(addonId) { addon, result ->
             components.core.addonManager.enableAddon(
                 addon,
                 onSuccess = { updatedAddon ->
@@ -222,8 +190,8 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
         }
     }
 
-    override fun disableAddon(addonId: String, callback: (Result<AddonInfo>) -> Unit) {
-        withInstalledAddon(addonId, callback) { addon, result ->
+    override suspend fun disableAddon(addonId: String): AddonInfo {
+        return withInstalledAddon(addonId) { addon, result ->
             components.core.addonManager.disableAddon(
                 addon,
                 onSuccess = { updatedAddon ->
@@ -244,12 +212,11 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
         }
     }
 
-    override fun setAddonAllowedInPrivateBrowsing(
+    override suspend fun setAddonAllowedInPrivateBrowsing(
         addonId: String,
         allowed: Boolean,
-        callback: (Result<AddonInfo>) -> Unit,
-    ) {
-        withInstalledAddon(addonId, callback) { addon, result ->
+    ): AddonInfo {
+        return withInstalledAddon(addonId) { addon, result ->
             components.core.addonManager.setAddonAllowedInPrivateBrowsing(
                 addon,
                 allowed,
@@ -271,12 +238,11 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
         }
     }
 
-    override fun setAddonAutoUpdateEnabledForAddon(
+    override suspend fun setAddonAutoUpdateEnabledForAddon(
         addonId: String,
         enabled: Boolean,
-        callback: (Result<AddonInfo>) -> Unit,
-    ) {
-        withInstalledAddon(addonId, callback) { addon, result ->
+    ): AddonInfo {
+        return withInstalledAddon(addonId) { addon, result ->
             if (enabled && isLocalFileInstalledAddon(addon.id)) {
                 result(
                     Result.success(
@@ -303,8 +269,8 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
         }
     }
 
-    override fun uninstallAddon(addonId: String, callback: (Result<Unit>) -> Unit) {
-        withInstalledAddon(addonId, callback) { addon, result ->
+    override suspend fun uninstallAddon(addonId: String) {
+        withInstalledAddon<Unit>(addonId) { addon, result ->
             components.core.addonManager.uninstallAddon(
                 addon,
                 onSuccess = {
@@ -320,97 +286,74 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
         }
     }
 
-    override fun triggerAddonUpdate(
-        addonId: String,
-        callback: (Result<AddonUpdateAttemptInfo?>) -> Unit,
-    ) {
+    override suspend fun triggerAddonUpdate(addonId: String): AddonUpdateAttemptInfo? {
         if (isLocalFileInstalledAddon(addonId)) {
-            runLocalFileAddonUpdate(addonId, callback)
-            return
+            return runLocalFileAddonUpdate(addonId)
         }
 
-        scope.launch {
-            try {
-                withContext(Dispatchers.Main.immediate) {
-                    runManagedAddonUpdate(addonId) { attempt ->
-                        callback(Result.success(attempt))
+        return awaitCallback { callback ->
+            scope.launch {
+                try {
+                    withContext(Dispatchers.Main.immediate) {
+                        runManagedAddonUpdate(addonId) { attempt ->
+                            callback(Result.success(attempt))
+                        }
                     }
+                } catch (throwable: Throwable) {
+                    callback(Result.failure(throwable))
                 }
-            } catch (throwable: Throwable) {
-                callback(Result.failure(throwable))
             }
         }
     }
 
-    override fun triggerAllAddonUpdates(callback: (Result<Unit>) -> Unit) {
-        scope.launch {
-            try {
-                val addons = components.core.addonManager.getAddons()
-                    .filter { it.isInstalled() && it.isSupported() }
-                    .filter { addon -> isAddonAutoUpdateEnabledForAddon(addon.id) }
-                    .filterNot { addon -> isLocalFileInstalledAddon(addon.id) }
+    override suspend fun triggerAllAddonUpdates() {
+        withContext(Dispatchers.IO) {
+            val addons = components.core.addonManager.getAddons()
+                .filter { it.isInstalled() && it.isSupported() }
+                .filter { addon -> isAddonAutoUpdateEnabledForAddon(addon.id) }
+                .filterNot { addon -> isLocalFileInstalledAddon(addon.id) }
 
-                withContext(Dispatchers.Main.immediate) {
+            withContext(Dispatchers.Main.immediate) {
+                addons.forEach { addon ->
+                    scheduleManagedAddonUpdate(addon.id)
+                }
+            }
+        }
+    }
+
+    override suspend fun getLastAddonUpdateAttempt(
+        addonId: String
+    ): AddonUpdateAttemptInfo? = withContext(Dispatchers.IO) {
+        val updaterAttempt = updateAttemptStorage.findUpdateAttemptBy(addonId)?.toPigeon()
+        val manualAttempt = getManualUpdateAttempt(addonId)
+        listOfNotNull(updaterAttempt, manualAttempt)
+            .maxByOrNull { it.dateMillisecondsSinceEpoch }
+    }
+
+    override suspend fun isAddonAutoUpdateEnabled(): Boolean =
+        prefs.getBoolean(AddonPrefs.PREF_AUTO_UPDATE_ENABLED, true)
+
+    override suspend fun setAddonAutoUpdateEnabled(enabled: Boolean) {
+        withContext(Dispatchers.IO) {
+            prefs.edit().putBoolean(AddonPrefs.PREF_AUTO_UPDATE_ENABLED, enabled).apply()
+
+            val addons = components.core.addonManager.getAddons()
+                .filter { it.isInstalled() && it.isSupported() }
+            withContext(Dispatchers.Main.immediate) {
+                if (enabled) {
                     addons.forEach { addon ->
-                        scheduleManagedAddonUpdate(addon.id)
+                        updateAddonAutoUpdateRegistration(addon.id)
+                    }
+                } else {
+                    addons.forEach { addon ->
+                        components.core.addonUpdater.unregisterForFutureUpdates(addon.id)
                     }
                 }
-
-                callback(Result.success(Unit))
-            } catch (throwable: Throwable) {
-                callback(Result.failure(throwable))
             }
         }
     }
 
-    override fun getLastAddonUpdateAttempt(
-        addonId: String,
-        callback: (Result<AddonUpdateAttemptInfo?>) -> Unit,
-    ) {
-        scope.launch {
-            runCatching {
-                val updaterAttempt = updateAttemptStorage.findUpdateAttemptBy(addonId)?.toPigeon()
-                val manualAttempt = getManualUpdateAttempt(addonId)
-                listOfNotNull(updaterAttempt, manualAttempt)
-                    .maxByOrNull { it.dateMillisecondsSinceEpoch }
-            }.fold(
-                onSuccess = { callback(Result.success(it)) },
-                onFailure = { callback(Result.failure(it)) },
-            )
-        }
-    }
-
-    override fun isAddonAutoUpdateEnabled(callback: (Result<Boolean>) -> Unit) {
-        callback(Result.success(prefs.getBoolean(AddonPrefs.PREF_AUTO_UPDATE_ENABLED, true)))
-    }
-
-    override fun setAddonAutoUpdateEnabled(enabled: Boolean, callback: (Result<Unit>) -> Unit) {
-        scope.launch {
-            try {
-                prefs.edit().putBoolean(AddonPrefs.PREF_AUTO_UPDATE_ENABLED, enabled).apply()
-
-                val addons = components.core.addonManager.getAddons()
-                    .filter { it.isInstalled() && it.isSupported() }
-                withContext(Dispatchers.Main.immediate) {
-                    if (enabled) {
-                        addons.forEach { addon ->
-                            updateAddonAutoUpdateRegistration(addon.id)
-                        }
-                    } else {
-                        addons.forEach { addon ->
-                            components.core.addonUpdater.unregisterForFutureUpdates(addon.id)
-                        }
-                    }
-                }
-
-                callback(Result.success(Unit))
-            } catch (throwable: Throwable) {
-                callback(Result.failure(throwable))
-            }
-        }
-    }
-
-    override fun installAddon(url: String, callback: (Result<Unit>) -> Unit) {
+    override suspend fun installAddon(url: String) {
         val isLocalFileInstall = url.startsWith("file://")
         val installMethod = if (isLocalFileInstall) {
             InstallationMethod.FROM_FILE
@@ -418,22 +361,23 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
             null
         }
 
-        scope.launch {
-            try {
-                withContext(Dispatchers.Main.immediate) {
-                    performAddonInstall(url, isLocalFileInstall, callback)
+        awaitCallback<Unit> { callback ->
+            scope.launch {
+                try {
+                    withContext(Dispatchers.Main.immediate) {
+                        performAddonInstall(url, isLocalFileInstall, callback)
+                    }
+                } catch (throwable: Throwable) {
+                    callback(Result.failure(throwable))
                 }
-            } catch (throwable: Throwable) {
-                callback(Result.failure(throwable))
             }
         }
     }
 
-    private fun <T> withInstalledAddon(
+    private suspend fun <T> withInstalledAddon(
         addonId: String,
-        callback: (Result<T>) -> Unit,
         block: suspend (Addon, (Result<T>) -> Unit) -> Unit,
-    ) {
+    ): T = awaitCallback { callback ->
         scope.launch {
             val addon = runCatching {
                 components.core.addonManager.getAddonByID(addonId)
@@ -448,6 +392,16 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
                 block(addon, callback)
             }
         }
+    }
+
+    /**
+     * Runs an operation that reports through a callback as a suspend call. The first result
+     * completes it; a later one is ignored, as a second Pigeon reply would have been.
+     */
+    private suspend fun <T> awaitCallback(start: ((Result<T>) -> Unit) -> Unit): T {
+        val completion = CompletableDeferred<T>()
+        start { result -> completion.completeWith(result) }
+        return completion.await()
     }
 
     private fun isAutoUpdateEnabled(): Boolean {
@@ -779,11 +733,8 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
         }
     }
 
-    private fun runLocalFileAddonUpdate(
-        addonId: String,
-        callback: (Result<AddonUpdateAttemptInfo?>) -> Unit,
-    ) {
-        withInstalledAddon(addonId, callback) { addon, result ->
+    private suspend fun runLocalFileAddonUpdate(addonId: String): AddonUpdateAttemptInfo? {
+        return withInstalledAddon(addonId) { addon, result ->
             val storeInfo = fetchAddonStoreInfo(addonId)
             if (storeInfo == null) {
                 saveManualUpdateAttempt(

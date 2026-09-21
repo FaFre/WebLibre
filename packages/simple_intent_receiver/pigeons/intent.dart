@@ -81,6 +81,7 @@ abstract class IntentHost {
 
 @FlutterApi()
 abstract class IntentEvents {
+  @asyncCallback
   void onIntentReceived(int sequence, Intent intent);
 }
 

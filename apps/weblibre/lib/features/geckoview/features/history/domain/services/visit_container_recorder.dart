@@ -33,7 +33,7 @@ class _HistoryEventsReceiver extends GeckoHistoryEvents {
   final void Function(String url, int visitTime, String tabId) _onVisit;
 
   @override
-  void onVisitRecorded(String url, int visitTime, String tabId) {
+  Future<void> onVisitRecorded(String url, int visitTime, String tabId) async {
     _onVisit(url, visitTime, tabId);
   }
 }

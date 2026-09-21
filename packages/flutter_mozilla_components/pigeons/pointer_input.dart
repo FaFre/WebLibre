@@ -56,9 +56,11 @@ abstract class PointerInputFlutterApi {
   /// [tracksHover] marks a hover event, and additionally arms the stationary
   /// watch that reports later changes through
   /// [PointerInputHostApi.hoverTargetChanged].
+  @asyncCallback
   PointerHitTest hitTest(double x, double y, bool tracksHover);
 
   /// The cursor left every registered surface, so the stationary watch stops.
+  @asyncCallback
   void pointerExit();
 }
 

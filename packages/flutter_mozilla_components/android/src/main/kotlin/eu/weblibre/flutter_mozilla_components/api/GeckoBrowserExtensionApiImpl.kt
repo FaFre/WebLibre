@@ -6,8 +6,8 @@
 
 package eu.weblibre.flutter_mozilla_components.api
 
-import eu.weblibre.flutter_mozilla_components.feature.ResultConsumer
 import eu.weblibre.flutter_mozilla_components.feature.BrowserExtensionFeature
+import eu.weblibre.flutter_mozilla_components.feature.awaitResult
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserExtensionApi
 import org.json.JSONArray
 import org.json.JSONObject
@@ -43,17 +43,8 @@ class GeckoBrowserExtensionApiImpl : GeckoBrowserExtensionApi {
         return list
     }
 
-    override fun getMarkdown(htmlList: List<String>, callback: (Result<List<Any>>) -> Unit) {
-        BrowserExtensionFeature.scheduleRequest("turndown", htmlList, object :
-            ResultConsumer<JSONObject> {
-            override fun success(result: JSONObject) {
-                val resultArray = result.getJSONArray("result")
-                callback(Result.success(resultArray.toList()))
-            }
-
-            override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-                callback(Result.failure(Exception("$errorCode $errorMessage $errorDetails")))
-            }
-        })
-    }
+    override suspend fun getMarkdown(htmlList: List<String>): List<Any> =
+        awaitResult({ BrowserExtensionFeature.scheduleRequest("turndown", htmlList, it) }) { result ->
+            result.getJSONArray("result").toList()
+        }
 }

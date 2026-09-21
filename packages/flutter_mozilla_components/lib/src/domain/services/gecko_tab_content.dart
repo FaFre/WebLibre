@@ -28,7 +28,7 @@ class GeckoTabContentService extends GeckoTabContentEvents {
   }
 
   @override
-  void onContentUpdate(int sequence, TabContent content) {
+  Future<void> onContentUpdate(int sequence, TabContent content) async {
     _contentSubject.addWhenMoreRecent(sequence, content.tabId, content);
   }
 

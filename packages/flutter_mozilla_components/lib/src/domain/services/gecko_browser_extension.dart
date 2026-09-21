@@ -58,7 +58,7 @@ class GeckoBrowserExtensionService extends BrowserExtensionEvents {
   }
 
   @override
-  void onFeedRequested(int sequence, String url) {
+  Future<void> onFeedRequested(int sequence, String url) async {
     _feedRequest.addWhenMoreRecent(sequence, null, url);
   }
 

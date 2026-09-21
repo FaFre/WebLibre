@@ -10,10 +10,8 @@ import androidx.core.net.toUri
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.pigeons.ClearDataType
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoDeleteBrowsingDataController
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import mozilla.components.browser.state.action.EngineAction
 import mozilla.components.browser.state.action.RecentlyClosedAction
@@ -24,12 +22,10 @@ import mozilla.components.concept.engine.Engine
 import mozilla.components.concept.engine.translate.ModelManagementOptions
 import mozilla.components.concept.engine.translate.ModelOperation
 import mozilla.components.concept.engine.translate.OperationLevel
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController {
-    companion object {
-        private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    }
-
     private val components by lazy {
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
     }
@@ -57,191 +53,140 @@ class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController 
         tabs.forEach { store.dispatch(EngineAction.UnlinkEngineSessionAction(it.id)) }
     }
 
-    override fun deleteTabs(callback: (Result<Unit>) -> Unit) {
-        coroutineScope.launch {
-            withContext(Dispatchers.Main) {
-                components.useCases.tabsUseCases.removeAllTabs.invoke(false)
-
-                callback(Result.success(Unit))
-            }
+    /** [Engine.clearData] as a suspend call that fails with the engine's own error. */
+    private suspend fun clearData(data: Engine.BrowsingData, host: String? = null) {
+        suspendCancellableCoroutine<Unit> { continuation ->
+            components.core.engine.clearData(
+                data = data,
+                host = host,
+                onSuccess = { continuation.resume(Unit) },
+                onError = { continuation.resumeWithException(it) },
+            )
         }
     }
 
-    override fun deleteBrowsingHistory(callback: (Result<Unit>) -> Unit) {
-        coroutineScope.launch {
-            withContext(Dispatchers.Main) {
-                components.core.historyStorage.deleteEverything()
-                components.core.store.dispatch(EngineAction.PurgeHistoryAction)
-                components.core.icons.clear()
-                components.core.store.dispatch(RecentlyClosedAction.RemoveAllClosedTabAction)
-
-                callback(Result.success(Unit))
-            }
+    override suspend fun deleteTabs() {
+        withContext(Dispatchers.Main) {
+            components.useCases.tabsUseCases.removeAllTabs.invoke(false)
         }
     }
 
-    override fun deleteCookiesAndSiteData(callback: (Result<Unit>) -> Unit) {
-        coroutineScope.launch {
-            withContext(Dispatchers.Main) {
-                closeMatchingSessions(components.core.store) { true }
-
-                components.core.engine.clearData(
-                    Engine.BrowsingData.select(
-                        Engine.BrowsingData.COOKIES,
-                        Engine.BrowsingData.AUTH_SESSIONS,
-                    ),
-                    onSuccess = {
-                        components.core.engine.clearData(
-                            Engine.BrowsingData.select(Engine.BrowsingData.DOM_STORAGES),
-                            onSuccess = { callback(Result.success(Unit)) },
-                            onError = { callback(Result.failure(it)) },
-                        )
-                    },
-                    onError = { callback(Result.failure(it)) },
-                )
-            }
+    override suspend fun deleteBrowsingHistory() {
+        withContext(Dispatchers.Main) {
+            components.core.historyStorage.deleteEverything()
+            components.core.store.dispatch(EngineAction.PurgeHistoryAction)
+            components.core.icons.clear()
+            components.core.store.dispatch(RecentlyClosedAction.RemoveAllClosedTabAction)
         }
     }
 
-    override fun deleteCachedFiles(callback: (Result<Unit>) -> Unit) {
-        coroutineScope.launch {
-            withContext(Dispatchers.Main) {
-                components.core.engine.manageTranslationsLanguageModel(
-                    options = ModelManagementOptions(
-                        operation = ModelOperation.DELETE,
-                        operationLevel = OperationLevel.CACHE,
-                    ),
-                    onSuccess = { },
-                    onError = { },
-                )
-                components.core.engine.clearData(
-                    Engine.BrowsingData.select(Engine.BrowsingData.ALL_CACHES),
-                    onSuccess = { callback(Result.success(Unit)) },
-                    onError = { callback(Result.failure(it)) },
-                )
-            }
+    override suspend fun deleteCookiesAndSiteData() {
+        withContext(Dispatchers.Main) {
+            closeMatchingSessions(components.core.store) { true }
+
+            clearData(
+                Engine.BrowsingData.select(
+                    Engine.BrowsingData.COOKIES,
+                    Engine.BrowsingData.AUTH_SESSIONS,
+                ),
+            )
+            clearData(Engine.BrowsingData.select(Engine.BrowsingData.DOM_STORAGES))
         }
     }
 
-    override fun deleteSitePermissions(callback: (Result<Unit>) -> Unit) {
-        coroutineScope.launch {
-            withContext(Dispatchers.Main) {
-                components.core.engine.clearData(
-                    Engine.BrowsingData.select(Engine.BrowsingData.ALL_SITE_SETTINGS),
-                    onSuccess = {
-                        coroutineScope.launch {
-                            try {
-                                components.core.permissionStorage.deleteAllSitePermissions()
-                                callback(Result.success(Unit))
-                            } catch (e: Throwable) {
-                                callback(Result.failure(e))
-                            }
-                        }
-                    },
-                    onError = { callback(Result.failure(it)) },
-                )
-            }
+    override suspend fun deleteCachedFiles() {
+        withContext(Dispatchers.Main) {
+            components.core.engine.manageTranslationsLanguageModel(
+                options = ModelManagementOptions(
+                    operation = ModelOperation.DELETE,
+                    operationLevel = OperationLevel.CACHE,
+                ),
+                onSuccess = { },
+                onError = { },
+            )
+            clearData(Engine.BrowsingData.select(Engine.BrowsingData.ALL_CACHES))
         }
     }
 
-    override fun deleteDownloads(callback: (Result<Unit>) -> Unit) {
-        coroutineScope.launch {
-            withContext(Dispatchers.Main) {
-                components.useCases.downloadsUseCases.removeAllDownloads.invoke()
-
-                callback(Result.success(Unit))
-            }
+    override suspend fun deleteSitePermissions() {
+        withContext(Dispatchers.Main) {
+            clearData(Engine.BrowsingData.select(Engine.BrowsingData.ALL_SITE_SETTINGS))
+        }
+        withContext(Dispatchers.Default) {
+            components.core.permissionStorage.deleteAllSitePermissions()
         }
     }
 
-    override fun clearDataForSessionContext(
-        contextId: String,
-        callback: (Result<Unit>) -> Unit
-    ) {
-        coroutineScope.launch {
-            withContext(Dispatchers.Main) {
-                // Detach engine sessions for any tab in this context so they don't
-                // re-accumulate data while the (fire-and-forget) clear is processed.
-                closeMatchingSessions(components.core.store) { it.contextId == contextId }
-
-                // GeckoView's clearDataForSessionContext uses dispatch (fire-and-forget),
-                // so there's no completion signal we can chain against. Fire it and
-                // signal completion immediately - by suspending matching sessions above
-                // we've at least ensured the operation can take effect.
-                components.core.runtime.storageController.clearDataForSessionContext(contextId)
-
-                callback(Result.success(Unit))
-            }
+    override suspend fun deleteDownloads() {
+        withContext(Dispatchers.Main) {
+            components.useCases.downloadsUseCases.removeAllDownloads.invoke()
         }
     }
 
-    override fun clearDataForHost(
-        host: String,
-        dataTypes: List<ClearDataType>,
-        callback: (Result<Unit>) -> Unit
-    ) {
-        coroutineScope.launch {
-            try {
-                withContext(Dispatchers.Main) {
-                    if (dataTypes.contains(ClearDataType.ALL_SITE_DATA) && (dataTypes.contains(
-                            ClearDataType.ONLY_COOKIES
-                        ) || dataTypes.contains(ClearDataType.ONLY_CACHES))
-                    ) {
-                        callback(Result.failure(Exception("Cookies/Cache must be exclusively!")))
-                        return@withContext
-                    }
+    override suspend fun clearDataForSessionContext(contextId: String) {
+        withContext(Dispatchers.Main) {
+            // Detach engine sessions for any tab in this context so they don't
+            // re-accumulate data while the (fire-and-forget) clear is processed.
+            closeMatchingSessions(components.core.store) { it.contextId == contextId }
 
-                    // Convert ClearDataType to Engine.BrowsingData flags
-                    val browsingDataTypes = dataTypes.map { dataType ->
-                        when (dataType) {
-                            ClearDataType.AUTH_SESSIONS -> Engine.BrowsingData.AUTH_SESSIONS
-                            ClearDataType.ALL_SITE_DATA -> Engine.BrowsingData.ALL_SITE_DATA
-                            ClearDataType.ONLY_COOKIES -> Engine.BrowsingData.COOKIES
-                            ClearDataType.ONLY_CACHES -> Engine.BrowsingData.ALL_CACHES
-                        }
-                    }.toIntArray()
+            // GeckoView's clearDataForSessionContext uses dispatch (fire-and-forget),
+            // so there's no completion signal we can chain against. Fire it and
+            // signal completion immediately - by suspending matching sessions above
+            // we've at least ensured the operation can take effect.
+            components.core.runtime.storageController.clearDataForSessionContext(contextId)
+        }
+    }
 
-                    // Find tabs on this host so we can detach their engine sessions
-                    // before clearing (across every container — the base-domain clear
-                    // below covers all partitions, so any open session on this host in
-                    // any container could otherwise re-accumulate cleared data).
-                    val matchingTabs = components.core.store.state.allTabs.filter { tab ->
-                        val tabHost = runCatching { tab.content.url.toUri().host }.getOrNull()
-                            ?: return@filter false
-                        tabHost == host || tabHost.endsWith(".$host")
-                    }
+    override suspend fun clearDataForHost(host: String, dataTypes: List<ClearDataType>) {
+        withContext(Dispatchers.Main) {
+            if (dataTypes.contains(ClearDataType.ALL_SITE_DATA) && (dataTypes.contains(
+                    ClearDataType.ONLY_COOKIES
+                ) || dataTypes.contains(ClearDataType.ONLY_CACHES))
+            ) {
+                throw Exception("Cookies/Cache must be exclusively!")
+            }
 
-                    // GeckoView warns that open sessions may re-accumulate previously
-                    // cleared data. Close them synchronously before clearing.
-                    matchingTabs.forEach { it.engineState.engineSession?.close() }
-                    matchingTabs.forEach {
-                        components.core.store.dispatch(EngineAction.UnlinkEngineSessionAction(it.id))
-                    }
-
-                    // Clear data for the specific host only. clearDataFromBaseDomain
-                    // (used by engine.clearData(host=)) deletes the site under an
-                    // empty OriginAttributes pattern, which already matches ALL
-                    // partitions — including every container's
-                    // `geckoViewSessionContextId`. So this clears this host across all
-                    // containers WITHOUT touching other sites in those containers.
-                    //
-                    // Do NOT fall back to clearDataForSessionContext here: that wipes a
-                    // container's entire storage (every unrelated site in it), which is
-                    // the container-wide data-loss reported in #524.
-                    components.core.engine.clearData(
-                        data = Engine.BrowsingData.select(*browsingDataTypes),
-                        host = host,
-                        onSuccess = {
-                            callback(Result.success(Unit))
-                        },
-                        onError = { throwable ->
-                            callback(Result.failure(throwable))
-                        }
-                    )
+            // Convert ClearDataType to Engine.BrowsingData flags
+            val browsingDataTypes = dataTypes.map { dataType ->
+                when (dataType) {
+                    ClearDataType.AUTH_SESSIONS -> Engine.BrowsingData.AUTH_SESSIONS
+                    ClearDataType.ALL_SITE_DATA -> Engine.BrowsingData.ALL_SITE_DATA
+                    ClearDataType.ONLY_COOKIES -> Engine.BrowsingData.COOKIES
+                    ClearDataType.ONLY_CACHES -> Engine.BrowsingData.ALL_CACHES
                 }
-            } catch (e: Exception) {
-                callback(Result.failure(e))
+            }.toIntArray()
+
+            // Find tabs on this host so we can detach their engine sessions
+            // before clearing (across every container — the base-domain clear
+            // below covers all partitions, so any open session on this host in
+            // any container could otherwise re-accumulate cleared data).
+            val matchingTabs = components.core.store.state.allTabs.filter { tab ->
+                val tabHost = runCatching { tab.content.url.toUri().host }.getOrNull()
+                    ?: return@filter false
+                tabHost == host || tabHost.endsWith(".$host")
             }
+
+            // GeckoView warns that open sessions may re-accumulate previously
+            // cleared data. Close them synchronously before clearing.
+            matchingTabs.forEach { it.engineState.engineSession?.close() }
+            matchingTabs.forEach {
+                components.core.store.dispatch(EngineAction.UnlinkEngineSessionAction(it.id))
+            }
+
+            // Clear data for the specific host only. clearDataFromBaseDomain
+            // (used by engine.clearData(host=)) deletes the site under an
+            // empty OriginAttributes pattern, which already matches ALL
+            // partitions — including every container's
+            // `geckoViewSessionContextId`. So this clears this host across all
+            // containers WITHOUT touching other sites in those containers.
+            //
+            // Do NOT fall back to clearDataForSessionContext here: that wipes a
+            // container's entire storage (every unrelated site in it), which is
+            // the container-wide data-loss reported in #524.
+            clearData(
+                data = Engine.BrowsingData.select(*browsingDataTypes),
+                host = host,
+            )
         }
     }
 }

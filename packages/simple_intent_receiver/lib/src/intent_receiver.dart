@@ -145,7 +145,7 @@ class IntentReceiver extends IntentEvents {
   Future<List<Intent>> pendingIntents = Future.value(const []);
 
   @override
-  void onIntentReceived(int sequence, Intent intent) {
+  Future<void> onIntentReceived(int sequence, Intent intent) async {
     if (_lastAdded != null && sequence <= _lastAdded!) {
       return;
     }

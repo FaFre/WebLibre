@@ -53,11 +53,11 @@ class GeckoSuggestionsService extends GeckoSuggestionEvents {
   }
 
   @override
-  void onSuggestionResult(
+  Future<void> onSuggestionResult(
     int sequence,
     GeckoSuggestionType suggestionType,
     List<GeckoSuggestion> suggestions,
-  ) {
+  ) async {
     _suggestionsSubject.addWhenMoreRecent(
       sequence,
       suggestionType,

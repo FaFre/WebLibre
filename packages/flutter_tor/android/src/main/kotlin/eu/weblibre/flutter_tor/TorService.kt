@@ -13,7 +13,6 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import eu.weblibre.flutter_tor.generated.TorConfiguration
 import eu.weblibre.flutter_tor.generated.TorStatus
-import io.flutter.plugin.common.BinaryMessenger
 import kotlinx.coroutines.*
 
 /**
@@ -75,14 +74,14 @@ class TorService : Service() {
     }
 
     /**
-     * Initialize the service with Flutter messenger for log streaming
+     * Initialize the service with the Flutter log and status streams
      */
-    fun initialize(messenger: BinaryMessenger) {
+    fun initialize(handler: LogStreamHandler) {
         if (logHandler == null) {
-            logHandler = LogStreamHandler(messenger)
-            torManager = TorManager(applicationContext, logHandler!!)
+            logHandler = handler
+            torManager = TorManager(applicationContext, handler)
 
-            Log.d(TAG, "Service initialized with messenger")
+            Log.d(TAG, "Service initialized with event streams")
         }
     }
 

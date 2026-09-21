@@ -29,7 +29,7 @@ class FlutterTorPlugin : FlutterPlugin, TorApi {
     }
 
     private var context: Context? = null
-    private var binaryMessenger: io.flutter.plugin.common.BinaryMessenger? = null
+    private var logStreamHandler: LogStreamHandler? = null
     private var torService: TorService? = null
     private var serviceConnection: ServiceConnection? = null
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -56,7 +56,12 @@ class FlutterTorPlugin : FlutterPlugin, TorApi {
         Log.d(TAG, "onAttachedToEngine")
         val appContext = flutterPluginBinding.applicationContext
         context = appContext
-        binaryMessenger = flutterPluginBinding.binaryMessenger
+
+        // Dart can subscribe to the log and status streams as soon as it runs, long
+        // before TorService has connected, so they are exposed now rather than then.
+        logStreamHandler = LogStreamHandler().also {
+            it.register(flutterPluginBinding.binaryMessenger)
+        }
 
         // Setup Pigeon API
         TorApi.setUp(flutterPluginBinding.binaryMessenger, this)
@@ -87,8 +92,9 @@ class FlutterTorPlugin : FlutterPlugin, TorApi {
         // Cancel coroutines
         scope.cancel()
 
+        logStreamHandler?.detach()
+        logStreamHandler = null
         context = null
-        binaryMessenger = null
     }
 
     /**
@@ -96,7 +102,7 @@ class FlutterTorPlugin : FlutterPlugin, TorApi {
      */
     private fun bindTorService(createIfNeeded: Boolean) {
         val ctx = context ?: return
-        val messenger = binaryMessenger ?: return
+        val logHandler = logStreamHandler ?: return
         if (serviceConnection != null) {
             if (createIfNeeded && torService == null) {
                 try {
@@ -115,7 +121,7 @@ class FlutterTorPlugin : FlutterPlugin, TorApi {
                 Log.d(TAG, "TorService connected")
                 val binder = service as? TorService.LocalBinder
                 torService = binder?.getService()
-                torService?.initialize(messenger)
+                torService?.initialize(logHandler)
 
                 serviceConnected.complete(Unit)
             }
@@ -201,49 +207,41 @@ class FlutterTorPlugin : FlutterPlugin, TorApi {
     }
 
     // ========== Pigeon TorApi Implementation ==========
-    // Note: These methods are now async with callbacks to avoid blocking the main thread
+    // Note: start/stop are suspend functions so pigeon replies once they return,
+    // without blocking the main thread
 
-    override fun startTor(config: TorConfiguration, callback: (Result<Long>) -> Unit) {
+    override suspend fun startTor(config: TorConfiguration): Long {
         Log.d(TAG, "startTor called with transport: ${config.transport}")
 
-        scope.launch {
-            try {
-                // Wait for service to be connected
-                val service = waitForService()
+        try {
+            // Wait for service to be connected
+            val service = waitForService()
 
-                val socksPort = withContext(Dispatchers.IO) {
-                    service.startTor(config)
-                }
-
-                val result = socksPort.toLong()
-                Log.d(TAG, "Returning SOCKS port to Flutter: $socksPort")
-                callback(Result.success(result))
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to start Tor", e)
-                callback(Result.failure(e))
+            val socksPort = withContext(Dispatchers.IO) {
+                service.startTor(config)
             }
+
+            val result = socksPort.toLong()
+            Log.d(TAG, "Returning SOCKS port to Flutter: $socksPort")
+            return result
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to start Tor", e)
+            throw e
         }
     }
 
-    override fun stopTor(callback: (Result<Unit>) -> Unit) {
+    override suspend fun stopTor() {
         Log.d(TAG, "stopTor called")
 
-        val service = torService
-        if (service == null) {
-            callback(Result.success(Unit))
-            return
-        }
+        val service = torService ?: return
 
-        scope.launch {
-            try {
-                withContext(Dispatchers.IO) {
-                    service.stopTor()
-                }
-                callback(Result.success(Unit))
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to stop Tor", e)
-                callback(Result.failure(e))
+        try {
+            withContext(Dispatchers.IO) {
+                service.stopTor()
             }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to stop Tor", e)
+            throw e
         }
     }
 

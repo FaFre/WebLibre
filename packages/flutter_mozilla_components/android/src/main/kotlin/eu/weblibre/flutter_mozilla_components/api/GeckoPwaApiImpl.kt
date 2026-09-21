@@ -25,10 +25,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.PwaManifest
 import eu.weblibre.flutter_mozilla_components.pigeons.ShareTarget
 import eu.weblibre.flutter_mozilla_components.pigeons.ShareTargetFiles
 import eu.weblibre.flutter_mozilla_components.pigeons.ShareTargetParams
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import mozilla.components.browser.icons.IconRequest
 import mozilla.components.browser.state.selector.findTab
@@ -48,10 +45,6 @@ import java.util.UUID
 class GeckoPwaApiImpl(
     private val context: Context
 ) : GeckoPwaApi {
-    companion object {
-        private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    }
-
     private enum class ShortcutKind(
         val shortcutType: String,
         val idPrefix: String,
@@ -72,15 +65,14 @@ class GeckoPwaApiImpl(
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
     }
 
-    override fun installWebApp(
+    override suspend fun installWebApp(
         tabId: String?,
         profileUuid: String,
         contextId: String?,
-        overrideAppName: String?,
-        callback: (Result<Boolean>) -> Unit
-    ) {
+        overrideAppName: String?
+    ): Boolean {
         logger.debug("installWebApp called for tabId: $tabId, profileUuid: $profileUuid, contextId: $contextId")
-        coroutineScope.launch {
+        return withContext(Dispatchers.Default) {
             try {
                 val store = components.core.store
                 val tab = if (tabId != null) {
@@ -91,8 +83,7 @@ class GeckoPwaApiImpl(
 
                 if (tab == null) {
                     logger.warn("Tab not found for installWebApp: $tabId")
-                    callback(Result.success(false))
-                    return@launch
+                    return@withContext false
                 }
 
                 val baseManifest = tab.content.webAppManifest ?: run {
@@ -133,10 +124,10 @@ class GeckoPwaApiImpl(
                     logger.warn("Failed to create PWA shortcut for tab ${tab.id}")
                 }
 
-                callback(Result.success(success))
+                success
             } catch (e: Exception) {
                 logger.error("Failed to install web app", e)
-                callback(Result.failure(e))
+                throw e
             }
         }
     }
@@ -377,15 +368,14 @@ class GeckoPwaApiImpl(
         }
     }
 
-    override fun installBasicShortcut(
+    override suspend fun installBasicShortcut(
         tabId: String?,
         profileUuid: String,
         contextId: String?,
-        overrideShortcutName: String?,
-        callback: (Result<Boolean>) -> Unit
-    ) {
+        overrideShortcutName: String?
+    ): Boolean {
         logger.debug("installBasicShortcut called for tabId: $tabId, profileUuid: $profileUuid")
-        coroutineScope.launch {
+        return withContext(Dispatchers.Default) {
             try {
                 val store = components.core.store
                 val tab = if (tabId != null) {
@@ -396,8 +386,7 @@ class GeckoPwaApiImpl(
 
                 if (tab == null) {
                     logger.warn("Tab not found for installBasicShortcut: $tabId")
-                    callback(Result.success(false))
-                    return@launch
+                    return@withContext false
                 }
 
                 val success = createBasicShortcut(
@@ -408,10 +397,10 @@ class GeckoPwaApiImpl(
                     contextId = contextId,
                 )
 
-                callback(Result.success(success))
+                success
             } catch (e: Exception) {
                 logger.error("Failed to create basic shortcut", e)
-                callback(Result.failure(e))
+                throw e
             }
         }
     }
@@ -546,9 +535,9 @@ class GeckoPwaApiImpl(
         }
     }
 
-    override fun getInstalledWebApps(callback: (Result<List<PwaManifest>>) -> Unit) {
+    override suspend fun getInstalledWebApps(): List<PwaManifest> {
         logger.debug("getInstalledWebApps called")
-        coroutineScope.launch {
+        return withContext(Dispatchers.Default) {
             try {
                 val storage = components.core.webAppManifestStorage
                 val currentProfileUuid = getCurrentProfileUuid()
@@ -597,10 +586,10 @@ class GeckoPwaApiImpl(
                 }
 
                 logger.debug("Found ${pwaManifests.size} installed web apps")
-                callback(Result.success(pwaManifests))
+                pwaManifests
             } catch (e: Exception) {
                 logger.error("Failed to get installed web apps", e)
-                callback(Result.failure(e))
+                throw e
             }
         }
     }
