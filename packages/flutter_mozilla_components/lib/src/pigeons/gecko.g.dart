@@ -10891,7 +10891,10 @@ abstract class GeckoStateEvents {
 
   Future<void> onIconUpdate(int sequence, String url, Uint8List bytes);
 
-  Future<void> onTabAdded(int sequence, String tabId);
+  /// [parentId] is the engine's opener for the tab — set for a tab opened
+  /// from a page (`window.open`, `target="_blank"`) — so the app can place the
+  /// row beside its opener the moment it is inserted.
+  Future<void> onTabAdded(int sequence, String tabId, String? parentId);
 
   Future<void> onTabListChange(int sequence, List<String> tabIds);
 
@@ -11062,8 +11065,9 @@ abstract class GeckoStateEvents {
           final List<Object?> args = message! as List<Object?>;
           final int arg_sequence = args[0]! as int;
           final String arg_tabId = args[1]! as String;
+          final String? arg_parentId = args[2] as String?;
           try {
-            await api.onTabAdded(arg_sequence, arg_tabId);
+            await api.onTabAdded(arg_sequence, arg_tabId, arg_parentId);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

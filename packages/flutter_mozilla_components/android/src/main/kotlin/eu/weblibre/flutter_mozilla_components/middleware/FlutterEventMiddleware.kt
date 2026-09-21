@@ -118,7 +118,8 @@ class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Midd
                 runOnUiThread {
                     flutterEvents.onTabAdded(
                         EventSequence.next(),
-                        action.tab.id
+                        action.tab.id,
+                        action.tab.parentId
                     ) { _ -> }
                 }
             }

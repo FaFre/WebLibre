@@ -104,6 +104,375 @@ void main() {
     ]);
   });
 
+  test('an engine-opened tab lands behind its opener at insert', () async {
+    await _insertTabs(db, const [
+      _TabFixture('opener'),
+      _TabFixture('existing-child', parentId: 'opener'),
+      _TabFixture('unrelated'),
+    ]);
+
+    await db.tabDao.insertTab(
+      'engine-tab',
+      source: TabSource.addedEvent,
+      parentId: const Value.absent(),
+      openerId: const Value('opener'),
+    );
+
+    expect(await _orderedTabIds(db), [
+      'opener',
+      'existing-child',
+      'engine-tab',
+      'unrelated',
+    ]);
+    // The opener is recorded at insert, but the row stays unclaimed so that
+    // seeding still claims it — without moving it.
+    final inserted = await db.tabDao
+        .getTabDataById('engine-tab')
+        .getSingleOrNull();
+    expect(inserted?.parentId, 'opener');
+    expect(inserted?.source, TabSource.addedEvent);
+
+    final seeded = await db.tabDao.seedParentFromEngineState(
+      childId: 'engine-tab',
+      parentId: 'opener',
+      contextId: null,
+    );
+    expect(seeded, isTrue);
+    final claimed = await db.tabDao
+        .getTabDataById('engine-tab')
+        .getSingleOrNull();
+    expect(claimed?.source, TabSource.manual);
+    expect(await _orderedTabIds(db), [
+      'opener',
+      'existing-child',
+      'engine-tab',
+      'unrelated',
+    ]);
+  });
+
+  test('ChildTabPlacement.endOfList ignores the opener at insert', () async {
+    await _insertTabs(db, const [
+      _TabFixture('opener'),
+      _TabFixture('unrelated'),
+    ]);
+
+    await db.tabDao.insertTab(
+      'engine-tab',
+      source: TabSource.addedEvent,
+      parentId: const Value.absent(),
+      openerId: const Value('opener'),
+      childPlacement: ChildTabPlacement.endOfList,
+    );
+
+    expect(await _orderedTabIds(db), ['opener', 'unrelated', 'engine-tab']);
+    final inserted = await db.tabDao
+        .getTabDataById('engine-tab')
+        .getSingleOrNull();
+    expect(inserted?.parentId, 'opener');
+  });
+
+  test(
+    'engine-opened siblings keep their opening order before seeding',
+    () async {
+      // Two tabs from one opener can both arrive before either is seeded. Each
+      // must see the previous one as a sibling, or the second anchors on the
+      // opener itself and lands in front of the first.
+      await _insertTabs(db, const [
+        _TabFixture('opener'),
+        _TabFixture('existing-child', parentId: 'opener'),
+        _TabFixture('unrelated'),
+      ]);
+
+      for (final id in ['first', 'second', 'third']) {
+        await db.tabDao.insertTab(
+          id,
+          source: TabSource.addedEvent,
+          parentId: const Value.absent(),
+          openerId: const Value('opener'),
+        );
+      }
+
+      expect(await _orderedTabIds(db), [
+        'opener',
+        'existing-child',
+        'first',
+        'second',
+        'third',
+        'unrelated',
+      ]);
+    },
+  );
+
+  test('seeding does not override a different local parent', () async {
+    await _insertTabs(db, const [
+      _TabFixture('opener'),
+      _TabFixture('local-parent'),
+      _TabFixture(
+        'child',
+        parentId: 'local-parent',
+        source: TabSource.addedEvent,
+      ),
+    ]);
+
+    final seeded = await db.tabDao.seedParentFromEngineState(
+      childId: 'child',
+      parentId: 'opener',
+      contextId: null,
+    );
+
+    final child = await db.tabDao.getTabDataById('child').getSingleOrNull();
+    expect(seeded, isFalse);
+    expect(child?.parentId, 'local-parent');
+    expect(child?.source, TabSource.addedEvent);
+  });
+
+  group('an opener without a row at insert', () {
+    // The tab appends (a dangling parent_id would violate the FK) and is
+    // moved behind its opener by whichever path links the parent later.
+
+    /// `[unrelated, engine-tab, opener]`: the engine tab appended while its
+    /// opener had no row, and the opener's row arrived after it.
+    Future<void> arrangeLateOpener() async {
+      await _insertTabs(db, const [_TabFixture('unrelated')]);
+      await db.tabDao.insertTab(
+        'engine-tab',
+        source: TabSource.addedEvent,
+        parentId: const Value.absent(),
+        openerId: const Value('opener'),
+      );
+      expect(await _orderedTabIds(db), ['unrelated', 'engine-tab']);
+      final inserted = await db.tabDao
+          .getTabDataById('engine-tab')
+          .getSingleOrNull();
+      expect(inserted?.parentId, isNull);
+
+      await db.tabDao.insertTab(
+        'opener',
+        source: TabSource.syncEvent,
+        parentId: const Value.absent(),
+      );
+      expect(await _orderedTabIds(db), ['unrelated', 'engine-tab', 'opener']);
+    }
+
+    test('engine seeding moves it behind the opener', () async {
+      await arrangeLateOpener();
+
+      final seeded = await db.tabDao.seedParentFromEngineState(
+        childId: 'engine-tab',
+        parentId: 'opener',
+        contextId: null,
+      );
+
+      expect(seeded, isTrue);
+      expect(await _orderedTabIds(db), ['unrelated', 'opener', 'engine-tab']);
+      final child = await db.tabDao
+          .getTabDataById('engine-tab')
+          .getSingleOrNull();
+      expect(child?.parentId, 'opener');
+      expect(child?.source, TabSource.manual);
+    });
+
+    test('the content-state sync moves it behind the opener', () async {
+      await arrangeLateOpener();
+
+      await db.tabDao.updateTabs(null, {
+        'engine-tab': _tabState('engine-tab', parentId: 'opener'),
+      });
+
+      expect(await _orderedTabIds(db), ['unrelated', 'opener', 'engine-tab']);
+      final child = await db.tabDao
+          .getTabDataById('engine-tab')
+          .getSingleOrNull();
+      expect(child?.parentId, 'opener');
+      expect(child?.source, TabSource.manual);
+    });
+
+    test('ChildTabPlacement.endOfList links it without moving it', () async {
+      await arrangeLateOpener();
+
+      await db.tabDao.seedParentFromEngineState(
+        childId: 'engine-tab',
+        parentId: 'opener',
+        contextId: null,
+        childPlacement: ChildTabPlacement.endOfList,
+      );
+
+      expect(await _orderedTabIds(db), ['unrelated', 'engine-tab', 'opener']);
+      final child = await db.tabDao
+          .getTabDataById('engine-tab')
+          .getSingleOrNull();
+      expect(child?.parentId, 'opener');
+    });
+
+    /// A late-linked tab that already has a child: anything opened from it
+    /// since its own insert recorded it as the parent.
+    Future<void> insertWithGrandchild({String? containerId}) async {
+      await db.tabDao.insertTab(
+        'child',
+        source: TabSource.addedEvent,
+        parentId: const Value.absent(),
+        openerId: const Value('opener'),
+        containerId: Value(containerId),
+      );
+      await db.tabDao.insertTab(
+        'grandchild',
+        source: TabSource.addedEvent,
+        parentId: const Value.absent(),
+        openerId: const Value('child'),
+        containerId: Value(containerId),
+      );
+    }
+
+    test('a late link moves the tab with its subtree as one block', () async {
+      await _insertTabs(db, const [_TabFixture('unrelated')]);
+      await insertWithGrandchild();
+      await db.tabDao.insertTab(
+        'opener',
+        source: TabSource.syncEvent,
+        parentId: const Value.absent(),
+      );
+      expect(await _orderedTabIds(db), [
+        'unrelated',
+        'child',
+        'grandchild',
+        'opener',
+      ]);
+
+      await db.tabDao.seedParentFromEngineState(
+        childId: 'child',
+        parentId: 'opener',
+        contextId: null,
+      );
+
+      expect(await _orderedTabIds(db), [
+        'unrelated',
+        'opener',
+        'child',
+        'grandchild',
+      ]);
+      final grandchild = await db.tabDao
+          .getTabDataById('grandchild')
+          .getSingleOrNull();
+      expect(grandchild?.parentId, 'child');
+    });
+
+    test('a parent in another container leaves the block in place', () async {
+      await _insertContainers(db, const [
+        _ContainerFixture('home', 'home-context'),
+        _ContainerFixture('work', 'work-context'),
+      ]);
+      // The opener's key sorts *before* home-root. Order keys are only
+      // comparable within a container, so ranking against it would drag the
+      // block in front of home-root.
+      await _insertTabs(db, const [
+        _TabFixture('opener', containerId: 'work'),
+        _TabFixture('home-root', containerId: 'home'),
+      ]);
+      // Appended with no parent (as if the opener had no row at the time),
+      // then a grandchild opened from it.
+      await db.tabDao.insertTab(
+        'child',
+        source: TabSource.addedEvent,
+        parentId: const Value.absent(),
+        containerId: const Value('home'),
+      );
+      await db.tabDao.insertTab(
+        'grandchild',
+        source: TabSource.addedEvent,
+        parentId: const Value.absent(),
+        openerId: const Value('child'),
+        containerId: const Value('home'),
+      );
+
+      await db.tabDao.seedParentFromEngineState(
+        childId: 'child',
+        parentId: 'opener',
+        contextId: null,
+      );
+
+      expect(await _orderedTabIdsInContainer(db, 'home'), [
+        'home-root',
+        'child',
+        'grandchild',
+      ]);
+      final child = await db.tabDao.getTabDataById('child').getSingleOrNull();
+      expect(child?.parentId, 'opener');
+      expect(child?.containerId, 'home');
+    });
+
+    test('a repaired container follows the moved block', () async {
+      await _insertContainers(db, const [
+        _ContainerFixture('work', 'work-context'),
+      ]);
+      await _insertTabs(db, const [_TabFixture('unassigned-root')]);
+      // Inserted with no container selected; the engine reports the work
+      // context, so seeding repairs the container.
+      await insertWithGrandchild();
+      await db.tabDao.insertTab(
+        'opener',
+        source: TabSource.syncEvent,
+        parentId: const Value.absent(),
+        containerId: const Value('work'),
+      );
+
+      await db.tabDao.seedParentFromEngineState(
+        childId: 'child',
+        parentId: 'opener',
+        contextId: 'work-context',
+      );
+
+      expect(await _orderedTabIdsInContainer(db, 'work'), [
+        'opener',
+        'child',
+        'grandchild',
+      ]);
+      final grandchild = await db.tabDao
+          .getTabDataById('grandchild')
+          .getSingleOrNull();
+      expect(grandchild?.containerId, 'work');
+    });
+
+    test(
+      'the pending-parent pass moves each behind the opener in order',
+      () async {
+        await _insertTabs(db, const [_TabFixture('unrelated')]);
+        for (final id in ['first', 'second']) {
+          await db.tabDao.insertTab(
+            id,
+            source: TabSource.addedEvent,
+            parentId: const Value.absent(),
+            openerId: const Value('opener'),
+          );
+          // No opener row yet, so seeding parks the link as pending.
+          final seeded = await db.tabDao.seedParentFromEngineState(
+            childId: id,
+            parentId: 'opener',
+            contextId: null,
+          );
+          expect(seeded, isFalse);
+        }
+
+        // The opener's row arrives through the tab-list sync (leading key), and
+        // the same transaction resolves the pending links.
+        await db.tabDao.syncTabs(
+          retainTabIds: const ['unrelated', 'first', 'second', 'opener'],
+        );
+
+        expect(await _orderedTabIds(db), [
+          'opener',
+          'first',
+          'second',
+          'unrelated',
+        ]);
+        for (final id in ['first', 'second']) {
+          final child = await db.tabDao.getTabDataById(id).getSingleOrNull();
+          expect(child?.parentId, 'opener');
+          expect(child?.source, TabSource.manual);
+        }
+      },
+    );
+  });
+
   test('setTabParent appends after the existing last child subtree', () async {
     await _insertTabs(db, const [
       _TabFixture('parent'),

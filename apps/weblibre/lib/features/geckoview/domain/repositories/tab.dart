@@ -1371,11 +1371,19 @@ class TabRepository extends _$TabRepository {
     final db = ref.watch(tabDatabaseProvider);
 
     final tabAddedSub = eventSerivce.tabAddedStream.listen(
-      (tabId) async {
+      (event) async {
         final containerId = ref.read(selectedContainerProvider);
         await db.tabDao.insertTab(
-          tabId,
+          event.tabId,
           parentId: const Value.absent(),
+          // Link an engine-opened tab to its opener and place it per the child
+          // tab placement setting right away, so it never has to move once the
+          // parent is seeded from engine state. An app-created tab already has
+          // its row (manual source wins the upsert), so this is a no-op for it.
+          openerId: Value(event.parentId),
+          childPlacement: ref
+              .read(generalSettingsWithDefaultsProvider)
+              .childTabPlacement,
           source: TabSource.addedEvent,
           containerId: Value(containerId),
         );
@@ -1466,6 +1474,9 @@ class TabRepository extends _$TabRepository {
         if (shouldSyncTabs) {
           final syncTabsResult = await db.tabDao.syncTabs(
             retainTabIds: next.value,
+            childPlacement: ref
+                .read(generalSettingsWithDefaultsProvider)
+                .childTabPlacement,
           );
           // Capture isolation contexts from rows deleted by syncTabs
           // (orphaned tabs from crashes, or tabs the engine dropped).
@@ -1510,6 +1521,9 @@ class TabRepository extends _$TabRepository {
         if (currentTabs.isNotEmpty) {
           final syncTabsResult = await db.tabDao.syncTabs(
             retainTabIds: currentTabs,
+            childPlacement: ref
+                .read(generalSettingsWithDefaultsProvider)
+                .childTabPlacement,
           );
           _pendingIsolationCleanup.addAll(
             syncTabsResult.deletedIsolationContextIds,
@@ -1533,7 +1547,13 @@ class TabRepository extends _$TabRepository {
         }
 
         tabStateDebouncer.eventOccured(() async {
-          await db.tabDao.updateTabs(debounceStartValue, next);
+          await db.tabDao.updateTabs(
+            debounceStartValue,
+            next,
+            childPlacement: ref
+                .read(generalSettingsWithDefaultsProvider)
+                .childTabPlacement,
+          );
         });
       },
       onError: (Object error, StackTrace stackTrace) {

@@ -2173,8 +2173,11 @@ abstract class GeckoStateEvents {
   @asyncCallback
   void onIconUpdate(int sequence, String url, Uint8List bytes);
 
+  /// [parentId] is the engine's opener for the tab — set for a tab opened
+  /// from a page (`window.open`, `target="_blank"`) — so the app can place the
+  /// row beside its opener the moment it is inserted.
   @asyncCallback
-  void onTabAdded(int sequence, String tabId);
+  void onTabAdded(int sequence, String tabId, String? parentId);
 
   @asyncCallback
   void onTabListChange(int sequence, List<String> tabIds);

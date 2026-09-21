@@ -10352,12 +10352,17 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
       } 
     }
   }
-  fun onTabAdded(sequenceArg: Long, tabIdArg: String, callback: (Result<Unit>) -> Unit)
+  /**
+   * [parentId] is the engine's opener for the tab — set for a tab opened
+   * from a page (`window.open`, `target="_blank"`) — so the app can place the
+   * row beside its opener the moment it is inserted.
+   */
+  fun onTabAdded(sequenceArg: Long, tabIdArg: String, parentIdArg: String?, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabAdded$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(sequenceArg, tabIdArg)) {
+    channel.send(listOf(sequenceArg, tabIdArg, parentIdArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
