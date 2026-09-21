@@ -77,6 +77,30 @@ import 'package:weblibre/utils/input_classification.dart';
 import 'package:weblibre/utils/text_field_line_count.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
+/// Where back leads from a tab this screen opened, once that tab has run out of
+/// page history.
+///
+/// This screen is a route, and the `go` that follows an open replaces it rather
+/// than stacking on it, so there is nothing left to pop back to. Without a
+/// behaviour the tab falls through to the double-back-to-close prompt: the same
+/// shortcut that leads home when tapped on the home page closed its tab when
+/// tapped on the new tab page (#623). Home is the surface both of them sit on.
+///
+/// Two tabs keep the fallthrough. One launched from an intent belongs to the
+/// app that sent us here — [TabRepository.addTab] gives it
+/// [BackgroundAppTabBackBehavior] — and one opened as a child has its opener
+/// underneath it, which is what the double-back handling is right for.
+TabBackBehavior? resolveSearchTabBackBehavior({
+  required bool launchedFromIntent,
+  required String? parentId,
+}) {
+  if (launchedFromIntent || parentId != null) {
+    return null;
+  }
+
+  return const ReturnToBrowserHomeTabBackBehavior();
+}
+
 class SearchScreen extends HookConsumerWidget {
   final String? initialSearchText;
   final TabType tabType;
@@ -455,19 +479,25 @@ class SearchScreen extends HookConsumerWidget {
             .read(tabSessionProvider(tabId: targetTabId).notifier)
             .loadUrl(url: uri);
       } else {
+        final parentId = (selectedTabType.value == TabType.child)
+            ? ref.read(selectedTabProvider)
+            : null;
+
         targetTabId = await ref
             .read(tabRepositoryProvider.notifier)
             .addTab(
               url: uri,
               tabMode: effectiveTabMode,
-              parentId: (selectedTabType.value == TabType.child)
-                  ? ref.read(selectedTabProvider)
-                  : null,
+              parentId: parentId,
               launchedFromIntent: launchedFromIntent,
               selectTab: true,
               containerSelection: selectedContainer == null
                   ? const TabContainerSelection.unassigned()
                   : TabContainerSelection.specific(selectedContainer),
+              onBackBehavior: resolveSearchTabBackBehavior(
+                launchedFromIntent: launchedFromIntent,
+                parentId: parentId,
+              ),
             );
       }
 

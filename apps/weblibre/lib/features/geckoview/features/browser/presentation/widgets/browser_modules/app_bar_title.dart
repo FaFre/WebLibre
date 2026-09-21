@@ -67,15 +67,28 @@ class CompactAppBarTitle extends ConsumerWidget {
       ),
     );
 
-    if (tabState == null) {
+    final showBrowserHome = ref.watch(shouldShowBrowserHomeProvider);
+
+    // No tab to address, or one the home surface is covering. Home is a layer
+    // over the selected tab rather than a tab of its own, so the selection
+    // outlives it: addressing that tab anyway left the page's URL and icon in
+    // the pill of a screen that is not showing that page, and handed the same
+    // URL to the search screen as the text to edit (#623).
+    if (tabState == null || showBrowserHome) {
       return _EmptyAppBarAddressField(
-        tabType: selectedTabType ?? settings.effectiveDefaultCreateTabType,
+        // On home this field is a second way into the same place as
+        // [HomeSearchPill], which offers the configured default. Following the
+        // covered tab's type instead would have the two disagree about what
+        // they open on the one screen that can show both.
+        tabType: showBrowserHome
+            ? settings.effectiveDefaultCreateTabType
+            : (selectedTabType ?? settings.effectiveDefaultCreateTabType),
         // The tools turn this field from "no page loaded" into the home
         // surface's search entry, which is only what it is when the pill has
         // stood down for it. Everywhere else the row has a page's worth of
         // buttons beside it and no width to spare.
         showSearchTools:
-            ref.watch(shouldShowBrowserHomeProvider) &&
+            showBrowserHome &&
             ref.watch(effectiveHomeSearchBarPlacementProvider) ==
                 HomeSearchBarPlacement.tabBar,
       );
@@ -284,15 +297,28 @@ class AppBarTitle extends ConsumerWidget {
       ),
     );
 
-    if (tabState == null) {
+    final showBrowserHome = ref.watch(shouldShowBrowserHomeProvider);
+
+    // No tab to address, or one the home surface is covering. Home is a layer
+    // over the selected tab rather than a tab of its own, so the selection
+    // outlives it: addressing that tab anyway left the page's URL and icon in
+    // the pill of a screen that is not showing that page, and handed the same
+    // URL to the search screen as the text to edit (#623).
+    if (tabState == null || showBrowserHome) {
       return _EmptyAppBarAddressField(
-        tabType: selectedTabType ?? settings.effectiveDefaultCreateTabType,
+        // On home this field is a second way into the same place as
+        // [HomeSearchPill], which offers the configured default. Following the
+        // covered tab's type instead would have the two disagree about what
+        // they open on the one screen that can show both.
+        tabType: showBrowserHome
+            ? settings.effectiveDefaultCreateTabType
+            : (selectedTabType ?? settings.effectiveDefaultCreateTabType),
         // The tools turn this field from "no page loaded" into the home
         // surface's search entry, which is only what it is when the pill has
         // stood down for it. Everywhere else the row has a page's worth of
         // buttons beside it and no width to spare.
         showSearchTools:
-            ref.watch(shouldShowBrowserHomeProvider) &&
+            showBrowserHome &&
             ref.watch(effectiveHomeSearchBarPlacementProvider) ==
                 HomeSearchBarPlacement.tabBar,
       );
@@ -538,12 +564,18 @@ class RailAppBarTitle extends ConsumerWidget {
       ),
     );
 
-    if (tabState == null) {
+    // Same rule as the horizontal title above: the home surface covers the
+    // selected tab without replacing it, so its address is not this screen's.
+    final showBrowserHome = ref.watch(shouldShowBrowserHomeProvider);
+
+    if (tabState == null || showBrowserHome) {
       return _EmptyRailAddressField(
         quarterTurns: quarterTurns,
         onTap: () async {
           await SearchRoute(
-            tabType: selectedTabType ?? settings.effectiveDefaultCreateTabType,
+            tabType: showBrowserHome
+                ? settings.effectiveDefaultCreateTabType
+                : (selectedTabType ?? settings.effectiveDefaultCreateTabType),
           ).push(context);
         },
       );
