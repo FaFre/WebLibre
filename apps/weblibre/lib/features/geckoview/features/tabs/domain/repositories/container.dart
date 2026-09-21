@@ -52,7 +52,10 @@ class ContainerRepository extends _$ContainerRepository {
       );
     }
 
-    return ref.read(tabDatabaseProvider).containerDao.addContainer(container);
+    return await ref
+        .read(tabDatabaseProvider)
+        .containerDao
+        .addContainer(container);
   }
 
   Future<List<ContainerDataWithCount>> getAllContainersWithCount() {
@@ -73,7 +76,7 @@ class ContainerRepository extends _$ContainerRepository {
       }
     }
 
-    return ref
+    return await ref
         .read(tabDatabaseProvider)
         .containerDao
         .replaceContainer(container);
@@ -110,7 +113,7 @@ class ContainerRepository extends _$ContainerRepository {
 
   Future<void> setContainerPinned(String id, {required bool isPinned}) async {
     final orderKey = await getTrailingContainerOrderKey(isPinned: isPinned);
-    return ref
+    return await ref
         .read(tabDatabaseProvider)
         .containerDao
         .assignPinned(id, isPinned: isPinned, orderKey: orderKey);
@@ -143,7 +146,7 @@ class ContainerRepository extends _$ContainerRepository {
   Future<void> deleteContainer(String id) async {
     await ref.read(tabDataRepositoryProvider.notifier).closeContainerTabs(id);
 
-    return ref.read(tabDatabaseProvider).containerDao.deleteContainer(id);
+    return await ref.read(tabDatabaseProvider).containerDao.deleteContainer(id);
   }
 
   Future<Set<Color>> getDistinctColors() {
@@ -261,11 +264,11 @@ class ContainerRepository extends _$ContainerRepository {
     bool isPinned,
   ) async {
     if (targetIndex <= 0) {
-      return getLeadingContainerOrderKey(isPinned: isPinned);
+      return await getLeadingContainerOrderKey(isPinned: isPinned);
     }
 
     if (targetIndex >= containers.length - 1) {
-      return getTrailingContainerOrderKey(isPinned: isPinned);
+      return await getTrailingContainerOrderKey(isPinned: isPinned);
     }
 
     if (targetIndex < oldIndex) {
@@ -276,7 +279,7 @@ class ContainerRepository extends _$ContainerRepository {
           await getLeadingContainerOrderKey(isPinned: isPinned);
     }
 
-    return getOrderKeyBeforeContainer(
+    return await getOrderKeyBeforeContainer(
       containers[targetIndex + 1].id,
       isPinned: isPinned,
     );

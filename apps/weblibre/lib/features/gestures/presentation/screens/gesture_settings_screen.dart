@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -42,11 +41,9 @@ class GestureSettingsScreen extends HookConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     void open(Widget screen) {
-      unawaited(
-        Navigator.of(
-          context,
-        ).push(MaterialPageRoute<void>(builder: (_) => screen)),
-      );
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute<void>(builder: (_) => screen));
     }
 
     return SettingsCustomScrollScaffold(

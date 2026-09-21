@@ -222,8 +222,7 @@ class SettingsTransferService extends _$SettingsTransferService {
   ) {
     return {
       for (final key in document.documents.keys)
-        if (SettingsTransferSection.forKindValue(key) case final section?)
-          section,
+        ?SettingsTransferSection.forKindValue(key),
     };
   }
 

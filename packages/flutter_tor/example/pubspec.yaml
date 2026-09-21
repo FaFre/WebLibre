@@ -19,7 +19,7 @@ dependencies:
     sdk: flutter
   flutter_tor:
     path: ../
-  hooks_riverpod: ^3.4.2
+  hooks_riverpod: ^3.4.3
 
   # HTTP client for testing Tor connectivity
   http: ^1.6.0
@@ -32,7 +32,7 @@ dev_dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
-  lint: ^2.8.0
+  lint: ^2.14.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

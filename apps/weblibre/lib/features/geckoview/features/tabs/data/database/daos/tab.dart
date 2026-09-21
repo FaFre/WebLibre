@@ -391,7 +391,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
       containerId: containerId,
     );
 
-    return db.containerDao
+    return await db.containerDao
         .generateOrderKeyAfterTabId(containerId, anchorTabId)
         .getSingleOrNull();
   }
@@ -555,7 +555,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     // [ChildTabPlacement.endOfList] all append to the end of the list.
     // Display direction is applied at render time via TabListDirection /
     // TabBarDirection settings, so we never need to insert at the front.
-    return db.containerDao
+    return await db.containerDao
         .generateTrailingOrderKey(containerId.value)
         .getSingle();
   }
@@ -780,7 +780,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
             ),
       );
 
-    return query
+    return await query
         .map((row) => row.read(db.closedTabTombstone.tabId)!)
         .get()
         .then((rows) => rows.toSet());
@@ -814,10 +814,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     }
 
     return db.transaction(() async {
-      final anchorIds = [
-        if (previousTabId != null) previousTabId,
-        if (nextTabId != null) nextTabId,
-      ];
+      final anchorIds = [?previousTabId, ?nextTabId];
 
       final anchors = anchorIds.isEmpty
           ? const <String, TabSummary>{}
@@ -1318,10 +1315,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
       // container. Otherwise `tabsWithRootAndDepth` draws the child as a local
       // root, and that root scope — not a scope of its own under an
       // out-of-container parent — is the one it holds a slot in.
-      final closingParentIds = {
-        for (final tab in closingTabs)
-          if (tab.parentId case final parentId?) parentId,
-      };
+      final closingParentIds = {for (final tab in closingTabs) ?tab.parentId};
       final closingParentContainerIds = closingParentIds.isEmpty
           ? const <String, String?>{}
           : await getTabsContainerId(
@@ -1527,8 +1521,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
       final repairedContainerIds = <String, String>{
         for (final entry in containerRepairCandidates.entries)
           if (currentContainerIds[entry.key] == null)
-            if (containerIdsByContext[entry.value] case final containerId?)
-              entry.key: containerId,
+            entry.key: ?containerIdsByContext[entry.value],
       };
 
       for (final state in next.values) {

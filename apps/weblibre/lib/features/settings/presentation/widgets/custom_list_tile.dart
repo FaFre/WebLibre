@@ -50,7 +50,7 @@ class CustomListTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
       child: Row(
         children: [
-          if (prefix != null) prefix!,
+          ?prefix,
           Expanded(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -72,11 +72,11 @@ class CustomListTile extends StatelessWidget {
                           color: theme.disabledColor,
                         ),
                 ),
-                if (content != null) content!,
+                ?content,
               ],
             ),
           ),
-          if (suffix != null) suffix!,
+          ?suffix,
         ],
       ),
     );

@@ -344,12 +344,10 @@ class _TabListView extends HookConsumerWidget {
             if (disableAnimations) {
               scrollController.jumpTo(targetOffset);
             } else {
-              unawaited(
-                scrollController.animateTo(
-                  targetOffset,
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeInOut,
-                ),
+              scrollController.animateTo(
+                targetOffset,
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
               );
             }
           }

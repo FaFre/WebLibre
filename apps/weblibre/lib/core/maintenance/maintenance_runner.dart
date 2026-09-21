@@ -139,15 +139,15 @@ class MaintenanceRunner {
       case MaintenanceAction.backup:
         break;
       case MaintenanceAction.restoreOver:
-        return _runRestoreOver(task, password);
+        return await _runRestoreOver(task, password);
       case MaintenanceAction.delete:
-        return _runDelete(task);
+        return await _runDelete(task);
       case MaintenanceAction.restoreClone:
       case null:
         // Restoring into a *new* profile is not destructive and stays in the
         // normal app, where it already works; there is nothing for a maintenance
         // lease to protect.
-        return _fail(
+        return await _fail(
           task,
           const UnknownMaintenanceFailure(
             'This task was created by a newer version of WebLibre and cannot '
@@ -158,7 +158,7 @@ class MaintenanceRunner {
 
     final targetTreeUri = task.targetTreeUri;
     if (targetTreeUri == null || targetTreeUri.isEmpty) {
-      return _fail(
+      return await _fail(
         task,
         const UnknownMaintenanceFailure(
           'This backup has no destination folder recorded.',
@@ -242,7 +242,7 @@ class MaintenanceRunner {
         error: error,
         stackTrace: stackTrace,
       );
-      return _fail(task, classifyMaintenanceFailure(error));
+      return await _fail(task, classifyMaintenanceFailure(error));
     }
   }
 
@@ -255,7 +255,7 @@ class MaintenanceRunner {
     final sourceFileUri = task.sourceFileUri;
 
     if (startupPaths == null || unpack == null) {
-      return _fail(
+      return await _fail(
         task,
         const UnknownMaintenanceFailure(
           'WebLibre cannot restore from this startup screen.',
@@ -263,7 +263,7 @@ class MaintenanceRunner {
       );
     }
     if (sourceFileUri == null || sourceFileUri.isEmpty) {
-      return _fail(
+      return await _fail(
         task,
         const UnknownMaintenanceFailure(
           'This restore has no backup file recorded.',
@@ -305,12 +305,12 @@ class MaintenanceRunner {
       // — which turned a mistyped archive password into a browser that could not
       // be opened again.
       logger.w('Restore ${task.id} did not start: ${error.reason}');
-      return _fail(task, error.failure);
+      return await _fail(task, error.failure);
     } on RestoreUnrecoverable catch (error) {
       // The journal stays on disk, so the reservation survives and the next
       // process offers recovery rather than booting a half-restored profile.
       logger.e('Restore ${task.id} needs manual recovery: $error');
-      return _mark(
+      return await _mark(
         task,
         MaintenanceTaskState.recoveryRequired,
         UnknownMaintenanceFailure('$error'),
@@ -321,7 +321,7 @@ class MaintenanceRunner {
         error: error,
         stackTrace: stackTrace,
       );
-      return _mark(
+      return await _mark(
         task,
         MaintenanceTaskState.recoveryRequired,
         classifyMaintenanceFailure(error),
@@ -332,7 +332,7 @@ class MaintenanceRunner {
   Future<MaintenanceTask> _runDelete(MaintenanceTask task) async {
     final startupPaths = paths;
     if (startupPaths == null) {
-      return _fail(
+      return await _fail(
         task,
         const UnknownMaintenanceFailure(
           'WebLibre cannot delete a profile from this startup screen.',
@@ -357,7 +357,7 @@ class MaintenanceRunner {
     } on MaintenanceAborted catch (error) {
       // Stopped before the ownership snapshot, so nothing was removed.
       logger.w('Delete ${task.id} did not start: ${error.reason}');
-      return _fail(task, error.failure);
+      return await _fail(task, error.failure);
     } catch (error, stackTrace) {
       // Delete is forward-only, so a failure is not a failure to undo — it is a
       // partially deleted profile that must be finished, never booted.
@@ -366,7 +366,7 @@ class MaintenanceRunner {
         error: error,
         stackTrace: stackTrace,
       );
-      return _mark(
+      return await _mark(
         task,
         MaintenanceTaskState.recoveryRequired,
         classifyMaintenanceFailure(error),

@@ -158,7 +158,7 @@ class SingboxProxyRuntimeRepository extends _$SingboxProxyRuntimeRepository {
       final currentState = await _stateSnapshotUnlocked();
       final activeProfileIds = _activeProfileIds(currentState);
 
-      return _startProfilesUnlocked(
+      return await _startProfilesUnlocked(
         {...activeProfileIds, profileId}.toList(),
         options: options,
       );
@@ -182,7 +182,7 @@ class SingboxProxyRuntimeRepository extends _$SingboxProxyRuntimeRepository {
 
       if (profileIds.every(activeProfileIds.contains)) return currentState;
 
-      return _startProfilesUnlocked(
+      return await _startProfilesUnlocked(
         {...activeProfileIds, ...profileIds}.toList(),
         options: options,
       );
@@ -367,7 +367,7 @@ class SingboxProxyRuntimeRepository extends _$SingboxProxyRuntimeRepository {
   }
 
   Future<String?> validateProfile(ProxyProfile profile) async {
-    return _plugin.validateProfile(await _runtimeProfile(profile));
+    return await _plugin.validateProfile(await _runtimeProfile(profile));
   }
 
   Future<void> _stopProfilesUnlocked(List<String> profileIds) async {
@@ -397,7 +397,7 @@ class SingboxProxyRuntimeRepository extends _$SingboxProxyRuntimeRepository {
       options ?? SingboxProxyRuntimeOptions(),
       profileIds: profileIds.toSet(),
     );
-    return _plugin.buildConfig(
+    return await _plugin.buildConfig(
       await _runtimeProfiles(profileIds),
       options: resolvedOptions,
     );
@@ -411,7 +411,7 @@ class SingboxProxyRuntimeRepository extends _$SingboxProxyRuntimeRepository {
         .fetchProfiles();
     final profileMap = {for (final profile in profiles) profile.id: profile};
 
-    return Future.wait(
+    return await Future.wait(
       profileIds.map((profileId) {
         final profile = profileMap[profileId];
         if (profile == null) {

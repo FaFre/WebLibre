@@ -232,9 +232,6 @@ class IntentReceiver extends IntentEvents {
 
     _queue.clear();
     _pendingError = null;
-    await Future.wait<void>([
-      _controller.close(),
-      if (released != null) released,
-    ]);
+    await Future.wait<void>([_controller.close(), ?released]);
   }
 }

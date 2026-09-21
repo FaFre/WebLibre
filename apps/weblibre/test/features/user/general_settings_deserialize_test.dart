@@ -89,7 +89,7 @@ void main() {
         DriftSqlType.double,
       };
 
-      for (final MapEntry(key: key, value: type)
+      for (final MapEntry(:key, value: type)
           in generalSettingColumnTypes.entries) {
         expect(supported, contains(type), reason: '$key has type $type');
       }

@@ -207,7 +207,7 @@ Future<_PreparedWallpaper> _prepareOffIsolate(
       stackTrace: s,
     );
 
-    return _prepare(bytes, mimeType);
+    return await _prepare(bytes, mimeType);
   }
 }
 

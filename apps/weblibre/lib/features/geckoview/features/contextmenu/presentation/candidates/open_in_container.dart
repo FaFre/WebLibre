@@ -88,7 +88,7 @@ class OpenInContainer extends HookConsumerWidget {
 
             if (!context.mounted) return null;
 
-            return ContainerCreateRoute(
+            return await ContainerCreateRoute(
               containerData: jsonEncode(draft.toJson()),
             ).push<ContainerData?>(context);
           }(),

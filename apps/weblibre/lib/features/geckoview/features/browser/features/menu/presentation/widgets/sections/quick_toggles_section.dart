@@ -130,10 +130,7 @@ class QuickTogglesSection extends ConsumerWidget {
       }
     }
 
-    final ordered = [
-      for (final item in items)
-        if (toggles[item] case final toggle?) toggle,
-    ];
+    final ordered = [for (final item in items) ?toggles[item]];
 
     if (ordered.isEmpty) return const SizedBox.shrink();
 

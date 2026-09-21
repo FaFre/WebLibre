@@ -37,7 +37,7 @@ class GeckoContainerProxyService {
         stackTrace: s,
         name: 'GeckoContainerProxyService',
       );
-      return Future.value(false);
+      return false;
     }
   }
 

@@ -77,7 +77,7 @@ class SearchTokenIssuanceController extends _$SearchTokenIssuanceController {
   /// idempotency key is reused so the server can replay the prior result.
   Future<IssuanceResult?> issue({required int count}) async {
     final pending = _pending;
-    if (pending != null) return pending;
+    if (pending != null) return await pending;
 
     final authState = ref.read(accountAuthRepositoryProvider).value;
     final client = authState?.client;
@@ -152,7 +152,7 @@ class SearchTokenIssuanceController extends _$SearchTokenIssuanceController {
       db.searchTokensDao,
       issuerKeyVersion: key.version,
     );
-    return issuance.issueAndStash(
+    return await issuance.issueAndStash(
       supabaseAccessToken: accessToken,
       idempotencyKey: idempotencyKey,
       count: count,

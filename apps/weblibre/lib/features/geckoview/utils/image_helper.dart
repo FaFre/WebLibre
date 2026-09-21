@@ -124,7 +124,7 @@ Future<Uint8List?> encodeScreenshotAsPng(Uint8List screenshot) async {
       stackTrace: s,
     );
 
-    return _transcodeToPng(screenshot);
+    return await _transcodeToPng(screenshot);
   }
 }
 

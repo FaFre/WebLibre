@@ -130,7 +130,7 @@ Future<List<String>> bookmarkGuidsForUrl(Ref ref, Uri? url) async {
   if (url == null) return const [];
 
   ref.watch(bookmarksRepositoryProvider);
-  return ref
+  return await ref
       .read(bookmarksRepositoryProvider.notifier)
       .bookmarkGuidsForUrl(url);
 }

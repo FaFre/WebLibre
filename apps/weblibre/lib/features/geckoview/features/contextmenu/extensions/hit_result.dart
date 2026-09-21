@@ -39,7 +39,7 @@ extension HitResultJson on HitResult {
 extension HitResultX on HitResult {
   String? getLinkText() {
     return switch (this) {
-      UnknownHitResult(linkText: final linkText) => linkText,
+      UnknownHitResult(:final linkText) => linkText,
       _ => null,
     };
   }
@@ -48,14 +48,12 @@ extension HitResultX on HitResult {
     const maxTitleLength = 2500;
 
     final uri = switch (this) {
-      UnknownHitResult(src: final src) => src,
-      ImageHitResult(src: final src, title: final title) =>
+      UnknownHitResult(:final src) => src,
+      ImageHitResult(:final src, :final title) =>
         title.isEmpty ? (src.length > maxTitleLength ? 'image' : src) : title!,
-      VideoHitResult(src: final src, title: final title) =>
-        title.isEmpty ? src : title!,
-      AudioHitResult(src: final src, title: final title) =>
-        title.isEmpty ? src : title!,
-      ImageSrcHitResult(uri: final uri) => uri,
+      VideoHitResult(:final src, :final title) => title.isEmpty ? src : title!,
+      AudioHitResult(:final src, :final title) => title.isEmpty ? src : title!,
+      ImageSrcHitResult(:final uri) => uri,
       PhoneHitResult() => 'about:blank',
       EmailHitResult() => 'about:blank',
       GeoHitResult() => 'about:blank',
@@ -66,14 +64,14 @@ extension HitResultX on HitResult {
 
   Uri? tryGetSource() {
     final uri = switch (this) {
-      UnknownHitResult(src: final src) => src,
-      ImageHitResult(src: final src) => src,
-      VideoHitResult(src: final src) => src,
-      AudioHitResult(src: final src) => src,
-      ImageSrcHitResult(src: final src) => src,
-      PhoneHitResult(src: final src) => src,
-      EmailHitResult(src: final src) => src,
-      GeoHitResult(src: final src) => src,
+      UnknownHitResult(:final src) => src,
+      ImageHitResult(:final src) => src,
+      VideoHitResult(:final src) => src,
+      AudioHitResult(:final src) => src,
+      ImageSrcHitResult(:final src) => src,
+      PhoneHitResult(:final src) => src,
+      EmailHitResult(:final src) => src,
+      GeoHitResult(:final src) => src,
     };
 
     return Uri.tryParse(uri);
@@ -83,15 +81,15 @@ extension HitResultX on HitResult {
     const maxTitleLength = 2500;
 
     return switch (this) {
-      UnknownHitResult(src: final src) => src.uriDisplayString,
-      ImageSrcHitResult(uri: final uri) => uri.uriDisplayString,
-      ImageHitResult(src: final src, title: final title) =>
+      UnknownHitResult(:final src) => src.uriDisplayString,
+      ImageSrcHitResult(:final uri) => uri.uriDisplayString,
+      ImageHitResult(:final src, :final title) =>
         title.isEmpty
             ? (src.length > maxTitleLength ? 'image' : src.uriDisplayString)
             : title!,
-      VideoHitResult(src: final src, title: final title) =>
+      VideoHitResult(:final src, :final title) =>
         (title.isEmpty) ? src.uriDisplayString : title!,
-      AudioHitResult(src: final src, title: final title) =>
+      AudioHitResult(:final src, :final title) =>
         (title.isEmpty) ? src.uriDisplayString : title!,
       _ => 'about:blank',
     };

@@ -14,14 +14,14 @@ dependencies:
 
   flutter_mozilla_components:
     path: ../
-  hooks_riverpod: ^3.4.2
+  hooks_riverpod: ^3.4.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   integration_test:
     sdk: flutter
-  lint: ^2.8.0
+  lint: ^2.14.0
 
 flutter:
   uses-material-design: true

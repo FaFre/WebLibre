@@ -50,7 +50,7 @@ class HistoryRowIcon extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final cachedIcon = useCachedFuture(
-      () async => iconBytes.mapNotNull(tryDecodeImage),
+      () async => await iconBytes.mapNotNull(tryDecodeImage),
       [iconBytes],
     );
 

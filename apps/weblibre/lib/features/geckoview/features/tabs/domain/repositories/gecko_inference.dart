@@ -136,7 +136,7 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
       ...assignedDocumentsProcessed,
     ]);
 
-    return embeddings.fold(
+    return embeddings.fold<List<String>?>(
       (embeddings) {
         final neighbors = embeddings.mapNotNull(
           (embeddings) =>
@@ -189,7 +189,7 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
       unassignedDocumentsProcessed,
     );
 
-    return embeddings.fold(
+    return await embeddings.fold(
       (embeddings) async {
         final clusters = embeddings.mapNotNull(
           (embeddings) =>
@@ -301,8 +301,7 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
       }
 
       return Result.success({
-        for (final MapEntry(:key, :value) in embeddings.entries)
-          if (value != null) key: value,
+        for (final MapEntry(:key, :value) in embeddings.entries) key: ?value,
       });
     } on TimeoutException {
       return Result.failure(
@@ -366,7 +365,7 @@ Future<String?> topicSuggestion(
       .read(geckoInferenceRepositoryProvider.notifier)
       .predictDocumentTopic(titles.value);
 
-  return topic.fold(
+  return topic.fold<String?>(
     (topic) {
       if (ref.mounted && topic.isNotEmpty) {
         ref.keepAlive();

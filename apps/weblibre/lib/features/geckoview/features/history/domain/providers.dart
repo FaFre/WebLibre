@@ -188,7 +188,7 @@ Future<List<HistoryEntry>> browsingHistory(Ref ref) async {
       .read(historyRepositoryProvider.notifier)
       .getDetailedVisits(options);
 
-  return _annotateVisits(
+  return await _annotateVisits(
     ref.read(tabDatabaseProvider).visitContainerDao,
     visits,
     filterContainerId: options.containerId,

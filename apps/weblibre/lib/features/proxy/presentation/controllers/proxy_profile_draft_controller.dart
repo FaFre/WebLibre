@@ -398,6 +398,6 @@ Map<String, String> _initialValuesForType(
   return {
     for (final field in spec.fields)
       if (field.defaultValue != null) field.key: field.defaultValue!,
-    if (overlay != null) ...overlay,
+    ...?overlay,
   };
 }

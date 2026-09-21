@@ -70,7 +70,7 @@ class ProxyDiagnosticsSettingsRepository
     final oldJson = current.toJson();
     final newJson = updateWithCurrent(current).toJson();
 
-    return db.transaction(() async {
+    return await db.transaction(() async {
       for (final MapEntry(:key, :value) in newJson.entries) {
         if (oldJson[key] != value) {
           await db.settingDao.updateSetting(key, _partitionKey, value);

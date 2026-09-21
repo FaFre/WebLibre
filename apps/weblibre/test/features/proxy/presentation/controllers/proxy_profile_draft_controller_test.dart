@@ -188,7 +188,7 @@ class _FakeProfilesRepository extends SingboxProxyProfilesRepository {
 
   @override
   Stream<List<ProxyProfile>> build() {
-    return Stream.value([if (existingProfile != null) existingProfile!]);
+    return Stream.value([?existingProfile]);
   }
 }
 

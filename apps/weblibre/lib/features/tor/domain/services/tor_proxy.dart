@@ -166,7 +166,7 @@ class TorProxyService extends _$TorProxyService {
     );
 
     await _tor.start(config);
-    return _tor.getStatus();
+    return await _tor.getStatus();
   }
 
   Future<TorStatus> requestSync() async {

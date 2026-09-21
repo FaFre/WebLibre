@@ -338,7 +338,7 @@ class GenericWebsiteService extends _$GenericWebsiteService {
     }
 
     if (cacheOnly) {
-      return _loadIconWithoutNetwork(eligibleUrls.first);
+      return await _loadIconWithoutNetwork(eligibleUrls.first);
     }
 
     for (final url in eligibleUrls) {

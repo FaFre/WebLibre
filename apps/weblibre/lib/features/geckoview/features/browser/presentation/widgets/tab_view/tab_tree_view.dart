@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -323,12 +322,10 @@ class _TabTreesGrid extends HookConsumerWidget {
         if (disableAnimations) {
           scrollController.jumpTo(targetOffset);
         } else {
-          unawaited(
-            scrollController.animateTo(
-              targetOffset,
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeInOut,
-            ),
+          scrollController.animateTo(
+            targetOffset,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
           );
         }
       });

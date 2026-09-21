@@ -436,7 +436,7 @@ class RestoreOperation {
     // nothing has been applied over it, so releasing it is the correct close.
     if (!phase.isDestructive) {
       await coordinator.finalizeAll(contextIn(staging));
-      return finish(RestoreRecoveryResult.rolledBack);
+      return await finish(RestoreRecoveryResult.rolledBack);
     }
 
     // Past the commit barrier the target is the restored data; only cleanup is
@@ -448,7 +448,7 @@ class RestoreOperation {
         );
       }
       await coordinator.finalizeAll(contextIn(target));
-      return finish(RestoreRecoveryResult.restored);
+      return await finish(RestoreRecoveryResult.restored);
     }
 
     final hasTarget = target.existsSync();
@@ -461,7 +461,7 @@ class RestoreOperation {
       // tell, and it is also the only thing that matters.
       final kept = await _validateOrRollback(target, old, journal);
       await _reconcileParticipants(coordinator, contextIn(target), kept: kept);
-      return finish(
+      return await finish(
         kept
             ? RestoreRecoveryResult.restored
             : RestoreRecoveryResult.rolledBack,
@@ -482,7 +482,7 @@ class RestoreOperation {
       }
 
       await _reconcileParticipants(coordinator, contextIn(target), kept: kept);
-      return finish(
+      return await finish(
         kept
             ? RestoreRecoveryResult.restored
             : RestoreRecoveryResult.rolledBack,
@@ -494,7 +494,7 @@ class RestoreOperation {
       // participant that did apply has to come back with it.
       await _rollback(old, target);
       await _reconcileParticipants(coordinator, contextIn(target), kept: false);
-      return finish(RestoreRecoveryResult.rolledBack);
+      return await finish(RestoreRecoveryResult.rolledBack);
     }
 
     if (hasTarget && !hasOld) {
@@ -506,7 +506,7 @@ class RestoreOperation {
       // it changes nothing: no live state was touched, so the staged tree is
       // simply dropped with the rest of the workspace.
       await coordinator.finalizeAll(contextIn(target));
-      return finish(RestoreRecoveryResult.indeterminate);
+      return await finish(RestoreRecoveryResult.indeterminate);
     }
 
     throw RestoreUnrecoverable(

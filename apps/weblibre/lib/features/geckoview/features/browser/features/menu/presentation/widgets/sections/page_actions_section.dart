@@ -169,10 +169,7 @@ class PageActionsSection extends HookConsumerWidget {
 
     return buildMenuCard(
       context,
-      children: [
-        for (final item in items)
-          if (tiles[item] case final tile?) tile,
-      ],
+      children: [for (final item in items) ?tiles[item]],
     );
   }
 }

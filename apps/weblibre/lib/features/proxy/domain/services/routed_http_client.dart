@@ -243,8 +243,10 @@ Raw<http.Client> routedHttpClient(Ref ref) {
 /// graph behind the selected tab.
 @Riverpod(keepAlive: true)
 Raw<Future<AppRoutingPolicy> Function()> selectedTabRoutingPolicy(Ref ref) {
-  return () async =>
-      resolveAppRoutingPolicy(ref, await routingContextIdForSelectedTab(ref));
+  return () async => await resolveAppRoutingPolicy(
+    ref,
+    await routingContextIdForSelectedTab(ref),
+  );
 }
 
 /// The client for app-originated requests made on behalf of the selected tab.

@@ -185,7 +185,7 @@ class AppLinksCoordinator extends _$AppLinksCoordinator {
         rule.scope: rule,
       });
     });
-    return resolve(requestId, decision);
+    return await resolve(requestId, decision);
   }
 
   /// Resolve the source tab's live [contextId] to the override storage key — the

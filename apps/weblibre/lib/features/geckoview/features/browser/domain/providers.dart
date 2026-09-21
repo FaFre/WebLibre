@@ -457,7 +457,7 @@ Future<List<VisitInfo>> quickTabSwitcherHistorySuggestions(
     return [];
   }
 
-  return ref
+  return await ref
       .read(historyRepositoryProvider.notifier)
       .getVisitsPaginated(count: 25);
 }

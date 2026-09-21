@@ -66,7 +66,7 @@ class ProxyInputConsumer extends _$ProxyInputConsumer {
     final trimmed = raw.trim();
 
     if (trimmed.startsWith('$weblibreProxyShareScheme://')) {
-      return _consumeShareUri(trimmed);
+      return await _consumeShareUri(trimmed);
     }
 
     if (_looksLikeWireguardConf(trimmed)) {

@@ -34,7 +34,7 @@ class ContainerTopicController extends _$ContainerTopicController {
     if (tabData.isEmpty) return null;
 
     final titles = tabData.map((t) => t.title).nonNulls.toSet();
-    return _predictFromTitles(titles);
+    return await _predictFromTitles(titles);
   }
 
   Future<String?> predictTopicFromTabIds(Set<String> tabIds) {

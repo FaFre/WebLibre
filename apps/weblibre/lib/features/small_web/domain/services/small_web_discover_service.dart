@@ -128,7 +128,7 @@ class SmallWebDiscoverService {
         .toList();
 
     if (unvisitedPages.isNotEmpty) {
-      return _pickAndRecord(unvisitedPages, consoleUrl);
+      return await _pickAndRecord(unvisitedPages, consoleUrl);
     }
 
     // No unvisited pages on this console — try alternatives
@@ -137,7 +137,7 @@ class SmallWebDiscoverService {
 
     // Last resort: revisit a page from the original console
     if (pages.isEmpty) return null;
-    return _pickAndRecord(pages, consoleUrl);
+    return await _pickAndRecord(pages, consoleUrl);
   }
 
   Future<void> updateItemTitle(String itemId, String title) {
@@ -157,7 +157,7 @@ class SmallWebDiscoverService {
         source: WanderConsoleSource.discovered,
       );
     }
-    return _wanderService.getPagesForConsole(consoleUrl);
+    return await _wanderService.getPagesForConsole(consoleUrl);
   }
 
   Future<WanderDiscoverResult?> _tryAlternativeConsoles(
@@ -185,7 +185,7 @@ class SmallWebDiscoverService {
       // Deliberately outside the try: the catch above is for consoles that fail
       // to fetch, and recording the pick failing is not that.
       if (candidates.isNotEmpty) {
-        return _pickAndRecord(candidates, altConsole);
+        return await _pickAndRecord(candidates, altConsole);
       }
     }
 

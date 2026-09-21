@@ -113,5 +113,7 @@ Future<List<SafDocumentFile>> backupList(Ref ref) async {
   final dirUri = ref.watch(backupDirectoryUriProvider);
   if (dirUri == null) return [];
 
-  return ref.watch(userBackupServiceProvider.notifier).getBackupList(dirUri);
+  return await ref
+      .watch(userBackupServiceProvider.notifier)
+      .getBackupList(dirUri);
 }

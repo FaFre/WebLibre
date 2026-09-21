@@ -164,7 +164,7 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
     final typeMapping = ref.read(userDatabaseProvider).typeMapping;
 
     return GeneralSettings.fromJson({
-      for (final MapEntry(key: key, value: type)
+      for (final MapEntry(:key, value: type)
           in generalSettingColumnTypes.entries)
         key: settings[key]?.readAs(type, typeMapping),
       for (final key in generalSettingJsonKeys)
@@ -194,7 +194,7 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
     final oldJson = current.toJson();
     final newJson = updateWithCurrent(current).toJson();
 
-    return db.transaction(() async {
+    return await db.transaction(() async {
       for (final MapEntry(:key, :value) in newJson.entries) {
         if (oldJson[key] != value) {
           await db.settingDao.updateSetting(key, _partitionKey, value);

@@ -61,7 +61,10 @@ Future<bool> confirmBulkTabCloseIfNeeded(
   if (groupsToDelete <= 0) return true;
   if (!context.mounted) return false;
 
-  return ui_helper.confirmIsolatedTabClose(context, groupCount: groupsToDelete);
+  return await ui_helper.confirmIsolatedTabClose(
+    context,
+    groupCount: groupsToDelete,
+  );
 }
 
 Future<bool> closeTabsWithConfirmation(

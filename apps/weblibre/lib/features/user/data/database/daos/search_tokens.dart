@@ -83,7 +83,7 @@ class SearchTokensDao extends DatabaseAccessor<UserDatabase> {
       ..addColumns([c])
       ..where(db.searchTokens.reservedAt.isNull());
     final row = await query.getSingle();
-    return row.read(c) ?? 0;
+    return row.read<int>(c) ?? 0;
   }
 
   Stream<int> watchCount() {

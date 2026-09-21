@@ -87,7 +87,7 @@ class GestureFeedbackOverlay extends HookConsumerWidget {
         current.arrows.length >= settings.minSuggestionStroke;
 
     final result = <_Suggestion>[];
-    for (final MapEntry(key: key, value: action) in settings.bindings.entries) {
+    for (final MapEntry(:key, value: action) in settings.bindings.entries) {
       final stroke = GestureStroke.fromKey(key);
       if (stroke.fingers != current.fingers) continue;
       if (stroke.startPosition != GestureStartPosition.anywhere &&

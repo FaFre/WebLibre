@@ -76,7 +76,7 @@ class CaptureServer {
     final existing = _server;
     if (existing != null) return existing;
     final pending = _starting;
-    if (pending != null) return pending;
+    if (pending != null) return await pending;
 
     // Track success and failure: a rejected bind() must clear `_starting`,
     // otherwise the stale rejected future is handed back to every subsequent
@@ -89,7 +89,7 @@ class CaptureServer {
           return server;
         })
         .whenComplete(() => _starting = null);
-    return _starting!;
+    return await _starting!;
   }
 
   Future<void> _serve(HttpServer server) async {
@@ -317,10 +317,7 @@ class CaptureServer {
       }
     }
 
-    final body = jsonEncode({
-      'status': status,
-      if (captureUrl != null) 'url': captureUrl,
-    });
+    final body = jsonEncode({'status': status, 'url': ?captureUrl});
     request.response.statusCode = HttpStatus.ok;
     request.response.headers
       ..contentType = ContentType('application', 'json', charset: 'utf-8')

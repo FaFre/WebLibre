@@ -87,10 +87,7 @@ class UrlCleanerCatalogService extends _$UrlCleanerCatalogService {
         ? client.get(Uri.parse(hashUrl)).timeout(const Duration(seconds: 15))
         : null;
 
-    final results = await Future.wait([
-      catalogFuture,
-      if (hashFuture != null) hashFuture,
-    ]);
+    final results = await Future.wait([catalogFuture, ?hashFuture]);
 
     final response = results[0];
     if (response.statusCode != 200) {

@@ -103,7 +103,7 @@ class AddonDetails extends _$AddonDetails {
 
     await _run(() async {
       await _service.installAddon(Uri.parse(current.downloadUrl));
-      return _service.getAddonById(addonId);
+      return await _service.getAddonById(addonId);
     });
   }
 
@@ -158,9 +158,9 @@ Future<List<AddonListing>> searchAddonListings(
 ) async {
   final trimmed = query.trim();
   if (trimmed.isEmpty) {
-    return ref.watch(featuredAddonListingsProvider(app).future);
+    return await ref.watch(featuredAddonListingsProvider(app).future);
   }
-  return ref
+  return await ref
       .read(addonServiceProvider)
       .searchAddonListings(query: trimmed, app: app);
 }
@@ -181,7 +181,7 @@ Future<String> addonDescriptionMarkdown(Ref ref, String addonId) async {
       addonId,
     ).selectAsync((addon) => addon?.description ?? ''),
   );
-  return turndownAddonHtml(description);
+  return await turndownAddonHtml(description);
 }
 
 @Riverpod()

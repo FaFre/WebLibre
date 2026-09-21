@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -91,13 +90,11 @@ void useScrollToActiveChip<K>({
       if (chipContext != null) {
         // The chip is built: snap it to the exact center and stop. Any late
         // layout shift (image/badge resize) is small enough to ignore.
-        unawaited(
-          Scrollable.ensureVisible(
-            chipContext,
-            alignment: 0.5,
-            duration: animationDuration,
-            curve: Curves.easeInOut,
-          ),
+        Scrollable.ensureVisible(
+          chipContext,
+          alignment: 0.5,
+          duration: animationDuration,
+          curve: Curves.easeInOut,
         );
         return;
       }

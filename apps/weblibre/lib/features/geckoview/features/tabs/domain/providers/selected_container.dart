@@ -235,7 +235,7 @@ bool shouldShowBrowserHome(Ref ref) {
 Future<int> selectedContainerTabCount(Ref ref) async {
   final selectedContainer = ref.watch(selectedContainerProvider);
 
-  return ref.watch(
+  return await ref.watch(
     watchContainerTabIdsProvider(
       // ignore: provider_parameters
       ContainerFilterById(containerId: selectedContainer),

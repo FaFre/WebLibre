@@ -517,7 +517,7 @@ class _Filesystem {
 
     await _migrateLegacyMozillaDir(defaultProfile);
 
-    return discovery.discoverProfiles(profilesDir);
+    return await discovery.discoverProfiles(profilesDir);
   }
 
   /// Moves a pre-multi-profile `files/mozilla` tree into the first profile.

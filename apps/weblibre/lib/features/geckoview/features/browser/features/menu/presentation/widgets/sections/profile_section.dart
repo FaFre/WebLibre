@@ -132,10 +132,7 @@ class ProfileSection extends HookConsumerWidget {
 
     return buildMenuCard(
       context,
-      children: [
-        for (final item in items)
-          if (tiles[item] case final tile?) tile,
-      ],
+      children: [for (final item in items) ?tiles[item]],
     );
   }
 }
@@ -164,7 +161,7 @@ class _SyncTile extends HookConsumerWidget {
 
     useEffect(() {
       if (isSyncing && !disableAnimations) {
-        unawaited(controller.repeat());
+        controller.repeat();
       } else {
         controller.stop();
         controller.reset();

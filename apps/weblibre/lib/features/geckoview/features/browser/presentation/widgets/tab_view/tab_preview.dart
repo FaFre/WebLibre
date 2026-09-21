@@ -63,7 +63,7 @@ Future<bool> _confirmIsolatedTabCloseIfNeeded(
   if (groupCount > 1) return true;
   if (!context.mounted) return false;
 
-  return ui_helper.confirmIsolatedTabClose(context);
+  return await ui_helper.confirmIsolatedTabClose(context);
 }
 
 class GridTabItemContainer extends StatelessWidget {
@@ -322,7 +322,7 @@ class GridTabPreview extends HookConsumerWidget {
                             if (trailingChild != null || isPinned)
                               const SizedBox(width: 4),
                           ],
-                          if (trailingChild != null) trailingChild!,
+                          ?trailingChild,
                           if (isPinned)
                             Padding(
                               padding: EdgeInsets.only(
@@ -627,7 +627,7 @@ class ListTabPreview extends HookConsumerWidget {
                     ],
                   ),
                 ),
-                if (groupToggle != null) groupToggle!,
+                ?groupToggle,
                 if (onDelete != null ||
                     onDeleteAll != null ||
                     onCloseSubtree != null)

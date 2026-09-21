@@ -44,6 +44,7 @@ import 'package:logger/logger.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/design/app_colors.dart';
+import 'package:weblibre/core/design/dynamic_color_scheme.dart';
 import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/core/error_observer.dart';
 import 'package:weblibre/core/filesystem.dart';
@@ -589,8 +590,12 @@ class _MainWidget extends HookConsumerWidget {
 
           // On Android S+ devices, use the provided dynamic color scheme.
           // (Recommended) Harmonize the dynamic color scheme' built-in semantic colors.
-          final harmonizedLight = lightDynamic.harmonized();
-          final harmonizedDark = darkDynamic.harmonized();
+          final harmonizedLight = lightDynamic
+              .harmonized()
+              .toFlutterColorScheme();
+          final harmonizedDark = darkDynamic
+              .harmonized()
+              .toFlutterColorScheme();
 
           // Workaround for https://github.com/material-foundation/flutter-packages/issues/649
           // dynamic_color package returns broken surfaceContainer* colors.

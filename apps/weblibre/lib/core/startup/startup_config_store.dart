@@ -80,7 +80,7 @@ class StartupConfigStore {
       if (cached != null) return cached;
     }
 
-    return _lock.synchronized(() => _readLocked());
+    return await _lock.synchronized(() => _readLocked());
   }
 
   Future<StartupConfig> _readLocked() async {

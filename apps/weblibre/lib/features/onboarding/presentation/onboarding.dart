@@ -289,14 +289,12 @@ Future<void> _restoreIntoThisUser(BuildContext context, WidgetRef ref) async {
     MaterialPageRoute<void>(
       builder: (_) => ProfileBackupListScreen(
         onBackupSelected: (context, uri) {
-          unawaited(
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => ProfileRestoreScreen(
-                  backupFileUri: uri,
-                  forcedOverwriteTarget: current,
-                  adoptArchiveName: true,
-                ),
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => ProfileRestoreScreen(
+                backupFileUri: uri,
+                forcedOverwriteTarget: current,
+                adoptArchiveName: true,
               ),
             ),
           );

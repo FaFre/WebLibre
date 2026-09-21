@@ -96,7 +96,7 @@ class StartupPreferenceEnforcementService
       _preferenceMigrationVersionKey,
     );
 
-    return value?.readAs(DriftSqlType.int, db.typeMapping) ?? 0;
+    return value?.readAs<int>(DriftSqlType.int, db.typeMapping) ?? 0;
   }
 
   Future<void> _writePreferenceMigrationVersion(int version) async {

@@ -44,7 +44,7 @@ Intent requestFor(
   String action = restartIntoProfileAction,
 }) => intentWith(
   action: action,
-  extra: {_extraKey: profileId, if (token != null) _authorizationKey: token},
+  extra: {_extraKey: profileId, _authorizationKey: ?token},
 );
 
 void main() {

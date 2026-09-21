@@ -165,8 +165,7 @@ class GestureSettings with FastEquatable {
   Map<String, BrowserAction> get bindings => {
     for (final MapEntry(:key, :value) in defaultGestureBindings.entries)
       if (!bindingOverrides.containsKey(key)) key: value,
-    for (final MapEntry(:key, :value) in bindingOverrides.entries)
-      if (value != null) key: value,
+    for (final MapEntry(:key, :value) in bindingOverrides.entries) key: ?value,
   };
 
   /// Whether any binding differs from the defaults.

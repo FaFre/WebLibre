@@ -183,7 +183,7 @@ String encodeSettingsExport({
   return const JsonEncoder.withIndent('  ').convert({
     'format': settingsExportFormat,
     'format_version': settingsExportFormatVersion,
-    if (appVersion != null) 'app_version': appVersion,
+    'app_version': ?appVersion,
     'exported_at': exportedAt.toUtc().toIso8601String(),
     if (redacted.isNotEmpty) 'redacted': redacted,
     'documents': {

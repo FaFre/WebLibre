@@ -37,7 +37,7 @@ class UrlCleanerCatalogFileService extends _$UrlCleanerCatalogFileService {
       return null;
     }
 
-    return catalogFile.lastModified();
+    return await catalogFile.lastModified();
   }
 
   Future<void> writeCatalog(String catalogJson) async {
@@ -51,7 +51,7 @@ class UrlCleanerCatalogFileService extends _$UrlCleanerCatalogFileService {
       return null;
     }
 
-    return catalogFile.readAsString();
+    return await catalogFile.readAsString();
   }
 
   Future<void> deleteCatalog() async {

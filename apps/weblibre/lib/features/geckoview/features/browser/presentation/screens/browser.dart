@@ -110,9 +110,9 @@ class _AnimatedToolbar extends HookWidget {
 
     useEffect(() {
       if (visible) {
-        unawaited(controller.forward());
+        controller.forward();
       } else {
-        unawaited(controller.reverse());
+        controller.reverse();
       }
       return null;
     }, [visible]);
@@ -2116,7 +2116,7 @@ class _Browser extends HookConsumerWidget {
 
       if (groupCount > 1 || !context.mounted) return groupCount > 1;
 
-      return ui_helper.confirmIsolatedTabClose(context);
+      return await ui_helper.confirmIsolatedTabClose(context);
     }
 
     return DragTarget<TabDragData>(
@@ -2443,12 +2443,10 @@ class _SiteSettingsSheet extends HookConsumerWidget {
         if (disableAnimations) {
           draggableScrollableController.jumpTo(1.0);
         } else {
-          unawaited(
-            draggableScrollableController.animateTo(
-              1.0,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.decelerate,
-            ),
+          draggableScrollableController.animateTo(
+            1.0,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.decelerate,
           );
         }
       }

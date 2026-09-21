@@ -33,9 +33,9 @@ class LaunchExternal extends HookConsumerWidget {
   static final _service = GeckoAppLinksService();
 
   static Future<bool> isSupported(HitResult hitResult) async {
-    return hitResult.tryGetLink().mapNotNull(
+    return (await hitResult.tryGetLink().mapNotNull(
           (url) async => (await _service.resolveAppLink(url)) != null,
-        ) ??
+        )) ??
         false;
   }
 

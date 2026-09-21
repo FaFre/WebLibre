@@ -141,7 +141,7 @@ class TabDataRepository extends _$TabDataRepository {
     final currentContainerData = await getTabContainerData(tabId);
 
     if (currentContainerData?.metadata.contextualIdentity == null) {
-      return ref
+      return await ref
           .read(tabDatabaseProvider)
           .tabDao
           .assignContainer(tabId, containerId: null);

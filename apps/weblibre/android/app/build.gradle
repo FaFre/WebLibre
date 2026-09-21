@@ -97,12 +97,11 @@ android {
             )
         }
         implementation files(weblibreGoMobileAar)
-        implementation('androidx.glance:glance-appwidget') {
-            version {
-                strictly '1.1.1'
-            }
-            because 'home_widget uses 1.+ and newer alpha releases require AGP 9.1 and compileSdk 37'
-        }
+        // SearchBarWidgetProvider uses Glance directly. home_widget pins
+        // glance-appwidget itself (1.2.0 as of home_widget 0.10.0, which needs
+        // setWidgetPreviews), so keep this in step with it and never `strictly`:
+        // a plain request lets Gradle take the higher of the two on its next bump.
+        implementation 'androidx.glance:glance-appwidget:1.2.0'
         implementation 'com.google.android.material:material:1.14.0'
     }
 

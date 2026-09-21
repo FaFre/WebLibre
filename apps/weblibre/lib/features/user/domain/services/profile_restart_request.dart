@@ -84,7 +84,7 @@ Future<String?> consumeRestartRequest(
   final authorizations =
       store ?? RestartAuthorizationStore(filesystem.startupPaths);
 
-  return authorizations.consume(
+  return await authorizations.consume(
     token is String ? token : null,
     claimedProfileId: claimed,
     now: now,

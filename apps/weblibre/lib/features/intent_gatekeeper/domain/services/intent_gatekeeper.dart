@@ -99,7 +99,7 @@ class IntentGatekeeper extends _$IntentGatekeeper {
       PendingIntentDecision(id: id, packageName: fromPackageName, url: url),
     );
 
-    return completer.future;
+    return await completer.future;
   }
 
   bool isPending(int id) => _pending.containsKey(id);

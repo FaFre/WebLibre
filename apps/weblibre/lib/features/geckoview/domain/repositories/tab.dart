@@ -509,7 +509,7 @@ class TabRepository extends _$TabRepository {
         .getSingleOrNull();
 
     if (ref.mounted && previousTabId != null) {
-      return selectTab(previousTabId);
+      return await selectTab(previousTabId);
     }
 
     return false;
@@ -526,7 +526,7 @@ class TabRepository extends _$TabRepository {
       return false;
     }
 
-    return selectTab(latestTab.id);
+    return await selectTab(latestTab.id);
   }
 
   Future<bool> resumeLatestContainerTab(
@@ -547,7 +547,7 @@ class TabRepository extends _$TabRepository {
       return false;
     }
 
-    return selectTab(latestTab.id);
+    return await selectTab(latestTab.id);
   }
 
   Future<bool> selectPreviousTab(
@@ -638,7 +638,7 @@ class TabRepository extends _$TabRepository {
     );
 
     if (ref.mounted && adjacentTabId != null) {
-      return selectTab(adjacentTabId);
+      return await selectTab(adjacentTabId);
     }
 
     return false;
@@ -865,7 +865,7 @@ class TabRepository extends _$TabRepository {
     if (!ref.mounted) return;
 
     if (ancestorTabId != null) {
-      return _selectTabAfterClose(ancestorTabId);
+      return await _selectTabAfterClose(ancestorTabId);
     }
 
     // Priority 2: Check for previous tab by timestamp
@@ -877,7 +877,7 @@ class TabRepository extends _$TabRepository {
 
     if (previousTabId != null) {
       if (sameContainerTabs.any((tab) => tab == previousTabId)) {
-        return _selectTabAfterClose(previousTabId);
+        return await _selectTabAfterClose(previousTabId);
       }
     }
 
@@ -890,7 +890,7 @@ class TabRepository extends _$TabRepository {
     );
 
     if (orderedNeighborTabId != null) {
-      return _selectTabAfterClose(orderedNeighborTabId);
+      return await _selectTabAfterClose(orderedNeighborTabId);
     }
 
     if (!ref.mounted) return;
@@ -927,7 +927,7 @@ class TabRepository extends _$TabRepository {
         );
 
     if (unassignedTabs.isNotEmpty) {
-      return _selectTabAfterClose(unassignedTabs.first);
+      return await _selectTabAfterClose(unassignedTabs.first);
     }
 
     if (!ref.mounted) return;
@@ -952,7 +952,7 @@ class TabRepository extends _$TabRepository {
     );
 
     if (nextContainerTabs.isNotEmpty) {
-      return _selectTabAfterClose(nextContainerTabs!.first);
+      return await _selectTabAfterClose(nextContainerTabs!.first);
     }
   }
 

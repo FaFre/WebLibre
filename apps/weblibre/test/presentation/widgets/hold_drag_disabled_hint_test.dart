@@ -36,7 +36,7 @@ Future<TestGesture> pumpAndPress(WidgetTester tester) async {
       ),
     ),
   );
-  return tester.startGesture(tester.getCenter(find.text('tab')));
+  return await tester.startGesture(tester.getCenter(find.text('tab')));
 }
 
 void main() {

@@ -213,7 +213,7 @@ class TopSiteRepository extends _$TopSiteRepository {
     if (existing != null) return existing.id;
 
     final orderKey = await db.topSiteDao.generateTrailingOrderKey().getSingle();
-    return _persistDefault(title: title, url: url, orderKey: orderKey);
+    return await _persistDefault(title: title, url: url, orderKey: orderKey);
   }
 
   Future<String> addPinnedSite({

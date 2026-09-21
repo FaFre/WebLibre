@@ -814,7 +814,7 @@ class _AccordionHeaderChip extends StatelessWidget {
           label: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (iconAvatar != null) iconAvatar,
+              ?iconAvatar,
               if (countBadge != null) ...[
                 if (iconAvatar != null) const SizedBox(height: 4),
                 // Multi-digit counts can exceed the narrow rail's fixed 48px chip

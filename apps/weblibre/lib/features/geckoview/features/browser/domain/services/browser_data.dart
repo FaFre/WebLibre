@@ -46,7 +46,7 @@ class BrowserDataService extends _$BrowserDataService {
   ) async {
     if (!_onStartDeleted) {
       _onStartDeleted = true;
-      return deleteData(types);
+      return await deleteData(types);
     }
   }
 

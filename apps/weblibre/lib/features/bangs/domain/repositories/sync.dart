@@ -47,7 +47,7 @@ class BangSyncRepository extends _$BangSyncRepository {
     }
 
     final result = await sourceService.fetchRemoteBangs(url, group);
-    return result.flatMapAsync((remoteBangs) async {
+    return await result.flatMapAsync((remoteBangs) async {
       await db.syncDao.syncBangs(
         group: group,
         remoteBangs: remoteBangs,

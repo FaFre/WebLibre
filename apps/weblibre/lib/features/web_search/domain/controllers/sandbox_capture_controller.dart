@@ -93,7 +93,7 @@ EquatableValue<Map<String, Uri>> sandboxSourceUris(Ref ref) {
   // here instead of propagating.
   return EquatableValue({
     for (final MapEntry(:key, :value) in rows.entries)
-      if (parseSandboxSource(value) case final uri?) key: uri,
+      key: ?parseSandboxSource(value),
   });
 }
 

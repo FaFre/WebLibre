@@ -391,13 +391,11 @@ class ContainerChips extends HookConsumerWidget {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final activeContext = activeItemKey.value.currentContext;
         if (activeContext != null) {
-          unawaited(
-            Scrollable.ensureVisible(
-              activeContext,
-              alignment: 0.5,
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeInOut,
-            ),
+          Scrollable.ensureVisible(
+            activeContext,
+            alignment: 0.5,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
           );
           return;
         }
@@ -426,13 +424,11 @@ class ContainerChips extends HookConsumerWidget {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           final retryContext = activeItemKey.value.currentContext;
           if (retryContext != null) {
-            unawaited(
-              Scrollable.ensureVisible(
-                retryContext,
-                alignment: 0.5,
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeInOut,
-              ),
+            Scrollable.ensureVisible(
+              retryContext,
+              alignment: 0.5,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOut,
             );
           }
         });

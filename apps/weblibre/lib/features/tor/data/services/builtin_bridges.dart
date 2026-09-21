@@ -40,7 +40,7 @@ class BuiltinBridgesService extends _$BuiltinBridgesService {
       return null;
     }
 
-    return bridgeFile.lastModified();
+    return await bridgeFile.lastModified();
   }
 
   Future<void> updateStoredBuiltinBridges(BuiltInBridges bridges) async {

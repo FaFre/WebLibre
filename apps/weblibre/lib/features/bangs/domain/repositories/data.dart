@@ -150,7 +150,7 @@ class BangDataRepository extends _$BangDataRepository {
 
     final db = ref.read(bangDatabaseProvider);
     //Pack in a transaction to bundle rebuilds of watch() queries
-    return db.transaction(() async {
+    return await db.transaction(() async {
       await db.bangDao.addSearchEntry(group, trigger, searchQuery);
       await db.definitionsDrift.evictHistoryEntries(limit: maxEntryCount);
     });

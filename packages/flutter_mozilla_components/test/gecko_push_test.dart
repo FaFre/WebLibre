@@ -101,5 +101,5 @@ Future<ByteData?> _dispatchStatus(
     GeckoPushEvents.pigeonChannelCodec.encodeMessage([sequence, status]),
     reply.complete,
   );
-  return reply.future;
+  return await reply.future;
 }

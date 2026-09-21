@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -180,17 +179,17 @@ class _AnimatedIndexedStackState extends State<AnimatedIndexedStack>
     _moveToEnd(entries, entry);
     switch (direction) {
       case _ChildAnimationDirection.primaryForward:
-        unawaited(entry.primaryController.forward(from: 0));
+        entry.primaryController.forward(from: 0);
         entry.secondaryController.value = 0;
       case _ChildAnimationDirection.primaryReverse:
-        unawaited(entry.primaryController.reverse(from: 1));
+        entry.primaryController.reverse(from: 1);
         entry.secondaryController.value = 0;
       case _ChildAnimationDirection.secondaryForward:
         entry.primaryController.value = 1;
-        unawaited(entry.secondaryController.forward(from: 0));
+        entry.secondaryController.forward(from: 0);
       case _ChildAnimationDirection.secondaryReverse:
         entry.primaryController.value = 1;
-        unawaited(entry.secondaryController.reverse(from: 1));
+        entry.secondaryController.reverse(from: 1);
     }
   }
 

@@ -138,7 +138,7 @@ class SearchModuleHeader extends StatelessWidget {
               ),
             ),
           ),
-          if (headerTrailing != null) headerTrailing!,
+          ?headerTrailing,
           if (showTrailing)
             // Borderless: an outlined pill next to an 11px label reads as the
             // most important thing in the row, which it is not.
