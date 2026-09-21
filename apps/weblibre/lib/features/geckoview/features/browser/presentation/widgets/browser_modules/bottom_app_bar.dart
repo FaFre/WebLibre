@@ -546,6 +546,17 @@ class BrowserTabBar extends HookConsumerWidget {
 
     final stackingMode = ref.watch(effectiveTabBarStackingModeProvider);
 
+    // Two-level stacking draws a row only when that row has something in it.
+    // The same provider backs `quickTabSwitcherRowCountProvider`, which is
+    // what reserved this bar's height — reading it here is what keeps the
+    // rows drawn and the slots reserved for them identical, so an empty row
+    // is not a blank band (#628).
+    final twoLevelRows = stackingMode == TabBarStackingMode.twoLevel
+        ? ref.watch(twoLevelQuickTabSwitcherRowsProvider).value
+        : null;
+    final showTwoLevelContainerRow = twoLevelRows?.containerRow ?? false;
+    final showTwoLevelMruRow = twoLevelRows?.mruRow ?? false;
+
     final tabBarPosition = ref.watch(effectiveTabBarPositionProvider);
     final isVertical = tabBarPosition.isVertical;
     // Only a vertical rail has a width to be wide; the horizontal bars leave
@@ -709,12 +720,21 @@ class BrowserTabBar extends HookConsumerWidget {
               ),
         child: switch (stackingMode) {
           TabBarStackingMode.disabled => const SizedBox.shrink(),
+          // Every switcher row carries its mode as a key, on whichever widget
+          // occupies the slot (the Expanded on the rail). Rows of the same
+          // type take each other's slots here — the two-level column drops one
+          // when it runs empty, and changing stacking mode swaps one for the
+          // other — so unkeyed, Flutter would match the surviving row to the
+          // departed one's element and hand it that row's hook state: scroll
+          // controller, user-scrolling timer and active-chip key.
           TabBarStackingMode.lastUsedTabs => QuickTabSwitcher(
+            key: const ValueKey(QuickTabSwitcherMode.lastUsedTabs),
             quickTabSwitcherMode: QuickTabSwitcherMode.lastUsedTabs,
             axis: switcherAxis,
             railWidth: railWidth,
           ),
           TabBarStackingMode.containerTabs => QuickTabSwitcher(
+            key: const ValueKey(QuickTabSwitcherMode.containerTabs),
             quickTabSwitcherMode: QuickTabSwitcherMode.containerTabs,
             axis: switcherAxis,
             railWidth: railWidth,
@@ -735,36 +755,49 @@ class BrowserTabBar extends HookConsumerWidget {
             switcherAxis == Axis.vertical
                 ? Column(
                     children: [
-                      Expanded(
-                        child: QuickTabSwitcher(
+                      if (showTwoLevelContainerRow)
+                        Expanded(
+                          key: const ValueKey(
+                            QuickTabSwitcherMode.containerTabs,
+                          ),
+                          child: QuickTabSwitcher(
+                            quickTabSwitcherMode:
+                                QuickTabSwitcherMode.containerTabs,
+                            enableHistoryFallback: false,
+                            axis: switcherAxis,
+                            railWidth: railWidth,
+                          ),
+                        ),
+                      if (showTwoLevelMruRow)
+                        Expanded(
+                          key: const ValueKey(
+                            QuickTabSwitcherMode.lastUsedTabs,
+                          ),
+                          child: QuickTabSwitcher(
+                            quickTabSwitcherMode:
+                                QuickTabSwitcherMode.lastUsedTabs,
+                            axis: switcherAxis,
+                            railWidth: railWidth,
+                          ),
+                        ),
+                    ],
+                  )
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (showTwoLevelContainerRow)
+                        const QuickTabSwitcher(
+                          key: ValueKey(QuickTabSwitcherMode.containerTabs),
                           quickTabSwitcherMode:
                               QuickTabSwitcherMode.containerTabs,
                           enableHistoryFallback: false,
-                          axis: switcherAxis,
-                          railWidth: railWidth,
                         ),
-                      ),
-                      Expanded(
-                        child: QuickTabSwitcher(
+                      if (showTwoLevelMruRow)
+                        const QuickTabSwitcher(
+                          key: ValueKey(QuickTabSwitcherMode.lastUsedTabs),
                           quickTabSwitcherMode:
                               QuickTabSwitcherMode.lastUsedTabs,
-                          axis: switcherAxis,
-                          railWidth: railWidth,
                         ),
-                      ),
-                    ],
-                  )
-                : const Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      QuickTabSwitcher(
-                        quickTabSwitcherMode:
-                            QuickTabSwitcherMode.containerTabs,
-                        enableHistoryFallback: false,
-                      ),
-                      QuickTabSwitcher(
-                        quickTabSwitcherMode: QuickTabSwitcherMode.lastUsedTabs,
-                      ),
                     ],
                   ),
         },
@@ -1489,8 +1522,12 @@ class QuickTabSwitcherView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (availableItems.isEmpty) {
-      // Hold the 48px slot: in two-level stacking an empty row must not
-      // collapse, since the toolbar height already accounts for both rows.
+      // Hold the 48px slot rather than collapsing: whether a row exists at
+      // all is decided upstream (quickTabSwitcherRowCountProvider, and the
+      // two-level row gates that follow it), and the toolbar height is
+      // already reserved for the rows it decided on. Shrinking here would
+      // only desync the content from that reservation on the frames where an
+      // item list empties before the count catches up.
       // On the rail the cross-axis width is fixed and the (vertical) list
       // fills the available height.
       return _isVertical
