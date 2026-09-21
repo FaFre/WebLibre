@@ -282,6 +282,9 @@ class TabRepository extends _$TabRepository {
       containerId: Value(assignedContainer?.id),
       url: Value(url),
       tabMode: Value(tabMode),
+      childPlacement: ref
+          .read(generalSettingsWithDefaultsProvider)
+          .childTabPlacement,
     );
 
     if (launchedFromIntent) {
@@ -349,6 +352,11 @@ class TabRepository extends _$TabRepository {
       UnassignedContainerTabSelection() => null,
       SpecificContainerTabSelection(:final container) => container,
     };
+    // Read once for the whole batch rather than per tab: the setting cannot
+    // change while these rows are being written.
+    final childPlacement = ref
+        .read(generalSettingsWithDefaultsProvider)
+        .childTabPlacement;
 
     final createdTabIds = await db.transaction(() async {
       final createdTabIds = await _tabsService.addMultipleTabs(
@@ -394,6 +402,7 @@ class TabRepository extends _$TabRepository {
           source: TabSource.manual,
           containerId: Value(assignedContainer?.id),
           url: Value(Uri.tryParse(tab.url)),
+          childPlacement: childPlacement,
           tabMode: Value(
             isIsolatedContextId(tab.contextId)
                 ? TabMode.isolated(tab.contextId!)

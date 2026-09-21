@@ -7,6 +7,7 @@ import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
 import 'package:weblibre/data/database/functions/url_functions.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/child_tab_placement.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 
@@ -26,6 +27,81 @@ void main() {
 
   tearDown(() async {
     await db.close();
+  });
+
+  test('a new child defaults to the position behind its opener', () async {
+    await _insertTabs(db, const [
+      _TabFixture('parent'),
+      _TabFixture('existing-child', parentId: 'parent'),
+      _TabFixture('existing-grandchild', parentId: 'existing-child'),
+      _TabFixture('unrelated'),
+    ]);
+
+    await db.tabDao.insertTab(
+      'new-child',
+      source: TabSource.manual,
+      parentId: const Value('parent'),
+    );
+
+    expect(await _orderedTabIds(db), [
+      'parent',
+      'existing-child',
+      'existing-grandchild',
+      'new-child',
+      'unrelated',
+    ]);
+  });
+
+  test('ChildTabPlacement.endOfList appends a new child to the end', () async {
+    await _insertTabs(db, const [
+      _TabFixture('parent'),
+      _TabFixture('existing-child', parentId: 'parent'),
+      _TabFixture('unrelated'),
+    ]);
+
+    await db.tabDao.insertTab(
+      'new-child',
+      source: TabSource.manual,
+      parentId: const Value('parent'),
+      childPlacement: ChildTabPlacement.endOfList,
+    );
+
+    expect(await _orderedTabIds(db), [
+      'parent',
+      'existing-child',
+      'unrelated',
+      'new-child',
+    ]);
+    // The opener is still recorded, so hierarchical views keep nesting it.
+    final newChild = await db.tabDao
+        .getTabDataById('new-child')
+        .getSingleOrNull();
+    expect(newChild?.parentId, 'parent');
+  });
+
+  test('an explicit anchor outranks ChildTabPlacement.endOfList', () async {
+    // What a duplicated tab does: it must land beside its source whatever the
+    // setting says about new children.
+    await _insertTabs(db, const [
+      _TabFixture('parent'),
+      _TabFixture('source', parentId: 'parent'),
+      _TabFixture('unrelated'),
+    ]);
+
+    await db.tabDao.insertTab(
+      'duplicate',
+      source: TabSource.manual,
+      parentId: const Value('parent'),
+      afterTabId: const Value('source'),
+      childPlacement: ChildTabPlacement.endOfList,
+    );
+
+    expect(await _orderedTabIds(db), [
+      'parent',
+      'source',
+      'duplicate',
+      'unrelated',
+    ]);
   });
 
   test('setTabParent appends after the existing last child subtree', () async {

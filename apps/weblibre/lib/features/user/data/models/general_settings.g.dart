@@ -71,6 +71,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings tabBarDirection(TabDirection tabBarDirection);
 
+  GeneralSettings childTabPlacement(ChildTabPlacement childTabPlacement);
+
   GeneralSettings tabIntentOpenSetting(
     TabIntentOpenSetting tabIntentOpenSetting,
   );
@@ -251,6 +253,7 @@ abstract class _$GeneralSettingsCWProxy {
     TabType storedDefaultCreateTabType,
     TabDirection tabListDirection,
     TabDirection tabBarDirection,
+    ChildTabPlacement childTabPlacement,
     TabIntentOpenSetting tabIntentOpenSetting,
     BookmarkOpenSetting bookmarkOpenSetting,
     BackgroundTabOpenAction backgroundTabOpenAction,
@@ -436,6 +439,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings tabBarDirection(TabDirection tabBarDirection) =>
       call(tabBarDirection: tabBarDirection);
+
+  @override
+  GeneralSettings childTabPlacement(ChildTabPlacement childTabPlacement) =>
+      call(childTabPlacement: childTabPlacement);
 
   @override
   GeneralSettings tabIntentOpenSetting(
@@ -736,6 +743,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? storedDefaultCreateTabType = const $CopyWithPlaceholder(),
     Object? tabListDirection = const $CopyWithPlaceholder(),
     Object? tabBarDirection = const $CopyWithPlaceholder(),
+    Object? childTabPlacement = const $CopyWithPlaceholder(),
     Object? tabIntentOpenSetting = const $CopyWithPlaceholder(),
     Object? bookmarkOpenSetting = const $CopyWithPlaceholder(),
     Object? backgroundTabOpenAction = const $CopyWithPlaceholder(),
@@ -957,6 +965,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.tabBarDirection
           // ignore: cast_nullable_to_non_nullable
           : tabBarDirection as TabDirection,
+      childTabPlacement:
+          childTabPlacement == const $CopyWithPlaceholder() ||
+              childTabPlacement == null
+          ? _value.childTabPlacement
+          // ignore: cast_nullable_to_non_nullable
+          : childTabPlacement as ChildTabPlacement,
       tabIntentOpenSetting:
           tabIntentOpenSetting == const $CopyWithPlaceholder() ||
               tabIntentOpenSetting == null
@@ -1381,6 +1395,10 @@ GeneralSettings _$GeneralSettingsFromJson(
     _$TabDirectionEnumMap,
     json['tabBarDirection'],
   ),
+  childTabPlacement: $enumDecodeNullable(
+    _$ChildTabPlacementEnumMap,
+    json['childTabPlacement'],
+  ),
   tabIntentOpenSetting: $enumDecodeNullable(
     _$TabIntentOpenSettingEnumMap,
     json['tabIntentOpenSetting'],
@@ -1539,6 +1557,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
       _$TabTypeEnumMap[instance.storedDefaultCreateTabType]!,
   'tabListDirection': _$TabDirectionEnumMap[instance.tabListDirection]!,
   'tabBarDirection': _$TabDirectionEnumMap[instance.tabBarDirection]!,
+  'childTabPlacement': _$ChildTabPlacementEnumMap[instance.childTabPlacement]!,
   'tabIntentOpenSetting':
       _$TabIntentOpenSettingEnumMap[instance.tabIntentOpenSetting]!,
   'bookmarkOpenSetting':
@@ -1666,6 +1685,11 @@ const _$TabTypeEnumMap = {
 const _$TabDirectionEnumMap = {
   TabDirection.newestFirst: 'newestFirst',
   TabDirection.oldestFirst: 'oldestFirst',
+};
+
+const _$ChildTabPlacementEnumMap = {
+  ChildTabPlacement.afterParent: 'afterParent',
+  ChildTabPlacement.endOfList: 'endOfList',
 };
 
 const _$TabIntentOpenSettingEnumMap = {

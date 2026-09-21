@@ -28,6 +28,7 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
 import 'package:weblibre/features/app_links/domain/entities/context_app_link_policy.dart';
 import 'package:weblibre/features/app_links/presentation/widgets/container_app_link_settings_dialog.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/child_tab_placement.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
@@ -63,6 +64,19 @@ const List<SettingsSectionDefinition> browsingSettingsSections = [
         subtitle: 'Choose how tabs are ordered in the tab bar',
         keywords: ['sorting', 'order'],
         child: _TabBarDirectionSection(),
+      ),
+      SettingsEntryDefinition(
+        title: 'New Child Tab Position',
+        subtitle: 'Choose where tabs opened from another tab are inserted',
+        keywords: [
+          'child tabs',
+          'new tab',
+          'position',
+          'order',
+          'end of list',
+          'after parent',
+        ],
+        child: _ChildTabPlacementSection(),
       ),
       SettingsEntryDefinition(
         title: 'Show Container UI',
@@ -643,6 +657,63 @@ class _TabBarDirectionSection extends HookConsumerWidget {
                     .save(
                       (currentSettings) =>
                           currentSettings.copyWith.tabBarDirection(value.first),
+                    );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChildTabPlacementSection extends HookConsumerWidget {
+  const _ChildTabPlacementSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final placement = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.childTabPlacement),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const ListTile(
+            title: Text('New Child Tab Position'),
+            subtitle: Text(
+              'Choose whether a tab opened from another tab follows its opener '
+              'or goes to the end. The opener is still remembered either way, '
+              'so the tree view is unaffected',
+            ),
+            leading: Icon(MdiIcons.fileTreeOutline),
+            contentPadding: EdgeInsets.zero,
+          ),
+          Center(
+            child: SegmentedButton(
+              showSelectedIcon: false,
+              segments: const [
+                ButtonSegment(
+                  value: ChildTabPlacement.afterParent,
+                  label: Text('After opener'),
+                  icon: Icon(MdiIcons.arrowRightBottom),
+                ),
+                ButtonSegment(
+                  value: ChildTabPlacement.endOfList,
+                  label: Text('At the end'),
+                  icon: Icon(MdiIcons.arrowCollapseDown),
+                ),
+              ],
+              selected: {placement},
+              onSelectionChanged: (value) async {
+                await ref
+                    .read(saveGeneralSettingsControllerProvider.notifier)
+                    .save(
+                      (currentSettings) => currentSettings.copyWith
+                          .childTabPlacement(value.first),
                     );
               },
             ),

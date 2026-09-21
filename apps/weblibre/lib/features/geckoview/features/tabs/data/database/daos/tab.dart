@@ -28,6 +28,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/projections/tab_summary.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/child_tab_placement.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
@@ -344,6 +345,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     required Value<String?> parentId,
     required Value<String?> containerId,
     Value<String?> afterTabId = const Value.absent(),
+    ChildTabPlacement childPlacement = ChildTabPlacement.afterParent,
   }) async {
     // Explicit "place after this tab" wins regardless of parent.
     if (afterTabId.present && afterTabId.value != null) {
@@ -355,7 +357,12 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
       }
     }
 
-    if (parentId.value.isNotEmpty) {
+    // `ChildTabPlacement.endOfList` keeps the parent relation but drops the
+    // positional tie to it, so the tab lands at the end like any other new
+    // tab. An explicit `afterTabId` above still wins: a duplicate belongs
+    // beside its source no matter where new children go.
+    if (parentId.value.isNotEmpty &&
+        childPlacement == ChildTabPlacement.afterParent) {
       // Place new child after the last existing sibling, falling back to
       // immediately after the parent if there are none yet.
       final lastChildId = await db.containerDao
@@ -384,7 +391,8 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
       // the new container). In either case append to the end.
     }
 
-    // Root tabs (or unresolved parent) always append to the end of the list.
+    // Root tabs, an unresolved parent, and children placed by
+    // [ChildTabPlacement.endOfList] all append to the end of the list.
     // Display direction is applied at render time via TabListDirection /
     // TabBarDirection settings, so we never need to insert at the front.
     return db.containerDao
@@ -401,6 +409,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     Value<Uri?> url = const Value.absent(),
     Value<String?> title = const Value.absent(),
     Value<TabMode> tabMode = const Value.absent(),
+    ChildTabPlacement childPlacement = ChildTabPlacement.afterParent,
   }) {
     return db.transaction(() async {
       final tabId = await createTab();
@@ -410,6 +419,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
             parentId: parentId,
             containerId: containerId,
             afterTabId: afterTabId,
+            childPlacement: childPlacement,
           );
       final Value<TabModeDbValue> persistedTabMode = tabMode.present
           ? Value(tabMode.value.toDbValue())
@@ -460,6 +470,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     Value<Uri?> url = const Value.absent(),
     Value<String?> title = const Value.absent(),
     Value<TabMode> tabMode = const Value.absent(),
+    ChildTabPlacement childPlacement = ChildTabPlacement.afterParent,
   }) {
     return db.transaction(() async {
       final currentOrderKey =
@@ -468,6 +479,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
             parentId: parentId,
             containerId: containerId,
             afterTabId: afterTabId,
+            childPlacement: childPlacement,
           );
       final Value<TabModeDbValue> persistedTabMode = tabMode.present
           ? Value(tabMode.value.toDbValue())
