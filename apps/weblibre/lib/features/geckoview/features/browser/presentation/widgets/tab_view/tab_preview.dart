@@ -20,7 +20,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
@@ -31,6 +30,7 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_depth_indicator.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_swipe_actions.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
@@ -40,7 +40,6 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
-import 'package:weblibre/presentation/widgets/single_finger_horizontal_drag.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -804,15 +803,8 @@ class SingleGridTabPreview extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dragStartPosition = useRef(Offset.zero);
-    // A ValueNotifier rather than useState: the drag fires per pointer event,
-    // and useState would rebuild this whole subtree — thumbnail, favicon,
-    // title, menus, badges — inside a scrolling list on every one. Only the
-    // ValueListenableBuilder below reruns now.
-    final draggedDistance = useValueNotifier(0.0);
-
-    // Built once per rebuild of *this* widget and handed to the builder as its
-    // `child`, so the drag never reconstructs it.
+    // Built once per rebuild of *this* widget and handed to [TabSwipeActions]
+    // as its child, so the drag never reconstructs it.
     final preview = RepaintBoundary(
       child: GridTabPreview(
         tabId: tabId,
@@ -904,45 +896,10 @@ class SingleGridTabPreview extends HookConsumerWidget {
       ),
     );
 
-    return SingleFingerHorizontalDrag(
-      onStart: (details) {
-        dragStartPosition.value = details.globalPosition;
-        draggedDistance.value = 0.0;
-      },
-      onUpdate: (details) {
-        draggedDistance.value = math.min(
-          (dragStartPosition.value - details.globalPosition).dx.abs(),
-          deleteThreshold,
-        );
-      },
-      onEnd: (details) async {
-        if (draggedDistance.value >= deleteThreshold) {
-          if (!await _confirmIsolatedTabCloseIfNeeded(context, ref, tabId)) {
-            draggedDistance.value = 0.0;
-            return;
-          }
-
-          await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
-
-          if (context.mounted) {
-            ui_helper.showTabUndoClose(
-              context,
-              ref.read(tabRepositoryProvider.notifier).undoClose,
-            );
-          }
-        }
-
-        draggedDistance.value = 0.0;
-      },
-      child: ValueListenableBuilder<double>(
-        valueListenable: draggedDistance,
-        // Kept unconditionally (rather than skipping it at rest) so the
-        // element tree doesn't reshape on drag start/end. Opacity at 1.0
-        // pushes no layer, so this costs nothing when not dragging.
-        builder: (context, distance, child) =>
-            Opacity(opacity: 1.0 - distance / deleteThreshold, child: child),
-        child: preview,
-      ),
+    return TabSwipeActions(
+      tabId: tabId,
+      threshold: deleteThreshold,
+      child: preview,
     );
   }
 }
@@ -973,11 +930,6 @@ class SingleListTabPreview extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dragStartPosition = useRef(Offset.zero);
-    // See [SingleGridTabPreview]: per-pointer-event drag updates must not
-    // rebuild the row's subtree inside a scrolling list.
-    final draggedDistance = useValueNotifier(0.0);
-
     final preview = RepaintBoundary(
       child: ListTabPreview(
         tabId: tabId,
@@ -1069,42 +1021,10 @@ class SingleListTabPreview extends HookConsumerWidget {
       ),
     );
 
-    return SingleFingerHorizontalDrag(
-      onStart: (details) {
-        dragStartPosition.value = details.globalPosition;
-        draggedDistance.value = 0.0;
-      },
-      onUpdate: (details) {
-        draggedDistance.value = math.min(
-          (dragStartPosition.value - details.globalPosition).dx.abs(),
-          deleteThreshold,
-        );
-      },
-      onEnd: (details) async {
-        if (draggedDistance.value >= deleteThreshold) {
-          if (!await _confirmIsolatedTabCloseIfNeeded(context, ref, tabId)) {
-            draggedDistance.value = 0.0;
-            return;
-          }
-
-          await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
-
-          if (context.mounted) {
-            ui_helper.showTabUndoClose(
-              context,
-              ref.read(tabRepositoryProvider.notifier).undoClose,
-            );
-          }
-        }
-
-        draggedDistance.value = 0.0;
-      },
-      child: ValueListenableBuilder<double>(
-        valueListenable: draggedDistance,
-        builder: (context, distance, child) =>
-            Opacity(opacity: 1.0 - distance / deleteThreshold, child: child),
-        child: preview,
-      ),
+    return TabSwipeActions(
+      tabId: tabId,
+      threshold: deleteThreshold,
+      child: preview,
     );
   }
 }

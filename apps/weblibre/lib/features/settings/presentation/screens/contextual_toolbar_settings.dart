@@ -32,6 +32,7 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/gestures/presentation/widgets/gesture_action_picker.dart';
+import 'package:weblibre/features/settings/presentation/widgets/setting_value_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart';
 
@@ -339,7 +340,7 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 8, 16),
+          padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -380,7 +381,7 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
               // The settings take the card's full width; the right inset
               // matches the left one past the drag handle's own padding.
               Padding(
-                padding: const EdgeInsets.only(top: 8, right: 8),
+                padding: const EdgeInsets.only(right: 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -396,7 +397,6 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
                               .toStoredFallbackId(),
                         ),
                       ),
-                      const SizedBox(height: 12),
                     ],
                     _LongPressPicker(
                       builtInActions: longPressActions,
@@ -448,12 +448,13 @@ class _LongPressPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final builtIn = _builtInOption;
 
-    return _ButtonSettingRow(
+    return SettingValueTile(
+      padding: _settingPadding,
       icon: Icons.touch_app_outlined,
-      label: 'Long press',
+      title: 'Long press',
+      description: 'What holding the button does',
       value: current?.title ?? builtIn.title,
       valueIcon: current?.icon ?? builtIn.icon,
-      isCustomized: current != null,
       onTap: () async {
         final picked = await showOptionalBrowserActionPicker(
           context,
@@ -512,104 +513,22 @@ class _FallbackPicker extends StatelessWidget {
             child: Text(opt.label),
           ),
       ],
-      builder: (context, controller, _) => _ButtonSettingRow(
+      builder: (context, controller, _) => SettingValueTile(
+        padding: _settingPadding,
         icon: Icons.swap_horiz,
-        label: 'If unavailable',
+        title: 'If unavailable',
+        description: "Shown instead while this button can't be used",
         value: currentLabel,
         valueIcon: currentDef?.icon ?? Icons.block,
-        isCustomized: currentId != null,
         onTap: () => controller.isOpen ? controller.close() : controller.open(),
       ),
     );
   }
 }
 
-/// One setting inside a toolbar button's card: [icon] and [label] as a
-/// caption, the current [value] in a filled, tappable field below. Both
-/// settings share it so they line up and read the same way (issue #469 was the
-/// two being mistaken for each other).
-class _ButtonSettingRow extends StatelessWidget {
-  const _ButtonSettingRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.valueIcon,
-    required this.isCustomized,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  /// What [value] stands for: the fallback button's icon, or the action's.
-  final IconData valueIcon;
-
-  /// Whether [value] is something other than the button's default, which is
-  /// then shown in the primary color.
-  final bool isCustomized;
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final mutedColor = colorScheme.onSurfaceVariant;
-    final valueColor = isCustomized
-        ? colorScheme.primary
-        : colorScheme.onSurface;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          children: [
-            Icon(icon, size: 16, color: mutedColor),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                label,
-                style: theme.textTheme.labelMedium?.copyWith(color: mutedColor),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Material(
-          color: colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(8),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
-              child: Row(
-                children: [
-                  Icon(valueIcon, size: 18, color: valueColor),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      value,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: valueColor,
-                        fontWeight: isCustomized ? FontWeight.w500 : null,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Icon(Icons.arrow_drop_down, color: mutedColor),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
+/// The card already pads its sides, so a setting only needs room above and
+/// below; its icon then lines up under the button's own.
+const _settingPadding = EdgeInsets.symmetric(vertical: 8);
 
 class _ToolbarPreviewDelegate extends SliverPersistentHeaderDelegate {
   const _ToolbarPreviewDelegate({

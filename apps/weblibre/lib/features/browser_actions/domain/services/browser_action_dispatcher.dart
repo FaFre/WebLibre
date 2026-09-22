@@ -41,6 +41,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/providers.da
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/delete_data.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/share_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/translation_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
@@ -70,13 +71,17 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
   @override
   void build() {}
 
-  /// Runs [action].
+  /// Runs [action] on [tabId], or on the selected tab when none is given.
+  ///
+  /// [tabId] is for triggers that belong to one tab, such as a swipe on its
+  /// card in the tab view, so the action lands on that tab rather than on
+  /// whichever one is selected.
   ///
   /// Actions that work on a page do nothing while no tab is selected; the ones
   /// that act on the browser itself (opening a tab, a screen, switching
   /// containers) still run.
-  Future<void> run(BrowserAction action) async {
-    final tabId = ref.read(selectedTabProvider);
+  Future<void> run(BrowserAction action, {String? tabId}) async {
+    tabId ??= ref.read(selectedTabProvider);
     if (tabId == null && _requiresTab(action)) return;
 
     try {
@@ -296,6 +301,11 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
         await _pushLocation(const KeyboardShortcutsOverviewRoute().location);
       case BrowserAction.toggleBookmark:
         await _toggleBookmark(pageTabId);
+      case BrowserAction.sharePage:
+        final context = await _navigatorContext();
+        if (context != null && context.mounted) {
+          await showShareBottomSheet(context, selectedTabId: pageTabId);
+        }
       case BrowserAction.translatePage:
         final context = await _navigatorContext();
         if (context != null && context.mounted) {

@@ -55,7 +55,7 @@ void main() {
     );
   }
 
-  testWidgets('beats the button\'s own long press', (tester) async {
+  testWidgets("beats the button's own long press", (tester) async {
     await pumpButton(tester);
 
     await tester.longPress(find.byType(IconButton));

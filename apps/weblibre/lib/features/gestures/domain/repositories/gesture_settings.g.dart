@@ -35,7 +35,7 @@ final class GestureSettingsRepositoryProvider
 }
 
 String _$gestureSettingsRepositoryHash() =>
-    r'cc04175c945292fef1eb6b708616bb6659dd3651';
+    r'f9e06ffae01c0046a7ba7353f2774cf366d04b7a';
 
 abstract class _$GestureSettingsRepository
     extends $StreamNotifier<GestureSettings> {
@@ -99,3 +99,90 @@ final class GestureSettingsWithDefaultsProvider
 
 String _$gestureSettingsWithDefaultsHash() =>
     r'f9f242b81ef9d4d0594ae1700fa11db503583672';
+
+/// What [gesture] currently does, or null when the user switched it off.
+
+@ProviderFor(builtInGestureBinding)
+final builtInGestureBindingProvider = BuiltInGestureBindingFamily._();
+
+/// What [gesture] currently does, or null when the user switched it off.
+
+final class BuiltInGestureBindingProvider
+    extends $FunctionalProvider<BrowserAction?, BrowserAction?, BrowserAction?>
+    with $Provider<BrowserAction?> {
+  /// What [gesture] currently does, or null when the user switched it off.
+  BuiltInGestureBindingProvider._({
+    required BuiltInGestureBindingFamily super.from,
+    required BuiltInGesture super.argument,
+  }) : super(
+         retry: null,
+         name: r'builtInGestureBindingProvider',
+         isAutoDispose: false,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$builtInGestureBindingHash();
+
+  @override
+  String toString() {
+    return r'builtInGestureBindingProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<BrowserAction?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  BrowserAction? create(Ref ref) {
+    final argument = this.argument as BuiltInGesture;
+    return builtInGestureBinding(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(BrowserAction? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<BrowserAction?>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is BuiltInGestureBindingProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$builtInGestureBindingHash() =>
+    r'ddab40f20e349bf99066153a6c3e74ee13522299';
+
+/// What [gesture] currently does, or null when the user switched it off.
+
+final class BuiltInGestureBindingFamily extends $Family
+    with $FunctionalFamilyOverride<BrowserAction?, BuiltInGesture> {
+  BuiltInGestureBindingFamily._()
+    : super(
+        retry: null,
+        name: r'builtInGestureBindingProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: false,
+      );
+
+  /// What [gesture] currently does, or null when the user switched it off.
+
+  BuiltInGestureBindingProvider call(BuiltInGesture gesture) =>
+      BuiltInGestureBindingProvider._(argument: gesture, from: this);
+
+  @override
+  String toString() => r'builtInGestureBindingProvider';
+}

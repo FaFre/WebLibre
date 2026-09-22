@@ -41,7 +41,7 @@ part 'settings_sync_service.g.dart';
 ///
 /// Bump this whenever a new value is added to an enum that settings sync
 /// carries.
-const _schemaVersion = 3;
+const _schemaVersion = 4;
 
 @Riverpod(keepAlive: true)
 class SettingsSyncService extends _$SettingsSyncService
@@ -82,14 +82,23 @@ class SettingsSyncService extends _$SettingsSyncService
   @override
   Future<void> applyRestored(List<int> plaintext) async {
     final json = jsonDecode(utf8.decode(plaintext)) as Map<String, dynamic>;
-    final envelope = SettingsSyncEnvelope.fromJson(json);
 
-    if (envelope.schemaVersion > _schemaVersion) {
+    // Checked on the raw JSON, before the payload is decoded: a newer
+    // snapshot can hold enum values this build does not know (a new
+    // BrowserAction, say), and decoding those would throw a decode error
+    // instead of this one.
+    final schemaVersion = switch (json['schema_version']) {
+      final num version => version.toInt(),
+      _ => throw const FormatException('Settings snapshot has no schema'),
+    };
+    if (schemaVersion > _schemaVersion) {
       throw Exception(
-        'Unsupported settings schema version: ${envelope.schemaVersion} '
+        'Unsupported settings schema version: $schemaVersion '
         '(this app supports up to $_schemaVersion)',
       );
     }
+
+    final envelope = SettingsSyncEnvelope.fromJson(json);
 
     final payload = envelope.payload;
 

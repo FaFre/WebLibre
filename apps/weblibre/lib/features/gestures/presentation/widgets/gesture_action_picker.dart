@@ -40,7 +40,8 @@ Future<BrowserAction?> showGestureActionPicker(
 typedef UnsetActionOption = ({String title, String description, IconData icon});
 
 /// Like [showGestureActionPicker], but the list starts with [unsetOption] and
-/// [selected] may be null to mark that entry as the current one.
+/// [selected] may be null to mark that entry as the current one. [actions]
+/// narrows the list to what the trigger can run.
 ///
 /// Returns null if dismissed; otherwise a record whose `action` is null when
 /// [unsetOption] was chosen.
@@ -48,14 +49,21 @@ Future<({BrowserAction? action})?> showOptionalBrowserActionPicker(
   BuildContext context, {
   required BrowserAction? selected,
   required UnsetActionOption unsetOption,
+  List<BrowserAction> actions = BrowserAction.values,
 }) {
-  return _showPicker(context, selected: selected, unsetOption: unsetOption);
+  return _showPicker(
+    context,
+    selected: selected,
+    unsetOption: unsetOption,
+    actions: actions,
+  );
 }
 
 Future<({BrowserAction? action})?> _showPicker(
   BuildContext context, {
   required BrowserAction? selected,
   UnsetActionOption? unsetOption,
+  List<BrowserAction> actions = BrowserAction.values,
 }) {
   return showModalBottomSheet<({BrowserAction? action})>(
     context: context,
@@ -65,16 +73,24 @@ Future<({BrowserAction? action})?> _showPicker(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
-    builder: (context) =>
-        _GestureActionPicker(selected: selected, unsetOption: unsetOption),
+    builder: (context) => _GestureActionPicker(
+      selected: selected,
+      unsetOption: unsetOption,
+      actions: actions,
+    ),
   );
 }
 
 class _GestureActionPicker extends StatelessWidget {
   final BrowserAction? selected;
   final UnsetActionOption? unsetOption;
+  final List<BrowserAction> actions;
 
-  const _GestureActionPicker({required this.selected, this.unsetOption});
+  const _GestureActionPicker({
+    required this.selected,
+    required this.actions,
+    this.unsetOption,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +98,7 @@ class _GestureActionPicker extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     final byCategory = <BrowserActionCategory, List<BrowserAction>>{};
-    for (final action in BrowserAction.values) {
+    for (final action in actions) {
       byCategory.putIfAbsent(action.category, () => []).add(action);
     }
 

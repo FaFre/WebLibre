@@ -27,10 +27,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/window_size_class.dart';
-import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/addons/domain/providers.dart'
     show pinnedAddonIdsProvider;
 import 'package:weblibre/features/addons/presentation/widgets/pinned_addon_bar.dart';
+import 'package:weblibre/features/browser_actions/domain/services/browser_action_dispatcher.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
@@ -46,7 +46,6 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/quick_switcher_button_row.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_view_reorder.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
@@ -64,6 +63,8 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:weblibre/features/gestures/data/models/built_in_gesture.dart';
+import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
@@ -568,61 +569,26 @@ class BrowserTabBar extends HookConsumerWidget {
 
     final dragStartPosition = useRef(Offset.zero);
 
-    // Swipe along the primary switch axis moves between tabs. [delta] is
-    // (dragStart - dragEnd) along that axis, so a right-to-left (or upward)
-    // swipe is positive and moves *up* the visible tab order, a rightward (or
-    // downward) swipe moves down it — the swipe drags the list under the
-    // finger.
-    Future<void> switchTabsBy(double delta) async {
-      final selectedTab = ref.read(selectedTabProvider);
-      final setting = await ref
-          .read(generalSettingsRepositoryProvider.notifier)
-          .fetchSettings();
-
-      if (selectedTab == null) return;
-
-      switch (setting.tabBarSwipeAction) {
-        case TabBarSwipeAction.switchLastOpened:
-          await ref
-              .read(tabRepositoryProvider.notifier)
-              .selectPreviouslyOpenedTab(selectedTab);
-        case TabBarSwipeAction.navigateOrderedTabs:
-          if (delta > 0) {
-            await ref
-                .read(tabRepositoryProvider.notifier)
-                .selectPreviousTab(selectedTab);
-          } else {
-            await ref
-                .read(tabRepositoryProvider.notifier)
-                .selectNextTab(selectedTab);
-          }
-      }
+    // Runs what the user bound to [gesture], if anything. Swipes along the
+    // bar are backward when they go right-to-left (or upward on the rail): the
+    // swipe drags the list under the finger.
+    Future<void> runSwipe(BuiltInGesture gesture) async {
+      final action = ref.read(builtInGestureBindingProvider(gesture));
+      if (action == null) return;
+      await ref.read(browserActionDispatcherProvider.notifier).run(action);
     }
 
-    void dismissToolbar() {
-      if (ref.read(bottomSheetControllerProvider) == null) {
-        unawaited(HapticFeedback.lightImpact());
-        ref
-            .read(toolbarVisibilityControllerProvider(selectedTabId).notifier)
-            .dismiss();
-      }
-    }
-
-    // Counterpart of dismissToolbar: swiping the bar *inward* (away from the
-    // edge it is docked to) opens the tab view, the same surface the tab count
-    // button opens — so the dismiss axis reads as one continuous control,
-    // pushing the bar off screen in one direction and pulling the tab view out
-    // of it in the other.
-    void showTabView() {
+    // The swipes across the bar — toward the edge it is docked to, or away
+    // from it — push the bar off screen and pull the tab view out of it by
+    // default, so they read as one continuous control. Whatever they are bound
+    // to, they stand down while a sheet covers the bar and confirm with a tap
+    // of haptics, as they always did.
+    Future<void> runCrossSwipe(BuiltInGesture gesture) async {
       if (ref.read(bottomSheetControllerProvider) != null) return;
+      if (ref.read(builtInGestureBindingProvider(gesture)) == null) return;
 
       unawaited(HapticFeedback.lightImpact());
-
-      if (settings.tabViewBottomSheet) {
-        ref.read(bottomSheetControllerProvider.notifier).show(ViewTabsSheet());
-      } else {
-        unawaited(const TabViewRoute().push(context));
-      }
+      await runSwipe(gesture);
     }
 
     final showTabTitle = displayedSheet is! ViewTabsSheet;
@@ -839,14 +805,18 @@ class BrowserTabBar extends HookConsumerWidget {
                   _ => false,
                 };
                 if (shouldDismiss) {
-                  dismissToolbar();
+                  await runCrossSwipe(BuiltInGesture.tabBarSwipeOutward);
                 } else if (shouldShowTabView) {
-                  showTabView();
+                  await runCrossSwipe(BuiltInGesture.tabBarSwipeInward);
                 }
               } else {
                 // Horizontal bar: horizontal swipe switches tabs.
                 if (distance.dx.abs() > 50 && distance.dy.abs() < 20) {
-                  await switchTabsBy(distance.dx);
+                  await runSwipe(
+                    distance.dx > 0
+                        ? BuiltInGesture.tabBarSwipeBackward
+                        : BuiltInGesture.tabBarSwipeForward,
+                  );
                 }
               }
             },
@@ -863,7 +833,11 @@ class BrowserTabBar extends HookConsumerWidget {
               if (isVertical) {
                 // Rail: vertical swipe switches tabs.
                 if (distance.dy.abs() > 50 && distance.dx.abs() < 20) {
-                  await switchTabsBy(distance.dy);
+                  await runSwipe(
+                    distance.dy > 0
+                        ? BuiltInGesture.tabBarSwipeBackward
+                        : BuiltInGesture.tabBarSwipeForward,
+                  );
                 }
                 return;
               }
@@ -892,9 +866,9 @@ class BrowserTabBar extends HookConsumerWidget {
                 _ => false,
               };
               if (shouldDismiss) {
-                dismissToolbar();
+                await runCrossSwipe(BuiltInGesture.tabBarSwipeOutward);
               } else if (shouldShowTabView) {
-                showTabView();
+                await runCrossSwipe(BuiltInGesture.tabBarSwipeInward);
               }
             },
     );

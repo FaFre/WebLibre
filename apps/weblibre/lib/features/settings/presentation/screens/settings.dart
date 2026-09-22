@@ -154,9 +154,16 @@ _CategoryGroups _buildCategories() {
     ),
     _SettingsCategoryDefinition(
       title: 'Gestures',
-      subtitle: 'Stroke gestures for browser actions',
+      subtitle: 'Swipes on the tab bar and tabs, drawn gestures',
       icon: MdiIcons.gestureSwipe,
-      keywords: const ['gesture', 'swipe', 'stroke'],
+      keywords: const [
+        'gesture',
+        'swipe',
+        'stroke',
+        'tab bar',
+        'long press',
+        'pinch',
+      ],
       onTap: (context) => GestureSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(

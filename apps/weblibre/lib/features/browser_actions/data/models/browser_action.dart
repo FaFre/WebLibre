@@ -290,6 +290,12 @@ enum BrowserAction {
     Icons.bookmark_border,
     BrowserActionCategory.page,
   ),
+  sharePage(
+    'Share',
+    'Share the current page',
+    Icons.share,
+    BrowserActionCategory.page,
+  ),
   translatePage(
     'Translate',
     'Open the page translation sheet',

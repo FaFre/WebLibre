@@ -88,6 +88,7 @@ class SingleFingerHorizontalDrag extends StatelessWidget {
   final GestureDragStartCallback? onStart;
   final GestureDragUpdateCallback? onUpdate;
   final GestureDragEndCallback? onEnd;
+  final GestureDragCancelCallback? onCancel;
   final Widget child;
 
   const SingleFingerHorizontalDrag({
@@ -95,6 +96,7 @@ class SingleFingerHorizontalDrag extends StatelessWidget {
     this.onStart,
     this.onUpdate,
     this.onEnd,
+    this.onCancel,
     super.key,
   });
 
@@ -114,6 +116,7 @@ class SingleFingerHorizontalDrag extends StatelessWidget {
                   ..onStart = onStart
                   ..onUpdate = onUpdate
                   ..onEnd = onEnd
+                  ..onCancel = onCancel
                   ..gestureSettings = MediaQuery.maybeGestureSettingsOf(
                     context,
                   );

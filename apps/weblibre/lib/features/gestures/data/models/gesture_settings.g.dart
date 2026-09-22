@@ -33,6 +33,10 @@ abstract class _$GestureSettingsCWProxy {
     Map<String, BrowserAction?> bindingOverrides,
   );
 
+  GestureSettings builtInOverrides(
+    Map<BuiltInGesture, BrowserAction?> builtInOverrides,
+  );
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GestureSettings(...).copyWith.fieldName(value)`.
   ///
@@ -53,6 +57,7 @@ abstract class _$GestureSettingsCWProxy {
     int minSuggestionStroke,
     List<String> excludedSites,
     Map<String, BrowserAction?> bindingOverrides,
+    Map<BuiltInGesture, BrowserAction?> builtInOverrides,
   });
 }
 
@@ -106,6 +111,11 @@ class _$GestureSettingsCWProxyImpl implements _$GestureSettingsCWProxy {
     Map<String, BrowserAction?> bindingOverrides,
   ) => call(bindingOverrides: bindingOverrides);
 
+  @override
+  GestureSettings builtInOverrides(
+    Map<BuiltInGesture, BrowserAction?> builtInOverrides,
+  ) => call(builtInOverrides: builtInOverrides);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GestureSettings(...).copyWith.fieldName(value)`.
   ///
@@ -127,6 +137,7 @@ class _$GestureSettingsCWProxyImpl implements _$GestureSettingsCWProxy {
     Object? minSuggestionStroke = const $CopyWithPlaceholder(),
     Object? excludedSites = const $CopyWithPlaceholder(),
     Object? bindingOverrides = const $CopyWithPlaceholder(),
+    Object? builtInOverrides = const $CopyWithPlaceholder(),
   }) {
     return GestureSettings(
       enabled: enabled == const $CopyWithPlaceholder() || enabled == null
@@ -189,6 +200,12 @@ class _$GestureSettingsCWProxyImpl implements _$GestureSettingsCWProxy {
           ? _value.bindingOverrides
           // ignore: cast_nullable_to_non_nullable
           : bindingOverrides as Map<String, BrowserAction?>,
+      builtInOverrides:
+          builtInOverrides == const $CopyWithPlaceholder() ||
+              builtInOverrides == null
+          ? _value.builtInOverrides
+          // ignore: cast_nullable_to_non_nullable
+          : builtInOverrides as Map<BuiltInGesture, BrowserAction?>,
     );
   }
 }
@@ -204,27 +221,32 @@ extension $GestureSettingsCopyWith on GestureSettings {
 // JsonSerializableGenerator
 // **************************************************************************
 
-GestureSettings _$GestureSettingsFromJson(Map<String, dynamic> json) =>
-    GestureSettings.withDefaults(
-      enabled: json['enabled'] as bool?,
-      active: json['active'] as bool?,
-      strokeSize: (json['strokeSize'] as num?)?.toInt(),
-      timeoutMs: (json['timeoutMs'] as num?)?.toInt(),
-      maxFingers: (json['maxFingers'] as num?)?.toInt(),
-      intervalMs: (json['intervalMs'] as num?)?.toInt(),
-      minStrokeIntervalMs: (json['minStrokeIntervalMs'] as num?)?.toInt(),
-      showFeedback: json['showFeedback'] as bool?,
-      suggestNext: json['suggestNext'] as bool?,
-      minSuggestionStroke: (json['minSuggestionStroke'] as num?)?.toInt(),
-      excludedSites: (json['excludedSites'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
-      bindingOverrides: (json['bindingOverrides'] as Map<String, dynamic>?)
-          ?.map(
-            (k, e) =>
-                MapEntry(k, $enumDecodeNullable(_$BrowserActionEnumMap, e)),
-          ),
-    );
+GestureSettings _$GestureSettingsFromJson(
+  Map<String, dynamic> json,
+) => GestureSettings.withDefaults(
+  enabled: json['enabled'] as bool?,
+  active: json['active'] as bool?,
+  strokeSize: (json['strokeSize'] as num?)?.toInt(),
+  timeoutMs: (json['timeoutMs'] as num?)?.toInt(),
+  maxFingers: (json['maxFingers'] as num?)?.toInt(),
+  intervalMs: (json['intervalMs'] as num?)?.toInt(),
+  minStrokeIntervalMs: (json['minStrokeIntervalMs'] as num?)?.toInt(),
+  showFeedback: json['showFeedback'] as bool?,
+  suggestNext: json['suggestNext'] as bool?,
+  minSuggestionStroke: (json['minSuggestionStroke'] as num?)?.toInt(),
+  excludedSites: (json['excludedSites'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  bindingOverrides: (json['bindingOverrides'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, $enumDecodeNullable(_$BrowserActionEnumMap, e)),
+  ),
+  builtInOverrides: (json['builtInOverrides'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(
+      $enumDecode(_$BuiltInGestureEnumMap, k),
+      $enumDecodeNullable(_$BrowserActionEnumMap, e),
+    ),
+  ),
+);
 
 Map<String, dynamic> _$GestureSettingsToJson(GestureSettings instance) =>
     <String, dynamic>{
@@ -241,6 +263,10 @@ Map<String, dynamic> _$GestureSettingsToJson(GestureSettings instance) =>
       'excludedSites': instance.excludedSites,
       'bindingOverrides': instance.bindingOverrides.map(
         (k, e) => MapEntry(k, _$BrowserActionEnumMap[e]),
+      ),
+      'builtInOverrides': instance.builtInOverrides.map(
+        (k, e) =>
+            MapEntry(_$BuiltInGestureEnumMap[k]!, _$BrowserActionEnumMap[e]),
       ),
     };
 
@@ -287,6 +313,7 @@ const _$BrowserActionEnumMap = {
   BrowserAction.decreaseFontSize: 'decreaseFontSize',
   BrowserAction.resetFontSize: 'resetFontSize',
   BrowserAction.toggleBookmark: 'toggleBookmark',
+  BrowserAction.sharePage: 'sharePage',
   BrowserAction.translatePage: 'translatePage',
   BrowserAction.printPage: 'printPage',
   BrowserAction.showHome: 'showHome',
@@ -302,4 +329,13 @@ const _$BrowserActionEnumMap = {
   BrowserAction.clearBrowsingData: 'clearBrowsingData',
   BrowserAction.moveToBackground: 'moveToBackground',
   BrowserAction.quitBrowser: 'quitBrowser',
+};
+
+const _$BuiltInGestureEnumMap = {
+  BuiltInGesture.tabBarSwipeBackward: 'tabBarSwipeBackward',
+  BuiltInGesture.tabBarSwipeForward: 'tabBarSwipeForward',
+  BuiltInGesture.tabBarSwipeOutward: 'tabBarSwipeOutward',
+  BuiltInGesture.tabBarSwipeInward: 'tabBarSwipeInward',
+  BuiltInGesture.tabSwipeLeft: 'tabSwipeLeft',
+  BuiltInGesture.tabSwipeRight: 'tabSwipeRight',
 };
