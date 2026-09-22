@@ -30,6 +30,7 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/services/toolbar_button_resolution.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/models/contextual_toolbar_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/toolbar_button_registry.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/resolved_toolbar_button.dart';
 
 class ContextualToolbar extends HookConsumerWidget {
   const ContextualToolbar({
@@ -87,10 +88,22 @@ class ContextualToolbar extends HookConsumerWidget {
       ),
       [configs, scope],
     );
+    final configById = useMemoized(
+      () => {for (final config in configs.value) config.buttonId: config},
+      [configs],
+    );
 
     final buttons = showConfiguredButtons
         ? resolvedButtons
-              .map((button) => _buildButton(scope, context, ref, button))
+              .map(
+                (button) => buildResolvedToolbarButton(
+                  scope,
+                  context,
+                  ref,
+                  button,
+                  configById,
+                ),
+              )
               .toList()
         : <Widget>[];
 
@@ -100,24 +113,6 @@ class ContextualToolbar extends HookConsumerWidget {
       wrap: wrap,
       trailing: trailing,
     );
-  }
-
-  Widget _buildButton(
-    ContextualToolbarScope scope,
-    BuildContext context,
-    WidgetRef ref,
-    ContextualToolbarButtonResolution button,
-  ) {
-    final def = toolbarButtonRegistryById[button.buttonId];
-    if (def == null) return const SizedBox.shrink();
-
-    final child = def.builder(scope, context, ref);
-
-    if (button.isEnabled) {
-      return child;
-    }
-
-    return Opacity(opacity: 0.38, child: IgnorePointer(child: child));
   }
 }
 

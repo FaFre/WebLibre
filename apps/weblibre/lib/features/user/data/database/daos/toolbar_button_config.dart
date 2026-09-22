@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:drift/drift.dart';
+import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/user/data/database/daos/toolbar_button_config.drift.dart';
 import 'package:weblibre/features/user/data/database/database.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart';
@@ -67,6 +68,11 @@ class ToolbarButtonConfigDao extends DatabaseAccessor<UserDatabase>
       (update(db.toolbarButtonConfigs)
             ..where((t) => t.buttonId.equals(buttonId)))
           .write(ToolbarButtonConfigsCompanion(fallbackId: Value(fallbackId)));
+
+  Future<void> assignLongPressAction(String buttonId, BrowserAction? action) =>
+      (update(db.toolbarButtonConfigs)..where((t) => t.buttonId.equals(buttonId))).write(
+        ToolbarButtonConfigsCompanion(longPressAction: Value(action)),
+      );
 
   Future<void> replaceAll(List<ToolbarButtonConfig> configs) =>
       transaction(() async {
@@ -154,6 +160,7 @@ class ToolbarButtonConfigDao extends DatabaseAccessor<UserDatabase>
           buttonId: config.buttonId,
           orderKey: config.orderKey,
           isVisible: config.isVisible,
+          longPressAction: config.longPressAction,
         ),
       );
     }

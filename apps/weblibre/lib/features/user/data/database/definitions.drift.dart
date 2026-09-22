@@ -5,7 +5,9 @@ import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     as i1;
 import 'package:flutter_singbox_proxy/src/singbox_proxy_api.g.dart' as i2;
 import 'dart:typed_data' as i3;
-import 'package:drift/internal/modular.dart' as i4;
+import 'package:weblibre/features/browser_actions/data/models/browser_action.dart'
+    as i4;
+import 'package:drift/internal/modular.dart' as i5;
 
 typedef $SettingCreateCompanionBuilder =
     i1.SettingCompanion Function({
@@ -147,7 +149,16 @@ class $SettingTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i1.Setting, i1.SettingData>(table),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i1.Setting,
+                    i1.SettingData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -421,7 +432,16 @@ class $ProxyProfileTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i1.ProxyProfileTable, i1.ProxyProfile>(table),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i1.ProxyProfileTable,
+                    i1.ProxyProfile
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -591,7 +611,16 @@ class $IconCacheTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i1.IconCache, i1.IconCacheData>(table),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i1.IconCache,
+                    i1.IconCacheData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -740,7 +769,16 @@ class $OnboardingTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i1.Onboarding, i1.OnboardingData>(table),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i1.Onboarding,
+                    i1.OnboardingData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -925,7 +963,16 @@ class $RiverpodTableManager
                 destroyKey: destroyKey,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i1.Riverpod, i1.RiverpodData>(table),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i1.Riverpod,
+                    i1.RiverpodData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -955,6 +1002,7 @@ typedef $ToolbarButtonConfigsCreateCompanionBuilder =
       required String orderKey,
       i0.Value<bool> isVisible,
       i0.Value<String?> fallbackId,
+      i0.Value<i4.BrowserAction?> longPressAction,
       i0.Value<int> rowid,
     });
 typedef $ToolbarButtonConfigsUpdateCompanionBuilder =
@@ -963,6 +1011,7 @@ typedef $ToolbarButtonConfigsUpdateCompanionBuilder =
       i0.Value<String> orderKey,
       i0.Value<bool> isVisible,
       i0.Value<String?> fallbackId,
+      i0.Value<i4.BrowserAction?> longPressAction,
       i0.Value<int> rowid,
     });
 
@@ -981,7 +1030,7 @@ final class $ToolbarButtonConfigsReferences
 
   static i1.ToolbarButtonConfigs _fallbackIdTable(
     i0.GeneratedDatabase db,
-  ) => i4.ReadDatabaseContainer(db)
+  ) => i5.ReadDatabaseContainer(db)
       .resultSet<i1.ToolbarButtonConfigs>('toolbar_button_configs')
       .createAlias(
         'toolbar_button_configs__fallback_id__toolbar_button_configs__button_id',
@@ -993,7 +1042,7 @@ final class $ToolbarButtonConfigsReferences
     final manager = i1
         .$ToolbarButtonConfigsTableManager(
           $_db,
-          i4.ReadDatabaseContainer(
+          i5.ReadDatabaseContainer(
             $_db,
           ).resultSet<i1.ToolbarButtonConfigs>('toolbar_button_configs'),
         )
@@ -1030,11 +1079,17 @@ class $ToolbarButtonConfigsFilterComposer
     builder: (column) => i0.ColumnFilters(column),
   );
 
+  i0.ColumnWithTypeConverterFilters<i4.BrowserAction?, i4.BrowserAction, String>
+  get longPressAction => $composableBuilder(
+    column: $table.longPressAction,
+    builder: (column) => i0.ColumnWithTypeConverterFilters(column),
+  );
+
   i1.$ToolbarButtonConfigsFilterComposer get fallbackId {
     final i1.$ToolbarButtonConfigsFilterComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.fallbackId,
-      referencedTable: i4.ReadDatabaseContainer(
+      referencedTable: i5.ReadDatabaseContainer(
         $db,
       ).resultSet<i1.ToolbarButtonConfigs>('toolbar_button_configs'),
       getReferencedColumn: (t) => t.buttonId,
@@ -1045,7 +1100,7 @@ class $ToolbarButtonConfigsFilterComposer
             $removeJoinBuilderFromRootComposer,
           }) => i1.$ToolbarButtonConfigsFilterComposer(
             $db: $db,
-            $table: i4.ReadDatabaseContainer(
+            $table: i5.ReadDatabaseContainer(
               $db,
             ).resultSet<i1.ToolbarButtonConfigs>('toolbar_button_configs'),
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
@@ -1082,11 +1137,16 @@ class $ToolbarButtonConfigsOrderingComposer
     builder: (column) => i0.ColumnOrderings(column),
   );
 
+  i0.ColumnOrderings<String> get longPressAction => $composableBuilder(
+    column: $table.longPressAction,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
   i1.$ToolbarButtonConfigsOrderingComposer get fallbackId {
     final i1.$ToolbarButtonConfigsOrderingComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.fallbackId,
-      referencedTable: i4.ReadDatabaseContainer(
+      referencedTable: i5.ReadDatabaseContainer(
         $db,
       ).resultSet<i1.ToolbarButtonConfigs>('toolbar_button_configs'),
       getReferencedColumn: (t) => t.buttonId,
@@ -1097,7 +1157,7 @@ class $ToolbarButtonConfigsOrderingComposer
             $removeJoinBuilderFromRootComposer,
           }) => i1.$ToolbarButtonConfigsOrderingComposer(
             $db: $db,
-            $table: i4.ReadDatabaseContainer(
+            $table: i5.ReadDatabaseContainer(
               $db,
             ).resultSet<i1.ToolbarButtonConfigs>('toolbar_button_configs'),
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
@@ -1128,12 +1188,18 @@ class $ToolbarButtonConfigsAnnotationComposer
   i0.GeneratedColumn<bool> get isVisible =>
       $composableBuilder(column: $table.isVisible, builder: (column) => column);
 
+  i0.GeneratedColumnWithTypeConverter<i4.BrowserAction?, String>
+  get longPressAction => $composableBuilder(
+    column: $table.longPressAction,
+    builder: (column) => column,
+  );
+
   i1.$ToolbarButtonConfigsAnnotationComposer get fallbackId {
     final i1.$ToolbarButtonConfigsAnnotationComposer composer =
         $composerBuilder(
           composer: this,
           getCurrentColumn: (t) => t.fallbackId,
-          referencedTable: i4.ReadDatabaseContainer(
+          referencedTable: i5.ReadDatabaseContainer(
             $db,
           ).resultSet<i1.ToolbarButtonConfigs>('toolbar_button_configs'),
           getReferencedColumn: (t) => t.buttonId,
@@ -1144,7 +1210,7 @@ class $ToolbarButtonConfigsAnnotationComposer
                 $removeJoinBuilderFromRootComposer,
               }) => i1.$ToolbarButtonConfigsAnnotationComposer(
                 $db: $db,
-                $table: i4.ReadDatabaseContainer(
+                $table: i5.ReadDatabaseContainer(
                   $db,
                 ).resultSet<i1.ToolbarButtonConfigs>('toolbar_button_configs'),
                 $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
@@ -1191,12 +1257,15 @@ class $ToolbarButtonConfigsTableManager
                 i0.Value<String> orderKey = const i0.Value.absent(),
                 i0.Value<bool> isVisible = const i0.Value.absent(),
                 i0.Value<String?> fallbackId = const i0.Value.absent(),
+                i0.Value<i4.BrowserAction?> longPressAction =
+                    const i0.Value.absent(),
                 i0.Value<int> rowid = const i0.Value.absent(),
               }) => i1.ToolbarButtonConfigsCompanion(
                 buttonId: buttonId,
                 orderKey: orderKey,
                 isVisible: isVisible,
                 fallbackId: fallbackId,
+                longPressAction: longPressAction,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1205,18 +1274,23 @@ class $ToolbarButtonConfigsTableManager
                 required String orderKey,
                 i0.Value<bool> isVisible = const i0.Value.absent(),
                 i0.Value<String?> fallbackId = const i0.Value.absent(),
+                i0.Value<i4.BrowserAction?> longPressAction =
+                    const i0.Value.absent(),
                 i0.Value<int> rowid = const i0.Value.absent(),
               }) => i1.ToolbarButtonConfigsCompanion.insert(
                 buttonId: buttonId,
                 orderKey: orderKey,
                 isVisible: isVisible,
                 fallbackId: fallbackId,
+                longPressAction: longPressAction,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<i1.ToolbarButtonConfigs, i1.ToolbarButtonConfig>(
+                    table,
+                  ),
                   i1.$ToolbarButtonConfigsReferences(db, table, e),
                 ),
               )
@@ -1288,6 +1362,7 @@ typedef $QuickSwitcherButtonConfigsCreateCompanionBuilder =
       required String orderKey,
       i0.Value<bool> isVisible,
       i0.Value<String?> fallbackId,
+      i0.Value<i4.BrowserAction?> longPressAction,
       i0.Value<int> rowid,
     });
 typedef $QuickSwitcherButtonConfigsUpdateCompanionBuilder =
@@ -1296,6 +1371,7 @@ typedef $QuickSwitcherButtonConfigsUpdateCompanionBuilder =
       i0.Value<String> orderKey,
       i0.Value<bool> isVisible,
       i0.Value<String?> fallbackId,
+      i0.Value<i4.BrowserAction?> longPressAction,
       i0.Value<int> rowid,
     });
 
@@ -1314,7 +1390,7 @@ final class $QuickSwitcherButtonConfigsReferences
 
   static i1.QuickSwitcherButtonConfigs _fallbackIdTable(
     i0.GeneratedDatabase db,
-  ) => i4.ReadDatabaseContainer(db)
+  ) => i5.ReadDatabaseContainer(db)
       .resultSet<i1.QuickSwitcherButtonConfigs>('quick_switcher_button_configs')
       .createAlias(
         'quick_switcher_button_configs__fallback_id__quick_switcher_button_configs__button_id',
@@ -1326,7 +1402,7 @@ final class $QuickSwitcherButtonConfigsReferences
     final manager = i1
         .$QuickSwitcherButtonConfigsTableManager(
           $_db,
-          i4.ReadDatabaseContainer(
+          i5.ReadDatabaseContainer(
             $_db,
           ).resultSet<i1.QuickSwitcherButtonConfigs>(
             'quick_switcher_button_configs',
@@ -1365,12 +1441,18 @@ class $QuickSwitcherButtonConfigsFilterComposer
     builder: (column) => i0.ColumnFilters(column),
   );
 
+  i0.ColumnWithTypeConverterFilters<i4.BrowserAction?, i4.BrowserAction, String>
+  get longPressAction => $composableBuilder(
+    column: $table.longPressAction,
+    builder: (column) => i0.ColumnWithTypeConverterFilters(column),
+  );
+
   i1.$QuickSwitcherButtonConfigsFilterComposer get fallbackId {
     final i1.$QuickSwitcherButtonConfigsFilterComposer composer =
         $composerBuilder(
           composer: this,
           getCurrentColumn: (t) => t.fallbackId,
-          referencedTable: i4.ReadDatabaseContainer($db)
+          referencedTable: i5.ReadDatabaseContainer($db)
               .resultSet<i1.QuickSwitcherButtonConfigs>(
                 'quick_switcher_button_configs',
               ),
@@ -1382,7 +1464,7 @@ class $QuickSwitcherButtonConfigsFilterComposer
                 $removeJoinBuilderFromRootComposer,
               }) => i1.$QuickSwitcherButtonConfigsFilterComposer(
                 $db: $db,
-                $table: i4.ReadDatabaseContainer($db)
+                $table: i5.ReadDatabaseContainer($db)
                     .resultSet<i1.QuickSwitcherButtonConfigs>(
                       'quick_switcher_button_configs',
                     ),
@@ -1420,12 +1502,17 @@ class $QuickSwitcherButtonConfigsOrderingComposer
     builder: (column) => i0.ColumnOrderings(column),
   );
 
+  i0.ColumnOrderings<String> get longPressAction => $composableBuilder(
+    column: $table.longPressAction,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
   i1.$QuickSwitcherButtonConfigsOrderingComposer get fallbackId {
     final i1.$QuickSwitcherButtonConfigsOrderingComposer composer =
         $composerBuilder(
           composer: this,
           getCurrentColumn: (t) => t.fallbackId,
-          referencedTable: i4.ReadDatabaseContainer($db)
+          referencedTable: i5.ReadDatabaseContainer($db)
               .resultSet<i1.QuickSwitcherButtonConfigs>(
                 'quick_switcher_button_configs',
               ),
@@ -1437,7 +1524,7 @@ class $QuickSwitcherButtonConfigsOrderingComposer
                 $removeJoinBuilderFromRootComposer,
               }) => i1.$QuickSwitcherButtonConfigsOrderingComposer(
                 $db: $db,
-                $table: i4.ReadDatabaseContainer($db)
+                $table: i5.ReadDatabaseContainer($db)
                     .resultSet<i1.QuickSwitcherButtonConfigs>(
                       'quick_switcher_button_configs',
                     ),
@@ -1469,12 +1556,18 @@ class $QuickSwitcherButtonConfigsAnnotationComposer
   i0.GeneratedColumn<bool> get isVisible =>
       $composableBuilder(column: $table.isVisible, builder: (column) => column);
 
+  i0.GeneratedColumnWithTypeConverter<i4.BrowserAction?, String>
+  get longPressAction => $composableBuilder(
+    column: $table.longPressAction,
+    builder: (column) => column,
+  );
+
   i1.$QuickSwitcherButtonConfigsAnnotationComposer get fallbackId {
     final i1.$QuickSwitcherButtonConfigsAnnotationComposer composer =
         $composerBuilder(
           composer: this,
           getCurrentColumn: (t) => t.fallbackId,
-          referencedTable: i4.ReadDatabaseContainer($db)
+          referencedTable: i5.ReadDatabaseContainer($db)
               .resultSet<i1.QuickSwitcherButtonConfigs>(
                 'quick_switcher_button_configs',
               ),
@@ -1486,7 +1579,7 @@ class $QuickSwitcherButtonConfigsAnnotationComposer
                 $removeJoinBuilderFromRootComposer,
               }) => i1.$QuickSwitcherButtonConfigsAnnotationComposer(
                 $db: $db,
-                $table: i4.ReadDatabaseContainer($db)
+                $table: i5.ReadDatabaseContainer($db)
                     .resultSet<i1.QuickSwitcherButtonConfigs>(
                       'quick_switcher_button_configs',
                     ),
@@ -1546,12 +1639,15 @@ class $QuickSwitcherButtonConfigsTableManager
                 i0.Value<String> orderKey = const i0.Value.absent(),
                 i0.Value<bool> isVisible = const i0.Value.absent(),
                 i0.Value<String?> fallbackId = const i0.Value.absent(),
+                i0.Value<i4.BrowserAction?> longPressAction =
+                    const i0.Value.absent(),
                 i0.Value<int> rowid = const i0.Value.absent(),
               }) => i1.QuickSwitcherButtonConfigsCompanion(
                 buttonId: buttonId,
                 orderKey: orderKey,
                 isVisible: isVisible,
                 fallbackId: fallbackId,
+                longPressAction: longPressAction,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1560,18 +1656,24 @@ class $QuickSwitcherButtonConfigsTableManager
                 required String orderKey,
                 i0.Value<bool> isVisible = const i0.Value.absent(),
                 i0.Value<String?> fallbackId = const i0.Value.absent(),
+                i0.Value<i4.BrowserAction?> longPressAction =
+                    const i0.Value.absent(),
                 i0.Value<int> rowid = const i0.Value.absent(),
               }) => i1.QuickSwitcherButtonConfigsCompanion.insert(
                 buttonId: buttonId,
                 orderKey: orderKey,
                 isVisible: isVisible,
                 fallbackId: fallbackId,
+                longPressAction: longPressAction,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<
+                    i1.QuickSwitcherButtonConfigs,
+                    i1.QuickSwitcherButtonConfig
+                  >(table),
                   i1.$QuickSwitcherButtonConfigsReferences(db, table, e),
                 ),
               )
@@ -1817,7 +1919,16 @@ class $SearchTokensTableManager
                 reservedAt: reservedAt,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i1.SearchTokens, i1.SearchToken>(table),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i1.SearchTokens,
+                    i1.SearchToken
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -3221,12 +3332,25 @@ class ToolbarButtonConfigs extends i0.Table
     $customConstraints:
         'REFERENCES toolbar_button_configs(button_id)ON DELETE SET NULL',
   );
+  late final i0.GeneratedColumnWithTypeConverter<i4.BrowserAction?, String>
+  longPressAction =
+      i0.GeneratedColumn<String>(
+        'long_press_action',
+        aliasedName,
+        true,
+        type: i0.DriftSqlType.string,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      ).withConverter<i4.BrowserAction?>(
+        i1.ToolbarButtonConfigs.$converterlongPressActionn,
+      );
   @override
   List<i0.GeneratedColumn> get $columns => [
     buttonId,
     orderKey,
     isVisible,
     fallbackId,
+    longPressAction,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3255,6 +3379,13 @@ class ToolbarButtonConfigs extends i0.Table
         i0.DriftSqlType.string,
         data['${effectivePrefix}fallback_id'],
       ),
+      longPressAction: i1.ToolbarButtonConfigs.$converterlongPressActionn
+          .fromSql(
+            attachedDatabase.typeMapping.read(
+              i0.DriftSqlType.string,
+              data['${effectivePrefix}long_press_action'],
+            ),
+          ),
     );
   }
 
@@ -3263,6 +3394,14 @@ class ToolbarButtonConfigs extends i0.Table
     return ToolbarButtonConfigs(attachedDatabase, alias);
   }
 
+  static i0.JsonTypeConverter2<i4.BrowserAction, String, String>
+  $converterlongPressAction = const i0.EnumNameConverter<i4.BrowserAction>(
+    i4.BrowserAction.values,
+  );
+  static i0.JsonTypeConverter2<i4.BrowserAction?, String?, String?>
+  $converterlongPressActionn = i0.JsonTypeConverter2.asNullable(
+    $converterlongPressAction,
+  );
   @override
   bool get dontWriteConstraints => true;
 }
@@ -3273,11 +3412,16 @@ class ToolbarButtonConfig extends i0.DataClass
   final String orderKey;
   final bool isVisible;
   final String? fallbackId;
+
+  /// Replaces the button's own long press when set; NULL keeps the built-in one.
+  /// By name, like every other persisted BrowserAction binding.
+  final i4.BrowserAction? longPressAction;
   const ToolbarButtonConfig({
     required this.buttonId,
     required this.orderKey,
     required this.isVisible,
     this.fallbackId,
+    this.longPressAction,
   });
   @override
   Map<String, i0.Expression> toColumns(bool nullToAbsent) {
@@ -3287,6 +3431,13 @@ class ToolbarButtonConfig extends i0.DataClass
     map['is_visible'] = i0.Variable<bool>(isVisible);
     if (!nullToAbsent || fallbackId != null) {
       map['fallback_id'] = i0.Variable<String>(fallbackId);
+    }
+    if (!nullToAbsent || longPressAction != null) {
+      map['long_press_action'] = i0.Variable<String>(
+        i1.ToolbarButtonConfigs.$converterlongPressActionn.toSql(
+          longPressAction,
+        ),
+      );
     }
     return map;
   }
@@ -3301,6 +3452,8 @@ class ToolbarButtonConfig extends i0.DataClass
       orderKey: serializer.fromJson<String>(json['order_key']),
       isVisible: serializer.fromJson<bool>(json['is_visible']),
       fallbackId: serializer.fromJson<String?>(json['fallback_id']),
+      longPressAction: i1.ToolbarButtonConfigs.$converterlongPressActionn
+          .fromJson(serializer.fromJson<String?>(json['long_press_action'])),
     );
   }
   @override
@@ -3311,6 +3464,11 @@ class ToolbarButtonConfig extends i0.DataClass
       'order_key': serializer.toJson<String>(orderKey),
       'is_visible': serializer.toJson<bool>(isVisible),
       'fallback_id': serializer.toJson<String?>(fallbackId),
+      'long_press_action': serializer.toJson<String?>(
+        i1.ToolbarButtonConfigs.$converterlongPressActionn.toJson(
+          longPressAction,
+        ),
+      ),
     };
   }
 
@@ -3319,11 +3477,15 @@ class ToolbarButtonConfig extends i0.DataClass
     String? orderKey,
     bool? isVisible,
     i0.Value<String?> fallbackId = const i0.Value.absent(),
+    i0.Value<i4.BrowserAction?> longPressAction = const i0.Value.absent(),
   }) => i1.ToolbarButtonConfig(
     buttonId: buttonId ?? this.buttonId,
     orderKey: orderKey ?? this.orderKey,
     isVisible: isVisible ?? this.isVisible,
     fallbackId: fallbackId.present ? fallbackId.value : this.fallbackId,
+    longPressAction: longPressAction.present
+        ? longPressAction.value
+        : this.longPressAction,
   );
   ToolbarButtonConfig copyWithCompanion(i1.ToolbarButtonConfigsCompanion data) {
     return ToolbarButtonConfig(
@@ -3333,6 +3495,9 @@ class ToolbarButtonConfig extends i0.DataClass
       fallbackId: data.fallbackId.present
           ? data.fallbackId.value
           : this.fallbackId,
+      longPressAction: data.longPressAction.present
+          ? data.longPressAction.value
+          : this.longPressAction,
     );
   }
 
@@ -3342,13 +3507,15 @@ class ToolbarButtonConfig extends i0.DataClass
           ..write('buttonId: $buttonId, ')
           ..write('orderKey: $orderKey, ')
           ..write('isVisible: $isVisible, ')
-          ..write('fallbackId: $fallbackId')
+          ..write('fallbackId: $fallbackId, ')
+          ..write('longPressAction: $longPressAction')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(buttonId, orderKey, isVisible, fallbackId);
+  int get hashCode =>
+      Object.hash(buttonId, orderKey, isVisible, fallbackId, longPressAction);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3356,7 +3523,8 @@ class ToolbarButtonConfig extends i0.DataClass
           other.buttonId == this.buttonId &&
           other.orderKey == this.orderKey &&
           other.isVisible == this.isVisible &&
-          other.fallbackId == this.fallbackId);
+          other.fallbackId == this.fallbackId &&
+          other.longPressAction == this.longPressAction);
 }
 
 class ToolbarButtonConfigsCompanion
@@ -3365,12 +3533,14 @@ class ToolbarButtonConfigsCompanion
   final i0.Value<String> orderKey;
   final i0.Value<bool> isVisible;
   final i0.Value<String?> fallbackId;
+  final i0.Value<i4.BrowserAction?> longPressAction;
   final i0.Value<int> rowid;
   const ToolbarButtonConfigsCompanion({
     this.buttonId = const i0.Value.absent(),
     this.orderKey = const i0.Value.absent(),
     this.isVisible = const i0.Value.absent(),
     this.fallbackId = const i0.Value.absent(),
+    this.longPressAction = const i0.Value.absent(),
     this.rowid = const i0.Value.absent(),
   });
   ToolbarButtonConfigsCompanion.insert({
@@ -3378,6 +3548,7 @@ class ToolbarButtonConfigsCompanion
     required String orderKey,
     this.isVisible = const i0.Value.absent(),
     this.fallbackId = const i0.Value.absent(),
+    this.longPressAction = const i0.Value.absent(),
     this.rowid = const i0.Value.absent(),
   }) : buttonId = i0.Value(buttonId),
        orderKey = i0.Value(orderKey);
@@ -3386,6 +3557,7 @@ class ToolbarButtonConfigsCompanion
     i0.Expression<String>? orderKey,
     i0.Expression<bool>? isVisible,
     i0.Expression<String>? fallbackId,
+    i0.Expression<String>? longPressAction,
     i0.Expression<int>? rowid,
   }) {
     return i0.RawValuesInsertable({
@@ -3393,6 +3565,7 @@ class ToolbarButtonConfigsCompanion
       if (orderKey != null) 'order_key': orderKey,
       if (isVisible != null) 'is_visible': isVisible,
       if (fallbackId != null) 'fallback_id': fallbackId,
+      if (longPressAction != null) 'long_press_action': longPressAction,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3402,6 +3575,7 @@ class ToolbarButtonConfigsCompanion
     i0.Value<String>? orderKey,
     i0.Value<bool>? isVisible,
     i0.Value<String?>? fallbackId,
+    i0.Value<i4.BrowserAction?>? longPressAction,
     i0.Value<int>? rowid,
   }) {
     return i1.ToolbarButtonConfigsCompanion(
@@ -3409,6 +3583,7 @@ class ToolbarButtonConfigsCompanion
       orderKey: orderKey ?? this.orderKey,
       isVisible: isVisible ?? this.isVisible,
       fallbackId: fallbackId ?? this.fallbackId,
+      longPressAction: longPressAction ?? this.longPressAction,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3428,6 +3603,13 @@ class ToolbarButtonConfigsCompanion
     if (fallbackId.present) {
       map['fallback_id'] = i0.Variable<String>(fallbackId.value);
     }
+    if (longPressAction.present) {
+      map['long_press_action'] = i0.Variable<String>(
+        i1.ToolbarButtonConfigs.$converterlongPressActionn.toSql(
+          longPressAction.value,
+        ),
+      );
+    }
     if (rowid.present) {
       map['rowid'] = i0.Variable<int>(rowid.value);
     }
@@ -3441,6 +3623,7 @@ class ToolbarButtonConfigsCompanion
           ..write('orderKey: $orderKey, ')
           ..write('isVisible: $isVisible, ')
           ..write('fallbackId: $fallbackId, ')
+          ..write('longPressAction: $longPressAction, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3493,12 +3676,25 @@ class QuickSwitcherButtonConfigs extends i0.Table
     $customConstraints:
         'REFERENCES quick_switcher_button_configs(button_id)ON DELETE SET NULL',
   );
+  late final i0.GeneratedColumnWithTypeConverter<i4.BrowserAction?, String>
+  longPressAction =
+      i0.GeneratedColumn<String>(
+        'long_press_action',
+        aliasedName,
+        true,
+        type: i0.DriftSqlType.string,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      ).withConverter<i4.BrowserAction?>(
+        i1.QuickSwitcherButtonConfigs.$converterlongPressActionn,
+      );
   @override
   List<i0.GeneratedColumn> get $columns => [
     buttonId,
     orderKey,
     isVisible,
     fallbackId,
+    longPressAction,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3530,6 +3726,13 @@ class QuickSwitcherButtonConfigs extends i0.Table
         i0.DriftSqlType.string,
         data['${effectivePrefix}fallback_id'],
       ),
+      longPressAction: i1.QuickSwitcherButtonConfigs.$converterlongPressActionn
+          .fromSql(
+            attachedDatabase.typeMapping.read(
+              i0.DriftSqlType.string,
+              data['${effectivePrefix}long_press_action'],
+            ),
+          ),
     );
   }
 
@@ -3538,6 +3741,14 @@ class QuickSwitcherButtonConfigs extends i0.Table
     return QuickSwitcherButtonConfigs(attachedDatabase, alias);
   }
 
+  static i0.JsonTypeConverter2<i4.BrowserAction, String, String>
+  $converterlongPressAction = const i0.EnumNameConverter<i4.BrowserAction>(
+    i4.BrowserAction.values,
+  );
+  static i0.JsonTypeConverter2<i4.BrowserAction?, String?, String?>
+  $converterlongPressActionn = i0.JsonTypeConverter2.asNullable(
+    $converterlongPressAction,
+  );
   @override
   bool get dontWriteConstraints => true;
 }
@@ -3548,11 +3759,13 @@ class QuickSwitcherButtonConfig extends i0.DataClass
   final String orderKey;
   final bool isVisible;
   final String? fallbackId;
+  final i4.BrowserAction? longPressAction;
   const QuickSwitcherButtonConfig({
     required this.buttonId,
     required this.orderKey,
     required this.isVisible,
     this.fallbackId,
+    this.longPressAction,
   });
   @override
   Map<String, i0.Expression> toColumns(bool nullToAbsent) {
@@ -3562,6 +3775,13 @@ class QuickSwitcherButtonConfig extends i0.DataClass
     map['is_visible'] = i0.Variable<bool>(isVisible);
     if (!nullToAbsent || fallbackId != null) {
       map['fallback_id'] = i0.Variable<String>(fallbackId);
+    }
+    if (!nullToAbsent || longPressAction != null) {
+      map['long_press_action'] = i0.Variable<String>(
+        i1.QuickSwitcherButtonConfigs.$converterlongPressActionn.toSql(
+          longPressAction,
+        ),
+      );
     }
     return map;
   }
@@ -3576,6 +3796,8 @@ class QuickSwitcherButtonConfig extends i0.DataClass
       orderKey: serializer.fromJson<String>(json['order_key']),
       isVisible: serializer.fromJson<bool>(json['is_visible']),
       fallbackId: serializer.fromJson<String?>(json['fallback_id']),
+      longPressAction: i1.QuickSwitcherButtonConfigs.$converterlongPressActionn
+          .fromJson(serializer.fromJson<String?>(json['long_press_action'])),
     );
   }
   @override
@@ -3586,6 +3808,11 @@ class QuickSwitcherButtonConfig extends i0.DataClass
       'order_key': serializer.toJson<String>(orderKey),
       'is_visible': serializer.toJson<bool>(isVisible),
       'fallback_id': serializer.toJson<String?>(fallbackId),
+      'long_press_action': serializer.toJson<String?>(
+        i1.QuickSwitcherButtonConfigs.$converterlongPressActionn.toJson(
+          longPressAction,
+        ),
+      ),
     };
   }
 
@@ -3594,11 +3821,15 @@ class QuickSwitcherButtonConfig extends i0.DataClass
     String? orderKey,
     bool? isVisible,
     i0.Value<String?> fallbackId = const i0.Value.absent(),
+    i0.Value<i4.BrowserAction?> longPressAction = const i0.Value.absent(),
   }) => i1.QuickSwitcherButtonConfig(
     buttonId: buttonId ?? this.buttonId,
     orderKey: orderKey ?? this.orderKey,
     isVisible: isVisible ?? this.isVisible,
     fallbackId: fallbackId.present ? fallbackId.value : this.fallbackId,
+    longPressAction: longPressAction.present
+        ? longPressAction.value
+        : this.longPressAction,
   );
   QuickSwitcherButtonConfig copyWithCompanion(
     i1.QuickSwitcherButtonConfigsCompanion data,
@@ -3610,6 +3841,9 @@ class QuickSwitcherButtonConfig extends i0.DataClass
       fallbackId: data.fallbackId.present
           ? data.fallbackId.value
           : this.fallbackId,
+      longPressAction: data.longPressAction.present
+          ? data.longPressAction.value
+          : this.longPressAction,
     );
   }
 
@@ -3619,13 +3853,15 @@ class QuickSwitcherButtonConfig extends i0.DataClass
           ..write('buttonId: $buttonId, ')
           ..write('orderKey: $orderKey, ')
           ..write('isVisible: $isVisible, ')
-          ..write('fallbackId: $fallbackId')
+          ..write('fallbackId: $fallbackId, ')
+          ..write('longPressAction: $longPressAction')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(buttonId, orderKey, isVisible, fallbackId);
+  int get hashCode =>
+      Object.hash(buttonId, orderKey, isVisible, fallbackId, longPressAction);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3633,7 +3869,8 @@ class QuickSwitcherButtonConfig extends i0.DataClass
           other.buttonId == this.buttonId &&
           other.orderKey == this.orderKey &&
           other.isVisible == this.isVisible &&
-          other.fallbackId == this.fallbackId);
+          other.fallbackId == this.fallbackId &&
+          other.longPressAction == this.longPressAction);
 }
 
 class QuickSwitcherButtonConfigsCompanion
@@ -3642,12 +3879,14 @@ class QuickSwitcherButtonConfigsCompanion
   final i0.Value<String> orderKey;
   final i0.Value<bool> isVisible;
   final i0.Value<String?> fallbackId;
+  final i0.Value<i4.BrowserAction?> longPressAction;
   final i0.Value<int> rowid;
   const QuickSwitcherButtonConfigsCompanion({
     this.buttonId = const i0.Value.absent(),
     this.orderKey = const i0.Value.absent(),
     this.isVisible = const i0.Value.absent(),
     this.fallbackId = const i0.Value.absent(),
+    this.longPressAction = const i0.Value.absent(),
     this.rowid = const i0.Value.absent(),
   });
   QuickSwitcherButtonConfigsCompanion.insert({
@@ -3655,6 +3894,7 @@ class QuickSwitcherButtonConfigsCompanion
     required String orderKey,
     this.isVisible = const i0.Value.absent(),
     this.fallbackId = const i0.Value.absent(),
+    this.longPressAction = const i0.Value.absent(),
     this.rowid = const i0.Value.absent(),
   }) : buttonId = i0.Value(buttonId),
        orderKey = i0.Value(orderKey);
@@ -3663,6 +3903,7 @@ class QuickSwitcherButtonConfigsCompanion
     i0.Expression<String>? orderKey,
     i0.Expression<bool>? isVisible,
     i0.Expression<String>? fallbackId,
+    i0.Expression<String>? longPressAction,
     i0.Expression<int>? rowid,
   }) {
     return i0.RawValuesInsertable({
@@ -3670,6 +3911,7 @@ class QuickSwitcherButtonConfigsCompanion
       if (orderKey != null) 'order_key': orderKey,
       if (isVisible != null) 'is_visible': isVisible,
       if (fallbackId != null) 'fallback_id': fallbackId,
+      if (longPressAction != null) 'long_press_action': longPressAction,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3679,6 +3921,7 @@ class QuickSwitcherButtonConfigsCompanion
     i0.Value<String>? orderKey,
     i0.Value<bool>? isVisible,
     i0.Value<String?>? fallbackId,
+    i0.Value<i4.BrowserAction?>? longPressAction,
     i0.Value<int>? rowid,
   }) {
     return i1.QuickSwitcherButtonConfigsCompanion(
@@ -3686,6 +3929,7 @@ class QuickSwitcherButtonConfigsCompanion
       orderKey: orderKey ?? this.orderKey,
       isVisible: isVisible ?? this.isVisible,
       fallbackId: fallbackId ?? this.fallbackId,
+      longPressAction: longPressAction ?? this.longPressAction,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3705,6 +3949,13 @@ class QuickSwitcherButtonConfigsCompanion
     if (fallbackId.present) {
       map['fallback_id'] = i0.Variable<String>(fallbackId.value);
     }
+    if (longPressAction.present) {
+      map['long_press_action'] = i0.Variable<String>(
+        i1.QuickSwitcherButtonConfigs.$converterlongPressActionn.toSql(
+          longPressAction.value,
+        ),
+      );
+    }
     if (rowid.present) {
       map['rowid'] = i0.Variable<int>(rowid.value);
     }
@@ -3718,6 +3969,7 @@ class QuickSwitcherButtonConfigsCompanion
           ..write('orderKey: $orderKey, ')
           ..write('isVisible: $isVisible, ')
           ..write('fallbackId: $fallbackId, ')
+          ..write('longPressAction: $longPressAction, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4040,7 +4292,7 @@ i0.Index get idxSearchTokensReservedAt => i0.Index(
   'CREATE INDEX idx_search_tokens_reserved_at ON search_tokens (reserved_at)',
 );
 
-class DefinitionsDrift extends i4.ModularAccessor {
+class DefinitionsDrift extends i5.ModularAccessor {
   DefinitionsDrift(i0.GeneratedDatabase db) : super(db);
   i0.Selectable<String> toolbarLeadingOrderKey({
     required int bucket,
@@ -4049,7 +4301,7 @@ class DefinitionsDrift extends i4.ModularAccessor {
     return customSelect(
       'SELECT lexo_rank_previous(?1, (SELECT order_key FROM toolbar_button_configs WHERE is_visible = ?2 ORDER BY order_key LIMIT 1)) AS _c0',
       variables: [i0.Variable<int>(bucket), i0.Variable<bool>(isVisible)],
-      readsFrom: {toolbarButtonConfigs},
+      readsFrom: {this.toolbarButtonConfigs},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
@@ -4060,7 +4312,7 @@ class DefinitionsDrift extends i4.ModularAccessor {
     return customSelect(
       'SELECT lexo_rank_next(?1, (SELECT order_key FROM toolbar_button_configs WHERE is_visible = ?2 ORDER BY order_key DESC LIMIT 1)) AS _c0',
       variables: [i0.Variable<int>(bucket), i0.Variable<bool>(isVisible)],
-      readsFrom: {toolbarButtonConfigs},
+      readsFrom: {this.toolbarButtonConfigs},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
@@ -4071,7 +4323,7 @@ class DefinitionsDrift extends i4.ModularAccessor {
     return customSelect(
       'WITH ordered_table AS (SELECT button_id, order_key, LEAD(order_key)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS next_order_key FROM toolbar_button_configs WHERE is_visible = ?1) SELECT lexo_rank_reorder_after(order_key, next_order_key) AS _c0 FROM ordered_table WHERE button_id = ?2',
       variables: [i0.Variable<bool>(isVisible), i0.Variable<String>(buttonId)],
-      readsFrom: {toolbarButtonConfigs},
+      readsFrom: {this.toolbarButtonConfigs},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
@@ -4082,7 +4334,7 @@ class DefinitionsDrift extends i4.ModularAccessor {
     return customSelect(
       'WITH ordered_table AS (SELECT button_id, order_key, LAG(order_key)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS prev_order_key FROM toolbar_button_configs WHERE is_visible = ?1) SELECT lexo_rank_reorder_before(order_key, prev_order_key) AS _c0 FROM ordered_table WHERE button_id = ?2',
       variables: [i0.Variable<bool>(isVisible), i0.Variable<String>(buttonId)],
-      readsFrom: {toolbarButtonConfigs},
+      readsFrom: {this.toolbarButtonConfigs},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
@@ -4093,7 +4345,7 @@ class DefinitionsDrift extends i4.ModularAccessor {
     return customSelect(
       'SELECT lexo_rank_previous(?1, (SELECT order_key FROM quick_switcher_button_configs WHERE is_visible = ?2 ORDER BY order_key LIMIT 1)) AS _c0',
       variables: [i0.Variable<int>(bucket), i0.Variable<bool>(isVisible)],
-      readsFrom: {quickSwitcherButtonConfigs},
+      readsFrom: {this.quickSwitcherButtonConfigs},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
@@ -4104,7 +4356,7 @@ class DefinitionsDrift extends i4.ModularAccessor {
     return customSelect(
       'SELECT lexo_rank_next(?1, (SELECT order_key FROM quick_switcher_button_configs WHERE is_visible = ?2 ORDER BY order_key DESC LIMIT 1)) AS _c0',
       variables: [i0.Variable<int>(bucket), i0.Variable<bool>(isVisible)],
-      readsFrom: {quickSwitcherButtonConfigs},
+      readsFrom: {this.quickSwitcherButtonConfigs},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
@@ -4115,7 +4367,7 @@ class DefinitionsDrift extends i4.ModularAccessor {
     return customSelect(
       'WITH ordered_table AS (SELECT button_id, order_key, LEAD(order_key)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS next_order_key FROM quick_switcher_button_configs WHERE is_visible = ?1) SELECT lexo_rank_reorder_after(order_key, next_order_key) AS _c0 FROM ordered_table WHERE button_id = ?2',
       variables: [i0.Variable<bool>(isVisible), i0.Variable<String>(buttonId)],
-      readsFrom: {quickSwitcherButtonConfigs},
+      readsFrom: {this.quickSwitcherButtonConfigs},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
@@ -4126,7 +4378,7 @@ class DefinitionsDrift extends i4.ModularAccessor {
     return customSelect(
       'WITH ordered_table AS (SELECT button_id, order_key, LAG(order_key)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS prev_order_key FROM quick_switcher_button_configs WHERE is_visible = ?1) SELECT lexo_rank_reorder_before(order_key, prev_order_key) AS _c0 FROM ordered_table WHERE button_id = ?2',
       variables: [i0.Variable<bool>(isVisible), i0.Variable<String>(buttonId)],
-      readsFrom: {quickSwitcherButtonConfigs},
+      readsFrom: {this.quickSwitcherButtonConfigs},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
@@ -4134,21 +4386,21 @@ class DefinitionsDrift extends i4.ModularAccessor {
     return customUpdate(
       'DELETE FROM icon_cache WHERE "rowid" IN (SELECT "rowid" FROM icon_cache ORDER BY fetch_date DESC LIMIT -1 OFFSET ?1)',
       variables: [i0.Variable<int>(limit)],
-      updates: {iconCache},
+      updates: {this.iconCache},
       updateKind: i0.UpdateKind.delete,
     );
   }
 
-  i1.ToolbarButtonConfigs get toolbarButtonConfigs => i4.ReadDatabaseContainer(
+  i1.ToolbarButtonConfigs get toolbarButtonConfigs => i5.ReadDatabaseContainer(
     attachedDatabase,
   ).resultSet<i1.ToolbarButtonConfigs>('toolbar_button_configs');
   i1.QuickSwitcherButtonConfigs get quickSwitcherButtonConfigs =>
-      i4.ReadDatabaseContainer(
+      i5.ReadDatabaseContainer(
         attachedDatabase,
       ).resultSet<i1.QuickSwitcherButtonConfigs>(
         'quick_switcher_button_configs',
       );
-  i1.IconCache get iconCache => i4.ReadDatabaseContainer(
+  i1.IconCache get iconCache => i5.ReadDatabaseContainer(
     attachedDatabase,
   ).resultSet<i1.IconCache>('icon_cache');
 }

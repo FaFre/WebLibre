@@ -19,6 +19,7 @@
  */
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/contextual_toolbar_config_repository.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/quick_switcher_toolbar_config_repository.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
@@ -43,6 +44,10 @@ abstract interface class ToolbarButtonConfigRepository {
   Future<void> assignVisibility(String buttonId, {required bool visible});
 
   Future<void> assignFallback(String buttonId, String? fallbackId);
+
+  /// Replaces [buttonId]'s own long press with [action]; null restores the
+  /// button's built-in long press.
+  Future<void> assignLongPressAction(String buttonId, BrowserAction? action);
 
   Future<String> generateLeadingOrderKey({required bool isVisible});
 

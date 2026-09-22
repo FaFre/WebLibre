@@ -19,6 +19,7 @@
  */
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/toolbar_button_config_repository.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_spec.dart';
 import 'package:weblibre/features/user/data/database/daos/quick_switcher_button_config.dart';
@@ -43,6 +44,7 @@ class QuickSwitcherToolbarConfigRepository
         orderKey: config.orderKey,
         isVisible: config.isVisible,
         fallbackId: config.fallbackId,
+        longPressAction: config.longPressAction,
       );
 
   QuickSwitcherButtonConfig _fromShared(ToolbarButtonConfig config) =>
@@ -51,6 +53,7 @@ class QuickSwitcherToolbarConfigRepository
         orderKey: config.orderKey,
         isVisible: config.isVisible,
         fallbackId: config.fallbackId,
+        longPressAction: config.longPressAction,
       );
 
   @override
@@ -75,6 +78,11 @@ class QuickSwitcherToolbarConfigRepository
   @override
   Future<void> assignFallback(String buttonId, String? fallbackId) {
     return _dao.assignFallback(buttonId, fallbackId);
+  }
+
+  @override
+  Future<void> assignLongPressAction(String buttonId, BrowserAction? action) {
+    return _dao.assignLongPressAction(buttonId, action);
   }
 
   @override

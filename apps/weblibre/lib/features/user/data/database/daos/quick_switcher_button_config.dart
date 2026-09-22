@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:drift/drift.dart';
+import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/user/data/database/daos/quick_switcher_button_config.drift.dart';
 import 'package:weblibre/features/user/data/database/database.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart';
@@ -71,6 +72,11 @@ class QuickSwitcherButtonConfigDao extends DatabaseAccessor<UserDatabase>
         db.quickSwitcherButtonConfigs,
       )..where((t) => t.buttonId.equals(buttonId))).write(
         QuickSwitcherButtonConfigsCompanion(fallbackId: Value(fallbackId)),
+      );
+
+  Future<void> assignLongPressAction(String buttonId, BrowserAction? action) =>
+      (update(db.quickSwitcherButtonConfigs)..where((t) => t.buttonId.equals(buttonId))).write(
+        QuickSwitcherButtonConfigsCompanion(longPressAction: Value(action)),
       );
 
   Future<void> replaceAll(List<QuickSwitcherButtonConfig> configs) =>
@@ -159,6 +165,7 @@ class QuickSwitcherButtonConfigDao extends DatabaseAccessor<UserDatabase>
           buttonId: config.buttonId,
           orderKey: config.orderKey,
           isVisible: config.isVisible,
+          longPressAction: config.longPressAction,
         ),
       );
     }

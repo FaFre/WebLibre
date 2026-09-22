@@ -1407,6 +1407,166 @@ i1.GeneratedColumn<int> _column_33(String aliasedName) =>
       $customConstraints: 'NOT NULL DEFAULT FALSE',
       defaultValue: const i1.CustomExpression('FALSE'),
     );
+
+final class Schema11 extends i0.VersionedSchema {
+  Schema11({required super.database}) : super(version: 11);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    setting,
+    proxyProfile,
+    idxProxyProfileUpdatedAt,
+    iconCache,
+    onboarding,
+    riverpod,
+    toolbarButtonConfigs,
+    idxToolbarOrderKey,
+    quickSwitcherButtonConfigs,
+    idxQuickSwitcherOrderKey,
+    searchTokens,
+    idxSearchTokensInsertedAt,
+    idxSearchTokensReservedAt,
+  ];
+  late final Shape0 setting = Shape0(
+    source: i0.VersionedTable(
+      entityName: 'setting',
+      withoutRowId: false,
+      isStrict: true,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape10 proxyProfile = Shape10(
+    source: i0.VersionedTable(
+      entityName: 'proxy_profile',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_20,
+        _column_21,
+        _column_22,
+        _column_23,
+        _column_30,
+        _column_33,
+        _column_24,
+        _column_25,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxProxyProfileUpdatedAt = i1.Index(
+    'idx_proxy_profile_updated_at',
+    'CREATE INDEX idx_proxy_profile_updated_at ON proxy_profile (updated_at)',
+  );
+  late final Shape1 iconCache = Shape1(
+    source: i0.VersionedTable(
+      entityName: 'icon_cache',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_3, _column_4, _column_5],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape2 onboarding = Shape2(
+    source: i0.VersionedTable(
+      entityName: 'onboarding',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_6, _column_7],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape3 riverpod = Shape3(
+    source: i0.VersionedTable(
+      entityName: 'riverpod',
+      withoutRowId: true,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_8, _column_9, _column_10],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape11 toolbarButtonConfigs = Shape11(
+    source: i0.VersionedTable(
+      entityName: 'toolbar_button_configs',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_11, _column_12, _column_13, _column_14, _column_34],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxToolbarOrderKey = i1.Index(
+    'idx_toolbar_order_key',
+    'CREATE INDEX idx_toolbar_order_key ON toolbar_button_configs (order_key)',
+  );
+  late final Shape11 quickSwitcherButtonConfigs = Shape11(
+    source: i0.VersionedTable(
+      entityName: 'quick_switcher_button_configs',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_11, _column_12, _column_31, _column_32, _column_34],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxQuickSwitcherOrderKey = i1.Index(
+    'idx_quick_switcher_order_key',
+    'CREATE INDEX idx_quick_switcher_order_key ON quick_switcher_button_configs (order_key)',
+  );
+  late final Shape6 searchTokens = Shape6(
+    source: i0.VersionedTable(
+      entityName: 'search_tokens',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_15, _column_16, _column_17, _column_18, _column_19],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxSearchTokensInsertedAt = i1.Index(
+    'idx_search_tokens_inserted_at',
+    'CREATE INDEX idx_search_tokens_inserted_at ON search_tokens (inserted_at)',
+  );
+  final i1.Index idxSearchTokensReservedAt = i1.Index(
+    'idx_search_tokens_reserved_at',
+    'CREATE INDEX idx_search_tokens_reserved_at ON search_tokens (reserved_at)',
+  );
+}
+
+class Shape11 extends i0.VersionedTable {
+  Shape11({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get buttonId =>
+      columnsByName['button_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get orderKey =>
+      columnsByName['order_key']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get isVisible =>
+      columnsByName['is_visible']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get fallbackId =>
+      columnsByName['fallback_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get longPressAction =>
+      columnsByName['long_press_action']! as i1.GeneratedColumn<String>;
+}
+
+i1.GeneratedColumn<String> _column_34(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'long_press_action',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: '',
+    );
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
@@ -1417,6 +1577,7 @@ i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema8 schema) from7To8,
   required Future<void> Function(i1.Migrator m, Schema9 schema) from8To9,
   required Future<void> Function(i1.Migrator m, Schema10 schema) from9To10,
+  required Future<void> Function(i1.Migrator m, Schema11 schema) from10To11,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -1465,6 +1626,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from9To10(migrator, schema);
         return 10;
+      case 10:
+        final schema = Schema11(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from10To11(migrator, schema);
+        return 11;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -1481,6 +1647,7 @@ i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema8 schema) from7To8,
   required Future<void> Function(i1.Migrator m, Schema9 schema) from8To9,
   required Future<void> Function(i1.Migrator m, Schema10 schema) from9To10,
+  required Future<void> Function(i1.Migrator m, Schema11 schema) from10To11,
 }) => i0.VersionedSchema.stepByStepHelper(
   step: migrationSteps(
     from1To2: from1To2,
@@ -1492,5 +1659,6 @@ i1.OnUpgrade stepByStep({
     from7To8: from7To8,
     from8To9: from8To9,
     from9To10: from9To10,
+    from10To11: from10To11,
   ),
 );

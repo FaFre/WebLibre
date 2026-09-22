@@ -19,6 +19,7 @@
  */
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/toolbar_button_config_repository.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_spec.dart';
 import 'package:weblibre/features/user/data/database/daos/toolbar_button_config.dart';
@@ -55,6 +56,11 @@ class ContextualToolbarConfigRepository
   @override
   Future<void> assignFallback(String buttonId, String? fallbackId) {
     return _dao.assignFallback(buttonId, fallbackId);
+  }
+
+  @override
+  Future<void> assignLongPressAction(String buttonId, BrowserAction? action) {
+    return _dao.assignLongPressAction(buttonId, action);
   }
 
   @override
