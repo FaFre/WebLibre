@@ -832,6 +832,13 @@ class TabRepository extends _$TabRepository {
     return null;
   }
 
+  /// Whether closing [tabId] hands the user back to its opener, which may live
+  /// in another container (see [_nearestAvailableAncestor]).
+  Future<bool> hasOpenAncestor(String tabId) async {
+    return await _nearestAvailableAncestor(tabId, excludedTabIds: const {}) !=
+        null;
+  }
+
   Future<void> _selectNextTab(
     String tabId, {
     Set<String> excludedTabIds = const {},

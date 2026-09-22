@@ -70,6 +70,8 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/sea
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/keyboard_shortcuts/presentation/widgets/browser_keyboard_shortcuts.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/repositories/container_proxy.dart';
@@ -2171,10 +2173,6 @@ class _Browser extends HookConsumerWidget {
                     .read(tabRepositoryProvider.notifier)
                     .backBehaviorFor(tabState?.id);
 
-                final tabCount = ref.read(
-                  tabListProvider.select((tabs) => tabs.value.length),
-                );
-
                 //Don't do anything if a child route is active
                 if (GoRouterState.of(context).topRoute?.name !=
                     BrowserRoute.name) {
@@ -2327,12 +2325,62 @@ class _Browser extends HookConsumerWidget {
 
                 // Handle double back to close (if enabled)
                 if (doubleBackCloseTab) {
+                  // A tab is only closed when that lands somewhere the user
+                  // came from: another tab of the container on screen, or the
+                  // tab's opener, which may live in another container (#530).
+                  // Closing a container's last tab otherwise selects a tab of
+                  // some other container, so repeated presses emptied every
+                  // container in turn (#616); leaving the app is the end of
+                  // the line instead. On home no tab is on screen, so there is
+                  // nothing to close either.
+                  var canCloseTab = false;
+                  if (tabState != null &&
+                      !ref.read(shouldShowBrowserHomeProvider)) {
+                    final containerId = await ref
+                        .read(tabDataRepositoryProvider.notifier)
+                        .getTabContainerId(tabState.id);
+                    if (!context.mounted) return true;
+
+                    final containerTabIds = await ref
+                        .read(containerRepositoryProvider.notifier)
+                        .getContainerTabIds(containerId);
+                    if (!context.mounted) return true;
+
+                    // Rows of closed tabs are only deleted once the engine's
+                    // tab list sync catches up, so the stored ids alone can
+                    // still count a tab that is already gone.
+                    final liveTabIds = ref.read(tabListProvider).value.toSet();
+                    final containerTabCount = containerTabIds
+                        .where(liveTabIds.contains)
+                        .length;
+
+                    canCloseTab =
+                        containerTabCount > 1 ||
+                        await ref
+                            .read(tabRepositoryProvider.notifier)
+                            .hasOpenAncestor(tabState.id);
+                    if (!context.mounted) return true;
+
+                    // The lookups above yield, so another back press, a tab
+                    // switch or a route may have come in between. The answer
+                    // describes the tab that was on screen when they started;
+                    // act on it only if that is still what the user sees, and
+                    // otherwise let this press go.
+                    if (ref.read(selectedTabProvider) != tabState.id ||
+                        ref.read(shouldShowBrowserHomeProvider) ||
+                        GoRouterState.of(context).topRoute?.name !=
+                            BrowserRoute.name ||
+                        Navigator.of(context, rootNavigator: true).canPop()) {
+                      return true;
+                    }
+                  }
+
                   if (lastBackButtonPress.value != null &&
                       DateTime.now().difference(lastBackButtonPress.value!) <
                           _backButtonPressTimeout) {
                     lastBackButtonPress.value = null;
 
-                    if (tabState != null && tabCount > 1) {
+                    if (tabState != null && canCloseTab) {
                       if (!await confirmIsolatedTabCloseIfNeeded(tabState.id)) {
                         return true;
                       }
@@ -2357,7 +2405,7 @@ class _Browser extends HookConsumerWidget {
                     lastBackButtonPress.value = DateTime.now();
                     ui_helper.showTabBackButtonMessage(
                       context,
-                      tabCount,
+                      canCloseTab,
                       _backButtonPressTimeout,
                     );
 
