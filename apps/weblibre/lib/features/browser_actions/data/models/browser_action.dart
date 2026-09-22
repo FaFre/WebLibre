@@ -375,7 +375,7 @@ enum BrowserAction {
   clearBrowsingData(
     'Clear Browsing Data',
     'Choose browsing data to delete',
-    Icons.delete_sweep_outlined,
+    MdiIcons.fire,
     BrowserActionCategory.app,
   ),
   moveToBackground(
