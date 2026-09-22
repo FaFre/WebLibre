@@ -213,7 +213,11 @@ class GeckoEngineSettingsApiImpl(
             }
         }
         if(settings.userAgent != null) {
-            components.core.engineSettings.userAgentString = settings.userAgent;
+            // A blank string must be treated the same as "unset": GeckoView's
+            // userAgentOverride treats any non-null value (including "") as
+            // authoritative and permanently overrides desktop-mode's UA, so an
+            // empty override can never reach the engine.
+            components.core.engineSettings.userAgentString = settings.userAgent.takeIf { it.isNotBlank() };
         }
         if(settings.contentBlocking != null) {
             components.core.engineSettings.queryParameterStripping = when(settings.contentBlocking.queryParameterStripping) {
