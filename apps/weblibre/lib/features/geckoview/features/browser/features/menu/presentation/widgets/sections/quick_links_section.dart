@@ -26,6 +26,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/delete_data.dart';
 import 'package:weblibre/features/small_web/presentation/controllers/small_web_mode_controller.dart';
 
 /// Icon grid of the browser's other screens.
@@ -87,6 +88,7 @@ class QuickLinksSection extends ConsumerWidget {
     MenuItemType.bangs,
     MenuItemType.feeds,
     MenuItemType.smallWeb,
+    MenuItemType.clearData,
   };
 
   Future<void> _open(
@@ -113,6 +115,9 @@ class QuickLinksSection extends ConsumerWidget {
       case MenuItemType.smallWeb:
         Navigator.pop(context);
         await ref.read(smallWebModeControllerProvider.notifier).enter();
+      case MenuItemType.clearData:
+        Navigator.pop(context);
+        await showDeleteDataDialog(context);
       default:
         break;
     }

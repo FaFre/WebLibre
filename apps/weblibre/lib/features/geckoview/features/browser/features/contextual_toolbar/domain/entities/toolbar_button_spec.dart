@@ -200,6 +200,12 @@ const hideTabBarToolbarButtonSpec = ToolbarButtonSpec(
   canBeFallbackTarget: false,
 );
 
+const clearBrowsingDataToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.clearBrowsingData,
+  defaultVisible: false,
+  canBeFallbackTarget: false,
+);
+
 const toolbarButtonSpecs = [
   backToolbarButtonSpec,
   forwardToolbarButtonSpec,
@@ -230,6 +236,7 @@ const toolbarButtonSpecs = [
   extensionShortcutToolbarButtonSpec,
   toggleGesturesToolbarButtonSpec,
   hideTabBarToolbarButtonSpec,
+  clearBrowsingDataToolbarButtonSpec,
   quitToolbarButtonSpec,
 ];
 

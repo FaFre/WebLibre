@@ -43,6 +43,7 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/models/contextual_toolbar_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_bar_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/delete_data.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_shortcut_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/font_size_bottom_sheet.dart';
@@ -650,6 +651,22 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
         return IconButton(onPressed: () {}, icon: const Icon(MdiIcons.puzzle));
       }
       return const _ExtensionShortcutToolbarButton();
+    },
+  ),
+  ToolbarButtonDefinition(
+    spec: clearBrowsingDataToolbarButtonSpec,
+    label: 'Clear Data',
+    icon: MdiIcons.fire,
+    builder: (scope, context, ref) {
+      return IconButton(
+        tooltip: 'Clear browsing data',
+        onPressed: scope.isPreview
+            ? () {}
+            : () async {
+                await showDeleteDataDialog(context);
+              },
+        icon: const Icon(MdiIcons.fire),
+      );
     },
   ),
   ToolbarButtonDefinition(

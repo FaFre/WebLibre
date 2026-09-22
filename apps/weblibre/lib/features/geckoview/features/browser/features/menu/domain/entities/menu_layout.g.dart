@@ -62,6 +62,7 @@ const _$MenuItemTypeEnumMap = {
   MenuItemType.bangs: 'bangs',
   MenuItemType.feeds: 'feeds',
   MenuItemType.smallWeb: 'smallWeb',
+  MenuItemType.clearData: 'clearData',
   MenuItemType.profileSwitch: 'profileSwitch',
   MenuItemType.syncNow: 'syncNow',
   MenuItemType.appSettings: 'appSettings',

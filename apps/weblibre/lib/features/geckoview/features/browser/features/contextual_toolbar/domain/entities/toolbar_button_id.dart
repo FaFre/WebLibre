@@ -48,5 +48,6 @@ enum ToolbarButtonId {
   extensionShortcut,
   toggleGestures,
   hideTabBar,
+  clearBrowsingData,
   quit,
 }

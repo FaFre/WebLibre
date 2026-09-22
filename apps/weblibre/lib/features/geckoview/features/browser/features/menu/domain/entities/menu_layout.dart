@@ -144,6 +144,7 @@ enum MenuItemType {
   bangs,
   feeds,
   smallWeb,
+  clearData,
 
   // Profile & App
   profileSwitch,
@@ -194,6 +195,7 @@ enum MenuItemType {
     bangs => 'Bangs',
     feeds => 'Feeds',
     smallWeb => 'Small Web',
+    clearData => 'Clear Data',
     profileSwitch => 'Profile',
     syncNow => 'Sync Now',
     appSettings => 'Settings',
@@ -249,6 +251,7 @@ enum MenuItemType {
     bangs => MdiIcons.exclamationThick,
     feeds => Icons.rss_feed,
     smallWeb => Icons.explore,
+    clearData => MdiIcons.fire,
     profileSwitch => Icons.person,
     syncNow => Icons.sync,
     appSettings => Icons.settings,
@@ -376,6 +379,7 @@ const List<MenuSectionDefault> menuLayoutDefaults = [
       MenuItemDefault(MenuItemType.bangs),
       MenuItemDefault(MenuItemType.feeds),
       MenuItemDefault(MenuItemType.smallWeb),
+      MenuItemDefault(MenuItemType.clearData),
     ],
   ),
   MenuSectionDefault(MenuSectionType.connection),
