@@ -9264,7 +9264,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settings_popularSitesAutocompleteSubtitle =>
-      'Eingaben mit bekannten Domains vervollständigen, wenn der Verlauf keinen Treffer hat';
+      'Eingaben mit bekannten Domains vervollständigen, wenn Verlauf und Lesezeichen keinen Treffer haben';
 
   @override
   String get settings_localIndexEnabledTitle => 'Lokalen Suchindex aktivieren';

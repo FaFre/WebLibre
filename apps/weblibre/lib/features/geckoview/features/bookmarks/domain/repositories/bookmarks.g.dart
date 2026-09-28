@@ -42,7 +42,7 @@ final class BookmarksRepositoryProvider
 }
 
 String _$bookmarksRepositoryHash() =>
-    r'20f005705d6235289f252bd9b17eb5f2227287ac';
+    r'eda4a4e7e022745e81a65b3545813513f46eb352';
 
 abstract class _$BookmarksRepository extends $Notifier<int> {
   int build();

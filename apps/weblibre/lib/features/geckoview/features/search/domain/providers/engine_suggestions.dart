@@ -17,12 +17,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/services/address_completion.dart';
 import 'package:weblibre/features/popular_sites/domain/repositories/popular_sites.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
@@ -36,7 +39,9 @@ class EngineSuggestions extends _$EngineSuggestions {
   ///
   /// 1. The engine's own autofill, which draws on saved history (Places). Only
   ///    asked when [includeHistory] is set — see `SearchSourcePolicy`.
-  /// 2. A popular-domain prefix match from the bundled Tranco-derived
+  /// 2. A saved bookmark whose address continues the typed text. Bookmarks are
+  ///    an explicit choice, so they rank above static popularity data.
+  /// 3. A popular-domain prefix match from the bundled Tranco-derived
   ///    `sites.db`, so typing "git" still completes to "github.com" without any
   ///    local data. Off with the `popularSitesAutocompleteEnabled` setting.
   Future<String?> getAutocompleteSuggestion(
@@ -56,6 +61,13 @@ class EngineSuggestions extends _$EngineSuggestions {
       if (!ref.mounted) return null;
     }
 
+    final bookmarkResult = await _bookmarkCompletion(query);
+    if (bookmarkResult != null) {
+      return bookmarkResult;
+    }
+
+    if (!ref.mounted) return null;
+
     final popularSitesEnabled = ref.read(
       generalSettingsWithDefaultsProvider.select(
         (s) => s.popularSitesAutocompleteEnabled,
@@ -71,6 +83,24 @@ class EngineSuggestions extends _$EngineSuggestions {
         .searchByPrefix(query, limit: 1);
 
     return popularSites.isEmpty ? null : popularSites.first.domain;
+  }
+
+  Future<String?> _bookmarkCompletion(String query) async {
+    // A search phrase can never be an address to complete, and storage search
+    // would still have to rank every bookmark matching its words.
+    if (query.contains(RegExp(r'\s'))) return null;
+
+    try {
+      final bookmarks = await ref
+          .read(bookmarksRepositoryProvider.notifier)
+          .searchEntries(query, limit: 20);
+
+      return addressCompletionFor(query, bookmarks.map((entry) => entry.url));
+    } on PlatformException catch (e) {
+      // Storage interrupts a search the next keystroke has superseded.
+      if (e.code == 'OperationInterrupted') return null;
+      rethrow;
+    }
   }
 
   Future<void> addQuery(

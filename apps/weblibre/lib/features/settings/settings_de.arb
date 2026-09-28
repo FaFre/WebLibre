@@ -673,7 +673,7 @@
   "settings_privateSearchSuggestionsSubtitle": "Beim Tippen in privaten Tabs den Vorschlagsanbieter und den Verlauf nutzen. Die Eingabe wird an den Anbieter gesendet.",
   "settings_popularSitesAutocompleteTitle": "Beliebte Websites vorschlagen",
   "settings_popularSitesAutocompleteKeywords": "beliebte Websites, Domains, Autovervollständigung",
-  "settings_popularSitesAutocompleteSubtitle": "Eingaben mit bekannten Domains vervollständigen, wenn der Verlauf keinen Treffer hat",
+  "settings_popularSitesAutocompleteSubtitle": "Eingaben mit bekannten Domains vervollständigen, wenn Verlauf und Lesezeichen keinen Treffer haben",
   "settings_localIndexEnabledTitle": "Lokalen Suchindex aktivieren",
   "settings_localIndexEnabledKeywords": "Seitentext, Verlauf, Volltextsuche",
   "settings_localIndexEnabledSubtitle": "Besuchte Seiten lokal indizieren, damit der Browser ihren Inhalt durchsuchen kann. Besuchsmetadaten bleiben in der Engine; nur der Seitentext wird auf dem Gerät gespeichert.",

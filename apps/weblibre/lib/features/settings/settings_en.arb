@@ -2869,7 +2869,7 @@
   "@settings_popularSitesAutocompleteKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_popularSitesAutocompleteSubtitle": "Complete typed text with well-known domains when your history has no match",
+  "settings_popularSitesAutocompleteSubtitle": "Complete typed text with well-known domains when your history and bookmarks have no match",
   "@settings_popularSitesAutocompleteSubtitle": {
     "description": "Explanation under that switch."
   },

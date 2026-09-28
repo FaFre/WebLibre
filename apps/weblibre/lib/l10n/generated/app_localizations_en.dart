@@ -9080,7 +9080,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_popularSitesAutocompleteSubtitle =>
-      'Complete typed text with well-known domains when your history has no match';
+      'Complete typed text with well-known domains when your history and bookmarks have no match';
 
   @override
   String get settings_localIndexEnabledTitle => 'Enable local search index';

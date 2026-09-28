@@ -42,7 +42,7 @@ final class BookmarkSearchResultsProvider
 }
 
 String _$bookmarkSearchResultsHash() =>
-    r'1708ae3df94113ab370086af38f9cc150d46d3c5';
+    r'f70bc4375730fc3ef9dce81b1af1da769338aaae';
 
 abstract class _$BookmarkSearchResults extends $Notifier<List<BookmarkEntry>> {
   List<BookmarkEntry> build();
@@ -357,7 +357,7 @@ final class BookmarkGuidsForUrlProvider
 }
 
 String _$bookmarkGuidsForUrlHash() =>
-    r'aeca791afdcad74c2e8af93c392860ea3cb92b20';
+    r'64a43e712dc179d07169676a1649468072773250';
 
 /// Guids of the bookmarks pointing at [url], or an empty list when there are
 /// none.

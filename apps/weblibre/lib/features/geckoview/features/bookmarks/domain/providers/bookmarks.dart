@@ -37,8 +37,6 @@ bool _hasVisibleContent(BookmarkFolder? folder) {
 
 @Riverpod()
 class BookmarkSearchResults extends _$BookmarkSearchResults {
-  final _service = GeckoBookmarksService();
-
   /// Identifies the most recent request.
   ///
   /// Typing starts a search per keystroke and storage does not answer them in
@@ -55,12 +53,11 @@ class BookmarkSearchResults extends _$BookmarkSearchResults {
     }
 
     try {
-      final results = await _service.searchBookmarks(query, limit: limit);
+      final results = await ref
+          .read(bookmarksRepositoryProvider.notifier)
+          .searchEntries(query, limit: limit);
       if (!ref.mounted || request != _latestRequest) return;
-      state = results
-          .map(BookmarkItem.parseRecursive)
-          .whereType<BookmarkEntry>()
-          .toList();
+      state = results;
     } on PlatformException catch (e) {
       if (e.code == 'OperationInterrupted') return;
       rethrow;

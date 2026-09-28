@@ -15491,7 +15491,7 @@ abstract class AppLocalizations {
   /// Explanation under that switch.
   ///
   /// In en, this message translates to:
-  /// **'Complete typed text with well-known domains when your history has no match'**
+  /// **'Complete typed text with well-known domains when your history and bookmarks have no match'**
   String get settings_popularSitesAutocompleteSubtitle;
 
   /// Switch: store the text of visited pages on the device so it can be searched.

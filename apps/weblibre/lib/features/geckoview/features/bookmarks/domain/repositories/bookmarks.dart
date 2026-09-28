@@ -180,6 +180,21 @@ class BookmarksRepository extends _$BookmarksRepository {
     return nodes.map((node) => node.guid).toList();
   }
 
+  /// Saved pages whose title or address matches [query], at most [limit],
+  /// in storage's own ranking.
+  ///
+  /// Folders never match: storage search only looks at bookmark entries.
+  Future<List<BookmarkEntry>> searchEntries(
+    String query, {
+    int limit = 10,
+  }) async {
+    final results = await _service.searchBookmarks(query, limit: limit);
+    return results
+        .map(BookmarkItem.parseRecursive)
+        .whereType<BookmarkEntry>()
+        .toList();
+  }
+
   /// Returns the GUIDs of all descendant folders of [guid] by fetching the
   /// full subtree from storage. This is safe to call even when the UI tree is
   /// filtered (e.g. during search), unlike the pure-utility
