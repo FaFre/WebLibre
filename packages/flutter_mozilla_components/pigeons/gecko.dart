@@ -2469,6 +2469,13 @@ abstract class GeckoHistoryApi {
   @async
   void deleteDownload(String id);
 
+  /// Remove every finished, failed or cancelled download created between
+  /// [startMillis] and [endMillis] (inclusive) from the download list,
+  /// keeping the files. Unlike the list [getDetailedVisits] returns, this is
+  /// not deduplicated by file name. Active downloads are left alone.
+  @async
+  void deleteDownloadsBetween(int startMillis, int endMillis);
+
   @async
   void deleteVisitsBetween(int startMillis, int endMillis);
 

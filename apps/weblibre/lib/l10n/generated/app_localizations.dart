@@ -7520,6 +7520,84 @@ abstract class AppLocalizations {
   /// **'Keep'**
   String get history_deleteFileActionKeep;
 
+  /// Checkbox in the history filter menu: show each address only once, as its newest visit. Older visits are hidden, not deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Distinct URLs'**
+  String get history_filterDistinctUrls;
+
+  /// Chip on a history row when Distinct URLs is on and the row stands for several visits of the same address. count is the number of visits, including the one shown.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 visit} other{{count} visits}}'**
+  String history_visitCount(int count);
+
+  /// Tooltip of the delete button in the history screen's app bar, which opens a menu of delete options.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete history'**
+  String get history_tooltipDeleteHistory;
+
+  /// Item in the history screen's delete menu: opens a dialog to delete every visit between two chosen dates and times.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Time Range…'**
+  String get history_deleteMenuTimeRange;
+
+  /// Item in the history screen's delete menu: opens the sheet for deleting browsing data (history, cookies, cache, etc.).
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Browsing Data…'**
+  String get history_deleteMenuBrowsingData;
+
+  /// Title of the dialog where a start and end date and time are chosen and every history visit between them is deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete History for a Time Range'**
+  String get history_deleteTimeRangeTitle;
+
+  /// Label of the row showing the start date and time of the range to delete. Tapping it opens a date picker, then a time picker.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get history_deleteTimeRangeFrom;
+
+  /// Label of the row showing the end date and time of the range to delete. The whole end minute is included.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get history_deleteTimeRangeTo;
+
+  /// Preset chip in the delete-time-range dialog: sets the range to the past 60 minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Last hour'**
+  String get history_deleteTimeRangeLastHour;
+
+  /// Preset chip in the delete-time-range dialog: sets the range from midnight until now.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get history_deleteTimeRangeToday;
+
+  /// Preset chip in the delete-time-range dialog: sets the range to the past seven days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 days'**
+  String get history_deleteTimeRangeLastWeek;
+
+  /// Explanation in the delete-time-range dialog of what is removed. Visits from every container are deleted; entries of finished and failed downloads disappear from the list but downloaded files are kept; running or paused downloads stay listed.
+  ///
+  /// In en, this message translates to:
+  /// **'Every visit in this range is deleted, in all containers. Finished and failed downloads from this range also leave the downloads list; the files stay on the device. Downloads still in progress are kept.'**
+  String get history_deleteTimeRangeExplanation;
+
+  /// Error under the chosen range in the delete-time-range dialog when the start is not earlier than the end. The Delete button is disabled.
+  ///
+  /// In en, this message translates to:
+  /// **'The start must be before the end.'**
+  String get history_deleteTimeRangeInvalid;
+
   /// Title of the sheet shown when a link is shared to or opened in WebLibre, offering ways to open it (new tab, custom tab, app) and to clean it.
   ///
   /// In en, this message translates to:

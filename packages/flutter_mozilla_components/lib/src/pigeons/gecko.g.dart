@@ -13007,6 +13007,30 @@ class GeckoHistoryApi {
     );
   }
 
+  /// Remove every finished, failed or cancelled download created between
+  /// [startMillis] and [endMillis] (inclusive) from the download list,
+  /// keeping the files. Unlike the list [getDetailedVisits] returns, this is
+  /// not deduplicated by file name. Active downloads are left alone.
+  Future<void> deleteDownloadsBetween(int startMillis, int endMillis) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryApi.deleteDownloadsBetween$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[startMillis, endMillis],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
   Future<void> deleteVisitsBetween(int startMillis, int endMillis) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryApi.deleteVisitsBetween$pigeonVar_messageChannelSuffix';

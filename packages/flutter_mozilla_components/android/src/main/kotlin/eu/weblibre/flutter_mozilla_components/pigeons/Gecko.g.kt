@@ -11724,6 +11724,13 @@ interface GeckoHistoryApi {
   suspend fun getVisitsPaginated(offset: Long, count: Long, excludeTypes: List<VisitType>): List<VisitInfo>
   suspend fun deleteVisit(url: String, timestamp: Long)
   suspend fun deleteDownload(id: String)
+  /**
+   * Remove every finished, failed or cancelled download created between
+   * [startMillis] and [endMillis] (inclusive) from the download list,
+   * keeping the files. Unlike the list [getDetailedVisits] returns, this is
+   * not deduplicated by file name. Active downloads are left alone.
+   */
+  suspend fun deleteDownloadsBetween(startMillis: Long, endMillis: Long)
   suspend fun deleteVisitsBetween(startMillis: Long, endMillis: Long)
   suspend fun getHistoryHighlights(weights: HistoryHighlightWeights, limit: Long): List<HistoryHighlight>
   suspend fun getTopFrecentSites(limit: Long, frecencyThreshold: FrecencyThresholdOption): List<TopFrecentSiteInfo>
@@ -11863,6 +11870,27 @@ interface GeckoHistoryApi {
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
                 api.deleteDownload(idArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                GeckoPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryApi.deleteDownloadsBetween$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val startMillisArg = args[0] as Long
+            val endMillisArg = args[1] as Long
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.deleteDownloadsBetween(startMillisArg, endMillisArg)
                 listOf(null)
               } catch (exception: Throwable) {
                 GeckoPigeonUtils.wrapError(exception)

@@ -4397,6 +4397,56 @@ class AppLocalizationsDe extends AppLocalizations {
   String get history_deleteFileActionKeep => 'Behalten';
 
   @override
+  String get history_filterDistinctUrls => 'Jede Adresse einmal';
+
+  @override
+  String history_visitCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Besuche',
+      one: '1 Besuch',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get history_tooltipDeleteHistory => 'Verlauf löschen';
+
+  @override
+  String get history_deleteMenuTimeRange => 'Zeitraum löschen …';
+
+  @override
+  String get history_deleteMenuBrowsingData => 'Browserdaten löschen …';
+
+  @override
+  String get history_deleteTimeRangeTitle =>
+      'Verlauf für einen Zeitraum löschen';
+
+  @override
+  String get history_deleteTimeRangeFrom => 'Von';
+
+  @override
+  String get history_deleteTimeRangeTo => 'Bis';
+
+  @override
+  String get history_deleteTimeRangeLastHour => 'Letzte Stunde';
+
+  @override
+  String get history_deleteTimeRangeToday => 'Heute';
+
+  @override
+  String get history_deleteTimeRangeLastWeek => 'Letzte 7 Tage';
+
+  @override
+  String get history_deleteTimeRangeExplanation =>
+      'Alle Besuche in diesem Zeitraum werden gelöscht, in allen Containern. Abgeschlossene und fehlgeschlagene Downloads aus diesem Zeitraum verschwinden auch aus der Download-Liste; die Dateien bleiben auf dem Gerät. Laufende Downloads bleiben erhalten.';
+
+  @override
+  String get history_deleteTimeRangeInvalid =>
+      'Der Beginn muss vor dem Ende liegen.';
+
+  @override
   String get openLinkTools_openLinkTitle => 'Link öffnen';
 
   @override

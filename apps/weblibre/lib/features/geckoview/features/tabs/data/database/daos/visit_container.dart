@@ -92,6 +92,17 @@ class VisitContainerDao extends DatabaseAccessor<TabDatabase>
         .get();
   }
 
+  /// Relation rows stamped between [startMillis] and [endMillis] (inclusive,
+  /// epoch millis), all containers.
+  Future<List<VisitContainerData>> relationsBetween(
+    int startMillis,
+    int endMillis,
+  ) {
+    return (db.select(
+      db.visitContainer,
+    )..where((t) => t.visitTime.isBetweenValues(startMillis, endMillis))).get();
+  }
+
   /// Remove a single relation row by primary key. Used when an individual
   /// history entry is deleted, so its tag can't later reattach (via the
   /// nearest-time join) to a different same-URL visit within the match window.
@@ -106,6 +117,22 @@ class VisitContainerDao extends DatabaseAccessor<TabDatabase>
     return (db.delete(
       db.visitContainer,
     )..where((t) => t.containerId.equals(containerId))).go();
+  }
+
+  /// Remove the relation rows with the given primary keys. Used when a time
+  /// range of history is deleted: the caller pairs the deleted visits with
+  /// their rows first, since a row's `visit_time` only approximates its
+  /// visit's. Chunked like [relationsForCanonicalUrls].
+  Future<void> deleteByIds(Iterable<int> ids) async {
+    const chunkSize = 500;
+    final idList = ids.toList(growable: false);
+    for (var start = 0; start < idList.length; start += chunkSize) {
+      final chunk = idList.sublist(
+        start,
+        math.min(start + chunkSize, idList.length),
+      );
+      await (db.delete(db.visitContainer)..where((t) => t.id.isIn(chunk))).go();
+    }
   }
 
   /// Remove every relation row, all containers. Used when the user clears all

@@ -200,5 +200,62 @@
   "history_deleteFileActionKeep": "Keep",
   "@history_deleteFileActionKeep": {
     "description": "Button in the delete-file dialog: remove the download from the list but keep the file on the device."
+  },
+  "history_filterDistinctUrls": "Distinct URLs",
+  "@history_filterDistinctUrls": {
+    "description": "Checkbox in the history filter menu: show each address only once, as its newest visit. Older visits are hidden, not deleted."
+  },
+  "history_visitCount": "{count, plural, =1{1 visit} other{{count} visits}}",
+  "@history_visitCount": {
+    "description": "Chip on a history row when Distinct URLs is on and the row stands for several visits of the same address. count is the number of visits, including the one shown.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "history_tooltipDeleteHistory": "Delete history",
+  "@history_tooltipDeleteHistory": {
+    "description": "Tooltip of the delete button in the history screen's app bar, which opens a menu of delete options."
+  },
+  "history_deleteMenuTimeRange": "Delete Time Range…",
+  "@history_deleteMenuTimeRange": {
+    "description": "Item in the history screen's delete menu: opens a dialog to delete every visit between two chosen dates and times."
+  },
+  "history_deleteMenuBrowsingData": "Delete Browsing Data…",
+  "@history_deleteMenuBrowsingData": {
+    "description": "Item in the history screen's delete menu: opens the sheet for deleting browsing data (history, cookies, cache, etc.)."
+  },
+  "history_deleteTimeRangeTitle": "Delete History for a Time Range",
+  "@history_deleteTimeRangeTitle": {
+    "description": "Title of the dialog where a start and end date and time are chosen and every history visit between them is deleted."
+  },
+  "history_deleteTimeRangeFrom": "From",
+  "@history_deleteTimeRangeFrom": {
+    "description": "Label of the row showing the start date and time of the range to delete. Tapping it opens a date picker, then a time picker."
+  },
+  "history_deleteTimeRangeTo": "To",
+  "@history_deleteTimeRangeTo": {
+    "description": "Label of the row showing the end date and time of the range to delete. The whole end minute is included."
+  },
+  "history_deleteTimeRangeLastHour": "Last hour",
+  "@history_deleteTimeRangeLastHour": {
+    "description": "Preset chip in the delete-time-range dialog: sets the range to the past 60 minutes."
+  },
+  "history_deleteTimeRangeToday": "Today",
+  "@history_deleteTimeRangeToday": {
+    "description": "Preset chip in the delete-time-range dialog: sets the range from midnight until now."
+  },
+  "history_deleteTimeRangeLastWeek": "Last 7 days",
+  "@history_deleteTimeRangeLastWeek": {
+    "description": "Preset chip in the delete-time-range dialog: sets the range to the past seven days."
+  },
+  "history_deleteTimeRangeExplanation": "Every visit in this range is deleted, in all containers. Finished and failed downloads from this range also leave the downloads list; the files stay on the device. Downloads still in progress are kept.",
+  "@history_deleteTimeRangeExplanation": {
+    "description": "Explanation in the delete-time-range dialog of what is removed. Visits from every container are deleted; entries of finished and failed downloads disappear from the list but downloaded files are kept; running or paused downloads stay listed."
+  },
+  "history_deleteTimeRangeInvalid": "The start must be before the end.",
+  "@history_deleteTimeRangeInvalid": {
+    "description": "Error under the chosen range in the delete-time-range dialog when the start is not earlier than the end. The Delete button is disabled."
   }
 }

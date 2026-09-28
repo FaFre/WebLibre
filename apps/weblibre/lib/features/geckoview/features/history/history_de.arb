@@ -43,5 +43,18 @@
   "history_deleteFileConfirm": "{fileName} löschen?",
   "history_deleteFileWarning": "Dadurch wird die Datei endgültig vom Gerät gelöscht.",
   "history_deleteFileRememberChoice": "Auswahl für die übrigen Dateien übernehmen",
-  "history_deleteFileActionKeep": "Behalten"
+  "history_deleteFileActionKeep": "Behalten",
+  "history_filterDistinctUrls": "Jede Adresse einmal",
+  "history_visitCount": "{count, plural, =1{1 Besuch} other{{count} Besuche}}",
+  "history_tooltipDeleteHistory": "Verlauf löschen",
+  "history_deleteMenuTimeRange": "Zeitraum löschen …",
+  "history_deleteMenuBrowsingData": "Browserdaten löschen …",
+  "history_deleteTimeRangeTitle": "Verlauf für einen Zeitraum löschen",
+  "history_deleteTimeRangeFrom": "Von",
+  "history_deleteTimeRangeTo": "Bis",
+  "history_deleteTimeRangeLastHour": "Letzte Stunde",
+  "history_deleteTimeRangeToday": "Heute",
+  "history_deleteTimeRangeLastWeek": "Letzte 7 Tage",
+  "history_deleteTimeRangeExplanation": "Alle Besuche in diesem Zeitraum werden gelöscht, in allen Containern. Abgeschlossene und fehlgeschlagene Downloads aus diesem Zeitraum verschwinden auch aus der Download-Liste; die Dateien bleiben auf dem Gerät. Laufende Downloads bleiben erhalten.",
+  "history_deleteTimeRangeInvalid": "Der Beginn muss vor dem Ende liegen."
 }

@@ -38,17 +38,29 @@ class HistoryFilterOptions with FastEquatable {
   /// all visits, each still annotated with its own container tag.
   final String? containerId;
 
+  /// Collapse the timeline to the newest visit of each URL. A view option
+  /// only: the older visits stay in Places and are still counted, deleted and
+  /// filtered with the row that stands for them.
+  @JsonKey(defaultValue: false)
+  final bool distinctUrls;
+
   HistoryFilterOptions({
     required this.dateRange,
     required this.visitTypes,
     this.containerId,
+    this.distinctUrls = false,
   });
 
   HistoryFilterOptions.withDefaults()
     : this(dateRange: null, visitTypes: {VisitType.link});
 
   @override
-  List<Object?> get hashParameters => [dateRange, visitTypes, containerId];
+  List<Object?> get hashParameters => [
+    dateRange,
+    visitTypes,
+    containerId,
+    distinctUrls,
+  ];
 
   factory HistoryFilterOptions.fromJson(Map<String, dynamic> json) =>
       _$HistoryFilterOptionsFromJson(json);

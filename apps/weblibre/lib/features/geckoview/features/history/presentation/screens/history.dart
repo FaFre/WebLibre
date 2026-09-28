@@ -41,6 +41,7 @@ import 'package:weblibre/features/geckoview/features/history/domain/entities/his
 import 'package:weblibre/features/geckoview/features/history/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/container_history.dart';
 import 'package:weblibre/features/geckoview/features/history/presentation/dialogs/delete_file.dart';
+import 'package:weblibre/features/geckoview/features/history/presentation/dialogs/delete_time_range.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
@@ -196,6 +197,15 @@ class Section extends MultiSliver {
                              ),
                            ),
                          ),
+                         if (item.olderVisits.isNotEmpty)
+                           Chip(
+                             avatar: const Icon(MdiIcons.history),
+                             label: Text(
+                               AppLocalizations.of(context).history_visitCount(
+                                 item.olderVisits.length + 1,
+                               ),
+                             ),
+                           ),
                          for (final containerId in item.containerIds)
                            if (containersById[containerId]
                                case final container?)
@@ -238,6 +248,7 @@ class HistoryScreen extends HookConsumerWidget {
     final textFilterController = useTextEditingController();
 
     final menuController = useMenuController();
+    final deleteMenuController = useMenuController();
 
     final historyFilter = isDownloadsMode
         ? ref.watch(historyDownloadsFilterProvider)
@@ -284,21 +295,35 @@ class HistoryScreen extends HookConsumerWidget {
       }
     }
 
-    Future<void> deleteHistoryItem(HistoryEntry item) async {
-      await ref
-          .read(containerHistoryRepositoryProvider.notifier)
-          .deleteVisit(item);
+    // Delete [rows] with every visit each stands for (a Distinct URLs row
+    // covers all visits of its URL, or it would resurface as the next older
+    // one), asking about each downloaded file still on the device.
+    Future<void> deleteRows(Iterable<HistoryEntry> rows) async {
+      final visits = [for (final row in rows) ...row.allVisits];
+      final downloadCount = visits
+          .where((visit) => visit.visitType == VisitType.download)
+          .length;
+      final repository = ref.read(containerHistoryRepositoryProvider.notifier);
 
-      final downloadedFile = item.title.mapNotNull((title) => File(title));
+      DeleteDecision? decision;
+      for (final visit in visits) {
+        await repository.deleteVisit(visit);
 
-      if (await downloadedFile?.exists() == true && context.mounted) {
-        final delete = await showDeleteFileDialog(
-          context,
-          downloadedFile.toString(),
-        );
+        // A download's title is its file path.
+        if (visit.visitType != VisitType.download) continue;
+        final file = visit.title.mapNotNull(File.new);
+        if (file == null || !await file.exists()) continue;
 
-        if (delete?.delete == true) {
-          await downloadedFile!.delete();
+        if (decision?.remember != true) {
+          if (!context.mounted) continue;
+          decision = await showDeleteFileDialog(
+            context,
+            file.path,
+            multiFileMode: downloadCount > 1,
+          );
+        }
+        if (decision?.delete == true) {
+          await file.delete();
         }
       }
 
@@ -384,46 +409,18 @@ class HistoryScreen extends HookConsumerWidget {
           if (selectedItems.value.isNotEmpty)
             IconButton(
               onPressed: () async {
-                DeleteDecision? deleteDecision;
-
-                for (final item in selectedItems.value) {
-                  await ref
-                      .read(containerHistoryRepositoryProvider.notifier)
-                      .deleteVisit(item);
-
-                  final downloadedFile = item.title.mapNotNull(
-                    (title) => File(title),
-                  );
-
-                  if (await downloadedFile?.exists() == true) {
-                    if (deleteDecision?.remember == true) {
-                      if (deleteDecision?.delete == true) {
-                        await downloadedFile!.delete();
-                      }
-                    } else if (context.mounted) {
-                      deleteDecision = await showDeleteFileDialog(
-                        context,
-                        downloadedFile.toString(),
-                        multiFileMode: true,
-                      );
-
-                      if (deleteDecision?.delete == true) {
-                        await downloadedFile!.delete();
-                      }
-                    }
-                  }
-                }
-
+                final rows = selectedItems.value;
                 selectedItems.value = {};
-                await refreshHistoryEntries();
+                await deleteRows(rows);
               },
               icon: const Icon(Icons.delete),
             )
-          else
+          else if (filterContainer != null || isDownloadsMode)
             IconButton(
               // Mirror what the list currently shows: with a container filter
-              // active, clear only that container's history; otherwise fall
-              // back to the full delete-browsing-data sheet.
+              // active, clear only that container's history; on the downloads
+              // screen, open the delete-browsing-data sheet for downloads. The
+              // unfiltered history screen gets the menu below instead.
               tooltip: filterContainer != null
                   ? l10n.history_tooltipClearContainerHistory(
                       filterContainer.name ?? l10n.history_unnamedContainer,
@@ -437,17 +434,58 @@ class HistoryScreen extends HookConsumerWidget {
 
                 await showDeleteDataDialog(
                   context,
-                  initialSettings: {
-                    if (isDownloadsMode)
-                      DeleteBrowsingDataType.downloads
-                    else
-                      DeleteBrowsingDataType.history,
-                  },
+                  initialSettings: {DeleteBrowsingDataType.downloads},
                 );
 
                 await refreshHistoryEntries();
               },
               icon: const Icon(Icons.delete),
+            )
+          else
+            MenuAnchor(
+              controller: deleteMenuController,
+              menuChildren: [
+                MenuItemButton(
+                  leadingIcon: const Icon(MdiIcons.clockRemoveOutline),
+                  child: Text(l10n.history_deleteMenuTimeRange),
+                  onPressed: () async {
+                    final range = await showDeleteTimeRangeDialog(
+                      context,
+                      initialRange: historyFilter.dateRange,
+                    );
+                    if (range == null) return;
+
+                    await ref
+                        .read(containerHistoryRepositoryProvider.notifier)
+                        .deleteVisitsBetween(range.start, range.end);
+
+                    await refreshHistoryEntries();
+                  },
+                ),
+                MenuItemButton(
+                  leadingIcon: const Icon(MdiIcons.deleteSweepOutline),
+                  child: Text(l10n.history_deleteMenuBrowsingData),
+                  onPressed: () async {
+                    await showDeleteDataDialog(
+                      context,
+                      initialSettings: {DeleteBrowsingDataType.history},
+                    );
+
+                    await refreshHistoryEntries();
+                  },
+                ),
+              ],
+              child: IconButton(
+                tooltip: l10n.history_tooltipDeleteHistory,
+                onPressed: () {
+                  if (deleteMenuController.isOpen) {
+                    deleteMenuController.close();
+                  } else {
+                    deleteMenuController.open();
+                  }
+                },
+                icon: const Icon(Icons.delete),
+              ),
             ),
           if (selectedItems.value.isEmpty)
             MenuAnchor(
@@ -539,6 +577,22 @@ class HistoryScreen extends HookConsumerWidget {
                         ),
                       },
                     ),
+                  ),
+                // A view option, not a visit type: its own group so it doesn't
+                // read as a fourth type.
+                if (!isDownloadsMode) const Divider(),
+                if (!isDownloadsMode)
+                  CheckboxMenuButton(
+                    closeOnActivate: false,
+                    value: historyFilter.distinctUrls,
+                    onChanged: (value) {
+                      if (value != null) {
+                        ref
+                            .read(historyVisitsFilterProvider.notifier)
+                            .setDistinctUrls(value);
+                      }
+                    },
+                    child: Text(l10n.history_filterDistinctUrls),
                   ),
                 if (!isDownloadsMode && (containers?.isNotEmpty ?? false)) ...[
                   const Divider(),
@@ -637,9 +691,7 @@ class HistoryScreen extends HookConsumerWidget {
                         .where(
                           (entry) =>
                               textFilter.isEmpty ||
-                              entry.title?.toLowerCase().contains(textFilter) ==
-                                  true ||
-                              entry.url.toLowerCase().contains(textFilter),
+                              entry.matchesText(textFilter),
                         )
                         .groupListsBy(
                           (element) => timeago.format(
@@ -674,7 +726,7 @@ class HistoryScreen extends HookConsumerWidget {
                               selectedItems: selectedItems.value,
                               containersById: containersById,
                               onLongPress: toggleSelected,
-                              onDelete: deleteHistoryItem,
+                              onDelete: (item) => deleteRows([item]),
                               onTap: (item) async {
                                 if (selectedItems.value.isNotEmpty) {
                                   toggleSelected(item);

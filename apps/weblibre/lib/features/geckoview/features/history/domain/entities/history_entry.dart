@@ -52,11 +52,24 @@ class HistoryEntry with FastEquatable {
   /// could otherwise pick a sibling same-URL visit's relation and mislabel it.
   final int? containerRelationId;
 
+  /// Older visits of the same URL that this row stands for when the timeline
+  /// shows distinct URLs (see [collapseToDistinctUrls]). Empty otherwise.
+  final List<HistoryEntry> olderVisits;
+
   HistoryEntry({
     required this.visit,
     required this.containerIds,
     this.containerRelationId,
+    this.olderVisits = const [],
   });
+
+  /// This visit followed by every older visit it stands for. Deleting a row
+  /// deletes all of them, so a collapsed URL does not resurface with its next
+  /// older visit.
+  Iterable<HistoryEntry> get allVisits sync* {
+    yield this;
+    yield* olderVisits;
+  }
 
   String get url => visit.url;
   String? get title => visit.title;
@@ -64,6 +77,15 @@ class HistoryEntry with FastEquatable {
   VisitType get visitType => visit.visitType;
   String? get previewImageUrl => visit.previewImageUrl;
   String? get contentId => visit.contentId;
+
+  /// Whether [lowerCaseQuery] occurs in the title or URL of this visit or of
+  /// any visit it stands for. A Distinct URLs row has to match through those
+  /// too: downloads of one URL can have different file names (their titles).
+  bool matchesText(String lowerCaseQuery) => allVisits.any(
+    (visit) =>
+        visit.title?.toLowerCase().contains(lowerCaseQuery) == true ||
+        visit.url.toLowerCase().contains(lowerCaseQuery),
+  );
 
   @override
   List<Object?> get hashParameters => [
@@ -75,6 +97,40 @@ class HistoryEntry with FastEquatable {
     visit.contentId,
     containerIds,
     containerRelationId,
+    olderVisits,
+  ];
+}
+
+/// Collapse [entries] to one row per URL: the first entry seen for each URL
+/// carries the later ones as [HistoryEntry.olderVisits].
+///
+/// [entries] must be sorted newest first, so each row is the newest visit and
+/// keeps its place in the timeline. URLs are compared exactly: two addresses
+/// that differ only in a tracking parameter or `www.` stay separate rows.
+List<HistoryEntry> collapseToDistinctUrls(List<HistoryEntry> entries) {
+  final olderByUrl = <String, List<HistoryEntry>>{};
+  final newest = <HistoryEntry>[];
+  for (final entry in entries) {
+    final older = olderByUrl[entry.url];
+    if (older == null) {
+      olderByUrl[entry.url] = <HistoryEntry>[];
+      newest.add(entry);
+    } else {
+      older.add(entry);
+    }
+  }
+
+  return [
+    for (final entry in newest)
+      if (olderByUrl[entry.url]!.isEmpty)
+        entry
+      else
+        HistoryEntry(
+          visit: entry.visit,
+          containerIds: entry.containerIds,
+          containerRelationId: entry.containerRelationId,
+          olderVisits: List.unmodifiable(olderByUrl[entry.url]!),
+        ),
   ];
 }
 
@@ -125,4 +181,98 @@ Map<int, int> pairVisitsToRelationsByTime(
     relationByVisit[pair.visitIndex] = pair.relationIndex;
   }
   return relationByVisit;
+}
+
+/// The visit times that must be loaded for [pairVisitsToRelationsByTime] to
+/// pair the visits and relations between [rangeStart] and [rangeEnd] exactly
+/// as it would over the complete history of one canonical URL, or null when
+/// nothing in the range can take part in a pair (always the case for a URL
+/// without relations).
+///
+/// Greedy pairing only links a visit and a relation within
+/// [historyVisitContainerMatchWindowMs] of each other, and one pair's outcome
+/// only depends on pairs sharing its visit or relation. Decisions therefore
+/// propagate through components of the visit–relation graph (edges: within one
+/// window), which can reach arbitrarily far through alternating visits and
+/// relations, so no fixed margin around the range is enough. Visits never link
+/// to each other: a run of untagged reloads needs nothing beyond the range.
+///
+/// Relations count as well as visits, from [relationMargin] before the range
+/// to [relationMargin] after it: whether one pairs with nothing at all
+/// (because its visit is one Places hides from the timeline) is only settled
+/// once its whole component is loaded.
+///
+/// The result spans one window around every relation in a component that
+/// contains such a visit or relation: a visit not yet loaded can only join
+/// such a component through one of those relations. When [visitTimes] already
+/// covers it, the pairing is final; if not, load the wider span and ask
+/// again.
+///
+/// [relationTimes] must be all relations of the URL, not only a time slice.
+({int start, int end})? pairingDependencyWindow({
+  required List<int> visitTimes,
+  required List<int> relationTimes,
+  required int rangeStart,
+  required int rangeEnd,
+  int relationMargin = 0,
+}) {
+  if (relationTimes.isEmpty) return null;
+  const window = historyVisitContainerMatchWindowMs;
+
+  // Union-find over visits (0 until visitTimes.length) and relations (after).
+  final parent = List<int>.generate(
+    visitTimes.length + relationTimes.length,
+    (index) => index,
+  );
+  int find(int node) {
+    var root = node;
+    while (parent[root] != root) {
+      parent[root] = parent[parent[root]];
+      root = parent[root];
+    }
+    return root;
+  }
+
+  final relationOrder = List<int>.generate(relationTimes.length, (i) => i)
+    ..sort((a, b) => relationTimes[a].compareTo(relationTimes[b]));
+  for (var visit = 0; visit < visitTimes.length; visit++) {
+    final time = visitTimes[visit];
+    // First relation at or after `time - window`, then every one within reach.
+    var low = 0;
+    var high = relationOrder.length;
+    while (low < high) {
+      final mid = (low + high) >> 1;
+      if (relationTimes[relationOrder[mid]] < time - window) {
+        low = mid + 1;
+      } else {
+        high = mid;
+      }
+    }
+    for (var k = low; k < relationOrder.length; k++) {
+      final relation = relationOrder[k];
+      if (relationTimes[relation] > time + window) break;
+      parent[find(visit)] = find(visitTimes.length + relation);
+    }
+  }
+
+  bool inRange(int time) => time >= rangeStart && time <= rangeEnd;
+  final anchoredRoots = {
+    for (var visit = 0; visit < visitTimes.length; visit++)
+      if (inRange(visitTimes[visit])) find(visit),
+    for (var relation = 0; relation < relationTimes.length; relation++)
+      if (relationTimes[relation] >= rangeStart - relationMargin &&
+          relationTimes[relation] <= rangeEnd + relationMargin)
+        find(visitTimes.length + relation),
+  };
+
+  int? start;
+  int? end;
+  for (var relation = 0; relation < relationTimes.length; relation++) {
+    if (!anchoredRoots.contains(find(visitTimes.length + relation))) continue;
+    final time = relationTimes[relation];
+    if (start == null || time - window < start) start = time - window;
+    if (end == null || time + window > end) end = time + window;
+  }
+
+  return start == null ? null : (start: start, end: end!);
 }

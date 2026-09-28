@@ -162,7 +162,32 @@ class GeckoHistoryApiImpl() : GeckoHistoryApi {
     override suspend fun deleteDownload(
         id: String
     ) {
-        components.useCases.downloadsUseCases.removeDownload(id)
+        // Only the list entry: Dart asks before deleting a file, and a
+        // time-range delete must never remove one. Explicit so a change to
+        // the middleware's deleteFileFromStorage default can't delete files.
+        components.useCases.downloadsUseCases.removeDownload(id, removeFromDisk = false)
+    }
+
+    override suspend fun deleteDownloadsBetween(
+        startMillis: Long,
+        endMillis: Long
+    ) {
+        // Straight from the store, so downloads the history list collapses
+        // (same file name and status) all go. A download still in progress
+        // keeps running and stays listed: removing its entry would orphan it.
+        val removable = setOf(
+            DownloadState.Status.COMPLETED,
+            DownloadState.Status.FAILED,
+            DownloadState.Status.CANCELLED,
+        )
+        components.core.store.state.downloads.values
+            .filter {
+                it.status in removable &&
+                        it.createdTime >= startMillis && it.createdTime <= endMillis
+            }
+            .forEach {
+                components.useCases.downloadsUseCases.removeDownload(it.id, removeFromDisk = false)
+            }
     }
 
     override suspend fun deleteVisitsBetween(

@@ -4316,6 +4316,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get history_deleteFileActionKeep => 'Keep';
 
   @override
+  String get history_filterDistinctUrls => 'Distinct URLs';
+
+  @override
+  String history_visitCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count visits',
+      one: '1 visit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get history_tooltipDeleteHistory => 'Delete history';
+
+  @override
+  String get history_deleteMenuTimeRange => 'Delete Time Range…';
+
+  @override
+  String get history_deleteMenuBrowsingData => 'Delete Browsing Data…';
+
+  @override
+  String get history_deleteTimeRangeTitle => 'Delete History for a Time Range';
+
+  @override
+  String get history_deleteTimeRangeFrom => 'From';
+
+  @override
+  String get history_deleteTimeRangeTo => 'To';
+
+  @override
+  String get history_deleteTimeRangeLastHour => 'Last hour';
+
+  @override
+  String get history_deleteTimeRangeToday => 'Today';
+
+  @override
+  String get history_deleteTimeRangeLastWeek => 'Last 7 days';
+
+  @override
+  String get history_deleteTimeRangeExplanation =>
+      'Every visit in this range is deleted, in all containers. Finished and failed downloads from this range also leave the downloads list; the files stay on the device. Downloads still in progress are kept.';
+
+  @override
+  String get history_deleteTimeRangeInvalid =>
+      'The start must be before the end.';
+
+  @override
   String get openLinkTools_openLinkTitle => 'Open link';
 
   @override

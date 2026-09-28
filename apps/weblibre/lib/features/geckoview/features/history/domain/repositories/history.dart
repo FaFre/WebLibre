@@ -31,6 +31,10 @@ class HistoryRepository extends _$HistoryRepository {
     return _service.deleteVisitsBetween(start, end);
   }
 
+  Future<void> deleteDownloadsBetween(DateTime start, DateTime end) {
+    return _service.deleteDownloadsBetween(start, end);
+  }
+
   Future<List<VisitInfo>> getDetailedVisits(HistoryFilterOptions options) {
     return _service
         .getDetailedVisits(

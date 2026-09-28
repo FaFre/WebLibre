@@ -24,12 +24,10 @@ import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/entities/history_entry.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/entities/history_filter_options.dart';
+import 'package:weblibre/features/geckoview/features/history/domain/repositories/container_history.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/visit_container.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/user/data/providers.dart';
-import 'package:weblibre/utils/url_canonical.dart';
 
 part 'providers.g.dart';
 
@@ -54,6 +52,10 @@ class HistoryVisitsFilter extends _$HistoryVisitsFilter {
 
   void setDateRange(DateTimeRange<DateTime>? range) {
     state = state.copyWith.dateRange(range);
+  }
+
+  void setDistinctUrls(bool value) {
+    state = state.copyWith.distinctUrls(value);
   }
 
   @override
@@ -102,84 +104,6 @@ class HistoryDownloadsFilter extends _$HistoryDownloadsFilter {
   }
 }
 
-/// Annotate Mozilla Places [visits] with the WebLibre container each belonged
-/// to (from the `visit_container` relation), matched by canonical URL and
-/// nearest visit time. Uncontained visits get an empty tag list. When
-/// [filterContainerId] is set, only visits resolving to that container are
-/// returned.
-///
-/// The match is **one-to-one within each canonical URL**: every relation row
-/// tags at most one visit, and every visit takes at most one relation. Without
-/// this, the same URL opened in several containers one after another (or a
-/// container visit followed by an uncontained one of the same URL, within the
-/// [historyVisitContainerMatchWindowMs] window) would let one relation bleed
-/// onto neighbouring visits — an uncontained visit stealing the previous
-/// container's tag. Pairs are assigned greedily from the smallest time delta,
-/// consuming both sides, which approximates the minimum-skew assignment.
-Future<List<HistoryEntry>> _annotateVisits(
-  VisitContainerDao dao,
-  List<VisitInfo> visits, {
-  String? filterContainerId,
-}) async {
-  // Visit indices grouped by canonical URL (Places rows without an
-  // indexable/canonicalizable URL simply carry no container).
-  final canonicals = <String>{};
-  final visitIndicesByCanonical = <String, List<int>>{};
-  for (var i = 0; i < visits.length; i++) {
-    final canonical = canonicalizeUrl(visits[i].url)?.canonical;
-    if (canonical != null) {
-      canonicals.add(canonical);
-      (visitIndicesByCanonical[canonical] ??= <int>[]).add(i);
-    }
-  }
-
-  final relations = await dao.relationsForCanonicalUrls(canonicals);
-  final byCanonical = <String, List<VisitContainerData>>{};
-  for (final relation in relations) {
-    (byCanonical[relation.urlCanonical] ??= <VisitContainerData>[]).add(
-      relation,
-    );
-  }
-
-  // Resolve the relation per visit via one-to-one nearest-time matching within
-  // each canonical URL group.
-  final relationByVisitIndex = <int, VisitContainerData>{};
-  for (final MapEntry(key: canonical, value: visitIndices)
-      in visitIndicesByCanonical.entries) {
-    final candidates = byCanonical[canonical];
-    if (candidates == null) continue;
-
-    final pairing = pairVisitsToRelationsByTime(
-      [for (final visitIndex in visitIndices) visits[visitIndex].visitTime],
-      [for (final candidate in candidates) candidate.visitTime],
-    );
-    pairing.forEach((localVisitIndex, relationIndex) {
-      relationByVisitIndex[visitIndices[localVisitIndex]] =
-          candidates[relationIndex];
-    });
-  }
-
-  final entries = <HistoryEntry>[];
-  for (var i = 0; i < visits.length; i++) {
-    final relation = relationByVisitIndex[i];
-
-    if (filterContainerId != null &&
-        relation?.containerId != filterContainerId) {
-      continue;
-    }
-
-    entries.add(
-      HistoryEntry(
-        visit: visits[i],
-        containerIds: relation == null ? const [] : [relation.containerId],
-        containerRelationId: relation?.id,
-      ),
-    );
-  }
-
-  return entries;
-}
-
 @Riverpod()
 Future<List<HistoryEntry>> browsingHistory(Ref ref) async {
   final options = ref.watch(historyVisitsFilterProvider);
@@ -188,11 +112,15 @@ Future<List<HistoryEntry>> browsingHistory(Ref ref) async {
       .read(historyRepositoryProvider.notifier)
       .getDetailedVisits(options);
 
-  return await _annotateVisits(
+  final entries = await annotateVisitsWithContainers(
     ref.read(tabDatabaseProvider).visitContainerDao,
     visits,
     filterContainerId: options.containerId,
   );
+
+  // Collapsed after the container filter, so a distinct row is the newest
+  // visit within the container being shown.
+  return options.distinctUrls ? collapseToDistinctUrls(entries) : entries;
 }
 
 @Riverpod()

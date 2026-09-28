@@ -57,6 +57,16 @@ class GeckoHistoryService {
     }
   }
 
+  /// Remove the finished, failed and cancelled downloads created between
+  /// [start] and [end] from the download list, keeping their files. Covers
+  /// every such download, including ones [getDetailedVisits] collapses.
+  Future<void> deleteDownloadsBetween(DateTime start, DateTime end) {
+    return _api.deleteDownloadsBetween(
+      start.millisecondsSinceEpoch,
+      end.millisecondsSinceEpoch,
+    );
+  }
+
   Future<void> deleteVisitsBetween(DateTime start, DateTime end) {
     return _api.deleteVisitsBetween(
       start.millisecondsSinceEpoch,

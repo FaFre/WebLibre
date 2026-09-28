@@ -44,7 +44,7 @@ final class HistoryVisitsFilterProvider
 }
 
 String _$historyVisitsFilterHash() =>
-    r'dca9d17bcaa5c5db2757edf59a8a23e2aebe8c99';
+    r'c6cf13530b8e2e40eae170aaea584eb1483343e3';
 
 @JsonPersist()
 abstract class _$HistoryVisitsFilterBase
@@ -162,7 +162,7 @@ final class BrowsingHistoryProvider
   }
 }
 
-String _$browsingHistoryHash() => r'0ed9a3d1f10091eb1a20f1c388c1ace80c1f75da';
+String _$browsingHistoryHash() => r'2a8b21d48c39e5a2f78dfa44ac1905f63c714a7f';
 
 @ProviderFor(browsingDownloads)
 final browsingDownloadsProvider = BrowsingDownloadsProvider._();
