@@ -68,4 +68,8 @@
     <string name="weblibre_launch_action_cancel">Cancel</string>
     <string name="weblibre_launch_action_close">Close</string>
 
+    <!-- Checkbox under the download manager chooser. When checked, the app picked
+       - next is used for later downloads without asking. -->
+    <string name="weblibre_download_app_chooser_always_use">Always use this app</string>
+
 </resources>

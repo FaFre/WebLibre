@@ -118,6 +118,7 @@ export 'src/pigeons/gecko.g.dart'
         NativeAppLinkRuleDecision,
         NativeContextAppLinkPolicy,
         PhoneHitResult,
+        PreferredDownloadManager,
         ProtectedTargetPattern,
         ProxyLoadError,
         PushDistributor,

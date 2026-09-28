@@ -10493,6 +10493,53 @@
   "@settings_externalDownloadManagerSubtitle": {
     "description": "Explanation under that switch."
   },
+  "settings_preferredDownloadManagerTitle": "Preferred download manager",
+  "@settings_preferredDownloadManagerTitle": {
+    "description": "Row showing which app downloads go to without asking, as remembered from the download manager chooser."
+  },
+  "settings_preferredDownloadManagerKeywords": "downloads, download manager, always use, default app, chooser, ask",
+  "@settings_preferredDownloadManagerKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "settings_preferredDownloadManagerSubtitleNotSet": "Not set — tick “Always use this app” the next time the chooser appears",
+  "@settings_preferredDownloadManagerSubtitleNotSet": {
+    "description": "Line under that row when no app is remembered. The row itself cannot be tapped: an app is remembered by ticking the “Always use this app” box in the download manager chooser that appears when a download starts. Quote that box's label as the chooser shows it in your language."
+  },
+  "settings_preferredDownloadManagerSubtitleThisApp": "{appName}, with a confirmation before each download",
+  "@settings_preferredDownloadManagerSubtitleThisApp": {
+    "description": "Line under that row when the browser itself is remembered: the chooser is skipped, but the browser's own download confirmation still shows. appName is the browser's name.",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_preferredDownloadManagerSubtitleUnavailable": "No longer installed ({packageName}) — asking every time",
+  "@settings_preferredDownloadManagerSubtitleUnavailable": {
+    "description": "Line under that row when the remembered app was uninstalled; the chooser shows until another app is remembered. packageName is the Android package id of the removed app.",
+    "placeholders": {
+      "packageName": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_preferredDownloadManagerSubtitleExternalOff": "Not set — only used with an external download manager",
+  "@settings_preferredDownloadManagerSubtitleExternalOff": {
+    "description": "Line under that row when no app is remembered and the external download manager switch is off, so WebLibre downloads everything itself and no chooser appears."
+  },
+  "settings_preferredDownloadManagerSubtitleInactive": "{appName} — not used while the external download manager is off",
+  "@settings_preferredDownloadManagerSubtitleInactive": {
+    "description": "Line under that row when an app is remembered but the external download manager switch is off, so WebLibre downloads everything itself. appName is the remembered app's name, or its Android package id when it is no longer installed.",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_preferredDownloadManagerClearTooltip": "Clear preferred manager",
+  "@settings_preferredDownloadManagerClearTooltip": {
+    "description": "Tooltip of the button that forgets the remembered download manager, so the chooser asks again."
+  },
   "settings_defaultBrowserSectionTitle": "Default Browser",
   "@settings_defaultBrowserSectionTitle": {
     "description": "Section heading on the general settings screen for the default browser setting."
@@ -10556,6 +10603,10 @@
   "settings_indexDownloadFolderSubtitle": "Choose where downloaded files are saved",
   "@settings_indexDownloadFolderSubtitle": {
     "description": "Summary of the download folder setting, shown as a settings search result."
+  },
+  "settings_indexPreferredDownloadManagerSubtitle": "The app downloads go to without asking",
+  "@settings_indexPreferredDownloadManagerSubtitle": {
+    "description": "Summary of the preferred download manager setting, shown as a settings search result."
   },
   "settings_contentIdentitySectionTitle": "Content & Identity",
   "@settings_contentIdentitySectionTitle": {

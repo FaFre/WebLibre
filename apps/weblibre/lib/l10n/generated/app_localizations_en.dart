@@ -8341,6 +8341,43 @@ class AppLocalizationsEn extends AppLocalizations {
       'Manage downloads with another app';
 
   @override
+  String get settings_preferredDownloadManagerTitle =>
+      'Preferred download manager';
+
+  @override
+  String get settings_preferredDownloadManagerKeywords =>
+      'downloads, download manager, always use, default app, chooser, ask';
+
+  @override
+  String get settings_preferredDownloadManagerSubtitleNotSet =>
+      'Not set — tick “Always use this app” the next time the chooser appears';
+
+  @override
+  String settings_preferredDownloadManagerSubtitleThisApp(String appName) {
+    return '$appName, with a confirmation before each download';
+  }
+
+  @override
+  String settings_preferredDownloadManagerSubtitleUnavailable(
+    String packageName,
+  ) {
+    return 'No longer installed ($packageName) — asking every time';
+  }
+
+  @override
+  String get settings_preferredDownloadManagerSubtitleExternalOff =>
+      'Not set — only used with an external download manager';
+
+  @override
+  String settings_preferredDownloadManagerSubtitleInactive(String appName) {
+    return '$appName — not used while the external download manager is off';
+  }
+
+  @override
+  String get settings_preferredDownloadManagerClearTooltip =>
+      'Clear preferred manager';
+
+  @override
   String get settings_defaultBrowserSectionTitle => 'Default Browser';
 
   @override
@@ -8396,6 +8433,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settings_indexDownloadFolderSubtitle =>
       'Choose where downloaded files are saved';
+
+  @override
+  String get settings_indexPreferredDownloadManagerSubtitle =>
+      'The app downloads go to without asking';
 
   @override
   String get settings_contentIdentitySectionTitle => 'Content & Identity';

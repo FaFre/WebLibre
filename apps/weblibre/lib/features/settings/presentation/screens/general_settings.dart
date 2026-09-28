@@ -24,7 +24,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
-    show GeckoBrowserService;
+    show GeckoBrowserService, PreferredDownloadManager;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:saf_util/saf_util.dart';
 import 'package:weblibre/core/logger.dart';
@@ -32,6 +32,7 @@ import 'package:weblibre/core/providers/app_localizations.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/repositories/locale_resolver.dart';
 import 'package:weblibre/extensions/locale.dart';
+import 'package:weblibre/features/settings/domain/providers/preferred_download_manager.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
@@ -143,6 +144,14 @@ List<SettingsSectionDefinition> generalSettingsSections(BuildContext context) {
             l10n.settings_externalDownloadManagerKeywords,
           ),
           child: const _ExternalDownloadManagerTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_preferredDownloadManagerTitle,
+          subtitle: l10n.settings_indexPreferredDownloadManagerSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_preferredDownloadManagerKeywords,
+          ),
+          child: const PreferredDownloadManagerTile(),
         ),
         SettingsEntryDefinition(
           title: l10n.settings_downloadFolderTitle,
@@ -735,11 +744,20 @@ class _DownloadDirectoryTile extends HookConsumerWidget {
     final directoryUri = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.downloadDirectoryUri),
     );
-    final useExternalDownloadManager = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.useExternalDownloadManager,
-      ),
-    );
+    // With WebLibre remembered as the download manager, the chooser is skipped
+    // and WebLibre downloads the file itself, into this folder.
+    final useExternalDownloadManager =
+        ref.watch(
+          generalSettingsWithDefaultsProvider.select(
+            (s) => s.useExternalDownloadManager,
+          ),
+        ) &&
+        ref.watch(
+              preferredDownloadManagerChoiceProvider.select(
+                (choice) => choice.value?.isThisApp,
+              ),
+            ) !=
+            true;
 
     // Resolving the folder is also how the grant is checked: access can be
     // revoked in the system settings, or the card it lives on unmounted, and
@@ -830,6 +848,83 @@ class _DownloadDirectoryTile extends HookConsumerWidget {
       // the choice here would not be honored.
       enabled: !useExternalDownloadManager,
       onTap: pick,
+    );
+  }
+}
+
+/// The app downloads go to without the chooser, as remembered from its
+/// "Always use this app" box, and the way back to being asked.
+class PreferredDownloadManagerTile extends HookConsumerWidget {
+  const PreferredDownloadManagerTile({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Set from the chooser, which runs while this screen is not showing — and
+    // in a Custom Tab, outside the app entirely — and the remembered app can be
+    // uninstalled in between. Read it again whenever the app comes back.
+    useOnAppLifecycleStateChange((previous, current) {
+      if (current == AppLifecycleState.resumed) {
+        ref.invalidate(preferredDownloadManagerChoiceProvider);
+      }
+    });
+
+    final useExternalDownloadManager = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.useExternalDownloadManager,
+      ),
+    );
+    final choice = ref.watch(preferredDownloadManagerChoiceProvider).value;
+    final l10n = AppLocalizations.of(context);
+
+    final subtitle = switch (choice) {
+      // With the switch off WebLibre downloads everything itself and no
+      // chooser ever shows, so neither "ask" nor an external app is true.
+      null when !useExternalDownloadManager =>
+        l10n.settings_preferredDownloadManagerSubtitleExternalOff,
+      null => l10n.settings_preferredDownloadManagerSubtitleNotSet,
+      PreferredDownloadManager(
+        isThisApp: false,
+        :final label,
+        :final packageName,
+      )
+          when !useExternalDownloadManager =>
+        l10n.settings_preferredDownloadManagerSubtitleInactive(
+          label ?? packageName,
+        ),
+      PreferredDownloadManager(label: null, :final packageName) =>
+        l10n.settings_preferredDownloadManagerSubtitleUnavailable(packageName),
+      PreferredDownloadManager(isThisApp: true, :final label?) =>
+        l10n.settings_preferredDownloadManagerSubtitleThisApp(label),
+      PreferredDownloadManager(:final label?) => label,
+    };
+
+    return ListTile(
+      title: Text(l10n.settings_preferredDownloadManagerTitle),
+      subtitle: Text(subtitle),
+      leading: Icon(
+        choice != null && choice.label == null
+            ? MdiIcons.downloadOff
+            : MdiIcons.downloadCircle,
+      ),
+      trailing: choice != null
+          ? IconButton(
+              icon: const Icon(Icons.close),
+              tooltip: l10n.settings_preferredDownloadManagerClearTooltip,
+              onPressed: () async {
+                try {
+                  await ref
+                      .read(preferredDownloadManagerChoiceProvider.notifier)
+                      .clear();
+                } catch (error, stackTrace) {
+                  logger.e(
+                    'Failed to clear the preferred download manager',
+                    error: error,
+                    stackTrace: stackTrace,
+                  );
+                }
+              },
+            )
+          : null,
     );
   }
 }

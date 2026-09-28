@@ -14256,6 +14256,56 @@ abstract class AppLocalizations {
   /// **'Manage downloads with another app'**
   String get settings_externalDownloadManagerSubtitle;
 
+  /// Row showing which app downloads go to without asking, as remembered from the download manager chooser.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferred download manager'**
+  String get settings_preferredDownloadManagerTitle;
+
+  /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'downloads, download manager, always use, default app, chooser, ask'**
+  String get settings_preferredDownloadManagerKeywords;
+
+  /// Line under that row when no app is remembered. The row itself cannot be tapped: an app is remembered by ticking the “Always use this app” box in the download manager chooser that appears when a download starts. Quote that box's label as the chooser shows it in your language.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set — tick “Always use this app” the next time the chooser appears'**
+  String get settings_preferredDownloadManagerSubtitleNotSet;
+
+  /// Line under that row when the browser itself is remembered: the chooser is skipped, but the browser's own download confirmation still shows. appName is the browser's name.
+  ///
+  /// In en, this message translates to:
+  /// **'{appName}, with a confirmation before each download'**
+  String settings_preferredDownloadManagerSubtitleThisApp(String appName);
+
+  /// Line under that row when the remembered app was uninstalled; the chooser shows until another app is remembered. packageName is the Android package id of the removed app.
+  ///
+  /// In en, this message translates to:
+  /// **'No longer installed ({packageName}) — asking every time'**
+  String settings_preferredDownloadManagerSubtitleUnavailable(
+    String packageName,
+  );
+
+  /// Line under that row when no app is remembered and the external download manager switch is off, so WebLibre downloads everything itself and no chooser appears.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set — only used with an external download manager'**
+  String get settings_preferredDownloadManagerSubtitleExternalOff;
+
+  /// Line under that row when an app is remembered but the external download manager switch is off, so WebLibre downloads everything itself. appName is the remembered app's name, or its Android package id when it is no longer installed.
+  ///
+  /// In en, this message translates to:
+  /// **'{appName} — not used while the external download manager is off'**
+  String settings_preferredDownloadManagerSubtitleInactive(String appName);
+
+  /// Tooltip of the button that forgets the remembered download manager, so the chooser asks again.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear preferred manager'**
+  String get settings_preferredDownloadManagerClearTooltip;
+
   /// Section heading on the general settings screen for the default browser setting.
   ///
   /// In en, this message translates to:
@@ -14351,6 +14401,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose where downloaded files are saved'**
   String get settings_indexDownloadFolderSubtitle;
+
+  /// Summary of the preferred download manager setting, shown as a settings search result.
+  ///
+  /// In en, this message translates to:
+  /// **'The app downloads go to without asking'**
+  String get settings_indexPreferredDownloadManagerSubtitle;
 
   /// Section heading on the advanced settings screen for JavaScript, user agent and certificate settings.
   ///

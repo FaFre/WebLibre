@@ -190,6 +190,17 @@ class GeckoEngineSettingsService {
     return _api.getUseExternalDownloadManager();
   }
 
+  /// The download manager the user chose to always use from the chooser, or
+  /// null while every download asks. Profile-scoped.
+  Future<PreferredDownloadManager?> getPreferredDownloadManager() {
+    return _api.getPreferredDownloadManager();
+  }
+
+  /// Forgets the remembered download manager, so the chooser asks again.
+  Future<void> clearPreferredDownloadManager() {
+    return _api.clearPreferredDownloadManager();
+  }
+
   /// Sets the browser-wide default desktop mode (BrowserState.desktopMode).
   /// Newly opened tabs inherit this default; a per-tab requestDesktopSite still
   /// overrides it for that tab.

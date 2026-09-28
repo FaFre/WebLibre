@@ -8,6 +8,7 @@ package eu.weblibre.flutter_mozilla_components.api
 
 import android.content.Context
 import eu.weblibre.flutter_mozilla_components.ColorSchemePreference
+import eu.weblibre.flutter_mozilla_components.DownloadManagerPreference
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.feature.ReaderViewAppearanceFeature
 import eu.weblibre.flutter_mozilla_components.history.HistoryExclusions
@@ -18,6 +19,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.DohSettingsMode
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettings
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.HttpsOnlyMode
+import eu.weblibre.flutter_mozilla_components.pigeons.PreferredDownloadManager
 import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
 import eu.weblibre.flutter_mozilla_components.pigeons.TrackingScope
 import mozilla.components.browser.state.action.ContentAction
@@ -421,6 +423,22 @@ class GeckoEngineSettingsApiImpl(
 
     override fun getUseExternalDownloadManager(): Boolean {
         return GlobalComponents.useExternalDownloadManager
+    }
+
+    override fun getPreferredDownloadManager(): PreferredDownloadManager? {
+        val context = applicationContext ?: return null
+        val choice = DownloadManagerPreference.read(context) ?: return null
+
+        return PreferredDownloadManager(
+            packageName = choice.packageName,
+            label = DownloadManagerPreference.label(context, choice),
+            isThisApp = DownloadManagerPreference.isThisApp(context, choice),
+        )
+    }
+
+    override fun clearPreferredDownloadManager() {
+        val context = applicationContext ?: return
+        DownloadManagerPreference.clear(context)
     }
 
     override fun setGlobalDesktopMode(enable: Boolean, applyToExistingTabs: Boolean) {
