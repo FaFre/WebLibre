@@ -15422,6 +15422,24 @@ abstract class AppLocalizations {
   /// **'The browser can read the clipboard to suggest URLs'**
   String get settings_allowClipboardAccessSubtitle;
 
+  /// Switch: while typing in the address bar, suggest pages from the saved browsing history (result rows and inline completion).
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest from history'**
+  String get settings_historySuggestionsTitle;
+
+  /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'history suggestions, visited pages, autocomplete, ghost text, privacy'**
+  String get settings_historySuggestionsKeywords;
+
+  /// Explanation under that switch. Makes clear that turning it off hides suggestions without deleting history.
+  ///
+  /// In en, this message translates to:
+  /// **'Show visited pages and complete addresses from your history while typing. Turning this off keeps your history.'**
+  String get settings_historySuggestionsSubtitle;
+
   /// Switch: let searches typed in a private tab use the search suggestion provider and the saved browsing history, like regular tabs do. Off by default.
   ///
   /// In en, this message translates to:
@@ -15601,6 +15619,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Accept the inline suggestion when pressing enter'**
   String get settings_indexAcceptSuggestionOnSubmitSubtitle;
+
+  /// Summary of the history suggestions setting, shown as a settings search result.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest visited pages while typing'**
+  String get settings_indexHistorySuggestionsSubtitle;
 
   /// Summary of the private tab suggestions setting, shown as a settings search result.
   ///

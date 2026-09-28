@@ -11368,6 +11368,18 @@
   "@settings_allowClipboardAccessSubtitle": {
     "description": "Explanation under that switch."
   },
+  "settings_historySuggestionsTitle": "Suggest from history",
+  "@settings_historySuggestionsTitle": {
+    "description": "Switch: while typing in the address bar, suggest pages from the saved browsing history (result rows and inline completion)."
+  },
+  "settings_historySuggestionsKeywords": "history suggestions, visited pages, autocomplete, ghost text, privacy",
+  "@settings_historySuggestionsKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "settings_historySuggestionsSubtitle": "Show visited pages and complete addresses from your history while typing. Turning this off keeps your history.",
+  "@settings_historySuggestionsSubtitle": {
+    "description": "Explanation under that switch. Makes clear that turning it off hides suggestions without deleting history."
+  },
   "settings_privateSearchSuggestionsTitle": "Suggestions in private tabs",
   "@settings_privateSearchSuggestionsTitle": {
     "description": "Switch: let searches typed in a private tab use the search suggestion provider and the saved browsing history, like regular tabs do. Off by default."
@@ -11492,6 +11504,10 @@
   "settings_indexAcceptSuggestionOnSubmitSubtitle": "Accept the inline suggestion when pressing enter",
   "@settings_indexAcceptSuggestionOnSubmitSubtitle": {
     "description": "Summary of the \"Autocomplete on enter\" setting, shown as a settings search result."
+  },
+  "settings_indexHistorySuggestionsSubtitle": "Suggest visited pages while typing",
+  "@settings_indexHistorySuggestionsSubtitle": {
+    "description": "Summary of the history suggestions setting, shown as a settings search result."
   },
   "settings_indexPrivateSearchSuggestionsSubtitle": "Use suggestions and history in private tabs",
   "@settings_indexPrivateSearchSuggestionsSubtitle": {

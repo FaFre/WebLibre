@@ -9220,6 +9220,17 @@ class AppLocalizationsDe extends AppLocalizations {
       'Der Browser kann die Zwischenablage lesen, um URLs vorzuschlagen';
 
   @override
+  String get settings_historySuggestionsTitle => 'Aus dem Verlauf vorschlagen';
+
+  @override
+  String get settings_historySuggestionsKeywords =>
+      'Verlaufsvorschläge, besuchte Seiten, Autovervollständigung, Datenschutz';
+
+  @override
+  String get settings_historySuggestionsSubtitle =>
+      'Beim Tippen besuchte Seiten anzeigen und Adressen aus dem Verlauf vervollständigen. Beim Ausschalten bleibt der Verlauf erhalten.';
+
+  @override
   String get settings_privateSearchSuggestionsTitle =>
       'Vorschläge in privaten Tabs';
 
@@ -9335,6 +9346,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get settings_indexAcceptSuggestionOnSubmitSubtitle =>
       'Beim Drücken der Eingabetaste den eingeblendeten Vorschlag übernehmen';
+
+  @override
+  String get settings_indexHistorySuggestionsSubtitle =>
+      'Beim Tippen besuchte Seiten vorschlagen';
 
   @override
   String get settings_indexPrivateSearchSuggestionsSubtitle =>

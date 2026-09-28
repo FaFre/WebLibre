@@ -9037,6 +9037,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'The browser can read the clipboard to suggest URLs';
 
   @override
+  String get settings_historySuggestionsTitle => 'Suggest from history';
+
+  @override
+  String get settings_historySuggestionsKeywords =>
+      'history suggestions, visited pages, autocomplete, ghost text, privacy';
+
+  @override
+  String get settings_historySuggestionsSubtitle =>
+      'Show visited pages and complete addresses from your history while typing. Turning this off keeps your history.';
+
+  @override
   String get settings_privateSearchSuggestionsTitle =>
       'Suggestions in private tabs';
 
@@ -9149,6 +9160,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settings_indexAcceptSuggestionOnSubmitSubtitle =>
       'Accept the inline suggestion when pressing enter';
+
+  @override
+  String get settings_indexHistorySuggestionsSubtitle =>
+      'Suggest visited pages while typing';
 
   @override
   String get settings_indexPrivateSearchSuggestionsSubtitle =>

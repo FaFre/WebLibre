@@ -22,10 +22,11 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/sea
 
 /// What one search may draw its suggestions from.
 ///
-/// A private search is isolated by default: its text never goes to a remote
-/// suggestion provider and regular saved history never suggests into it. The
-/// private search suggestions setting lifts that, giving private searches the
-/// same sources as regular ones.
+/// Two settings decide it. History suggestions are the user's standing choice
+/// for saved history. Private search suggestions decide whether a private search
+/// gets the regular sources at all: off by default, a private search's text
+/// never goes to a remote suggestion provider and regular saved history never
+/// suggests into it, whatever the history setting says.
 ///
 /// Open tabs, bookmarks and the bundled popular-sites list are not gated here.
 /// They stay on the device, and a private search keeps them.
@@ -45,13 +46,14 @@ class SearchSourcePolicy with FastEquatable {
 
   factory SearchSourcePolicy.resolve({
     required bool privateMode,
+    required bool historySuggestionsEnabled,
     required bool privateSearchSuggestionsEnabled,
   }) {
     final isolated = privateMode && !privateSearchSuggestionsEnabled;
 
     return SearchSourcePolicy(
       remoteSuggestions: !isolated,
-      savedHistory: !isolated,
+      savedHistory: !isolated && historySuggestionsEnabled,
     );
   }
 

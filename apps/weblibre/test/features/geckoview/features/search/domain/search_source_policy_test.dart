@@ -29,9 +29,10 @@ const _historyModules = {
 
 void main() {
   group('SearchSourcePolicy.resolve', () {
-    test('a regular search uses every source', () {
+    test('a regular search uses every source by default', () {
       final policy = SearchSourcePolicy.resolve(
         privateMode: false,
+        historySuggestionsEnabled: true,
         privateSearchSuggestionsEnabled: false,
       );
 
@@ -40,31 +41,58 @@ void main() {
       expect(SearchModuleType.values.every(policy.allowsModule), isTrue);
     });
 
-    test('by default a private search uses neither remote suggestions nor '
-        'saved history', () {
+    test('the setting hides saved history but keeps remote suggestions', () {
       final policy = SearchSourcePolicy.resolve(
-        privateMode: true,
+        privateMode: false,
+        historySuggestionsEnabled: false,
         privateSearchSuggestionsEnabled: false,
       );
 
-      expect(policy.remoteSuggestions, isFalse);
+      expect(policy.remoteSuggestions, isTrue);
       expect(policy.savedHistory, isFalse);
     });
 
     test('opting in gives a private search the regular sources', () {
       final policy = SearchSourcePolicy.resolve(
         privateMode: true,
+        historySuggestionsEnabled: true,
         privateSearchSuggestionsEnabled: true,
       );
 
       expect(policy.remoteSuggestions, isTrue);
       expect(policy.savedHistory, isTrue);
     });
+
+    test('opting in still honours the history setting', () {
+      final policy = SearchSourcePolicy.resolve(
+        privateMode: true,
+        historySuggestionsEnabled: false,
+        privateSearchSuggestionsEnabled: true,
+      );
+
+      expect(policy.remoteSuggestions, isTrue);
+      expect(policy.savedHistory, isFalse);
+    });
+
+    for (final historySuggestionsEnabled in [true, false]) {
+      test('by default a private search uses neither remote suggestions nor '
+          'saved history (history setting: $historySuggestionsEnabled)', () {
+        final policy = SearchSourcePolicy.resolve(
+          privateMode: true,
+          historySuggestionsEnabled: historySuggestionsEnabled,
+          privateSearchSuggestionsEnabled: false,
+        );
+
+        expect(policy.remoteSuggestions, isFalse);
+        expect(policy.savedHistory, isFalse);
+      });
+    }
   });
 
   group('SearchSourcePolicy.allowsModule', () {
     final policy = SearchSourcePolicy.resolve(
       privateMode: true,
+      historySuggestionsEnabled: true,
       privateSearchSuggestionsEnabled: false,
     );
 
@@ -74,7 +102,7 @@ void main() {
       }
     });
 
-    test('keeps tabs, bookmarks, popular sites and suggestions', () {
+    test('keeps tabs, bookmarks, popular sites, actions and suggestions', () {
       for (final module in SearchModuleType.values) {
         if (_historyModules.contains(module)) continue;
         expect(policy.allowsModule(module), isTrue, reason: module.name);

@@ -27,6 +27,12 @@ part 'search_source_policy.g.dart';
 /// The [SearchSourcePolicy] for a search typed into a private tab or not.
 @Riverpod()
 SearchSourcePolicy searchSourcePolicy(Ref ref, {required bool privateMode}) {
+  final historySuggestionsEnabled = ref.watch(
+    generalSettingsWithDefaultsProvider.select(
+      (s) => s.historySuggestionsEnabled,
+    ),
+  );
+
   // Only a private search depends on it, so a regular one does not rebuild
   // when it changes.
   final privateSearchSuggestionsEnabled =
@@ -39,6 +45,7 @@ SearchSourcePolicy searchSourcePolicy(Ref ref, {required bool privateMode}) {
 
   return SearchSourcePolicy.resolve(
     privateMode: privateMode,
+    historySuggestionsEnabled: historySuggestionsEnabled,
     privateSearchSuggestionsEnabled: privateSearchSuggestionsEnabled,
   );
 }

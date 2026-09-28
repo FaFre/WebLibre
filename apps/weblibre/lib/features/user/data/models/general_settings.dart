@@ -471,10 +471,17 @@ class GeneralSettings with FastEquatable {
   /// (history/top domains) has no match. Defaults to true.
   final bool popularSitesAutocompleteEnabled;
 
+  /// Whether saved browsing history may suggest while typing: the history
+  /// result sections (engine and local content index) and the history-derived
+  /// inline completion. Turning it off hides those suggestions without
+  /// deleting either store. Private searches only follow it when
+  /// [privateSearchSuggestionsEnabled] is on. Defaults to true.
+  final bool historySuggestionsEnabled;
+
   /// Whether a search typed into a private tab may use the same suggestion
-  /// sources as a regular one: the remote suggestion provider and saved
-  /// history. Off by default, so private input stays on the device and regular
-  /// history stays out of it.
+  /// sources as a regular one: the remote suggestion provider, and saved
+  /// history as far as [historySuggestionsEnabled] allows. Off by default, so
+  /// private input stays on the device and regular history stays out of it.
   final bool privateSearchSuggestionsEnabled;
 
   /// Whether dark mode should use pure-black ("OLED"/high-contrast) surfaces.
@@ -593,6 +600,7 @@ class GeneralSettings with FastEquatable {
     required this.indexPrivateTabs,
     required this.acceptSuggestionOnSubmit,
     required this.popularSitesAutocompleteEnabled,
+    required this.historySuggestionsEnabled,
     required this.privateSearchSuggestionsEnabled,
     required this.pureBlack,
     required this.globalDesktopMode,
@@ -687,6 +695,7 @@ class GeneralSettings with FastEquatable {
     bool? indexPrivateTabs,
     bool? acceptSuggestionOnSubmit,
     bool? popularSitesAutocompleteEnabled,
+    bool? historySuggestionsEnabled,
     bool? privateSearchSuggestionsEnabled,
     bool? pureBlack,
     bool? globalDesktopMode,
@@ -807,6 +816,7 @@ class GeneralSettings with FastEquatable {
        acceptSuggestionOnSubmit = acceptSuggestionOnSubmit ?? true,
        popularSitesAutocompleteEnabled =
            popularSitesAutocompleteEnabled ?? true,
+       historySuggestionsEnabled = historySuggestionsEnabled ?? true,
        privateSearchSuggestionsEnabled =
            privateSearchSuggestionsEnabled ?? false,
        pureBlack = pureBlack ?? false,
@@ -1056,6 +1066,7 @@ class GeneralSettings with FastEquatable {
     indexPrivateTabs,
     acceptSuggestionOnSubmit,
     popularSitesAutocompleteEnabled,
+    historySuggestionsEnabled,
     privateSearchSuggestionsEnabled,
     pureBlack,
     globalDesktopMode,

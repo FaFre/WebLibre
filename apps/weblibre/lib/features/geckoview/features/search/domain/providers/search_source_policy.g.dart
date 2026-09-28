@@ -77,7 +77,7 @@ final class SearchSourcePolicyProvider
 }
 
 String _$searchSourcePolicyHash() =>
-    r'368e8d081eb8fa5daad4d7a9195685eeabd0ce71';
+    r'f41e098132a5df821f49ae5fb91d1b16a715cd1b';
 
 /// The [SearchSourcePolicy] for a search typed into a private tab or not.
 

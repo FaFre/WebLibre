@@ -211,6 +211,8 @@ abstract class _$GeneralSettingsCWProxy {
     bool popularSitesAutocompleteEnabled,
   );
 
+  GeneralSettings historySuggestionsEnabled(bool historySuggestionsEnabled);
+
   GeneralSettings privateSearchSuggestionsEnabled(
     bool privateSearchSuggestionsEnabled,
   );
@@ -317,6 +319,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool indexPrivateTabs,
     bool acceptSuggestionOnSubmit,
     bool popularSitesAutocompleteEnabled,
+    bool historySuggestionsEnabled,
     bool privateSearchSuggestionsEnabled,
     bool pureBlack,
     bool globalDesktopMode,
@@ -703,6 +706,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   ) => call(popularSitesAutocompleteEnabled: popularSitesAutocompleteEnabled);
 
   @override
+  GeneralSettings historySuggestionsEnabled(bool historySuggestionsEnabled) =>
+      call(historySuggestionsEnabled: historySuggestionsEnabled);
+
+  @override
   GeneralSettings privateSearchSuggestionsEnabled(
     bool privateSearchSuggestionsEnabled,
   ) => call(privateSearchSuggestionsEnabled: privateSearchSuggestionsEnabled);
@@ -819,6 +826,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? indexPrivateTabs = const $CopyWithPlaceholder(),
     Object? acceptSuggestionOnSubmit = const $CopyWithPlaceholder(),
     Object? popularSitesAutocompleteEnabled = const $CopyWithPlaceholder(),
+    Object? historySuggestionsEnabled = const $CopyWithPlaceholder(),
     Object? privateSearchSuggestionsEnabled = const $CopyWithPlaceholder(),
     Object? pureBlack = const $CopyWithPlaceholder(),
     Object? globalDesktopMode = const $CopyWithPlaceholder(),
@@ -1324,6 +1332,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.popularSitesAutocompleteEnabled
           // ignore: cast_nullable_to_non_nullable
           : popularSitesAutocompleteEnabled as bool,
+      historySuggestionsEnabled:
+          historySuggestionsEnabled == const $CopyWithPlaceholder() ||
+              historySuggestionsEnabled == null
+          ? _value.historySuggestionsEnabled
+          // ignore: cast_nullable_to_non_nullable
+          : historySuggestionsEnabled as bool,
       privateSearchSuggestionsEnabled:
           privateSearchSuggestionsEnabled == const $CopyWithPlaceholder() ||
               privateSearchSuggestionsEnabled == null
@@ -1539,6 +1553,7 @@ GeneralSettings _$GeneralSettingsFromJson(
   acceptSuggestionOnSubmit: json['acceptSuggestionOnSubmit'] as bool?,
   popularSitesAutocompleteEnabled:
       json['popularSitesAutocompleteEnabled'] as bool?,
+  historySuggestionsEnabled: json['historySuggestionsEnabled'] as bool?,
   privateSearchSuggestionsEnabled:
       json['privateSearchSuggestionsEnabled'] as bool?,
   pureBlack: json['pureBlack'] as bool?,
@@ -1659,6 +1674,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'indexPrivateTabs': instance.indexPrivateTabs,
   'acceptSuggestionOnSubmit': instance.acceptSuggestionOnSubmit,
   'popularSitesAutocompleteEnabled': instance.popularSitesAutocompleteEnabled,
+  'historySuggestionsEnabled': instance.historySuggestionsEnabled,
   'privateSearchSuggestionsEnabled': instance.privateSearchSuggestionsEnabled,
   'pureBlack': instance.pureBlack,
   'globalDesktopMode': instance.globalDesktopMode,

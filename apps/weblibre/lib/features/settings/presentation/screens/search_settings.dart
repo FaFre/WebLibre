@@ -91,6 +91,12 @@ List<SettingsSectionDefinition> searchSettingsSections(BuildContext context) {
           child: const _MaxSearchHistoryEntriesSection(),
         ),
         SettingsEntryDefinition(
+          title: l10n.settings_historySuggestionsTitle,
+          subtitle: l10n.settings_indexHistorySuggestionsSubtitle,
+          keywords: settingsKeywords(l10n.settings_historySuggestionsKeywords),
+          child: const _HistorySuggestionsTile(),
+        ),
+        SettingsEntryDefinition(
           title: l10n.settings_privateSearchSuggestionsTitle,
           subtitle: l10n.settings_indexPrivateSearchSuggestionsSubtitle,
           keywords: settingsKeywords(
@@ -426,6 +432,35 @@ class _AcceptSuggestionOnSubmitTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.acceptSuggestionOnSubmit(value),
+            );
+      },
+    );
+  }
+}
+
+class _HistorySuggestionsTile extends HookConsumerWidget {
+  const _HistorySuggestionsTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final historySuggestionsEnabled = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.historySuggestionsEnabled,
+      ),
+    );
+    final l10n = AppLocalizations.of(context);
+
+    return SwitchListTile.adaptive(
+      title: Text(l10n.settings_historySuggestionsTitle),
+      subtitle: Text(l10n.settings_historySuggestionsSubtitle),
+      secondary: const Icon(Icons.history),
+      value: historySuggestionsEnabled,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.historySuggestionsEnabled(value),
             );
       },
     );
