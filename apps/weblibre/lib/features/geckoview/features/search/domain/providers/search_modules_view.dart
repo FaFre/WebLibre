@@ -71,6 +71,11 @@ enum SearchModuleType {
   /// nor reports a count; the header's trailing slot holds the reroll button.
   quote,
 
+  /// Browser actions (reload, history, settings, ...). On the search surface,
+  /// the ones whose name matches the query; on the new-tab page, all of them.
+  /// Tapping a row runs it; submitting the query never does.
+  actions,
+
   /// New tab / View tabs / Resume last tab. These act on the browser shell
   /// around the surface, so they are only offered on [ModuleSurface.home] —
   /// on the new-tab page "New tab" is the page you are already looking at.
@@ -115,6 +120,9 @@ enum ModuleSurface {
       (type: SearchModuleType.recentSearches, visible: true),
       (type: SearchModuleType.frequentBangs, visible: true),
       (type: SearchModuleType.topSites, visible: true),
+      // On even for pages the user has already customized — unlike Quote,
+      // this one is meant to be found without a trip to "Customize sections".
+      (type: SearchModuleType.actions, visible: true),
       (type: SearchModuleType.recentArticles, visible: true),
       (type: SearchModuleType.recentTabs, visible: true),
       (type: SearchModuleType.recentHistory, visible: true),
@@ -132,6 +140,7 @@ enum ModuleSurface {
       (type: SearchModuleType.searchProviders, visible: true),
       (type: SearchModuleType.searchSuggestions, visible: true),
       (type: SearchModuleType.tabs, visible: true),
+      (type: SearchModuleType.actions, visible: true),
       (type: SearchModuleType.bookmarks, visible: true),
       (type: SearchModuleType.articles, visible: true),
       (type: SearchModuleType.combinedHistory, visible: true),

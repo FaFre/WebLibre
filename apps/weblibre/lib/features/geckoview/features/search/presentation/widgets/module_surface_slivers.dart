@@ -32,6 +32,7 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/recent_tabs_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/empty_state/top_sites_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_module_reorder_view.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/action_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_article_summary.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -54,6 +55,12 @@ class ModuleSurfaceCallbacks {
   final TextEditingController? searchTextController;
   final Future<void> Function(String query)? submitSearch;
 
+  /// Present only on the search screen, which carries out the Actions
+  /// section's rows. [actionTabId] is the tab page actions apply to, or null
+  /// to offer browser-wide actions only (see `ActionSearch`).
+  final void Function(ActionSearchItem item)? onActionItemSelected;
+  final String? actionTabId;
+
   /// Present only on [ModuleSurface.home], which is embedded in the browser
   /// shell and can act on it.
   final VoidCallback? onNewTab;
@@ -67,6 +74,8 @@ class ModuleSurfaceCallbacks {
     required this.onContainerSelected,
     this.searchTextController,
     this.submitSearch,
+    this.onActionItemSelected,
+    this.actionTabId,
     this.onNewTab,
     this.onViewTabs,
     this.onResumeLastTab,
@@ -103,6 +112,13 @@ Map<SearchModuleType, Widget Function()> buildSurfaceModuleBuilders({
     SearchModuleType.containers: () =>
         ContainersSection(onContainerSelected: callbacks.onContainerSelected),
     SearchModuleType.quote: () => const QuoteSection(),
+    if (callbacks.onActionItemSelected != null)
+      SearchModuleType.actions: () => ActionSearch(
+        // No query yet: the section lists every action it can offer.
+        searchTextListenable: null,
+        pageTabId: callbacks.actionTabId,
+        onItemSelected: callbacks.onActionItemSelected!,
+      ),
     if (callbacks.onNewTab != null &&
         callbacks.onViewTabs != null &&
         callbacks.onResumeLastTab != null)

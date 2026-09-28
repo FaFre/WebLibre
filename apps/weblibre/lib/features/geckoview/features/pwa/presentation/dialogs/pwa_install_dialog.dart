@@ -21,10 +21,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
@@ -51,8 +50,13 @@ class ShortcutInstallConfig {
 /// A manifest makes "Install as App" the expected choice, but it does not rule
 /// out a plain shortcut: a site being installable is no reason to withhold the
 /// option of just pinning it as a normal tab, so both rows are offered.
+///
+/// [tabId] is the tab being installed. Its container or isolated context is
+/// what the storage choice starts from, so the installed page opens with the
+/// cookies and logins it has in that tab.
 Future<ShortcutInstallConfig?> showPwaInstallBottomSheet(
   BuildContext context, {
+  required String? tabId,
   required String defaultName,
   required Uri url,
 }) {
@@ -68,6 +72,7 @@ Future<ShortcutInstallConfig?> showPwaInstallBottomSheet(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
       child: _InstallConfigSheet(
+        tabId: tabId,
         defaultName: defaultName,
         url: url,
         showAppOption: true,
@@ -84,6 +89,7 @@ Future<ShortcutInstallConfig?> showPwaInstallBottomSheet(
 /// (requires the allowNonManifestPwaInstall setting to be enabled).
 Future<ShortcutInstallConfig?> showShortcutChoiceBottomSheet(
   BuildContext context, {
+  required String? tabId,
   required String defaultName,
   required Uri url,
   required bool showAppOption,
@@ -100,6 +106,7 @@ Future<ShortcutInstallConfig?> showShortcutChoiceBottomSheet(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
       child: _InstallConfigSheet(
+        tabId: tabId,
         defaultName: defaultName,
         url: url,
         showAppOption: showAppOption,
@@ -141,12 +148,16 @@ class _StorageNewIsolated extends _StorageOption {
 }
 
 class _InstallConfigSheet extends HookConsumerWidget {
+  /// The tab being installed. Not necessarily the selected one: a gesture on a
+  /// tab card installs that card's page.
+  final String? tabId;
   final String defaultName;
   final Uri url;
   final bool showAppOption;
   final bool showShortcutOption;
 
   const _InstallConfigSheet({
+    required this.tabId,
     required this.defaultName,
     required this.url,
     required this.showAppOption,
@@ -161,23 +172,26 @@ class _InstallConfigSheet extends HookConsumerWidget {
 
     final nameController = useTextEditingController(text: defaultName);
 
-    final selectedTabId = ref.watch(selectedTabProvider);
-    final tabContextId = selectedTabId != null
-        ? ref.watch(tabStateProvider(selectedTabId))?.contextId
+    // Both come from the tab being installed — not the selected tab, and not
+    // the container picked in the tab bar, which the tab need not belong to.
+    final tabContextId = tabId != null
+        ? ref.watch(tabStateProvider(tabId))?.contextId
         : null;
-    final containerAsync = ref.watch(selectedContainerDataProvider);
-    final containerData = containerAsync.asData?.value;
+    final containerData = ref
+        .watch(watchTabContainerDataProvider(tabId))
+        .asData
+        ?.value;
 
     final options = useMemoized<List<_StorageOption>>(
       () {
         final list = <_StorageOption>[const _StorageDefault()];
 
-        // If the current tab is in an isolated context, offer to inherit it.
+        // If the tab is in an isolated context, offer to inherit it.
         if (isIsolatedContextId(tabContextId)) {
           list.add(_StorageInheritIsolated(tabContextId!));
         }
 
-        // If a regular (non-isolated) container is active, offer it.
+        // If the tab is in a regular (non-isolated) container, offer it.
         final containerContextId = containerData?.metadata.contextualIdentity;
         if (containerData != null &&
             containerContextId != null &&

@@ -120,7 +120,7 @@ final class PageInfoProvider
     with $FutureModifier<WebPageInfo>, $FutureProvider<WebPageInfo> {
   PageInfoProvider._({
     required PageInfoFamily super.from,
-    required (Uri, {bool isImageRequest}) super.argument,
+    required (Uri, {bool isImageRequest, String? tabId}) super.argument,
   }) : super(
          retry: null,
          name: r'pageInfoProvider',
@@ -147,8 +147,14 @@ final class PageInfoProvider
 
   @override
   FutureOr<WebPageInfo> create(Ref ref) {
-    final argument = this.argument as (Uri, {bool isImageRequest});
-    return pageInfo(ref, argument.$1, isImageRequest: argument.isImageRequest);
+    final argument =
+        this.argument as (Uri, {bool isImageRequest, String? tabId});
+    return pageInfo(
+      ref,
+      argument.$1,
+      isImageRequest: argument.isImageRequest,
+      tabId: argument.tabId,
+    );
   }
 
   @override
@@ -162,13 +168,13 @@ final class PageInfoProvider
   }
 }
 
-String _$pageInfoHash() => r'de6a17a592c2e013c222436b8a1a4bedba2175a2';
+String _$pageInfoHash() => r'91ffe72d44f86790152b71c9a0936af06eeb2b3b';
 
 final class PageInfoFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<WebPageInfo>,
-          (Uri, {bool isImageRequest})
+          (Uri, {bool isImageRequest, String? tabId})
         > {
   PageInfoFamily._()
     : super(
@@ -179,11 +185,14 @@ final class PageInfoFamily extends $Family
         isAutoDispose: true,
       );
 
-  PageInfoProvider call(Uri url, {required bool isImageRequest}) =>
-      PageInfoProvider._(
-        argument: (url, isImageRequest: isImageRequest),
-        from: this,
-      );
+  PageInfoProvider call(
+    Uri url, {
+    required bool isImageRequest,
+    String? tabId,
+  }) => PageInfoProvider._(
+    argument: (url, isImageRequest: isImageRequest, tabId: tabId),
+    from: this,
+  );
 
   @override
   String toString() => r'pageInfoProvider';
@@ -254,7 +263,7 @@ final class WebsiteFeedProviderProvider
 }
 
 String _$websiteFeedProviderHash() =>
-    r'b8ad81b883acee41f420af9aeca254fbd29b3107';
+    r'bb9912adc2ce8a4c55a6881dacecb39933168153';
 
 final class WebsiteFeedProviderFamily extends $Family
     with

@@ -23,6 +23,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/pwa/presentation/dialogs/pwa_install_dialog.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -34,19 +35,33 @@ import 'package:weblibre/utils/ui_helper.dart';
 /// The manifest supplies the default name; the sheet itself offers both
 /// "Install as App" and a plain shortcut, so the choice comes back in
 /// [ShortcutInstallConfig.type].
-Future<void> showPwaInstallDialog(BuildContext context, WidgetRef ref) async {
+Future<void> showPwaInstallDialog(BuildContext context, WidgetRef ref) =>
+    showPwaInstallDialogUsing(context, ref.read);
+
+/// [showPwaInstallDialog] for callers without a [WidgetRef], such as a
+/// keep-alive service that opens it on the navigator's context.
+///
+/// Installs [tabId], or the selected tab when it is null. A caller that acts
+/// on a particular tab — a gesture on a tab card — must pass it, or the
+/// selected tab is what ends up on the home screen.
+Future<void> showPwaInstallDialogUsing(
+  BuildContext context,
+  ProviderRead read, {
+  String? tabId,
+}) async {
   final l10n = AppLocalizations.of(context);
-  final selectedTabId = ref.read(selectedTabProvider);
-  final manifest = ref.read(currentTabManifestProvider);
+  final selectedTabId = tabId ?? read(selectedTabProvider);
+  final manifest = read(tabManifestProvider(selectedTabId));
   final defaultName =
       manifest?.shortName ?? manifest?.name ?? l10n.pwa_defaultWebAppName;
   final tabState = selectedTabId != null
-      ? ref.read(tabStateProvider(selectedTabId))
+      ? read(tabStateProvider(selectedTabId))
       : null;
   final url = tabState?.url ?? Uri.parse('about:blank');
 
   final config = await showPwaInstallBottomSheet(
     context,
+    tabId: selectedTabId,
     defaultName: defaultName,
     url: url,
   );
@@ -56,7 +71,8 @@ Future<void> showPwaInstallDialog(BuildContext context, WidgetRef ref) async {
 
   await _performInstall(
     context,
-    ref,
+    read,
+    tabId: selectedTabId,
     config: config,
     defaultName: defaultName,
     manifestBacked: true,
@@ -65,25 +81,33 @@ Future<void> showPwaInstallDialog(BuildContext context, WidgetRef ref) async {
 
 /// Shows choice dialog for sites without a manifest.
 /// Offers "Add as Shortcut" (always) and "Add as App" (if setting enabled).
-Future<void> showShortcutInstallDialog(
+Future<void> showShortcutInstallDialog(BuildContext context, WidgetRef ref) =>
+    showShortcutInstallDialogUsing(context, ref.read);
+
+/// [showShortcutInstallDialog] for callers without a [WidgetRef]. Pins
+/// [tabId], or the selected tab when it is null — see
+/// [showPwaInstallDialogUsing].
+Future<void> showShortcutInstallDialogUsing(
   BuildContext context,
-  WidgetRef ref,
-) async {
+  ProviderRead read, {
+  String? tabId,
+}) async {
   final l10n = AppLocalizations.of(context);
-  final selectedTabId = ref.read(selectedTabProvider);
+  final selectedTabId = tabId ?? read(selectedTabProvider);
   if (selectedTabId == null) return;
 
-  final tabState = ref.read(tabStateProvider(selectedTabId));
+  final tabState = read(tabStateProvider(selectedTabId));
   final defaultName = tabState?.title.trim().isNotEmpty == true
       ? tabState!.title
       : l10n.pwa_defaultSiteName;
   final url = tabState?.url ?? Uri.parse('about:blank');
 
-  final settings = ref.read(generalSettingsWithDefaultsProvider);
+  final settings = read(generalSettingsWithDefaultsProvider);
   final showAppOption = settings.allowNonManifestPwaInstall;
 
   final config = await showShortcutChoiceBottomSheet(
     context,
+    tabId: selectedTabId,
     defaultName: defaultName,
     url: url,
     showAppOption: showAppOption,
@@ -94,7 +118,8 @@ Future<void> showShortcutInstallDialog(
 
   await _performInstall(
     context,
-    ref,
+    read,
+    tabId: selectedTabId,
     config: config,
     defaultName: defaultName,
     manifestBacked: false,
@@ -108,7 +133,8 @@ Future<void> showShortcutInstallDialog(
 /// [manifestBacked] says which sheet asked, which the failure copy needs.
 Future<void> _performInstall(
   BuildContext context,
-  WidgetRef ref, {
+  ProviderRead read, {
+  required String? tabId,
   required ShortcutInstallConfig config,
   required String defaultName,
   required bool manifestBacked,
@@ -132,15 +158,17 @@ Future<void> _performInstall(
     final bool success;
     switch (config.type) {
       case ShortcutInstallType.shortcut:
-        success = await ref.read(
+        success = await read(
           installBasicShortcutProvider(
+            tabId: tabId,
             overrideName: overrideName,
             contextId: config.contextId,
           ).future,
         );
       case ShortcutInstallType.app:
-        success = await ref.read(
+        success = await read(
           installCurrentWebAppProvider(
+            tabId: tabId,
             overrideName: overrideName,
             contextId: config.contextId,
           ).future,

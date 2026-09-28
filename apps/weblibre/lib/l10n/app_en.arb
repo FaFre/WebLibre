@@ -2263,6 +2263,354 @@
   "@browserActions_quitBrowserDescription": {
     "description": "Explanation under that browser action's name in the action lists: it closes all tabs and exits the app. WebLibre is the app name."
   },
+  "browserActions_categoryCreate": "Create",
+  "@browserActions_categoryCreate": {
+    "description": "Heading of a group of browser actions that create something new (a container, a bookmark folder, a profile, ...) in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions."
+  },
+  "browserActions_openInPrivateTabTitle": "Open in Private Tab",
+  "@browserActions_openInPrivateTabTitle": {
+    "description": "Name of the browser action that opens the current page again in a new private tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
+  },
+  "browserActions_openInPrivateTabDescription": "Open the current page in a new private tab",
+  "@browserActions_openInPrivateTabDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens the current page again in a new private tab."
+  },
+  "browserActions_moveTabToContainerTitle": "Move to Container",
+  "@browserActions_moveTabToContainerTitle": {
+    "description": "Name of the browser action that moves the current tab into a container the user picks, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
+  },
+  "browserActions_moveTabToContainerDescription": "Move the current tab to another container",
+  "@browserActions_moveTabToContainerDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it moves the current tab into a container the user picks."
+  },
+  "browserActions_copyLinkTitle": "Copy Link",
+  "@browserActions_copyLinkTitle": {
+    "description": "Name of the browser action that copies the current page's address to the clipboard, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
+  },
+  "browserActions_copyLinkDescription": "Copy the address of the current page",
+  "@browserActions_copyLinkDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it copies the current page's address to the clipboard."
+  },
+  "browserActions_siteSettingsTitle": "Site Settings",
+  "@browserActions_siteSettingsTitle": {
+    "description": "Name of the browser action that opens the sheet with the current site's permissions and tracking protection, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
+  },
+  "browserActions_siteSettingsDescription": "Permissions and tracking protection for this site",
+  "@browserActions_siteSettingsDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens the sheet with the current site's permissions and tracking protection."
+  },
+  "browserActions_addToHomeScreenTitle": "Add to Home Screen",
+  "@browserActions_addToHomeScreenTitle": {
+    "description": "Name of the browser action that installs the current site on the Android home screen as an app or shortcut, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
+  },
+  "browserActions_addToHomeScreenDescription": "Install the current site as an app or shortcut",
+  "@browserActions_addToHomeScreenDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it installs the current site on the Android home screen as an app or shortcut."
+  },
+  "browserActions_subscribeToPageFeedTitle": "Subscribe to Page",
+  "@browserActions_subscribeToPageFeedTitle": {
+    "description": "Name of the browser action that looks for RSS/Atom feeds on the current page and offers to subscribe, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
+  },
+  "browserActions_subscribeToPageFeedDescription": "Find and follow the feeds of the current page",
+  "@browserActions_subscribeToPageFeedDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it looks for RSS/Atom feeds on the current page and offers to subscribe."
+  },
+  "browserActions_showFeedsTitle": "Feeds",
+  "@browserActions_showFeedsTitle": {
+    "description": "Name of the browser action that opens the list of subscribed RSS/Atom feeds, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
+  },
+  "browserActions_showFeedsDescription": "Open your feeds",
+  "@browserActions_showFeedsDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens the list of subscribed RSS/Atom feeds."
+  },
+  "browserActions_showProfilesTitle": "Profiles",
+  "@browserActions_showProfilesTitle": {
+    "description": "Name of the browser action that opens the list of browser profiles, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
+  },
+  "browserActions_showProfilesDescription": "Manage your profiles",
+  "@browserActions_showProfilesDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens the list of browser profiles."
+  },
+  "browserActions_showProxySettingsTitle": "Proxy",
+  "@browserActions_showProxySettingsTitle": {
+    "description": "Name of the browser action that opens the proxy settings, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
+  },
+  "browserActions_showProxySettingsDescription": "Open proxy settings",
+  "@browserActions_showProxySettingsDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens the proxy settings."
+  },
+  "browserActions_showTorTitle": "Tor",
+  "@browserActions_showTorTitle": {
+    "description": "Name of the browser action that opens the Tor proxy screen. Tor is a brand name, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
+  },
+  "browserActions_showTorDescription": "Open Tor settings",
+  "@browserActions_showTorDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens the Tor proxy screen. Tor is a brand name."
+  },
+  "browserActions_showSyncSettingsTitle": "Sync",
+  "@browserActions_showSyncSettingsTitle": {
+    "description": "Name of the browser action that opens the sync settings, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
+  },
+  "browserActions_showSyncSettingsDescription": "Open sync settings",
+  "@browserActions_showSyncSettingsDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens the sync settings."
+  },
+  "browserActions_showContentBlockerListsTitle": "Filter Lists",
+  "@browserActions_showContentBlockerListsTitle": {
+    "description": "Name of the browser action that opens the filter lists of the uBlock Origin content blocker, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
+  },
+  "browserActions_showContentBlockerListsDescription": "Manage the content blocker's filter lists",
+  "@browserActions_showContentBlockerListsDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens the filter lists of the uBlock Origin content blocker."
+  },
+  "browserActions_showErrorLogsTitle": "Error Logs",
+  "@browserActions_showErrorLogsTitle": {
+    "description": "Name of the browser action that opens the screen with the app's error logs, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
+  },
+  "browserActions_showErrorLogsDescription": "View the app's error logs",
+  "@browserActions_showErrorLogsDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens the screen with the app's error logs."
+  },
+  "browserActions_showAboutTitle": "About",
+  "@browserActions_showAboutTitle": {
+    "description": "Name of the browser action that opens the About screen. WebLibre is the app name, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
+  },
+  "browserActions_showAboutDescription": "About WebLibre",
+  "@browserActions_showAboutDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens the About screen. WebLibre is the app name."
+  },
+  "browserActions_newContainerTitle": "New Container",
+  "@browserActions_newContainerTitle": {
+    "description": "Name of the browser action that starts creating a new container (a separate browsing identity), shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
+  },
+  "browserActions_newContainerDescription": "Create a container",
+  "@browserActions_newContainerDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it starts creating a new container (a separate browsing identity)."
+  },
+  "browserActions_newBookmarkFolderTitle": "New Bookmark Folder",
+  "@browserActions_newBookmarkFolderTitle": {
+    "description": "Name of the browser action that starts creating a new bookmark folder, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
+  },
+  "browserActions_newBookmarkFolderDescription": "Create a bookmark folder",
+  "@browserActions_newBookmarkFolderDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it starts creating a new bookmark folder."
+  },
+  "browserActions_addFeedTitle": "Add Feed",
+  "@browserActions_addFeedTitle": {
+    "description": "Name of the browser action that opens the dialog for subscribing to an RSS/Atom feed by address, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
+  },
+  "browserActions_addFeedDescription": "Subscribe to a feed by its address",
+  "@browserActions_addFeedDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens the dialog for subscribing to an RSS/Atom feed by address."
+  },
+  "browserActions_newSearchEngineTitle": "New Search Shortcut",
+  "@browserActions_newSearchEngineTitle": {
+    "description": "Name of the browser action that starts creating a custom bang (a search shortcut such as \\\"!w\\\"), shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
+  },
+  "browserActions_newSearchEngineDescription": "Create your own bang search shortcut",
+  "@browserActions_newSearchEngineDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it starts creating a custom bang (a search shortcut such as \\\"!w\\\")."
+  },
+  "browserActions_newProfileTitle": "New Profile",
+  "@browserActions_newProfileTitle": {
+    "description": "Name of the browser action that starts creating a new browser profile, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
+  },
+  "browserActions_newProfileDescription": "Create a browser profile",
+  "@browserActions_newProfileDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it starts creating a new browser profile."
+  },
+  "browserActions_newProxyProfileTitle": "New Proxy Profile",
+  "@browserActions_newProxyProfileTitle": {
+    "description": "Name of the browser action that starts adding a new proxy server profile, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
+  },
+  "browserActions_newProxyProfileDescription": "Add a proxy server",
+  "@browserActions_newProxyProfileDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it starts adding a new proxy server profile."
+  },
+  "browserActions_backupProfileTitle": "Back Up Profile",
+  "@browserActions_backupProfileTitle": {
+    "description": "Name of the browser action that starts backing up the current browser profile, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
+  },
+  "browserActions_backupProfileDescription": "Create a backup of the current profile",
+  "@browserActions_backupProfileDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it starts backing up the current browser profile."
+  },
+  "browserActions_toggleBookmarkKeywords": "favorite, save page, star",
+  "@browserActions_toggleBookmarkKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_findInPageKeywords": "search in page, search text, find text",
+  "@browserActions_findInPageKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_copyLinkKeywords": "copy url, copy address, clipboard",
+  "@browserActions_copyLinkKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_sharePageKeywords": "send, share link, send to",
+  "@browserActions_sharePageKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_toggleReaderModeKeywords": "reader view, reading mode, article, simplify page",
+  "@browserActions_toggleReaderModeKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_toggleDesktopModeKeywords": "desktop version, request desktop site, mobile site, user agent",
+  "@browserActions_toggleDesktopModeKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_translatePageKeywords": "translation, language, translator",
+  "@browserActions_translatePageKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_siteSettingsKeywords": "permissions, cookies, tracking protection, camera, microphone, location, site info",
+  "@browserActions_siteSettingsKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_addToHomeScreenKeywords": "pwa, install, web app, shortcut, launcher, app",
+  "@browserActions_addToHomeScreenKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_subscribeToPageFeedKeywords": "rss, atom, feed, subscribe, follow, news",
+  "@browserActions_subscribeToPageFeedKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_printPageKeywords": "pdf, save as pdf, printer",
+  "@browserActions_printPageKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_increaseFontSizeKeywords": "zoom in, bigger text, larger font, text size",
+  "@browserActions_increaseFontSizeKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_decreaseFontSizeKeywords": "zoom out, smaller text, smaller font, text size",
+  "@browserActions_decreaseFontSizeKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_resetFontSizeKeywords": "default text size, reset zoom, text size",
+  "@browserActions_resetFontSizeKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_openInPrivateTabKeywords": "incognito, private browsing, private mode",
+  "@browserActions_openInPrivateTabKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_moveTabToContainerKeywords": "assign container, identity, tab group",
+  "@browserActions_moveTabToContainerKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_duplicateTabKeywords": "clone tab, copy tab",
+  "@browserActions_duplicateTabKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_togglePinTabKeywords": "pin tab, unpin, sticky",
+  "@browserActions_togglePinTabKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_closeTabKeywords": "close, remove tab",
+  "@browserActions_closeTabKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_reopenClosedTabKeywords": "undo close, restore tab, recently closed",
+  "@browserActions_reopenClosedTabKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_showHistoryKeywords": "visited pages, browsing history, recently visited",
+  "@browserActions_showHistoryKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_showBookmarksKeywords": "favorites, saved pages, bookmark manager",
+  "@browserActions_showBookmarksKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_showDownloadsKeywords": "downloaded files, files, download manager",
+  "@browserActions_showDownloadsKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_showTabViewKeywords": "tab overview, all tabs, tab switcher, open tabs",
+  "@browserActions_showTabViewKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_showContainersKeywords": "identities, container list, workspaces",
+  "@browserActions_showContainersKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_showFeedsKeywords": "rss, atom, news, subscriptions",
+  "@browserActions_showFeedsKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_showProfilesKeywords": "users, accounts, switch profile",
+  "@browserActions_showProfilesKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_showProxySettingsKeywords": "vpn, sing-box, socks, connection, network",
+  "@browserActions_showProxySettingsKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_showTorKeywords": "onion, anonymous, bridges, anonymity",
+  "@browserActions_showTorKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_showSyncSettingsKeywords": "account, synchronize, devices",
+  "@browserActions_showSyncSettingsKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_showAddonsKeywords": "extensions, plugins, webextensions",
+  "@browserActions_showAddonsKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_showContentBlockerListsKeywords": "ublock, adblock, ad blocker, filters, blocklists",
+  "@browserActions_showContentBlockerListsKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_openSettingsKeywords": "preferences, options, configuration",
+  "@browserActions_openSettingsKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_showKeyboardShortcutsKeywords": "hotkeys, key bindings, keys",
+  "@browserActions_showKeyboardShortcutsKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_showErrorLogsKeywords": "logs, debug, crash, bug report",
+  "@browserActions_showErrorLogsKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_showAboutKeywords": "version, license, info",
+  "@browserActions_showAboutKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_newContainerKeywords": "add container, create identity, workspace",
+  "@browserActions_newContainerKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_newBookmarkFolderKeywords": "add folder, create folder, organize bookmarks",
+  "@browserActions_newBookmarkFolderKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_addFeedKeywords": "rss, atom, subscribe, add subscription",
+  "@browserActions_addFeedKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_newSearchEngineKeywords": "bang, custom search, add search engine, search shortcut",
+  "@browserActions_newSearchEngineKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_newProfileKeywords": "add user, create profile, new account",
+  "@browserActions_newProfileKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_newProxyProfileKeywords": "add proxy, vpn, server, sing-box, socks",
+  "@browserActions_newProxyProfileKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_backupProfileKeywords": "backup, export, save data, archive",
+  "@browserActions_backupProfileKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_clearBrowsingDataKeywords": "delete history, clear cache, cookies, erase, wipe, privacy",
+  "@browserActions_clearBrowsingDataKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
   "bookmarks_title": "Bookmarks",
   "@bookmarks_title": {
     "description": "Title of the bookmarks screen."
@@ -5751,6 +6099,10 @@
   "@search_moduleLabelQuickActions": {
     "description": "Heading of the home screen section with buttons such as New tab and View tabs; also its name when reordering sections."
   },
+  "search_moduleLabelActions": "Actions",
+  "@search_moduleLabelActions": {
+    "description": "Heading of the search results section listing browser actions (Reload, History, Settings, ...) whose name matches the typed text; tapping one runs it. Also its name when reordering sections."
+  },
   "search_couldNotLoadHistory": "Could not load history",
   "@search_couldNotLoadHistory": {
     "description": "Error heading in the search screen when history matches could not be loaded."
@@ -5989,6 +6341,50 @@
   "search_invalidAddress": "Invalid address",
   "@search_invalidAddress": {
     "description": "Error message when the text entered in the address field cannot be opened as a web address."
+  },
+  "search_actionSwitchToContainer": "Switch to container",
+  "@search_actionSwitchToContainer": {
+    "description": "Subtitle under a container's name in the search screen's Actions section; tapping the row switches to that container (a separate browsing identity)."
+  },
+  "search_actionSwitchToProfile": "Switch to this profile (restarts the browser)",
+  "@search_actionSwitchToProfile": {
+    "description": "Subtitle under a browser profile's name in the search screen's Actions section; tapping the row switches to that profile, which restarts the app."
+  },
+  "search_actionOpenFeed": "Open feed",
+  "@search_actionOpenFeed": {
+    "description": "Subtitle under a subscribed RSS/Atom feed's name in the search screen's Actions section; tapping the row opens the feed's articles."
+  },
+  "search_actionSettingLocation": "Settings › {category} › {section}",
+  "@search_actionSettingLocation": {
+    "description": "Where a setting found by the search screen's Actions section lives: the settings category and the section within it, shown under the setting's name. Tapping the row opens that settings screen.",
+    "placeholders": {
+      "category": {
+        "type": "String",
+        "example": "Privacy & Security"
+      },
+      "section": {
+        "type": "String",
+        "example": "Tracking Protection"
+      }
+    }
+  },
+  "search_actionSettingCategory": "Settings › {category}",
+  "@search_actionSettingCategory": {
+    "description": "Shown under a settings screen found by the search screen's Actions section: where it lives. Tapping the row opens that settings screen.",
+    "placeholders": {
+      "category": {
+        "type": "String",
+        "example": "Privacy & Security"
+      }
+    }
+  },
+  "search_actionUnnamedContainer": "Unnamed container",
+  "@search_actionUnnamedContainer": {
+    "description": "Row title in the search screen's Actions section for a container the user never named."
+  },
+  "search_actionUntitledFeed": "Untitled feed",
+  "@search_actionUntitledFeed": {
+    "description": "Row title in the search screen's Actions section for a subscribed feed that has no title."
   },
   "tabs_actionSelect": "Select",
   "@tabs_actionSelect": {

@@ -1798,6 +1798,318 @@ class AppLocalizationsEn extends AppLocalizations {
       'Close all tabs and quit WebLibre';
 
   @override
+  String get browserActions_categoryCreate => 'Create';
+
+  @override
+  String get browserActions_openInPrivateTabTitle => 'Open in Private Tab';
+
+  @override
+  String get browserActions_openInPrivateTabDescription =>
+      'Open the current page in a new private tab';
+
+  @override
+  String get browserActions_moveTabToContainerTitle => 'Move to Container';
+
+  @override
+  String get browserActions_moveTabToContainerDescription =>
+      'Move the current tab to another container';
+
+  @override
+  String get browserActions_copyLinkTitle => 'Copy Link';
+
+  @override
+  String get browserActions_copyLinkDescription =>
+      'Copy the address of the current page';
+
+  @override
+  String get browserActions_siteSettingsTitle => 'Site Settings';
+
+  @override
+  String get browserActions_siteSettingsDescription =>
+      'Permissions and tracking protection for this site';
+
+  @override
+  String get browserActions_addToHomeScreenTitle => 'Add to Home Screen';
+
+  @override
+  String get browserActions_addToHomeScreenDescription =>
+      'Install the current site as an app or shortcut';
+
+  @override
+  String get browserActions_subscribeToPageFeedTitle => 'Subscribe to Page';
+
+  @override
+  String get browserActions_subscribeToPageFeedDescription =>
+      'Find and follow the feeds of the current page';
+
+  @override
+  String get browserActions_showFeedsTitle => 'Feeds';
+
+  @override
+  String get browserActions_showFeedsDescription => 'Open your feeds';
+
+  @override
+  String get browserActions_showProfilesTitle => 'Profiles';
+
+  @override
+  String get browserActions_showProfilesDescription => 'Manage your profiles';
+
+  @override
+  String get browserActions_showProxySettingsTitle => 'Proxy';
+
+  @override
+  String get browserActions_showProxySettingsDescription =>
+      'Open proxy settings';
+
+  @override
+  String get browserActions_showTorTitle => 'Tor';
+
+  @override
+  String get browserActions_showTorDescription => 'Open Tor settings';
+
+  @override
+  String get browserActions_showSyncSettingsTitle => 'Sync';
+
+  @override
+  String get browserActions_showSyncSettingsDescription => 'Open sync settings';
+
+  @override
+  String get browserActions_showContentBlockerListsTitle => 'Filter Lists';
+
+  @override
+  String get browserActions_showContentBlockerListsDescription =>
+      'Manage the content blocker\'s filter lists';
+
+  @override
+  String get browserActions_showErrorLogsTitle => 'Error Logs';
+
+  @override
+  String get browserActions_showErrorLogsDescription =>
+      'View the app\'s error logs';
+
+  @override
+  String get browserActions_showAboutTitle => 'About';
+
+  @override
+  String get browserActions_showAboutDescription => 'About WebLibre';
+
+  @override
+  String get browserActions_newContainerTitle => 'New Container';
+
+  @override
+  String get browserActions_newContainerDescription => 'Create a container';
+
+  @override
+  String get browserActions_newBookmarkFolderTitle => 'New Bookmark Folder';
+
+  @override
+  String get browserActions_newBookmarkFolderDescription =>
+      'Create a bookmark folder';
+
+  @override
+  String get browserActions_addFeedTitle => 'Add Feed';
+
+  @override
+  String get browserActions_addFeedDescription =>
+      'Subscribe to a feed by its address';
+
+  @override
+  String get browserActions_newSearchEngineTitle => 'New Search Shortcut';
+
+  @override
+  String get browserActions_newSearchEngineDescription =>
+      'Create your own bang search shortcut';
+
+  @override
+  String get browserActions_newProfileTitle => 'New Profile';
+
+  @override
+  String get browserActions_newProfileDescription => 'Create a browser profile';
+
+  @override
+  String get browserActions_newProxyProfileTitle => 'New Proxy Profile';
+
+  @override
+  String get browserActions_newProxyProfileDescription => 'Add a proxy server';
+
+  @override
+  String get browserActions_backupProfileTitle => 'Back Up Profile';
+
+  @override
+  String get browserActions_backupProfileDescription =>
+      'Create a backup of the current profile';
+
+  @override
+  String get browserActions_toggleBookmarkKeywords =>
+      'favorite, save page, star';
+
+  @override
+  String get browserActions_findInPageKeywords =>
+      'search in page, search text, find text';
+
+  @override
+  String get browserActions_copyLinkKeywords =>
+      'copy url, copy address, clipboard';
+
+  @override
+  String get browserActions_sharePageKeywords => 'send, share link, send to';
+
+  @override
+  String get browserActions_toggleReaderModeKeywords =>
+      'reader view, reading mode, article, simplify page';
+
+  @override
+  String get browserActions_toggleDesktopModeKeywords =>
+      'desktop version, request desktop site, mobile site, user agent';
+
+  @override
+  String get browserActions_translatePageKeywords =>
+      'translation, language, translator';
+
+  @override
+  String get browserActions_siteSettingsKeywords =>
+      'permissions, cookies, tracking protection, camera, microphone, location, site info';
+
+  @override
+  String get browserActions_addToHomeScreenKeywords =>
+      'pwa, install, web app, shortcut, launcher, app';
+
+  @override
+  String get browserActions_subscribeToPageFeedKeywords =>
+      'rss, atom, feed, subscribe, follow, news';
+
+  @override
+  String get browserActions_printPageKeywords => 'pdf, save as pdf, printer';
+
+  @override
+  String get browserActions_increaseFontSizeKeywords =>
+      'zoom in, bigger text, larger font, text size';
+
+  @override
+  String get browserActions_decreaseFontSizeKeywords =>
+      'zoom out, smaller text, smaller font, text size';
+
+  @override
+  String get browserActions_resetFontSizeKeywords =>
+      'default text size, reset zoom, text size';
+
+  @override
+  String get browserActions_openInPrivateTabKeywords =>
+      'incognito, private browsing, private mode';
+
+  @override
+  String get browserActions_moveTabToContainerKeywords =>
+      'assign container, identity, tab group';
+
+  @override
+  String get browserActions_duplicateTabKeywords => 'clone tab, copy tab';
+
+  @override
+  String get browserActions_togglePinTabKeywords => 'pin tab, unpin, sticky';
+
+  @override
+  String get browserActions_closeTabKeywords => 'close, remove tab';
+
+  @override
+  String get browserActions_reopenClosedTabKeywords =>
+      'undo close, restore tab, recently closed';
+
+  @override
+  String get browserActions_showHistoryKeywords =>
+      'visited pages, browsing history, recently visited';
+
+  @override
+  String get browserActions_showBookmarksKeywords =>
+      'favorites, saved pages, bookmark manager';
+
+  @override
+  String get browserActions_showDownloadsKeywords =>
+      'downloaded files, files, download manager';
+
+  @override
+  String get browserActions_showTabViewKeywords =>
+      'tab overview, all tabs, tab switcher, open tabs';
+
+  @override
+  String get browserActions_showContainersKeywords =>
+      'identities, container list, workspaces';
+
+  @override
+  String get browserActions_showFeedsKeywords =>
+      'rss, atom, news, subscriptions';
+
+  @override
+  String get browserActions_showProfilesKeywords =>
+      'users, accounts, switch profile';
+
+  @override
+  String get browserActions_showProxySettingsKeywords =>
+      'vpn, sing-box, socks, connection, network';
+
+  @override
+  String get browserActions_showTorKeywords =>
+      'onion, anonymous, bridges, anonymity';
+
+  @override
+  String get browserActions_showSyncSettingsKeywords =>
+      'account, synchronize, devices';
+
+  @override
+  String get browserActions_showAddonsKeywords =>
+      'extensions, plugins, webextensions';
+
+  @override
+  String get browserActions_showContentBlockerListsKeywords =>
+      'ublock, adblock, ad blocker, filters, blocklists';
+
+  @override
+  String get browserActions_openSettingsKeywords =>
+      'preferences, options, configuration';
+
+  @override
+  String get browserActions_showKeyboardShortcutsKeywords =>
+      'hotkeys, key bindings, keys';
+
+  @override
+  String get browserActions_showErrorLogsKeywords =>
+      'logs, debug, crash, bug report';
+
+  @override
+  String get browserActions_showAboutKeywords => 'version, license, info';
+
+  @override
+  String get browserActions_newContainerKeywords =>
+      'add container, create identity, workspace';
+
+  @override
+  String get browserActions_newBookmarkFolderKeywords =>
+      'add folder, create folder, organize bookmarks';
+
+  @override
+  String get browserActions_addFeedKeywords =>
+      'rss, atom, subscribe, add subscription';
+
+  @override
+  String get browserActions_newSearchEngineKeywords =>
+      'bang, custom search, add search engine, search shortcut';
+
+  @override
+  String get browserActions_newProfileKeywords =>
+      'add user, create profile, new account';
+
+  @override
+  String get browserActions_newProxyProfileKeywords =>
+      'add proxy, vpn, server, sing-box, socks';
+
+  @override
+  String get browserActions_backupProfileKeywords =>
+      'backup, export, save data, archive';
+
+  @override
+  String get browserActions_clearBrowsingDataKeywords =>
+      'delete history, clear cache, cookies, erase, wipe, privacy';
+
+  @override
   String get bookmarks_title => 'Bookmarks';
 
   @override
@@ -4497,6 +4809,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get search_moduleLabelQuickActions => 'Quick Actions';
 
   @override
+  String get search_moduleLabelActions => 'Actions';
+
+  @override
   String get search_couldNotLoadHistory => 'Could not load history';
 
   @override
@@ -4670,6 +4985,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get search_invalidAddress => 'Invalid address';
+
+  @override
+  String get search_actionSwitchToContainer => 'Switch to container';
+
+  @override
+  String get search_actionSwitchToProfile =>
+      'Switch to this profile (restarts the browser)';
+
+  @override
+  String get search_actionOpenFeed => 'Open feed';
+
+  @override
+  String search_actionSettingLocation(String category, String section) {
+    return 'Settings › $category › $section';
+  }
+
+  @override
+  String search_actionSettingCategory(String category) {
+    return 'Settings › $category';
+  }
+
+  @override
+  String get search_actionUnnamedContainer => 'Unnamed container';
+
+  @override
+  String get search_actionUntitledFeed => 'Untitled feed';
 
   @override
   String get tabs_actionSelect => 'Select';

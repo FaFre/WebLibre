@@ -3140,6 +3140,528 @@ abstract class AppLocalizations {
   /// **'Close all tabs and quit WebLibre'**
   String get browserActions_quitBrowserDescription;
 
+  /// Heading of a group of browser actions that create something new (a container, a bookmark folder, a profile, ...) in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get browserActions_categoryCreate;
+
+  /// Name of the browser action that opens the current page again in a new private tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in Private Tab'**
+  String get browserActions_openInPrivateTabTitle;
+
+  /// Explanation under that browser action's name in the action lists: it opens the current page again in a new private tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the current page in a new private tab'**
+  String get browserActions_openInPrivateTabDescription;
+
+  /// Name of the browser action that moves the current tab into a container the user picks, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to Container'**
+  String get browserActions_moveTabToContainerTitle;
+
+  /// Explanation under that browser action's name in the action lists: it moves the current tab into a container the user picks.
+  ///
+  /// In en, this message translates to:
+  /// **'Move the current tab to another container'**
+  String get browserActions_moveTabToContainerDescription;
+
+  /// Name of the browser action that copies the current page's address to the clipboard, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Link'**
+  String get browserActions_copyLinkTitle;
+
+  /// Explanation under that browser action's name in the action lists: it copies the current page's address to the clipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy the address of the current page'**
+  String get browserActions_copyLinkDescription;
+
+  /// Name of the browser action that opens the sheet with the current site's permissions and tracking protection, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Site Settings'**
+  String get browserActions_siteSettingsTitle;
+
+  /// Explanation under that browser action's name in the action lists: it opens the sheet with the current site's permissions and tracking protection.
+  ///
+  /// In en, this message translates to:
+  /// **'Permissions and tracking protection for this site'**
+  String get browserActions_siteSettingsDescription;
+
+  /// Name of the browser action that installs the current site on the Android home screen as an app or shortcut, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Home Screen'**
+  String get browserActions_addToHomeScreenTitle;
+
+  /// Explanation under that browser action's name in the action lists: it installs the current site on the Android home screen as an app or shortcut.
+  ///
+  /// In en, this message translates to:
+  /// **'Install the current site as an app or shortcut'**
+  String get browserActions_addToHomeScreenDescription;
+
+  /// Name of the browser action that looks for RSS/Atom feeds on the current page and offers to subscribe, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe to Page'**
+  String get browserActions_subscribeToPageFeedTitle;
+
+  /// Explanation under that browser action's name in the action lists: it looks for RSS/Atom feeds on the current page and offers to subscribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Find and follow the feeds of the current page'**
+  String get browserActions_subscribeToPageFeedDescription;
+
+  /// Name of the browser action that opens the list of subscribed RSS/Atom feeds, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Feeds'**
+  String get browserActions_showFeedsTitle;
+
+  /// Explanation under that browser action's name in the action lists: it opens the list of subscribed RSS/Atom feeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Open your feeds'**
+  String get browserActions_showFeedsDescription;
+
+  /// Name of the browser action that opens the list of browser profiles, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Profiles'**
+  String get browserActions_showProfilesTitle;
+
+  /// Explanation under that browser action's name in the action lists: it opens the list of browser profiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your profiles'**
+  String get browserActions_showProfilesDescription;
+
+  /// Name of the browser action that opens the proxy settings, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy'**
+  String get browserActions_showProxySettingsTitle;
+
+  /// Explanation under that browser action's name in the action lists: it opens the proxy settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open proxy settings'**
+  String get browserActions_showProxySettingsDescription;
+
+  /// Name of the browser action that opens the Tor proxy screen. Tor is a brand name, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Tor'**
+  String get browserActions_showTorTitle;
+
+  /// Explanation under that browser action's name in the action lists: it opens the Tor proxy screen. Tor is a brand name.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Tor settings'**
+  String get browserActions_showTorDescription;
+
+  /// Name of the browser action that opens the sync settings, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync'**
+  String get browserActions_showSyncSettingsTitle;
+
+  /// Explanation under that browser action's name in the action lists: it opens the sync settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open sync settings'**
+  String get browserActions_showSyncSettingsDescription;
+
+  /// Name of the browser action that opens the filter lists of the uBlock Origin content blocker, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter Lists'**
+  String get browserActions_showContentBlockerListsTitle;
+
+  /// Explanation under that browser action's name in the action lists: it opens the filter lists of the uBlock Origin content blocker.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage the content blocker\'s filter lists'**
+  String get browserActions_showContentBlockerListsDescription;
+
+  /// Name of the browser action that opens the screen with the app's error logs, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Error Logs'**
+  String get browserActions_showErrorLogsTitle;
+
+  /// Explanation under that browser action's name in the action lists: it opens the screen with the app's error logs.
+  ///
+  /// In en, this message translates to:
+  /// **'View the app\'s error logs'**
+  String get browserActions_showErrorLogsDescription;
+
+  /// Name of the browser action that opens the About screen. WebLibre is the app name, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get browserActions_showAboutTitle;
+
+  /// Explanation under that browser action's name in the action lists: it opens the About screen. WebLibre is the app name.
+  ///
+  /// In en, this message translates to:
+  /// **'About WebLibre'**
+  String get browserActions_showAboutDescription;
+
+  /// Name of the browser action that starts creating a new container (a separate browsing identity), shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'New Container'**
+  String get browserActions_newContainerTitle;
+
+  /// Explanation under that browser action's name in the action lists: it starts creating a new container (a separate browsing identity).
+  ///
+  /// In en, this message translates to:
+  /// **'Create a container'**
+  String get browserActions_newContainerDescription;
+
+  /// Name of the browser action that starts creating a new bookmark folder, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'New Bookmark Folder'**
+  String get browserActions_newBookmarkFolderTitle;
+
+  /// Explanation under that browser action's name in the action lists: it starts creating a new bookmark folder.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a bookmark folder'**
+  String get browserActions_newBookmarkFolderDescription;
+
+  /// Name of the browser action that opens the dialog for subscribing to an RSS/Atom feed by address, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Feed'**
+  String get browserActions_addFeedTitle;
+
+  /// Explanation under that browser action's name in the action lists: it opens the dialog for subscribing to an RSS/Atom feed by address.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe to a feed by its address'**
+  String get browserActions_addFeedDescription;
+
+  /// Name of the browser action that starts creating a custom bang (a search shortcut such as \"!w\"), shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'New Search Shortcut'**
+  String get browserActions_newSearchEngineTitle;
+
+  /// Explanation under that browser action's name in the action lists: it starts creating a custom bang (a search shortcut such as \"!w\").
+  ///
+  /// In en, this message translates to:
+  /// **'Create your own bang search shortcut'**
+  String get browserActions_newSearchEngineDescription;
+
+  /// Name of the browser action that starts creating a new browser profile, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'New Profile'**
+  String get browserActions_newProfileTitle;
+
+  /// Explanation under that browser action's name in the action lists: it starts creating a new browser profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a browser profile'**
+  String get browserActions_newProfileDescription;
+
+  /// Name of the browser action that starts adding a new proxy server profile, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'New Proxy Profile'**
+  String get browserActions_newProxyProfileTitle;
+
+  /// Explanation under that browser action's name in the action lists: it starts adding a new proxy server profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a proxy server'**
+  String get browserActions_newProxyProfileDescription;
+
+  /// Name of the browser action that starts backing up the current browser profile, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Back Up Profile'**
+  String get browserActions_backupProfileTitle;
+
+  /// Explanation under that browser action's name in the action lists: it starts backing up the current browser profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a backup of the current profile'**
+  String get browserActions_backupProfileDescription;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'favorite, save page, star'**
+  String get browserActions_toggleBookmarkKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'search in page, search text, find text'**
+  String get browserActions_findInPageKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'copy url, copy address, clipboard'**
+  String get browserActions_copyLinkKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'send, share link, send to'**
+  String get browserActions_sharePageKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'reader view, reading mode, article, simplify page'**
+  String get browserActions_toggleReaderModeKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'desktop version, request desktop site, mobile site, user agent'**
+  String get browserActions_toggleDesktopModeKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'translation, language, translator'**
+  String get browserActions_translatePageKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'permissions, cookies, tracking protection, camera, microphone, location, site info'**
+  String get browserActions_siteSettingsKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'pwa, install, web app, shortcut, launcher, app'**
+  String get browserActions_addToHomeScreenKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'rss, atom, feed, subscribe, follow, news'**
+  String get browserActions_subscribeToPageFeedKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'pdf, save as pdf, printer'**
+  String get browserActions_printPageKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'zoom in, bigger text, larger font, text size'**
+  String get browserActions_increaseFontSizeKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'zoom out, smaller text, smaller font, text size'**
+  String get browserActions_decreaseFontSizeKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'default text size, reset zoom, text size'**
+  String get browserActions_resetFontSizeKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'incognito, private browsing, private mode'**
+  String get browserActions_openInPrivateTabKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'assign container, identity, tab group'**
+  String get browserActions_moveTabToContainerKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'clone tab, copy tab'**
+  String get browserActions_duplicateTabKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'pin tab, unpin, sticky'**
+  String get browserActions_togglePinTabKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'close, remove tab'**
+  String get browserActions_closeTabKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'undo close, restore tab, recently closed'**
+  String get browserActions_reopenClosedTabKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'visited pages, browsing history, recently visited'**
+  String get browserActions_showHistoryKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'favorites, saved pages, bookmark manager'**
+  String get browserActions_showBookmarksKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'downloaded files, files, download manager'**
+  String get browserActions_showDownloadsKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'tab overview, all tabs, tab switcher, open tabs'**
+  String get browserActions_showTabViewKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'identities, container list, workspaces'**
+  String get browserActions_showContainersKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'rss, atom, news, subscriptions'**
+  String get browserActions_showFeedsKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'users, accounts, switch profile'**
+  String get browserActions_showProfilesKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'vpn, sing-box, socks, connection, network'**
+  String get browserActions_showProxySettingsKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'onion, anonymous, bridges, anonymity'**
+  String get browserActions_showTorKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'account, synchronize, devices'**
+  String get browserActions_showSyncSettingsKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'extensions, plugins, webextensions'**
+  String get browserActions_showAddonsKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'ublock, adblock, ad blocker, filters, blocklists'**
+  String get browserActions_showContentBlockerListsKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'preferences, options, configuration'**
+  String get browserActions_openSettingsKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'hotkeys, key bindings, keys'**
+  String get browserActions_showKeyboardShortcutsKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'logs, debug, crash, bug report'**
+  String get browserActions_showErrorLogsKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'version, license, info'**
+  String get browserActions_showAboutKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'add container, create identity, workspace'**
+  String get browserActions_newContainerKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'add folder, create folder, organize bookmarks'**
+  String get browserActions_newBookmarkFolderKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'rss, atom, subscribe, add subscription'**
+  String get browserActions_addFeedKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'bang, custom search, add search engine, search shortcut'**
+  String get browserActions_newSearchEngineKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'add user, create profile, new account'**
+  String get browserActions_newProfileKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'add proxy, vpn, server, sing-box, socks'**
+  String get browserActions_newProxyProfileKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'backup, export, save data, archive'**
+  String get browserActions_backupProfileKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'delete history, clear cache, cookies, erase, wipe, privacy'**
+  String get browserActions_clearBrowsingDataKeywords;
+
   /// Title of the bookmarks screen.
   ///
   /// In en, this message translates to:
@@ -7808,6 +8330,12 @@ abstract class AppLocalizations {
   /// **'Quick Actions'**
   String get search_moduleLabelQuickActions;
 
+  /// Heading of the search results section listing browser actions (Reload, History, Settings, ...) whose name matches the typed text; tapping one runs it. Also its name when reordering sections.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get search_moduleLabelActions;
+
   /// Error heading in the search screen when history matches could not be loaded.
   ///
   /// In en, this message translates to:
@@ -8113,6 +8641,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invalid address'**
   String get search_invalidAddress;
+
+  /// Subtitle under a container's name in the search screen's Actions section; tapping the row switches to that container (a separate browsing identity).
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to container'**
+  String get search_actionSwitchToContainer;
+
+  /// Subtitle under a browser profile's name in the search screen's Actions section; tapping the row switches to that profile, which restarts the app.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to this profile (restarts the browser)'**
+  String get search_actionSwitchToProfile;
+
+  /// Subtitle under a subscribed RSS/Atom feed's name in the search screen's Actions section; tapping the row opens the feed's articles.
+  ///
+  /// In en, this message translates to:
+  /// **'Open feed'**
+  String get search_actionOpenFeed;
+
+  /// Where a setting found by the search screen's Actions section lives: the settings category and the section within it, shown under the setting's name. Tapping the row opens that settings screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings › {category} › {section}'**
+  String search_actionSettingLocation(String category, String section);
+
+  /// Shown under a settings screen found by the search screen's Actions section: where it lives. Tapping the row opens that settings screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings › {category}'**
+  String search_actionSettingCategory(String category);
+
+  /// Row title in the search screen's Actions section for a container the user never named.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed container'**
+  String get search_actionUnnamedContainer;
+
+  /// Row title in the search screen's Actions section for a subscribed feed that has no title.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled feed'**
+  String get search_actionUntitledFeed;
 
   /// Button that picks an item: a container in the container list, or the chosen color in the color picker.
   ///

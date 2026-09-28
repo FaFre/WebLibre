@@ -77,6 +77,10 @@
   "@search_moduleLabelQuickActions": {
     "description": "Heading of the home screen section with buttons such as New tab and View tabs; also its name when reordering sections."
   },
+  "search_moduleLabelActions": "Actions",
+  "@search_moduleLabelActions": {
+    "description": "Heading of the search results section listing browser actions (Reload, History, Settings, ...) whose name matches the typed text; tapping one runs it. Also its name when reordering sections."
+  },
 
   "search_couldNotLoadHistory": "Could not load history",
   "@search_couldNotLoadHistory": {
@@ -297,5 +301,50 @@
   "search_invalidAddress": "Invalid address",
   "@search_invalidAddress": {
     "description": "Error message when the text entered in the address field cannot be opened as a web address."
+  },
+
+  "search_actionSwitchToContainer": "Switch to container",
+  "@search_actionSwitchToContainer": {
+    "description": "Subtitle under a container's name in the search screen's Actions section; tapping the row switches to that container (a separate browsing identity)."
+  },
+  "search_actionSwitchToProfile": "Switch to this profile (restarts the browser)",
+  "@search_actionSwitchToProfile": {
+    "description": "Subtitle under a browser profile's name in the search screen's Actions section; tapping the row switches to that profile, which restarts the app."
+  },
+  "search_actionOpenFeed": "Open feed",
+  "@search_actionOpenFeed": {
+    "description": "Subtitle under a subscribed RSS/Atom feed's name in the search screen's Actions section; tapping the row opens the feed's articles."
+  },
+  "search_actionSettingLocation": "Settings › {category} › {section}",
+  "@search_actionSettingLocation": {
+    "description": "Where a setting found by the search screen's Actions section lives: the settings category and the section within it, shown under the setting's name. Tapping the row opens that settings screen.",
+    "placeholders": {
+      "category": {
+        "type": "String",
+        "example": "Privacy & Security"
+      },
+      "section": {
+        "type": "String",
+        "example": "Tracking Protection"
+      }
+    }
+  },
+  "search_actionSettingCategory": "Settings › {category}",
+  "@search_actionSettingCategory": {
+    "description": "Shown under a settings screen found by the search screen's Actions section: where it lives. Tapping the row opens that settings screen.",
+    "placeholders": {
+      "category": {
+        "type": "String",
+        "example": "Privacy & Security"
+      }
+    }
+  },
+  "search_actionUnnamedContainer": "Unnamed container",
+  "@search_actionUnnamedContainer": {
+    "description": "Row title in the search screen's Actions section for a container the user never named."
+  },
+  "search_actionUntitledFeed": "Untitled feed",
+  "@search_actionUntitledFeed": {
+    "description": "Row title in the search screen's Actions section for a subscribed feed that has no title."
   }
 }

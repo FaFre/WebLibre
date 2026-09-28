@@ -50,6 +50,7 @@ extension SearchModuleTypeL10n on SearchModuleType {
       SearchModuleType.frequentBangs => l10n.search_moduleLabelFrequentBangs,
       SearchModuleType.quote => l10n.search_moduleLabelQuote,
       SearchModuleType.quickActions => l10n.search_moduleLabelQuickActions,
+      SearchModuleType.actions => l10n.search_moduleLabelActions,
     };
   }
 }

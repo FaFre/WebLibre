@@ -19,6 +19,7 @@
  */
 import 'package:flutter/widgets.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Display strings for [BrowserAction].
@@ -93,6 +94,34 @@ extension BrowserActionL10n on BrowserAction {
       BrowserAction.moveToBackground =>
         l10n.browserActions_moveToBackgroundTitle,
       BrowserAction.quitBrowser => l10n.browserActions_quitBrowserTitle,
+      BrowserAction.openInPrivateTab =>
+        l10n.browserActions_openInPrivateTabTitle,
+      BrowserAction.moveTabToContainer =>
+        l10n.browserActions_moveTabToContainerTitle,
+      BrowserAction.copyLink => l10n.browserActions_copyLinkTitle,
+      BrowserAction.siteSettings => l10n.browserActions_siteSettingsTitle,
+      BrowserAction.addToHomeScreen => l10n.browserActions_addToHomeScreenTitle,
+      BrowserAction.subscribeToPageFeed =>
+        l10n.browserActions_subscribeToPageFeedTitle,
+      BrowserAction.showFeeds => l10n.browserActions_showFeedsTitle,
+      BrowserAction.showProfiles => l10n.browserActions_showProfilesTitle,
+      BrowserAction.showProxySettings =>
+        l10n.browserActions_showProxySettingsTitle,
+      BrowserAction.showTor => l10n.browserActions_showTorTitle,
+      BrowserAction.showSyncSettings =>
+        l10n.browserActions_showSyncSettingsTitle,
+      BrowserAction.showContentBlockerLists =>
+        l10n.browserActions_showContentBlockerListsTitle,
+      BrowserAction.showErrorLogs => l10n.browserActions_showErrorLogsTitle,
+      BrowserAction.showAbout => l10n.browserActions_showAboutTitle,
+      BrowserAction.newContainer => l10n.browserActions_newContainerTitle,
+      BrowserAction.newBookmarkFolder =>
+        l10n.browserActions_newBookmarkFolderTitle,
+      BrowserAction.addFeed => l10n.browserActions_addFeedTitle,
+      BrowserAction.newSearchEngine => l10n.browserActions_newSearchEngineTitle,
+      BrowserAction.newProfile => l10n.browserActions_newProfileTitle,
+      BrowserAction.newProxyProfile => l10n.browserActions_newProxyProfileTitle,
+      BrowserAction.backupProfile => l10n.browserActions_backupProfileTitle,
     };
   }
 
@@ -180,7 +209,117 @@ extension BrowserActionL10n on BrowserAction {
       BrowserAction.moveToBackground =>
         l10n.browserActions_moveToBackgroundDescription,
       BrowserAction.quitBrowser => l10n.browserActions_quitBrowserDescription,
+      BrowserAction.openInPrivateTab =>
+        l10n.browserActions_openInPrivateTabDescription,
+      BrowserAction.moveTabToContainer =>
+        l10n.browserActions_moveTabToContainerDescription,
+      BrowserAction.copyLink => l10n.browserActions_copyLinkDescription,
+      BrowserAction.siteSettings => l10n.browserActions_siteSettingsDescription,
+      BrowserAction.addToHomeScreen =>
+        l10n.browserActions_addToHomeScreenDescription,
+      BrowserAction.subscribeToPageFeed =>
+        l10n.browserActions_subscribeToPageFeedDescription,
+      BrowserAction.showFeeds => l10n.browserActions_showFeedsDescription,
+      BrowserAction.showProfiles => l10n.browserActions_showProfilesDescription,
+      BrowserAction.showProxySettings =>
+        l10n.browserActions_showProxySettingsDescription,
+      BrowserAction.showTor => l10n.browserActions_showTorDescription,
+      BrowserAction.showSyncSettings =>
+        l10n.browserActions_showSyncSettingsDescription,
+      BrowserAction.showContentBlockerLists =>
+        l10n.browserActions_showContentBlockerListsDescription,
+      BrowserAction.showErrorLogs =>
+        l10n.browserActions_showErrorLogsDescription,
+      BrowserAction.showAbout => l10n.browserActions_showAboutDescription,
+      BrowserAction.newContainer => l10n.browserActions_newContainerDescription,
+      BrowserAction.newBookmarkFolder =>
+        l10n.browserActions_newBookmarkFolderDescription,
+      BrowserAction.addFeed => l10n.browserActions_addFeedDescription,
+      BrowserAction.newSearchEngine =>
+        l10n.browserActions_newSearchEngineDescription,
+      BrowserAction.newProfile => l10n.browserActions_newProfileDescription,
+      BrowserAction.newProxyProfile =>
+        l10n.browserActions_newProxyProfileDescription,
+      BrowserAction.backupProfile =>
+        l10n.browserActions_backupProfileDescription,
     };
+  }
+
+  /// Words the search screen's Actions section also finds this action by,
+  /// such as "pwa" for Add to Home Screen. Never displayed.
+  ///
+  /// Only the actions that section offers have any; the rest return none.
+  List<String> keywords(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    final message = switch (this) {
+      BrowserAction.toggleBookmark =>
+        l10n.browserActions_toggleBookmarkKeywords,
+      BrowserAction.findInPage => l10n.browserActions_findInPageKeywords,
+      BrowserAction.copyLink => l10n.browserActions_copyLinkKeywords,
+      BrowserAction.sharePage => l10n.browserActions_sharePageKeywords,
+      BrowserAction.toggleReaderMode =>
+        l10n.browserActions_toggleReaderModeKeywords,
+      BrowserAction.toggleDesktopMode =>
+        l10n.browserActions_toggleDesktopModeKeywords,
+      BrowserAction.translatePage => l10n.browserActions_translatePageKeywords,
+      BrowserAction.siteSettings => l10n.browserActions_siteSettingsKeywords,
+      BrowserAction.addToHomeScreen =>
+        l10n.browserActions_addToHomeScreenKeywords,
+      BrowserAction.subscribeToPageFeed =>
+        l10n.browserActions_subscribeToPageFeedKeywords,
+      BrowserAction.printPage => l10n.browserActions_printPageKeywords,
+      BrowserAction.increaseFontSize =>
+        l10n.browserActions_increaseFontSizeKeywords,
+      BrowserAction.decreaseFontSize =>
+        l10n.browserActions_decreaseFontSizeKeywords,
+      BrowserAction.resetFontSize => l10n.browserActions_resetFontSizeKeywords,
+      BrowserAction.openInPrivateTab =>
+        l10n.browserActions_openInPrivateTabKeywords,
+      BrowserAction.moveTabToContainer =>
+        l10n.browserActions_moveTabToContainerKeywords,
+      BrowserAction.duplicateTab => l10n.browserActions_duplicateTabKeywords,
+      BrowserAction.togglePinTab => l10n.browserActions_togglePinTabKeywords,
+      BrowserAction.closeTab => l10n.browserActions_closeTabKeywords,
+      BrowserAction.reopenClosedTab =>
+        l10n.browserActions_reopenClosedTabKeywords,
+      BrowserAction.showHistory => l10n.browserActions_showHistoryKeywords,
+      BrowserAction.showBookmarks => l10n.browserActions_showBookmarksKeywords,
+      BrowserAction.showDownloads => l10n.browserActions_showDownloadsKeywords,
+      BrowserAction.showTabView => l10n.browserActions_showTabViewKeywords,
+      BrowserAction.showContainers =>
+        l10n.browserActions_showContainersKeywords,
+      BrowserAction.showFeeds => l10n.browserActions_showFeedsKeywords,
+      BrowserAction.showProfiles => l10n.browserActions_showProfilesKeywords,
+      BrowserAction.showProxySettings =>
+        l10n.browserActions_showProxySettingsKeywords,
+      BrowserAction.showTor => l10n.browserActions_showTorKeywords,
+      BrowserAction.showSyncSettings =>
+        l10n.browserActions_showSyncSettingsKeywords,
+      BrowserAction.showAddons => l10n.browserActions_showAddonsKeywords,
+      BrowserAction.showContentBlockerLists =>
+        l10n.browserActions_showContentBlockerListsKeywords,
+      BrowserAction.openSettings => l10n.browserActions_openSettingsKeywords,
+      BrowserAction.showKeyboardShortcuts =>
+        l10n.browserActions_showKeyboardShortcutsKeywords,
+      BrowserAction.showErrorLogs => l10n.browserActions_showErrorLogsKeywords,
+      BrowserAction.showAbout => l10n.browserActions_showAboutKeywords,
+      BrowserAction.newContainer => l10n.browserActions_newContainerKeywords,
+      BrowserAction.newBookmarkFolder =>
+        l10n.browserActions_newBookmarkFolderKeywords,
+      BrowserAction.addFeed => l10n.browserActions_addFeedKeywords,
+      BrowserAction.newSearchEngine =>
+        l10n.browserActions_newSearchEngineKeywords,
+      BrowserAction.newProfile => l10n.browserActions_newProfileKeywords,
+      BrowserAction.newProxyProfile =>
+        l10n.browserActions_newProxyProfileKeywords,
+      BrowserAction.backupProfile => l10n.browserActions_backupProfileKeywords,
+      BrowserAction.clearBrowsingData =>
+        l10n.browserActions_clearBrowsingDataKeywords,
+      _ => null,
+    };
+
+    return message == null ? const [] : settingsKeywords(message);
   }
 }
 
@@ -196,6 +335,7 @@ extension BrowserActionCategoryL10n on BrowserActionCategory {
       BrowserActionCategory.tabs => l10n.browserActions_categoryTabs,
       BrowserActionCategory.page => l10n.browserActions_categoryPage,
       BrowserActionCategory.open => l10n.browserActions_categoryOpen,
+      BrowserActionCategory.create => l10n.browserActions_categoryCreate,
       BrowserActionCategory.app => l10n.browserActions_categoryApp,
     };
   }

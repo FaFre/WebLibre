@@ -115,6 +115,92 @@ abstract class _$PwaManifestState extends $Notifier<Map<String, PwaManifest?>> {
   }
 }
 
+/// PWA manifest for [tabId]; null without a tab or a manifest.
+
+@ProviderFor(tabManifest)
+final tabManifestProvider = TabManifestFamily._();
+
+/// PWA manifest for [tabId]; null without a tab or a manifest.
+
+final class TabManifestProvider
+    extends $FunctionalProvider<PwaManifest?, PwaManifest?, PwaManifest?>
+    with $Provider<PwaManifest?> {
+  /// PWA manifest for [tabId]; null without a tab or a manifest.
+  TabManifestProvider._({
+    required TabManifestFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'tabManifestProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$tabManifestHash();
+
+  @override
+  String toString() {
+    return r'tabManifestProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<PwaManifest?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  PwaManifest? create(Ref ref) {
+    final argument = this.argument as String?;
+    return tabManifest(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(PwaManifest? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<PwaManifest?>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is TabManifestProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$tabManifestHash() => r'e90dc6e9c1ef64df2a31b785e852eefedb31f1a9';
+
+/// PWA manifest for [tabId]; null without a tab or a manifest.
+
+final class TabManifestFamily extends $Family
+    with $FunctionalFamilyOverride<PwaManifest?, String?> {
+  TabManifestFamily._()
+    : super(
+        retry: null,
+        name: r'tabManifestProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// PWA manifest for [tabId]; null without a tab or a manifest.
+
+  TabManifestProvider call(String? tabId) =>
+      TabManifestProvider._(argument: tabId, from: this);
+
+  @override
+  String toString() => r'tabManifestProvider';
+}
+
 /// PWA manifest for the currently selected tab.
 
 @ProviderFor(currentTabManifest)
@@ -160,7 +246,93 @@ final class CurrentTabManifestProvider
 }
 
 String _$currentTabManifestHash() =>
-    r'6121287eaaa18d080154c8ffe6e2a4b8c2d144d3';
+    r'169a7272c55d914d11b3800d183316ce818c1264';
+
+/// Whether [tabId] is installable as a PWA.
+
+@ProviderFor(isTabInstallable)
+final isTabInstallableProvider = IsTabInstallableFamily._();
+
+/// Whether [tabId] is installable as a PWA.
+
+final class IsTabInstallableProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Whether [tabId] is installable as a PWA.
+  IsTabInstallableProvider._({
+    required IsTabInstallableFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'isTabInstallableProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$isTabInstallableHash();
+
+  @override
+  String toString() {
+    return r'isTabInstallableProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    final argument = this.argument as String?;
+    return isTabInstallable(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is IsTabInstallableProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$isTabInstallableHash() => r'096bf38907d97932e841343afb73623a4e145bd1';
+
+/// Whether [tabId] is installable as a PWA.
+
+final class IsTabInstallableFamily extends $Family
+    with $FunctionalFamilyOverride<bool, String?> {
+  IsTabInstallableFamily._()
+    : super(
+        retry: null,
+        name: r'isTabInstallableProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Whether [tabId] is installable as a PWA.
+
+  IsTabInstallableProvider call(String? tabId) =>
+      IsTabInstallableProvider._(argument: tabId, from: this);
+
+  @override
+  String toString() => r'isTabInstallableProvider';
+}
 
 /// Boolean indicating if the current tab is installable as a PWA.
 
@@ -207,25 +379,29 @@ final class IsCurrentTabInstallableProvider
 }
 
 String _$isCurrentTabInstallableHash() =>
-    r'484c048dca283317d30b3847a32092784dde48be';
+    r'2adc08329d90de80fb9e9bbd1e04e5f308e6a486';
 
-/// Installs the current tab as a PWA, embedding profile and container context
-/// in the shortcut intent so the PWA reopens with the same isolation.
+/// Installs [tabId] — the selected tab when null — as a PWA, embedding profile
+/// and container context in the shortcut intent so the PWA reopens with the
+/// same isolation.
 
 @ProviderFor(installCurrentWebApp)
 final installCurrentWebAppProvider = InstallCurrentWebAppFamily._();
 
-/// Installs the current tab as a PWA, embedding profile and container context
-/// in the shortcut intent so the PWA reopens with the same isolation.
+/// Installs [tabId] — the selected tab when null — as a PWA, embedding profile
+/// and container context in the shortcut intent so the PWA reopens with the
+/// same isolation.
 
 final class InstallCurrentWebAppProvider
     extends $FunctionalProvider<AsyncValue<bool>, bool, FutureOr<bool>>
     with $FutureModifier<bool>, $FutureProvider<bool> {
-  /// Installs the current tab as a PWA, embedding profile and container context
-  /// in the shortcut intent so the PWA reopens with the same isolation.
+  /// Installs [tabId] — the selected tab when null — as a PWA, embedding profile
+  /// and container context in the shortcut intent so the PWA reopens with the
+  /// same isolation.
   InstallCurrentWebAppProvider._({
     required InstallCurrentWebAppFamily super.from,
-    required ({String? overrideName, String? contextId}) super.argument,
+    required ({String? tabId, String? overrideName, String? contextId})
+    super.argument,
   }) : super(
          retry: null,
          name: r'installCurrentWebAppProvider',
@@ -252,9 +428,11 @@ final class InstallCurrentWebAppProvider
   @override
   FutureOr<bool> create(Ref ref) {
     final argument =
-        this.argument as ({String? overrideName, String? contextId});
+        this.argument
+            as ({String? tabId, String? overrideName, String? contextId});
     return installCurrentWebApp(
       ref,
+      tabId: argument.tabId,
       overrideName: argument.overrideName,
       contextId: argument.contextId,
     );
@@ -272,16 +450,17 @@ final class InstallCurrentWebAppProvider
 }
 
 String _$installCurrentWebAppHash() =>
-    r'6eeed094b9ea9ade946dab77c691f271c92f89e1';
+    r'bf22621c635ae862c77d51888cc32f03acbd0303';
 
-/// Installs the current tab as a PWA, embedding profile and container context
-/// in the shortcut intent so the PWA reopens with the same isolation.
+/// Installs [tabId] — the selected tab when null — as a PWA, embedding profile
+/// and container context in the shortcut intent so the PWA reopens with the
+/// same isolation.
 
 final class InstallCurrentWebAppFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<bool>,
-          ({String? overrideName, String? contextId})
+          ({String? tabId, String? overrideName, String? contextId})
         > {
   InstallCurrentWebAppFamily._()
     : super(
@@ -292,14 +471,16 @@ final class InstallCurrentWebAppFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Installs the current tab as a PWA, embedding profile and container context
-  /// in the shortcut intent so the PWA reopens with the same isolation.
+  /// Installs [tabId] — the selected tab when null — as a PWA, embedding profile
+  /// and container context in the shortcut intent so the PWA reopens with the
+  /// same isolation.
 
   InstallCurrentWebAppProvider call({
+    String? tabId,
     String? overrideName,
     String? contextId,
   }) => InstallCurrentWebAppProvider._(
-    argument: (overrideName: overrideName, contextId: contextId),
+    argument: (tabId: tabId, overrideName: overrideName, contextId: contextId),
     from: this,
   );
 
@@ -353,6 +534,92 @@ final class InstalledWebAppsProvider
 
 String _$installedWebAppsHash() => r'ff185620ccd25bf6b71415e34e3e0c0f20d5e59d';
 
+/// Whether [tabId] is on an HTTPS page (eligible for home screen shortcut).
+
+@ProviderFor(isTabShortcutable)
+final isTabShortcutableProvider = IsTabShortcutableFamily._();
+
+/// Whether [tabId] is on an HTTPS page (eligible for home screen shortcut).
+
+final class IsTabShortcutableProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Whether [tabId] is on an HTTPS page (eligible for home screen shortcut).
+  IsTabShortcutableProvider._({
+    required IsTabShortcutableFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'isTabShortcutableProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$isTabShortcutableHash();
+
+  @override
+  String toString() {
+    return r'isTabShortcutableProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    final argument = this.argument as String?;
+    return isTabShortcutable(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is IsTabShortcutableProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$isTabShortcutableHash() => r'58c267b0a383c7d5dc28fb5283c04f8061df0bfa';
+
+/// Whether [tabId] is on an HTTPS page (eligible for home screen shortcut).
+
+final class IsTabShortcutableFamily extends $Family
+    with $FunctionalFamilyOverride<bool, String?> {
+  IsTabShortcutableFamily._()
+    : super(
+        retry: null,
+        name: r'isTabShortcutableProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Whether [tabId] is on an HTTPS page (eligible for home screen shortcut).
+
+  IsTabShortcutableProvider call(String? tabId) =>
+      IsTabShortcutableProvider._(argument: tabId, from: this);
+
+  @override
+  String toString() => r'isTabShortcutableProvider';
+}
+
 /// Whether the current tab is on an HTTPS page (eligible for home screen shortcut).
 
 @ProviderFor(isCurrentTabShortcutable)
@@ -398,22 +665,26 @@ final class IsCurrentTabShortcutableProvider
 }
 
 String _$isCurrentTabShortcutableHash() =>
-    r'5ffd27964eef44991d16e1c07ce4c1315a676549';
+    r'6681b7a55458645c3fedf4ce1b0a027abbf256f4';
 
-/// Creates a basic bookmark shortcut on the home screen for the current tab.
+/// Creates a basic bookmark shortcut on the home screen for [tabId], the
+/// selected tab when null.
 
 @ProviderFor(installBasicShortcut)
 final installBasicShortcutProvider = InstallBasicShortcutFamily._();
 
-/// Creates a basic bookmark shortcut on the home screen for the current tab.
+/// Creates a basic bookmark shortcut on the home screen for [tabId], the
+/// selected tab when null.
 
 final class InstallBasicShortcutProvider
     extends $FunctionalProvider<AsyncValue<bool>, bool, FutureOr<bool>>
     with $FutureModifier<bool>, $FutureProvider<bool> {
-  /// Creates a basic bookmark shortcut on the home screen for the current tab.
+  /// Creates a basic bookmark shortcut on the home screen for [tabId], the
+  /// selected tab when null.
   InstallBasicShortcutProvider._({
     required InstallBasicShortcutFamily super.from,
-    required ({String? overrideName, String? contextId}) super.argument,
+    required ({String? tabId, String? overrideName, String? contextId})
+    super.argument,
   }) : super(
          retry: null,
          name: r'installBasicShortcutProvider',
@@ -440,9 +711,11 @@ final class InstallBasicShortcutProvider
   @override
   FutureOr<bool> create(Ref ref) {
     final argument =
-        this.argument as ({String? overrideName, String? contextId});
+        this.argument
+            as ({String? tabId, String? overrideName, String? contextId});
     return installBasicShortcut(
       ref,
+      tabId: argument.tabId,
       overrideName: argument.overrideName,
       contextId: argument.contextId,
     );
@@ -460,15 +733,16 @@ final class InstallBasicShortcutProvider
 }
 
 String _$installBasicShortcutHash() =>
-    r'7155266e635d0016e4d3ed407bc6d8af61434b0f';
+    r'2311bdbfe74d543b0bbfe05c54ff35177ae69d2e';
 
-/// Creates a basic bookmark shortcut on the home screen for the current tab.
+/// Creates a basic bookmark shortcut on the home screen for [tabId], the
+/// selected tab when null.
 
 final class InstallBasicShortcutFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<bool>,
-          ({String? overrideName, String? contextId})
+          ({String? tabId, String? overrideName, String? contextId})
         > {
   InstallBasicShortcutFamily._()
     : super(
@@ -479,13 +753,15 @@ final class InstallBasicShortcutFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Creates a basic bookmark shortcut on the home screen for the current tab.
+  /// Creates a basic bookmark shortcut on the home screen for [tabId], the
+  /// selected tab when null.
 
   InstallBasicShortcutProvider call({
+    String? tabId,
     String? overrideName,
     String? contextId,
   }) => InstallBasicShortcutProvider._(
-    argument: (overrideName: overrideName, contextId: contextId),
+    argument: (tabId: tabId, overrideName: overrideName, contextId: contextId),
     from: this,
   );
 

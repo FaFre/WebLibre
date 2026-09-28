@@ -63,29 +63,35 @@ void main() {
 
   tearDown(() => controller.dispose());
 
-  Widget harness({required bool privateMode}) {
-    return ProviderScope(
-      overrides: [
-        engineSuggestionsProvider.overrideWith(() => engine),
-        generalSettingsWithDefaultsProvider.overrideWith(
-          (ref) => GeneralSettings.withDefaults(),
-        ),
-        searchSourcePolicyProvider(privateMode: false).overrideWithValue(
-          SearchSourcePolicy(remoteSuggestions: true, savedHistory: true),
-        ),
-        searchSourcePolicyProvider(privateMode: true).overrideWithValue(
-          SearchSourcePolicy(remoteSuggestions: false, savedHistory: false),
-        ),
-      ],
-      child: MaterialApp(
-        home: Scaffold(
-          body: SearchField(
-            textEditingController: controller,
-            onSubmitted: (_) {},
-            activeBang: null,
-            showSuggestions: true,
-            label: const Text('Search'),
-            privateMode: privateMode,
+  // The scope is built inside `pumpWidget` rather than returned from a helper:
+  // a `ProviderScope` handed to it directly is the root one, and only a nested
+  // scope has to declare `dependencies`. Pumping it again with a different
+  // mode keeps the same element, so the field keeps its state.
+  Future<void> pumpHarness(WidgetTester tester, {required bool privateMode}) {
+    return tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          engineSuggestionsProvider.overrideWith(() => engine),
+          generalSettingsWithDefaultsProvider.overrideWith(
+            (ref) => GeneralSettings.withDefaults(),
+          ),
+          searchSourcePolicyProvider(privateMode: false).overrideWithValue(
+            SearchSourcePolicy(remoteSuggestions: true, savedHistory: true),
+          ),
+          searchSourcePolicyProvider(privateMode: true).overrideWithValue(
+            SearchSourcePolicy(remoteSuggestions: false, savedHistory: false),
+          ),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: SearchField(
+              textEditingController: controller,
+              onSubmitted: (_) {},
+              activeBang: null,
+              showSuggestions: true,
+              label: const Text('Search'),
+              privateMode: privateMode,
+            ),
           ),
         ),
       ),
@@ -103,7 +109,7 @@ void main() {
 
   testWidgets('a history completion on screen hides when the search turns '
       'private', (tester) async {
-    await tester.pumpWidget(harness(privateMode: false));
+    await pumpHarness(tester, privateMode: false);
 
     controller.text = 'git';
     await tester.pump();
@@ -114,7 +120,7 @@ void main() {
     expect(ghost('hub.com'), findsOneWidget);
 
     // Same ProviderScope and element: only the mode flips.
-    await tester.pumpWidget(harness(privateMode: true));
+    await pumpHarness(tester, privateMode: true);
 
     expect(tester.takeException(), isNull);
     expect(ghost('hub.com'), findsNothing);
@@ -123,14 +129,14 @@ void main() {
   testWidgets('a history lookup that lands after the switch stays hidden', (
     tester,
   ) async {
-    await tester.pumpWidget(harness(privateMode: false));
+    await pumpHarness(tester, privateMode: false);
 
     controller.text = 'git';
     await tester.pump();
     final pending = engine.lookups.single;
     expect(pending.includeHistory, isTrue);
 
-    await tester.pumpWidget(harness(privateMode: true));
+    await pumpHarness(tester, privateMode: true);
     pending.answer.complete('github.com');
     await landLookup(tester);
 
@@ -139,7 +145,7 @@ void main() {
   });
 
   testWidgets('a private lookup made without history is shown', (tester) async {
-    await tester.pumpWidget(harness(privateMode: true));
+    await pumpHarness(tester, privateMode: true);
 
     controller.text = 'git';
     await tester.pump();

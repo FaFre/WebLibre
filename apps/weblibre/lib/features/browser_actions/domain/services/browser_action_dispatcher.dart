@@ -18,7 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -28,6 +30,7 @@ import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
@@ -44,17 +47,24 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/utils/
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/share_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/translation_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
+import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/pwa/presentation/widgets/pwa_install_button.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_cycle.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
+import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/web_feed/presentation/utils/page_feeds.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/move_to_background.dart';
@@ -82,7 +92,7 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
   /// containers) still run.
   Future<void> run(BrowserAction action, {String? tabId}) async {
     tabId ??= ref.read(selectedTabProvider);
-    if (tabId == null && _requiresTab(action)) return;
+    if (tabId == null && requiresTab(action)) return;
 
     try {
       await _execute(action, tabId);
@@ -99,7 +109,7 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
   ///
   /// Anything not listed is assumed to act on the page, which is the safe
   /// default for a newly added action.
-  static bool _requiresTab(BrowserAction action) => switch (action) {
+  static bool requiresTab(BrowserAction action) => switch (action) {
     BrowserAction.focusAddressBar ||
     BrowserAction.newTab ||
     BrowserAction.newPrivateTab ||
@@ -128,11 +138,26 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
     BrowserAction.showContainers ||
     BrowserAction.toggleTabBar ||
     BrowserAction.moveToBackground ||
-    BrowserAction.quitBrowser => false,
+    BrowserAction.quitBrowser ||
+    BrowserAction.showFeeds ||
+    BrowserAction.showProfiles ||
+    BrowserAction.showProxySettings ||
+    BrowserAction.showTor ||
+    BrowserAction.showSyncSettings ||
+    BrowserAction.showContentBlockerLists ||
+    BrowserAction.showErrorLogs ||
+    BrowserAction.showAbout ||
+    BrowserAction.newContainer ||
+    BrowserAction.newBookmarkFolder ||
+    BrowserAction.addFeed ||
+    BrowserAction.newSearchEngine ||
+    BrowserAction.newProfile ||
+    BrowserAction.newProxyProfile ||
+    BrowserAction.backupProfile => false,
     _ => true,
   };
 
-  /// Performs [action]. [tabId] is only null for actions [_requiresTab] lets
+  /// Performs [action]. [tabId] is only null for actions [requiresTab] lets
   /// through.
   Future<void> _execute(BrowserAction action, String? tabId) async {
     final tabRepository = ref.read(tabRepositoryProvider.notifier);
@@ -322,6 +347,97 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
         }
       case BrowserAction.moveToBackground:
         await moveToBackground();
+      case BrowserAction.openInPrivateTab:
+        await _openInPrivateTab(pageTabId);
+      case BrowserAction.moveTabToContainer:
+        await _moveTabToContainer(pageTabId);
+      case BrowserAction.copyLink:
+        await Clipboard.setData(
+          ClipboardData(text: _pageUrl(pageTabId).toString()),
+        );
+      case BrowserAction.siteSettings:
+        // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
+        final tabState = ref.read(tabStateProvider(pageTabId));
+        if (tabState != null) {
+          ref
+              .read(bottomSheetControllerProvider.notifier)
+              .show(SiteSettingsSheet(tabState: tabState));
+        }
+      case BrowserAction.addToHomeScreen:
+        // Checked against [pageTabId], not the selected tab: a swipe on a tab
+        // card installs that card's page.
+        // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
+        final installable = ref.read(isTabInstallableProvider(pageTabId));
+        final shortcutable =
+            // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
+            ref.read(isTabShortcutableProvider(pageTabId));
+        if (!installable && !shortcutable) return;
+
+        final context = await _navigatorContext();
+        if (context != null && context.mounted) {
+          // A manifest makes it an installable app; without one, the site can
+          // still become a plain shortcut — the same choice the menu makes.
+          if (installable) {
+            await showPwaInstallDialogUsing(
+              context,
+              ref.read,
+              tabId: pageTabId,
+            );
+          } else {
+            await showShortcutInstallDialogUsing(
+              context,
+              ref.read,
+              tabId: pageTabId,
+            );
+          }
+        }
+      case BrowserAction.subscribeToPageFeed:
+        final context = await _navigatorContext();
+        if (context != null && context.mounted) {
+          await subscribeToPageFeedsUsing(context, ref.read, tabId: pageTabId);
+        }
+      case BrowserAction.showFeeds:
+        await _pushLocation(FeedListRoute().location);
+      case BrowserAction.showProfiles:
+        await _pushLocation(ProfileListRoute().location);
+      case BrowserAction.showProxySettings:
+        await _pushLocation(const ProxySettingsRoute().location);
+      case BrowserAction.showTor:
+        await _pushLocation(const TorProxyRoute().location);
+      case BrowserAction.showSyncSettings:
+        await _pushLocation(SyncSettingsRoute().location);
+      case BrowserAction.showContentBlockerLists:
+        await _pushLocation(UBlockFilterListsRoute().location);
+      case BrowserAction.showErrorLogs:
+        await _pushLocation(ErrorLogsRoute().location);
+      case BrowserAction.showAbout:
+        await _pushLocation(AboutRoute().location);
+      case BrowserAction.newContainer:
+        final container = await ref
+            .read(containerRepositoryProvider.notifier)
+            .createNewContainer();
+        await _pushLocation(
+          ContainerCreateRoute(
+            containerData: jsonEncode(container.toJson()),
+          ).location,
+        );
+      case BrowserAction.newBookmarkFolder:
+        await _pushLocation(
+          BookmarkFolderAddRoute(parentGuid: BookmarkRoot.mobile.id).location,
+        );
+      case BrowserAction.addFeed:
+        await _pushLocation(const FeedAddRoute(uri: null).location);
+      case BrowserAction.newSearchEngine:
+        await _pushLocation(const NewUserBangRoute().location);
+      case BrowserAction.newProfile:
+        await _pushLocation(CreateProfileRoute().location);
+      case BrowserAction.newProxyProfile:
+        await _pushLocation(const SingboxProxyProfileEditorRoute().location);
+      case BrowserAction.backupProfile:
+        final profile = await ref.read(selectedProfileProvider.future);
+        await _pushLocation(
+          BackupProfileRoute(profile: jsonEncode(profile.toJson())).location,
+        );
       case BrowserAction.quitBrowser:
         final context = await _navigatorContext();
         if (context != null && context.mounted) {
@@ -330,6 +446,74 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
             await exitApp(ProviderScope.containerOf(context, listen: false));
           }
         }
+    }
+  }
+
+  /// The address the page actions work with: the page a sandboxed capture was
+  /// taken from rather than the capture itself, like the menu's copy and share.
+  Uri _pageUrl(String tabId) {
+    // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
+    final sandboxSource = ref.read(
+      sandboxSourceUriForTabProvider(tabId: tabId),
+    );
+    // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
+    return sandboxSource ?? ref.read(tabStateProvider(tabId))!.url;
+  }
+
+  /// Opens the page in a new private tab, in the same container, and selects
+  /// it. A private tab is simply duplicated, like the menu's private clone.
+  Future<void> _openInPrivateTab(String tabId) async {
+    // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
+    final tabState = ref.read(tabStateProvider(tabId));
+    if (tabState == null) return;
+
+    final containerData = await ref
+        .read(tabDataRepositoryProvider.notifier)
+        .getTabContainerData(tabId);
+    final tabRepository = ref.read(tabRepositoryProvider.notifier);
+
+    if (tabState.tabMode is PrivateTabMode) {
+      await tabRepository.duplicateTab(
+        selectTabId: tabId,
+        containerData: containerData,
+        selectTab: true,
+      );
+    } else {
+      await tabRepository.addTab(
+        url: _pageUrl(tabId),
+        tabMode: TabMode.private,
+        containerSelection: containerData == null
+            ? const TabContainerSelection.unassigned()
+            : TabContainerSelection.specific(containerData),
+        selectTab: true,
+      );
+    }
+  }
+
+  /// Asks for a container and moves the tab into it, or out of its container
+  /// when the user picks "none" — the tab menu's "Assign container".
+  Future<void> _moveTabToContainer(String tabId) async {
+    final router = await ref.read(routerProvider.future);
+    if (!ref.mounted) return;
+
+    final selection = await router.push<ContainerSelectionResult?>(
+      const ContainerSelectionRoute().location,
+    );
+    if (!ref.mounted) return;
+
+    final tabData = ref.read(tabDataRepositoryProvider.notifier);
+    switch (selection) {
+      case ContainerSelectionSelected(:final containerId):
+        final containerData = await ref
+            .read(containerRepositoryProvider.notifier)
+            .getContainerData(containerId);
+        if (containerData != null) {
+          await tabData.assignContainer(tabId, containerData);
+        }
+      case ContainerSelectionUnassigned():
+        await tabData.unassignContainer(tabId);
+      case null:
+        break;
     }
   }
 

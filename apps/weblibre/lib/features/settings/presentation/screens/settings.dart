@@ -426,3 +426,71 @@ class _SearchResultTile extends HookConsumerWidget {
     );
   }
 }
+
+/// One place the settings search can take the user: a whole settings screen,
+/// or one setting on it.
+class SettingsSearchTarget {
+  final String title;
+  final String? subtitle;
+  final List<String> keywords;
+
+  /// The settings screen it lives on.
+  final String category;
+
+  /// The section on that screen, or null when the target is the screen itself.
+  final String? section;
+
+  final IconData icon;
+
+  /// Pushes the settings screen. For a single setting, the caller first hands
+  /// [title] to `PendingSettingsHighlight` so the screen scrolls to it.
+  final Future<void> Function(BuildContext context) open;
+
+  const SettingsSearchTarget({
+    required this.title,
+    required this.subtitle,
+    required this.keywords,
+    required this.category,
+    required this.section,
+    required this.icon,
+    required this.open,
+  });
+
+  bool get isCategory => section == null;
+}
+
+/// Everything the settings search indexes, for search surfaces outside the
+/// settings screen (the search screen's Actions section).
+///
+/// Built from the same category definitions as the settings screen, so the two
+/// can never disagree about what exists or where it lives.
+List<SettingsSearchTarget> settingsSearchTargets(BuildContext context) {
+  final categories = _buildCategories(context);
+
+  return [
+    for (final category in [...categories.browser, ...categories.services]) ...[
+      SettingsSearchTarget(
+        title: category.title,
+        subtitle: category.subtitle,
+        keywords: category.keywords,
+        category: category.title,
+        section: null,
+        icon: category.icon,
+        open: category.onTap,
+      ),
+      for (final section in category.sections)
+        for (final entry in section.entries)
+          SettingsSearchTarget(
+            title: entry.title,
+            subtitle: entry.subtitle,
+            // A section's synonyms find every setting in it, as they do in the
+            // settings search itself.
+            keywords: [...entry.keywords, ...section.keywords],
+            category: category.title,
+            section: section.title,
+            icon: category.icon,
+            open: category.onTap,
+          ),
+    ],
+  ];
+}

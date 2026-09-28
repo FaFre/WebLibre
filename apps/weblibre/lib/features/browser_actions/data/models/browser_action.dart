@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:weblibre/presentation/icons/tor_icons.dart';
 
 /// Browser commands that can be bound to a touch gesture or a keyboard
 /// shortcut.
@@ -72,6 +73,11 @@ enum BrowserAction {
     MdiIcons.folderArrowLeftOutline,
     BrowserActionCategory.tabs,
   ),
+  openInPrivateTab(MdiIcons.incognito, BrowserActionCategory.tabs),
+  moveTabToContainer(
+    MdiIcons.folderArrowUpDownOutline,
+    BrowserActionCategory.tabs,
+  ),
 
   // Page tools
   toggleReaderMode(MdiIcons.bookOpenOutline, BrowserActionCategory.page),
@@ -86,6 +92,10 @@ enum BrowserAction {
   sharePage(Icons.share, BrowserActionCategory.page),
   translatePage(Icons.translate, BrowserActionCategory.page),
   printPage(MdiIcons.printer, BrowserActionCategory.page),
+  copyLink(MdiIcons.contentCopy, BrowserActionCategory.page),
+  siteSettings(MdiIcons.tuneVariant, BrowserActionCategory.page),
+  addToHomeScreen(Icons.add_to_home_screen, BrowserActionCategory.page),
+  subscribeToPageFeed(MdiIcons.rssBox, BrowserActionCategory.page),
 
   // Open
   showHome(Icons.home_outlined, BrowserActionCategory.open),
@@ -97,11 +107,28 @@ enum BrowserAction {
   showAddons(MdiIcons.puzzleOutline, BrowserActionCategory.open),
   openSettings(Icons.settings_outlined, BrowserActionCategory.open),
   showKeyboardShortcuts(MdiIcons.keyboardOutline, BrowserActionCategory.open),
+  showFeeds(MdiIcons.rss, BrowserActionCategory.open),
+  showProfiles(Icons.people_outline, BrowserActionCategory.open),
+  showProxySettings(MdiIcons.lanConnect, BrowserActionCategory.open),
+  showTor(TorIcons.onionAlt, BrowserActionCategory.open),
+  showSyncSettings(Icons.sync, BrowserActionCategory.open),
+  showContentBlockerLists(MdiIcons.filterOutline, BrowserActionCategory.open),
+  showErrorLogs(MdiIcons.bugOutline, BrowserActionCategory.open),
+  showAbout(Icons.info_outline, BrowserActionCategory.open),
+
+  // Create
+  newContainer(MdiIcons.folderPlusOutline, BrowserActionCategory.create),
+  newBookmarkFolder(MdiIcons.folderStarOutline, BrowserActionCategory.create),
+  addFeed(MdiIcons.rssBox, BrowserActionCategory.create),
+  newSearchEngine(Icons.manage_search, BrowserActionCategory.create),
+  newProfile(Icons.person_add_outlined, BrowserActionCategory.create),
+  newProxyProfile(MdiIcons.serverPlus, BrowserActionCategory.create),
 
   // App
   toggleTabBar(MdiIcons.dockBottom, BrowserActionCategory.app),
   clearBrowsingData(MdiIcons.fire, BrowserActionCategory.app),
   moveToBackground(MdiIcons.arrowCollapseDown, BrowserActionCategory.app),
+  backupProfile(MdiIcons.backupRestore, BrowserActionCategory.app),
   quitBrowser(MdiIcons.power, BrowserActionCategory.app);
 
   final IconData icon;
@@ -113,4 +140,12 @@ enum BrowserAction {
 }
 
 /// High-level grouping of [BrowserAction]s for the settings UI.
-enum BrowserActionCategory { navigation, scrolling, tabs, page, open, app }
+enum BrowserActionCategory {
+  navigation,
+  scrolling,
+  tabs,
+  page,
+  open,
+  create,
+  app,
+}

@@ -32,6 +32,8 @@ import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/providers/search.dart';
 import 'package:weblibre/features/bangs/domain/services/bang_query.dart';
 import 'package:weblibre/features/bangs/domain/services/reverse_match.dart';
+import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
+import 'package:weblibre/features/browser_actions/domain/services/browser_action_dispatcher.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
@@ -50,6 +52,7 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/module_surface_slivers.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_field.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_module_reorder_view.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/action_search.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/bookmark_search.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/combined_history_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/feed_search.dart';
@@ -61,10 +64,13 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/tab_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/compact_container_selector.dart';
 import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/features/search_credits/domain/repositories/web_search_settings.dart';
+import 'package:weblibre/features/settings/domain/providers/pending_settings_highlight.dart';
+import 'package:weblibre/features/user/domain/presentation/utils/profile_switch_handler.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/search_controller.dart';
 import 'package:weblibre/features/web_search/presentation/open_in_new_tab.dart';
@@ -565,6 +571,67 @@ class SearchScreen extends HookConsumerWidget {
       }
     }
 
+    /// Leaves the search screen for the browser, then runs [action] there.
+    ///
+    /// The screen goes first: actions that open a screen or sheet must land on
+    /// the browser, not stack on top of a search the user has finished with.
+    Future<void> runBrowserAction(BrowserAction action) async {
+      // Read up front: this widget and its ref are gone once the route is left.
+      final dispatcher = ref.read(browserActionDispatcherProvider.notifier);
+      final pageTabId = isEditMode ? tabId : null;
+
+      ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
+      const BrowserRoute().go(context);
+
+      await WidgetsBinding.instance.endOfFrame;
+      await dispatcher.run(action, tabId: pageTabId);
+    }
+
+    Future<void> selectContainer(ContainerDataWithCount container) async {
+      final result = await ref
+          .read(selectedContainerProvider.notifier)
+          .setContainerId(container.id);
+
+      if (!context.mounted) return;
+
+      if (result == SetContainerResult.success) {
+        await ensureProxyStartedForContainer(context, ref, container);
+      }
+
+      if (context.mounted && result == SetContainerResult.success) {
+        const TabViewRoute().go(context);
+      }
+    }
+
+    /// A row of the Actions section. Browser actions leave for the browser
+    /// first; the rest either navigate the way their own screens do or ask
+    /// first (a profile switch restarts the browser).
+    Future<void> selectActionItem(ActionSearchItem item) async {
+      switch (item) {
+        case BrowserActionSearchItem(:final action):
+          await runBrowserAction(action);
+        case ContainerSearchItem(:final container):
+          await selectContainer(container);
+        case ProfileSearchItem(:final profile):
+          await handleSwitchProfile(context, ref, profile);
+        case FeedSearchItem(:final feed):
+          await FeedArticleListRoute(feedId: feed.url).push(context);
+        case SettingSearchItem(:final target):
+          // The same hand-off the settings search makes, so the screen opens
+          // scrolled to the setting.
+          final pendingHighlight = ref.read(
+            pendingSettingsHighlightProvider.notifier,
+          );
+          if (!target.isCategory) pendingHighlight.set(target.title);
+          try {
+            await target.open(context);
+          } catch (_) {
+            pendingHighlight.clear();
+            rethrow;
+          }
+      }
+    }
+
     final autoSubmittedInitialSearch = useRef(false);
     useEffect(() {
       if (!autoSubmitSearch ||
@@ -617,6 +684,8 @@ class SearchScreen extends HookConsumerWidget {
       onUriSelected: openUriInTab,
       searchTextController: searchTextController,
       submitSearch: submitSearch,
+      onActionItemSelected: selectActionItem,
+      actionTabId: isEditMode ? tabId : null,
       onArticleSelected: (article) {
         FeedArticleRoute(articleId: article.id).pushReplacement(context);
       },
@@ -628,21 +697,7 @@ class SearchScreen extends HookConsumerWidget {
           const BrowserRoute().go(context);
         }
       },
-      onContainerSelected: (container) async {
-        final result = await ref
-            .read(selectedContainerProvider.notifier)
-            .setContainerId(container.id);
-
-        if (!context.mounted) return;
-
-        if (result == SetContainerResult.success) {
-          await ensureProxyStartedForContainer(context, ref, container);
-        }
-
-        if (context.mounted && result == SetContainerResult.success) {
-          const TabViewRoute().go(context);
-        }
-      },
+      onContainerSelected: selectContainer,
     );
 
     final searchWidgets = <SearchModuleType, Widget>{
@@ -661,6 +716,11 @@ class SearchScreen extends HookConsumerWidget {
         fetchRemoteSuggestions: sourcePolicy.remoteSuggestions,
       ),
       SearchModuleType.tabs: TabSearch(searchTextListenable: sampledQueryText),
+      SearchModuleType.actions: ActionSearch(
+        searchTextListenable: sampledQueryText,
+        pageTabId: isEditMode ? tabId : null,
+        onItemSelected: selectActionItem,
+      ),
       SearchModuleType.bookmarks: BookmarkSearch(
         searchTextListenable: sampledQueryText,
         onUriSelected: openUriInTab,
@@ -702,6 +762,7 @@ class SearchScreen extends HookConsumerWidget {
       return switch (type) {
         SearchModuleType.searchProviders ||
         SearchModuleType.searchSuggestions ||
+        SearchModuleType.actions ||
         SearchModuleType.articles => false,
         _ => true,
       };

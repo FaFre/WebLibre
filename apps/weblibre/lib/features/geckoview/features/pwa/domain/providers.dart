@@ -70,45 +70,55 @@ class PwaManifestState extends _$PwaManifestState {
   }
 }
 
-/// PWA manifest for the currently selected tab.
+/// PWA manifest for [tabId]; null without a tab or a manifest.
 @Riverpod()
-PwaManifest? currentTabManifest(Ref ref) {
-  final selectedTabId = ref.watch(selectedTabProvider);
+PwaManifest? tabManifest(Ref ref, String? tabId) {
   final manifestState = ref.watch(pwaManifestStateProvider);
 
-  if (selectedTabId == null) return null;
+  if (tabId == null) return null;
 
-  return manifestState[selectedTabId];
+  return manifestState[tabId];
 }
 
-/// Boolean indicating if the current tab is installable as a PWA.
+/// PWA manifest for the currently selected tab.
 @Riverpod()
-bool isCurrentTabInstallable(Ref ref) {
-  final selectedTabId = ref.watch(selectedTabProvider);
+PwaManifest? currentTabManifest(Ref ref) =>
+    ref.watch(tabManifestProvider(ref.watch(selectedTabProvider)));
+
+/// Whether [tabId] is installable as a PWA.
+@Riverpod()
+bool isTabInstallable(Ref ref, String? tabId) {
   // Sandbox-captured tabs serve a loopback page; "installing" it would
   // either pin the loopback URL (broken after the capture server cycles)
   // or, worse, silently navigate the source URL.
   final sandboxSourceUri = ref.watch(
-    sandboxSourceUriForTabProvider(tabId: selectedTabId),
+    sandboxSourceUriForTabProvider(tabId: tabId),
   );
   if (sandboxSourceUri != null) return false;
 
-  final manifest = ref.watch(currentTabManifestProvider);
+  final manifest = ref.watch(tabManifestProvider(tabId));
 
   if (manifest == null) return false;
 
   return isManifestInstallable(manifest);
 }
 
-/// Installs the current tab as a PWA, embedding profile and container context
-/// in the shortcut intent so the PWA reopens with the same isolation.
+/// Boolean indicating if the current tab is installable as a PWA.
+@Riverpod()
+bool isCurrentTabInstallable(Ref ref) =>
+    ref.watch(isTabInstallableProvider(ref.watch(selectedTabProvider)));
+
+/// Installs [tabId] — the selected tab when null — as a PWA, embedding profile
+/// and container context in the shortcut intent so the PWA reopens with the
+/// same isolation.
 @Riverpod()
 Future<bool> installCurrentWebApp(
   Ref ref, {
+  String? tabId,
   String? overrideName,
   String? contextId,
 }) {
-  final selectedTabId = ref.read(selectedTabProvider);
+  final selectedTabId = tabId ?? ref.read(selectedTabProvider);
 
   if (selectedTabId == null) {
     throw StateError('No tab selected');
@@ -130,34 +140,40 @@ Future<List<PwaManifest>> installedWebApps(Ref ref) {
   return GeckoPwaApi().getInstalledWebApps();
 }
 
-/// Whether the current tab is on an HTTPS page (eligible for home screen shortcut).
+/// Whether [tabId] is on an HTTPS page (eligible for home screen shortcut).
 @Riverpod()
-bool isCurrentTabShortcutable(Ref ref) {
-  final selectedTabId = ref.watch(selectedTabProvider);
-  if (selectedTabId == null) return false;
+bool isTabShortcutable(Ref ref, String? tabId) {
+  if (tabId == null) return false;
 
-  // Same reasoning as `isCurrentTabInstallable`: never offer to pin a
+  // Same reasoning as `isTabInstallable`: never offer to pin a
   // sandbox-captured tab to the home screen.
   final sandboxSourceUri = ref.watch(
-    sandboxSourceUriForTabProvider(tabId: selectedTabId),
+    sandboxSourceUriForTabProvider(tabId: tabId),
   );
   if (sandboxSourceUri != null) return false;
 
-  final tabState = ref.watch(tabStateProvider(selectedTabId));
+  final tabState = ref.watch(tabStateProvider(tabId));
   if (tabState == null) return false;
 
   return tabState.url.isHttps ||
       (tabState.url.isHttp && tabState.url.isLocalhost);
 }
 
-/// Creates a basic bookmark shortcut on the home screen for the current tab.
+/// Whether the current tab is on an HTTPS page (eligible for home screen shortcut).
+@Riverpod()
+bool isCurrentTabShortcutable(Ref ref) =>
+    ref.watch(isTabShortcutableProvider(ref.watch(selectedTabProvider)));
+
+/// Creates a basic bookmark shortcut on the home screen for [tabId], the
+/// selected tab when null.
 @Riverpod()
 Future<bool> installBasicShortcut(
   Ref ref, {
+  String? tabId,
   String? overrideName,
   String? contextId,
 }) {
-  final selectedTabId = ref.read(selectedTabProvider);
+  final selectedTabId = tabId ?? ref.read(selectedTabProvider);
 
   if (selectedTabId == null) {
     throw StateError('No tab selected');

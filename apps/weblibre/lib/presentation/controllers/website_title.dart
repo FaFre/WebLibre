@@ -72,10 +72,17 @@ Future<WebPageInfo> pageInfo(
   Ref ref,
   Uri url, {
   required bool isImageRequest,
+
+  /// The tab the page belongs to, whose route the request must take. Null
+  /// means the selected tab, which is right for callers that only ever look
+  /// at the page on screen.
+  String? tabId,
 }) async {
   final link = ref.cacheFor(const Duration(minutes: 2));
 
-  final tabState = ref.read(selectedTabStateProvider);
+  final tabState = tabId == null
+      ? ref.read(selectedTabStateProvider)
+      : ref.read(tabStateProvider(tabId));
 
   // Fetching page info requests the page itself, so it must travel the same
   // route the tab would. The context id is resolved here and the routing
@@ -106,6 +113,7 @@ AsyncValue<EquatableValue<Set<Uri>?>> websiteFeedProvider(
     pageInfoProvider(
       tabState.url,
       isImageRequest: false,
+      tabId: tabId,
     ).select((value) => value.whenData((data) => EquatableValue(data.feeds))),
   );
 

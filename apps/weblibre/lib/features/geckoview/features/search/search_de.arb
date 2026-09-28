@@ -19,6 +19,7 @@
   "search_moduleLabelFrequentBangs": "Häufige Bangs",
   "search_moduleLabelQuote": "Zitat",
   "search_moduleLabelQuickActions": "Schnellaktionen",
+  "search_moduleLabelActions": "Aktionen",
   "search_couldNotLoadHistory": "Verlauf konnte nicht geladen werden",
   "search_couldNotLoadLocalContent": "Lokale Inhalte konnten nicht geladen werden",
   "search_failedSearchingArticles": "Artikelsuche fehlgeschlagen",
@@ -69,5 +70,13 @@
   "search_refreshQuoteTooltip": "Neues Zitat",
   "search_quotePlaceholder": "Einen neuen Tab öffnen und diesen Platz mit Leben füllen.",
   "search_searchFieldLabel": "Suchen oder URL eingeben",
-  "search_invalidAddress": "Ungültige Adresse"
+  "search_invalidAddress": "Ungültige Adresse",
+
+  "search_actionSwitchToContainer": "Zu diesem Container wechseln",
+  "search_actionSwitchToProfile": "Zu diesem Profil wechseln (startet den Browser neu)",
+  "search_actionOpenFeed": "Feed öffnen",
+  "search_actionSettingLocation": "Einstellungen › {category} › {section}",
+  "search_actionSettingCategory": "Einstellungen › {category}",
+  "search_actionUnnamedContainer": "Unbenannter Container",
+  "search_actionUntitledFeed": "Feed ohne Titel"
 }

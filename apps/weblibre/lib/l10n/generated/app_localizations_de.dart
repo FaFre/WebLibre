@@ -1835,6 +1835,327 @@ class AppLocalizationsDe extends AppLocalizations {
       'Alle Tabs schließen und WebLibre beenden';
 
   @override
+  String get browserActions_categoryCreate => 'Erstellen';
+
+  @override
+  String get browserActions_openInPrivateTabTitle => 'In privatem Tab öffnen';
+
+  @override
+  String get browserActions_openInPrivateTabDescription =>
+      'Die aktuelle Seite in einem neuen privaten Tab öffnen';
+
+  @override
+  String get browserActions_moveTabToContainerTitle =>
+      'In Container verschieben';
+
+  @override
+  String get browserActions_moveTabToContainerDescription =>
+      'Den aktuellen Tab in einen anderen Container verschieben';
+
+  @override
+  String get browserActions_copyLinkTitle => 'Link kopieren';
+
+  @override
+  String get browserActions_copyLinkDescription =>
+      'Die Adresse der aktuellen Seite kopieren';
+
+  @override
+  String get browserActions_siteSettingsTitle => 'Website-Einstellungen';
+
+  @override
+  String get browserActions_siteSettingsDescription =>
+      'Berechtigungen und Tracking-Schutz für diese Website';
+
+  @override
+  String get browserActions_addToHomeScreenTitle =>
+      'Zum Startbildschirm hinzufügen';
+
+  @override
+  String get browserActions_addToHomeScreenDescription =>
+      'Die aktuelle Website als App oder Verknüpfung installieren';
+
+  @override
+  String get browserActions_subscribeToPageFeedTitle => 'Seite abonnieren';
+
+  @override
+  String get browserActions_subscribeToPageFeedDescription =>
+      'Die Feeds der aktuellen Seite finden und abonnieren';
+
+  @override
+  String get browserActions_showFeedsTitle => 'Feeds';
+
+  @override
+  String get browserActions_showFeedsDescription => 'Deine Feeds öffnen';
+
+  @override
+  String get browserActions_showProfilesTitle => 'Profile';
+
+  @override
+  String get browserActions_showProfilesDescription => 'Profile verwalten';
+
+  @override
+  String get browserActions_showProxySettingsTitle => 'Proxy';
+
+  @override
+  String get browserActions_showProxySettingsDescription =>
+      'Proxy-Einstellungen öffnen';
+
+  @override
+  String get browserActions_showTorTitle => 'Tor';
+
+  @override
+  String get browserActions_showTorDescription => 'Tor-Einstellungen öffnen';
+
+  @override
+  String get browserActions_showSyncSettingsTitle => 'Synchronisierung';
+
+  @override
+  String get browserActions_showSyncSettingsDescription =>
+      'Synchronisierungseinstellungen öffnen';
+
+  @override
+  String get browserActions_showContentBlockerListsTitle => 'Filterlisten';
+
+  @override
+  String get browserActions_showContentBlockerListsDescription =>
+      'Die Filterlisten des Inhaltsblockers verwalten';
+
+  @override
+  String get browserActions_showErrorLogsTitle => 'Fehlerprotokolle';
+
+  @override
+  String get browserActions_showErrorLogsDescription =>
+      'Die Fehlerprotokolle der App ansehen';
+
+  @override
+  String get browserActions_showAboutTitle => 'Über';
+
+  @override
+  String get browserActions_showAboutDescription => 'Über WebLibre';
+
+  @override
+  String get browserActions_newContainerTitle => 'Neuer Container';
+
+  @override
+  String get browserActions_newContainerDescription =>
+      'Einen Container erstellen';
+
+  @override
+  String get browserActions_newBookmarkFolderTitle => 'Neuer Lesezeichenordner';
+
+  @override
+  String get browserActions_newBookmarkFolderDescription =>
+      'Einen Lesezeichenordner erstellen';
+
+  @override
+  String get browserActions_addFeedTitle => 'Feed hinzufügen';
+
+  @override
+  String get browserActions_addFeedDescription =>
+      'Einen Feed über seine Adresse abonnieren';
+
+  @override
+  String get browserActions_newSearchEngineTitle => 'Neue Suchverknüpfung';
+
+  @override
+  String get browserActions_newSearchEngineDescription =>
+      'Eine eigene Bang-Suchverknüpfung erstellen';
+
+  @override
+  String get browserActions_newProfileTitle => 'Neues Profil';
+
+  @override
+  String get browserActions_newProfileDescription =>
+      'Ein Browserprofil erstellen';
+
+  @override
+  String get browserActions_newProxyProfileTitle => 'Neues Proxy-Profil';
+
+  @override
+  String get browserActions_newProxyProfileDescription =>
+      'Einen Proxyserver hinzufügen';
+
+  @override
+  String get browserActions_backupProfileTitle => 'Profil sichern';
+
+  @override
+  String get browserActions_backupProfileDescription =>
+      'Eine Sicherung des aktuellen Profils erstellen';
+
+  @override
+  String get browserActions_toggleBookmarkKeywords =>
+      'Favorit, Seite speichern, Stern';
+
+  @override
+  String get browserActions_findInPageKeywords =>
+      'auf Seite suchen, Text suchen, finden';
+
+  @override
+  String get browserActions_copyLinkKeywords =>
+      'URL kopieren, Adresse kopieren, Zwischenablage';
+
+  @override
+  String get browserActions_sharePageKeywords =>
+      'senden, Link teilen, versenden';
+
+  @override
+  String get browserActions_toggleReaderModeKeywords =>
+      'Leseansicht, Lesemodus, Artikel, Seite vereinfachen';
+
+  @override
+  String get browserActions_toggleDesktopModeKeywords =>
+      'Desktopversion, Desktopseite anfordern, mobile Seite, User-Agent';
+
+  @override
+  String get browserActions_translatePageKeywords =>
+      'Übersetzung, Sprache, übersetzen';
+
+  @override
+  String get browserActions_siteSettingsKeywords =>
+      'Berechtigungen, Cookies, Tracking-Schutz, Kamera, Mikrofon, Standort, Website-Info';
+
+  @override
+  String get browserActions_addToHomeScreenKeywords =>
+      'PWA, installieren, Web-App, Verknüpfung, Startbildschirm, App';
+
+  @override
+  String get browserActions_subscribeToPageFeedKeywords =>
+      'RSS, Atom, Feed, abonnieren, folgen, Nachrichten';
+
+  @override
+  String get browserActions_printPageKeywords =>
+      'PDF, als PDF speichern, Drucker';
+
+  @override
+  String get browserActions_increaseFontSizeKeywords =>
+      'vergrößern, größere Schrift, Textgröße, Zoom';
+
+  @override
+  String get browserActions_decreaseFontSizeKeywords =>
+      'verkleinern, kleinere Schrift, Textgröße, Zoom';
+
+  @override
+  String get browserActions_resetFontSizeKeywords =>
+      'Standardschriftgröße, Zoom zurücksetzen, Textgröße';
+
+  @override
+  String get browserActions_openInPrivateTabKeywords =>
+      'inkognito, privates Surfen, privater Modus';
+
+  @override
+  String get browserActions_moveTabToContainerKeywords =>
+      'Container zuweisen, Identität, Tabgruppe';
+
+  @override
+  String get browserActions_duplicateTabKeywords => 'Tab klonen, Tab kopieren';
+
+  @override
+  String get browserActions_togglePinTabKeywords =>
+      'Tab anheften, lösen, fixieren';
+
+  @override
+  String get browserActions_closeTabKeywords => 'schließen, Tab entfernen';
+
+  @override
+  String get browserActions_reopenClosedTabKeywords =>
+      'Schließen rückgängig, Tab wiederherstellen, zuletzt geschlossen';
+
+  @override
+  String get browserActions_showHistoryKeywords =>
+      'besuchte Seiten, Browserverlauf, zuletzt besucht';
+
+  @override
+  String get browserActions_showBookmarksKeywords =>
+      'Favoriten, gespeicherte Seiten, Lesezeichenverwaltung';
+
+  @override
+  String get browserActions_showDownloadsKeywords =>
+      'heruntergeladene Dateien, Dateien, Download-Manager';
+
+  @override
+  String get browserActions_showTabViewKeywords =>
+      'Tabübersicht, alle Tabs, Tab-Wechsler, offene Tabs';
+
+  @override
+  String get browserActions_showContainersKeywords =>
+      'Identitäten, Containerliste, Arbeitsbereiche';
+
+  @override
+  String get browserActions_showFeedsKeywords =>
+      'RSS, Atom, Nachrichten, Abonnements';
+
+  @override
+  String get browserActions_showProfilesKeywords =>
+      'Benutzer, Konten, Profil wechseln';
+
+  @override
+  String get browserActions_showProxySettingsKeywords =>
+      'VPN, sing-box, SOCKS, Verbindung, Netzwerk';
+
+  @override
+  String get browserActions_showTorKeywords =>
+      'Onion, anonym, Brücken, Anonymität';
+
+  @override
+  String get browserActions_showSyncSettingsKeywords =>
+      'Konto, synchronisieren, Geräte';
+
+  @override
+  String get browserActions_showAddonsKeywords =>
+      'Erweiterungen, Plugins, Add-ons';
+
+  @override
+  String get browserActions_showContentBlockerListsKeywords =>
+      'uBlock, Adblock, Werbeblocker, Filter, Sperrlisten';
+
+  @override
+  String get browserActions_openSettingsKeywords =>
+      'Optionen, Konfiguration, Präferenzen';
+
+  @override
+  String get browserActions_showKeyboardShortcutsKeywords =>
+      'Hotkeys, Tastenbelegung, Tasten';
+
+  @override
+  String get browserActions_showErrorLogsKeywords =>
+      'Protokolle, Debug, Absturz, Fehlerbericht';
+
+  @override
+  String get browserActions_showAboutKeywords => 'Version, Lizenz, Info';
+
+  @override
+  String get browserActions_newContainerKeywords =>
+      'Container hinzufügen, Identität erstellen, Arbeitsbereich';
+
+  @override
+  String get browserActions_newBookmarkFolderKeywords =>
+      'Ordner hinzufügen, Ordner erstellen, Lesezeichen ordnen';
+
+  @override
+  String get browserActions_addFeedKeywords =>
+      'RSS, Atom, abonnieren, Abonnement hinzufügen';
+
+  @override
+  String get browserActions_newSearchEngineKeywords =>
+      'Bang, eigene Suche, Suchmaschine hinzufügen, Suchkürzel';
+
+  @override
+  String get browserActions_newProfileKeywords =>
+      'Benutzer hinzufügen, Profil erstellen, neues Konto';
+
+  @override
+  String get browserActions_newProxyProfileKeywords =>
+      'Proxy hinzufügen, VPN, Server, sing-box, SOCKS';
+
+  @override
+  String get browserActions_backupProfileKeywords =>
+      'Sicherung, exportieren, Daten sichern, Archiv';
+
+  @override
+  String get browserActions_clearBrowsingDataKeywords =>
+      'Verlauf löschen, Cache leeren, Cookies, löschen, Datenschutz';
+
+  @override
   String get bookmarks_title => 'Lesezeichen';
 
   @override
@@ -4588,6 +4909,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get search_moduleLabelQuickActions => 'Schnellaktionen';
 
   @override
+  String get search_moduleLabelActions => 'Aktionen';
+
+  @override
   String get search_couldNotLoadHistory =>
       'Verlauf konnte nicht geladen werden';
 
@@ -4767,6 +5091,32 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get search_invalidAddress => 'Ungültige Adresse';
+
+  @override
+  String get search_actionSwitchToContainer => 'Zu diesem Container wechseln';
+
+  @override
+  String get search_actionSwitchToProfile =>
+      'Zu diesem Profil wechseln (startet den Browser neu)';
+
+  @override
+  String get search_actionOpenFeed => 'Feed öffnen';
+
+  @override
+  String search_actionSettingLocation(String category, String section) {
+    return 'Einstellungen › $category › $section';
+  }
+
+  @override
+  String search_actionSettingCategory(String category) {
+    return 'Einstellungen › $category';
+  }
+
+  @override
+  String get search_actionUnnamedContainer => 'Unbenannter Container';
+
+  @override
+  String get search_actionUntitledFeed => 'Feed ohne Titel';
 
   @override
   String get tabs_actionSelect => 'Auswählen';

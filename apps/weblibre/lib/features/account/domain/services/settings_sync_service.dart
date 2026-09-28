@@ -41,7 +41,7 @@ part 'settings_sync_service.g.dart';
 ///
 /// Bump this whenever a new value is added to an enum that settings sync
 /// carries.
-const _schemaVersion = 4;
+const _schemaVersion = 5;
 
 @Riverpod(keepAlive: true)
 class SettingsSyncService extends _$SettingsSyncService
